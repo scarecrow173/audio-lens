@@ -17,13 +17,11 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "https://github.com/scarecrow173/audio-lens/issues/1"
+  derives-from: []
   derived-by: []
   verifies: []
   verified-by: []
-  references:
-    - "https://github.com/scarecrow173/audio-lens/issues/1"
+  references: []
   defers: []
   deferred-by: []
 ---
