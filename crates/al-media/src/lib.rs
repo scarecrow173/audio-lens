@@ -2,7 +2,11 @@
 //! and the versioned capture-artifact dictionary.
 
 pub mod format;
+pub mod hash;
 pub mod metadata;
+pub mod wav;
 
 pub use format::{MediaFormat, detect_format};
-pub use metadata::MediaError;
+pub use hash::sha256_hex;
+pub use metadata::{AudioMetadata, IntegrityObservation, MediaError, SampleFormat};
+pub use wav::{DecodedAudio, decode_wav};
