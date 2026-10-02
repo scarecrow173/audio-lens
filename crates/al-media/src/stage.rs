@@ -147,12 +147,16 @@ impl IngestStage {
             StageError::new(StageKind::Ingest, format!("cannot create inputs dir: {e}"))
         })?;
 
-        // Decoded PCM: raw little-endian f64, interleaved.
+        // Artifact writes go through write_durable (tmp+fsync+rename):
+        // the manifest can mark the stage Completed durably, so the
+        // artifacts it points at must be durable too — otherwise a power
+        // loss could leave Completed next to a truncated artifact, which
+        // resume would wrongly skip as finished.
         let pcm_rel = PathBuf::from("inputs")
             .join(input.input_id.as_str())
             .join("decoded.f64le");
         let pcm_bytes: Vec<u8> = audio.samples.iter().flat_map(|v| v.to_le_bytes()).collect();
-        fs::write(job_dir.join(&pcm_rel), &pcm_bytes)
+        al_job::fsutil::write_durable(&job_dir.join(&pcm_rel), &pcm_bytes)
             .map_err(|e| StageError::new(StageKind::Ingest, format!("cannot write PCM: {e}")))?;
 
         let meta_rel = PathBuf::from("inputs")
@@ -169,9 +173,9 @@ impl IngestStage {
         let meta_text = serde_json::to_string_pretty(&meta_json).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot serialize metadata: {e}"))
         })?;
-        fs::write(job_dir.join(&meta_rel), meta_text).map_err(|e| {
-            StageError::new(StageKind::Ingest, format!("cannot write metadata: {e}"))
-        })?;
+        al_job::fsutil::write_durable(&job_dir.join(&meta_rel), meta_text.as_bytes()).map_err(
+            |e| StageError::new(StageKind::Ingest, format!("cannot write metadata: {e}")),
+        )?;
 
         // Link produced artifacts to the declared-input artifact so the
         // manifest lineage reaches back to the source file.

@@ -87,7 +87,9 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
 - 未対応形式・読み込み失敗はステージ全体を `decode/input unavailable`
   で明示的失敗させる(部分的成功を作らない)
 - PCM は `decoded.f64le`(raw little-endian)として分離保存し、
-  メタデータは JSON に集約
+  メタデータは JSON に集約。両者とも `al_job::fsutil::write_durable`
+  経由で書き出し、manifest の durable な Completed 記録と整合する
+  (電源断で部分書き込み artifact が残らない)
 
 ## Validation
 

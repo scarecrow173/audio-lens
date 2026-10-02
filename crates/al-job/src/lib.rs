@@ -1,5 +1,6 @@
 //! AudioLens job orchestration (job model, manifest, registry, runner).
 
+pub mod fsutil;
 pub mod job;
 pub mod manifest;
 pub mod registry;

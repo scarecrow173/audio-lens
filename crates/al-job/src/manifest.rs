@@ -121,30 +121,14 @@ impl Manifest {
 
     /// Persist the manifest under `job_dir`.
     ///
-    /// The write is atomic and durable: the content is fsynced in a temp
-    /// file before rename, and the directory entry is fsynced after, so
-    /// even a power loss leaves either the previous or the new manifest
+    /// The write is atomic and durable (temp file, fsync, rename): a
+    /// crash or power loss leaves either the previous or the new manifest
     /// fully intact — never a truncated canonical record that would make
     /// the job unresumable.
     pub fn save(&self, job_dir: &Path) -> io::Result<()> {
-        fs::create_dir_all(job_dir)?;
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        let tmp = job_dir.join("manifest.json.tmp");
-        {
-            use std::io::Write;
-            let mut file = fs::File::create(&tmp)?;
-            file.write_all(json.as_bytes())?;
-            file.sync_all()?;
-        }
-        fs::rename(&tmp, job_dir.join(Self::FILE_NAME))?;
-        // Flush the rename's directory entry where the platform supports
-        // it (directory fsync is not available on Windows).
-        #[cfg(unix)]
-        if let Ok(dir) = fs::File::open(job_dir) {
-            let _ = dir.sync_all();
-        }
-        Ok(())
+        crate::fsutil::write_durable(&job_dir.join(Self::FILE_NAME), json.as_bytes())
     }
 
     /// Load a manifest from `job_dir`.

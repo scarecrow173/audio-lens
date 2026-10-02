@@ -337,14 +337,31 @@ fn concurrent_resume_of_same_job_is_rejected() {
     runner.run(&def, &mut trio.stages).unwrap();
 
     // A second writer holding the job lock must block any new resume —
-    // the lock is what is held, not the file's mere existence.
-    let lock = std::fs::File::create(runner.job_dir(&def.job_id).join(".lock")).unwrap();
+    // the lock is what is held, not the file's mere existence. The lock
+    // file is a sibling of the job dir (`<base>/<job>.lock`).
+    let lock = std::fs::File::create(dir.join(format!("{}.lock", def.job_id))).unwrap();
     lock.try_lock().unwrap();
     let err = runner.resume(&def, &mut trio.stages).unwrap_err();
     assert!(err.message.contains("already running"));
 
     drop(lock);
     runner.resume(&def, &mut trio.stages).unwrap();
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn leftover_lock_file_does_not_block_run() {
+    let dir = temp_dir("stalelock");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    // A crashed process may leave <base>/<job>.lock behind; only a held
+    // lock blocks, so the fresh run must succeed.
+    std::fs::write(dir.join(format!("{}.lock", def.job_id)), b"").unwrap();
+    runner.run(&def, &mut trio.stages).unwrap();
+    assert_eq!(trio.a_runs.get(), 1);
 
     std::fs::remove_dir_all(&dir).ok();
 }

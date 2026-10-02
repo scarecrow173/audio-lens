@@ -88,13 +88,22 @@ impl StageRunner {
 
     /// Take an exclusive advisory lock on the job for the duration of a
     /// run/resume so concurrent writers cannot race on the manifest or
-    /// stage artifacts. The OS releases the lock when the process dies,
-    /// so a leftover `.lock` file is harmless — only the held lock
-    /// blocks, never the file's existence.
-    fn lock_job(job_dir: &std::path::Path) -> Result<std::fs::File, StageError> {
-        let file = std::fs::File::create(job_dir.join(".lock")).map_err(|e| {
-            StageError::new(StageKind::Ingest, format!("cannot open job lock: {e}"))
+    /// stage artifacts. The lock file lives next to the job directory
+    /// (`<base>/<job>.lock`), so the lock can be taken *before* the job
+    /// directory exists — there is no window where a resume could lock
+    /// first and strand an unresumable directory.
+    ///
+    /// The OS releases the lock when the process dies, so a leftover
+    /// lock file is harmless — only the held lock blocks, never the
+    /// file's existence.
+    fn lock_job(&self, job_id: &al_core::JobId) -> Result<std::fs::File, StageError> {
+        std::fs::create_dir_all(&self.base_dir).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("cannot create base dir: {e}"))
         })?;
+        let file =
+            std::fs::File::create(self.base_dir.join(format!("{job_id}.lock"))).map_err(|e| {
+                StageError::new(StageKind::Ingest, format!("cannot open job lock: {e}"))
+            })?;
         file.try_lock().map_err(|e| {
             StageError::new(
                 StageKind::Ingest,
@@ -118,15 +127,16 @@ impl StageRunner {
     ) -> Result<Manifest, StageError> {
         Self::validate_plan(def, stages)?;
         Self::validate_inputs(def)?;
+        // Lock before touching the filesystem: no window exists where a
+        // concurrent resume could win the lock and leave a job dir that
+        // neither run nor resume can use.
+        let _lock = self.lock_job(&def.job_id)?;
         let job_dir = self.job_dir(&def.job_id);
         // A fresh run must not overwrite an existing job: jobs are
         // immutable, so re-executing the same definition requires a new
         // JobId (a fresh JobDefinition::create). Reserving the directory
         // with create_dir also rejects leftover partial artifacts and
         // double-run races — the error is not just "manifest exists".
-        std::fs::create_dir_all(&self.base_dir).map_err(|e| {
-            StageError::new(StageKind::Ingest, format!("cannot create base dir: {e}"))
-        })?;
         std::fs::create_dir(&job_dir).map_err(|e| {
             StageError::new(
                 StageKind::Ingest,
@@ -136,7 +146,6 @@ impl StageRunner {
                 ),
             )
         })?;
-        let _lock = Self::lock_job(&job_dir)?;
         let mut manifest = Manifest::new(
             def.job_id.clone(),
             def.inputs.clone(),
@@ -163,7 +172,7 @@ impl StageRunner {
         let job_dir = self.job_dir(&def.job_id);
         // Lock before reading so a concurrent writer cannot hand us a
         // half-updated manifest or race on stage artifacts.
-        let _lock = Self::lock_job(&job_dir)?;
+        let _lock = self.lock_job(&def.job_id)?;
         let mut manifest = Manifest::load(&job_dir).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot load manifest: {e}"))
         })?;
