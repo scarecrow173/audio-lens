@@ -64,11 +64,15 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
   辞書は既定でバイナリ埋め込み(`Dictionary::embedded()`)、
   config `dictionary` キーで明示ファイルに差し替え可能
   (読めない場合は明示的失敗)
-- 外部辞書を指定した場合、run 時に内容を `dictionary_text` /
-  `dictionary_sha256` として job config にスナップショットする。
-  manifest が config を保持するため resume は元ファイルに依存せず、
-  同一 Job ID で辞書内容が固定される(結合テストで
-  「run → 辞書削除 → resume 成功」を確認)
+- 辞書は指定の有無に関わらず常に `dictionary_text` /
+  `dictionary_sha256` として job config にスナップショットされる
+  (既定は `Dictionary::EMBEDDED_JSON`)。manifest が config を保持する
+  ため resume は元ファイルにも当時のバイナリにも依存せず、同一
+  Job ID で辞書内容が固定される(結合テストで「run → 辞書削除 →
+  resume 成功」と既定実行での snapshot 記録を確認)
+- CLI は入力ファイルを Job 作成時に読み、`source_sha256` を
+  `JobInput` に固定する。Ingest は manifest 上の固定値と実ファイルの
+  ハッシュを照合し、不一致は `input content changed` で明示的失敗
 - `--config` の読込・JSON parse 失敗は `{}` への暗黙
   フォールバックではなく明示的エラー(設定が無視されて
   Job が成功するのを防ぐ)
