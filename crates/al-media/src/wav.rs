@@ -192,6 +192,11 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
         // Chunks are word-aligned: an odd size is followed by a pad byte.
         offset = body_end + (size % 2);
     }
+    if offset != data.len() {
+        return Err(MediaError::malformed(
+            "trailing bytes after last RIFF chunk",
+        ));
+    }
 
     let fmt = fmt.ok_or_else(|| MediaError::malformed("missing fmt chunk"))?;
     if fmt.channels == 0 {
@@ -304,6 +309,19 @@ mod tests {
         wav.extend_from_slice(&3u32.to_le_bytes());
         wav.extend_from_slice(&[0u8, 128, 255]);
         // No pad byte; the file ends mid-chunk-padding.
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_trailing_bytes_after_last_chunk() {
+        let mut wav = make_wav(1, 48000, 16, &[1, 2]);
+        wav.extend_from_slice(&[0xAA; 5]); // 5 bytes too short for a header
+        // Keep RIFF size consistent so only the trailing bytes are wrong.
+        let riff = (wav.len() - 8) as u32;
+        wav[4..8].copy_from_slice(&riff.to_le_bytes());
         assert!(matches!(
             decode_wav(&wav),
             Err(MediaError::Malformed { .. })
