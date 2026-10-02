@@ -7,6 +7,7 @@ use al_job::job::{JobDefinition, JobInput};
 use al_job::manifest::{ArtifactRecord, Manifest};
 use al_job::runner::StageRunner;
 use al_job::stage::{Stage, StageContext, StageError};
+use al_locate::LocateStage;
 use al_media::IngestStage;
 
 const USAGE: &str = "\
@@ -30,9 +31,10 @@ CONFIG:
                  Defaults to the dictionary bundled with the binary.
 
 NOTE:
-  The ingest (WAV/PCM) and dataset (analysis manifest) stages are
-  implemented. All other stages are stubs that emit marker artifacts;
-  real stages are added by later plans.
+  The ingest (WAV/PCM), locate (source localization), and dataset
+  (analysis manifest) stages are implemented. The analysis,
+  visualization, and export stages are stubs that emit marker
+  artifacts; real stages are added by later plans.
 ";
 
 /// Foundation stub stage: emits one marker artifact per run so the runner,
@@ -112,6 +114,9 @@ fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Sta
             IngestStage::with_dictionary(al_media::Dictionary::embedded())
         };
         return Ok(Box::new(stage));
+    }
+    if kind == StageKind::Locate {
+        return Ok(Box::new(LocateStage::new()));
     }
     if kind == StageKind::Dataset {
         return Ok(Box::new(DatasetStage::new()));
