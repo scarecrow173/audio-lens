@@ -45,6 +45,11 @@ pub struct Dictionary {
     /// Dictionary entries.
     #[serde(default)]
     pub entries: Vec<DictEntry>,
+    /// SHA-256 of the JSON text this dictionary was parsed from.
+    /// Recorded in job metadata so annotations stay attributable to the
+    /// exact dictionary content, not just a version label.
+    #[serde(skip)]
+    pub sha256: String,
 }
 
 /// An annotation returned by a dictionary lookup. Carries the dictionary
@@ -65,12 +70,27 @@ impl Dictionary {
     /// Load a dictionary from a JSON file.
     pub fn load(path: &Path) -> io::Result<Self> {
         let text = std::fs::read_to_string(path)?;
-        serde_json::from_str(&text).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Self::from_json(&text).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
     }
 
-    /// Parse a dictionary from JSON text.
+    /// Parse a dictionary from JSON text, recording its content hash.
     pub fn from_json(text: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(text)
+        let mut dict: Self = serde_json::from_str(text)?;
+        dict.sha256 = crate::hash::sha256_hex(text.as_bytes());
+        Ok(dict)
+    }
+
+    /// The dictionary bundled with the binary.
+    ///
+    /// Using the embedded dictionary as the default keeps ingest results
+    /// deterministic regardless of the working directory; the content hash
+    /// recorded in metadata identifies exactly which dictionary produced
+    /// the annotations.
+    pub fn embedded() -> Self {
+        Self::from_json(include_str!(
+            "../../../dictionaries/capture-artifacts.v1.json"
+        ))
+        .expect("bundled dictionary must parse")
     }
 
     /// Look up annotations for a codec/container pair.
@@ -146,11 +166,19 @@ mod tests {
 
     #[test]
     fn bundled_dictionary_loads() {
-        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../dictionaries/capture-artifacts.v1.json");
-        let dict = Dictionary::load(&path).unwrap();
+        let dict = Dictionary::embedded();
         assert_eq!(dict.version, "1");
         assert!(!dict.entries.is_empty());
+        assert_eq!(dict.sha256.len(), 64);
+    }
+
+    #[test]
+    fn loaded_dictionary_records_content_hash() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../dictionaries/capture-artifacts.v1.json");
+        let text = std::fs::read_to_string(&path).unwrap();
+        let dict = Dictionary::load(&path).unwrap();
+        assert_eq!(dict.sha256, crate::hash::sha256_hex(text.as_bytes()));
     }
 
     #[test]
