@@ -64,13 +64,16 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
   (declared_input の `path` は空)。`resolve()` /
   `resolve_by_role()` は空 path の artifact を `None` / スキップ
   とし、job_dir 自体への誤解決を防ぐ
-- `JobDefinition::create` で入力パスを絶対化し、manifest に記録される
-  入力位置が実行時 CWD に依存しないようにする(別 CWD からの
-  resume でも同一ファイルを読む)
-- `JobInput.source_sha256` で入力内容のハッシュを Job 作成時に固定
-  (CLI がファイルを読んで計算)。declared_input artifact の params にも
-  `source_sha256` を記録し、manifest だけで入力バイト列を特定できる。
-  Ingest 側は resume/再実行時に一致を検証する
+- `JobDefinition::create` は `io::Result` を返し、入力パスの絶対化と
+  内容ハッシュ(`source_sha256`)の固定を作成時に必ず行う。
+  読めない入力は Job 作成自体が失敗し、ライブラリ経路でも
+  unpinned input の Job を作れない。declared_input artifact の
+  params にも `source_sha256` を記録し、manifest だけで入力
+  バイト列を特定できる。Ingest 側は resume/再実行時に一致を検証する。
+  呼び出し側が明示的に設定した `source_sha256` はそのまま保持する
+- SHA-256 実装は `al-core::hash` に置く(al-job が入力固定に使う
+  ため al-media から移動。al-media は re-export で `sha256_hex` を
+  公開)
 - serde/serde_json は相互運用目的の依存として採用(コア処理ではない)
 
 ## Related Experiments

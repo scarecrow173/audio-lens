@@ -70,9 +70,11 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
   ため resume は元ファイルにも当時のバイナリにも依存せず、同一
   Job ID で辞書内容が固定される(結合テストで「run → 辞書削除 →
   resume 成功」と既定実行での snapshot 記録を確認)
-- CLI は入力ファイルを Job 作成時に読み、`source_sha256` を
-  `JobInput` に固定する。Ingest は manifest 上の固定値と実ファイルの
-  ハッシュを照合し、不一致は `input content changed` で明示的失敗
+- `JobDefinition::create` が全入力の `source_sha256` を Job 作成時に
+  固定する(ライブラリ経路でも unpinned input は作れない。呼出側が
+  指定したハッシュは保持される)。Ingest は manifest 上の固定値と
+  実ファイルのハッシュを照合し、不一致は `input content changed`
+  で明示的失敗。読めない入力は Job 作成自体が io エラーになる
 - `--config` の読込・JSON parse 失敗は `{}` への暗黙
   フォールバックではなく明示的エラー(設定が無視されて
   Job が成功するのを防ぐ)
