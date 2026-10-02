@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z881eeUpQjjpRLhM0io"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest"
 created: "2026-10-02"
 updated: "2026-10-02"
