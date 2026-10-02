@@ -16,6 +16,7 @@ dependencies:
   - scarecrow173/apm-packages/packages/doc-driven-dev#main
   - scarecrow173/apm-packages/packages/github-automation#main
   - scarecrow173/apm-packages/packages/token-compression#main
+  - scarecrow173/apm-packages/packages/review-protocol#main
   mcp: []
 devDependencies:
   mcp:
