@@ -1,0 +1,26 @@
+[settings]
+minimum_release_age = "7d"
+# mise.lock を維持し、install/use で locked version を優先させる
+lockfile = true
+
+[env]
+UV_EXCLUDE_NEWER = "1 week"
+
+# 言語 toolchain は未定。決定次第ここへ追加する。
+# 現状は apm install / serena MCP の実行に必要な最小構成のみ pin する。
+[tools]
+python = "3.12"
+uv = "0.11"
+# apm.lock.yaml は apm 0.28.0 で生成。0.30.0 は Windows で path dep 解決が
+# 壊れているため lock 生成版に pin する。
+"pipx:apm-cli"  = { version = "0.28.0", uvx_args = "--prerelease allow" }
+"pipx:serena-agent" = "1.7.0"
+
+# Repository-owned setup contract: fresh checkout を開発可能にする
+# canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
+# 言語 stack 決定後、依存 install / build 手順をここへ追加する。
+[tasks.setup]
+description = "Restore APM dependencies for a fresh checkout"
+run = [
+  "apm install",
+]

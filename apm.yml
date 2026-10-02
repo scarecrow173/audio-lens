@@ -1,0 +1,38 @@
+name: audio-lens
+version: 1.0.0
+description: APM project for audio-lens
+author: scarecrow173
+targets:
+- copilot
+- codex
+- claude
+- cursor
+- windsurf
+dependencies:
+  apm:
+  - scarecrow173/apm-packages/packages/basic-dev-foundation#main
+  - scarecrow173/apm-packages/packages/recommended-dev-suite#main
+  - scarecrow173/apm-packages/packages/steer-enterprise-web-research#main
+  - scarecrow173/apm-packages/packages/doc-driven-dev#main
+  - scarecrow173/apm-packages/packages/github-automation#main
+  - scarecrow173/apm-packages/packages/token-compression#main
+  mcp: []
+devDependencies:
+  mcp:
+  - name: serena
+    registry: false
+    transport: stdio
+    command: serena
+    args:
+    - start-mcp-server
+    - --context
+    - ide
+    - --project-from-cwd
+  - name: mise
+    registry: false
+    transport: stdio
+    command: mise
+    args:
+    - mcp
+includes: auto
+scripts: {}
