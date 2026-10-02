@@ -1,7 +1,7 @@
 ---
 id: "TASK-cwUga2iqYje7mVg950IY46"
 type: "task"
-status: "todo"
+status: "done"
 title: "Rust ワークスペースの初期化"
 created: "2026-10-02"
 updated: "2026-10-02"
