@@ -71,6 +71,11 @@ apm_modules/
 .windsurf/rules/
 .windsurf/workflows/
 
-# SDP generated artifacts (regenerate via skill-discovery-protocol); inference JSON is agent-authored
-.sdp/*
-!.sdp/skill-reference-inferences.json
+# SDP generated artifacts (regenerate via skill-discovery-protocol)
+.sdp/
+
+# Serena MCP generated artifacts
+.serena/
+
+# Rust build artifacts
+target/
