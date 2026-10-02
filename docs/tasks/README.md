@@ -26,7 +26,7 @@ Directory: `docs/tasks`
 | TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | todo | [locate-mixer.md](./locate-mixer.md) |
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | todo | [locate-residual.md](./locate-residual.md) |
 | TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | todo | [locate-result-schema.md](./locate-result-schema.md) |
-| TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | todo | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
+| TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | in-progress | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
 | TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | todo | [locate-stage-cli.md](./locate-stage-cli.md) |
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | todo | [locate-tracking.md](./locate-tracking.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |

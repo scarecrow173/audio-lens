@@ -42,6 +42,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "al-locate"
+version = "0.1.0"
+dependencies = [
+ "al-core",
+ "al-job",
+ "al-media",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "al-media"
 version = "0.1.0"
 dependencies = [
