@@ -54,15 +54,23 @@ task `docs/tasks/wav-decode.md`、test-spec `ingest-wav-decode` に従う。
 ### Changes
 
 - `wav.rs`: fmt/data チャンク走査、PCM u8/s16/s24/s32 と
-  float32/64 を f64 へ変換、奇数チャンクの pad byte 対応、
+  float32/64 を f64 へ変換(整数 PCM は整数値のまま保持し
+  [-1,1] スケーリングしない。u8 は offset binary を符号値に
+  変換)、奇数チャンクの pad byte 対応、末尾不完全フレーム・
   破損・非対応形式の明示的失敗
 - `hash.rs`: 依存ゼロの SHA-256(既知ベクトルで検証)
 - `metadata.rs` の `AudioMetadata` / `SampleFormat` を利用
 
 ### Decisions During Implementation
 
-- PCM は f64 に変換して保持(ゲイン正規化は行わないという意味での
-  「正規化前」を保持)。元のビット深度・フォーマットは別フィールドに記録
+- PCM はソースのネイティブスケールで f64 に保持(整数 PCM は
+  整数値のまま、f64 の精度内で無損失)。[-1,1] へのスケーリングは
+  正規化に該当するため行わない。元のビット深度・フォーマットは
+  `sample_format` に記録
+- 8bit PCM は unsigned offset binary のため `raw - 128` の符号値に
+  変換(u8 の wrapping 演算で波形が反転する不具合を修正)
+- data チャンクがフレーム境界で終わらない場合は `malformed` で
+  明示的失敗(暗黙切り捨てしない)
 - 24bit の符号拡張を明示処理
 
 ## Validation
