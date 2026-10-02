@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J5bNO5HoVp8PkGjrg"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-media 骨格とフォーマット検出・明示的失敗"
 created: "2026-10-02"
 updated: "2026-10-02"
