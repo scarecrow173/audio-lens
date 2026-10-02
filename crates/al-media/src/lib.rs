@@ -4,9 +4,11 @@
 pub mod format;
 pub mod hash;
 pub mod metadata;
+pub mod timing;
 pub mod wav;
 
 pub use format::{MediaFormat, detect_format};
 pub use hash::sha256_hex;
 pub use metadata::{AudioMetadata, IntegrityObservation, MediaError, SampleFormat};
+pub use timing::{ClockKind, Discontinuity, IntervalStats, TimingObservation, observe_timing};
 pub use wav::{DecodedAudio, decode_wav};
