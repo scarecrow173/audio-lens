@@ -8,9 +8,10 @@ use al_core::StageKind;
 use al_job::manifest::ArtifactRecord;
 use al_job::stage::{Stage, StageContext, StageError};
 
+use al_core::sha256_hex;
+
 use crate::dictionary::Dictionary;
 use crate::format::{MediaFormat, detect_format};
-use crate::hash::sha256_hex;
 use crate::metadata::AudioMetadata;
 use crate::wav::decode_wav;
 

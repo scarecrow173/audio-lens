@@ -68,7 +68,8 @@ fn ingest_wav_produces_pcm_and_metadata_artifacts() {
         vec![input(InputRole::CaptureBug, &wav)],
         serde_json::json!({}),
         vec![StageKind::Ingest],
-    );
+    )
+    .unwrap();
     let mut stages: Vec<Box<dyn Stage>> =
         vec![Box::new(IngestStage::with_dictionary(bundled_dictionary()))];
 
@@ -127,7 +128,8 @@ fn same_input_reproduces_same_hash() {
             vec![input(InputRole::CaptureBug, &wav)],
             serde_json::json!({}),
             vec![StageKind::Ingest],
-        );
+        )
+        .unwrap();
         let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
         let manifest = runner.run(&def, &mut stages).unwrap();
         let meta = manifest
@@ -154,7 +156,8 @@ fn unknown_format_fails_explicitly() {
         vec![input(InputRole::CaptureBug, &bogus)],
         serde_json::json!({}),
         vec![StageKind::Ingest],
-    );
+    )
+    .unwrap();
     let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
 
     let err = runner.run(&def, &mut stages).unwrap_err();
@@ -180,7 +183,9 @@ fn input_changed_after_creation_fails_explicitly() {
     let mut job_input = input(InputRole::CaptureBug, &wav);
     job_input.source_sha256 = Some(al_media::sha256_hex(&std::fs::read(&wav).unwrap()));
 
-    // The file is then replaced under the same path.
+    // The file is then replaced under the same path. The pinned hash is
+    // kept by `create` (caller-provided hashes win), so the stage must
+    // detect the mismatch.
     std::fs::write(&wav, wav_bytes(1, 48000, &[1; 100])).unwrap();
 
     let job_dir = temp_dir("job5");
@@ -189,7 +194,8 @@ fn input_changed_after_creation_fails_explicitly() {
         vec![job_input],
         serde_json::json!({}),
         vec![StageKind::Ingest],
-    );
+    )
+    .unwrap();
     let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
 
     let err = runner.run(&def, &mut stages).unwrap_err();
@@ -234,7 +240,8 @@ fn resume_reuses_completed_ingest_artifacts() {
         vec![input(InputRole::CaptureBug, &wav)],
         serde_json::json!({}),
         vec![StageKind::Ingest, StageKind::Locate],
-    );
+    )
+    .unwrap();
     let probe_ran = Rc::new(Cell::new(0));
     let mut stages: Vec<Box<dyn Stage>> = vec![
         Box::new(IngestStage::new()),

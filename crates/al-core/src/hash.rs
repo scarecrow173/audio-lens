@@ -1,6 +1,7 @@
-//! Minimal SHA-256 implementation for source-file provenance.
+//! Minimal SHA-256 implementation for content provenance.
 //!
-//! Implemented in-tree so `al-media` stays free of external dependencies.
+//! Implemented in-tree so the workspace stays free of external hashing
+//! dependencies. Used to pin job inputs and dictionary snapshots.
 
 const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
