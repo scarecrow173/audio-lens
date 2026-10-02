@@ -185,8 +185,21 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
         }
         let body = &data[body_start..body_end];
         match id {
-            b"fmt " => fmt = Some(parse_fmt(body)?),
-            b"data" => pcm = Some(body),
+            // Duplicate fmt/data are rejected rather than silently
+            // last-wins: dropping an earlier `data` chunk would discard
+            // part of the input, breaking the no-loss decode contract.
+            b"fmt " => {
+                if fmt.is_some() {
+                    return Err(MediaError::malformed("duplicate fmt chunk"));
+                }
+                fmt = Some(parse_fmt(body)?);
+            }
+            b"data" => {
+                if pcm.is_some() {
+                    return Err(MediaError::malformed("duplicate data chunk"));
+                }
+                pcm = Some(body);
+            }
             _ => {}
         }
         // Chunks are word-aligned: an odd size is followed by a pad byte.
@@ -201,6 +214,9 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
     let fmt = fmt.ok_or_else(|| MediaError::malformed("missing fmt chunk"))?;
     if fmt.channels == 0 {
         return Err(MediaError::malformed("fmt declares zero channels"));
+    }
+    if fmt.sample_rate == 0 {
+        return Err(MediaError::malformed("fmt declares zero sample rate"));
     }
     let pcm = pcm.ok_or_else(|| MediaError::malformed("missing data chunk"))?;
     let (sample_format, codec, samples) = decode_samples(&fmt, pcm)?;
@@ -344,6 +360,49 @@ mod tests {
         // block_align field inside the fmt chunk (offset 12 within body,
         // body starts at byte 28).
         wav[28 + 12] = 99;
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_duplicate_data_chunk() {
+        let mut wav = make_wav(1, 48000, 16, &[1, 2]);
+        // A second data chunk would silently override the first; that
+        // discards input bytes and must be rejected.
+        wav.extend_from_slice(b"data");
+        wav.extend_from_slice(&2u32.to_le_bytes());
+        wav.extend_from_slice(&3i16.to_le_bytes());
+        let riff = (wav.len() - 8) as u32;
+        wav[4..8].copy_from_slice(&riff.to_le_bytes());
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_duplicate_fmt_chunk() {
+        let wav = make_wav(1, 48000, 16, &[1, 2]);
+        let mut with_dup = Vec::new();
+        with_dup.extend_from_slice(&wav[..36]); // RIFF header + first fmt
+        with_dup.extend_from_slice(&wav[12..36]); // duplicate fmt
+        with_dup.extend_from_slice(&wav[36..]); // data chunk
+        let riff = (with_dup.len() - 8) as u32;
+        with_dup[4..8].copy_from_slice(&riff.to_le_bytes());
+        assert!(matches!(
+            decode_wav(&with_dup),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_zero_sample_rate() {
+        let mut wav = make_wav(1, 48000, 16, &[1, 2]);
+        // fmt body starts at byte 20; sample_rate at +4, byte_rate at +8.
+        wav[24..28].copy_from_slice(&0u32.to_le_bytes());
+        wav[28..32].copy_from_slice(&0u32.to_le_bytes());
         assert!(matches!(
             decode_wav(&wav),
             Err(MediaError::Malformed { .. })
