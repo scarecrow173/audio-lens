@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kIgVL2y1o3HNiBmfD"
 type: "task"
-status: "todo"
+status: "done"
 title: "tracking: anchor/segment/TimeMap + ループ反復識別"
 created: "2026-10-02"
 updated: "2026-10-02"

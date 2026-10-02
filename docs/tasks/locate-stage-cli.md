@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kJCh6jSerzLdxIwnb"
 type: "task"
-status: "todo"
+status: "done"
 title: "LocateStage + CLI 接続"
 created: "2026-10-02"
 updated: "2026-10-02"

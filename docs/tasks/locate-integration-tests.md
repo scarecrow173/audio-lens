@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kK3Fu6B5tJ0qnORg0"
 type: "task"
-status: "todo"
+status: "done"
 title: "locate 結合テスト(合成 fixture)"
 created: "2026-10-02"
 updated: "2026-10-02"
