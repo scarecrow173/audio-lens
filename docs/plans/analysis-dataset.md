@@ -31,7 +31,9 @@ relations:
     - "docs/adr/analysis-dataset-storage.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/dataset-store-roundtrip.md"
+    - "docs/test-specs/dataset-provenance-validity.md"
   references: []
   defers: []
   deferred-by: []
