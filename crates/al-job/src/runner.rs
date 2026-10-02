@@ -32,10 +32,7 @@ impl StageRunner {
     /// Validate the declared stage dependency graph.
     ///
     /// Fails if a stage's dependencies are not part of the job's stage plan.
-    fn validate_plan(
-        def: &JobDefinition,
-        stages: &[Box<dyn Stage>],
-    ) -> Result<(), StageError> {
+    fn validate_plan(def: &JobDefinition, stages: &[Box<dyn Stage>]) -> Result<(), StageError> {
         for stage in stages {
             for dep in stage.depends_on() {
                 if !def.stages.contains(&dep) {
@@ -156,9 +153,9 @@ impl StageRunner {
                     return Err(err);
                 }
             }
-            manifest.save(job_dir).map_err(|e| {
-                StageError::new(*stage_kind, format!("cannot save manifest: {e}"))
-            })?;
+            manifest
+                .save(job_dir)
+                .map_err(|e| StageError::new(*stage_kind, format!("cannot save manifest: {e}")))?;
         }
         Ok(manifest.clone())
     }
