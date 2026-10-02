@@ -37,20 +37,18 @@ impl IngestStage {
         }
     }
 
-    /// Load a dictionary file if it exists; absent file means no dictionary.
+    /// Stage that loads a dictionary from an explicit file path.
+    /// A missing or unreadable file is an explicit error — an explicit
+    /// configuration must not silently degrade to "no dictionary".
     pub fn with_dictionary_file(path: impl Into<PathBuf>) -> Result<Self, StageError> {
         let path = path.into();
-        let dictionary = if path.exists() {
-            Some(Dictionary::load(&path).map_err(|e| {
-                StageError::new(
-                    StageKind::Ingest,
-                    format!("cannot load dictionary {}: {e}", path.display()),
-                )
-            })?)
-        } else {
-            None
-        };
-        Ok(Self { dictionary })
+        let dictionary = Dictionary::load(&path).map_err(|e| {
+            StageError::new(
+                StageKind::Ingest,
+                format!("cannot load dictionary {}: {e}", path.display()),
+            )
+        })?;
+        Ok(Self::with_dictionary(dictionary))
     }
 
     fn ingest_input(
@@ -101,6 +99,13 @@ impl IngestStage {
             .as_ref()
             .map(|d| d.annotate(Some(&audio.codec), Some("wav")))
             .unwrap_or_default();
+        let dictionary_info = self.dictionary.as_ref().map(|d| {
+            serde_json::json!({
+                "version": d.version,
+                "sha256": d.sha256,
+                "entries": d.entries.len(),
+            })
+        });
 
         let metadata = AudioMetadata {
             container: "wav".into(),
@@ -136,6 +141,7 @@ impl IngestStage {
             "role": input.role,
             "source_path": input.path,
             "audio": metadata,
+            "dictionary": dictionary_info,
             "annotations": annotations,
         });
         let meta_text = serde_json::to_string_pretty(&meta_json).map_err(|e| {
@@ -145,13 +151,21 @@ impl IngestStage {
             StageError::new(StageKind::Ingest, format!("cannot write metadata: {e}"))
         })?;
 
+        // Link produced artifacts to the declared-input artifact so the
+        // manifest lineage reaches back to the source file.
+        let lineage: Vec<_> = ctx
+            .manifest
+            .input_artifact(&input.input_id)
+            .into_iter()
+            .collect();
+
         Ok(vec![
             ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
                 role: "decoded_pcm".into(),
                 path: pcm_rel,
                 produced_by: Some(StageKind::Ingest),
-                inputs: vec![],
+                inputs: lineage.clone(),
                 params: serde_json::json!({
                     "codec": audio.codec,
                     "sample_rate": audio.sample_rate,
@@ -163,10 +177,18 @@ impl IngestStage {
                 role: "ingest_metadata".into(),
                 path: meta_rel,
                 produced_by: Some(StageKind::Ingest),
-                inputs: vec![],
+                inputs: lineage,
                 params: serde_json::json!({
                     "source_hash": metadata.source_hash,
                     "annotation_count": annotations.len(),
+                    "dictionary_version": self
+                        .dictionary
+                        .as_ref()
+                        .map(|d| d.version.clone()),
+                    "dictionary_sha256": self
+                        .dictionary
+                        .as_ref()
+                        .map(|d| d.sha256.clone()),
                 }),
             },
         ])

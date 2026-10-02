@@ -57,13 +57,29 @@ impl Manifest {
     /// Manifest filename inside a job directory.
     pub const FILE_NAME: &'static str = "manifest.json";
 
-    /// Create an empty manifest for a freshly created job.
+    /// Create a manifest for a freshly created job. Each declared input is
+    /// registered as an artifact with `produced_by: None` so downstream
+    /// artifacts can point their lineage at the source they came from.
     pub fn new(
         job_id: JobId,
         inputs: Vec<JobInput>,
         config: serde_json::Value,
         stages: &[StageKind],
     ) -> Self {
+        let artifacts = inputs
+            .iter()
+            .map(|input| ArtifactRecord {
+                artifact_id: ArtifactId::new(),
+                role: "declared_input".into(),
+                path: input.path.clone(),
+                produced_by: None,
+                inputs: Vec::new(),
+                params: serde_json::json!({
+                    "input_id": input.input_id,
+                    "input_role": input.role,
+                }),
+            })
+            .collect();
         Self {
             job_id,
             inputs,
@@ -77,8 +93,20 @@ impl Manifest {
                     error: None,
                 })
                 .collect(),
-            artifacts: Vec::new(),
+            artifacts,
         }
+    }
+
+    /// Artifact id registered for a declared input, if any.
+    pub fn input_artifact(&self, input_id: &al_core::InputId) -> Option<ArtifactId> {
+        self.artifacts
+            .iter()
+            .find(|record| {
+                record.role == "declared_input"
+                    && record.params.get("input_id").and_then(|v| v.as_str())
+                        == Some(input_id.as_str())
+            })
+            .map(|record| record.artifact_id.clone())
     }
 
     /// Persist the manifest under `job_dir`.
@@ -178,15 +206,30 @@ mod tests {
     #[test]
     fn register_links_artifact_to_stage() {
         let manifest = sample_manifest();
-        assert_eq!(manifest.artifacts.len(), 2);
+        // One declared input artifact + two produced artifacts.
+        assert_eq!(manifest.artifacts.len(), 3);
         let locate = manifest.stage(StageKind::Locate).unwrap();
         assert_eq!(locate.artifacts.len(), 1);
     }
 
     #[test]
+    fn declared_input_is_an_artifact() {
+        let manifest = sample_manifest();
+        let input = &manifest.inputs[0];
+        let id = manifest.input_artifact(&input.input_id).unwrap();
+        let record = manifest.artifact(&id).unwrap();
+        assert_eq!(record.role, "declared_input");
+        assert_eq!(record.produced_by, None);
+    }
+
+    #[test]
     fn lineage_walks_upstream_chain() {
         let manifest = sample_manifest();
-        let locate = &manifest.artifacts[1];
+        let locate = manifest
+            .artifacts
+            .iter()
+            .find(|a| a.role == "locate_result")
+            .unwrap();
         let lineage = manifest.lineage_of(&locate.artifact_id);
         assert_eq!(lineage.len(), 2);
         assert_eq!(lineage[0], locate.artifact_id);
