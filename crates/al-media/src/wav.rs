@@ -176,6 +176,13 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
         if body_end > data.len() {
             return Err(MediaError::malformed("chunk extends past end of file"));
         }
+        // An odd-sized chunk must be followed by its word-alignment pad
+        // byte — including the last chunk.
+        if body_end + (size % 2) > data.len() {
+            return Err(MediaError::malformed(
+                "missing pad byte after odd-sized chunk",
+            ));
+        }
         let body = &data[body_start..body_end];
         match id {
             b"fmt " => fmt = Some(parse_fmt(body)?),
@@ -273,6 +280,30 @@ mod tests {
         let data_len_at = wav.len() - 10;
         wav[data_len_at] = 5;
         wav.truncate(wav.len() - 1);
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_missing_pad_byte_at_eof() {
+        let mut wav = Vec::new();
+        wav.extend_from_slice(b"RIFF");
+        wav.extend_from_slice(&39u32.to_le_bytes()); // len 47 minus 8
+        wav.extend_from_slice(b"WAVE");
+        wav.extend_from_slice(b"fmt ");
+        wav.extend_from_slice(&16u32.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes());
+        wav.extend_from_slice(&8000u32.to_le_bytes());
+        wav.extend_from_slice(&8000u32.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes());
+        wav.extend_from_slice(&8u16.to_le_bytes());
+        wav.extend_from_slice(b"data");
+        wav.extend_from_slice(&3u32.to_le_bytes());
+        wav.extend_from_slice(&[0u8, 128, 255]);
+        // No pad byte; the file ends mid-chunk-padding.
         assert!(matches!(
             decode_wav(&wav),
             Err(MediaError::Malformed { .. })
