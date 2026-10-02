@@ -1,7 +1,7 @@
 ---
 id: "TASK-wjixVNPct4FFdTgz7uqvU9"
 type: "task"
-status: "todo"
+status: "done"
 title: "共有ドメイン型と安定 id の実装"
 created: "2026-10-02"
 updated: "2026-10-02"
