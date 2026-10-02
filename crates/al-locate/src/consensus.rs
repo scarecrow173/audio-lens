@@ -14,17 +14,35 @@ use crate::result::{LocateResult, SampleRange};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConsensusConfig {
     /// Minimum number of methods that must agree on one position.
+    #[serde(default = "default_min_agreeing")]
     pub min_agreeing_methods: u32,
     /// Maximum |position_i − position_j| to count as agreement
     /// (samples).
+    #[serde(default = "default_position_tolerance")]
     pub position_tolerance: u64,
-    /// Minimum peak score for a candidate to count as agreement.
+    /// Minimum peak score magnitude for a candidate to count as
+    /// agreement.
+    #[serde(default = "default_min_score")]
     pub min_score: f64,
     /// Minimum peak-to-background ratio for a candidate to count.
+    #[serde(default = "default_min_p2b")]
     pub min_peak_to_background: f64,
 }
 
 use serde::{Deserialize, Serialize};
+
+fn default_min_agreeing() -> u32 {
+    2
+}
+fn default_position_tolerance() -> u64 {
+    256
+}
+fn default_min_score() -> f64 {
+    0.3
+}
+fn default_min_p2b() -> f64 {
+    2.0
+}
 
 impl Default for ConsensusConfig {
     fn default() -> Self {
@@ -53,14 +71,23 @@ pub fn evaluate(
     algorithm_id: &str,
     algorithm_version: &str,
 ) -> LocateResult {
-    // Usable top candidates: method is usable evidence, and its top
-    // peak clears the score/background floors.
+    // Usable top candidates: one vote per method, and its top peak
+    // clears the score/background floors. Scores are signed (negative
+    // = polarity inversion); agreement is judged on magnitude.
+    let mut seen_methods: Vec<&str> = Vec::new();
     let votes: Vec<u64> = evidence
         .iter()
         .filter(|e| e.validity != Validity::ComputationFailed)
-        .filter_map(|e| e.candidates.first())
+        .filter_map(|e| {
+            if seen_methods.contains(&e.method.as_str()) {
+                return None;
+            }
+            seen_methods.push(e.method.as_str());
+            e.candidates.first()
+        })
         .filter(|c| {
-            c.score >= config.min_score && c.peak_to_background >= config.min_peak_to_background
+            c.score.abs() >= config.min_score
+                && c.peak_to_background >= config.min_peak_to_background
         })
         .map(|c| c.position)
         .collect();
@@ -80,9 +107,12 @@ pub fn evaluate(
             end: source_len,
         },
         capture_range: position
-            .map(|p| SampleRange {
-                start: p,
-                end: (p + source_len).min(capture_len),
+            .map(|p| {
+                let start = p.min(capture_len);
+                SampleRange {
+                    start,
+                    end: (p + source_len).min(capture_len).max(start),
+                }
             })
             .unwrap_or(SampleRange { start: 0, end: 0 }),
         evidence: evidence.to_vec(),
@@ -114,15 +144,17 @@ pub fn evaluate(
         );
     }
 
-    // Cluster votes within tolerance. Take the largest cluster; a tie
-    // or a second ≥min cluster at a distant position is ambiguity,
-    // not a silent pick.
+    // Cluster votes within tolerance. A cluster's diameter (not just
+    // neighbour distance) is bounded by position_tolerance, so every
+    // member pair is within tolerance — no transitive chaining.
+    // Take the largest cluster; a tie or a second ≥min cluster at a
+    // distant position is ambiguity, not a silent pick.
     let mut sorted = votes.clone();
     sorted.sort_unstable();
     let mut clusters: Vec<Vec<u64>> = Vec::new();
     for &v in &sorted {
         match clusters.last_mut() {
-            Some(c) if v - c[c.len() - 1] <= config.position_tolerance => c.push(v),
+            Some(c) if v - c[0] <= config.position_tolerance => c.push(v),
             _ => clusters.push(vec![v]),
         }
     }
@@ -189,6 +221,7 @@ mod tests {
                 peak_to_background: 5.0,
                 peak_width: 4,
                 peak_ratio_12: Some(2.0),
+                channel_pair: None,
             }],
             validity: Validity::Valid,
             reject_reason: None,

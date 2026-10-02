@@ -82,8 +82,12 @@ fn preflight(
 
 /// Extract ranked peaks from a correlation curve.
 ///
-/// `corr[lag]` is the correlation at lag. Returns candidates sorted
-/// by descending score; background is the median absolute value.
+/// `corr[lag]` is the correlation at lag. Peaks are local maxima of
+/// `|corr|` — including both endpoints and the single-element case —
+/// so a source embedded flush at the capture tail is still found, and
+/// a polarity-inverted source produces a negative-score candidate
+/// rather than nothing. Candidates are sorted by descending `|score|`;
+/// background is the median absolute value.
 pub fn peaks_from_correlation(corr: &[f64], top: usize) -> Vec<LocateCandidate> {
     if corr.is_empty() {
         return Vec::new();
@@ -92,37 +96,50 @@ pub fn peaks_from_correlation(corr: &[f64], top: usize) -> Vec<LocateCandidate> 
     abs.sort_by(|a, b| a.total_cmp(b));
     let background = abs[abs.len() / 2].max(1e-12);
 
-    // Local maxima strictly above the background.
-    let mut peaks: Vec<(usize, f64)> = (1..corr.len().saturating_sub(1))
-        .filter(|&i| corr[i] >= corr[i - 1] && corr[i] > corr[i + 1] && corr[i] > background)
-        .map(|i| (i, corr[i]))
-        .collect();
-    if corr.len() >= 2 && corr[0] > corr[1] && corr[0] > background {
-        peaks.push((0, corr[0]));
-    }
-    peaks.sort_by(|a, b| b.1.total_cmp(&a.1));
+    let n = corr.len();
+    let is_peak = |i: usize| {
+        let v = corr[i].abs();
+        v > background
+            && (i == 0 || corr[i - 1].abs() <= v)
+            && (i + 1 == n || corr[i + 1].abs() < v)
+    };
+    let mut peaks: Vec<(usize, f64)> = if n == 1 {
+        vec![(0, corr[0])]
+    } else {
+        (0..n)
+            .filter(|&i| is_peak(i))
+            .map(|i| (i, corr[i]))
+            .collect()
+    };
+    peaks.sort_by(|a, b| b.1.abs().total_cmp(&a.1.abs()));
     peaks.truncate(top);
 
-    let second = peaks.get(1).map(|p| p.1);
+    let second = peaks.get(1).map(|p| p.1.abs());
     peaks
         .iter()
-        .map(|&(i, score)| {
-            // Half-max width around the peak.
-            let half = score / 2.0;
+        .enumerate()
+        .map(|(rank, &(i, score))| {
+            // Half-max width around the peak in |corr|.
+            let half = score.abs() / 2.0;
             let mut lo = i;
-            while lo > 0 && corr[lo] > half {
+            while lo > 0 && corr[lo].abs() > half {
                 lo -= 1;
             }
             let mut hi = i;
-            while hi + 1 < corr.len() && corr[hi] > half {
+            while hi + 1 < n && corr[hi].abs() > half {
                 hi += 1;
             }
             LocateCandidate {
                 position: i as u64,
                 score,
-                peak_to_background: score / background,
+                peak_to_background: score.abs() / background,
                 peak_width: (hi - lo) as u64,
-                peak_ratio_12: second.map(|s| score / s.max(1e-12)),
+                peak_ratio_12: if rank == 0 {
+                    second.map(|s| score.abs() / s.max(1e-12))
+                } else {
+                    None
+                },
+                channel_pair: None,
             }
         })
         .collect()
@@ -137,19 +154,23 @@ fn evidence_from_corr(method: &'static str, version: &'static str, corr: &[f64])
             Validity::InsufficientSupport,
             "no correlation peak above background",
         ),
-        Some(top) if top.score <= 0.0 => rejected(
+        Some(top) if !top.score.is_finite() || top.score.abs() <= 1e-12 => rejected(
             method,
             version,
             Validity::LowCorrelation,
             "correlation peak is non-positive",
         ),
-        Some(top) if top.peak_to_background < MIN_PEAK_TO_BACKGROUND => MethodEvidence {
-            method: method.into(),
-            method_version: version.into(),
-            candidates,
-            validity: Validity::LowCorrelation,
-            reject_reason: Some("peak-to-background below threshold".into()),
-        },
+        // A single-lag correlation has no background to compare
+        // against; |score| alone carries the evidence.
+        Some(top) if corr.len() > 1 && top.peak_to_background < MIN_PEAK_TO_BACKGROUND => {
+            MethodEvidence {
+                method: method.into(),
+                method_version: version.into(),
+                candidates,
+                validity: Validity::LowCorrelation,
+                reject_reason: Some("peak-to-background below threshold".into()),
+            }
+        }
         Some(_) => MethodEvidence {
             method: method.into(),
             method_version: version.into(),
@@ -368,6 +389,30 @@ mod tests {
         let short = noise_signal(5, 64);
         let ev = FullNcc.locate(&noise_signal(9, 512), &short, 48000);
         assert_eq!(ev.validity, Validity::InsufficientSupport);
+    }
+
+    #[test]
+    fn single_lag_correlation_yields_a_candidate() {
+        // Signal identical in length to the template → correlation of
+        // length 1; the sole lag is still a valid peak.
+        let template = noise_signal(13, 512);
+        let ev = FullNcc.locate(&template, &template, 48000);
+        assert_eq!(ev.validity, Validity::Valid);
+        assert_eq!(ev.candidates.len(), 1);
+        assert_eq!(ev.candidates[0].position, 0);
+        assert!((ev.candidates[0].score - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn peaks_from_correlation_checks_endpoints_and_magnitude() {
+        // Peak at the last index, and a polarity-inverted peak.
+        let mut corr = vec![0.1; 8];
+        corr[7] = 0.95;
+        assert_eq!(peaks_from_correlation(&corr, 4)[0].position, 7);
+        corr[7] = -0.95;
+        assert_eq!(peaks_from_correlation(&corr, 4)[0].score, -0.95);
+        assert_eq!(peaks_from_correlation(&[0.9], 4).len(), 1);
+        assert!(peaks_from_correlation(&[], 4).is_empty());
     }
 
     #[test]
