@@ -337,7 +337,12 @@ impl<W: Write + Seek> WavWriter<W> {
         out.write_all(&bits.to_le_bytes())?;
         out.write_all(b"data")?;
         out.write_all(&0u32.to_le_bytes())?;
-        Ok(Self { out, encoding, channels, data_len: 0 })
+        Ok(Self {
+            out,
+            encoding,
+            channels,
+            data_len: 0,
+        })
     }
 
     /// Encode and append `samples` (interleaved f64 in the encoding's
@@ -359,18 +364,25 @@ impl<W: Write + Seek> WavWriter<W> {
     }
 
     /// Patch the RIFF and `data` size fields and return the writer.
-    /// The stream is *not* flushed beyond what `out` does; the caller
-    /// must still `sync_all`/rename for durability.
+    /// Chunks are word-aligned, so an odd `data` size is followed by a
+    /// pad byte that counts toward the RIFF size. The stream is *not*
+    /// flushed beyond what `out` does; the caller must still
+    /// `sync_all`/rename for durability.
     pub fn finish(mut self) -> io::Result<W> {
-        if self.data_len > u64::from(u32::MAX - 36) {
+        if self.data_len > u64::from(u32::MAX - 37) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 "data chunk exceeds RIFF 32-bit size limit",
             ));
         }
+        let pad = self.data_len % 2;
+        if pad == 1 {
+            self.out.seek(SeekFrom::End(0))?;
+            self.out.write_all(&[0u8])?;
+        }
         self.out.seek(SeekFrom::Start(4))?;
         self.out
-            .write_all(&((36 + self.data_len) as u32).to_le_bytes())?;
+            .write_all(&((36 + self.data_len + pad) as u32).to_le_bytes())?;
         self.out.seek(SeekFrom::Start(40))?;
         self.out.write_all(&(self.data_len as u32).to_le_bytes())?;
         Ok(self.out)
@@ -580,5 +592,63 @@ mod tests {
         let mut wav = make_wav(1, 48000, 16, &[1, 2]);
         wav.truncate(wav.len() - 3);
         assert!(decode_wav(&wav).is_err());
+    }
+
+    fn encode(encoding: WavEncoding, channels: u16, rate: u32, samples: &[f64]) -> Vec<u8> {
+        let cursor = io::Cursor::new(Vec::new());
+        let mut w = WavWriter::new(cursor, encoding, channels, rate).unwrap();
+        w.write_samples(samples).unwrap();
+        w.finish().unwrap().into_inner()
+    }
+
+    #[test]
+    fn s16_encode_decodes_back_exactly() {
+        let samples = [16384.0, -16384.0, 0.0, 32767.0];
+        let wav = encode(WavEncoding::PcmS16, 2, 48000, &samples);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.sample_format, SampleFormat::PcmS16);
+        assert_eq!(audio.channels, 2);
+        assert_eq!(audio.samples, samples);
+    }
+
+    #[test]
+    fn s24_and_s32_round_trip() {
+        for (enc, expected) in [
+            (WavEncoding::PcmS24, SampleFormat::PcmS24),
+            (WavEncoding::PcmS32, SampleFormat::PcmS32),
+        ] {
+            let samples = [8_388_000.0, -8_388_000.0, 1.0];
+            let wav = encode(enc, 1, 44100, &samples);
+            let audio = decode_wav(&wav).unwrap();
+            assert_eq!(audio.sample_format, expected);
+            assert_eq!(audio.samples, samples);
+        }
+    }
+
+    #[test]
+    fn float32_round_trip_keeps_native_scale() {
+        let samples = [0.5_f64, -0.25, 1.0];
+        let wav = encode(WavEncoding::Float32, 1, 48000, &samples);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.sample_format, SampleFormat::Float32);
+        assert_eq!(audio.samples, samples);
+    }
+
+    #[test]
+    fn integer_encode_clamps_to_range() {
+        let wav = encode(WavEncoding::PcmS16, 1, 48000, &[40_000.0, -40_000.0]);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.samples, vec![32767.0, -32768.0]);
+    }
+
+    #[test]
+    fn rejects_misaligned_sample_count_and_bad_params() {
+        let cursor = io::Cursor::new(Vec::new());
+        assert!(WavWriter::new(cursor, WavEncoding::PcmS16, 0, 48000).is_err());
+        let cursor = io::Cursor::new(Vec::new());
+        assert!(WavWriter::new(cursor, WavEncoding::PcmS16, 1, 0).is_err());
+        let cursor = io::Cursor::new(Vec::new());
+        let mut w = WavWriter::new(cursor, WavEncoding::PcmS16, 2, 48000).unwrap();
+        assert!(w.write_samples(&[1.0]).is_err());
     }
 }
