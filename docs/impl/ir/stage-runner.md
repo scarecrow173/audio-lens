@@ -71,6 +71,11 @@ task `docs/tasks/stage-runner.md`、test-spec `docs/test-specs/stage-runner-resu
   同 Job ID の改変 def を渡しても実行前に拒否される
 - run/resume 共通で全入力の `source_sha256` 必須性を検証し、
   unpinned input の struct-literal 迂回を拒否する
+- manifest の保存は temp file + rename の atomic write。
+  書き込み途中の kill/電源断で canonical manifest が破損しない
+- `validate_plan` は stage plan の重複・依存の順序(依存が後続に
+  あると永遠に完了しない)を事前検証し、未登録実装も run/resume
+  入口で拒否する。依存の「存在」だけでなく配置まで確認する
 
 ## Related Experiments
 

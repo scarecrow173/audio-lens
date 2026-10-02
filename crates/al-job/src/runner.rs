@@ -49,16 +49,36 @@ impl StageRunner {
         Ok(())
     }
 
-    /// Validate the declared stage dependency graph.
+    /// Validate the declared stage plan.
     ///
-    /// Fails if a stage's dependencies are not part of the job's stage plan.
+    /// The plan must list each stage at most once, every planned stage
+    /// must have a registered implementation, and each stage's
+    /// dependencies must appear *before* it in the plan — a dep that is
+    /// merely present but ordered later can never complete, which would
+    /// strand the job mid-execution.
     fn validate_plan(def: &JobDefinition, stages: &[Box<dyn Stage>]) -> Result<(), StageError> {
-        for stage in stages {
+        let mut seen = std::collections::HashSet::new();
+        for stage_kind in &def.stages {
+            if !seen.insert(*stage_kind) {
+                return Err(StageError::new(
+                    *stage_kind,
+                    "duplicate stage in the stage plan",
+                ));
+            }
+            let stage = stages
+                .iter()
+                .find(|s| s.kind() == *stage_kind)
+                .ok_or_else(|| {
+                    StageError::new(
+                        *stage_kind,
+                        "no stage implementation registered for this kind",
+                    )
+                })?;
             for dep in stage.depends_on() {
-                if !def.stages.contains(&dep) {
+                if !seen.contains(&dep) {
                     return Err(StageError::new(
-                        stage.kind(),
-                        format!("dependency {dep:?} is not part of the stage plan"),
+                        *stage_kind,
+                        format!("dependency {dep:?} must precede {stage_kind:?} in the plan"),
                     ));
                 }
             }

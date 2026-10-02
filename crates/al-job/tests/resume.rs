@@ -276,11 +276,53 @@ fn resume_with_altered_definition_is_rejected() {
     let err = runner.resume(&altered, &mut trio.stages).unwrap_err();
     assert!(err.message.contains("differs"));
 
-    // Same job id but an extra stage not in the recorded plan.
+    // Same job id but a shorter stage plan than the recorded one:
+    // validate_plan accepts it (prefix is still dependency-ordered), so
+    // the rejection must come from the recorded-definition check.
     let mut altered = def.clone();
-    altered.stages.push(StageKind::Export);
+    altered.stages.truncate(2);
     let err = runner.resume(&altered, &mut trio.stages).unwrap_err();
     assert!(err.message.contains("differs"));
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn duplicate_stage_in_plan_is_rejected() {
+    let dir = temp_dir("dup");
+    let runner = StageRunner::new(&dir);
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, capture)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest, StageKind::Locate, StageKind::Ingest],
+    )
+    .unwrap();
+    let mut trio = stub_trio();
+    let err = runner.run(&def, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("duplicate stage"));
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn dependency_listed_after_dependent_is_rejected() {
+    let dir = temp_dir("deporder");
+    let runner = StageRunner::new(&dir);
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
+    // Locate depends on Ingest, but the plan runs Locate first: the dep
+    // can never complete, so the plan must be rejected up front.
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, capture)],
+        serde_json::json!({}),
+        vec![StageKind::Locate, StageKind::Ingest],
+    )
+    .unwrap();
+    let mut trio = stub_trio();
+    let err = runner.run(&def, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("must precede"));
 
     std::fs::remove_dir_all(&dir).ok();
 }
