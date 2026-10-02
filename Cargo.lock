@@ -21,6 +21,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "al-dataset"
+version = "0.1.0"
+dependencies = [
+ "al-core",
+ "al-job",
+ "al-media",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "al-job"
 version = "0.1.0"
 dependencies = [

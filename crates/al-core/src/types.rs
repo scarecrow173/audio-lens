@@ -60,15 +60,33 @@ impl StageKind {
 }
 
 /// Whether a measurement is meaningful for a range.
+///
+/// The variant set distinguishes every way a measurement can fail to
+/// be trustworthy. `Valid` (no anomaly found) is never conflated with
+/// the inability to measure.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Validity {
-    /// Measurement is valid.
+    /// Measurement is valid (may still be "no anomaly").
     Valid,
-    /// Measurement could not be produced (distinguishes from "no anomaly").
-    Unavailable,
-    /// Measurement exists but is degraded or partial.
-    Degraded,
+    /// The analyzed range is silent or below usable energy.
+    SilenceInsufficientEnergy,
+    /// Too few valid windows or samples support the measurement.
+    InsufficientSupport,
+    /// Correlation evidence is too weak to trust the measurement.
+    LowCorrelation,
+    /// Coherence is too low to trust the measurement.
+    LowCoherence,
+    /// The alignment underpinning the measurement is ambiguous.
+    AmbiguousAlignment,
+    /// The requested frequency range is outside what is supported.
+    OutOfSupportedFrequencyRange,
+    /// The input could not be decoded or is unavailable.
+    DecodeInputUnavailable,
+    /// The measurement does not apply to this artifact.
+    NotApplicable,
+    /// The computation itself failed.
+    ComputationFailed,
 }
 
 /// Confidence that a measured observation reflects a real phenomenon.
@@ -111,7 +129,9 @@ mod tests {
 
     #[test]
     fn validity_is_distinct_from_absence() {
-        assert_ne!(Validity::Valid, Validity::Unavailable);
-        assert_ne!(Validity::Unavailable, Validity::Degraded);
+        // "No anomaly" and "cannot measure" are different states.
+        assert_ne!(Validity::Valid, Validity::InsufficientSupport);
+        assert_ne!(Validity::Valid, Validity::ComputationFailed);
+        assert_ne!(Validity::DecodeInputUnavailable, Validity::NotApplicable);
     }
 }
