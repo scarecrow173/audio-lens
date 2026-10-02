@@ -9,6 +9,7 @@ dependencies = [
  "al-core",
  "al-dataset",
  "al-job",
+ "al-locate",
  "al-media",
  "serde_json",
 ]
