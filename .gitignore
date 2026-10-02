@@ -74,3 +74,6 @@ apm_modules/
 # SDP generated artifacts (regenerate via skill-discovery-protocol); inference JSON is agent-authored
 .sdp/*
 !.sdp/skill-reference-inferences.json
+
+# Serena MCP generated artifacts
+.serena/
