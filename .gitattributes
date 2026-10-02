@@ -1,0 +1,49 @@
+# Normalize text files to LF by default.
+* text=auto eol=lf
+
+# Documentation and config
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+
+# Audio fixtures and intermediates
+*.wav binary
+*.flac binary
+*.mp3 binary
+*.ogg binary
+*.opus binary
+*.aac binary
+*.m4a binary
+*.aif binary
+*.aiff binary
+
+# Video / capture inputs
+*.mp4 binary
+*.mov binary
+*.mkv binary
+*.avi binary
+*.webm binary
+*.m2ts binary
+
+# Columnar / tensor analysis data
+*.parquet binary
+*.arrow binary
+*.npy binary
+*.npz binary
+*.zip binary
