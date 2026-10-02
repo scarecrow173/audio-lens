@@ -6,6 +6,7 @@ use al_job::job::{JobDefinition, JobInput};
 use al_job::manifest::{ArtifactRecord, Manifest};
 use al_job::runner::StageRunner;
 use al_job::stage::{Stage, StageContext, StageError};
+use al_media::IngestStage;
 
 const USAGE: &str = "\
 al — AudioLens job runner (foundation CLI)
@@ -55,6 +56,24 @@ impl Stage for StubStage {
             params: serde_json::json!({"stub": true}),
         }])
     }
+}
+
+/// Default dictionary location, relative to the working directory.
+const DEFAULT_DICTIONARY: &str = "dictionaries/capture-artifacts.v1.json";
+
+/// Build the stage implementation for `kind`. Stages without a real
+/// implementation fall back to the foundation stub.
+fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Stage>, String> {
+    if kind == StageKind::Ingest {
+        let dictionary_path = config
+            .get("dictionary")
+            .and_then(|v| v.as_str())
+            .unwrap_or(DEFAULT_DICTIONARY);
+        let stage =
+            IngestStage::with_dictionary_file(dictionary_path).map_err(|e| e.to_string())?;
+        return Ok(Box::new(stage));
+    }
+    Ok(Box::new(StubStage { kind }))
 }
 
 fn fail(message: impl std::fmt::Display) -> ExitCode {
@@ -132,11 +151,14 @@ fn cmd_run(args: &[String]) -> ExitCode {
         .and_then(|text| serde_json::from_str(&text).ok())
         .unwrap_or_else(|| serde_json::json!({}));
 
-    let def = JobDefinition::create(inputs, config, stage_kinds.clone());
-    let mut stages: Vec<Box<dyn Stage>> = stage_kinds
-        .iter()
-        .map(|kind| Box::new(StubStage { kind: *kind }) as Box<dyn Stage>)
-        .collect();
+    let def = JobDefinition::create(inputs, config.clone(), stage_kinds.clone());
+    let mut stages: Vec<Box<dyn Stage>> = Vec::new();
+    for kind in &stage_kinds {
+        match make_stage(*kind, &config) {
+            Ok(stage) => stages.push(stage),
+            Err(e) => return fail(e),
+        }
+    }
     let runner = StageRunner::new(base_dir);
     match runner.run(&def, &mut stages) {
         Ok(manifest) => {
@@ -173,11 +195,13 @@ fn cmd_resume(args: &[String]) -> ExitCode {
         Ok(v) => v,
         Err(e) => return fail(e),
     };
-    let mut stages: Vec<Box<dyn Stage>> = def
-        .stages
-        .iter()
-        .map(|kind| Box::new(StubStage { kind: *kind }) as Box<dyn Stage>)
-        .collect();
+    let mut stages: Vec<Box<dyn Stage>> = Vec::new();
+    for kind in &def.stages {
+        match make_stage(*kind, &def.config) {
+            Ok(stage) => stages.push(stage),
+            Err(e) => return fail(e),
+        }
+    }
     let runner = StageRunner::new(base_dir);
     match runner.resume(&def, &mut stages) {
         Ok(manifest) => {
