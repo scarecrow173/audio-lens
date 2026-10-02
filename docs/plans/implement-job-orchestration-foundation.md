@@ -32,7 +32,9 @@ relations:
     - "docs/adr/implementation-stack.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/job-immutability-provenance.md"
+    - "docs/test-specs/stage-runner-resume.md"
   references: []
   defers: []
   deferred-by: []
