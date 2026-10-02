@@ -62,7 +62,8 @@ task `docs/tasks/wav-decode.md`、test-spec `ingest-wav-decode` に従う。
   `block_align == channels * bytes/sample`、
   `byte_rate == sample_rate * block_align` を満たさない
   ヘッダは malformed として拒否。奇数サイズチャンクの
-  pad byte 欠落(末尾含む)も malformed
+  pad byte 欠落(末尾含む)、および最終チャンク後の 1〜7 byte の
+  残り(不完全な次チャンクヘッダ/trailing garbage)も malformed
 - `hash.rs`: 依存ゼロの SHA-256(既知ベクトルで検証)
 - `metadata.rs` の `AudioMetadata` / `SampleFormat` を利用
 
