@@ -21,9 +21,14 @@ STAGES:
   ingest, locate, cheap_analysis, reference_analysis, expensive_analysis,
   dataset, visualization, export
 
+CONFIG:
+  A JSON file passed via --config. Keys:
+    dictionary   Path to a capture-artifact dictionary JSON. Defaults to the
+                 dictionary bundled with the binary.
+
 NOTE:
-  Stage implementations are stubs that emit marker artifacts. Real ingest /
-  locate / analysis stages are added by later plans.
+  The ingest stage is implemented (WAV/PCM). All other stages are stubs
+  that emit marker artifacts; real stages are added by later plans.
 ";
 
 /// Foundation stub stage: emits one marker artifact per run so the runner,
@@ -58,19 +63,17 @@ impl Stage for StubStage {
     }
 }
 
-/// Default dictionary location, relative to the working directory.
-const DEFAULT_DICTIONARY: &str = "dictionaries/capture-artifacts.v1.json";
-
 /// Build the stage implementation for `kind`. Stages without a real
 /// implementation fall back to the foundation stub.
 fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Stage>, String> {
     if kind == StageKind::Ingest {
-        let dictionary_path = config
-            .get("dictionary")
-            .and_then(|v| v.as_str())
-            .unwrap_or(DEFAULT_DICTIONARY);
-        let stage =
-            IngestStage::with_dictionary_file(dictionary_path).map_err(|e| e.to_string())?;
+        // Default to the dictionary bundled with the binary so results do
+        // not depend on the working directory; `config.dictionary` selects
+        // an explicit file (and fails explicitly if it cannot be loaded).
+        let stage = match config.get("dictionary").and_then(|v| v.as_str()) {
+            Some(path) => IngestStage::with_dictionary_file(path).map_err(|e| e.to_string())?,
+            None => IngestStage::with_dictionary(al_media::Dictionary::embedded()),
+        };
         return Ok(Box::new(stage));
     }
     Ok(Box::new(StubStage { kind }))

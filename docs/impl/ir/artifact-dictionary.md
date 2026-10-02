@@ -57,6 +57,10 @@ task `docs/tasks/artifact-dictionary.md`、test-spec
 - `dictionary.rs`: `Dictionary` / `DictEntry` / `EntryMatch` /
   `Annotation`。`annotate(codec, container)` はセレクタの AND マッチ
   (未指定フィールドはワイルドカード)。返り値は全て辞書バージョン付き
+- `Dictionary` は読み込んだ JSON テキストの SHA-256 を保持し、
+  `Dictionary::embedded()` でバイナリ埋め込みの辞書を提供
+  (既定が CWD に依存しないよう、かつ注釈の provenance を
+  内容ハッシュで追跡できるようにするため)
 - `dictionaries/capture-artifacts.v1.json`: 初期版。
   codec_hf_cutoff(aac/mp3)、container_block_size、src_route、
   lossy_codec_present の最小構成
