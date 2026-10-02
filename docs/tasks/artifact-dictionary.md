@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J7BD4f6wbRbKvnycr"
 type: "task"
-status: "todo"
+status: "done"
 title: "キャプチャアーティファクト辞書"
 created: "2026-10-02"
 updated: "2026-10-02"
