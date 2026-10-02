@@ -50,6 +50,8 @@ struct FmtChunk {
     format_tag: u16,
     channels: u16,
     sample_rate: u32,
+    byte_rate: u32,
+    block_align: u16,
     bits_per_sample: u16,
 }
 
@@ -73,7 +75,8 @@ fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
         format_tag: read_u16(chunk, 0)?,
         channels: read_u16(chunk, 2)?,
         sample_rate: read_u32(chunk, 4)?,
-        // byte_rate at 8, block_align at 12
+        byte_rate: read_u32(chunk, 8)?,
+        block_align: read_u16(chunk, 12)?,
         bits_per_sample: read_u16(chunk, 14)?,
     })
 }
@@ -97,7 +100,23 @@ fn decode_samples(
             }
         };
 
-    let frame_bytes = bytes_per_sample * fmt.channels.max(1) as usize;
+    // Cross-check the declared frame layout: a header that contradicts
+    // itself is corrupt, not merely unusual.
+    let expected_block = fmt.channels as usize * bytes_per_sample;
+    if usize::from(fmt.block_align) != expected_block {
+        return Err(MediaError::malformed(format!(
+            "block_align {} does not match channels*bytes_per_sample {expected_block}",
+            fmt.block_align
+        )));
+    }
+    if u64::from(fmt.byte_rate) != u64::from(fmt.sample_rate) * u64::from(fmt.block_align) {
+        return Err(MediaError::malformed(format!(
+            "byte_rate {} does not match sample_rate*block_align",
+            fmt.byte_rate
+        )));
+    }
+
+    let frame_bytes = usize::from(fmt.block_align);
     if !data.len().is_multiple_of(frame_bytes) {
         return Err(MediaError::malformed("data chunk ends mid-frame"));
     }
@@ -135,6 +154,13 @@ fn decode_samples(
 pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
     if data.len() < 12 || &data[0..4] != b"RIFF" || &data[8..12] != b"WAVE" {
         return Err(MediaError::input_unavailable("not a RIFF/WAVE file"));
+    }
+    // The RIFF size field declares the whole file minus its own header.
+    let riff_size = read_u32(data, 4)? as usize;
+    if riff_size != data.len() - 8 {
+        return Err(MediaError::malformed(
+            "RIFF size does not match file length",
+        ));
     }
 
     let mut fmt: Option<FmtChunk> = None;
@@ -221,7 +247,7 @@ mod tests {
     fn decodes_8bit_unsigned_offset_binary() {
         let mut wav = Vec::new();
         wav.extend_from_slice(b"RIFF");
-        wav.extend_from_slice(&39u32.to_le_bytes());
+        wav.extend_from_slice(&40u32.to_le_bytes()); // file len 48 minus 8
         wav.extend_from_slice(b"WAVE");
         wav.extend_from_slice(b"fmt ");
         wav.extend_from_slice(&16u32.to_le_bytes());
@@ -247,6 +273,28 @@ mod tests {
         let data_len_at = wav.len() - 10;
         wav[data_len_at] = 5;
         wav.truncate(wav.len() - 1);
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_inconsistent_riff_size() {
+        let mut wav = make_wav(1, 48000, 16, &[1, 2]);
+        wav[4] = 0; // declared RIFF size far too small
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+
+    #[test]
+    fn rejects_inconsistent_block_align() {
+        let mut wav = make_wav(2, 48000, 16, &[1, 2]);
+        // block_align field inside the fmt chunk (offset 12 within body,
+        // body starts at byte 28).
+        wav[28 + 12] = 99;
         assert!(matches!(
             decode_wav(&wav),
             Err(MediaError::Malformed { .. })
