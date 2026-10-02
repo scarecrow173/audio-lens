@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J84S1ChoUOODLF67z"
 type: "task"
-status: "todo"
+status: "done"
 title: "IngestStage 実装と CLI 接続"
 created: "2026-10-02"
 updated: "2026-10-02"
