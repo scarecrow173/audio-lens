@@ -90,6 +90,7 @@ impl TableWriter {
                 "rows_per_chunk must be > 0",
             ));
         }
+        validate_schema(&schema)?;
         fs::create_dir(root).map_err(|e| {
             io::Error::new(
                 e.kind(),
@@ -103,7 +104,12 @@ impl TableWriter {
             buffered: Vec::new(),
             row_count: 0,
         };
-        w.flush_metadata()?;
+        // `index.json` is the commit marker: it is written only by
+        // `finish`, so a half-written table fails `TableReader::open`
+        // instead of reading as an empty-but-valid table.
+        let schema_json = serde_json::to_vec_pretty(&w.schema)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        write_durable(&w.root.join("schema.json"), &schema_json)?;
         Ok(w)
     }
 
@@ -142,11 +148,17 @@ impl TableWriter {
         Ok(())
     }
 
-    /// Flush the partial tail chunk and the index. Must be called
-    /// before readers open the table.
+    /// Flush the partial tail chunk and write the index. Must be
+    /// called before readers open the table.
     pub fn finish(mut self) -> io::Result<()> {
         self.flush_chunk()?;
-        self.flush_metadata()
+        let index = TableIndex {
+            rows_per_chunk: self.rows_per_chunk,
+            row_count: self.row_count,
+        };
+        let index_json = serde_json::to_vec_pretty(&index)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        write_durable(&self.root.join("index.json"), &index_json)
     }
 
     fn flush_chunk(&mut self) -> io::Result<()> {
@@ -164,7 +176,13 @@ impl TableWriter {
                     Cell::I64(v) => payload.extend_from_slice(&v.to_le_bytes()),
                     Cell::F64(v) => payload.extend_from_slice(&v.to_le_bytes()),
                     Cell::Str(s) => {
-                        payload.extend_from_slice(&(s.len() as u32).to_le_bytes());
+                        let len = u32::try_from(s.len()).map_err(|_| {
+                            io::Error::new(
+                                io::ErrorKind::InvalidInput,
+                                format!("string cell exceeds u32 length: {}", s.len()),
+                            )
+                        })?;
+                        payload.extend_from_slice(&len.to_le_bytes());
                         payload.extend_from_slice(s.as_bytes());
                     }
                 }
@@ -179,19 +197,33 @@ impl TableWriter {
         self.buffered.clear();
         Ok(())
     }
+}
 
-    fn flush_metadata(&self) -> io::Result<()> {
-        let schema_json = serde_json::to_vec_pretty(&self.schema)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        write_durable(&self.root.join("schema.json"), &schema_json)?;
-        let index = TableIndex {
-            rows_per_chunk: self.rows_per_chunk,
-            row_count: self.row_count,
-        };
-        let index_json = serde_json::to_vec_pretty(&index)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        write_durable(&self.root.join("index.json"), &index_json)
+/// Column names become directory names: reject anything that could
+/// escape the table root or alias another column.
+fn validate_schema(schema: &[Column]) -> io::Result<()> {
+    let mut seen = std::collections::HashSet::new();
+    for col in schema {
+        let name = &col.name;
+        if name.is_empty()
+            || name == "."
+            || name == ".."
+            || name.contains('/')
+            || name.contains('\\')
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("unsafe column name {name:?}"),
+            ));
+        }
+        if !seen.insert(name.as_str()) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("duplicate column name {name:?}"),
+            ));
+        }
     }
+    Ok(())
 }
 
 /// Reads row ranges and column subsets from a table root.
@@ -208,6 +240,17 @@ impl TableReader {
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         let index: TableIndex = serde_json::from_slice(&fs::read(root.join("index.json"))?)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        // On-disk schema/index are untrusted: reject names that would
+        // escape the table root and a chunk size that would divide by
+        // zero.
+        validate_schema(&schema)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))?;
+        if index.rows_per_chunk == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "index.json has rows_per_chunk == 0",
+            ));
+        }
         Ok(Self {
             root: root.to_path_buf(),
             schema,
@@ -344,6 +387,16 @@ impl TableReader {
             };
             cells.push(cell);
         }
+        if pos != bytes.len() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "chunk {} has {} trailing bytes",
+                    path.display(),
+                    bytes.len() - pos
+                ),
+            ));
+        }
         Ok(cells)
     }
 }
@@ -434,6 +487,63 @@ mod tests {
             w.push(&[Cell::Str("x".into()), Cell::I64(1), Cell::Null])
                 .is_err()
         );
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn unsafe_and_duplicate_column_names_rejected() {
+        let dir = std::env::temp_dir().join(format!("tbl-n-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        for bad in ["..", "a/b", "a\\b", ""] {
+            let schema = vec![Column {
+                name: bad.into(),
+                data_type: DataType::F64,
+            }];
+            assert!(TableWriter::create(&dir.join("t1"), schema, 4).is_err());
+            fs::remove_dir_all(dir.join("t1")).ok();
+        }
+        let dup = vec![
+            Column {
+                name: "v".into(),
+                data_type: DataType::F64,
+            },
+            Column {
+                name: "v".into(),
+                data_type: DataType::I64,
+            },
+        ];
+        assert!(TableWriter::create(&dir.join("t2"), dup, 4).is_err());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn unfinished_table_is_not_readable() {
+        let dir = std::env::temp_dir().join(format!("tbl-u-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let root = dir.join("t");
+        {
+            let mut w = TableWriter::create(&root, schema(), 4).unwrap();
+            for i in 0..8 {
+                w.push(&[Cell::F64(i as f64), Cell::I64(i), Cell::Null])
+                    .unwrap();
+            }
+            // Dropped without finish(): index.json is never written.
+        }
+        assert!(TableReader::open(&root).is_err());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn corrupt_index_fails_not_panics() {
+        let dir = std::env::temp_dir().join(format!("tbl-i-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let root = write_table(&dir, 4, 10);
+        fs::write(
+            root.join("index.json"),
+            r#"{"rows_per_chunk":0,"row_count":10}"#,
+        )
+        .unwrap();
+        assert!(TableReader::open(&root).is_err());
         fs::remove_dir_all(&dir).ok();
     }
 }

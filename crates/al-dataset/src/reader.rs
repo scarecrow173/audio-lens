@@ -68,15 +68,27 @@ impl DatasetReader {
         self.manifest
             .artifacts
             .iter()
-            .find(|a| a.path == rel)
+            .find(|a| a.role == role && a.path == rel)
             .filter(|a| a.store == store)
             .ok_or_else(|| invalid(format!("no {store:?} artifact at {rel}")))
+    }
+
+    /// Resolve a manifest-recorded artifact path against the dataset
+    /// root. Manifest paths are untrusted: reject anything that could
+    /// point outside the root.
+    fn resolve(&self, a: &DatasetArtifact) -> io::Result<PathBuf> {
+        for part in a.path.split('/') {
+            if part.is_empty() || part == "." || part == ".." || part.contains('\\') {
+                return Err(invalid(format!("unsafe artifact path {:?}", a.path)));
+            }
+        }
+        Ok(self.root.join(&a.path))
     }
 
     /// Open a table artifact for range/column reads.
     pub fn open_table(&self, role: &str, name: &str) -> io::Result<TableReader> {
         let a = self.artifact(role, name, StoreKind::Table)?;
-        TableReader::open(&self.root.join(&a.path))
+        TableReader::open(&self.resolve(a)?)
     }
 
     /// Convenience: read `[start, end)` rows of selected columns.
@@ -95,7 +107,7 @@ impl DatasetReader {
     /// Open a tensor artifact for region reads.
     pub fn open_tensor(&self, role: &str, name: &str) -> io::Result<TensorReader> {
         let a = self.artifact(role, name, StoreKind::Tensor)?;
-        TensorReader::open(&self.root.join(&a.path))
+        TensorReader::open(&self.resolve(a)?)
     }
 
     /// Convenience: read a tensor region (per-dim `[start, end)`).
@@ -116,7 +128,7 @@ impl DatasetReader {
             format!("{name}.wav")
         };
         let a = self.artifact(role, &name, StoreKind::Audio)?;
-        read_wav(&self.root.join(&a.path))
+        read_wav(&self.resolve(a)?)
     }
 
     /// Read a JSON artifact.
@@ -127,7 +139,7 @@ impl DatasetReader {
             format!("{name}.json")
         };
         let a = self.artifact(role, &name, StoreKind::Json)?;
-        let bytes = std::fs::read(self.root.join(&a.path))?;
+        let bytes = std::fs::read(self.resolve(a)?)?;
         serde_json::from_slice(&bytes).map_err(|e| invalid(e.to_string()))
     }
 }
