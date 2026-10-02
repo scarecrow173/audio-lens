@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z881BJBYiNLa5ozHuiO"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "列指向チャンク表ストア"
 created: "2026-10-02"
 updated: "2026-10-02"
