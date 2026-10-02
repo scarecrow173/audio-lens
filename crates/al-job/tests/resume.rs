@@ -203,6 +203,47 @@ fn reexecution_issues_a_new_job_id_and_manifest() {
 }
 
 #[test]
+fn rerun_of_same_job_id_is_rejected() {
+    let dir = temp_dir("rerun");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    runner.run(&def, &mut trio.stages).unwrap();
+    // Re-running the same definition must not silently overwrite the job.
+    let err = runner.run(&def, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("already exists"));
+    assert_eq!(trio.a_runs.get(), 1);
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn resume_with_altered_definition_is_rejected() {
+    let dir = temp_dir("altered");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    trio.b_fail.set(true);
+    assert!(runner.run(&def, &mut trio.stages).is_err());
+
+    // Same job id but different config: struct-literal bypass.
+    let mut altered = def.clone();
+    altered.config = serde_json::json!({"preset": "changed"});
+    let err = runner.resume(&altered, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("differs"));
+
+    // Same job id but an extra stage not in the recorded plan.
+    let mut altered = def.clone();
+    altered.stages.push(StageKind::Export);
+    let err = runner.resume(&altered, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("differs"));
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn dependency_order_violation_is_rejected() {
     let dir = temp_dir("dep");
     let runner = StageRunner::new(&dir);

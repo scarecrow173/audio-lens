@@ -60,6 +60,13 @@ task `docs/tasks/stage-runner.md`、test-spec `docs/test-specs/stage-runner-resu
 
 - ステージは manifest を直接変更せず成果物レコードを返し、runner が登録する
 - デフォルト依存は canonical pipeline order の先行ステージ全て
+- `run` は job_dir に既存 manifest.json があると明示的に拒否する
+  (同一 Job ID の上書きは不可。再実行は新しい `JobDefinition::create`)
+- `resume` は manifest に記録された `inputs`/`config`/`stages` と
+  渡された JobDefinition の完全一致を検証する。struct literal で
+  同 Job ID の改変 def を渡しても実行前に拒否される
+- run/resume 共通で全入力の `source_sha256` 必須性を検証し、
+  unpinned input の struct-literal 迂回を拒否する
 
 ## Related Experiments
 

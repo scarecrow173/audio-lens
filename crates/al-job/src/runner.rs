@@ -76,6 +76,18 @@ impl StageRunner {
         Self::validate_plan(def, stages)?;
         Self::validate_inputs(def)?;
         let job_dir = self.job_dir(&def.job_id);
+        // A fresh run must not overwrite an existing job: jobs are
+        // immutable, so re-executing the same definition requires a new
+        // JobId (a fresh JobDefinition::create).
+        if job_dir.join(Manifest::FILE_NAME).exists() {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                format!(
+                    "job {} already exists; re-execution requires a new JobDefinition",
+                    def.job_id
+                ),
+            ));
+        }
         let mut manifest = Manifest::new(
             def.job_id.clone(),
             def.inputs.clone(),
@@ -102,6 +114,28 @@ impl StageRunner {
             return Err(StageError::new(
                 StageKind::Ingest,
                 "manifest job id does not match the supplied job definition",
+            ));
+        }
+        // Resume must replay the recorded job exactly: a caller could
+        // struct-literal a JobDefinition with the same id but altered
+        // inputs/config/stages, which would diverge from the manifest.
+        if manifest.inputs != def.inputs {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                "resume inputs differ from the recorded job definition",
+            ));
+        }
+        if manifest.config != def.config {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                "resume config differs from the recorded job definition",
+            ));
+        }
+        let planned: Vec<StageKind> = manifest.stages.iter().map(|r| r.stage).collect();
+        if planned != def.stages {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                "resume stage plan differs from the recorded job definition",
             ));
         }
         self.execute(&mut manifest, &job_dir, def, stages)
