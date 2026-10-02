@@ -53,12 +53,32 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
 ### Changes
 
 - `job.rs`: JobDefinition(不変)・JobInput・input ビルダ。再実行は常に新 JobId
-- `manifest.rs`: StageRecord/ArtifactRecord/Manifest。save/load・stage 別成果物紐付け・lineage 再構成
+- `manifest.rs`: StageRecord/ArtifactRecord/Manifest。save/load・stage 別成果物紐付け・lineage 再構成。宣言入力は `produced_by: None` の `declared_input` artifact として登録され、下流成果物の `inputs` が元入力を指せる
 - `registry.rs`: ArtifactRegistry(id 発行・manifest 参照での絶対パス解決・role 検索)
 
 ### Decisions During Implementation
 
 - registry は状態を持たず命名規則のみを担い、正本は manifest に集約
+- `ArtifactRecord::path` は「job_dir 相対」契約を維持し、外部入力の
+  実際の位置は `params.source_path`/`source_path_abs` に記録する
+  (declared_input の `path` は空)。`resolve()` /
+  `resolve_by_role()` は空 path の artifact を `None` / スキップ
+  とし、job_dir 自体への誤解決を防ぐ
+- `JobDefinition::create` は `io::Result` を返し、入力パスの絶対化と
+  内容ハッシュ(`source_sha256`)の固定を作成時に必ず行う。
+  読めない入力は Job 作成自体が失敗し、ライブラリ経路でも
+  unpinned input の Job を作れない。declared_input artifact の
+  params にも `source_sha256` を記録し、manifest だけで入力
+  バイト列を特定できる。Ingest 側は resume/再実行時に一致を検証する。
+  呼び出し側が明示的に設定した `source_sha256` はそのまま保持する
+- `JobDefinition`/`JobInput` は serde round-trip のため public フィールドを
+  維持するが、`StageRunner::run`/`resume` は実行前に全入力の
+  `source_sha256` 必須性を検証する。struct literal で構築した
+  unpinned input は runner 入口で明示的に拒否されるため、
+  `create` 迂回経路でも不変性を破れない
+- SHA-256 実装は `al-core::hash` に置く(al-job が入力固定に使う
+  ため al-media から移動。al-media は re-export で `sha256_hex` を
+  公開)
 - serde/serde_json は相互運用目的の依存として採用(コア処理ではない)
 
 ## Related Experiments

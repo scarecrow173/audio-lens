@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034yZp5w0ziN8jQO61t3nW"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "ジョブオーケストレーション基盤の実装"
 created: "2026-10-02"
 updated: "2026-10-02"

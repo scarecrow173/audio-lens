@@ -14,7 +14,9 @@ pub struct ArtifactRecord {
     pub artifact_id: ArtifactId,
     /// Free-form role label (e.g. `decoded_pcm`, `locate_result`).
     pub role: String,
-    /// Path relative to the job directory.
+    /// Path relative to the job directory. Empty for artifacts without
+    /// job-local storage — e.g. declared inputs, whose external location is
+    /// recorded in `params.source_path` instead.
     pub path: PathBuf,
     /// Stage that produced the artifact (`None` for declared inputs).
     pub produced_by: Option<StageKind>,
@@ -57,13 +59,37 @@ impl Manifest {
     /// Manifest filename inside a job directory.
     pub const FILE_NAME: &'static str = "manifest.json";
 
-    /// Create an empty manifest for a freshly created job.
+    /// Create a manifest for a freshly created job. Each declared input is
+    /// registered as an artifact with `produced_by: None` so downstream
+    /// artifacts can point their lineage at the source they came from.
     pub fn new(
         job_id: JobId,
         inputs: Vec<JobInput>,
         config: serde_json::Value,
         stages: &[StageKind],
     ) -> Self {
+        let artifacts = inputs
+            .iter()
+            .map(|input| ArtifactRecord {
+                artifact_id: ArtifactId::new(),
+                role: "declared_input".into(),
+                // External inputs live outside the job directory, so the
+                // location goes to params rather than the job-relative
+                // `path` contract.
+                path: PathBuf::new(),
+                produced_by: None,
+                inputs: Vec::new(),
+                params: serde_json::json!({
+                    "input_id": input.input_id,
+                    "input_role": input.role,
+                    "source_path": input.path,
+                    "source_path_abs": std::path::absolute(&input.path)
+                        .ok()
+                        .map(|p| p.display().to_string()),
+                    "source_sha256": input.source_sha256,
+                }),
+            })
+            .collect();
         Self {
             job_id,
             inputs,
@@ -77,16 +103,32 @@ impl Manifest {
                     error: None,
                 })
                 .collect(),
-            artifacts: Vec::new(),
+            artifacts,
         }
     }
 
+    /// Artifact id registered for a declared input, if any.
+    pub fn input_artifact(&self, input_id: &al_core::InputId) -> Option<ArtifactId> {
+        self.artifacts
+            .iter()
+            .find(|record| {
+                record.role == "declared_input"
+                    && record.params.get("input_id").and_then(|v| v.as_str())
+                        == Some(input_id.as_str())
+            })
+            .map(|record| record.artifact_id.clone())
+    }
+
     /// Persist the manifest under `job_dir`.
+    ///
+    /// The write is atomic and durable (temp file, fsync, rename): a
+    /// crash or power loss leaves either the previous or the new manifest
+    /// fully intact — never a truncated canonical record that would make
+    /// the job unresumable.
     pub fn save(&self, job_dir: &Path) -> io::Result<()> {
-        fs::create_dir_all(job_dir)?;
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        fs::write(job_dir.join(Self::FILE_NAME), json)
+        crate::fsutil::write_durable(&job_dir.join(Self::FILE_NAME), json.as_bytes())
     }
 
     /// Load a manifest from `job_dir`.
@@ -178,15 +220,34 @@ mod tests {
     #[test]
     fn register_links_artifact_to_stage() {
         let manifest = sample_manifest();
-        assert_eq!(manifest.artifacts.len(), 2);
+        // One declared input artifact + two produced artifacts.
+        assert_eq!(manifest.artifacts.len(), 3);
         let locate = manifest.stage(StageKind::Locate).unwrap();
         assert_eq!(locate.artifacts.len(), 1);
     }
 
     #[test]
+    fn declared_input_is_an_artifact() {
+        let manifest = sample_manifest();
+        let input = &manifest.inputs[0];
+        let id = manifest.input_artifact(&input.input_id).unwrap();
+        let record = manifest.artifact(&id).unwrap();
+        assert_eq!(record.role, "declared_input");
+        assert_eq!(record.produced_by, None);
+        // External inputs keep their location in params, not in the
+        // job-relative path contract.
+        assert!(record.path.as_os_str().is_empty());
+        assert_eq!(record.params["source_path"].as_str(), Some("capture.mkv"));
+    }
+
+    #[test]
     fn lineage_walks_upstream_chain() {
         let manifest = sample_manifest();
-        let locate = &manifest.artifacts[1];
+        let locate = manifest
+            .artifacts
+            .iter()
+            .find(|a| a.role == "locate_result")
+            .unwrap();
         let lineage = manifest.lineage_of(&locate.artifact_id);
         assert_eq!(lineage.len(), 2);
         assert_eq!(lineage[0], locate.artifact_id);
