@@ -33,7 +33,9 @@ relations:
     - "docs/adr/implementation-stack.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/ingest-wav-decode.md"
+    - "docs/test-specs/av-timing-observation.md"
   references: []
   defers: []
   deferred-by: []
