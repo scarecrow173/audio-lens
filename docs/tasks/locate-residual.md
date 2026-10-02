@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kJaSUxUrTrHj1cMG7"
 type: "task"
-status: "todo"
+status: "done"
 title: "residual-search: 2段階探索 + 減算来歴"
 created: "2026-10-02"
 updated: "2026-10-02"
