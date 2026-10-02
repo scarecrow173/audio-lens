@@ -184,10 +184,21 @@ fn cmd_run(args: &[String]) -> ExitCode {
         Ok(kinds) => kinds,
         Err(e) => return fail(e),
     };
-    let mut config = parse_flag(args, "--config")
-        .and_then(|path| std::fs::read_to_string(path).ok())
-        .and_then(|text| serde_json::from_str(&text).ok())
-        .unwrap_or_else(|| serde_json::json!({}));
+    // An explicitly given --config must not silently fall back to
+    // defaults: unreadable or unparsable files are an error.
+    let mut config = match parse_flag(args, "--config") {
+        Some(path) => {
+            let text = match std::fs::read_to_string(path) {
+                Ok(text) => text,
+                Err(e) => return fail(format!("cannot read config {path}: {e}")),
+            };
+            match serde_json::from_str(&text) {
+                Ok(config) => config,
+                Err(e) => return fail(format!("invalid config JSON {path}: {e}")),
+            }
+        }
+        None => serde_json::json!({}),
+    };
     if let Err(e) = resolve_config(&mut config) {
         return fail(e);
     }
