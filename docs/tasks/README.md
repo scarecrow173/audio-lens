@@ -10,11 +10,11 @@ Directory: `docs/tasks`
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
-| TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | todo | [dataset-integration-tests.md](./dataset-integration-tests.md) |
-| TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | todo | [dataset-reader.md](./dataset-reader.md) |
+| TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |
+| TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | done | [dataset-reader.md](./dataset-reader.md) |
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
-| TASK-034z889vFy9QDdh0EG6Nj4 | DatasetStage 実装と CLI 接続 | todo | [dataset-stage.md](./dataset-stage.md) |
-| TASK-034z888EftCjwJOLuS09K0 | provenance レコードと dataset-writer | in-progress | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
+| TASK-034z889vFy9QDdh0EG6Nj4 | DatasetStage 実装と CLI 接続 | done | [dataset-stage.md](./dataset-stage.md) |
+| TASK-034z888EftCjwJOLuS09K0 | provenance レコードと dataset-writer | done | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |

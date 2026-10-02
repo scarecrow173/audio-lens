@@ -80,3 +80,17 @@ task `docs/tasks/artifact-dictionary.md`、test-spec
 ## Follow-ups
 
 - 実測に基づく辞書項目の拡充は運用フェーズで追加
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Risks
+
+- なし
