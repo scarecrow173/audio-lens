@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use al_core::{InputId, InputRole, JobId, StageKind};
+use al_core::{InputRole, JobId, StageKind};
 use al_job::job::{JobDefinition, JobInput};
 use al_job::manifest::{ArtifactRecord, Manifest};
 use al_job::runner::StageRunner;
@@ -130,15 +130,9 @@ fn parse_input(value: &str) -> Result<JobInput, String> {
         .ok_or_else(|| format!("input {value:?} must be <role>:<path>"))?;
     let role: InputRole = serde_json::from_value(serde_json::Value::String(role.to_owned()))
         .map_err(|_| format!("unknown input role {role:?}"))?;
-    // Pin the input's content hash at job creation so a later resume
-    // cannot silently ingest a replaced file under the same job id.
-    let bytes = std::fs::read(path).map_err(|e| format!("cannot read input {path}: {e}"))?;
-    Ok(JobInput {
-        input_id: InputId::new(),
-        role,
-        path: PathBuf::from(path),
-        source_sha256: Some(al_media::sha256_hex(&bytes)),
-    })
+    // `JobDefinition::create` pins the input's content hash, so a later
+    // resume cannot silently ingest a replaced file under the same job id.
+    Ok(al_job::job::input(role, path))
 }
 
 fn parse_flag<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
@@ -207,7 +201,10 @@ fn cmd_run(args: &[String]) -> ExitCode {
         return fail(e);
     }
 
-    let def = JobDefinition::create(inputs, config.clone(), stage_kinds.clone());
+    let def = match JobDefinition::create(inputs, config.clone(), stage_kinds.clone()) {
+        Ok(def) => def,
+        Err(e) => return fail(format!("cannot create job: {e}")),
+    };
     let mut stages: Vec<Box<dyn Stage>> = Vec::new();
     for kind in &stage_kinds {
         match make_stage(*kind, &config) {

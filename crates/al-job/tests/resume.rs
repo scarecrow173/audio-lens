@@ -88,9 +88,13 @@ fn temp_dir(tag: &str) -> PathBuf {
     dir
 }
 
-fn sample_def() -> JobDefinition {
+fn sample_def(dir: &std::path::Path) -> JobDefinition {
+    // `JobDefinition::create` pins input content hashes, so the declared
+    // input must be a real file.
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
     JobDefinition::create(
-        vec![input(InputRole::CaptureBug, "capture.mkv")],
+        vec![input(InputRole::CaptureBug, capture)],
         serde_json::json!({"preset": "test"}),
         vec![
             StageKind::Ingest,
@@ -98,13 +102,14 @@ fn sample_def() -> JobDefinition {
             StageKind::CheapAnalysis,
         ],
     )
+    .unwrap()
 }
 
 #[test]
 fn failed_stage_preserves_completed_artifacts_and_resume_completes() {
     let dir = temp_dir("partial");
     let runner = StageRunner::new(&dir);
-    let def = sample_def();
+    let def = sample_def(&dir);
     let mut trio = stub_trio();
 
     trio.b_fail.set(true);
@@ -156,7 +161,7 @@ fn failed_stage_preserves_completed_artifacts_and_resume_completes() {
 fn resume_after_full_success_is_a_noop() {
     let dir = temp_dir("noop");
     let runner = StageRunner::new(&dir);
-    let def = sample_def();
+    let def = sample_def(&dir);
     let mut trio = stub_trio();
 
     runner.run(&def, &mut trio.stages).unwrap();
@@ -173,8 +178,8 @@ fn resume_after_full_success_is_a_noop() {
 fn reexecution_issues_a_new_job_id_and_manifest() {
     let dir = temp_dir("newjob");
     let runner = StageRunner::new(&dir);
-    let first = sample_def();
-    let second = sample_def();
+    let first = sample_def(&dir);
+    let second = sample_def(&dir);
     assert_ne!(first.job_id, second.job_id);
 
     let mut trio = stub_trio();
@@ -202,11 +207,14 @@ fn dependency_order_violation_is_rejected() {
     let dir = temp_dir("dep");
     let runner = StageRunner::new(&dir);
     // Locate は Ingest に依存するが、計画が Locate のみのため拒否される
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
     let def = JobDefinition::create(
-        vec![input(InputRole::CaptureBug, "capture.mkv")],
+        vec![input(InputRole::CaptureBug, capture)],
         serde_json::json!({}),
         vec![StageKind::Locate],
-    );
+    )
+    .unwrap();
     let mut trio = stub_trio();
     assert!(runner.run(&def, &mut trio.stages).is_err());
 
@@ -217,7 +225,7 @@ fn dependency_order_violation_is_rejected() {
 fn manifest_reconstructs_artifact_lineage() {
     let dir = temp_dir("lineage");
     let runner = StageRunner::new(&dir);
-    let def = sample_def();
+    let def = sample_def(&dir);
     let mut trio = stub_trio();
 
     let manifest = runner.run(&def, &mut trio.stages).unwrap();

@@ -76,7 +76,7 @@ impl Dictionary {
     /// Parse a dictionary from JSON text, recording its content hash.
     pub fn from_json(text: &str) -> Result<Self, serde_json::Error> {
         let mut dict: Self = serde_json::from_str(text)?;
-        dict.sha256 = crate::hash::sha256_hex(text.as_bytes());
+        dict.sha256 = al_core::sha256_hex(text.as_bytes());
         Ok(dict)
     }
 
@@ -183,7 +183,7 @@ mod tests {
             .join("../../dictionaries/capture-artifacts.v1.json");
         let text = std::fs::read_to_string(&path).unwrap();
         let dict = Dictionary::load(&path).unwrap();
-        assert_eq!(dict.sha256, crate::hash::sha256_hex(text.as_bytes()));
+        assert_eq!(dict.sha256, al_core::sha256_hex(text.as_bytes()));
     }
 
     #[test]
