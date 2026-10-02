@@ -123,7 +123,16 @@ fn failed_stage_preserves_completed_artifacts_and_resume_completes() {
         manifest.stage(StageKind::Locate).unwrap().status,
         StageStatus::Failed
     );
-    assert_eq!(manifest.artifacts.len(), 1);
+    // One declared-input artifact + the single artifact stage A produced.
+    assert_eq!(manifest.artifacts.len(), 2);
+    assert_eq!(
+        manifest
+            .artifacts
+            .iter()
+            .filter(|a| a.produced_by.is_some())
+            .count(),
+        1
+    );
 
     trio.b_fail.set(false);
     let manifest = runner.resume(&def, &mut trio.stages).unwrap();
@@ -137,7 +146,8 @@ fn failed_stage_preserves_completed_artifacts_and_resume_completes() {
             .iter()
             .all(|s| s.status == StageStatus::Completed)
     );
-    assert_eq!(manifest.artifacts.len(), 3);
+    // One declared-input artifact + one artifact per completed stage.
+    assert_eq!(manifest.artifacts.len(), 4);
 
     std::fs::remove_dir_all(&dir).ok();
 }

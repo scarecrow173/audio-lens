@@ -99,8 +99,16 @@ fn ingest_wav_produces_pcm_and_metadata_artifacts() {
     assert_eq!(meta["audio"]["sample_rate"], 48000);
     assert_eq!(meta["audio"]["channels"], 2);
     assert_eq!(meta["audio"]["source_hash"].as_str().unwrap().len(), 64);
+    // Dictionary provenance (version + content hash) is recorded.
+    assert_eq!(meta["dictionary"]["sha256"].as_str().unwrap().len(), 64);
     // The dictionary annotates, never alters raw measurements.
     assert!(!meta["annotations"].as_array().unwrap().is_empty());
+
+    // Produced artifacts trace lineage back to the declared input.
+    assert!(!pcm.inputs.is_empty());
+    let input_record = manifest.artifact(&pcm.inputs[0]).unwrap();
+    assert_eq!(input_record.role, "declared_input");
+    assert_eq!(input_record.produced_by, None);
 
     std::fs::remove_dir_all(&dir).ok();
     std::fs::remove_dir_all(&job_dir).ok();

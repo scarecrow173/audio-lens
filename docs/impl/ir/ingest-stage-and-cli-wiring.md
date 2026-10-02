@@ -56,12 +56,14 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
 
 - `stage.rs`: `IngestStage`。入力ファイル読込 → フォーマット検出 →
   WAV デコード → `inputs/<input-id>/decoded.f64le`(生 f64 PCM)と
-  `metadata.json`(AudioMetadata + annotations)を書き出し、
-  `decoded_pcm` / `ingest_metadata` の ArtifactRecord を返す。
-  辞書は `with_dictionary_file` で注入(不在なら注釈なし)
+  `metadata.json`(AudioMetadata + dictionary provenance +
+  annotations)を書き出し、`decoded_pcm` / `ingest_metadata` の
+  ArtifactRecord を返す。両成果物の `inputs` は宣言入力 artifact を
+  指し、manifest lineage が元入力まで遡れる
 - `al-cli`: `make_stage()` を追加。Ingest は実装、他はスタブ維持。
-  辞書パスは config `dictionary` キー、既定は
-  `dictionaries/capture-artifacts.v1.json`
+  辞書は既定でバイナリ埋め込み(`Dictionary::embedded()`)、
+  config `dictionary` キーで明示ファイルに差し替え可能
+  (読めない場合は明示的失敗)
 
 ### Decisions During Implementation
 
