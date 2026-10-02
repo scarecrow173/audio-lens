@@ -78,22 +78,32 @@ impl StageRunner {
         let job_dir = self.job_dir(&def.job_id);
         // A fresh run must not overwrite an existing job: jobs are
         // immutable, so re-executing the same definition requires a new
-        // JobId (a fresh JobDefinition::create).
-        if job_dir.join(Manifest::FILE_NAME).exists() {
-            return Err(StageError::new(
+        // JobId (a fresh JobDefinition::create). Reserving the directory
+        // with create_dir also rejects leftover partial artifacts and
+        // double-run races — the error is not just "manifest exists".
+        std::fs::create_dir_all(&self.base_dir).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("cannot create base dir: {e}"))
+        })?;
+        std::fs::create_dir(&job_dir).map_err(|e| {
+            StageError::new(
                 StageKind::Ingest,
                 format!(
-                    "job {} already exists; re-execution requires a new JobDefinition",
+                    "job {} already exists; re-execution requires a new JobDefinition: {e}",
                     def.job_id
                 ),
-            ));
-        }
+            )
+        })?;
         let mut manifest = Manifest::new(
             def.job_id.clone(),
             def.inputs.clone(),
             def.config.clone(),
             &def.stages,
         );
+        // Persist the initial manifest before any stage runs so a crash
+        // mid-stage still leaves a resumable job record.
+        manifest.save(&job_dir).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("cannot save manifest: {e}"))
+        })?;
         self.execute(&mut manifest, &job_dir, def, stages)
     }
 

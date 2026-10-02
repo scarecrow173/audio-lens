@@ -60,8 +60,12 @@ task `docs/tasks/stage-runner.md`、test-spec `docs/test-specs/stage-runner-resu
 
 - ステージは manifest を直接変更せず成果物レコードを返し、runner が登録する
 - デフォルト依存は canonical pipeline order の先行ステージ全て
-- `run` は job_dir に既存 manifest.json があると明示的に拒否する
+- `run` は `create_dir` で job_dir を原子的に予約し、既存ディレクトリ
+  (manifest 有無・部分成果物を問わず)は明示的に拒否する
   (同一 Job ID の上書きは不可。再実行は新しい `JobDefinition::create`)
+- `run` は最初のステージ実行前に初期 manifest を永続化する。
+  プロセスが stage 途中で kill/panic しても manifest が残り、
+  `resume` で Pending 状態から再開できる
 - `resume` は manifest に記録された `inputs`/`config`/`stages` と
   渡された JobDefinition の完全一致を検証する。struct literal で
   同 Job ID の改変 def を渡しても実行前に拒否される

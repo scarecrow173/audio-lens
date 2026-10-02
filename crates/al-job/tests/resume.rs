@@ -48,6 +48,7 @@ struct StubTrio {
     a_runs: Rc<Cell<usize>>,
     b_runs: Rc<Cell<usize>>,
     c_runs: Rc<Cell<usize>>,
+    a_fail: Rc<Cell<bool>>,
     b_fail: Rc<Cell<bool>>,
 }
 
@@ -55,12 +56,13 @@ fn stub_trio() -> StubTrio {
     let a_runs = Rc::new(Cell::new(0));
     let b_runs = Rc::new(Cell::new(0));
     let c_runs = Rc::new(Cell::new(0));
+    let a_fail = Rc::new(Cell::new(false));
     let b_fail = Rc::new(Cell::new(false));
     let stages: Vec<Box<dyn Stage>> = vec![
         Box::new(StubStage::new(
             StageKind::Ingest,
             a_runs.clone(),
-            Rc::new(Cell::new(false)),
+            a_fail.clone(),
         )),
         Box::new(StubStage::new(
             StageKind::Locate,
@@ -78,6 +80,7 @@ fn stub_trio() -> StubTrio {
         a_runs,
         b_runs,
         c_runs,
+        a_fail,
         b_fail,
     }
 }
@@ -214,6 +217,45 @@ fn rerun_of_same_job_id_is_rejected() {
     let err = runner.run(&def, &mut trio.stages).unwrap_err();
     assert!(err.message.contains("already exists"));
     assert_eq!(trio.a_runs.get(), 1);
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn run_rejects_leftover_job_dir_without_manifest() {
+    let dir = temp_dir("leftover");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    // Simulate a crash mid-first-stage: job dir exists with partial
+    // artifacts but no manifest.
+    let job_dir = runner.job_dir(&def.job_id);
+    std::fs::create_dir_all(job_dir.join("inputs")).unwrap();
+    std::fs::write(job_dir.join("partial.bin"), b"x").unwrap();
+
+    let err = runner.run(&def, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("already exists"));
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn manifest_exists_for_failed_first_stage_and_resume_works() {
+    let dir = temp_dir("crash");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    // Even when the very first stage fails, the manifest was persisted
+    // before execution, so resume is possible.
+    trio.a_fail.set(true);
+    assert!(runner.run(&def, &mut trio.stages).is_err());
+    assert!(runner.job_dir(&def.job_id).join("manifest.json").exists());
+
+    trio.a_fail.set(false);
+    runner.resume(&def, &mut trio.stages).unwrap();
+    assert_eq!(trio.a_runs.get(), 2);
 
     std::fs::remove_dir_all(&dir).ok();
 }
