@@ -33,7 +33,9 @@ relations:
     - "docs/adr/multi-method-locate-consensus.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/locate-method-consensus.md"
+    - "docs/test-specs/locate-tracking-residual.md"
   references: []
   defers: []
   deferred-by: []

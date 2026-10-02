@@ -1,5 +1,6 @@
 # TASK Documents
 
+
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/tasks`
@@ -19,10 +20,19 @@ Directory: `docs/tasks`
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
+| TASK-034z8kB6w92jCsle2QoqKe | 合議受理 + 失敗モードフラグ | todo | [locate-consensus.md](./locate-consensus.md) |
+| TASK-034z8kK3Fu6B5tJ0qnORg0 | locate 結合テスト(合成 fixture) | todo | [locate-integration-tests.md](./locate-integration-tests.md) |
+| TASK-034z8kAawdMoi8AxPYZjrB | locate-methods 4手法 + 候補/証拠型 | todo | [locate-methods.md](./locate-methods.md) |
+| TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | todo | [locate-mixer.md](./locate-mixer.md) |
+| TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | todo | [locate-residual.md](./locate-residual.md) |
+| TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | todo | [locate-result-schema.md](./locate-result-schema.md) |
+| TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | todo | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
+| TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | todo | [locate-stage-cli.md](./locate-stage-cli.md) |
+| TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | todo | [locate-tracking.md](./locate-tracking.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |
 | TASK-034yZBGR8sboPsFlB6FpMr | 最小 CLI(run / resume / inspect)の実装 | done | [minimal-cli.md](./minimal-cli.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
-| TASK-034z882rSUvcx6IerdcaPD | WAV エンコーダと音声ストア | done | [wav-audio-store.md](./wav-audio-store.md) |
+| TASK-034z882rSUvcx6IerdcaPD | WAV エンコーダと音声ストア | todo | [wav-audio-store.md](./wav-audio-store.md) |
 | TASK-034z0J62VyM1KI8DpxaE3D | WAV デコード・メタデータ・SHA-256 ハッシュ | done | [wav-decode.md](./wav-decode.md) |
