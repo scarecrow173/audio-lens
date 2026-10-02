@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034z0yzgmf43IGEQwzG9gE"
 type: "plan"
-status: "draft"
+status: "approved"
 title: "インジェストとAVタイミングの実装"
 created: "2026-10-02"
 updated: "2026-10-02"
