@@ -109,3 +109,38 @@ fn resume_uses_snapshotted_dictionary_after_source_deleted() {
 
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn missing_or_invalid_config_is_an_explicit_error() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("cfg");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    for config in ["nonexistent.json", "broken.json"] {
+        if config == "broken.json" {
+            std::fs::write(dir.join(config), "{ not json").unwrap();
+        }
+        let out = Command::new(al)
+            .args([
+                "run",
+                "--base-dir",
+                jobs.to_str().unwrap(),
+                "--input",
+                &format!("capture_bug:{}", wav.display()),
+                "--stages",
+                "ingest",
+                "--config",
+                dir.join(config).to_str().unwrap(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "config {config} should fail explicitly"
+        );
+    }
+
+    std::fs::remove_dir_all(&dir).ok();
+}

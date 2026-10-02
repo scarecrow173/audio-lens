@@ -69,6 +69,9 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
   manifest が config を保持するため resume は元ファイルに依存せず、
   同一 Job ID で辞書内容が固定される(結合テストで
   「run → 辞書削除 → resume 成功」を確認)
+- `--config` の読込・JSON parse 失敗は `{}` への暗黙
+  フォールバックではなく明示的エラー(設定が無視されて
+  Job が成功するのを防ぐ)
 
 ### Decisions During Implementation
 
