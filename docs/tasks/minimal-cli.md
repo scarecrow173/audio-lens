@@ -1,7 +1,7 @@
 ---
 id: "TASK-034yZBGR8sboPsFlB6FpMr"
 type: "task"
-status: "todo"
+status: "done"
 title: "最小 CLI(run / resume / inspect)の実装"
 created: "2026-10-02"
 updated: "2026-10-02"
