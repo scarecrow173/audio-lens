@@ -120,11 +120,17 @@ impl Manifest {
     }
 
     /// Persist the manifest under `job_dir`.
+    ///
+    /// The write is atomic (temp file + rename): a crash mid-save leaves
+    /// either the previous manifest or the new one intact, never a
+    /// truncated canonical record that would make the job unresumable.
     pub fn save(&self, job_dir: &Path) -> io::Result<()> {
         fs::create_dir_all(job_dir)?;
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        fs::write(job_dir.join(Self::FILE_NAME), json)
+        let tmp = job_dir.join("manifest.json.tmp");
+        fs::write(&tmp, json)?;
+        fs::rename(&tmp, job_dir.join(Self::FILE_NAME))
     }
 
     /// Load a manifest from `job_dir`.
