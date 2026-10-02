@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/al-core",
+    "crates/al-job",
+    "crates/al-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+al-core = { path = "crates/al-core" }
+al-job = { path = "crates/al-job" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

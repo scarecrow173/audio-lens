@@ -6,9 +6,10 @@ lockfile = true
 [env]
 UV_EXCLUDE_NEWER = "1 week"
 
-# 言語 toolchain は未定。決定次第ここへ追加する。
-# 現状は apm install / serena MCP の実行に必要な最小構成のみ pin する。
+# 実装言語は Rust(docs/adr/implementation-stack.md)。
+# apm install / serena MCP 用の最小構成に加えて rust を pin する。
 [tools]
+rust = "1.98.1"
 python = "3.12"
 uv = "0.11"
 # apm.lock.yaml は apm 0.28.0 で生成。0.30.0 は Windows で path dep 解決が
@@ -18,9 +19,24 @@ uv = "0.11"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
 # canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
-# 言語 stack 決定後、依存 install / build 手順をここへ追加する。
 [tasks.setup]
 description = "Restore APM dependencies for a fresh checkout"
 run = [
   "apm install",
 ]
+
+[tasks.build]
+description = "cargo build --workspace"
+run = "cargo build --workspace"
+
+[tasks.test]
+description = "cargo test --workspace"
+run = "cargo test --workspace"
+
+[tasks.lint]
+description = "cargo clippy --workspace -- -D warnings"
+run = "cargo clippy --workspace --all-targets -- -D warnings"
+
+[tasks.fmt]
+description = "cargo fmt --all -- --check"
+run = "cargo fmt --all -- --check"
