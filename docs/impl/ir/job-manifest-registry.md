@@ -67,6 +67,10 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
 - `JobDefinition::create` で入力パスを絶対化し、manifest に記録される
   入力位置が実行時 CWD に依存しないようにする(別 CWD からの
   resume でも同一ファイルを読む)
+- `JobInput.source_sha256` で入力内容のハッシュを Job 作成時に固定
+  (CLI がファイルを読んで計算)。declared_input artifact の params にも
+  `source_sha256` を記録し、manifest だけで入力バイト列を特定できる。
+  Ingest 側は resume/再実行時に一致を検証する
 - serde/serde_json は相互運用目的の依存として採用(コア処理ではない)
 
 ## Related Experiments

@@ -172,6 +172,34 @@ fn unknown_format_fails_explicitly() {
 }
 
 #[test]
+fn input_changed_after_creation_fails_explicitly() {
+    let dir = temp_dir("tamper");
+    let wav = write_fixture(&dir, "cap.wav", &wav_bytes(1, 48000, &[0; 100]));
+
+    // Job creation pins the input's content hash.
+    let mut job_input = input(InputRole::CaptureBug, &wav);
+    job_input.source_sha256 = Some(al_media::sha256_hex(&std::fs::read(&wav).unwrap()));
+
+    // The file is then replaced under the same path.
+    std::fs::write(&wav, wav_bytes(1, 48000, &[1; 100])).unwrap();
+
+    let job_dir = temp_dir("job5");
+    let runner = StageRunner::new(&job_dir);
+    let def = JobDefinition::create(
+        vec![job_input],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    );
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
+
+    let err = runner.run(&def, &mut stages).unwrap_err();
+    assert!(err.message.contains("input content changed"));
+
+    std::fs::remove_dir_all(&dir).ok();
+    std::fs::remove_dir_all(&job_dir).ok();
+}
+
+#[test]
 fn resume_reuses_completed_ingest_artifacts() {
     let dir = temp_dir("resume");
     let wav = write_fixture(&dir, "cap.wav", &wav_bytes(1, 48000, &[0; 960]));
