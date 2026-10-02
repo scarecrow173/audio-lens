@@ -32,13 +32,19 @@ impl ArtifactRegistry {
     }
 
     /// Resolve an artifact record to its absolute path.
+    ///
+    /// Artifacts without job-local storage (an empty `path`, e.g. declared
+    /// inputs backed by an external file) resolve to `None` rather than to
+    /// the job directory itself.
     pub fn resolve(&self, manifest: &Manifest, id: &ArtifactId) -> Option<PathBuf> {
         manifest
             .artifact(id)
+            .filter(|record| !record.path.as_os_str().is_empty())
             .map(|record| self.job_dir.join(&record.path))
     }
 
     /// Resolve all artifacts carrying the given role label.
+    /// Artifacts without job-local storage are skipped.
     pub fn resolve_by_role<'m>(
         &self,
         manifest: &'m Manifest,
@@ -47,7 +53,7 @@ impl ArtifactRegistry {
         manifest
             .artifacts
             .iter()
-            .filter(|record| record.role == role)
+            .filter(|record| record.role == role && !record.path.as_os_str().is_empty())
             .map(|record| (record, self.job_dir.join(&record.path)))
             .collect()
     }
@@ -88,5 +94,28 @@ mod tests {
         let resolved = registry.resolve(&manifest, &id).unwrap();
         assert_eq!(resolved, dir.join("intermediate/decoded.wav"));
         assert_eq!(registry.resolve_by_role(&manifest, "decoded_pcm").len(), 1);
+    }
+
+    #[test]
+    fn resolve_returns_none_for_artifacts_without_job_storage() {
+        let dir = PathBuf::from("jobs/example");
+        let registry = ArtifactRegistry::new(&dir);
+        let manifest = Manifest::new(
+            JobId::new(),
+            vec![input(InputRole::CaptureBug, "capture.mkv")],
+            serde_json::json!({}),
+            &[],
+        );
+        let input_id = manifest
+            .input_artifact(&manifest.inputs[0].input_id)
+            .unwrap();
+        // A declared input has no job-local storage; it must not resolve
+        // to the job directory itself.
+        assert_eq!(registry.resolve(&manifest, &input_id), None);
+        assert!(
+            registry
+                .resolve_by_role(&manifest, "declared_input")
+                .is_empty()
+        );
     }
 }

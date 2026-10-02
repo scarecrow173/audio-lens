@@ -61,8 +61,12 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
 - registry は状態を持たず命名規則のみを担い、正本は manifest に集約
 - `ArtifactRecord::path` は「job_dir 相対」契約を維持し、外部入力の
   実際の位置は `params.source_path`/`source_path_abs` に記録する
-  (declared_input の `path` は空)。`resolve()` が外部ファイルを
-  誤って job_dir 配下に解決しないため
+  (declared_input の `path` は空)。`resolve()` /
+  `resolve_by_role()` は空 path の artifact を `None` / スキップ
+  とし、job_dir 自体への誤解決を防ぐ
+- `JobDefinition::create` で入力パスを絶対化し、manifest に記録される
+  入力位置が実行時 CWD に依存しないようにする(別 CWD からの
+  resume でも同一ファイルを読む)
 - serde/serde_json は相互運用目的の依存として採用(コア処理ではない)
 
 ## Related Experiments
