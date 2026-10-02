@@ -53,12 +53,16 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
 ### Changes
 
 - `job.rs`: JobDefinition(不変)・JobInput・input ビルダ。再実行は常に新 JobId
-- `manifest.rs`: StageRecord/ArtifactRecord/Manifest。save/load・stage 別成果物紐付け・lineage 再構成
+- `manifest.rs`: StageRecord/ArtifactRecord/Manifest。save/load・stage 別成果物紐付け・lineage 再構成。宣言入力は `produced_by: None` の `declared_input` artifact として登録され、下流成果物の `inputs` が元入力を指せる
 - `registry.rs`: ArtifactRegistry(id 発行・manifest 参照での絶対パス解決・role 検索)
 
 ### Decisions During Implementation
 
 - registry は状態を持たず命名規則のみを担い、正本は manifest に集約
+- `ArtifactRecord::path` は「job_dir 相対」契約を維持し、外部入力の
+  実際の位置は `params.source_path`/`source_path_abs` に記録する
+  (declared_input の `path` は空)。`resolve()` が外部ファイルを
+  誤って job_dir 配下に解決しないため
 - serde/serde_json は相互運用目的の依存として採用(コア処理ではない)
 
 ## Related Experiments
