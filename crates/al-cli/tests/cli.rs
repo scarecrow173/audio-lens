@@ -111,6 +111,46 @@ fn resume_uses_snapshotted_dictionary_after_source_deleted() {
 }
 
 #[test]
+fn default_run_snapshots_bundled_dictionary_into_config() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("embedded");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    // No --config: the bundled dictionary is still snapshotted into the
+    // job config so resume stays pinned to those exact bytes.
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest",
+        ])
+        .output()
+        .unwrap();
+    assert!(out.status.success(), "run failed: {:?}", out);
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+    let manifest: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(jobs.join(job_id).join("manifest.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        manifest["config"]["dictionary_sha256"].as_str(),
+        Some(al_media::sha256_hex(al_media::Dictionary::EMBEDDED_JSON.as_bytes()).as_str())
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn missing_or_invalid_config_is_an_explicit_error() {
     let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("cfg");

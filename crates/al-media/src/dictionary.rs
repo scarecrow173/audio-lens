@@ -80,6 +80,14 @@ impl Dictionary {
         Ok(dict)
     }
 
+    /// Raw JSON text of the dictionary bundled with the binary.
+    ///
+    /// Exposed so callers can snapshot the exact bytes (plus their hash)
+    /// into a job config — a `resume` then stays pinned to this content
+    /// even if the binary's embedded dictionary later changes.
+    pub const EMBEDDED_JSON: &'static str =
+        include_str!("../../../dictionaries/capture-artifacts.v1.json");
+
     /// The dictionary bundled with the binary.
     ///
     /// Using the embedded dictionary as the default keeps ingest results
@@ -87,10 +95,7 @@ impl Dictionary {
     /// recorded in metadata identifies exactly which dictionary produced
     /// the annotations.
     pub fn embedded() -> Self {
-        Self::from_json(include_str!(
-            "../../../dictionaries/capture-artifacts.v1.json"
-        ))
-        .expect("bundled dictionary must parse")
+        Self::from_json(Self::EMBEDDED_JSON).expect("bundled dictionary must parse")
     }
 
     /// Look up annotations for a codec/container pair.

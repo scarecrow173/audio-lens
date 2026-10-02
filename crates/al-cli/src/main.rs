@@ -72,15 +72,15 @@ impl Stage for StubStage {
 /// manifest — and therefore `resume` — is pinned to the exact bytes that
 /// ran, regardless of what happens to the file afterwards.
 fn resolve_config(config: &mut serde_json::Value) -> Result<(), String> {
-    let Some(path) = config
-        .get("dictionary")
-        .and_then(|v| v.as_str())
-        .map(str::to_owned)
-    else {
-        return Ok(());
+    // Always pin the dictionary into the job config: an explicit
+    // `dictionary` path is read now, otherwise the bundled dictionary is
+    // used. Either way `resume` replays the snapshot inside the manifest
+    // rather than re-resolving a file or the then-current binary.
+    let text = match config.get("dictionary").and_then(|v| v.as_str()) {
+        Some(path) => std::fs::read_to_string(path)
+            .map_err(|e| format!("cannot read dictionary {path}: {e}"))?,
+        None => al_media::Dictionary::EMBEDDED_JSON.to_owned(),
     };
-    let text = std::fs::read_to_string(&path)
-        .map_err(|e| format!("cannot read dictionary {path}: {e}"))?;
     let obj = config
         .as_object_mut()
         .ok_or_else(|| "config must be a JSON object".to_owned())?;
@@ -130,10 +130,14 @@ fn parse_input(value: &str) -> Result<JobInput, String> {
         .ok_or_else(|| format!("input {value:?} must be <role>:<path>"))?;
     let role: InputRole = serde_json::from_value(serde_json::Value::String(role.to_owned()))
         .map_err(|_| format!("unknown input role {role:?}"))?;
+    // Pin the input's content hash at job creation so a later resume
+    // cannot silently ingest a replaced file under the same job id.
+    let bytes = std::fs::read(path).map_err(|e| format!("cannot read input {path}: {e}"))?;
     Ok(JobInput {
         input_id: InputId::new(),
         role,
         path: PathBuf::from(path),
+        source_sha256: Some(al_media::sha256_hex(&bytes)),
     })
 }
 
