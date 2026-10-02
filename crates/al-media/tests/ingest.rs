@@ -206,6 +206,31 @@ fn input_changed_after_creation_fails_explicitly() {
 }
 
 #[test]
+fn unpinned_input_via_struct_literal_is_rejected() {
+    let dir = temp_dir("unpinned");
+    let wav = write_fixture(&dir, "cap.wav", &wav_bytes(1, 48000, &[0; 100]));
+
+    // JobDefinition fields are public, so a struct literal can bypass
+    // `create()`'s hash pinning. The runner must reject it anyway.
+    let def = JobDefinition {
+        job_id: al_core::JobId::new(),
+        inputs: vec![input(InputRole::CaptureBug, &wav)], // source_sha256: None
+        config: serde_json::json!({}),
+        stages: vec![StageKind::Ingest],
+    };
+
+    let job_dir = temp_dir("job-unpinned");
+    let runner = StageRunner::new(&job_dir);
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
+
+    let err = runner.run(&def, &mut stages).unwrap_err();
+    assert!(err.message.contains("no pinned source hash"));
+
+    std::fs::remove_dir_all(&dir).ok();
+    std::fs::remove_dir_all(&job_dir).ok();
+}
+
+#[test]
 fn resume_reuses_completed_ingest_artifacts() {
     let dir = temp_dir("resume");
     let wav = write_fixture(&dir, "cap.wav", &wav_bytes(1, 48000, &[0; 960]));
