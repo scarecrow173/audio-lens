@@ -328,6 +328,28 @@ fn dependency_listed_after_dependent_is_rejected() {
 }
 
 #[test]
+fn concurrent_resume_of_same_job_is_rejected() {
+    let dir = temp_dir("locked");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    runner.run(&def, &mut trio.stages).unwrap();
+
+    // A second writer holding the job lock must block any new resume —
+    // the lock is what is held, not the file's mere existence.
+    let lock = std::fs::File::create(runner.job_dir(&def.job_id).join(".lock")).unwrap();
+    lock.try_lock().unwrap();
+    let err = runner.resume(&def, &mut trio.stages).unwrap_err();
+    assert!(err.message.contains("already running"));
+
+    drop(lock);
+    runner.resume(&def, &mut trio.stages).unwrap();
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn dependency_order_violation_is_rejected() {
     let dir = temp_dir("dep");
     let runner = StageRunner::new(&dir);
