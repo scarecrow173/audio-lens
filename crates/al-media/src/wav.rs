@@ -8,7 +8,13 @@ use crate::metadata::{MediaError, SampleFormat};
 /// Decoded audio: pre-normalization PCM plus stream metadata.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DecodedAudio {
-    /// Interleaved samples converted to f64 (no gain normalization applied).
+    /// Interleaved samples in the source's native scale, stored as f64.
+    ///
+    /// Integer PCM keeps its exact integer value (u8 is offset to signed),
+    /// and IEEE float passes through unchanged. No scaling to a [-1, 1]
+    /// range and no gain normalization is applied; `sample_format` records
+    /// which scale the values are in. All supported integer widths fit
+    /// exactly in an f64, so this is lossless.
     pub samples: Vec<f64>,
     /// Channel count.
     pub channels: u16,
@@ -91,13 +97,17 @@ fn decode_samples(
             }
         };
 
-    let frames = data.len() / (bytes_per_sample * fmt.channels.max(1) as usize);
-    let usable = frames * bytes_per_sample * fmt.channels.max(1) as usize;
-    let mut samples = Vec::with_capacity(usable / bytes_per_sample);
-    for raw in data[..usable].chunks_exact(bytes_per_sample) {
+    let frame_bytes = bytes_per_sample * fmt.channels.max(1) as usize;
+    if !data.len().is_multiple_of(frame_bytes) {
+        return Err(MediaError::malformed("data chunk ends mid-frame"));
+    }
+    let mut samples = Vec::with_capacity(data.len() / bytes_per_sample);
+    for raw in data.chunks_exact(bytes_per_sample) {
         let v = match bytes_per_sample {
-            1 if fmt.format_tag == 1 => f64::from(raw[0].wrapping_sub(128)) / 128.0,
-            2 => f64::from(i16::from_le_bytes([raw[0], raw[1]])) / 32768.0,
+            // 8-bit PCM is unsigned offset binary; keep the decoded value
+            // as an exact (signed) integer, unscaled.
+            1 if fmt.format_tag == 1 => f64::from(i16::from(raw[0]) - 128),
+            2 => f64::from(i16::from_le_bytes([raw[0], raw[1]])),
             3 => {
                 let v = i32::from(raw[0]) | (i32::from(raw[1]) << 8) | (i32::from(raw[2]) << 16);
                 let v = if v & 0x80_0000 != 0 {
@@ -105,10 +115,10 @@ fn decode_samples(
                 } else {
                     v
                 };
-                v as f64 / 8_388_608.0
+                f64::from(v)
             }
             4 if fmt.format_tag == 1 => {
-                f64::from(i32::from_le_bytes([raw[0], raw[1], raw[2], raw[3]])) / 2_147_483_648.0
+                f64::from(i32::from_le_bytes([raw[0], raw[1], raw[2], raw[3]]))
             }
             4 => f64::from(f32::from_le_bytes([raw[0], raw[1], raw[2], raw[3]])),
             8 => f64::from_le_bytes([
@@ -201,8 +211,46 @@ mod tests {
         assert_eq!(audio.channels, 2);
         assert_eq!(audio.sample_rate, 48000);
         assert_eq!(audio.frames(), 2);
-        assert!((audio.samples[0] - 0.5).abs() < 1e-4);
-        assert!((audio.samples[1] + 0.5).abs() < 1e-4);
+        // Pre-normalization: raw integer values are kept exactly.
+        assert_eq!(audio.samples[0], 16384.0);
+        assert_eq!(audio.samples[1], -16384.0);
+        assert_eq!(audio.samples[3], 32767.0);
+    }
+
+    #[test]
+    fn decodes_8bit_unsigned_offset_binary() {
+        let mut wav = Vec::new();
+        wav.extend_from_slice(b"RIFF");
+        wav.extend_from_slice(&39u32.to_le_bytes());
+        wav.extend_from_slice(b"WAVE");
+        wav.extend_from_slice(b"fmt ");
+        wav.extend_from_slice(&16u32.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes()); // mono
+        wav.extend_from_slice(&8000u32.to_le_bytes());
+        wav.extend_from_slice(&8000u32.to_le_bytes());
+        wav.extend_from_slice(&1u16.to_le_bytes());
+        wav.extend_from_slice(&8u16.to_le_bytes());
+        wav.extend_from_slice(b"data");
+        wav.extend_from_slice(&3u32.to_le_bytes());
+        wav.extend_from_slice(&[0u8, 128, 255]);
+        wav.push(0); // word-align pad
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.sample_format, SampleFormat::PcmU8);
+        assert_eq!(audio.samples, vec![-128.0, 0.0, 127.0]);
+    }
+
+    #[test]
+    fn rejects_data_chunk_ending_mid_frame() {
+        let mut wav = make_wav(1, 48000, 16, &[1, 2, 3]);
+        // Corrupt the data chunk size to an odd length (1.5 frames).
+        let data_len_at = wav.len() - 10;
+        wav[data_len_at] = 5;
+        wav.truncate(wav.len() - 1);
+        assert!(matches!(
+            decode_wav(&wav),
+            Err(MediaError::Malformed { .. })
+        ));
     }
 
     #[test]
