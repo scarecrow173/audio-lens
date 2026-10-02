@@ -21,14 +21,23 @@ pub fn write_wav(
         fs::create_dir_all(parent)?;
     }
     let tmp = tmp_path_for(path);
-    {
+    let result = (|| {
         let file = File::create(&tmp)?;
         let mut writer = WavWriter::new(file, encoding, channels, sample_rate)?;
-        writer.write_samples(samples)?;
+        // Encode in bounded blocks: the streaming encoder exists so a
+        // large file never needs a second full-size buffer.
+        const BLOCK: usize = 1 << 20; // samples per encode call
+        for block in samples.chunks(BLOCK) {
+            writer.write_samples(block)?;
+        }
         let file = writer.finish()?;
         file.sync_all()?;
+        rename_durable(&tmp, path)
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&tmp);
     }
-    rename_durable(&tmp, path)
+    result
 }
 
 /// Decode a WAV file from the dataset.

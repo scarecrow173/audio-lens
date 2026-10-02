@@ -322,7 +322,25 @@ impl<W: Write + Seek> WavWriter<W> {
             ));
         }
         let bits = encoding.bits_per_sample();
-        let block_align = channels * (bits / 8);
+        // Compute in u32 so absurd channel counts fail explicitly
+        // instead of wrapping into a self-inconsistent header.
+        let block_align = u32::from(channels)
+            .checked_mul(u32::from(bits / 8))
+            .filter(|v| *v <= u32::from(u16::MAX))
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    format!("channels {channels} x {}-bit exceeds WAV block_align", bits),
+                )
+            })? as u16;
+        let byte_rate = sample_rate
+            .checked_mul(u32::from(block_align))
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    format!("sample_rate {sample_rate} x block_align {block_align} overflows u32"),
+                )
+            })?;
         // Placeholder sizes; patched on finish.
         out.write_all(b"RIFF")?;
         out.write_all(&0u32.to_le_bytes())?;
@@ -332,7 +350,7 @@ impl<W: Write + Seek> WavWriter<W> {
         out.write_all(&encoding.format_tag().to_le_bytes())?;
         out.write_all(&channels.to_le_bytes())?;
         out.write_all(&sample_rate.to_le_bytes())?;
-        out.write_all(&(sample_rate * u32::from(block_align)).to_le_bytes())?;
+        out.write_all(&byte_rate.to_le_bytes())?;
         out.write_all(&block_align.to_le_bytes())?;
         out.write_all(&bits.to_le_bytes())?;
         out.write_all(b"data")?;
