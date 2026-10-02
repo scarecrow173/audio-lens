@@ -71,8 +71,13 @@ task `docs/tasks/stage-runner.md`、test-spec `docs/test-specs/stage-runner-resu
   同 Job ID の改変 def を渡しても実行前に拒否される
 - run/resume 共通で全入力の `source_sha256` 必須性を検証し、
   unpinned input の struct-literal 迂回を拒否する
-- manifest の保存は temp file + rename の atomic write。
-  書き込み途中の kill/電源断で canonical manifest が破損しない
+- manifest の保存は temp file + `sync_all` + rename + ディレクトリ
+  fsync(unix)の atomic & durable write。kill/電源断でも直前の完全な
+  manifest か新 manifest のどちらかしか残らない
+- run/resume は job_dir 内 `.lock` ファイルに `try_lock` で実行中
+  排他ロックを取る。同一 Job の並行 resume/run による manifest・
+  成果物の競合更新を防ぐ。プロセス死亡時は OS がロックを解放する
+  ため `.lock` ファイル残骸は無害(存在ではなく保持が判定)
 - `validate_plan` は stage plan の重複・依存の順序(依存が後続に
   あると永遠に完了しない)を事前検証し、未登録実装も run/resume
   入口で拒否する。依存の「存在」だけでなく配置まで確認する

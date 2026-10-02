@@ -86,6 +86,29 @@ impl StageRunner {
         Ok(())
     }
 
+    /// Take an exclusive advisory lock on the job for the duration of a
+    /// run/resume so concurrent writers cannot race on the manifest or
+    /// stage artifacts. The OS releases the lock when the process dies,
+    /// so a leftover `.lock` file is harmless — only the held lock
+    /// blocks, never the file's existence.
+    fn lock_job(job_dir: &std::path::Path) -> Result<std::fs::File, StageError> {
+        let file = std::fs::File::create(job_dir.join(".lock")).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("cannot open job lock: {e}"))
+        })?;
+        file.try_lock().map_err(|e| {
+            StageError::new(
+                StageKind::Ingest,
+                match e {
+                    std::fs::TryLockError::WouldBlock => {
+                        "job is already running in another process".to_owned()
+                    }
+                    std::fs::TryLockError::Error(err) => format!("cannot lock job: {err}"),
+                },
+            )
+        })?;
+        Ok(file)
+    }
+
     /// Run a fresh job: create the job directory, manifest, and execute
     /// every planned stage in order.
     pub fn run(
@@ -113,6 +136,7 @@ impl StageRunner {
                 ),
             )
         })?;
+        let _lock = Self::lock_job(&job_dir)?;
         let mut manifest = Manifest::new(
             def.job_id.clone(),
             def.inputs.clone(),
@@ -137,6 +161,9 @@ impl StageRunner {
         Self::validate_plan(def, stages)?;
         Self::validate_inputs(def)?;
         let job_dir = self.job_dir(&def.job_id);
+        // Lock before reading so a concurrent writer cannot hand us a
+        // half-updated manifest or race on stage artifacts.
+        let _lock = Self::lock_job(&job_dir)?;
         let mut manifest = Manifest::load(&job_dir).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot load manifest: {e}"))
         })?;
