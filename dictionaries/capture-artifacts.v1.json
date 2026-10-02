@@ -1,0 +1,63 @@
+{
+  "version": "1",
+  "entries": [
+    {
+      "topic": "codec_hf_cutoff",
+      "matches": { "codec": "aac" },
+      "annotation": {
+        "kind": "expected_high_frequency_cutoff",
+        "expected_khz": [15.0, 20.0],
+        "note": "AAC エンコーダは設定次第で高域をローパスする。観測されたカットオフがこの範囲内なら録画アーティファクトと一致する可能性が高い"
+      },
+      "reference": "AAC encoder lowpass behavior (general knowledge)"
+    },
+    {
+      "topic": "codec_hf_cutoff",
+      "matches": { "codec": "mp3" },
+      "annotation": {
+        "kind": "expected_high_frequency_cutoff",
+        "expected_khz": [15.0, 18.5],
+        "note": "MP3 のビットレート依存の高域カットオフ"
+      },
+      "reference": "MP3 lowpass vs bitrate (general knowledge)"
+    },
+    {
+      "topic": "container_block_size",
+      "matches": { "codec": "aac" },
+      "annotation": {
+        "kind": "frame_block_size",
+        "samples_per_frame": 1024,
+        "note": "AAC-LC のフレーム長。エネルギーの周期性が 1024 サンプル境界に現れることがある"
+      },
+      "reference": "AAC-LC frame size"
+    },
+    {
+      "topic": "container_block_size",
+      "matches": { "codec": "mp3" },
+      "annotation": {
+        "kind": "frame_block_size",
+        "samples_per_frame": 1152,
+        "note": "MP3 のグラニュール/フレーム長"
+      },
+      "reference": "MP3 frame size"
+    },
+    {
+      "topic": "src_route",
+      "matches": {},
+      "annotation": {
+        "kind": "expected_sample_rate_route",
+        "note": "OS/キャプチャソフトは 44.1↔48kHz の SRC を挟むことがある。観測された SRC 痕跡(高域フィルタ特性・位相シフト)はこの経路と照合できる"
+      },
+      "reference": null
+    },
+    {
+      "topic": "lossy_codec_present",
+      "matches": { "codec": "aac" },
+      "annotation": {
+        "kind": "lossy_codec_present",
+        "note": "非可逆コーデック: 波形レベルの差分評価ではエンコード歪みを分けて考える"
+      },
+      "reference": null
+    }
+  ]
+}
