@@ -14,6 +14,14 @@ pub struct JobInput {
     /// created so the stored location does not depend on the working
     /// directory the job was launched from.
     pub path: PathBuf,
+    /// SHA-256 of the input content pinned at job creation, when known.
+    ///
+    /// Stages that read the input verify the content against this hash so
+    /// a `resume` cannot silently ingest a replaced file under the same
+    /// job id. `None` means "content not pinned" (e.g. inputs built
+    /// programmatically without hashing).
+    #[serde(default)]
+    pub source_sha256: Option<String>,
 }
 
 /// Immutable definition of one analysis job.
@@ -67,6 +75,7 @@ pub fn input(role: InputRole, path: impl Into<PathBuf>) -> JobInput {
         input_id: InputId::new(),
         role,
         path: path.into(),
+        source_sha256: None,
     }
 }
 

@@ -68,6 +68,21 @@ impl IngestStage {
         })?;
         let source_hash = sha256_hex(&bytes);
 
+        // The job pins input content at creation; a resume must not
+        // silently ingest a replaced file under the same job id.
+        if let Some(expected) = &input.source_sha256
+            && *expected != source_hash
+        {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                format!(
+                    "input content changed since job creation: {} \
+                     (expected sha256 {expected}, got {source_hash})",
+                    path.display()
+                ),
+            ));
+        }
+
         let format = detect_format(&bytes).ok_or_else(|| {
             StageError::new(
                 StageKind::Ingest,

@@ -86,6 +86,7 @@ impl Manifest {
                     "source_path_abs": std::path::absolute(&input.path)
                         .ok()
                         .map(|p| p.display().to_string()),
+                    "source_sha256": input.source_sha256,
                 }),
             })
             .collect();
