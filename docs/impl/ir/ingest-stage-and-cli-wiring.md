@@ -64,6 +64,11 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
   辞書は既定でバイナリ埋め込み(`Dictionary::embedded()`)、
   config `dictionary` キーで明示ファイルに差し替え可能
   (読めない場合は明示的失敗)
+- 外部辞書を指定した場合、run 時に内容を `dictionary_text` /
+  `dictionary_sha256` として job config にスナップショットする。
+  manifest が config を保持するため resume は元ファイルに依存せず、
+  同一 Job ID で辞書内容が固定される(結合テストで
+  「run → 辞書削除 → resume 成功」を確認)
 
 ### Decisions During Implementation
 

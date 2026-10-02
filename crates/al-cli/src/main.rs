@@ -23,8 +23,10 @@ STAGES:
 
 CONFIG:
   A JSON file passed via --config. Keys:
-    dictionary   Path to a capture-artifact dictionary JSON. Defaults to the
-                 dictionary bundled with the binary.
+    dictionary   Path to a capture-artifact dictionary JSON. The file's
+                 content is snapshotted into the job at run time, so resume
+                 does not depend on the file and the job stays reproducible.
+                 Defaults to the dictionary bundled with the binary.
 
 NOTE:
   The ingest stage is implemented (WAV/PCM). All other stages are stubs
@@ -63,16 +65,49 @@ impl Stage for StubStage {
     }
 }
 
+/// Snapshot the external dictionary into the job config.
+///
+/// `config.dictionary` names a file; at `run` time its content is copied
+/// into `config.dictionary_text` (with `config.dictionary_sha256`) so the
+/// manifest — and therefore `resume` — is pinned to the exact bytes that
+/// ran, regardless of what happens to the file afterwards.
+fn resolve_config(config: &mut serde_json::Value) -> Result<(), String> {
+    let Some(path) = config
+        .get("dictionary")
+        .and_then(|v| v.as_str())
+        .map(str::to_owned)
+    else {
+        return Ok(());
+    };
+    let text = std::fs::read_to_string(&path)
+        .map_err(|e| format!("cannot read dictionary {path}: {e}"))?;
+    let obj = config
+        .as_object_mut()
+        .ok_or_else(|| "config must be a JSON object".to_owned())?;
+    obj.insert(
+        "dictionary_sha256".into(),
+        serde_json::json!(al_media::sha256_hex(text.as_bytes())),
+    );
+    obj.insert("dictionary_text".into(), serde_json::json!(text));
+    Ok(())
+}
+
 /// Build the stage implementation for `kind`. Stages without a real
 /// implementation fall back to the foundation stub.
 fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Stage>, String> {
     if kind == StageKind::Ingest {
-        // Default to the dictionary bundled with the binary so results do
-        // not depend on the working directory; `config.dictionary` selects
-        // an explicit file (and fails explicitly if it cannot be loaded).
-        let stage = match config.get("dictionary").and_then(|v| v.as_str()) {
-            Some(path) => IngestStage::with_dictionary_file(path).map_err(|e| e.to_string())?,
-            None => IngestStage::with_dictionary(al_media::Dictionary::embedded()),
+        // `dictionary_text` (the run-time snapshot) pins the dictionary
+        // content; `dictionary` remains usable for configs that never went
+        // through `resolve_config`. Default is the bundled dictionary, so
+        // results never depend on the working directory.
+        let stage = if let Some(text) = config.get("dictionary_text").and_then(|v| v.as_str()) {
+            let dictionary = al_media::Dictionary::from_json(text)
+                .map_err(|e| format!("invalid snapshotted dictionary: {e}"))?;
+            IngestStage::with_dictionary(dictionary)
+        } else if let Some(path) = config.get("dictionary").and_then(|v| v.as_str()) {
+            IngestStage::with_dictionary_file(path).map_err(|e| e.to_string())?
+        } else {
+            IngestStage::with_dictionary(al_media::Dictionary::embedded())
         };
         return Ok(Box::new(stage));
     }
@@ -149,10 +184,13 @@ fn cmd_run(args: &[String]) -> ExitCode {
         Ok(kinds) => kinds,
         Err(e) => return fail(e),
     };
-    let config = parse_flag(args, "--config")
+    let mut config = parse_flag(args, "--config")
         .and_then(|path| std::fs::read_to_string(path).ok())
         .and_then(|text| serde_json::from_str(&text).ok())
         .unwrap_or_else(|| serde_json::json!({}));
+    if let Err(e) = resolve_config(&mut config) {
+        return fail(e);
+    }
 
     let def = JobDefinition::create(inputs, config.clone(), stage_kinds.clone());
     let mut stages: Vec<Box<dyn Stage>> = Vec::new();
