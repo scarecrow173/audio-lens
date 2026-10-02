@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J8zzSGVEuhTR3yHOM"
 type: "task"
-status: "todo"
+status: "done"
 title: "合成 fixture による ingest 結合テスト"
 created: "2026-10-02"
 updated: "2026-10-02"
