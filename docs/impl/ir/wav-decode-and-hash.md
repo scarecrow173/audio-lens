@@ -60,11 +60,13 @@ task `docs/tasks/wav-decode.md`、test-spec `ingest-wav-decode` に従う。
   破損・非対応形式の明示的失敗
 - ヘッダ整合性検証: RIFF size == ファイル長-8、
   `block_align == channels * bytes/sample`、
-  `byte_rate == sample_rate * block_align` を満たさない
-  ヘッダは malformed として拒否。奇数サイズチャンクの
-  pad byte 欠落(末尾含む)、および最終チャンク後の 1〜7 byte の
-  残り(不完全な次チャンクヘッダ/trailing garbage)も malformed
-- `hash.rs`: 依存ゼロの SHA-256(既知ベクトルで検証)
+  `byte_rate == sample_rate * block_align`、`channels > 0`、
+  `sample_rate > 0` を満たさないヘッダは malformed として拒否。
+  奇数サイズチャンクの pad byte 欠落(末尾含む)、最終チャンク後の
+  1〜7 byte の残り(不完全な次チャンクヘッダ/trailing garbage)、
+  および duplicate `fmt `/`data` チャンク(入力の一部を黙って捨てる
+  last-wins を防ぐ)も malformed
+- `al-core::hash`: 依存ゼロの SHA-256(既知ベクトルで検証)
 - `metadata.rs` の `AudioMetadata` / `SampleFormat` を利用
 
 ### Decisions During Implementation
