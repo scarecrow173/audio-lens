@@ -1,7 +1,7 @@
 ---
 id: "TASK-034yZBFMasR7zBTzyrlevq"
 type: "task"
-status: "todo"
+status: "done"
 title: "ステージ trait と stage-runner の実装"
 created: "2026-10-02"
 updated: "2026-10-02"

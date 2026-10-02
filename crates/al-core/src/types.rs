@@ -36,6 +36,29 @@ pub enum StageKind {
     Export,
 }
 
+impl StageKind {
+    /// Canonical pipeline order; earlier kinds are prerequisites of later ones.
+    pub const PIPELINE_ORDER: &'static [StageKind] = &[
+        StageKind::Ingest,
+        StageKind::Locate,
+        StageKind::CheapAnalysis,
+        StageKind::ReferenceAnalysis,
+        StageKind::ExpensiveAnalysis,
+        StageKind::Dataset,
+        StageKind::Visualization,
+        StageKind::Export,
+    ];
+
+    /// All stage kinds that must complete before this one.
+    pub fn dependencies(&self) -> Vec<StageKind> {
+        Self::PIPELINE_ORDER
+            .iter()
+            .copied()
+            .take_while(|kind| kind != self)
+            .collect()
+    }
+}
+
 /// Whether a measurement is meaningful for a range.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
