@@ -1,7 +1,7 @@
 ---
 id: "TASK-034yZBGf1qCjTi7xP8XFVR"
 type: "task"
-status: "todo"
+status: "done"
 title: "run / resume 再現テストの実装"
 created: "2026-10-02"
 updated: "2026-10-02"
