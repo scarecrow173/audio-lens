@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8821L9FbGf5lvsQjiM"
 type: "task"
-status: "todo"
+status: "in-progress"
 title: "チャンクテンソルストア"
 created: "2026-10-02"
 updated: "2026-10-02"

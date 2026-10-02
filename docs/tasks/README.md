@@ -7,8 +7,8 @@ Directory: `docs/tasks`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
-| TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | todo | [chunked-tensor-store.md](./chunked-tensor-store.md) |
-| TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | in-progress | [columnar-table-store.md](./columnar-table-store.md) |
+| TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | in-progress | [chunked-tensor-store.md](./chunked-tensor-store.md) |
+| TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | todo | [dataset-integration-tests.md](./dataset-integration-tests.md) |
 | TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | todo | [dataset-reader.md](./dataset-reader.md) |
