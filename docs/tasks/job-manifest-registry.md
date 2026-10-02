@@ -1,7 +1,7 @@
 ---
 id: "TASK-J14iCJv5kCKP839iZfaROa"
 type: "task"
-status: "todo"
+status: "done"
 title: "不変ジョブ・manifest・成果物レジストリの実装"
 created: "2026-10-02"
 updated: "2026-10-02"
