@@ -58,6 +58,10 @@ task `docs/tasks/wav-decode.md`、test-spec `ingest-wav-decode` に従う。
   [-1,1] スケーリングしない。u8 は offset binary を符号値に
   変換)、奇数チャンクの pad byte 対応、末尾不完全フレーム・
   破損・非対応形式の明示的失敗
+- ヘッダ整合性検証: RIFF size == ファイル長-8、
+  `block_align == channels * bytes/sample`、
+  `byte_rate == sample_rate * block_align` を満たさない
+  ヘッダは malformed として拒否
 - `hash.rs`: 依存ゼロの SHA-256(既知ベクトルで検証)
 - `metadata.rs` の `AudioMetadata` / `SampleFormat` を利用
 
