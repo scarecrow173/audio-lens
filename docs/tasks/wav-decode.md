@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J62VyM1KI8DpxaE3D"
 type: "task"
-status: "todo"
+status: "done"
 title: "WAV デコード・メタデータ・SHA-256 ハッシュ"
 created: "2026-10-02"
 updated: "2026-10-02"
