@@ -67,7 +67,11 @@ impl TimeMap {
     pub fn capture_to_source(&self, capture: u64) -> Option<u64> {
         for seg in &self.segments {
             let [cs, ce] = seg.capture_range;
-            if capture < cs || capture >= ce {
+            // Inclusive end: adjacent segments may share a boundary
+            // anchor, and the earlier (finer-interpolated) segment
+            // resolves it correctly; the last segment's terminal
+            // anchor is reachable.
+            if capture < cs || capture > ce {
                 continue;
             }
             if seg.anchors.len() < 2 {
@@ -108,29 +112,30 @@ pub struct LoopOccurrence {
     pub capture_time: u64,
 }
 
-/// Identify loop occurrences: each acceptance `position` is an
-/// occurrence of the loop body; `loop_index` = `position /
-/// body_len`. Occurrences are never collapsed into one fuzzy match.
+/// Identify loop occurrences: each located `position` is an actual
+/// occurrence start in the capture. `loop_index` is the occurrence
+/// ordinal in capture-time order; `occurrence_position` is the
+/// detected position itself (not a synthetic grid); `source_phase`/
+/// `source_time` are 0 because each occurrence plays the body from
+/// its start. Occurrences are never collapsed into one fuzzy match.
 pub fn identify_loop_occurrences(positions: &[u64], body_len: u64) -> Vec<LoopOccurrence> {
     if body_len == 0 {
         return Vec::new();
     }
-    let mut out: Vec<LoopOccurrence> = positions
+    let mut sorted: Vec<u64> = positions.to_vec();
+    sorted.sort_unstable();
+    sorted.dedup();
+    sorted
         .iter()
-        .map(|&capture_time| {
-            let phase = capture_time % body_len;
-            LoopOccurrence {
-                loop_index: (capture_time / body_len) as u32,
-                occurrence_position: capture_time - phase,
-                source_phase: phase,
-                source_time: phase,
-                capture_time,
-            }
+        .enumerate()
+        .map(|(i, &capture_time)| LoopOccurrence {
+            loop_index: i as u32,
+            occurrence_position: capture_time,
+            source_phase: 0,
+            source_time: 0,
+            capture_time,
         })
-        .collect();
-    out.sort_by_key(|o| o.capture_time);
-    out.dedup_by_key(|o| (o.loop_index, o.source_phase));
-    out
+        .collect()
 }
 
 /// Segment a sorted anchor list into a piecewise `TimeMap`.
@@ -208,55 +213,61 @@ fn finish_run(
     if run.is_empty() {
         return;
     }
-    // Split at flagged (non-unit-rate) boundaries.
+    // Split where the local edge rate *changes*: consecutive edges
+    // with the same slope stay in one piece, so a sustained drift
+    // becomes a single Drift segment rather than fragments. The
+    // boundary anchor is shared between adjacent pieces (half-open
+    // ranges keep segments non-overlapping).
     let mut pieces: Vec<Vec<Anchor>> = Vec::new();
     let mut cur = vec![run[0]];
+    let mut prev_edge_rate: Option<f64> = None;
     for w in run.windows(2) {
-        let off_rate = (local_rate(w) - 1.0).abs() > rate_tolerance;
-        if off_rate {
-            cur.push(w[1]);
+        let r = local_rate(w);
+        let changed = match prev_edge_rate {
+            Some(pr) => {
+                r.is_finite() != pr.is_finite()
+                    || (r.is_finite() && pr.is_finite() && (r - pr).abs() > rate_tolerance)
+            }
+            None => false,
+        };
+        if changed {
             pieces.push(std::mem::take(&mut cur));
             cur = vec![w[0]];
         }
         cur.push(w[1]);
+        prev_edge_rate = Some(r);
     }
     if !cur.is_empty() {
         pieces.push(cur);
     }
     for piece in pieces {
-        let kind = if piece.len() < min_run {
-            SegmentKind::Jitter
-        } else {
-            let ds = piece[piece.len() - 1]
-                .source
-                .saturating_sub(piece[0].source);
-            let dc = piece[piece.len() - 1]
-                .capture
-                .saturating_sub(piece[0].capture);
-            let rate = if ds == 0 {
-                f64::INFINITY
-            } else {
-                dc as f64 / ds as f64
-            };
-            if rate.is_finite() && (rate - 1.0).abs() <= rate_tolerance {
-                SegmentKind::Continuous
-            } else {
-                SegmentKind::Drift
-            }
-        };
         let ds_ = piece[piece.len() - 1]
             .source
             .saturating_sub(piece[0].source);
         let dc_ = piece[piece.len() - 1]
             .capture
             .saturating_sub(piece[0].capture);
+        let rate = if ds_ == 0 {
+            f64::INFINITY
+        } else {
+            dc_ as f64 / ds_ as f64
+        };
+        let kind = if piece.len() < min_run {
+            // A short off-rate piece is a discrete jump: source
+            // advancing faster than capture means skipped content.
+            if ds_ > dc_ {
+                SegmentKind::Skip
+            } else {
+                SegmentKind::Jitter
+            }
+        } else if rate.is_finite() && (rate - 1.0).abs() <= rate_tolerance {
+            SegmentKind::Continuous
+        } else {
+            SegmentKind::Drift
+        };
         segments.push(Segment {
             kind,
-            rate: if ds_ == 0 {
-                None
-            } else {
-                Some(dc_ as f64 / ds_ as f64)
-            },
+            rate: if ds_ == 0 { None } else { Some(rate) },
             source_range: [piece[0].source, piece[piece.len() - 1].source],
             capture_range: [piece[0].capture, piece[piece.len() - 1].capture],
             anchors: piece,
@@ -301,7 +312,43 @@ mod tests {
         anchors.extend((10..15).map(|i| a(i * 100, 50000 + (i - 10) * 100)));
         let map = build_time_map(&anchors, 0.05, 5000, 3);
         let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
-        assert!(kinds.contains(&SegmentKind::Drift));
-        assert!(kinds.contains(&SegmentKind::Gap));
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Drift,
+                SegmentKind::Gap,
+                SegmentKind::Continuous
+            ]
+        );
+        // A uniform drift is one segment, never a stack of
+        // overlapping fragments (half-open ranges may share an edge).
+        assert!(
+            map.segments
+                .windows(2)
+                .all(|w| w[1].capture_range[0] >= w[0].capture_range[1])
+        );
+        // A boundary anchor shared by two segments resolves through
+        // the earlier segment; the terminal anchor is reachable.
+        let drift_end = map.segments[0].capture_range[1];
+        assert!(map.capture_to_source(drift_end).is_some());
+        let terminal = map.segments.last().unwrap().capture_range[1];
+        assert!(map.capture_to_source(terminal).is_some());
+    }
+
+    #[test]
+    fn skip_forward_is_a_discrete_segment() {
+        // rate-1 run, one source-forward jump (ds >> dc), rate-1 run.
+        let mut anchors: Vec<_> = (0..6).map(|i| a(i * 100, 1000 + i * 100)).collect();
+        anchors.extend((6..12).map(|i| a(400 + i * 100, 1000 + i * 100)));
+        let map = build_time_map(&anchors, 0.05, 50000, 3);
+        let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Continuous,
+                SegmentKind::Skip,
+                SegmentKind::Continuous
+            ]
+        );
     }
 }

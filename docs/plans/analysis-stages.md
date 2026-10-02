@@ -127,10 +127,10 @@ candidate / event モデル + 確度伝播を `al-analysis` クレートとし�
   スペクトルを再利用)
 - `ExpensiveAnalysisStage::depends_on() = [Ingest, CheapAnalysis]`
   (cheap 由来の候補で起動できる;reference が無くても動く)
-- **`LocateStage` は `source_asset` / `capture_*` が無い場合
-  `Err` ではなく `Ok(vec![])`** を返す(空結果で完了。
-  「locate を skip する実行」が可能になる)。source/capture の
-  片方だけある場合は従来どおり明示的エラー。
+- **`LocateStage` は `source_asset` / `capture_*` のどちらかが無い
+  場合 `Err` ではなく `Ok(vec![])`** を返す(ペアが作れない以上
+  やるべき仕事が無い。capture-only / source-only ジョブが
+  パイプラインを止めない)。
 
 ## 確度・validity 伝播規約
 

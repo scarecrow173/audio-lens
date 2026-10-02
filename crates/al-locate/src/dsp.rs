@@ -10,10 +10,12 @@ use std::f64::consts::PI;
 
 /// Split interleaved samples into per-channel contiguous vectors.
 ///
-/// `interleaved.len()` must be a multiple of `channels`.
+/// Always returns `channels` entries (each possibly empty). A
+/// trailing partial frame is dropped; `channels == 0` returns an
+/// empty vector.
 pub fn deinterleave(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
     let channels = usize::from(channels);
-    if channels == 0 || interleaved.is_empty() {
+    if channels == 0 {
         return Vec::new();
     }
     let frames = interleaved.len() / channels;
