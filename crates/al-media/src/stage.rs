@@ -70,10 +70,16 @@ impl IngestStage {
         let source_hash = sha256_hex(&bytes);
 
         // The job pins input content at creation; a resume must not
-        // silently ingest a replaced file under the same job id.
-        if let Some(expected) = &input.source_sha256
-            && *expected != source_hash
-        {
+        // silently ingest a replaced file under the same job id. An
+        // unpinned input is an error, not a skip — the runner validates
+        // this too, but the stage does not rely on that.
+        let Some(expected) = &input.source_sha256 else {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                format!("input {} has no pinned source hash", path.display()),
+            ));
+        };
+        if *expected != source_hash {
             return Err(StageError::new(
                 StageKind::Ingest,
                 format!(

@@ -29,6 +29,26 @@ impl StageRunner {
         self.base_dir.join(job_id.as_str())
     }
 
+    /// Validate that every declared input carries its pinned content
+    /// hash. `JobDefinition` fields are public, so a caller could build
+    /// one by struct literal and bypass `create()`'s pinning; this gate
+    /// makes the invariant hold regardless of construction path.
+    fn validate_inputs(def: &JobDefinition) -> Result<(), StageError> {
+        for input in &def.inputs {
+            if input.source_sha256.is_none() {
+                return Err(StageError::new(
+                    StageKind::Ingest,
+                    format!(
+                        "input {} has no pinned source hash; build jobs with \
+                         JobDefinition::create",
+                        input.path.display()
+                    ),
+                ));
+            }
+        }
+        Ok(())
+    }
+
     /// Validate the declared stage dependency graph.
     ///
     /// Fails if a stage's dependencies are not part of the job's stage plan.
@@ -54,6 +74,7 @@ impl StageRunner {
         stages: &mut Vec<Box<dyn Stage>>,
     ) -> Result<Manifest, StageError> {
         Self::validate_plan(def, stages)?;
+        Self::validate_inputs(def)?;
         let job_dir = self.job_dir(&def.job_id);
         let mut manifest = Manifest::new(
             def.job_id.clone(),
@@ -72,6 +93,7 @@ impl StageRunner {
         stages: &mut Vec<Box<dyn Stage>>,
     ) -> Result<Manifest, StageError> {
         Self::validate_plan(def, stages)?;
+        Self::validate_inputs(def)?;
         let job_dir = self.job_dir(&def.job_id);
         let mut manifest = Manifest::load(&job_dir).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot load manifest: {e}"))

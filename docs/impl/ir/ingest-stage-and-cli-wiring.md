@@ -74,7 +74,10 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
   固定する(ライブラリ経路でも unpinned input は作れない。呼出側が
   指定したハッシュは保持される)。Ingest は manifest 上の固定値と
   実ファイルのハッシュを照合し、不一致は `input content changed`
-  で明示的失敗。読めない入力は Job 作成自体が io エラーになる
+  で明示的失敗。読めない入力は Job 作成自体が io エラーになる。
+  `StageRunner` も実行前に unpinned input を拒否し、IngestStage は
+  `source_sha256` が `None` の入力をスキップせず明示的に失敗させる
+  (defense in depth)
 - `--config` の読込・JSON parse 失敗は `{}` への暗黙
   フォールバックではなく明示的エラー(設定が無視されて
   Job が成功するのを防ぐ)

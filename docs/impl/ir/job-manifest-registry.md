@@ -71,6 +71,11 @@ task `docs/tasks/job-manifest-registry.md`、spec `docs/specs/analysis-job-model
   params にも `source_sha256` を記録し、manifest だけで入力
   バイト列を特定できる。Ingest 側は resume/再実行時に一致を検証する。
   呼び出し側が明示的に設定した `source_sha256` はそのまま保持する
+- `JobDefinition`/`JobInput` は serde round-trip のため public フィールドを
+  維持するが、`StageRunner::run`/`resume` は実行前に全入力の
+  `source_sha256` 必須性を検証する。struct literal で構築した
+  unpinned input は runner 入口で明示的に拒否されるため、
+  `create` 迂回経路でも不変性を破れない
 - SHA-256 実装は `al-core::hash` に置く(al-job が入力固定に使う
   ため al-media から移動。al-media は re-export で `sha256_hex` を
   公開)
