@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z0J6W0kR1ncPEkWbQgf"
 type: "task"
-status: "todo"
+status: "done"
 title: "タイムスタンプ源 trait と間隔・ドリフト・不連続観測"
 created: "2026-10-02"
 updated: "2026-10-02"
