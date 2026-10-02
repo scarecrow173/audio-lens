@@ -14,7 +14,9 @@ pub struct ArtifactRecord {
     pub artifact_id: ArtifactId,
     /// Free-form role label (e.g. `decoded_pcm`, `locate_result`).
     pub role: String,
-    /// Path relative to the job directory.
+    /// Path relative to the job directory. Empty for artifacts without
+    /// job-local storage — e.g. declared inputs, whose external location is
+    /// recorded in `params.source_path` instead.
     pub path: PathBuf,
     /// Stage that produced the artifact (`None` for declared inputs).
     pub produced_by: Option<StageKind>,
@@ -71,12 +73,19 @@ impl Manifest {
             .map(|input| ArtifactRecord {
                 artifact_id: ArtifactId::new(),
                 role: "declared_input".into(),
-                path: input.path.clone(),
+                // External inputs live outside the job directory, so the
+                // location goes to params rather than the job-relative
+                // `path` contract.
+                path: PathBuf::new(),
                 produced_by: None,
                 inputs: Vec::new(),
                 params: serde_json::json!({
                     "input_id": input.input_id,
                     "input_role": input.role,
+                    "source_path": input.path,
+                    "source_path_abs": std::path::absolute(&input.path)
+                        .ok()
+                        .map(|p| p.display().to_string()),
                 }),
             })
             .collect();
@@ -220,6 +229,10 @@ mod tests {
         let record = manifest.artifact(&id).unwrap();
         assert_eq!(record.role, "declared_input");
         assert_eq!(record.produced_by, None);
+        // External inputs keep their location in params, not in the
+        // job-relative path contract.
+        assert!(record.path.as_os_str().is_empty());
+        assert_eq!(record.params["source_path"].as_str(), Some("capture.mkv"));
     }
 
     #[test]
