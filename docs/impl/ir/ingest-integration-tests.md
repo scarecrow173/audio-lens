@@ -75,3 +75,17 @@ task `docs/tasks/ingest-integration-tests.md`、test-spec
 ## Follow-ups
 
 - 実コンテナ対応後は実ファイル golden test を `fixtures/` に追加
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Risks
+
+- なし

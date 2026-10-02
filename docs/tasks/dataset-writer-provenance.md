@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z888EftCjwJOLuS09K0"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "provenance レコードと dataset-writer"
 created: "2026-10-02"
 updated: "2026-10-02"

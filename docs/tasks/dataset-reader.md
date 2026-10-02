@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8896wbdQ95hRyjJY0y"
 type: "task"
-status: "todo"
+status: "done"
 title: "dataset-reader(manifest 経由参照)"
 created: "2026-10-02"
 updated: "2026-10-02"

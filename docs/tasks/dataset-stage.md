@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z889vFy9QDdh0EG6Nj4"
 type: "task"
-status: "todo"
+status: "done"
 title: "DatasetStage 実装と CLI 接続"
 created: "2026-10-02"
 updated: "2026-10-02"

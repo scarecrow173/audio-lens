@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z889WFC0CLXorGLm3bG"
 type: "task"
-status: "todo"
+status: "done"
 title: "dataset 結合テスト"
 created: "2026-10-02"
 updated: "2026-10-02"
