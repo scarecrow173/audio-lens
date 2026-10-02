@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kB6w92jCsle2QoqKe"
 type: "task"
-status: "todo"
+status: "done"
 title: "合議受理 + 失敗モードフラグ"
 created: "2026-10-02"
 updated: "2026-10-02"

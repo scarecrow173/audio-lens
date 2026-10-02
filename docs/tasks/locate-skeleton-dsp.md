@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kzGSMXKkTFTGi2GJ6"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "al-locate 骨格 + DSP プリミティブ + workspace 配線"
 created: "2026-10-02"
 updated: "2026-10-02"

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kAawdMoi8AxPYZjrB"
 type: "task"
-status: "todo"
+status: "done"
 title: "locate-methods 4手法 + 候補/証拠型"
 created: "2026-10-02"
 updated: "2026-10-02"

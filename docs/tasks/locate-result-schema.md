@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kAE3mkxbYycE0kq7l"
 type: "task"
-status: "todo"
+status: "done"
 title: "LocateResult スキーマ + AlignmentId 発行"
 created: "2026-10-02"
 updated: "2026-10-02"

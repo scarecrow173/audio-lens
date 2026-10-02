@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z8kIHPMPeuyRptsxAAF"
 type: "task"
-status: "todo"
+status: "in-progress"
 title: "mixer-fit: 最小二乗混合行列推定"
 created: "2026-10-02"
 updated: "2026-10-02"
