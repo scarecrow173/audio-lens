@@ -7,6 +7,45 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Source of a timestamp sequence for one clock.
+///
+/// Implementations wrap whatever produced the timestamps — a container
+/// demuxer, a synthetic generator, a replayed capture — so observation
+/// never depends on where the sequence came from.
+pub trait TimestampSource {
+    /// Which clock the timestamps belong to.
+    fn clock(&self) -> ClockKind;
+    /// Ticks per second of the timestamps.
+    fn timebase_hz(&self) -> u64;
+    /// The observed timestamps, in `timebase_hz` ticks.
+    fn timestamps(&self) -> &[i64];
+}
+
+/// An in-memory timestamp sequence (extracted PTS, synthetic series, ...).
+#[derive(Debug, Clone)]
+pub struct SequenceTimestamps {
+    /// Which clock the sequence belongs to.
+    pub clock: ClockKind,
+    /// Ticks per second.
+    pub timebase_hz: u64,
+    /// Timestamp sequence.
+    pub pts: Vec<i64>,
+}
+
+impl TimestampSource for SequenceTimestamps {
+    fn clock(&self) -> ClockKind {
+        self.clock
+    }
+
+    fn timebase_hz(&self) -> u64 {
+        self.timebase_hz
+    }
+
+    fn timestamps(&self) -> &[i64] {
+        &self.pts
+    }
+}
+
 /// Which clock a timestamp sequence belongs to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -60,8 +99,9 @@ pub struct TimingObservation {
     pub discontinuities: Vec<Discontinuity>,
     /// Indices where `pts[i] == pts[i-1]` (duplicate-frame candidates).
     pub duplicates: Vec<usize>,
-    /// Indices where the interval is at least twice the local median
-    /// (dropped-frame candidates).
+    /// Indices of *isolated* large intervals — at least twice the local
+    /// median while both neighbours stay near it. Sustained shifts (a VFR
+    /// section slowing down) are discontinuities, not per-frame drops.
     pub drop_candidates: Vec<usize>,
 }
 
@@ -72,6 +112,22 @@ fn median(values: &[i64]) -> i64 {
     let mut sorted = values.to_vec();
     sorted.sort_unstable();
     sorted[sorted.len() / 2]
+}
+
+/// Observe the timestamps produced by a [`TimestampSource`].
+///
+/// `nominal_interval_ticks` is optional reference information only — it is
+/// used to report drift and is never used to "fix" the series.
+pub fn observe_source(
+    source: &impl TimestampSource,
+    nominal_interval_ticks: Option<f64>,
+) -> TimingObservation {
+    observe_timing(
+        source.clock(),
+        source.timebase_hz(),
+        source.timestamps(),
+        nominal_interval_ticks,
+    )
 }
 
 /// Observe a timestamp sequence without assuming a frame rate.
@@ -100,10 +156,13 @@ pub fn observe_timing(
 
     // A discontinuity is an interval at least 2x the median, or negative/
     // zero when the median is positive. The median keeps VFR variation from
-    // triggering on itself.
+    // triggering on itself. A drop candidate additionally requires the
+    // interval to be isolated — both neighbours near the median — so a
+    // sustained VFR regime is not misread as dropped frames.
     let mut discontinuities = Vec::new();
     let mut duplicates = Vec::new();
     let mut drop_candidates = Vec::new();
+    let near_median = |interval: i64| interval <= med + med / 2;
     for (i, &interval) in intervals.iter().enumerate() {
         if interval == 0 {
             duplicates.push(i + 1);
@@ -113,7 +172,9 @@ pub fn observe_timing(
                 observed_ticks: interval,
                 reference_ticks: med,
             });
-            if interval >= med * 2 {
+            let isolated = (i == 0 || near_median(intervals[i - 1]))
+                && (i + 1 >= intervals.len() || near_median(intervals[i + 1]));
+            if interval >= med * 2 && isolated {
                 drop_candidates.push(i);
             }
         }
@@ -179,6 +240,33 @@ mod tests {
         assert_eq!(obs.discontinuities.len(), 1);
         assert_eq!(obs.discontinuities[0].interval_index, 14);
         assert_eq!(obs.drop_candidates, vec![14]);
+    }
+
+    #[test]
+    fn sustained_vfr_slowdown_is_not_a_drop() {
+        // CFR section followed by a sustained slower section (legit VFR):
+        // the regime change is a discontinuity but not dropped frames.
+        let mut pts: Vec<i64> = (0..40).map(|i| i * 1000).collect();
+        let mut t = *pts.last().unwrap();
+        for _ in 0..20 {
+            t += 2000;
+            pts.push(t);
+        }
+        let obs = observe_timing(ClockKind::Video, 90_000, &pts, None);
+        assert!(!obs.discontinuities.is_empty());
+        assert!(obs.drop_candidates.is_empty());
+    }
+
+    #[test]
+    fn timestamp_source_drives_observation() {
+        let source = SequenceTimestamps {
+            clock: ClockKind::Audio,
+            timebase_hz: 48_000,
+            pts: vec![0, 960, 1920],
+        };
+        let obs = observe_source(&source, None);
+        assert_eq!(obs.clock, ClockKind::Audio);
+        assert_eq!(obs.intervals, vec![960, 960]);
     }
 
     #[test]

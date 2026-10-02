@@ -14,5 +14,8 @@ pub use format::{MediaFormat, detect_format};
 pub use hash::sha256_hex;
 pub use metadata::{AudioMetadata, IntegrityObservation, MediaError, SampleFormat};
 pub use stage::IngestStage;
-pub use timing::{ClockKind, Discontinuity, IntervalStats, TimingObservation, observe_timing};
+pub use timing::{
+    ClockKind, Discontinuity, IntervalStats, SequenceTimestamps, TimestampSource,
+    TimingObservation, observe_source, observe_timing,
+};
 pub use wav::{DecodedAudio, decode_wav};

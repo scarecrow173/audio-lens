@@ -54,17 +54,22 @@ task `docs/tasks/timing-observation.md`、test-spec
 
 ### Changes
 
-- `timing.rs`: `ClockKind`(Audio/Video 個別保持)、`IntervalStats`、
-  `Discontinuity`、`TimingObservation`、`observe_timing()`
+- `timing.rs`: `TimestampSource` trait + `SequenceTimestamps`、
+  `ClockKind`(Audio/Video 個別保持)、`IntervalStats`、
+  `Discontinuity`、`TimingObservation`、`observe_timing()` /
+  `observe_source()`
 - 不連続判定は局所中央値(2x 以上または負の間隔)で、VFR の変動が
   誤検出にならない
+- drop 候補は「孤立した」大きな間隔のみに限定(両隣が中央値近傍)。
+  持続的な VFR 低下は不連続として記録するが drop にはしない
 - drift は nominal interval 指定時のみ ppm で報告(生系列は変更しない)
 
 ### Decisions During Implementation
 
-- task メモの `TimestampSource` trait は導入せず、スライス入力の純粋
-  関数に留めた(KISS)。実コンテナ接続時にソース側が系列を供給する形を
-  想定。必要になれば trait 化する
+- `TimestampSource` trait を導入し、コンテナ抽出・合成系列の双方が
+  同一の観測経路に乗る形にした(plan/task の記載どおり)
+- `observe_timing()` はスライス入力の純粋関数として残し、
+  `observe_source()` が trait 経由の薄い入口になる
 
 ## Validation
 
