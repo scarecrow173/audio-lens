@@ -61,10 +61,13 @@ pub fn summary_body(
     let (mut accepted, mut rejected) = (0u64, 0u64);
     if let Ok(t) = reader.open_table("locate", "summary") {
         let n = t.row_count();
-        if n > 0 {
-            // `status` column index 3 per the materialize schema.
-            for row in t.read_range(0, n, Some(&[3]))? {
-                if let Some(al_dataset::table::Cell::Str(s)) = row.first() {
+        // `read_range` is column-major: one column of `n` cells.
+        let status_col = t.schema().iter().position(|c| c.name == "status");
+        if n > 0
+            && let Some(col) = status_col
+        {
+            for cell in t.read_range(0, n, Some(&[col]))?.into_iter().flatten() {
+                if let al_dataset::table::Cell::Str(s) = cell {
                     match s.as_str() {
                         "accepted" => accepted += 1,
                         _ => rejected += 1,
