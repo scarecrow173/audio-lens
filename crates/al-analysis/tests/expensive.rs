@@ -242,6 +242,64 @@ fn manual_ranges_analyze_without_any_candidate() {
 }
 
 #[test]
+fn non_valid_candidate_region_records_invalid_observations() {
+    // Digital silence: `level.integrated_dbfs` (-240 dBFS) trips the
+    // silence rule with `SilenceInsufficientEnergy` — the only
+    // candidate is non-`Valid`, so the region must persist invalid
+    // observations (null scalars) rather than computed numbers. The
+    // zero/stuck-run and noise-floor rules are raised out of range
+    // so no `Valid` trigger fires alongside.
+    let cap = vec![0.0f64; 24_000];
+    let mut fx = fixture(&cap);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({
+        "analysis": {"events": {
+            "zero_run_samples": 1e9,
+            "stuck_run_samples": 1e9,
+            "noise_floor_dbfs": 1e9
+        }}
+    });
+
+    let cheap_recs = al_analysis::stage::CheapAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("cheap stage");
+    for rec in cheap_recs {
+        fx.manifest.register_artifact(rec);
+    }
+
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("expensive stage");
+
+    let exp = recs
+        .iter()
+        .find(|r| r.role == "expensive_features")
+        .expect("non-valid candidate still produces a region");
+    let body: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&exp.path)).expect("expensive json"))
+            .unwrap();
+    let records = body["records"].as_array().unwrap();
+    assert!(!records.is_empty());
+    for r in records {
+        assert_ne!(
+            r["validity"].as_str().unwrap(),
+            "valid",
+            "{} claimed Valid",
+            r["feature_id"]
+        );
+        assert!(
+            r["value"]["scalar"].is_null(),
+            "{} emitted a finite number: {}",
+            r["feature_id"],
+            r["value"]
+        );
+        assert!(r["invalid_reason"].is_string());
+    }
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
 fn always_run_analyzes_full_input_without_reference_stage() {
     // No locate/reference stages ran: cheap-only candidates must
     // still drive the stage.

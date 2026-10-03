@@ -44,6 +44,7 @@ impl Stage for CheapAnalysisStage {
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
         let err = |e: io::Error| StageError::new(StageKind::CheapAnalysis, e.to_string());
         let cfg = CheapConfig::from_job(ctx.config);
+        let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let mut records = Vec::new();
 
@@ -91,7 +92,7 @@ impl Stage for CheapAnalysisStage {
 
             let out = cheap::analyze_input(&dec, &cfg);
             for tensor in &out.tensors {
-                write_tensor(&mut writer, tensor, &dec.input_id, &dec).map_err(err)?;
+                write_tensor(&mut writer, tensor, prov_dec(&dec), chunk_bytes).map_err(err)?;
             }
             writer
                 .write_json(
@@ -139,6 +140,7 @@ impl Stage for ReferenceAnalysisStage {
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
         let err = |e: io::Error| StageError::new(StageKind::ReferenceAnalysis, e.to_string());
         let cfg = ReferenceConfig::from_job(ctx.config);
+        let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let job_dir = ctx.registry.job_dir();
         let mut records = Vec::new();
@@ -228,9 +230,26 @@ impl Stage for ReferenceAnalysisStage {
                 }
             };
 
-            let out = reference::analyze_pair(&pair, &aligned, upstream, &cfg);
+            let out =
+                reference::analyze_pair(&pair, &result.alignment_id, &aligned, upstream, &cfg);
+            let tensor_prov = al_dataset::provenance::Provenance {
+                input_id: result.source_input_id.clone(),
+                algorithm_id: "reference.v1".into(),
+                algorithm_version: "1".into(),
+                params: serde_json::json!({
+                    "capture_input_id": result.capture_input_id,
+                }),
+                alignment_id: Some(result.alignment_id.to_string()),
+                parents: cap_dec
+                    .artifact_ids
+                    .iter()
+                    .chain(src_dec.artifact_ids.iter())
+                    .map(|a| a.as_str().to_string())
+                    .chain(std::iter::once(artifact.artifact_id.as_str().to_string()))
+                    .collect(),
+            };
             for tensor in &out.tensors {
-                write_tensor(&mut writer, tensor, &pair, &cap_dec).map_err(err)?;
+                write_tensor(&mut writer, tensor, tensor_prov.clone(), chunk_bytes).map_err(err)?;
             }
             for audio in &out.residual_audio {
                 writer
@@ -484,13 +503,44 @@ impl Stage for ExpensiveAnalysisStage {
     }
 }
 
+/// Default persisted-tensor chunk budget (~4 MiB), overridable via
+/// `config.analysis.dataset.tensor_chunk_bytes`. Large intermediates
+/// (STFT/PSD frames × bins) must stay range-readable without loading
+/// the whole array, so one chunk never exceeds the budget.
+const DEFAULT_TENSOR_CHUNK_BYTES: u64 = 4 * 1024 * 1024;
+
+/// Byte budget for one persisted tensor chunk.
+fn tensor_chunk_bytes(config: &serde_json::Value) -> u64 {
+    config
+        .get("analysis")
+        .and_then(|a| a.get("dataset"))
+        .and_then(|d| d.get("tensor_chunk_bytes"))
+        .and_then(|v| v.as_u64())
+        .unwrap_or(DEFAULT_TENSOR_CHUNK_BYTES)
+        // Below one f64 element no grid is possible.
+        .max(8)
+}
+
+/// Chunk grid for a `[time, bins]` tensor: whole bin rows grouped so
+/// one chunk stays under `bytes`, splitting along the time axis.
+/// A single row wider than the budget is column-split instead so the
+/// cap still holds.
+fn tensor_chunk_shape(shape: [u64; 2], bytes: u64) -> [u64; 2] {
+    let budget = (bytes / 8).max(1);
+    let cols = shape[1].min(budget).max(1);
+    let rows = (budget / cols).clamp(1, shape[0].max(1));
+    [rows, cols]
+}
+
 /// Split a tensor's `intermediate/...`, `features/cheap/...`, or
-/// `residual/...` path into role/name and persist it as one chunk.
+/// `residual/...` path into role/name and persist it chunked along
+/// the time axis under `provenance` (producer algorithm + alignment
+/// + parents supplied by the calling stage).
 fn write_tensor(
     writer: &mut DatasetWriter,
     tensor: &cheap::NamedTensor,
-    input_id: &str,
-    dec: &al_locate::decode::DecodedInput,
+    provenance: al_dataset::provenance::Provenance,
+    chunk_bytes: u64,
 ) -> io::Result<()> {
     let (role, name) = ["intermediate/", "features/cheap/", "residual/"]
         .iter()
@@ -509,30 +559,26 @@ fn write_tensor(
     if tensor.data.is_empty() {
         return Ok(());
     }
-    let chunk = al_dataset::writer::TensorChunk {
-        coords: vec![0, 0],
-        data: tensor.data.clone(),
-    };
-    // Single whole-tensor chunk — the data covers the full extent.
-    writer.write_tensor(
-        role,
-        name,
-        &tensor.shape,
-        &tensor.shape,
-        &[chunk],
-        al_dataset::provenance::Provenance {
-            input_id: input_id.to_string(),
-            algorithm_id: "cheap.v1".into(),
-            algorithm_version: "1".into(),
-            params: serde_json::json!({}),
-            alignment_id: None,
-            parents: dec
-                .artifact_ids
-                .iter()
-                .map(|a| a.as_str().to_string())
-                .collect(),
-        },
-    )
+    let [rows, cols] = tensor.shape;
+    let chunk_shape = tensor_chunk_shape(tensor.shape, chunk_bytes);
+    let (r_step, c_step) = (chunk_shape[0], chunk_shape[1]);
+    let mut chunks = Vec::new();
+    for r0 in (0..rows).step_by(r_step as usize) {
+        for c0 in (0..cols).step_by(c_step as usize) {
+            let r_end = (r0 + r_step).min(rows);
+            let c_end = (c0 + c_step).min(cols);
+            let mut data = Vec::with_capacity(((r_end - r0) * (c_end - c0)) as usize);
+            for r in r0..r_end {
+                let lo = (r * cols + c0) as usize;
+                data.extend_from_slice(&tensor.data[lo..lo + (c_end - c0) as usize]);
+            }
+            chunks.push(al_dataset::writer::TensorChunk {
+                coords: vec![r0 / r_step, c0 / c_step],
+                data,
+            });
+        }
+    }
+    writer.write_tensor(role, name, &tensor.shape, &chunk_shape, &chunks, provenance)
 }
 
 fn prov(
@@ -583,5 +629,104 @@ fn artifact(ctx: &StageContext<'_>, path: &str, input: &al_job::job::JobInput) -
         produced_by: Some(StageKind::CheapAnalysis),
         inputs,
         params: serde_json::json!({}),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn noise(n: usize, seed: u64) -> Vec<f64> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                ((s >> 33) as f64 / (1u64 << 31) as f64) * 2.0 - 1.0
+            })
+            .collect()
+    }
+
+    #[test]
+    fn chunk_shape_splits_the_time_axis_under_the_budget() {
+        // 16 KiB budget = 2048 f64 elements → 4 rows of 512 bins.
+        assert_eq!(tensor_chunk_shape([100, 512], 16 * 1024), [4, 512]);
+        // Budget above the whole tensor → a single chunk.
+        assert_eq!(
+            tensor_chunk_shape([61, 2048], DEFAULT_TENSOR_CHUNK_BYTES),
+            [61, 2048]
+        );
+        // A row wider than the budget is column-split so the cap
+        // still holds.
+        let shape = tensor_chunk_shape([8, 1_000_000], 16 * 1024);
+        assert_eq!(shape, [1, 2048]);
+        // Degenerate budgets still yield a legal grid.
+        assert_eq!(tensor_chunk_shape([3, 7], 8), [1, 1]);
+    }
+
+    #[test]
+    fn persisted_stft_reads_partially_across_chunk_boundaries() {
+        // A real STFT persisted under a small budget must become
+        // multiple chunks, and a range read crossing chunk boundaries
+        // must return exact values without the whole array.
+        let rate = 48_000u32;
+        let m = crate::stft::stft(&noise(1 << 15, 0x5eed), 2048, 512, rate);
+        let frames = m.frames() as u64;
+        let cols = m.fft_size as u64;
+        let data: Vec<f64> = m.re.iter().flatten().copied().collect();
+        let tensor = cheap::NamedTensor {
+            path: "intermediate/in/stft_re".into(),
+            shape: [frames, cols],
+            data: data.clone(),
+        };
+
+        let dir = std::env::temp_dir().join(format!("al-stage-{}", al_core::JobId::new()));
+        let mut writer = DatasetWriter::create(&dir, Vec::new(), serde_json::json!({})).unwrap();
+        let prov = al_dataset::provenance::Provenance {
+            input_id: "in".into(),
+            algorithm_id: "reference.v1".into(),
+            algorithm_version: "1".into(),
+            params: serde_json::json!({}),
+            alignment_id: Some("aln-x".into()),
+            parents: vec!["ART-parent".into()],
+        };
+        // 64 KiB budget = 8192 elements → 4 frames per 2048-bin chunk.
+        write_tensor(&mut writer, &tensor, prov, 64 * 1024).unwrap();
+        writer.finish().unwrap();
+
+        let reader = al_dataset::reader::DatasetReader::open(&dir).unwrap();
+        let t = reader.open_tensor("intermediate", "in/stft_re").unwrap();
+        assert_eq!(t.meta().chunk_shape, vec![4, 2048]);
+        let chunk_files = std::fs::read_dir(dir.join("intermediate/in/stft_re/chunks"))
+            .unwrap()
+            .count();
+        assert!(chunk_files > 1, "expected multiple chunks");
+
+        // Caller-supplied provenance lands on the manifest artifact.
+        let artifact = reader
+            .manifest()
+            .artifacts
+            .iter()
+            .find(|a| a.path == "intermediate/in/stft_re")
+            .expect("tensor artifact registered");
+        assert_eq!(artifact.provenance.algorithm_id, "reference.v1");
+        assert_eq!(artifact.provenance.alignment_id.as_deref(), Some("aln-x"));
+
+        // Rows 3..9 span chunks 0..2 (4 rows per chunk).
+        let (vals, shape) = reader
+            .read_tensor("intermediate", "in/stft_re", &[[3, 9], [0, cols]])
+            .unwrap();
+        assert_eq!(shape, vec![6, cols]);
+        let expect: Vec<f64> = (3..9)
+            .flat_map(|r| {
+                data[(r * cols) as usize..((r + 1) * cols) as usize]
+                    .iter()
+                    .copied()
+            })
+            .collect();
+        assert_eq!(vals, expect);
+
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

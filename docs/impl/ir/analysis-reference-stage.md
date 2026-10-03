@@ -99,6 +99,19 @@ task `docs/tasks/analysis-reference-stage.md`、plan
   統一パスとした。ステージは abort しない
 - R3 の FIR は Welch H(`E[conj(X)·Y]/E[|X|²]`)の irfft で、
   畳み込み長は 4096 tap に制限
+- レビュー修正(確認済み P1 相当):
+  - FeatureRecord.alignment_id が dataset path stem
+    (`<src>__<cap>`)を持ち、artifact provenance の
+    `result.alignment_id` と食い違っていた → `analyze_pair`
+    が locate 発行の `AlignmentId` を受け取り全レコードに
+    付与する(ペア名はパス命名専用に分離)
+  - 共有 `write_tensor` が provenance を `cheap.v1` /
+    `alignment_id=None` に固定していた → producer の
+    algorithm/alignment/parents を引数化し、reference 系
+    tensor は `reference.v1` + 当該 alignment を記録する
+  - `chunk_shape == shape` で部分読み出しが全体ロードに
+    なっていた → 時間軸(行)方向に ~4 MiB 上限で分割する
+    (`config.analysis.dataset.tensor_chunk_bytes` で上書き可)
 
 ## Related Experiments
 
