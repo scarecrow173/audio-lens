@@ -385,3 +385,72 @@ fn export_package_is_portable_deterministic_and_manifested() {
 
     fs::remove_dir_all(&fx.dir).ok();
 }
+
+#[test]
+fn export_name_rejects_unsafe_directory_names() {
+    let fx = fixture();
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+
+    // Sentinel under the job dir: `../keep` would reach it through
+    // the unvalidated join + remove_dir_all.
+    let sentinel = fx.dir.join("keep").join("marker.txt");
+    fs::create_dir_all(sentinel.parent().unwrap()).unwrap();
+    fs::write(&sentinel, b"keep").unwrap();
+
+    let mut names = vec!["../keep", "..", ".", "a/b", ""];
+    #[cfg(windows)]
+    names.extend(["a\\b", "C:/keep", "C:\\keep", "\\\\server\\share"]);
+    #[cfg(not(windows))]
+    names.push("/keep");
+    for name in names {
+        let cfg = al_viz::package::ExportConfig {
+            copy_media: false,
+            name: name.into(),
+        };
+        let err = al_viz::package::build(&fx.dir, &fx.manifest, &cfg)
+            .expect_err(&format!("export name {name:?} must be rejected"));
+        assert_eq!(
+            err.kind(),
+            std::io::ErrorKind::InvalidData,
+            "export name {name:?} produced wrong error kind"
+        );
+    }
+    assert!(sentinel.exists(), "traversal deleted the sentinel file");
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn export_shrinks_absolute_paths_inside_config() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let dict = fx.dir.join("cfg").join("dict.bin");
+    let config = serde_json::json!({
+        "analysis": {"dict": dict.to_string_lossy()},
+        "extra": {"refs": ["plain", dict.to_string_lossy()]},
+    });
+    seed_dataset(&fx, &config);
+    al_viz::stage::VisualizationStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("visualization stage");
+    al_viz::stage::ExportStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("export stage");
+
+    let pkg_manifest: serde_json::Value = serde_json::from_slice(
+        &fs::read(fx.dir.join("export/analysis/analysis/manifest.json")).unwrap(),
+    )
+    .unwrap();
+    // Absolute config paths travel as file-name references; the
+    // original host path must not survive anywhere in config.
+    assert_eq!(pkg_manifest["config"]["analysis"]["dict"], "dict.bin");
+    assert_eq!(pkg_manifest["config"]["extra"]["refs"][1], "dict.bin");
+    assert_eq!(pkg_manifest["config"]["extra"]["refs"][0], "plain");
+    let body = fs::read_to_string(fx.dir.join("export/analysis/analysis/manifest.json")).unwrap();
+    let dir_fwd = fx.dir.to_string_lossy().replace('\\', "/");
+    let dir_back = fx.dir.to_string_lossy().replace('/', "\\");
+    assert!(!body.contains(&dir_fwd) && !body.contains(&dir_back));
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
