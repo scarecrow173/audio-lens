@@ -388,6 +388,69 @@ fn export_package_is_portable_deterministic_and_manifested() {
 }
 
 #[test]
+fn export_copy_media_separates_same_named_inputs() {
+    // Two inputs that share a basename but differ in content must
+    // not collapse into a single media/ file.
+    let dir = std::env::temp_dir().join(format!("al-viz-test-{}", JobId::new()));
+    fs::create_dir_all(dir.join("a")).unwrap();
+    fs::create_dir_all(dir.join("b")).unwrap();
+    fs::write(dir.join("a/cap.wav"), b"media-A").unwrap();
+    fs::write(dir.join("b/cap.wav"), b"media-B-differs").unwrap();
+
+    let mut cap_a = input(InputRole::CaptureBug, dir.join("a/cap.wav"));
+    cap_a.source_sha256 = Some(al_core::sha256_hex(b"media-A"));
+    let mut cap_b = input(InputRole::CaptureReference, dir.join("b/cap.wav"));
+    cap_b.source_sha256 = Some(al_core::sha256_hex(b"media-B-differs"));
+    let id_a = cap_a.input_id.to_string();
+    let id_b = cap_b.input_id.to_string();
+    let manifest = Manifest::new(
+        JobId::new(),
+        vec![cap_a, cap_b],
+        serde_json::json!({}),
+        &[StageKind::Dataset, StageKind::Export],
+    );
+
+    DatasetWriter::open_or_create(
+        &dir.join("analysis"),
+        provenance::input_references(&manifest).unwrap(),
+        serde_json::json!({}),
+    )
+    .unwrap()
+    .finish()
+    .unwrap();
+
+    let cfg = al_viz::package::ExportConfig {
+        copy_media: true,
+        name: "analysis".into(),
+    };
+    let (pkg, files) = al_viz::package::build(&dir, &manifest, &cfg).expect("export build");
+
+    // Each input is copied under its own media/<input_id>/ dir.
+    let rel_a = format!("media/{id_a}/cap.wav");
+    let rel_b = format!("media/{id_b}/cap.wav");
+    assert_eq!(fs::read(pkg.join(&rel_a)).unwrap(), b"media-A");
+    assert_eq!(fs::read(pkg.join(&rel_b)).unwrap(), b"media-B-differs");
+    assert!(files.contains(&rel_a) && files.contains(&rel_b));
+
+    // The export manifest records each input's real package path,
+    // so every recorded sha256 matches the file it points at.
+    let export_manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(pkg.join("export_manifest.json")).unwrap()).unwrap();
+    let inputs = export_manifest["inputs"].as_array().unwrap();
+    for (id, rel) in [(id_a, rel_a), (id_b, rel_b)] {
+        let rec = inputs
+            .iter()
+            .find(|i| i["input_id"].as_str() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("missing export record for {id}"));
+        assert_eq!(rec["media_path"].as_str(), Some(rel.as_str()));
+        let copied = al_core::sha256_hex(&fs::read(pkg.join(&rel)).unwrap());
+        assert_eq!(rec["sha256"].as_str().unwrap(), copied.as_str());
+    }
+
+    fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn export_name_rejects_unsafe_directory_names() {
     let fx = fixture();
     let config = serde_json::json!({});

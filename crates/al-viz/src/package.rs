@@ -89,6 +89,13 @@ fn base_name(s: &str) -> &str {
     s.rsplit(['/', '\\']).find(|p| !p.is_empty()).unwrap_or(s)
 }
 
+/// Package-relative location of one input's copied media:
+/// `media/<input_id>/<file_name>`. The input id scopes each file so
+/// inputs that share a basename can never overwrite one another.
+fn media_rel_path(input_id: &str, file_name: &str) -> String {
+    format!("media/{input_id}/{file_name}")
+}
+
 /// Shrink absolute-path strings anywhere inside `v` down to
 /// file-name references, so the copied job config embeds no
 /// host-specific locations.
@@ -158,10 +165,14 @@ pub fn build(
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| source_path.clone());
             input["source_path"] = serde_json::json!(file_name);
+            let media_path = cfg.copy_media.then(|| {
+                media_rel_path(input["input_id"].as_str().unwrap_or_default(), &file_name)
+            });
             input_records.push(serde_json::json!({
                 "input_id": input["input_id"],
                 "role": input["role"],
                 "file_name": file_name,
+                "media_path": media_path,
                 "sha256": input["source_sha256"],
             }));
         }
@@ -169,17 +180,20 @@ pub fn build(
     shrink_abs_paths(&mut ds_manifest["config"]);
     fs::write(&manifest_path, serde_json::to_string_pretty(&ds_manifest)?)?;
 
-    // 3. Optional media copy.
+    // 3. Optional media copy: each input lands under its own
+    //    `media/<input_id>/` directory — the same package-relative
+    //    path recorded in the export manifest — so two inputs with
+    //    the same file name keep distinct copies and each recorded
+    //    sha256 matches the file it points at.
     if cfg.copy_media {
-        let media_dir = dest.join("media");
-        fs::create_dir_all(&media_dir)?;
         for input in &manifest.inputs {
             let file_name = input
                 .path
                 .file_name()
                 .map(|n| n.to_string_lossy().to_string())
                 .ok_or_else(|| invalid(format!("input {} has no file name", input.input_id)))?;
-            let target = media_dir.join(file_name);
+            let target = dest.join(media_rel_path(&input.input_id.to_string(), &file_name));
+            fs::create_dir_all(target.parent().unwrap())?;
             fs::copy(&input.path, &target).map_err(|e| {
                 invalid(format!(
                     "copy_media requested but {} is unreadable: {e}",
