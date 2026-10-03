@@ -7,6 +7,7 @@
 
 pub mod cheap;
 pub mod records;
+pub mod reference;
 pub mod session;
 pub mod stage;
 pub mod stft;

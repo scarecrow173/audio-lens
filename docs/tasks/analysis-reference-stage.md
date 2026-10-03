@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nvusj4lsGXWZBzU0k"
 type: "task"
-status: "todo"
+status: "done"
 title: "ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3"
 created: "2026-10-02"
 updated: "2026-10-02"
