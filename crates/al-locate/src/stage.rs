@@ -583,24 +583,22 @@ impl Stage for LocateStage {
                     // deviations surface as real segment rates.
                     let mut occurrence_positions = vec![primary];
                     occurrence_positions.extend(&occurrences);
+                    // Sorted order so each occurrence's midpoint cell
+                    // covers real capture regions — the primary can
+                    // land anywhere in the sorted list.
+                    occurrence_positions.sort_unstable();
                     let body_len = source_len.max(1);
                     let loops = identify_loop_occurrences(&occurrence_positions, body_len, primary);
                     let min_index = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
-                    // A source long enough to split into windows gets
-                    // one anchor per window, so drift, jitter, skips,
-                    // gaps and resumes inside a single occurrence
-                    // stay observable. Each occurrence owns the
-                    // capture region between the midpoints to its
-                    // neighbours; an occurrence is only real when the
-                    // body start window matches inside its region —
-                    // secondary correlation peaks are not replays.
-                    // With one verified occurrence the mapping is
-                    // tracked in plain source coordinates; several
-                    // verified occurrences are real passes, so their
-                    // windows unroll onto the pass grid.
+                    // An occurrence is only real when the body start
+                    // window matches at its own position (within
+                    // position tolerance); secondary correlation
+                    // peaks are not replays. Unverified candidates
+                    // are dropped before the pass grid and the
+                    // reported occurrences are built.
                     let cap_n = capture.channel_samples[0].len();
-                    let positions: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
-                    let cell_of = |i: usize| -> (usize, usize) {
+                    let detected: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
+                    let cell_of = |positions: &[u64], i: usize| -> (usize, usize) {
                         let lo = if i == 0 {
                             0
                         } else {
@@ -613,29 +611,52 @@ impl Stage for LocateStage {
                         };
                         (lo, hi)
                     };
-                    let window = self.config.anchor_window as usize;
+                    // The verification template is the body start —
+                    // clamped to the body so sources shorter than the
+                    // anchor window still verify whole-body replays.
+                    let window =
+                        (self.config.anchor_window as usize).min(source.channel_samples[0].len());
+                    let tol = tolerance as usize;
                     let verified: Vec<usize> = (0..loops.len())
                         .filter(|&i| {
-                            positions[i] == primary || {
-                                let (lo, hi) = cell_of(i);
+                            detected[i] == primary || {
+                                let pos = detected[i] as usize;
+                                let lo = pos.saturating_sub(tol);
+                                let hi = (pos + window + tol).min(cap_n);
                                 self.best_window_match(source, &capture, 0, window, lo, hi)
                                     .is_some()
                             }
                         })
                         .collect();
-                    let mut anchors = if verified.len() <= 1 {
+                    let loops: Vec<_> = verified.iter().map(|&i| loops[i].clone()).collect();
+                    let positions: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
+                    // Reported occurrences are verified replays only
+                    // (every position but the primary).
+                    occurrences = positions
+                        .iter()
+                        .copied()
+                        .filter(|&p| p != primary)
+                        .collect();
+                    derived["occurrences"] = serde_json::json!(occurrences);
+
+                    // A source long enough to split into windows gets
+                    // one anchor per window, so drift, jitter, skips,
+                    // gaps and resumes inside a single occurrence
+                    // stay observable. With one verified occurrence
+                    // the mapping is tracked in plain source
+                    // coordinates; several verified occurrences are
+                    // real passes, so their windows unroll onto the
+                    // pass grid.
+                    let mut anchors = if loops.len() <= 1 {
                         self.window_anchors_in(source, &capture, 0, cap_n, 0)
                     } else {
-                        let min_v = verified
+                        let min_v = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
+                        loops
                             .iter()
-                            .map(|&i| loops[i].loop_index)
-                            .min()
-                            .unwrap_or(0);
-                        verified
-                            .iter()
-                            .flat_map(|&i| {
-                                let base = ((loops[i].loop_index - min_v) * body_len as i64) as u64;
-                                let (lo, hi) = cell_of(i);
+                            .enumerate()
+                            .flat_map(|(i, o)| {
+                                let base = ((o.loop_index - min_v) * body_len as i64) as u64;
+                                let (lo, hi) = cell_of(&positions, i);
                                 self.window_anchors_in(source, &capture, lo, hi, base)
                             })
                             .collect()
