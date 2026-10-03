@@ -24,7 +24,10 @@ pub enum ChannelSelector {
 }
 
 /// Where the measured payload lives.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+///
+/// JSON has no NaN literal: invalid measurements persist
+/// `{"scalar": null}` and deserialize back to `f64::NAN`.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Value {
     /// A scalar value held directly in the record.
@@ -37,6 +40,24 @@ pub enum Value {
         /// Per-dimension `[start, end)` coordinates.
         region: Vec<[u64; 2]>,
     },
+}
+
+impl<'de> Deserialize<'de> for Value {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "snake_case")]
+        enum Repr {
+            Scalar(Option<f64>),
+            Tensor {
+                array: String,
+                region: Vec<[u64; 2]>,
+            },
+        }
+        match Repr::deserialize(deserializer)? {
+            Repr::Scalar(v) => Ok(Value::Scalar(v.unwrap_or(f64::NAN))),
+            Repr::Tensor { array, region } => Ok(Value::Tensor { array, region }),
+        }
+    }
 }
 
 /// Analysis resolution parameters.
