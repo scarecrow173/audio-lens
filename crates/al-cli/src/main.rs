@@ -31,10 +31,11 @@ CONFIG:
                  Defaults to the dictionary bundled with the binary.
 
 NOTE:
-  The ingest (WAV/PCM), locate (source localization), and dataset
-  (analysis manifest) stages are implemented. The analysis,
-  visualization, and export stages are stubs that emit marker
-  artifacts; real stages are added by later plans.
+  The ingest (WAV/PCM), locate (source localization), cheap analysis
+  (always-on observations), and dataset (analysis manifest) stages are
+  implemented. The reference/expensive analysis, visualization, and
+  export stages are stubs that emit marker artifacts; real stages are
+  added by later plans.
 ";
 
 /// Foundation stub stage: emits one marker artifact per run so the runner,
@@ -117,6 +118,9 @@ fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Sta
     }
     if kind == StageKind::Locate {
         return Ok(Box::new(LocateStage::new()));
+    }
+    if kind == StageKind::CheapAnalysis {
+        return Ok(Box::new(al_analysis::stage::CheapAnalysisStage::new()));
     }
     if kind == StageKind::Dataset {
         return Ok(Box::new(DatasetStage::new()));
