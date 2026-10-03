@@ -107,3 +107,13 @@ task `docs/tasks/ingest-stage.md`、design `ingest-av` に従う。
 ## Follow-ups
 
 - 実コンテナパーサ追加時に `detect_format` / `ingest_input` の分岐を拡張
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし

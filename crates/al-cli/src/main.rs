@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use al_core::{InputRole, JobId, StageKind};
+use al_dataset::DatasetStage;
 use al_job::job::{JobDefinition, JobInput};
 use al_job::manifest::{ArtifactRecord, Manifest};
 use al_job::runner::StageRunner;
@@ -29,8 +30,9 @@ CONFIG:
                  Defaults to the dictionary bundled with the binary.
 
 NOTE:
-  The ingest stage is implemented (WAV/PCM). All other stages are stubs
-  that emit marker artifacts; real stages are added by later plans.
+  The ingest (WAV/PCM) and dataset (analysis manifest) stages are
+  implemented. All other stages are stubs that emit marker artifacts;
+  real stages are added by later plans.
 ";
 
 /// Foundation stub stage: emits one marker artifact per run so the runner,
@@ -110,6 +112,9 @@ fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Sta
             IngestStage::with_dictionary(al_media::Dictionary::embedded())
         };
         return Ok(Box::new(stage));
+    }
+    if kind == StageKind::Dataset {
+        return Ok(Box::new(DatasetStage::new()));
     }
     Ok(Box::new(StubStage { kind }))
 }

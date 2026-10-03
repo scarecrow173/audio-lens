@@ -90,3 +90,17 @@ task `docs/tasks/wav-decode.md`、test-spec `ingest-wav-decode` に従う。
 ## Follow-ups
 
 - 実コンテナ(MKV/MP4)の対応は別プラン
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Risks
+
+- なし

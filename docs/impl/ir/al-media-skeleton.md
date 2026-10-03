@@ -72,3 +72,17 @@ task `docs/tasks/media-skeleton.md`、plan `implement-ingest-av` に従う。
 ## Follow-ups
 
 - WAV デコーダ / timing / dictionary / IngestStage は後続タスクで実装
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Risks
+
+- なし
