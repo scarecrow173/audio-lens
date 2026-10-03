@@ -21,6 +21,10 @@ fn read_full(reader: &DatasetReader, role: &str, name: &str) -> io::Result<(Vec<
     Ok((shape, data))
 }
 
+fn invalid(msg: impl Into<String>) -> io::Error {
+    io::Error::new(io::ErrorKind::InvalidData, msg.into())
+}
+
 fn cell_str(c: &Cell) -> Option<String> {
     match c {
         Cell::Str(s) => Some(s.clone()),
@@ -247,28 +251,47 @@ pub fn events_view(reader: &DatasetReader) -> io::Result<Option<JsonProduct>> {
             body: serde_json::json!({"markers": []}),
         }));
     }
-    let data = table.read_range(0, rows, None)?;
-    let mut markers = Vec::with_capacity(data.len());
-    for row in &data {
-        let s = |i: usize| row.get(i).and_then(cell_str);
-        let f = |i: usize| row.get(i).and_then(cell_f64);
+    // `read_range` is column-major: cols[col][row]. Resolve fields by
+    // column name so a schema reorder never misaligns the markers.
+    let cols = table.read_range(0, rows, None)?;
+    let schema = table.schema();
+    let idx = |name: &str| {
+        schema
+            .iter()
+            .position(|c| c.name == name)
+            .ok_or_else(|| invalid(format!("events table missing column {name}")))
+    };
+    let s = |i: usize, name: &str| -> io::Result<Option<String>> {
+        Ok(cols
+            .get(idx(name)?)
+            .and_then(|c| c.get(i))
+            .and_then(cell_str))
+    };
+    let f = |i: usize, name: &str| -> io::Result<Option<f64>> {
+        Ok(cols
+            .get(idx(name)?)
+            .and_then(|c| c.get(i))
+            .and_then(cell_f64))
+    };
+    let mut markers = Vec::with_capacity(rows as usize);
+    for i in 0..rows as usize {
         markers.push(serde_json::json!({
-            "event_id": s(0),
-            "kind": s(1),
-            "input_id": s(2),
-            "start_s": f(3),
-            "end_s": f(4),
-            "strength": f(5),
-            "confidence": s(6),
-            "validity": s(7),
-            "source_feature": s(8),
-            "freq_lo_hz": f(9),
-            "freq_hi_hz": f(10),
-            "channels": s(11),
-            "algorithm_id": s(12),
-            "algorithm_version": s(13),
-            "evidence": s(14),
-            "params": s(15),
+            "event_id": s(i, "event_id")?,
+            "kind": s(i, "kind")?,
+            "input_id": s(i, "input_id")?,
+            "start_s": f(i, "start_s")?,
+            "end_s": f(i, "end_s")?,
+            "strength": f(i, "strength")?,
+            "confidence": s(i, "confidence")?,
+            "validity": s(i, "validity")?,
+            "source_feature": s(i, "source_feature")?,
+            "freq_lo_hz": f(i, "freq_lo_hz")?,
+            "freq_hi_hz": f(i, "freq_hi_hz")?,
+            "channels": s(i, "channels")?,
+            "algorithm_id": s(i, "algorithm_id")?,
+            "algorithm_version": s(i, "algorithm_version")?,
+            "evidence": s(i, "evidence")?,
+            "params": s(i, "params")?,
         }));
     }
     Ok(Some(JsonProduct {
