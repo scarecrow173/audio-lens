@@ -19,8 +19,8 @@ use al_job::stage::{Stage, StageContext, StageError};
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
 use crate::decode::{DecodedInput, decode_input};
-use crate::dsp;
-use crate::methods::default_methods;
+use crate::dsp::ncc;
+use crate::methods::{default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
 use crate::residual::residual_search;
 use crate::result::{LocateResult, SampleRange};
@@ -35,10 +35,52 @@ pub struct LocateConfig {
     /// Ridge parameter for mixer fitting.
     #[serde(default = "default_ridge")]
     pub ridge: f64,
+    /// Allowed deviation of a segment's dcapture/dsource rate from 1.0
+    /// before it stops being `Continuous`.
+    #[serde(default = "default_rate_tolerance")]
+    pub rate_tolerance: f64,
+    /// Anchors an off-rate run must span to count as `Drift`; shorter
+    /// off-rate runs are `Jitter`.
+    #[serde(default = "default_min_run")]
+    pub min_run: usize,
+    /// Source window length for per-window anchor extraction
+    /// (samples). A source that fits at least two windows gets one
+    /// anchor per window, so drift, jitter, skips, gaps and resumes
+    /// inside a single occurrence stay observable; shorter sources
+    /// keep one anchor per occurrence.
+    #[serde(default = "default_anchor_window")]
+    pub anchor_window: u64,
+    /// Hop between successive anchor windows (samples).
+    #[serde(default = "default_anchor_hop")]
+    pub anchor_hop: u64,
+    /// Slack between the source and capture advances of consecutive
+    /// anchors before their boundary becomes `Gap`/`Skip` (samples).
+    #[serde(default = "default_anchor_gap")]
+    pub anchor_gap: u64,
 }
 
 fn default_ridge() -> f64 {
     1e-3
+}
+
+fn default_rate_tolerance() -> f64 {
+    0.05
+}
+
+fn default_min_run() -> usize {
+    3
+}
+
+fn default_anchor_window() -> u64 {
+    512
+}
+
+fn default_anchor_hop() -> u64 {
+    512
+}
+
+fn default_anchor_gap() -> u64 {
+    256
 }
 
 impl Default for LocateConfig {
@@ -46,6 +88,11 @@ impl Default for LocateConfig {
         Self {
             consensus: ConsensusConfig::default(),
             ridge: default_ridge(),
+            rate_tolerance: default_rate_tolerance(),
+            min_run: default_min_run(),
+            anchor_window: default_anchor_window(),
+            anchor_hop: default_anchor_hop(),
+            anchor_gap: default_anchor_gap(),
         }
     }
 }
@@ -72,148 +119,9 @@ fn err(e: impl std::fmt::Display) -> StageError {
     StageError::new(StageKind::Locate, e.to_string())
 }
 
-/// Sub-block anchors used to build a pair's time map: each block of
-/// the source is re-located inside the matched capture window so
-/// drift/skips inside one occurrence become visible.
-const ANCHOR_BLOCKS: usize = 16;
-/// Minimum block energy to emit an anchor.
-const MIN_ANCHOR_ENERGY: f64 = 1e-9;
-/// Candidates merged across channel pairs per method.
-const MAX_MERGED_CANDIDATES: usize = 16;
-
-/// Locate `block`-sized pieces of `source` inside the capture window
-/// starting at `pos` and return them as anchors.
-fn block_anchors(source: &[f64], capture_window: &[f64], pos: usize, blocks: usize) -> Vec<Anchor> {
-    let n = source.len();
-    if n == 0 || capture_window.is_empty() {
-        return Vec::new();
-    }
-    let block = (n / blocks.max(1)).max(1);
-    let mut anchors = Vec::new();
-    for b0 in (0..n).step_by(block) {
-        let b1 = (b0 + block).min(n);
-        let template = &source[b0..b1];
-        if template.iter().map(|v| v * v).sum::<f64>() < MIN_ANCHOR_ENERGY {
-            continue;
-        }
-        if capture_window.len() < template.len() {
-            continue;
-        }
-        let corr = dsp::ncc(
-            template,
-            capture_window,
-            capture_window.len() - template.len(),
-        );
-        if let Some((bi, &bs)) = corr
-            .iter()
-            .enumerate()
-            .max_by(|a, b| a.1.abs().total_cmp(&b.1.abs()))
-        {
-            anchors.push(Anchor {
-                source: b0 as u64,
-                capture: (pos + bi) as u64,
-                score: bs,
-            });
-        }
-    }
-    anchors
-}
-
 impl LocateStage {
-    /// Run every method on every channel pair; merge all pairs'
-    /// candidates (each tagged with its channel pair) into one
-    /// evidence per method. The method's validity comes from the
-    /// strongest pair — but no pair's candidates are dropped.
-    fn locate_pair(&self, source: &DecodedInput, capture: &DecodedInput) -> Vec<MethodEvidence> {
-        let methods = default_methods();
-        let mut merged: Vec<MethodEvidence> = Vec::new();
-        for method in &methods {
-            let mut per_pair: Vec<MethodEvidence> = Vec::new();
-            for (si, src_ch) in source.channel_samples.iter().enumerate() {
-                for (ci, cap_ch) in capture.channel_samples.iter().enumerate() {
-                    let mut ev = method.locate(src_ch, cap_ch, source.sample_rate);
-                    for c in &mut ev.candidates {
-                        c.channel_pair = Some([si as u32, ci as u32]);
-                    }
-                    per_pair.push(ev);
-                }
-            }
-            // Best pair by top-candidate score magnitude anchors the
-            // method's validity; candidates merge across all pairs.
-            let best = per_pair
-                .iter()
-                .max_by(|a, b| {
-                    let sa = a.candidates.first().map(|c| c.score.abs()).unwrap_or(0.0);
-                    let sb = b.candidates.first().map(|c| c.score.abs()).unwrap_or(0.0);
-                    sa.total_cmp(&sb)
-                })
-                .cloned();
-            let mut candidates: Vec<LocateCandidate> =
-                per_pair.into_iter().flat_map(|e| e.candidates).collect();
-            candidates.sort_by(|a, b| b.score.abs().total_cmp(&a.score.abs()));
-            candidates.truncate(MAX_MERGED_CANDIDATES);
-            match best {
-                Some(mut ev) => {
-                    ev.candidates = candidates;
-                    ev.method = method.id().into();
-                    ev.method_version = method.version().into();
-                    merged.push(ev);
-                }
-                None => merged.push(MethodEvidence {
-                    method: method.id().into(),
-                    method_version: method.version().into(),
-                    candidates: vec![],
-                    validity: Validity::ComputationFailed,
-                    reject_reason: Some("no channel pair could be evaluated".into()),
-                }),
-            }
-        }
-        merged
-    }
-
-    /// Positions where ≥ `min_agreeing_methods` *distinct* methods
-    /// placed a qualifying candidate within `position_tolerance` of
-    /// each other. The accepted primary cluster is excluded; on a
-    /// contested result every qualifying cluster is reported (the
-    /// spec's "複数の正当な出現" case).
-    fn occurrences(&self, evidence: &[MethodEvidence], result: &LocateResult) -> Vec<u64> {
-        let cfg = &self.config.consensus;
-        let mut votes: Vec<(String, u64)> = evidence
-            .iter()
-            .filter(|e| e.validity == Validity::Valid)
-            .flat_map(|e| {
-                e.candidates
-                    .iter()
-                    .filter(|c| {
-                        c.score.abs() >= cfg.min_score
-                            && c.peak_to_background >= cfg.min_peak_to_background
-                    })
-                    .map(move |c| (e.method.clone(), c.position))
-            })
-            .collect();
-        votes.sort_by_key(|v| v.1);
-        let mut clusters: Vec<Vec<(String, u64)>> = Vec::new();
-        for v in votes {
-            match clusters.last_mut() {
-                Some(c) if v.1 - c[0].1 <= cfg.position_tolerance => c.push(v),
-                _ => clusters.push(vec![v]),
-            }
-        }
-        let primary = result.capture_range.start;
-        clusters
-            .iter()
-            .filter(|c| {
-                let mut ms: Vec<&str> = c.iter().map(|v| v.0.as_str()).collect();
-                ms.sort_unstable();
-                ms.dedup();
-                ms.len() as u32 >= cfg.min_agreeing_methods
-            })
-            .map(|c| c[c.len() / 2].1)
-            .filter(|&p| !(result.accepted && p.abs_diff(primary) <= cfg.position_tolerance))
-            .collect()
-    }
-
-    /// A marked result for a pair that cannot be located.
+    /// Explicit non-accepted result for a pair that cannot be
+    /// evaluated (missing/empty decode, sample-rate mismatch).
     fn marked_result(
         &self,
         source_input_id: &str,
@@ -236,67 +144,164 @@ impl LocateStage {
             accepted: false,
             algorithm_id: "locate-consensus".into(),
             algorithm_version: "1".into(),
-            params: serde_json::to_value(&self.config.consensus).unwrap_or_default(),
+            params: serde_json::to_value(&self.config).unwrap_or_default(),
         }
     }
 
-    /// Persist one `LocateResult` plus derived artifacts under
-    /// `locate/<source>/<capture>/`.
-    fn persist_result(
+    /// Run every method on every channel pair of
+    /// `source_channels` × `capture_channels`. Returned evidence is
+    /// grouped by method (declaration order) so [`merged_votes`] can
+    /// pick each method's strongest pair, and the full per-pair list
+    /// is kept for the `locate_evidence` artifact so channel detail
+    /// survives.
+    fn locate_channels(
         &self,
-        result: &LocateResult,
-        extra: serde_json::Value,
-        residual_pcm: Option<&[f64]>,
+        source_channels: &[Vec<f64>],
+        capture_channels: &[Vec<f64>],
+        sample_rate: u32,
+    ) -> Vec<PairEvidence> {
+        let mut pairs = Vec::new();
+        for method in default_methods() {
+            for (source_channel, src_ch) in source_channels.iter().enumerate() {
+                for (capture_channel, cap_ch) in capture_channels.iter().enumerate() {
+                    pairs.push(PairEvidence {
+                        source_channel,
+                        capture_channel,
+                        evidence: method.locate(src_ch, cap_ch, sample_rate),
+                    });
+                }
+            }
+        }
+        pairs
+    }
+
+    /// Best full-band NCC peak of `source[..][w_off..w_off+window]`
+    /// inside `capture[..][lo..hi]`, taken across every channel pair.
+    /// Returns the absolute capture position and score when the peak
+    /// clears the consensus thresholds, `None` otherwise.
+    fn best_window_match(
+        &self,
+        source: &DecodedInput,
+        capture: &DecodedInput,
+        w_off: usize,
+        window: usize,
+        lo: usize,
+        hi: usize,
+    ) -> Option<(u64, f64)> {
+        if hi.saturating_sub(lo) < window || w_off + window > source.channel_samples[0].len() {
+            return None;
+        }
+        let mut best: Option<LocateCandidate> = None;
+        for src_ch in &source.channel_samples {
+            let template = &src_ch[w_off..w_off + window];
+            for cap_ch in &capture.channel_samples {
+                let corr = ncc(template, &cap_ch[lo..hi], hi - lo - window);
+                if let Some(c) = peaks_from_correlation(&corr, 1).into_iter().next()
+                    && best.as_ref().is_none_or(|b| c.score > b.score)
+                {
+                    best = Some(c);
+                }
+            }
+        }
+        let c = best?;
+        (c.score >= self.config.consensus.min_score
+            && c.peak_to_background >= self.config.consensus.min_peak_to_background)
+            .then(|| (lo as u64 + c.position, c.score))
+    }
+
+    /// One anchor per source window, each located inside
+    /// `capture[lo..hi]`. Anchor source coordinates are `base + w_off`
+    /// so callers can place them on the unrolled pass grid; windows
+    /// whose peak stays below the consensus thresholds contribute no
+    /// anchor. Returns an empty list when the source fits fewer than
+    /// two windows.
+    fn window_anchors_in(
+        &self,
+        source: &DecodedInput,
+        capture: &DecodedInput,
+        lo: usize,
+        hi: usize,
+        base: u64,
+    ) -> Vec<Anchor> {
+        let window = self.config.anchor_window as usize;
+        let hop = self.config.anchor_hop.max(1) as usize;
+        let n = source.channel_samples[0].len();
+        if window == 0 || n < window + hop {
+            return Vec::new();
+        }
+        let mut offsets: Vec<usize> = (0..=n - window).step_by(hop).collect();
+        if offsets.last().copied() != Some(n - window) {
+            offsets.push(n - window);
+        }
+        offsets
+            .iter()
+            .filter_map(|&w_off| {
+                self.best_window_match(source, capture, w_off, window, lo, hi)
+                    .map(|(capture, score)| Anchor {
+                        source: base + w_off as u64,
+                        capture,
+                        score,
+                    })
+            })
+            .collect()
+    }
+
+    /// Persist one JSON artifact under `dir` and return its record.
+    #[allow(clippy::too_many_arguments)]
+    fn persist_json(
+        &self,
+        dir: &std::path::Path,
+        name: &str,
+        role: &str,
+        body: &serde_json::Value,
         lineage: &[al_core::ArtifactId],
-        dir: PathBuf,
+        params: serde_json::Value,
         ctx: &StageContext<'_>,
-    ) -> Result<Vec<ArtifactRecord>, StageError> {
+    ) -> Result<ArtifactRecord, StageError> {
         let job_dir = ctx.registry.job_dir();
-        fs::create_dir_all(job_dir.join(&dir)).map_err(err)?;
-        let rel = dir.join("result.json");
-        let body = serde_json::json!({
-            "result": result,
-            "derived": extra,
-        });
+        fs::create_dir_all(job_dir.join(dir)).map_err(err)?;
+        let rel = dir.join(name);
         al_job::fsutil::write_durable(
             &job_dir.join(&rel),
-            serde_json::to_string_pretty(&body).map_err(err)?.as_bytes(),
+            serde_json::to_string_pretty(body).map_err(err)?.as_bytes(),
         )
         .map_err(err)?;
-        let mut records = vec![ArtifactRecord {
+        Ok(ArtifactRecord {
             artifact_id: ctx.registry.issue(),
-            role: "locate_result".into(),
+            role: role.into(),
             path: rel,
             produced_by: Some(StageKind::Locate),
             inputs: lineage.to_vec(),
-            params: serde_json::json!({
-                "source_input_id": result.source_input_id,
-                "capture_input_id": result.capture_input_id,
-                "accepted": result.accepted,
-                "validity": result.validity,
-                "alignment_id": result.alignment_id,
-            }),
-        }];
-        if let Some(samples) = residual_pcm {
-            let rel = dir.join("residual.f64le");
-            let bytes: Vec<u8> = samples.iter().flat_map(|v| v.to_le_bytes()).collect();
-            al_job::fsutil::write_durable(&job_dir.join(&rel), &bytes).map_err(err)?;
-            records.push(ArtifactRecord {
-                artifact_id: ctx.registry.issue(),
-                role: "locate_residual".into(),
-                path: rel,
-                produced_by: Some(StageKind::Locate),
-                inputs: lineage.to_vec(),
-                params: serde_json::json!({
-                    "source_input_id": result.source_input_id,
-                    "capture_input_id": result.capture_input_id,
-                    "alignment_id": result.alignment_id,
-                    "format": "f64le-interleaved",
-                }),
-            });
-        }
-        Ok(records)
+            params,
+        })
     }
+}
+
+/// Method evidence from one (source channel, capture channel) pair.
+#[derive(Debug, Clone, serde::Serialize)]
+struct PairEvidence {
+    source_channel: usize,
+    capture_channel: usize,
+    #[serde(flatten)]
+    evidence: MethodEvidence,
+}
+
+/// Keep, per method, the evidence of the strongest channel pair.
+/// `pairs` must be grouped by method (see [`LocateStage::locate_channels`]).
+fn merged_votes(pairs: &[PairEvidence]) -> Vec<MethodEvidence> {
+    let top = |e: &MethodEvidence| e.candidates.first().map(|c| c.score).unwrap_or(0.0);
+    let mut merged: Vec<MethodEvidence> = Vec::new();
+    for pair in pairs {
+        match merged.last_mut() {
+            Some(m) if m.method == pair.evidence.method => {
+                if top(&pair.evidence) > top(m) {
+                    *m = pair.evidence.clone();
+                }
+            }
+            _ => merged.push(pair.evidence.clone()),
+        }
+    }
+    merged
 }
 
 impl Stage for LocateStage {
@@ -324,14 +329,15 @@ impl Stage for LocateStage {
             .collect();
         // Nothing to pair (capture-only or source-only job) →
         // complete with empty output so the pipeline can continue to
-        // capture-only analysis. Pairable work always exists only
-        // when both roles are present.
+        // capture-only analysis.
         if sources.is_empty() || captures.is_empty() {
             return Ok(Vec::new());
         }
 
-        // Decode each input once — a missing decode becomes a
-        // per-pair mark below, never an abort for the whole stage.
+        // Decode every input once up front; the residual pass needs
+        // all sources after the per-pair results exist. A missing
+        // decode becomes a per-pair mark below, never an abort for
+        // the whole stage.
         let mut decoded_sources = Vec::with_capacity(sources.len());
         for input in &sources {
             decoded_sources.push(decode_input(input, ctx).map_err(err)?);
@@ -342,105 +348,140 @@ impl Stage for LocateStage {
         }
 
         let mut records = Vec::new();
-        for (si, src_input) in sources.iter().enumerate() {
-            for (ci, cap_input) in captures.iter().enumerate() {
+        for (cap_index, cap_input) in captures.iter().enumerate() {
+            // A capture with missing or empty decoded PCM marks every
+            // source pair; it never aborts the stage.
+            let capture_mark = match &decoded_captures[cap_index] {
+                None => Some((
+                    Validity::DecodeInputUnavailable,
+                    format!("no decoded_pcm artifact for capture {}", cap_input.input_id),
+                )),
+                Some(c)
+                    if c.channel_samples.is_empty()
+                        || c.channel_samples.iter().all(|ch| ch.is_empty()) =>
+                {
+                    Some((
+                        Validity::InsufficientSupport,
+                        "decoded PCM is empty".to_string(),
+                    ))
+                }
+                Some(_) => None,
+            };
+            if let Some((validity, reason)) = capture_mark {
+                for (src_index, src_input) in sources.iter().enumerate() {
+                    let dir = PathBuf::from("locate")
+                        .join(src_input.input_id.to_string())
+                        .join(cap_input.input_id.to_string());
+                    let lineage = decoded_sources[src_index]
+                        .as_ref()
+                        .map(|s| s.artifact_ids.clone())
+                        .unwrap_or_default();
+                    let result = self.marked_result(
+                        &src_input.input_id.to_string(),
+                        &cap_input.input_id.to_string(),
+                        validity,
+                        reason.clone(),
+                    );
+                    records.push(self.persist_json(
+                        &dir,
+                        "result.json",
+                        "locate_result",
+                        &serde_json::json!({"result": result, "derived": {}}),
+                        &lineage,
+                        serde_json::json!({
+                            "source_input_id": result.source_input_id,
+                            "capture_input_id": result.capture_input_id,
+                            "accepted": result.accepted,
+                            "validity": result.validity,
+                            "alignment_id": result.alignment_id,
+                        }),
+                        ctx,
+                    )?);
+                }
+                continue;
+            }
+            let capture = decoded_captures[cap_index].as_ref().unwrap();
+            let capture_len = capture.channel_samples[0].len() as u64;
+            let tolerance = self.config.consensus.position_tolerance;
+            // Per-source results kept alive for the residual pass;
+            // accepted pairs additionally carry their `locate_result`
+            // artifact id for lineage.
+            let mut results: Vec<Option<LocateResult>> = Vec::new();
+            results.resize_with(decoded_sources.len(), || None);
+            let mut accepted: Vec<(usize, al_core::ArtifactId)> = Vec::new();
+            for (src_index, src_input) in sources.iter().enumerate() {
                 let dir = PathBuf::from("locate")
                     .join(src_input.input_id.to_string())
                     .join(cap_input.input_id.to_string());
+                let mut lineage = decoded_sources[src_index]
+                    .as_ref()
+                    .map(|s| s.artifact_ids.clone())
+                    .unwrap_or_default();
+                lineage.extend(capture.artifact_ids.iter().cloned());
 
-                // Any missing decode → per-pair explicit mark.
-                let (source, capture) = match (&decoded_sources[si], &decoded_captures[ci]) {
-                    (Some(s), Some(c)) => (s, c),
-                    _ => {
-                        let missing = match (&decoded_sources[si], &decoded_captures[ci]) {
-                            (None, _) => {
-                                format!("no decoded_pcm artifact for source {}", src_input.input_id)
-                            }
-                            (_, None) => format!(
-                                "no decoded_pcm artifact for capture {}",
-                                cap_input.input_id
-                            ),
-                            _ => unreachable!(),
-                        };
-                        let result = self.marked_result(
-                            &src_input.input_id.to_string(),
-                            &cap_input.input_id.to_string(),
-                            Validity::DecodeInputUnavailable,
-                            missing,
-                        );
-                        let mut lineage = decoded_sources[si]
-                            .as_ref()
-                            .map(|s| s.artifact_ids.clone())
-                            .unwrap_or_default();
-                        if let Some(c) = &decoded_captures[ci] {
-                            lineage.extend(c.artifact_ids.iter().cloned());
-                        }
-                        records.extend(self.persist_result(
-                            &result,
-                            serde_json::json!({}),
-                            None,
-                            &lineage,
-                            dir,
-                            ctx,
-                        )?);
-                        continue;
+                // Missing or empty decode → per-pair explicit mark;
+                // sample-rate mismatch is never resampled — also a
+                // mark. One bad pair never aborts the others.
+                let mark = match &decoded_sources[src_index] {
+                    None => Some((
+                        Validity::DecodeInputUnavailable,
+                        format!("no decoded_pcm artifact for source {}", src_input.input_id),
+                        serde_json::json!({}),
+                    )),
+                    Some(s)
+                        if s.channel_samples.is_empty()
+                            || s.channel_samples.iter().all(|c| c.is_empty()) =>
+                    {
+                        Some((
+                            Validity::InsufficientSupport,
+                            "decoded PCM is empty".to_string(),
+                            serde_json::json!({"empty_input": true}),
+                        ))
                     }
-                };
-
-                // Empty/degenerate decoded input → explicit mark, not
-                // a panic.
-                if source.channel_samples.is_empty()
-                    || capture.channel_samples.is_empty()
-                    || source.channel_samples.iter().all(|c| c.is_empty())
-                    || capture.channel_samples.iter().all(|c| c.is_empty())
-                {
-                    let result = self.marked_result(
-                        &source.input_id,
-                        &capture.input_id,
-                        Validity::InsufficientSupport,
-                        "decoded PCM is empty",
-                    );
-                    let mut lineage = source.artifact_ids.clone();
-                    lineage.extend(capture.artifact_ids.iter().cloned());
-                    records.extend(self.persist_result(
-                        &result,
-                        serde_json::json!({"empty_input": true}),
-                        None,
-                        &lineage,
-                        dir,
-                        ctx,
-                    )?);
-                    continue;
-                }
-
-                // Sample-rate mismatch: never resample — mark the pair
-                // explicitly instead.
-                if source.sample_rate != capture.sample_rate {
-                    let result = self.marked_result(
-                        &source.input_id,
-                        &capture.input_id,
+                    Some(s) if s.sample_rate != capture.sample_rate => Some((
                         Validity::OutOfSupportedFrequencyRange,
                         format!(
                             "sample rate mismatch: source {} Hz vs capture {} Hz",
-                            source.sample_rate, capture.sample_rate
+                            s.sample_rate, capture.sample_rate
                         ),
-                    );
-                    let mut lineage = source.artifact_ids.clone();
-                    lineage.extend(capture.artifact_ids.iter().cloned());
-                    records.extend(self.persist_result(
-                        &result,
                         serde_json::json!({"sample_rate_mismatch": true}),
-                        None,
+                    )),
+                    Some(_) => None,
+                };
+                if let Some((validity, reason, derived)) = mark {
+                    let result = self.marked_result(
+                        &src_input.input_id.to_string(),
+                        &cap_input.input_id.to_string(),
+                        validity,
+                        reason,
+                    );
+                    records.push(self.persist_json(
+                        &dir,
+                        "result.json",
+                        "locate_result",
+                        &serde_json::json!({"result": result, "derived": derived}),
                         &lineage,
-                        dir,
+                        serde_json::json!({
+                            "source_input_id": result.source_input_id,
+                            "capture_input_id": result.capture_input_id,
+                            "accepted": result.accepted,
+                            "validity": result.validity,
+                            "alignment_id": result.alignment_id,
+                        }),
                         ctx,
                     )?);
+                    results[src_index] = Some(result);
                     continue;
                 }
+                let source = decoded_sources[src_index].as_ref().unwrap();
 
-                let evidence = self.locate_pair(source, capture);
+                let pairs = self.locate_channels(
+                    &source.channel_samples,
+                    &capture.channel_samples,
+                    source.sample_rate,
+                );
+                let evidence = merged_votes(&pairs);
                 let source_len = source.channel_samples[0].len() as u64;
-                let capture_len = capture.channel_samples[0].len() as u64;
                 let result = evaluate(
                     &evidence,
                     &source.input_id,
@@ -452,124 +493,321 @@ impl Stage for LocateStage {
                     "1",
                 );
 
-                let occurrences = self.occurrences(&evidence, &result);
-                let mut derived = serde_json::json!({"occurrences": occurrences});
-                let mut residual_pcm: Option<Vec<f64>> = None;
+                // Every channel pair's evidence is its own artifact so
+                // per-channel detail survives the vote merge.
+                records.push(self.persist_json(
+                    &dir,
+                    "evidence.json",
+                    "locate_evidence",
+                    &serde_json::json!({"evidence": pairs}),
+                    &lineage,
+                    serde_json::json!({
+                        "source_input_id": source.input_id,
+                        "capture_input_id": capture.input_id,
+                        "channel_pairs": pairs.len(),
+                    }),
+                    ctx,
+                )?);
 
+                // Additional occurrences: cluster every usable
+                // candidate beyond the primary position by width, so
+                // one physical pass contributes a single occurrence
+                // and multiple legitimate appearances stay separate.
+                let mut occurrences: Vec<u64> = Vec::new();
+                let mut scores: std::collections::HashMap<u64, f64> =
+                    std::collections::HashMap::new();
                 if result.accepted {
-                    let primary = result.capture_range.start as usize;
+                    let mut positions: Vec<u64> = Vec::new();
+                    for pair in &pairs {
+                        if pair.evidence.validity != Validity::Valid {
+                            continue;
+                        }
+                        for c in &pair.evidence.candidates {
+                            if c.score >= self.config.consensus.min_score
+                                && c.peak_to_background
+                                    >= self.config.consensus.min_peak_to_background
+                            {
+                                positions.push(c.position);
+                                let e = scores.entry(c.position).or_insert(c.score);
+                                *e = e.max(c.score);
+                            }
+                        }
+                    }
+                    positions.sort_unstable();
+                    positions.dedup();
+                    let primary = result.capture_range.start;
+                    let mut cluster: Vec<u64> = Vec::new();
+                    for &p in &positions {
+                        if p.abs_diff(primary) <= tolerance {
+                            continue;
+                        }
+                        match cluster.first() {
+                            Some(&first) if p - first <= tolerance => cluster.push(p),
+                            _ => {
+                                if !cluster.is_empty() {
+                                    occurrences.push(cluster[(cluster.len() - 1) / 2]);
+                                }
+                                cluster = vec![p];
+                            }
+                        }
+                    }
+                    if !cluster.is_empty() {
+                        occurrences.push(cluster[(cluster.len() - 1) / 2]);
+                    }
+                }
+
+                // Derived data for the primary result: mixer fit on the
+                // matched window; loop occurrences and the piecewise
+                // time map are their own artifacts below.
+                let mut derived = serde_json::json!({"occurrences": occurrences});
+                let mut time_map_body = None;
+                if result.accepted {
+                    let primary = result.capture_range.start;
+                    let start = primary as usize;
                     let len = source_len as usize;
-                    if primary + len <= capture.channel_samples[0].len() {
+                    if start + len <= capture.channel_samples[0].len() {
                         let cap_window: Vec<Vec<f64>> = capture
                             .channel_samples
                             .iter()
-                            .map(|c| c[primary..primary + len].to_vec())
+                            .map(|c| c[start..start + len].to_vec())
                             .collect();
                         if let Some(mix) =
                             fit_mix(&source.channel_samples, &cap_window, self.config.ridge)
                         {
                             derived["mixer"] = serde_json::to_value(&mix).unwrap_or_default();
                         }
-
-                        // Two-stage residual search: subtract the fit,
-                        // then re-run the methods on the residual so a
-                        // quieter repetition becomes findable.
-                        let cfg = self.config.consensus.clone();
-                        let src_id = source.input_id.clone();
-                        let cap_id = capture.input_id.clone();
-                        let stage_config = self.config.clone();
-                        let search = residual_search(
-                            &source.input_id,
-                            result.alignment_id.clone(),
-                            &source.channel_samples,
-                            &cap_window,
-                            self.config.ridge,
-                            |residual| {
-                                let residual_input = DecodedInput {
-                                    input_id: cap_id.clone(),
-                                    sample_rate: capture.sample_rate,
-                                    channels: capture.channels,
-                                    channel_samples: residual.to_vec(),
-                                    artifact_ids: vec![],
-                                };
-                                let residual_stage = LocateStage::with_config(stage_config);
-                                let child_evidence =
-                                    residual_stage.locate_pair(source, &residual_input);
-                                evaluate(
-                                    &child_evidence,
-                                    &src_id,
-                                    &cap_id,
-                                    source_len,
-                                    len as u64,
-                                    &cfg,
-                                    "locate-residual",
-                                    "1",
-                                )
-                            },
-                        );
-                        if let Some((search, residual_chs)) = search {
-                            // Persist the residual itself (interleaved
-                            // f64) alongside the search record.
-                            let mut interleaved = Vec::new();
-                            if let Some(first) = residual_chs.first() {
-                                let frames = first.len();
-                                interleaved.reserve(frames * residual_chs.len());
-                                for t in 0..frames {
-                                    for ch in &residual_chs {
-                                        interleaved.push(ch[t]);
-                                    }
-                                }
-                            }
-                            residual_pcm = Some(interleaved);
-                            derived["residual_search"] =
-                                serde_json::to_value(&search).unwrap_or_default();
-                        }
                     }
 
-                    // Occurrence anchors → piecewise time map. Use the
-                    // best-scoring candidate's channel pair (fallback
-                    // 0/0) for the anchor scan.
-                    let pair = evidence
-                        .iter()
-                        .flat_map(|e| e.candidates.iter())
-                        .max_by(|a, b| a.score.abs().total_cmp(&b.score.abs()))
-                        .and_then(|c| c.channel_pair)
-                        .unwrap_or([0, 0]);
-                    let src_ch = &source.channel_samples[pair[0] as usize];
-                    let cap_ch = &capture.channel_samples[pair[1] as usize];
-                    let mut occurrence_positions = vec![primary as u64];
+                    // Loop occurrences anchor the pass grid at the
+                    // accepted position; time-map anchors then unroll
+                    // each pass to `loop_index * body_len` so spacing
+                    // deviations surface as real segment rates.
+                    let mut occurrence_positions = vec![primary];
                     occurrence_positions.extend(&occurrences);
-                    let mut anchors: Vec<Anchor> = Vec::new();
-                    for &pos in &occurrence_positions {
-                        let p = pos as usize;
-                        let end = (p + len).min(cap_ch.len());
-                        if p >= end {
-                            continue;
+                    // Sorted order so each occurrence's midpoint cell
+                    // covers real capture regions — the primary can
+                    // land anywhere in the sorted list.
+                    occurrence_positions.sort_unstable();
+                    let body_len = source_len.max(1);
+                    let loops = identify_loop_occurrences(&occurrence_positions, body_len, primary);
+                    let min_index = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
+                    // An occurrence is only real when the body start
+                    // window matches at its own position (within
+                    // position tolerance); secondary correlation
+                    // peaks are not replays. Unverified candidates
+                    // are dropped before the pass grid and the
+                    // reported occurrences are built.
+                    let cap_n = capture.channel_samples[0].len();
+                    let detected: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
+                    let cell_of = |positions: &[u64], i: usize| -> (usize, usize) {
+                        let lo = if i == 0 {
+                            0
+                        } else {
+                            ((positions[i - 1] + positions[i]) / 2) as usize
+                        };
+                        let hi = if i + 1 == positions.len() {
+                            cap_n
+                        } else {
+                            ((positions[i] + positions[i + 1]) / 2) as usize
+                        };
+                        (lo, hi)
+                    };
+                    // The verification template is the body start —
+                    // clamped to the body so sources shorter than the
+                    // anchor window still verify whole-body replays.
+                    let window =
+                        (self.config.anchor_window as usize).min(source.channel_samples[0].len());
+                    let tol = tolerance as usize;
+                    let verified: Vec<usize> = (0..loops.len())
+                        .filter(|&i| {
+                            detected[i] == primary || {
+                                let pos = detected[i] as usize;
+                                let lo = pos.saturating_sub(tol);
+                                let hi = (pos + window + tol).min(cap_n);
+                                self.best_window_match(source, capture, 0, window, lo, hi)
+                                    .is_some()
+                            }
+                        })
+                        .collect();
+                    let loops: Vec<_> = verified.iter().map(|&i| loops[i].clone()).collect();
+                    let positions: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
+                    // Reported occurrences are verified replays only
+                    // (every position but the primary).
+                    occurrences = positions
+                        .iter()
+                        .copied()
+                        .filter(|&p| p != primary)
+                        .collect();
+                    derived["occurrences"] = serde_json::json!(occurrences);
+
+                    // A source long enough to split into windows gets
+                    // one anchor per window, so drift, jitter, skips,
+                    // gaps and resumes inside a single occurrence
+                    // stay observable. With one verified occurrence
+                    // the mapping is tracked in plain source
+                    // coordinates; several verified occurrences are
+                    // real passes, so their windows unroll onto the
+                    // pass grid.
+                    let mut anchors = if loops.len() <= 1 {
+                        self.window_anchors_in(source, capture, 0, cap_n, 0)
+                    } else {
+                        let min_v = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
+                        loops
+                            .iter()
+                            .enumerate()
+                            .flat_map(|(i, o)| {
+                                let base = ((o.loop_index - min_v) * body_len as i64) as u64;
+                                let (lo, hi) = cell_of(&positions, i);
+                                self.window_anchors_in(source, capture, lo, hi, base)
+                            })
+                            .collect()
+                    };
+                    if anchors.is_empty() {
+                        // Short sources (and sources whose windows all
+                        // failed to match) keep one anchor per
+                        // occurrence on the unrolled pass grid.
+                        for o in &loops {
+                            anchors.push(Anchor {
+                                source: ((o.loop_index - min_index) * body_len as i64) as u64,
+                                capture: o.occurrence_position,
+                                score: scores.get(&o.occurrence_position).copied().unwrap_or(0.0),
+                            });
                         }
-                        anchors.extend(block_anchors(src_ch, &cap_ch[p..end], p, ANCHOR_BLOCKS));
                     }
                     anchors.sort_by_key(|a| a.capture);
                     let time_map = build_time_map(
                         &anchors,
-                        0.10,
-                        (len / ANCHOR_BLOCKS.max(1)).max(1) as u64 * 2,
-                        3,
+                        self.config.rate_tolerance,
+                        self.config.anchor_gap,
+                        self.config.min_run,
                     );
-                    let loops = identify_loop_occurrences(&occurrence_positions, source_len.max(1));
-                    derived["loop_occurrences"] = serde_json::to_value(&loops).unwrap_or_default();
-                    derived["time_map"] = serde_json::to_value(&time_map).unwrap_or_default();
+                    time_map_body = Some(serde_json::json!({
+                        "time_map": time_map,
+                        "anchors": anchors,
+                        "loop_occurrences": loops,
+                        "anchor_reference": primary,
+                    }));
                 }
 
-                let mut lineage = source.artifact_ids.clone();
-                lineage.extend(capture.artifact_ids.iter().cloned());
-                records.extend(self.persist_result(
-                    &result,
-                    derived,
-                    residual_pcm.as_deref(),
+                if let Some(body) = time_map_body {
+                    records.push(self.persist_json(
+                        &dir,
+                        "time_map.json",
+                        "time_map",
+                        &body,
+                        &lineage,
+                        serde_json::json!({
+                            "source_input_id": source.input_id,
+                            "capture_input_id": capture.input_id,
+                        }),
+                        ctx,
+                    )?);
+                }
+
+                let accepted_result = result.accepted;
+                let record = self.persist_json(
+                    &dir,
+                    "result.json",
+                    "locate_result",
+                    &serde_json::json!({
+                        "result": result,
+                        "derived": derived,
+                    }),
                     &lineage,
-                    dir,
+                    serde_json::json!({
+                        "source_input_id": result.source_input_id,
+                        "capture_input_id": result.capture_input_id,
+                        "accepted": result.accepted,
+                        "validity": result.validity,
+                        "alignment_id": result.alignment_id,
+                    }),
                     ctx,
-                )?);
+                )?;
+                if accepted_result {
+                    accepted.push((src_index, record.artifact_id.clone()));
+                }
+                results[src_index] = Some(result);
+                records.push(record);
+            }
+
+            // Two-stage residual search: for each accepted alignment,
+            // subtract the fitted mix from the capture and re-run the
+            // locate methods for every source on the residual —
+            // quieter sources and repeat occurrences surface once the
+            // dominant contribution is removed. Provenance (parent
+            // source, alignment, transform, energies, child result) is
+            // persisted per (parent, child) pair.
+            for &(parent_idx, ref parent_artifact) in &accepted {
+                let Some(parent) = &decoded_sources[parent_idx] else {
+                    continue;
+                };
+                let parent_result = results[parent_idx].as_ref().unwrap();
+                let start = parent_result.capture_range.start as usize;
+                let span =
+                    (parent_result.capture_range.end - parent_result.capture_range.start) as usize;
+                if span == 0 {
+                    continue;
+                }
+                let mut aligned =
+                    vec![vec![0.0; capture_len as usize]; parent.channel_samples.len()];
+                for (a, s) in aligned.iter_mut().zip(&parent.channel_samples) {
+                    a[start..start + span].copy_from_slice(&s[..span]);
+                }
+                for child in decoded_sources.iter().flatten() {
+                    if child.sample_rate != capture.sample_rate {
+                        continue;
+                    }
+                    let child_len = child.channel_samples[0].len() as u64;
+                    let Some(search) = residual_search(
+                        &parent.input_id,
+                        parent_result.alignment_id.clone(),
+                        &aligned,
+                        &capture.channel_samples,
+                        self.config.ridge,
+                        |residual| {
+                            let pairs = self.locate_channels(
+                                &child.channel_samples,
+                                residual,
+                                child.sample_rate,
+                            );
+                            evaluate(
+                                &merged_votes(&pairs),
+                                &child.input_id,
+                                &capture.input_id,
+                                child_len,
+                                capture_len,
+                                &self.config.consensus,
+                                "locate-consensus",
+                                "1",
+                            )
+                        },
+                    ) else {
+                        continue;
+                    };
+                    let dir = PathBuf::from("locate")
+                        .join(&child.input_id)
+                        .join(&capture.input_id);
+                    let name = format!("residual_{}.json", parent.input_id);
+                    let mut lineage = parent.artifact_ids.clone();
+                    lineage.extend(capture.artifact_ids.iter().cloned());
+                    lineage.extend(child.artifact_ids.iter().cloned());
+                    lineage.push(parent_artifact.clone());
+                    records.push(self.persist_json(
+                        &dir,
+                        &name,
+                        "residual",
+                        &serde_json::to_value(&search).unwrap_or_default(),
+                        &lineage,
+                        serde_json::json!({
+                            "parent_source": search.parent_source,
+                            "parent_alignment": search.parent_alignment,
+                            "child_source": search.child.source_input_id,
+                            "child_accepted": search.child.accepted,
+                            "confidence": search.confidence,
+                        }),
+                        ctx,
+                    )?);
+                }
             }
         }
         Ok(records)

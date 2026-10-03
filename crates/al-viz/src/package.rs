@@ -6,7 +6,7 @@
 
 use std::fs;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use al_job::manifest::Manifest;
 
@@ -54,6 +54,62 @@ fn invalid(msg: impl Into<String>) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, msg.into())
 }
 
+/// `config.export.name` names the directory that gets deleted and
+/// rebuilt, so it must be a single safe path component. Anything else
+/// (`..`, separators, absolute or prefixed paths) would escape
+/// `<job>/export/` and remove or write outside the job.
+fn validate_package_name(name: &str) -> io::Result<()> {
+    let mut components = Path::new(name).components();
+    let single_normal =
+        matches!(components.next(), Some(Component::Normal(_))) && components.next().is_none();
+    if single_normal {
+        Ok(())
+    } else {
+        Err(invalid(format!(
+            "export.name {name:?} must be a single directory name"
+        )))
+    }
+}
+
+/// True when `s` looks like an absolute path on any supported host.
+/// `Path::is_absolute` only knows the host convention, so Windows
+/// drive / UNC forms and POSIX roots are checked explicitly — a
+/// package must not embed host-specific locations whichever OS
+/// produced them.
+fn looks_absolute(s: &str) -> bool {
+    if s.starts_with('/') || s.starts_with('\\') || Path::new(s).is_absolute() {
+        return true;
+    }
+    let b = s.as_bytes();
+    b.len() >= 3 && b[0].is_ascii_alphabetic() && b[1] == b':' && matches!(b[2], b'/' | b'\\')
+}
+
+/// Last path segment of `s` under either separator convention.
+fn base_name(s: &str) -> &str {
+    s.rsplit(['/', '\\']).find(|p| !p.is_empty()).unwrap_or(s)
+}
+
+/// Package-relative location of one input's copied media:
+/// `media/<input_id>/<file_name>`. The input id scopes each file so
+/// inputs that share a basename can never overwrite one another.
+fn media_rel_path(input_id: &str, file_name: &str) -> String {
+    format!("media/{input_id}/{file_name}")
+}
+
+/// Shrink absolute-path strings anywhere inside `v` down to
+/// file-name references, so the copied job config embeds no
+/// host-specific locations.
+fn shrink_abs_paths(v: &mut serde_json::Value) {
+    match v {
+        serde_json::Value::String(s) if looks_absolute(s) => {
+            *s = base_name(s).to_string();
+        }
+        serde_json::Value::Array(items) => items.iter_mut().for_each(shrink_abs_paths),
+        serde_json::Value::Object(map) => map.values_mut().for_each(shrink_abs_paths),
+        _ => {}
+    }
+}
+
 /// Copy `src` recursively into `dst` (which must not yet exist).
 fn copy_tree(src: &Path, dst: &Path) -> io::Result<()> {
     fs::create_dir_all(dst)?;
@@ -78,6 +134,7 @@ pub fn build(
     manifest: &Manifest,
     cfg: &ExportConfig,
 ) -> io::Result<(PathBuf, Vec<String>)> {
+    validate_package_name(&cfg.name)?;
     let analysis = job_dir.join("analysis");
     if !analysis.join("manifest.json").exists() {
         return Err(invalid(
@@ -93,7 +150,10 @@ pub fn build(
     // 1. Copy the dataset wholesale.
     copy_tree(&analysis, &dest.join("analysis"))?;
 
-    // 2. Shrink absolute input paths in the copied dataset manifest.
+    // 2. Shrink absolute paths in the copied dataset manifest:
+    //    declared input sources and every string inside the copied
+    //    job config (dictionary / config file references travel as
+    //    file names, never host paths).
     let manifest_path = dest.join("analysis/manifest.json");
     let mut ds_manifest: serde_json::Value = serde_json::from_slice(&fs::read(&manifest_path)?)?;
     let mut input_records = Vec::new();
@@ -105,27 +165,35 @@ pub fn build(
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| source_path.clone());
             input["source_path"] = serde_json::json!(file_name);
+            let media_path = cfg.copy_media.then(|| {
+                media_rel_path(input["input_id"].as_str().unwrap_or_default(), &file_name)
+            });
             input_records.push(serde_json::json!({
                 "input_id": input["input_id"],
                 "role": input["role"],
                 "file_name": file_name,
+                "media_path": media_path,
                 "sha256": input["source_sha256"],
             }));
         }
     }
+    shrink_abs_paths(&mut ds_manifest["config"]);
     fs::write(&manifest_path, serde_json::to_string_pretty(&ds_manifest)?)?;
 
-    // 3. Optional media copy.
+    // 3. Optional media copy: each input lands under its own
+    //    `media/<input_id>/` directory — the same package-relative
+    //    path recorded in the export manifest — so two inputs with
+    //    the same file name keep distinct copies and each recorded
+    //    sha256 matches the file it points at.
     if cfg.copy_media {
-        let media_dir = dest.join("media");
-        fs::create_dir_all(&media_dir)?;
         for input in &manifest.inputs {
             let file_name = input
                 .path
                 .file_name()
                 .map(|n| n.to_string_lossy().to_string())
                 .ok_or_else(|| invalid(format!("input {} has no file name", input.input_id)))?;
-            let target = media_dir.join(file_name);
+            let target = dest.join(media_rel_path(&input.input_id.to_string(), &file_name));
+            fs::create_dir_all(target.parent().unwrap())?;
             fs::copy(&input.path, &target).map_err(|e| {
                 invalid(format!(
                     "copy_media requested but {} is unreadable: {e}",

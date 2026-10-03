@@ -120,24 +120,44 @@ fn embedded_source_is_located_with_time_map_and_residual() {
     assert!((result["capture_range"]["start"].as_u64().unwrap() as i64 - 5_000).abs() <= 64);
     assert!(result["agreeing_methods"].as_u64().unwrap() >= 3);
 
-    // Derived artifacts: mixer fit, time map, residual search.
+    // Derived data: mixer fit and verified occurrences.
     assert!(body["derived"]["mixer"]["matrix"].is_array());
-    assert!(body["derived"]["time_map"]["segments"].is_array());
-    assert!(body["derived"]["residual_search"]["child"].is_object());
-    // Channel-pair identity is preserved in method evidence.
-    assert!(result["evidence"].as_array().unwrap().iter().all(|e| {
-        e["candidates"]
+    assert!(body["derived"]["occurrences"].is_array());
+    // The piecewise time map is its own artifact.
+    let time_map_rec = records
+        .iter()
+        .find(|r| r.role == "time_map" && r.path.ends_with("time_map.json"))
+        .expect("time_map artifact");
+    let tm: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&time_map_rec.path)).unwrap())
+            .unwrap();
+    assert!(tm["time_map"]["segments"].is_array());
+    // Per-channel-pair evidence is its own artifact.
+    let evidence_rec = records
+        .iter()
+        .find(|r| r.role == "locate_evidence")
+        .expect("locate_evidence artifact");
+    let ev: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&evidence_rec.path)).unwrap())
+            .unwrap();
+    assert!(
+        ev["evidence"]
             .as_array()
             .unwrap()
             .iter()
-            .all(|c| c["channel_pair"] == serde_json::json!([0, 0]))
-    }));
-    // Residual PCM persisted as its own artifact.
-    assert!(
-        records
-            .iter()
-            .any(|r| r.role == "locate_residual" && r.path.ends_with("residual.f64le"))
+            .all(|p| p["source_channel"].is_u64() && p["capture_channel"].is_u64())
     );
+    // Residual search ran once per accepted alignment and records
+    // the child locate result with subtraction provenance.
+    let residual_rec = records
+        .iter()
+        .find(|r| r.role == "residual")
+        .expect("residual artifact");
+    let res: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&residual_rec.path)).unwrap())
+            .unwrap();
+    assert!(res["child"].is_object());
+    assert!(res["energy"]["before"].is_f64());
 
     fs::remove_dir_all(&fx.dir).ok();
 }
@@ -209,7 +229,11 @@ fn repeated_source_reports_second_occurrence() {
     } else {
         2_000
     };
-    assert!((occurrences[0] as i64 - other).abs() <= 64);
+    assert!(
+        (occurrences[0] as i64 - other).abs() <= 64,
+        "occurrence {} vs expected ~{other} (primary {primary})",
+        occurrences[0]
+    );
 
     fs::remove_dir_all(&fx.dir).ok();
 }
