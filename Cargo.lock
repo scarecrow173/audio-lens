@@ -25,6 +25,7 @@ dependencies = [
  "al-job",
  "al-locate",
  "al-media",
+ "al-viz",
  "serde_json",
 ]
 
@@ -81,6 +82,7 @@ dependencies = [
 name = "al-viz"
 version = "0.1.0"
 dependencies = [
+ "al-analysis",
  "al-core",
  "al-dataset",
  "al-job",
