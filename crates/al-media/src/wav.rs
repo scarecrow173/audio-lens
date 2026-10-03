@@ -3,6 +3,8 @@
 //! Only uncompressed PCM (format tag 1) and IEEE float (tag 3) are decoded.
 //! Anything else fails explicitly as `decode/input unavailable`.
 
+use std::io::{self, Seek, SeekFrom, Write};
+
 use crate::metadata::{MediaError, SampleFormat};
 
 /// Decoded audio: pre-normalization PCM plus stream metadata.
@@ -231,6 +233,166 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
     })
 }
 
+/// Output encoding for [`WavWriter`].
+///
+/// Input samples are `f64` in the *native scale* of the chosen encoding
+/// — the same convention [`decode_wav`] uses for output. Integer
+/// encodings expect integer-scale values (clamped to the target width,
+/// rounded to nearest); the float encodings cast directly. Encoding a
+/// decoded file in the same format is therefore lossless.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WavEncoding {
+    /// Signed 16-bit little-endian PCM.
+    PcmS16,
+    /// Signed 24-bit little-endian PCM.
+    PcmS24,
+    /// Signed 32-bit little-endian PCM.
+    PcmS32,
+    /// IEEE 754 32-bit float.
+    Float32,
+    /// IEEE 754 64-bit float.
+    Float64,
+}
+
+impl WavEncoding {
+    fn format_tag(self) -> u16 {
+        match self {
+            Self::Float32 | Self::Float64 => 3,
+            _ => 1,
+        }
+    }
+
+    fn bits_per_sample(self) -> u16 {
+        match self {
+            Self::PcmS16 => 16,
+            Self::PcmS24 => 24,
+            Self::PcmS32 | Self::Float32 => 32,
+            Self::Float64 => 64,
+        }
+    }
+
+    fn encode_sample(self, v: f64, out: &mut Vec<u8>) {
+        match self {
+            Self::PcmS16 => {
+                let s = v.round().clamp(f64::from(i16::MIN), f64::from(i16::MAX)) as i16;
+                out.extend_from_slice(&s.to_le_bytes());
+            }
+            Self::PcmS24 => {
+                let s = v.round().clamp(-8_388_608.0, 8_388_607.0) as i32;
+                let b = s.to_le_bytes();
+                out.extend_from_slice(&b[..3]);
+            }
+            Self::PcmS32 => {
+                let s = v.round().clamp(f64::from(i32::MIN), f64::from(i32::MAX)) as i32;
+                out.extend_from_slice(&s.to_le_bytes());
+            }
+            Self::Float32 => out.extend_from_slice(&(v as f32).to_le_bytes()),
+            Self::Float64 => out.extend_from_slice(&v.to_le_bytes()),
+        }
+    }
+}
+
+/// Streams `f64` samples into a RIFF/WAVE file.
+///
+/// The header is written up front with placeholder sizes and patched
+/// on [`WavWriter::finish`], so arbitrarily long streams never need a
+/// full-size output buffer in memory. Durability (fsync + rename) is
+/// the caller's job — see `al_job::fsutil::rename_durable`.
+pub struct WavWriter<W: Write + Seek> {
+    out: W,
+    encoding: WavEncoding,
+    channels: u16,
+    data_len: u64,
+}
+
+impl<W: Write + Seek> WavWriter<W> {
+    /// Write the RIFF/`fmt `/`data` headers and get ready for samples.
+    pub fn new(
+        mut out: W,
+        encoding: WavEncoding,
+        channels: u16,
+        sample_rate: u32,
+    ) -> io::Result<Self> {
+        if channels == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "channels must be > 0",
+            ));
+        }
+        if sample_rate == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "sample_rate must be > 0",
+            ));
+        }
+        let bits = encoding.bits_per_sample();
+        let block_align = channels * (bits / 8);
+        // Placeholder sizes; patched on finish.
+        out.write_all(b"RIFF")?;
+        out.write_all(&0u32.to_le_bytes())?;
+        out.write_all(b"WAVE")?;
+        out.write_all(b"fmt ")?;
+        out.write_all(&16u32.to_le_bytes())?;
+        out.write_all(&encoding.format_tag().to_le_bytes())?;
+        out.write_all(&channels.to_le_bytes())?;
+        out.write_all(&sample_rate.to_le_bytes())?;
+        out.write_all(&(sample_rate * u32::from(block_align)).to_le_bytes())?;
+        out.write_all(&block_align.to_le_bytes())?;
+        out.write_all(&bits.to_le_bytes())?;
+        out.write_all(b"data")?;
+        out.write_all(&0u32.to_le_bytes())?;
+        Ok(Self {
+            out,
+            encoding,
+            channels,
+            data_len: 0,
+        })
+    }
+
+    /// Encode and append `samples` (interleaved f64 in the encoding's
+    /// native scale). Length must be a multiple of `channels`.
+    pub fn write_samples(&mut self, samples: &[f64]) -> io::Result<()> {
+        if !samples.len().is_multiple_of(usize::from(self.channels)) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "sample count is not a multiple of channels",
+            ));
+        }
+        let mut buf = Vec::with_capacity(samples.len() * 3);
+        for &v in samples {
+            self.encoding.encode_sample(v, &mut buf);
+        }
+        self.out.write_all(&buf)?;
+        self.data_len += buf.len() as u64;
+        Ok(())
+    }
+
+    /// Patch the RIFF and `data` size fields and return the writer.
+    /// Chunks are word-aligned, so an odd `data` size is followed by a
+    /// pad byte that counts toward the RIFF size. The stream is *not*
+    /// flushed beyond what `out` does; the caller must still
+    /// `sync_all`/rename for durability.
+    pub fn finish(mut self) -> io::Result<W> {
+        if self.data_len > u64::from(u32::MAX - 37) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "data chunk exceeds RIFF 32-bit size limit",
+            ));
+        }
+        let pad = self.data_len % 2;
+        if pad == 1 {
+            self.out.seek(SeekFrom::End(0))?;
+            self.out.write_all(&[0u8])?;
+        }
+        self.out.seek(SeekFrom::Start(4))?;
+        self.out
+            .write_all(&((36 + self.data_len + pad) as u32).to_le_bytes())?;
+        self.out.seek(SeekFrom::Start(40))?;
+        self.out.write_all(&(self.data_len as u32).to_le_bytes())?;
+        Ok(self.out)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -434,5 +596,63 @@ mod tests {
         let mut wav = make_wav(1, 48000, 16, &[1, 2]);
         wav.truncate(wav.len() - 3);
         assert!(decode_wav(&wav).is_err());
+    }
+
+    fn encode(encoding: WavEncoding, channels: u16, rate: u32, samples: &[f64]) -> Vec<u8> {
+        let cursor = io::Cursor::new(Vec::new());
+        let mut w = WavWriter::new(cursor, encoding, channels, rate).unwrap();
+        w.write_samples(samples).unwrap();
+        w.finish().unwrap().into_inner()
+    }
+
+    #[test]
+    fn s16_encode_decodes_back_exactly() {
+        let samples = [16384.0, -16384.0, 0.0, 32767.0];
+        let wav = encode(WavEncoding::PcmS16, 2, 48000, &samples);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.sample_format, SampleFormat::PcmS16);
+        assert_eq!(audio.channels, 2);
+        assert_eq!(audio.samples, samples);
+    }
+
+    #[test]
+    fn s24_and_s32_round_trip() {
+        for (enc, expected) in [
+            (WavEncoding::PcmS24, SampleFormat::PcmS24),
+            (WavEncoding::PcmS32, SampleFormat::PcmS32),
+        ] {
+            let samples = [8_388_000.0, -8_388_000.0, 1.0];
+            let wav = encode(enc, 1, 44100, &samples);
+            let audio = decode_wav(&wav).unwrap();
+            assert_eq!(audio.sample_format, expected);
+            assert_eq!(audio.samples, samples);
+        }
+    }
+
+    #[test]
+    fn float32_round_trip_keeps_native_scale() {
+        let samples = [0.5_f64, -0.25, 1.0];
+        let wav = encode(WavEncoding::Float32, 1, 48000, &samples);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.sample_format, SampleFormat::Float32);
+        assert_eq!(audio.samples, samples);
+    }
+
+    #[test]
+    fn integer_encode_clamps_to_range() {
+        let wav = encode(WavEncoding::PcmS16, 1, 48000, &[40_000.0, -40_000.0]);
+        let audio = decode_wav(&wav).unwrap();
+        assert_eq!(audio.samples, vec![32767.0, -32768.0]);
+    }
+
+    #[test]
+    fn rejects_misaligned_sample_count_and_bad_params() {
+        let cursor = io::Cursor::new(Vec::new());
+        assert!(WavWriter::new(cursor, WavEncoding::PcmS16, 0, 48000).is_err());
+        let cursor = io::Cursor::new(Vec::new());
+        assert!(WavWriter::new(cursor, WavEncoding::PcmS16, 1, 0).is_err());
+        let cursor = io::Cursor::new(Vec::new());
+        let mut w = WavWriter::new(cursor, WavEncoding::PcmS16, 2, 48000).unwrap();
+        assert!(w.write_samples(&[1.0]).is_err());
     }
 }

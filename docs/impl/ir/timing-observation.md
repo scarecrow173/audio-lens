@@ -80,3 +80,17 @@ task `docs/tasks/timing-observation.md`、test-spec
 ## Follow-ups
 
 - 実コンテナからの PTS 抽出(MKV/MP4 パーサ)は別プラン
+
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Risks
+
+- なし

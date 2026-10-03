@@ -16,18 +16,23 @@ pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    let tmp = path.with_file_name(format!(
-        "{}.tmp",
-        path.file_name().and_then(|n| n.to_str()).unwrap_or("tmp")
-    ));
+    let tmp = tmp_path_for(path);
     {
         let mut file = fs::File::create(&tmp)?;
         file.write_all(bytes)?;
         file.sync_all()?;
     }
-    fs::rename(&tmp, path)?;
-    // Flush the rename's directory entry where the platform supports it
-    // (directory fsync is not available on Windows).
+    rename_durable(&tmp, path)
+}
+
+/// Rename an already-synced temp file over `path`, then flush the
+/// rename's directory entry where the platform supports it (directory
+/// fsync is not available on Windows).
+///
+/// For streamed writes: create the temp file with
+/// [`tmp_path_for`], write and `sync_all` it, then call this.
+pub fn rename_durable(tmp: &Path, path: &Path) -> io::Result<()> {
+    fs::rename(tmp, path)?;
     #[cfg(unix)]
     if let Some(parent) = path.parent()
         && let Ok(dir) = fs::File::open(parent)
@@ -35,4 +40,32 @@ pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
         let _ = dir.sync_all();
     }
     Ok(())
+}
+
+/// The sibling temp path `write_durable` uses for `path`.
+pub fn tmp_path_for(path: &Path) -> std::path::PathBuf {
+    path.with_file_name(format!(
+        "{}.tmp",
+        path.file_name().and_then(|n| n.to_str()).unwrap_or("tmp")
+    ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // The create→finish rewrite paths (manifest.json, array.json) rely
+    // on the rename replacing an existing destination atomically —
+    // which `fs::rename` guarantees on both POSIX and Windows.
+    #[test]
+    fn write_durable_replaces_existing_destination() {
+        let dir = std::env::temp_dir().join(format!("fsutil-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("manifest.json");
+        write_durable(&path, b"first").unwrap();
+        write_durable(&path, b"second").unwrap();
+        assert_eq!(fs::read(&path).unwrap(), b"second");
+        assert!(!tmp_path_for(&path).exists());
+        fs::remove_dir_all(&dir).ok();
+    }
 }
