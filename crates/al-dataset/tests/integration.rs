@@ -368,3 +368,79 @@ fn failed_dataset_stage_is_resumable() {
     fs::remove_dir_all(&base).ok();
     fs::remove_dir_all(&wav_dir).ok();
 }
+
+/// run materialization: `ingest,dataset` writes each input's decoded
+/// PCM as `analysis/inputs/<input_id>.wav`, registered in the dataset
+/// manifest with provenance back to the ingest artifacts, and the
+/// samples round-trip through the dataset audio store.
+#[test]
+fn decoded_inputs_materialize_as_wav() {
+    let base = tmp("inwav");
+    let wav_dir = tmp("inwavsrc");
+    let wav_path = wav_dir.join("cap.wav");
+    let samples = vec![0.0_f64, 1000.0, -1000.0, 400.0, -400.0];
+    {
+        use std::io::Write as _;
+        let cursor = std::io::Cursor::new(Vec::new());
+        let mut w = al_media::wav::WavWriter::new(cursor, WavEncoding::PcmS16, 1, 8000).unwrap();
+        w.write_samples(&samples).unwrap();
+        let mut f = std::fs::File::create(&wav_path).unwrap();
+        f.write_all(&w.finish().unwrap().into_inner()).unwrap();
+    }
+
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, &wav_path)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest, StageKind::Dataset],
+    )
+    .unwrap();
+    let runner = StageRunner::new(&base);
+    let mut stages: Vec<Box<dyn al_job::stage::Stage>> =
+        vec![Box::new(IngestStage::new()), Box::new(DatasetStage::new())];
+    let manifest = runner.run(&def, &mut stages).unwrap();
+
+    let analysis = base.join(def.job_id.to_string()).join("analysis");
+    let input_id = def.inputs[0].input_id.as_str();
+    assert!(
+        analysis
+            .join("inputs")
+            .join(format!("{input_id}.wav"))
+            .exists()
+    );
+
+    let ds = DatasetReader::open(&analysis).unwrap();
+    let audio = ds.read_audio("inputs", &format!("{input_id}.wav")).unwrap();
+    assert_eq!(audio.samples, samples);
+    assert_eq!(audio.channels, 1);
+    assert_eq!(audio.sample_rate, 8000);
+
+    let artifact = ds
+        .artifacts("inputs")
+        .into_iter()
+        .find(|a| a.path == format!("inputs/{input_id}.wav"))
+        .expect("wav artifact registered in dataset manifest");
+    assert_eq!(artifact.store, al_dataset::StoreKind::Audio);
+    assert_eq!(artifact.provenance.input_id, input_id);
+    assert_eq!(artifact.provenance.parents.len(), 2);
+
+    // The ingest metadata lands as a JSON sibling so the dataset is
+    // self-contained.
+    let meta = ds
+        .read_json("inputs", &format!("{input_id}.metadata"))
+        .unwrap();
+    assert_eq!(meta["input_id"].as_str(), Some(input_id));
+
+    // The job manifest records the materialized store roots with
+    // lineage back to the ingest artifacts.
+    let wav_rel = PathBuf::from("analysis/inputs").join(format!("{input_id}.wav"));
+    let record = manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "dataset_input_audio" && a.path == wav_rel)
+        .expect("dataset_input_audio artifact recorded");
+    let pcm = manifest.artifact(&record.inputs[0]).unwrap();
+    assert_eq!(pcm.role, "decoded_pcm");
+
+    fs::remove_dir_all(&base).ok();
+    fs::remove_dir_all(&wav_dir).ok();
+}
