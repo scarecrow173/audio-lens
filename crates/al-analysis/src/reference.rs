@@ -186,15 +186,20 @@ pub struct Aligned<'a> {
 }
 
 /// Analyze one `(source, capture)` pair that has an *accepted*
-/// locate result. `pair` is the dataset path stem (`<src>__<cap>`);
+/// locate result. `pair` is the dataset path stem (`<src>__<cap>`)
+/// used for artifact naming; `alignment_id` is the id issued by the
+/// locate stage for this result and is stamped onto every record so
+/// rows and artifact provenance reference the same alignment.
 /// `src_seg`/`cap_seg` are the aligned channel slices (same length).
 pub fn analyze_pair(
     pair: &str,
+    alignment_id: &al_core::AlignmentId,
     src: &Aligned<'_>,
     upstream_validity: Validity,
     cfg: &ReferenceConfig,
 ) -> ReferenceResult {
     let mut out = ReferenceResult::default();
+    let alignment_id = alignment_id.as_str();
     let lineage: Vec<String> = Vec::new(); // filled by caller via params
     let up_conf = src.upstream_confidence;
     let up_val = propagate_validity(upstream_validity);
@@ -216,7 +221,7 @@ pub fn analyze_pair(
             Some(format!("upstream validity {upstream_validity:?}")),
             0,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
     };
 
@@ -271,7 +276,7 @@ pub fn analyze_pair(
             ("ref.lag_p95", s.p95, "samples"),
         ] {
             let mut r = lag_rb.scalar(id, v, unit, None, lag_conf, up_val, None, s.support);
-            r.alignment_id = Some(pair.to_string());
+            r.alignment_id = Some(alignment_id.to_string());
             out.records.push(r);
         }
         // Drift: linear fit slope of τ(t) → samples/sample; local
@@ -300,7 +305,7 @@ pub fn analyze_pair(
                 None,
                 s.support,
             );
-            r.alignment_id = Some(pair.to_string());
+            r.alignment_id = Some(alignment_id.to_string());
             out.records.push(r);
             let mut ts = lag_rb.scalar(
                 "ref.local_time_scale",
@@ -312,7 +317,7 @@ pub fn analyze_pair(
                 None,
                 s.support,
             );
-            ts.alignment_id = Some(pair.to_string());
+            ts.alignment_id = Some(alignment_id.to_string());
             out.records.push(ts);
         }
         // Step candidates: |Δτ| above 4× MAD.
@@ -331,7 +336,7 @@ pub fn analyze_pair(
             None,
             s.support,
         );
-        st.alignment_id = Some(pair.to_string());
+        st.alignment_id = Some(alignment_id.to_string());
         out.records.push(st);
         if let Some(w) = robust_summary(&lag_widths) {
             let mut pw = lag_rb.scalar(
@@ -344,7 +349,7 @@ pub fn analyze_pair(
                 None,
                 w.support,
             );
-            pw.alignment_id = Some(pair.to_string());
+            pw.alignment_id = Some(alignment_id.to_string());
             out.records.push(pw);
         }
         // τ(t) trajectory as a tensor for downstream reuse.
@@ -363,7 +368,7 @@ pub fn analyze_pair(
             Some("aligned region shorter than lag_window".into()),
             0,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
     }
 
@@ -380,7 +385,7 @@ pub fn analyze_pair(
         None,
         n as u64,
     );
-    g.alignment_id = Some(pair.to_string());
+    g.alignment_id = Some(alignment_id.to_string());
     out.records.push(g);
     // 400 Hz gain: bandpass both around 400 Hz then LS.
     if n >= 1024 {
@@ -397,7 +402,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        g4.alignment_id = Some(pair.to_string());
+        g4.alignment_id = Some(alignment_id.to_string());
         g4.params = serde_json::json!({"band": [lo, hi]});
         out.records.push(g4);
     }
@@ -413,7 +418,7 @@ pub fn analyze_pair(
         None,
         n as u64,
     );
-    rr.alignment_id = Some(pair.to_string());
+    rr.alignment_id = Some(alignment_id.to_string());
     out.records.push(rr);
     let gw = cfg.gain_window.min(n);
     if gw >= 64 {
@@ -441,7 +446,7 @@ pub fn analyze_pair(
             None,
             gains.len() as u64,
         );
-        lc.alignment_id = Some(pair.to_string());
+        lc.alignment_id = Some(alignment_id.to_string());
         out.records.push(lc);
     }
 
@@ -460,7 +465,7 @@ pub fn analyze_pair(
             Some("aligned region shorter than stft window".into()),
             0,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
         return out;
     }
@@ -579,7 +584,7 @@ pub fn analyze_pair(
             None,
             s.support,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
     }
 
@@ -659,7 +664,7 @@ pub fn analyze_pair(
             None,
             frames as u64,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         r.freq_range = Some(al_dataset::types::Range { start: lo, end: hi });
         r.reference = Some(g400);
         r.delta = Some(al_dataset::types::Delta {
@@ -703,7 +708,7 @@ pub fn analyze_pair(
         None,
         n as u64,
     );
-    sim.alignment_id = Some(pair.to_string());
+    sim.alignment_id = Some(alignment_id.to_string());
     out.records.push(sim);
     // Band correlation: bandpass each third-octave band, corr per
     // band (first 8 bands to bound cost).
@@ -728,7 +733,7 @@ pub fn analyze_pair(
             None,
             band_corrs.len() as u64,
         );
-        bc.alignment_id = Some(pair.to_string());
+        bc.alignment_id = Some(alignment_id.to_string());
         out.records.push(bc);
     }
     // PHAT evidence: whiten the cross-spectrum of a source template
@@ -746,7 +751,7 @@ pub fn analyze_pair(
         None,
         n as u64,
     );
-    ph.alignment_id = Some(pair.to_string());
+    ph.alignment_id = Some(alignment_id.to_string());
     out.records.push(ph);
     // Envelope similarity: corr of spectral envelopes.
     let env_s = spectral_envelope(src_mono, cfg.stft_window, 64);
@@ -766,7 +771,7 @@ pub fn analyze_pair(
         None,
         env_n as u64,
     );
-    es.alignment_id = Some(pair.to_string());
+    es.alignment_id = Some(alignment_id.to_string());
     out.records.push(es);
 
     // ==== Channel family ====
@@ -783,7 +788,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         r.params = serde_json::json!({
             "matrix": mix.matrix,
             "ridge": mix.ridge,
@@ -803,7 +808,7 @@ pub fn analyze_pair(
                     None,
                     n as u64,
                 );
-                pc.alignment_id = Some(pair.to_string());
+                pc.alignment_id = Some(alignment_id.to_string());
                 pc.channels = Some(al_dataset::types::ChannelSelector::Channel(c as u16));
                 pc.params = serde_json::json!({"from_source_ch": 0});
                 out.records.push(pc);
@@ -826,7 +831,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        pr.alignment_id = Some(pair.to_string());
+        pr.alignment_id = Some(alignment_id.to_string());
         out.records.push(pr);
     }
     // L/R band coherence (magnitude + phase) for stereo captures.
@@ -885,7 +890,7 @@ pub fn analyze_pair(
                     None,
                     fr as u64,
                 );
-                lr.alignment_id = Some(pair.to_string());
+                lr.alignment_id = Some(alignment_id.to_string());
                 lr.freq_range = Some(al_dataset::types::Range {
                     start: bands[0].0,
                     end: bands[0].1,
@@ -915,7 +920,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        msr.alignment_id = Some(pair.to_string());
+        msr.alignment_id = Some(alignment_id.to_string());
         msr.channels = Some(al_dataset::types::ChannelSelector::ChannelPair(0, 1));
         out.records.push(msr);
         // Crosstalk / leakage: for stereo source, energy of the
@@ -955,7 +960,7 @@ pub fn analyze_pair(
                 None,
                 n as u64,
             );
-            xt.alignment_id = Some(pair.to_string());
+            xt.alignment_id = Some(alignment_id.to_string());
             out.records.push(xt);
         }
     }
@@ -992,7 +997,7 @@ pub fn analyze_pair(
                 None,
                 (os.len() + oc.len()) as u64,
             );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
         let mut tr = rb(ResolutionClass::Segment).scalar(
             "ref.transient_strength_ratio",
@@ -1004,7 +1009,7 @@ pub fn analyze_pair(
             None,
             (os.len() + oc.len()) as u64,
         );
-        tr.alignment_id = Some(pair.to_string());
+        tr.alignment_id = Some(alignment_id.to_string());
         out.records.push(tr);
     }
     // F0 ratio via autocorrelation peak of each signal.
@@ -1033,7 +1038,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         r.params = serde_json::json!({"src_f0": fs, "cap_f0": fc});
         out.records.push(r);
     }
@@ -1065,7 +1070,7 @@ pub fn analyze_pair(
             None,
             frames as u64,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         r.params = serde_json::json!({"src_hz": ds, "cap_hz": dc});
         out.records.push(r);
     }
@@ -1223,7 +1228,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        rr.alignment_id = Some(pair.to_string());
+        rr.alignment_id = Some(alignment_id.to_string());
         rr.params = serde_json::json!({"stage": name, "order": idx});
         out.records.push(rr);
         let mut rc = rb(ResolutionClass::Segment).scalar(
@@ -1236,7 +1241,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        rc.alignment_id = Some(pair.to_string());
+        rc.alignment_id = Some(alignment_id.to_string());
         rc.params = serde_json::json!({"stage": name});
         out.records.push(rc);
     }
@@ -1252,7 +1257,7 @@ pub fn analyze_pair(
             None,
             n as u64,
         );
-        r.alignment_id = Some(pair.to_string());
+        r.alignment_id = Some(alignment_id.to_string());
         out.records.push(r);
     }
 
@@ -1302,18 +1307,43 @@ mod tests {
 
     const N: usize = 1 << 16;
     const RATE: u32 = 48_000;
+    const ALN: &str = "ALN-0123456789abcdefghijkl";
+
+    fn analyze<'a>(pair: &str, aligned: &Aligned<'a>, validity: Validity) -> ReferenceResult {
+        analyze_pair(
+            pair,
+            &al_core::AlignmentId::parse(ALN).unwrap(),
+            aligned,
+            validity,
+            &ReferenceConfig::default(),
+        )
+    }
+
+    #[test]
+    fn records_carry_the_locate_alignment_id() {
+        let src = vec![noise(N, 0x5eed)];
+        let cap = src.clone();
+        let pair = aligned(&src, &cap, RATE);
+        for validity in [Validity::Valid, Validity::AmbiguousAlignment] {
+            let out = analyze("src__cap", &pair, validity);
+            assert!(!out.records.is_empty());
+            for r in &out.records {
+                assert_eq!(
+                    r.alignment_id.as_deref(),
+                    Some(ALN),
+                    "record {}",
+                    r.feature_id
+                );
+            }
+        }
+    }
 
     #[test]
     fn known_gain_is_recovered() {
         let src = vec![noise(N, 0x5eed)];
         let cap = vec![src[0].iter().map(|&v| 0.5 * v).collect::<Vec<f64>>()];
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::Valid,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::Valid);
 
         let gain = scalar(record(&out, "ref.gain_ls"));
         assert!((gain - 0.5).abs() < 0.02, "gain {gain}");
@@ -1336,12 +1366,7 @@ mod tests {
                 .collect::<Vec<f64>>(),
         ];
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::Valid,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::Valid);
 
         let gd = scalar(record(&out, "ref.group_delay_median_s"));
         let expected = delay as f64 / RATE as f64;
@@ -1365,12 +1390,7 @@ mod tests {
                 .collect::<Vec<f64>>(),
         ];
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::Valid,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::Valid);
 
         let mut ratios: Vec<f64> = out
             .records
@@ -1392,12 +1412,7 @@ mod tests {
         let src = vec![noise(N, 0xdead_beef)];
         let cap = src.clone();
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::Valid,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::Valid);
 
         let sim = scalar(record(&out, "ref.similarity_fullband"));
         assert!(sim > 0.99, "similarity {sim}");
@@ -1410,12 +1425,7 @@ mod tests {
         let src = vec![noise(4096, 1)];
         let cap = src.clone();
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::AmbiguousAlignment,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::AmbiguousAlignment);
         assert!(!out.records.is_empty());
         for r in &out.records {
             assert_ne!(
@@ -1434,12 +1444,7 @@ mod tests {
         let src = vec![noise(2048, 2)];
         let cap = src.clone();
         let pair = aligned(&src, &cap, RATE);
-        let out = analyze_pair(
-            "src__cap",
-            &pair,
-            Validity::Valid,
-            &ReferenceConfig::default(),
-        );
+        let out = analyze("src__cap", &pair, Validity::Valid);
         let gain = scalar(record(&out, "ref.gain_ls"));
         assert!((gain - 1.0).abs() < 1e-9);
     }
