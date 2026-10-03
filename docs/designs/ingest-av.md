@@ -108,6 +108,9 @@ relations:
 - 対応コンテナ / コーデックの初期セット | 自前デコードモジュールの
   段階的追加に依存(`../adr/implementation-stack.md`) |
   実装フェーズ | 対象外入力の取りこぼし
+  → 解決済: WAV/PCM + レガシー AVI(PCM 音声・映像は宣言メタ
+  データのみ)。`../impl/ir/avi-container-ingest-and-video-fixtures.md`
+  を参照
 - 映像イベント検出器の具体的実装 | 解析対象ゲームに依存 |
   実装フェーズ | 汎用機構なしの個別実装増殖
 

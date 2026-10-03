@@ -19,6 +19,7 @@ Directory: `docs/impl/ir`
 | analysis-reference-stage | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | al-media-skeleton | [al-media-skeleton.md](./al-media-skeleton.md) |
 | artifact-dictionary | [artifact-dictionary.md](./artifact-dictionary.md) |
+| avi-container-ingest-and-video-fixtures | [avi-container-ingest-and-video-fixtures.md](./avi-container-ingest-and-video-fixtures.md) |
 | chunked-tensor-store | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | columnar-table-store | [columnar-table-store.md](./columnar-table-store.md) |
 | core-domain-types | [core-domain-types.md](./core-domain-types.md) |
