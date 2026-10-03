@@ -153,9 +153,13 @@ pub fn identify_loop_occurrences(
 /// dcapture/dsource slope from 1.0 before a segment is split into
 /// `Drift`; off-rate runs shorter than `min_run` anchors are marked
 /// `Jitter` instead, and single anchors (no observable slope) stay
-/// `Continuous`. Gaps between anchor capture positions larger than
-/// `gap_samples` become `Gap` segments; a source-position rewind
-/// after a gap becomes `Resume`.
+/// `Continuous`. `gap_samples` is the slack between the source and
+/// capture advances of consecutive anchors: capture advancing
+/// farther than the source by more than that slack becomes `Gap`
+/// (unmapped capture), the source advancing farther becomes `Skip`
+/// (skipped source content), and a source rewind becomes `Resume`
+/// regardless of the capture distance — a restart is the more
+/// specific observation.
 pub fn build_time_map(
     anchors: &[Anchor],
     rate_tolerance: f64,
@@ -169,33 +173,31 @@ pub fn build_time_map(
     let mut run: Vec<Anchor> = vec![anchors[0]];
     for w in anchors.windows(2) {
         let (prev, next) = (w[0], w[1]);
-        let gap = next.capture > prev.capture + gap_samples;
-        let rewind = next.source < prev.source;
-        if gap {
-            finish_run(&mut segments, &mut run, rate_tolerance, min_run);
-            segments.push(Segment {
-                kind: SegmentKind::Gap,
-                anchors: vec![],
-                source_range: [prev.source, next.source],
-                capture_range: [prev.capture, next.capture],
-                rate: None,
-            });
-            run = vec![next];
+        let dc = next.capture.saturating_sub(prev.capture);
+        let ds = next.source.saturating_sub(prev.source);
+        let kind = if next.source < prev.source {
+            SegmentKind::Resume
+        } else if dc > ds.saturating_add(gap_samples) {
+            SegmentKind::Gap
+        } else if ds > dc.saturating_add(gap_samples) {
+            SegmentKind::Skip
+        } else {
+            run.push(next);
             continue;
-        }
-        if rewind {
-            finish_run(&mut segments, &mut run, rate_tolerance, min_run);
-            segments.push(Segment {
-                kind: SegmentKind::Resume,
-                anchors: vec![next],
-                source_range: [prev.source, next.source],
-                capture_range: [prev.capture, next.capture],
-                rate: None,
-            });
-            run = vec![next];
-            continue;
-        }
-        run.push(next);
+        };
+        finish_run(&mut segments, &mut run, rate_tolerance, min_run);
+        segments.push(Segment {
+            kind,
+            anchors: if kind == SegmentKind::Resume {
+                vec![next]
+            } else {
+                vec![]
+            },
+            source_range: [prev.source, next.source],
+            capture_range: [prev.capture, next.capture],
+            rate: None,
+        });
+        run = vec![next];
     }
     finish_run(&mut segments, &mut run, rate_tolerance, min_run);
     TimeMap { segments }
@@ -223,17 +225,21 @@ fn finish_run(
     if run.is_empty() {
         return;
     }
-    // Split at flagged (non-unit-rate) boundaries.
+    // Split at rate-class transitions so each piece is a maximal run
+    // of windows that are all on-rate or all off-rate. Consecutive
+    // off-rate windows share one piece; piece boundaries reuse the
+    // shared anchor so segments tile the run without overlapping.
     let mut pieces: Vec<Vec<Anchor>> = Vec::new();
     let mut cur = vec![run[0]];
+    let mut cur_off = false;
     for w in run.windows(2) {
         let off_rate = (local_rate(w) - 1.0).abs() > rate_tolerance;
-        if off_rate {
-            cur.push(w[1]);
+        if cur.len() > 1 && off_rate != cur_off {
             pieces.push(std::mem::take(&mut cur));
             cur = vec![w[0]];
         }
         cur.push(w[1]);
+        cur_off = off_rate;
     }
     if !cur.is_empty() {
         pieces.push(cur);
@@ -354,5 +360,94 @@ mod tests {
         let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
         assert!(kinds.contains(&SegmentKind::Drift));
         assert!(kinds.contains(&SegmentKind::Gap));
+    }
+
+    #[test]
+    fn consecutive_off_rate_windows_form_one_segment() {
+        // A sustained 1.1x drift: every window is off-rate, but the
+        // run must become a single Drift segment — not overlapping
+        // pieces that duplicate anchors.
+        let anchors: Vec<_> = (0..6).map(|i| a(i * 100, i * 110)).collect();
+        let map = build_time_map(&anchors, 0.05, 500, 3);
+        assert_eq!(map.segments.len(), 1);
+        assert_eq!(map.segments[0].kind, SegmentKind::Drift);
+        assert_eq!(map.segments[0].source_range, [0, 500]);
+        assert_eq!(map.segments[0].capture_range, [0, 550]);
+        let rate = map.segments[0].rate.unwrap();
+        assert!((rate - 1.1).abs() < 1e-9);
+    }
+
+    #[test]
+    fn mixed_rate_runs_split_at_transitions() {
+        // on-rate, then off-rate, then on-rate windows: three
+        // non-overlapping pieces, each a maximal same-class run.
+        let mut anchors: Vec<_> = (0..4).map(|i| a(i * 100, i * 100)).collect();
+        anchors.extend((4..8).map(|i| a(i * 100, 300 + (i - 3) * 115)));
+        anchors.extend((8..12).map(|i| a(i * 100, 760 + (i - 7) * 100)));
+        let map = build_time_map(&anchors, 0.05, 500, 3);
+        let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Continuous,
+                SegmentKind::Drift,
+                SegmentKind::Continuous
+            ]
+        );
+        for w in map.segments.windows(2) {
+            assert!(
+                w[1].capture_range[0] >= w[0].capture_range[1],
+                "capture ranges overlap or run backwards: {:?}",
+                map.segments
+            );
+            assert!(
+                w[1].source_range[0] >= w[0].source_range[1],
+                "source ranges overlap or run backwards: {:?}",
+                map.segments
+            );
+        }
+    }
+
+    #[test]
+    fn forward_source_jump_becomes_skip() {
+        // Source jumps 600 samples forward while capture stays
+        // contiguous: skipped source content, not a capture gap.
+        let mut anchors: Vec<_> = (0..4).map(|i| a(i * 100, i * 100)).collect();
+        anchors.extend((10..14).map(|i| a(i * 100, 300 + (i - 9) * 100)));
+        let map = build_time_map(&anchors, 0.05, 200, 3);
+        let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Continuous,
+                SegmentKind::Skip,
+                SegmentKind::Continuous
+            ]
+        );
+        assert_eq!(map.segments[1].source_range, [300, 1000]);
+    }
+
+    #[test]
+    fn rewind_is_resume_even_across_a_capture_gap() {
+        // A restart is the more specific observation: a source rewind
+        // is Resume even when the capture also jumped far.
+        let anchors = vec![
+            a(0, 0),
+            a(100, 100),
+            a(200, 200),
+            a(50, 5000),
+            a(150, 5100),
+            a(250, 5200),
+        ];
+        let map = build_time_map(&anchors, 0.05, 200, 3);
+        let kinds: Vec<_> = map.segments.iter().map(|s| s.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Continuous,
+                SegmentKind::Resume,
+                SegmentKind::Continuous
+            ]
+        );
     }
 }
