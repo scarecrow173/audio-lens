@@ -33,9 +33,10 @@ CONFIG:
 NOTE:
   The ingest (WAV/PCM), locate (source localization), cheap analysis
   (always-on observations), reference analysis (aligned comparison),
-  and dataset (analysis manifest) stages are implemented. The
-  expensive analysis, visualization, and export stages are stubs
-  that emit marker artifacts; real stages are added by later plans.
+  expensive analysis (candidate-driven deep dive), and dataset
+  (analysis manifest) stages are implemented. The visualization and
+  export stages are stubs that emit marker artifacts; real stages
+  are added by later plans.
 ";
 
 /// Foundation stub stage: emits one marker artifact per run so the runner,
@@ -124,6 +125,9 @@ fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Sta
     }
     if kind == StageKind::ReferenceAnalysis {
         return Ok(Box::new(al_analysis::stage::ReferenceAnalysisStage::new()));
+    }
+    if kind == StageKind::ExpensiveAnalysis {
+        return Ok(Box::new(al_analysis::stage::ExpensiveAnalysisStage::new()));
     }
     if kind == StageKind::Dataset {
         return Ok(Box::new(DatasetStage::new()));

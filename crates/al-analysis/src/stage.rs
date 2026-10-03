@@ -15,6 +15,8 @@ use al_locate::result::LocateResult;
 use al_media::wav::WavEncoding;
 
 use crate::cheap::{self, CheapConfig};
+use crate::events::{self, EventConfig};
+use crate::expensive::{self, ExpensiveConfig};
 use crate::reference::{self, Aligned, ReferenceConfig};
 use crate::session::open_analysis_dataset;
 
@@ -280,6 +282,161 @@ impl Stage for ReferenceAnalysisStage {
                 inputs: vec![artifact.artifact_id.clone()],
                 params: serde_json::json!({}),
             });
+        }
+
+        writer.finish().map_err(err)?;
+        Ok(records)
+    }
+}
+
+/// Candidate-driven deep analysis over triggered regions.
+#[derive(Debug, Default)]
+pub struct ExpensiveAnalysisStage;
+
+impl ExpensiveAnalysisStage {
+    /// Create the stage.
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Stage for ExpensiveAnalysisStage {
+    fn kind(&self) -> StageKind {
+        StageKind::ExpensiveAnalysis
+    }
+
+    /// Only cheap features are required to produce candidates;
+    /// reference features are used when present but not required.
+    fn depends_on(&self) -> Vec<StageKind> {
+        vec![StageKind::Ingest, StageKind::CheapAnalysis]
+    }
+
+    fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
+        let err = |e: io::Error| StageError::new(StageKind::ExpensiveAnalysis, e.to_string());
+        let e_cfg = ExpensiveConfig::from_job(ctx.config);
+        let c_cfg = EventConfig::from_job(ctx.config);
+        let mut writer = open_analysis_dataset(ctx).map_err(err)?;
+        let root = ctx.registry.job_dir().join("analysis");
+        let reader = al_dataset::reader::DatasetReader::open(&root).map_err(err)?;
+        let mut records = Vec::new();
+
+        // 1. Extract candidate events from the cheap/reference
+        // feature stores and persist them under the `events` role.
+        // The table is written even when empty so `role_produced`
+        // distinguishes "ran" from `not_produced`.
+        let mut all_events: Vec<events::CandidateEvent> = Vec::new();
+        for role in expensive::CANDIDATE_ROLES {
+            for artifact in reader
+                .artifacts(role)
+                .into_iter()
+                .filter(|a| a.store == al_dataset::manifest::StoreKind::Json)
+            {
+                let name = artifact
+                    .path
+                    .strip_prefix(&format!("{role}/"))
+                    .unwrap_or(&artifact.path);
+                let body = reader.read_json(role, name).map_err(err)?;
+                let feat_records = expensive::parse_feature_records(&body);
+                // `features/cheap/<input>` maps to that input;
+                // `features/reference/<src>__<cap>` events apply to the
+                // capture side (the measured pipeline output). The
+                // `.json` store suffix is not part of the input id.
+                let stem = name.strip_suffix(".json").unwrap_or(name);
+                let input_id = stem.split("__").last().unwrap_or(stem).to_string();
+                all_events.extend(expensive::extract_candidates(
+                    &artifact.path,
+                    &input_id,
+                    &feat_records,
+                    &c_cfg,
+                ));
+            }
+        }
+        writer
+            .write_table(
+                "events",
+                "candidates",
+                &events::events_schema(),
+                &events::events_to_rows(&all_events),
+                al_dataset::provenance::Provenance {
+                    input_id: "job".into(),
+                    algorithm_id: "events.v1".into(),
+                    algorithm_version: "1".into(),
+                    params: serde_json::json!({}),
+                    alignment_id: None,
+                    parents: Vec::new(),
+                },
+            )
+            .map_err(err)?;
+
+        // 2. Plan triggered regions per input and deep-analyze them.
+        let dictionary = ctx
+            .config
+            .get("dictionary_text")
+            .and_then(|v| v.as_str())
+            .and_then(|text| al_media::Dictionary::from_json(text).ok());
+        for input in &ctx.manifest.inputs {
+            let input_id = input.input_id.to_string();
+            let Some(dec) = decode_input(input, ctx)
+                .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))?
+            else {
+                continue;
+            };
+            let n = dec.channel_samples.first().map_or(0, |c| c.len());
+            if n == 0 {
+                continue;
+            }
+            let duration_s = n as f64 / dec.sample_rate as f64;
+            let own_events: Vec<events::CandidateEvent> = all_events
+                .iter()
+                .filter(|e| e.input_id == input_id)
+                .cloned()
+                .collect();
+            let regions = expensive::plan_regions(duration_s, &own_events, &e_cfg);
+            let chans: Vec<&[f64]> = dec.channel_samples.iter().map(|c| c.as_slice()).collect();
+            for (i, region) in regions.iter().enumerate() {
+                let out = expensive::analyze_region(
+                    &input_id,
+                    &chans,
+                    dec.sample_rate,
+                    region,
+                    dictionary.as_ref(),
+                    &e_cfg,
+                );
+                let name = format!("{input_id}__r{i:03}");
+                writer
+                    .write_json(
+                        "features/expensive",
+                        &name,
+                        &serde_json::json!({
+                            "region_s": [region.start_s, region.end_s],
+                            "triggers": region.triggers,
+                            "records": out.records,
+                        }),
+                        al_dataset::provenance::Provenance {
+                            input_id: input_id.clone(),
+                            algorithm_id: "expensive.v1".into(),
+                            algorithm_version: "1".into(),
+                            params: serde_json::json!({
+                                "triggers": region.triggers,
+                            }),
+                            alignment_id: None,
+                            parents: dec
+                                .artifact_ids
+                                .iter()
+                                .map(|a| a.as_str().to_string())
+                                .collect(),
+                        },
+                    )
+                    .map_err(err)?;
+                records.push(ArtifactRecord {
+                    artifact_id: ctx.registry.issue(),
+                    role: "expensive_features".into(),
+                    path: PathBuf::from(format!("analysis/features/expensive/{name}.json")),
+                    produced_by: Some(StageKind::ExpensiveAnalysis),
+                    inputs: dec.artifact_ids.clone(),
+                    params: serde_json::json!({"triggers": region.triggers}),
+                });
+            }
         }
 
         writer.finish().map_err(err)?;
