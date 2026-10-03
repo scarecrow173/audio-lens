@@ -321,8 +321,8 @@ pub fn read_wav_range<R: Read + Seek>(
 /// Input samples are `f64` in the *native scale* of the chosen encoding
 /// — the same convention [`decode_wav`] uses for output. Integer
 /// encodings expect integer-scale values (clamped to the target width,
-/// rounded to nearest); `Float32` casts directly. Encoding a decoded
-/// file in the same format is therefore lossless.
+/// rounded to nearest); the float encodings cast directly. Encoding a
+/// decoded file in the same format is therefore lossless.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WavEncoding {
     /// Signed 16-bit little-endian PCM.
@@ -333,12 +333,14 @@ pub enum WavEncoding {
     PcmS32,
     /// IEEE 754 32-bit float.
     Float32,
+    /// IEEE 754 64-bit float.
+    Float64,
 }
 
 impl WavEncoding {
     fn format_tag(self) -> u16 {
         match self {
-            Self::Float32 => 3,
+            Self::Float32 | Self::Float64 => 3,
             _ => 1,
         }
     }
@@ -348,6 +350,7 @@ impl WavEncoding {
             Self::PcmS16 => 16,
             Self::PcmS24 => 24,
             Self::PcmS32 | Self::Float32 => 32,
+            Self::Float64 => 64,
         }
     }
 
@@ -367,6 +370,7 @@ impl WavEncoding {
                 out.extend_from_slice(&s.to_le_bytes());
             }
             Self::Float32 => out.extend_from_slice(&(v as f32).to_le_bytes()),
+            Self::Float64 => out.extend_from_slice(&v.to_le_bytes()),
         }
     }
 }

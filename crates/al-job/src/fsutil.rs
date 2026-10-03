@@ -111,4 +111,19 @@ mod tests {
         #[cfg(windows)]
         assert!(checked_job_path(job, Path::new(r"\\server\share")).is_err());
     }
+
+    // The create→finish rewrite paths (manifest.json, array.json) rely
+    // on the rename replacing an existing destination atomically —
+    // which `fs::rename` guarantees on both POSIX and Windows.
+    #[test]
+    fn write_durable_replaces_existing_destination() {
+        let dir = std::env::temp_dir().join(format!("fsutil-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("manifest.json");
+        write_durable(&path, b"first").unwrap();
+        write_durable(&path, b"second").unwrap();
+        assert_eq!(fs::read(&path).unwrap(), b"second");
+        assert!(!tmp_path_for(&path).exists());
+        fs::remove_dir_all(&dir).ok();
+    }
 }

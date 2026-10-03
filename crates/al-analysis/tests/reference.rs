@@ -167,6 +167,55 @@ fn accepted_alignment_produces_features_residuals_and_dataset() {
     let g = scalar_value(&gain);
     assert!(g > 0.2 && g < 0.8, "gain {g}");
 
+    // Every record references the alignment id issued by locate —
+    // not the dataset path stem.
+    let result: serde_json::Value = serde_json::from_str(
+        &fs::read_to_string(
+            fx.dir
+                .join("locate")
+                .join(&fx.source_input_id)
+                .join(&fx.capture_input_id)
+                .join("result.json"),
+        )
+        .expect("locate result.json"),
+    )
+    .expect("locate result parses");
+    let aln = result["result"]["alignment_id"]
+        .as_str()
+        .expect("alignment_id");
+    for r in body["records"].as_array().unwrap() {
+        assert_eq!(
+            r["alignment_id"].as_str(),
+            Some(aln),
+            "record {} must reference the locate alignment",
+            r["feature_id"]
+        );
+    }
+
+    // Intermediate tensors produced by the reference stage record
+    // reference.v1 + the same alignment, not the cheap producer.
+    let reader =
+        al_dataset::reader::DatasetReader::open(&fx.dir.join("analysis")).expect("dataset opens");
+    let pair_prefix = format!(
+        "intermediate/{}__{}",
+        fx.source_input_id, fx.capture_input_id
+    );
+    let tensors: Vec<_> = reader
+        .artifacts("intermediate")
+        .into_iter()
+        .filter(|a| a.path.starts_with(&pair_prefix))
+        .collect();
+    assert!(!tensors.is_empty(), "no intermediate tensors persisted");
+    for a in tensors {
+        assert_eq!(a.provenance.algorithm_id, "reference.v1", "{}", a.path);
+        assert_eq!(
+            a.provenance.alignment_id.as_deref(),
+            Some(aln),
+            "{}",
+            a.path
+        );
+    }
+
     // R0-R3 residual RMS ratios are present and non-increasing.
     let ratios: Vec<f64> = body["records"]
         .as_array()
@@ -252,6 +301,12 @@ fn rejected_alignment_persists_invalid_rows_and_completes() {
     assert!(!records.is_empty());
     for r in records {
         assert_ne!(r["validity"], "valid", "record {}", r["feature_id"]);
+        assert_eq!(
+            r["alignment_id"].as_str(),
+            Some("aln-rejected"),
+            "record {} must reference the issued alignment",
+            r["feature_id"]
+        );
     }
 
     fs::remove_dir_all(&fx.dir).ok();
