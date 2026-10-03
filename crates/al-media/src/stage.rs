@@ -10,10 +10,19 @@ use al_job::stage::{Stage, StageContext, StageError};
 
 use al_core::sha256_hex;
 
+use crate::avi::{StreamTiming, VideoInfo, decode_avi};
 use crate::dictionary::Dictionary;
 use crate::format::{MediaFormat, detect_format};
 use crate::metadata::AudioMetadata;
-use crate::wav::decode_wav;
+use crate::wav::{DecodedAudio, decode_wav};
+
+/// Optional mux-level observations a container may carry alongside the
+/// decoded PCM: declared video facts plus per-stream packet timing.
+#[derive(Default)]
+struct MuxObservations {
+    video: Option<VideoInfo>,
+    av_timing: Vec<StreamTiming>,
+}
 
 /// Ingest stage: decodes declared inputs into pre-normalization PCM plus
 /// metadata/annotation artifacts registered in the manifest.
@@ -101,25 +110,55 @@ impl IngestStage {
         })?;
 
         match format {
-            MediaFormat::Wav => self.ingest_wav(input, &bytes, source_hash, ctx),
+            MediaFormat::Wav => {
+                let audio = decode_wav(&bytes).map_err(|e| {
+                    StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
+                })?;
+                self.ingest_decoded(
+                    input,
+                    audio,
+                    "wav",
+                    MuxObservations::default(),
+                    source_hash,
+                    ctx,
+                )
+            }
+            MediaFormat::Avi => {
+                let media = decode_avi(&bytes).map_err(|e| {
+                    StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
+                })?;
+                self.ingest_decoded(
+                    input,
+                    media.audio,
+                    "avi",
+                    MuxObservations {
+                        video: media.video,
+                        av_timing: media.timing,
+                    },
+                    source_hash,
+                    ctx,
+                )
+            }
         }
     }
 
-    fn ingest_wav(
+    /// Register artifacts for an input decoded to PCM: `decoded.f64le`
+    /// plus `metadata.json` (with `video` and `av_timing` sections for
+    /// containers that carry muxed streams). Shared by every supported
+    /// container.
+    fn ingest_decoded(
         &self,
         input: &al_job::job::JobInput,
-        bytes: &[u8],
+        audio: DecodedAudio,
+        container: &str,
+        mux: MuxObservations,
         source_hash: String,
         ctx: &StageContext<'_>,
     ) -> Result<Vec<ArtifactRecord>, StageError> {
-        let audio = decode_wav(bytes).map_err(|e| {
-            StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
-        })?;
-
         let annotations: Vec<crate::dictionary::Annotation> = self
             .dictionary
             .as_ref()
-            .map(|d| d.annotate(Some(&audio.codec), Some("wav")))
+            .map(|d| d.annotate(Some(&audio.codec), Some(container)))
             .unwrap_or_default();
         let dictionary_info = self.dictionary.as_ref().map(|d| {
             serde_json::json!({
@@ -130,7 +169,7 @@ impl IngestStage {
         });
 
         let metadata = AudioMetadata {
-            container: "wav".into(),
+            container: container.into(),
             codec: audio.codec.clone(),
             sample_rate: audio.sample_rate,
             channels: audio.channels,
@@ -167,6 +206,8 @@ impl IngestStage {
             "role": input.role,
             "source_path": input.path,
             "audio": metadata,
+            "video": mux.video,
+            "av_timing": mux.av_timing,
             "dictionary": dictionary_info,
             "annotations": annotations,
         });

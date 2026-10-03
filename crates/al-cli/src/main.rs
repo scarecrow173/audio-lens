@@ -31,7 +31,8 @@ CONFIG:
                  Defaults to the dictionary bundled with the binary.
 
 NOTE:
-  All stages are implemented: ingest (WAV/PCM), locate (source
+  All stages are implemented: ingest (WAV/PCM, AVI/PCM+uncompressed
+  video — see docs for container scope), locate (source
   localization), cheap analysis (always-on observations), reference
   analysis (aligned comparison), expensive analysis (candidate-
   driven deep dive), dataset (analysis manifest), visualization

@@ -300,6 +300,107 @@ fn resume_reuses_completed_ingest_artifacts() {
 }
 
 #[test]
+fn ingest_avi_produces_pcm_metadata_and_video_facts() {
+    let dir = temp_dir("avi");
+    let audio: Vec<u8> = (0..960i16)
+        .flat_map(|v| (v % 400 - 200).to_le_bytes())
+        .collect();
+    let avi_bytes = al_media::write_avi(&al_media::AviSpec {
+        width: 64,
+        height: 48,
+        fps: 10,
+        frames: vec![vec![7u8; 64 * 48 * 3]; 20],
+        audio,
+        channels: 1,
+        sample_rate: 48_000,
+    });
+    let avi = write_fixture(&dir, "cap.avi", &avi_bytes);
+
+    let job_dir = temp_dir("job-avi");
+    let runner = StageRunner::new(&job_dir);
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, &avi)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    )
+    .unwrap();
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
+
+    let manifest = runner.run(&def, &mut stages).unwrap();
+    let meta_record = manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "ingest_metadata")
+        .expect("ingest_metadata artifact");
+    let meta_path = runner.job_dir(&manifest.job_id).join(&meta_record.path);
+    let meta: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(meta_path).unwrap()).unwrap();
+    assert_eq!(meta["audio"]["container"], "avi");
+    assert_eq!(meta["audio"]["codec"], "pcm_s16le");
+    assert_eq!(meta["audio"]["frames"], 960);
+    assert_eq!(meta["video"]["codec"], "rawvideo");
+    assert_eq!(meta["video"]["frames"], 20);
+    assert_eq!(meta["video"]["fps"], 10.0);
+    assert_eq!(meta["video"]["width"], 64);
+
+    // movi packet order is persisted as per-stream clock observations.
+    let timing = meta["av_timing"].as_array().expect("av_timing array");
+    assert_eq!(timing.len(), 2);
+    let v = timing
+        .iter()
+        .find(|t| t["stream_type"] == "vids")
+        .expect("video timing");
+    assert_eq!(v["observation"]["clock"], "video");
+    assert_eq!(v["observation"]["timestamp_count"], 20);
+    // The movi-order-derived timestamp column itself is persisted:
+    // metadata alone can address each frame's position on its clock.
+    assert_eq!(v["start_tick"], 0);
+    let vts: Vec<i64> = v["movi_order_timestamps"]
+        .as_array()
+        .expect("movi_order_timestamps array")
+        .iter()
+        .map(|t| t.as_i64().unwrap())
+        .collect();
+    assert_eq!(vts, (0..20).collect::<Vec<i64>>());
+    let a = timing
+        .iter()
+        .find(|t| t["stream_type"] == "auds")
+        .expect("audio timing");
+    assert_eq!(a["observation"]["clock"], "audio");
+    assert_eq!(a["observation"]["timestamp_count"], 1);
+    assert_eq!(a["movi_order_timestamps"], serde_json::json!([0]));
+
+    // WAV inputs never carry a video section.
+    assert!(meta["video"].is_object());
+
+    std::fs::remove_dir_all(&dir).ok();
+    std::fs::remove_dir_all(&job_dir).ok();
+}
+
+#[test]
+fn malformed_avi_fails_explicitly() {
+    let dir = temp_dir("avi-bad");
+    // RIFF/AVI signature but no movi list.
+    let avi = write_fixture(&dir, "cap.avi", b"RIFF\x04\0\0\0AVI ");
+
+    let job_dir = temp_dir("job-avi-bad");
+    let runner = StageRunner::new(&job_dir);
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, &avi)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    )
+    .unwrap();
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
+
+    let err = runner.run(&def, &mut stages).unwrap_err();
+    assert!(err.message.contains("missing movi list"));
+
+    std::fs::remove_dir_all(&dir).ok();
+    std::fs::remove_dir_all(&job_dir).ok();
+}
+
+#[test]
 fn timing_observation_serializes_with_annotations_separately() {
     use al_media::{ClockKind, observe_timing};
 

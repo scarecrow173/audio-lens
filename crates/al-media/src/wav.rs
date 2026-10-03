@@ -48,7 +48,7 @@ impl DecodedAudio {
     }
 }
 
-struct FmtChunk {
+pub(crate) struct FmtChunk {
     format_tag: u16,
     channels: u16,
     sample_rate: u32,
@@ -57,19 +57,19 @@ struct FmtChunk {
     bits_per_sample: u16,
 }
 
-fn read_u16(data: &[u8], at: usize) -> Result<u16, MediaError> {
+pub(crate) fn read_u16(data: &[u8], at: usize) -> Result<u16, MediaError> {
     data.get(at..at + 2)
         .map(|b| u16::from_le_bytes([b[0], b[1]]))
         .ok_or_else(|| MediaError::malformed("truncated u16 field"))
 }
 
-fn read_u32(data: &[u8], at: usize) -> Result<u32, MediaError> {
+pub(crate) fn read_u32(data: &[u8], at: usize) -> Result<u32, MediaError> {
     data.get(at..at + 4)
         .map(|b| u32::from_le_bytes([b[0], b[1], b[2], b[3]]))
         .ok_or_else(|| MediaError::malformed("truncated u32 field"))
 }
 
-fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
+pub(crate) fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
     if chunk.len() < 16 {
         return Err(MediaError::malformed("fmt chunk shorter than 16 bytes"));
     }
@@ -83,7 +83,7 @@ fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
     })
 }
 
-fn decode_samples(
+pub(crate) fn decode_samples(
     fmt: &FmtChunk,
     data: &[u8],
 ) -> Result<(SampleFormat, String, Vec<f64>), MediaError> {
@@ -268,6 +268,15 @@ fn decoded(fmt: &FmtChunk, body: &[u8]) -> Result<DecodedAudio, MediaError> {
         sample_format,
         codec,
     })
+}
+
+/// Decode a WAVEFORMATEX body + raw sample bytes (the layout shared by
+/// WAV `fmt `/`data` chunks and AVI audio `strf`/`wb` chunks).
+pub(crate) fn decode_waveformatex(
+    fmt_bytes: &[u8],
+    data: &[u8],
+) -> Result<DecodedAudio, MediaError> {
+    decoded(&parse_fmt(fmt_bytes)?, data)
 }
 
 /// Decode a RIFF/WAVE file into pre-normalization PCM.

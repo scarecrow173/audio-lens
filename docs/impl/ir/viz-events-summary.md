@@ -71,6 +71,10 @@ task `docs/tasks/viz-events-summary.md`、plan
   非決定性があった(回帰テストで検出・修正)
 - ロール一覧はソート済み、製品一覧は生成順(決定的)で
   serialize する
+- locate サマリの accepted/rejected 集計は `read_range` の
+  列優先レイアウトに合わせて列名 `status` で解決する
+  (当初位置インデックスのまま行として読み、先頭行しか
+  数えられていなかった)
 
 ## Related Experiments
 

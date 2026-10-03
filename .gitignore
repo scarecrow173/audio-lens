@@ -79,3 +79,6 @@ apm_modules/
 
 # Rust build artifacts
 target/
+
+# Sample verification runs (regenerate: see samples/README.md)
+samples/_runs/

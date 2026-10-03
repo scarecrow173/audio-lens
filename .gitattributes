@@ -19,9 +19,9 @@
 *.jpeg binary
 *.gif binary
 *.pdf binary
-# Audio fixtures and intermediates
-*.wav binary
-*.flac binary
+# Audio fixtures and intermediates (Git LFS)
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
 *.mp3 binary
 *.ogg binary
 *.opus binary
@@ -30,20 +30,18 @@
 *.aif binary
 *.aiff binary
 # Video / capture inputs
-*.mp4 binary
-*.mov binary
-*.mkv binary
-*.avi binary
-*.webm binary
-*.m2ts binary
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.mkv filter=lfs diff=lfs merge=lfs -text
+*.avi filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+*.m2ts filter=lfs diff=lfs merge=lfs -text
 # Columnar / tensor analysis data
 *.parquet binary
 *.arrow binary
 *.npy binary
 *.npz binary
 *.zip binary
-*.wav filter=lfs diff=lfs merge=lfs -text
-*.flac filter=lfs diff=lfs merge=lfs -text
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 *.opus filter=lfs diff=lfs merge=lfs -text
@@ -51,12 +49,6 @@
 *.m4a filter=lfs diff=lfs merge=lfs -text
 *.aif filter=lfs diff=lfs merge=lfs -text
 *.aiff filter=lfs diff=lfs merge=lfs -text
-*.mp4 filter=lfs diff=lfs merge=lfs -text
-*.mov filter=lfs diff=lfs merge=lfs -text
-*.mkv filter=lfs diff=lfs merge=lfs -text
-*.avi filter=lfs diff=lfs merge=lfs -text
-*.webm filter=lfs diff=lfs merge=lfs -text
-*.m2ts filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text

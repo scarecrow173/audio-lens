@@ -68,6 +68,10 @@ task `docs/tasks/viz-views.md`、plan
   (dataset 由来のみ)
 - イベントビューは events ロールが produced でもテーブルが
   無い場合に `None` を返し、呼び出し側で product を作らない
+- `TableReader::read_range` は列優先(`cols[col][row]`)を返す。
+  初期実装が行として扱いフィールドがずれていたため、サンプル
+  データでの動作確認を経て列名(`schema()`)でフィールドを
+  解決する実装に修正した
 
 ## Related Experiments
 
