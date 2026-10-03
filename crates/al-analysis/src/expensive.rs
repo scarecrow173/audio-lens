@@ -120,6 +120,11 @@ pub struct TriggeredRegion {
     /// Weakest confidence among the selecting evidence (`High` for
     /// `manual` / `always_run`).
     pub confidence: Confidence,
+    /// Whether at least one `Valid` trigger (`manual`, `always_run`,
+    /// or a `Valid` event) selected this region. A region selected
+    /// only by non-`Valid` automatic events is recorded as invalid
+    /// observations — no estimation runs on untrusted evidence.
+    pub has_valid_trigger: bool,
 }
 
 /// Map an event kind to its semantic trigger reason. The candidate
@@ -153,7 +158,9 @@ fn weakest_validity(a: Validity, b: Validity) -> Validity {
 /// `[0, duration_s]`. Event-selected regions carry the events'
 /// validity/confidence (`manual` / `always_run` count as independent
 /// `Valid`/`High` triggers) so downstream never promotes weak
-/// evidence into strong claims.
+/// evidence into strong claims. `has_valid_trigger` tracks whether
+/// any `Valid` evidence selected the merged region — regions without
+/// it are analyzed as invalid observations only.
 pub fn plan_regions(
     duration_s: f64,
     events: &[CandidateEvent],
@@ -167,6 +174,7 @@ pub fn plan_regions(
             triggers: vec!["always_run".into()],
             validity: Validity::Valid,
             confidence: Confidence::High,
+            has_valid_trigger: true,
         });
     }
     for &(a, b) in &cfg.manual_ranges {
@@ -176,6 +184,7 @@ pub fn plan_regions(
             triggers: vec!["manual".into()],
             validity: Validity::Valid,
             confidence: Confidence::High,
+            has_valid_trigger: true,
         });
     }
     let half = cfg.event_window_s;
@@ -190,6 +199,7 @@ pub fn plan_regions(
             triggers: event_triggers(e),
             validity: e.validity,
             confidence: e.confidence,
+            has_valid_trigger: e.validity == Validity::Valid,
         });
     }
     // Merge overlapping / abutting regions per input.
@@ -203,6 +213,7 @@ pub fn plan_regions(
             last.end_s = last.end_s.max(r.end_s);
             last.validity = weakest_validity(last.validity, r.validity);
             last.confidence = last.confidence.min(r.confidence);
+            last.has_valid_trigger |= r.has_valid_trigger;
             for t in r.triggers {
                 if !last.triggers.contains(&t) {
                     last.triggers.push(t);
@@ -241,6 +252,10 @@ fn corr0(x: &[f64], y: &[f64]) -> f64 {
 /// Run the expensive analysis families over one region of one input.
 /// `chans` are the input's decoded channels; the region selects the
 /// sample range. `triggers` are persisted into every record's params.
+/// A region without a `Valid` trigger (`has_valid_trigger == false`)
+/// skips estimation entirely: each feature is persisted as an
+/// invalid observation (NaN scalar + mapped validity), per the
+/// plan's rule that non-`Valid` upstream evidence yields no numbers.
 pub fn analyze_region(
     input_id: &str,
     chans: &[&[f64]],
@@ -312,6 +327,76 @@ pub fn analyze_region(
         });
         r
     };
+    // Plan contract: when no `Valid` trigger selected the region the
+    // upstream evidence is untrusted, so no estimation runs — every
+    // feature is persisted as an invalid observation (NaN scalar,
+    // mapped validity) rather than a finite number. The feature list
+    // mirrors the families computed below so consumers always see
+    // the same schema per region.
+    if !region.has_valid_trigger {
+        let reason = || {
+            Some(format!(
+                "selected by non-valid upstream evidence ({:?})",
+                region.validity
+            ))
+        };
+        for (id, unit) in [
+            ("exp.region_support", "samples"),
+            ("exp.polarity_asymmetry", "ratio"),
+            ("exp.dynamic_range_db", "db"),
+            ("exp.attack_db_per_20ms", "db"),
+            ("exp.release_db_per_20ms", "db"),
+            ("exp.repeat_block_score", "corr"),
+            ("exp.gap_count", "count"),
+            ("exp.codec_block_score", "ratio"),
+            ("exp.codec_block_size", "samples"),
+        ] {
+            out.records.push(push(
+                id,
+                f64::NAN,
+                unit,
+                Confidence::High,
+                trigger_val,
+                reason(),
+                0,
+            ));
+        }
+        let mut spectral = vec![
+            ("exp.cutoff_hz", "hz"),
+            ("exp.narrowband_peak_count", "count"),
+            ("exp.narrowband_notch_count", "count"),
+            ("exp.echo_delay_s", "seconds"),
+            ("exp.cepstrum_prominence", "ratio"),
+            ("exp.src_image_score", "corr"),
+            ("exp.src_candidate_rate", "hz"),
+            ("exp.thd_ratio", "ratio"),
+            ("exp.spectral_hole_ratio", "ratio"),
+            ("exp.tonal_peak_count", "count"),
+            ("exp.hum_harmonic_count", "count"),
+        ];
+        if dictionary.is_some() {
+            spectral.insert(1, ("exp.dictionary_cutoff_delta_khz", "khz"));
+        }
+        if chans.len() >= 2 {
+            spectral.push(("exp.freq_lr_coherence", "coherence"));
+        }
+        for (id, unit) in spectral {
+            let mut r = push_spec(
+                id,
+                f64::NAN,
+                unit,
+                Confidence::High,
+                trigger_val,
+                reason(),
+                0,
+            );
+            if id == "exp.freq_lr_coherence" {
+                r.channels = Some(ChannelSelector::ChannelPair(0, 1));
+            }
+            out.records.push(r);
+        }
+        return out;
+    }
     let Some(mono) = chans.first().copied() else {
         out.records.push(push(
             "exp.region_support",
@@ -943,6 +1028,7 @@ pub use crate::events::{EventConfig as CandidateConfig, extract_candidates};
 mod tests {
     use super::*;
     use crate::events::CandidateEvent;
+    use al_dataset::types::Value;
 
     fn ev(kind: EventKind, start: f64, end: Option<f64>) -> CandidateEvent {
         ev_with(kind, start, end, Validity::Valid, Confidence::High)
@@ -1053,8 +1139,10 @@ mod tests {
         assert_eq!(r.len(), 1, "{r:?}");
         assert_eq!(r[0].validity, Validity::AmbiguousAlignment);
         assert_eq!(r[0].confidence, Confidence::Low);
+        assert!(r[0].has_valid_trigger);
 
-        // Non-Valid evidence alone still selects a region, flagged.
+        // Non-Valid evidence alone still selects a region, flagged,
+        // but without a `Valid` trigger it must not be estimated.
         let r = plan_regions(
             10.0,
             &[ev_with(
@@ -1069,10 +1157,32 @@ mod tests {
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].validity, Validity::InsufficientSupport);
         assert_eq!(r[0].confidence, Confidence::Medium);
+        assert!(!r[0].has_valid_trigger);
+
+        // A `manual` range is an independent `Valid` trigger: merged
+        // with a non-Valid event it still licenses estimation.
+        let cfg = ExpensiveConfig {
+            manual_ranges: vec![(2.5, 3.5)],
+            ..ExpensiveConfig::default()
+        };
+        let r = plan_regions(
+            10.0,
+            &[ev_with(
+                EventKind::Clipping,
+                3.0,
+                None,
+                Validity::InsufficientSupport,
+                Confidence::Medium,
+            )],
+            &cfg,
+        );
+        assert_eq!(r.len(), 1, "{r:?}");
+        assert!(r[0].has_valid_trigger);
+        assert_eq!(r[0].validity, Validity::InsufficientSupport);
     }
 
     #[test]
-    fn non_valid_trigger_propagates_into_region_outputs() {
+    fn non_valid_trigger_records_invalid_observations() {
         let rate = 48_000u32;
         let sig = noise(1 << 15, 0xf00d);
         let chans: Vec<&[f64]> = vec![&sig];
@@ -1082,6 +1192,7 @@ mod tests {
             triggers: vec!["candidate:EVT-t".into()],
             validity: Validity::AmbiguousAlignment,
             confidence: Confidence::Low,
+            has_valid_trigger: false,
         };
         let out = analyze_region(
             "in",
@@ -1091,12 +1202,15 @@ mod tests {
             None,
             &ExpensiveConfig::default(),
         );
+        // Every feature family is persisted as an invalid
+        // observation: mapped validity, no finite numbers, no claim
+        // beyond the trigger's confidence.
         assert!(!out.records.is_empty());
         for r in &out.records {
-            assert_ne!(
+            assert_eq!(
                 r.validity,
-                Validity::Valid,
-                "record {} must not claim Valid",
+                Validity::AmbiguousAlignment,
+                "record {} must carry the mapped validity",
                 r.feature_id
             );
             assert_eq!(
@@ -1105,6 +1219,108 @@ mod tests {
                 "record {} must not out-trust its trigger",
                 r.feature_id
             );
+            assert!(
+                r.invalid_reason.is_some(),
+                "record {} must explain why it is invalid",
+                r.feature_id
+            );
+            match r.value {
+                Value::Scalar(v) => assert!(
+                    v.is_nan(),
+                    "record {} must not emit a finite number",
+                    r.feature_id
+                ),
+                _ => panic!("scalar expected"),
+            }
+        }
+        for id in [
+            "exp.cutoff_hz",
+            "exp.echo_delay_s",
+            "exp.src_image_score",
+            "exp.codec_block_score",
+            "exp.hum_harmonic_count",
+        ] {
+            assert!(
+                out.records.iter().any(|r| r.feature_id == id),
+                "missing invalid observation for {id}"
+            );
+        }
+        // Stereo-only features are not emitted for mono input.
+        assert!(
+            out.records
+                .iter()
+                .all(|r| r.feature_id != "exp.freq_lr_coherence")
+        );
+    }
+
+    #[test]
+    fn non_valid_trigger_marks_stereo_features_invalid_too() {
+        let rate = 48_000u32;
+        let sig = noise(1 << 15, 0xbeef);
+        let chans: Vec<&[f64]> = vec![&sig, &sig];
+        let region = TriggeredRegion {
+            start_s: 0.0,
+            end_s: sig.len() as f64 / rate as f64,
+            triggers: vec!["candidate:EVT-t".into()],
+            validity: Validity::InsufficientSupport,
+            confidence: Confidence::Medium,
+            has_valid_trigger: false,
+        };
+        let out = analyze_region(
+            "in",
+            &chans,
+            rate,
+            &region,
+            None,
+            &ExpensiveConfig::default(),
+        );
+        let coh = record(&out, "exp.freq_lr_coherence");
+        // InsufficientSupport maps to SilenceInsufficientEnergy.
+        assert_eq!(coh.validity, Validity::SilenceInsufficientEnergy);
+        assert_eq!(coh.channels, Some(ChannelSelector::ChannelPair(0, 1)));
+        match coh.value {
+            Value::Scalar(v) => assert!(v.is_nan()),
+            _ => panic!("scalar expected"),
+        }
+    }
+
+    #[test]
+    fn manual_trigger_still_estimates_when_merged_with_non_valid_event() {
+        let rate = 48_000u32;
+        let raw = noise(1 << 16, 0xabc);
+        let sig = al_locate::dsp::bandpass(&raw, rate, 100.0, 8_000.0);
+        let chans: Vec<&[f64]> = vec![&sig];
+        let region = TriggeredRegion {
+            start_s: 0.0,
+            end_s: sig.len() as f64 / rate as f64,
+            triggers: vec!["manual".into(), "candidate:EVT-t".into()],
+            validity: Validity::AmbiguousAlignment,
+            confidence: Confidence::Low,
+            has_valid_trigger: true,
+        };
+        let out = analyze_region(
+            "in",
+            &chans,
+            rate,
+            &region,
+            None,
+            &ExpensiveConfig::default(),
+        );
+        // Estimation ran: finite numbers exist, but records still
+        // carry the weakest trigger's validity and confidence.
+        let cutoff = record(&out, "exp.cutoff_hz");
+        match cutoff.value {
+            Value::Scalar(v) => assert!(v.is_finite(), "manual trigger must estimate"),
+            _ => panic!("scalar expected"),
+        }
+        for r in &out.records {
+            assert_ne!(
+                r.validity,
+                Validity::Valid,
+                "record {} must not claim Valid",
+                r.feature_id
+            );
+            assert_eq!(r.confidence, Confidence::Low);
         }
     }
 
@@ -1153,6 +1369,7 @@ mod tests {
             triggers: vec!["always_run".into()],
             validity: Validity::Valid,
             confidence: Confidence::High,
+            has_valid_trigger: true,
         };
         let out = analyze_region(
             "in",
