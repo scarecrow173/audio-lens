@@ -352,12 +352,23 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
         .expect("video timing");
     assert_eq!(v["observation"]["clock"], "video");
     assert_eq!(v["observation"]["timestamp_count"], 20);
+    // The movi-order-derived timestamp column itself is persisted:
+    // metadata alone can address each frame's position on its clock.
+    assert_eq!(v["start_tick"], 0);
+    let vts: Vec<i64> = v["movi_order_timestamps"]
+        .as_array()
+        .expect("movi_order_timestamps array")
+        .iter()
+        .map(|t| t.as_i64().unwrap())
+        .collect();
+    assert_eq!(vts, (0..20).collect::<Vec<i64>>());
     let a = timing
         .iter()
         .find(|t| t["stream_type"] == "auds")
         .expect("audio timing");
     assert_eq!(a["observation"]["clock"], "audio");
     assert_eq!(a["observation"]["timestamp_count"], 1);
+    assert_eq!(a["movi_order_timestamps"], serde_json::json!([0]));
 
     // WAV inputs never carry a video section.
     assert!(meta["video"].is_object());

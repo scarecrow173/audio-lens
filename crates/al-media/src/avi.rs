@@ -14,7 +14,9 @@
 //! stream — and recorded as a CFR-free [`StreamTiming`] observation
 //! (audio packet timestamps and video frame positions alike). The mux
 //! order is the primary fact; nothing is reconstructed from a nominal
-//! frame rate.
+//! frame rate. The derived timestamp column itself is persisted
+//! (`StreamTiming::start_tick` + `movi_order_timestamps`) so per-packet
+//! positions stay addressable from `metadata.json` alone.
 
 use crate::metadata::MediaError;
 use crate::timing::{ClockKind, TimingObservation, observe_timing};
@@ -53,6 +55,18 @@ pub struct StreamTiming {
     pub stream: u32,
     /// Stream kind fourcc as text (`vids`, `auds`, ...).
     pub stream_type: String,
+    /// Initial stream-clock position: `strh` `dwStart` converted to
+    /// rate-domain ticks (`dwStart * dwScale`), the base offset of
+    /// `movi_order_timestamps`. Kept even when the stream has no
+    /// `movi` packets.
+    pub start_tick: i64,
+    /// Per-packet timestamps on this stream's clock, in
+    /// `observation.timebase_hz` ticks. Element `i` is the position of
+    /// this stream's `i`-th `movi` packet, derived from `movi` mux
+    /// order (cumulative `strh` ticks consumed by earlier packets of
+    /// the same stream, starting at `start_tick`) — not a
+    /// container-stored PTS.
+    pub movi_order_timestamps: Vec<i64>,
     /// Observation over the packet timeline; see `crate::timing`.
     pub observation: TimingObservation,
 }
@@ -241,10 +255,13 @@ fn stream_timings(streams: &[StreamHead], packets: &[MoviPacket<'_>]) -> Vec<Str
             // Audio packets are irregularly sized by design; only video
             // frames have a meaningful nominal interval (dwScale ticks).
             let nominal = (clock == ClockKind::Video && s.scale > 0).then_some(f64::from(s.scale));
+            let observation = observe_timing(clock, u64::from(s.rate), &pts[i], nominal);
             Some(StreamTiming {
                 stream: i as u32,
                 stream_type: String::from_utf8_lossy(&s.fcc_type).into_owned(),
-                observation: observe_timing(clock, u64::from(s.rate), &pts[i], nominal),
+                start_tick: i64::from(s.start) * i64::from(s.scale),
+                movi_order_timestamps: std::mem::take(&mut pts[i]),
+                observation,
             })
         })
         .collect()
@@ -594,11 +611,19 @@ mod tests {
         out
     }
 
-    fn strh_body(fcc: &[u8; 4], scale: u32, rate: u32, length: u32, sample_size: u32) -> Vec<u8> {
+    fn strh_body(
+        fcc: &[u8; 4],
+        scale: u32,
+        rate: u32,
+        start: u32,
+        length: u32,
+        sample_size: u32,
+    ) -> Vec<u8> {
         let mut b = vec![0u8; 56];
         b[..4].copy_from_slice(fcc);
         b[20..24].copy_from_slice(&scale.to_le_bytes());
         b[24..28].copy_from_slice(&rate.to_le_bytes());
+        b[28..32].copy_from_slice(&start.to_le_bytes());
         b[32..36].copy_from_slice(&length.to_le_bytes());
         b[44..48].copy_from_slice(&sample_size.to_le_bytes());
         b
@@ -622,7 +647,7 @@ mod tests {
     fn audio_only_avi(format_tag: u16, pcm: &[u8]) -> Vec<u8> {
         let strf = wavefmt_body(format_tag, 1, 48_000, 16);
         let mut astrl = Vec::new();
-        push_chunk(&mut astrl, b"strh", &strh_body(b"auds", 2, 96_000, 0, 2));
+        push_chunk(&mut astrl, b"strh", &strh_body(b"auds", 2, 96_000, 0, 0, 2));
         push_chunk(&mut astrl, b"strf", &strf);
         let mut hdrl = Vec::new();
         push_list(&mut hdrl, b"strl", &astrl);
@@ -722,6 +747,10 @@ mod tests {
         assert_eq!(v.observation.timestamp_count, 30);
         assert!(v.observation.intervals.iter().all(|&i| i == 1));
         assert_eq!(v.observation.drift_ppm, Some(0.0));
+        // The derived per-packet column is persisted, not just the
+        // aggregate observation: one entry per packet, dwStart-based.
+        assert_eq!(v.start_tick, 0);
+        assert_eq!(v.movi_order_timestamps, (0..30).collect::<Vec<i64>>());
 
         // Audio stream 1: a single wb packet covering its PCM, on the
         // byte-rate clock (block_align scale, byte_rate rate).
@@ -729,6 +758,8 @@ mod tests {
         assert_eq!(a.observation.clock, ClockKind::Audio);
         assert_eq!(a.observation.timebase_hz, 96_000);
         assert_eq!(a.observation.timestamp_count, 1);
+        assert_eq!(a.start_tick, 0);
+        assert_eq!(a.movi_order_timestamps, vec![0]);
 
         // Interleaved packet order maps to cumulative stream positions:
         // stream 1's two wb packets sit at 0 and len(first) ticks.
@@ -738,6 +769,37 @@ mod tests {
         let a1 = m2.timing.iter().find(|t| t.stream == 1).unwrap();
         assert_eq!(a1.observation.timestamp_count, 2);
         assert_eq!(a1.observation.intervals, vec![half as i64]);
+        assert_eq!(a1.movi_order_timestamps, vec![0, half as i64]);
+    }
+
+    #[test]
+    fn derived_timestamps_keep_dwstart_offset() {
+        // vids strh: dwStart=5, dwScale=2 on a 10 Hz clock → the derived
+        // timeline must start at 10 rate-domain ticks, and every packet
+        // position keeps that offset.
+        let mut hdrl = Vec::new();
+        let mut vstrl = Vec::new();
+        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 2, 10, 5, 3, 0));
+        push_chunk(&mut vstrl, b"strf", &[0u8; 40]);
+        push_list(&mut hdrl, b"strl", &vstrl);
+        let mut astrl = Vec::new();
+        push_chunk(&mut astrl, b"strh", &strh_body(b"auds", 2, 96_000, 0, 0, 2));
+        push_chunk(&mut astrl, b"strf", &wavefmt_body(1, 1, 48_000, 16));
+        push_list(&mut hdrl, b"strl", &astrl);
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"00db", &[0u8; 4]);
+        push_chunk(&mut movi, b"00db", &[0u8; 4]);
+        push_chunk(&mut movi, b"00db", &[0u8; 4]);
+        push_chunk(&mut movi, b"01wb", &[0u8; 64]);
+        let mut body = Vec::new();
+        push_list(&mut body, b"hdrl", &hdrl);
+        push_list(&mut body, b"movi", &movi);
+        let m = decode_avi(&avi_with_tail(&body)).unwrap();
+
+        let v = m.timing.iter().find(|t| t.stream_type == "vids").unwrap();
+        assert_eq!(v.start_tick, 10); // dwStart * dwScale
+        assert_eq!(v.movi_order_timestamps, vec![10, 12, 14]);
+        assert_eq!(v.observation.intervals, vec![2, 2]);
     }
 
     /// Two-audio-stream AVI (video + mono auds + stereo auds) with
@@ -746,16 +808,16 @@ mod tests {
         let half = audio_a.len() / 2;
         let mut hdrl = Vec::new();
         let mut vstrl = Vec::new();
-        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 1, 10, 2, 0));
+        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 1, 10, 0, 2, 0));
         push_chunk(&mut vstrl, b"strf", &[0u8; 40]);
         push_list(&mut hdrl, b"strl", &vstrl);
         for (strh, strf) in [
             (
-                strh_body(b"auds", 2, 96_000, 0, 2),
+                strh_body(b"auds", 2, 96_000, 0, 0, 2),
                 wavefmt_body(1, 1, 48_000, 16),
             ),
             (
-                strh_body(b"auds", 4, 192_000, 0, 4),
+                strh_body(b"auds", 4, 192_000, 0, 0, 4),
                 wavefmt_body(1, 2, 48_000, 16),
             ),
         ] {
