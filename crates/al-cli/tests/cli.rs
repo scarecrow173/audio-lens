@@ -303,6 +303,56 @@ fn capture_only_runs_through_cheap_analysis_and_dataset() {
 }
 
 #[test]
+fn full_pipeline_reaches_visualization_and_export() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("viz");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest,cheap_analysis,dataset,visualization,export",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+    let job_dir = jobs.join(job_id);
+
+    for rel in [
+        "analysis/visualization/timeline.json",
+        "analysis/visualization/summary.json",
+        "analysis/visualization/skipped.json",
+        "export/analysis/export_manifest.json",
+        "export/analysis/golden/snapshot.json",
+    ] {
+        assert!(job_dir.join(rel).exists(), "missing {rel}");
+    }
+    let manifest: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(job_dir.join("export/analysis/export_manifest.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(manifest["inputs"][0]["file_name"].as_str(), Some("cap.wav"));
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn stage_plan_missing_dependency_is_rejected() {
     let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("dep");
