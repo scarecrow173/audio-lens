@@ -9,6 +9,7 @@ dependencies = [
  "al-core",
  "al-dataset",
  "al-job",
+ "al-locate",
  "al-media",
  "serde_json",
 ]
@@ -37,6 +38,17 @@ name = "al-job"
 version = "0.1.0"
 dependencies = [
  "al-core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "al-locate"
+version = "0.1.0"
+dependencies = [
+ "al-core",
+ "al-job",
+ "al-media",
  "serde",
  "serde_json",
 ]

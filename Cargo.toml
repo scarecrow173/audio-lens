@@ -6,6 +6,7 @@ members = [
     "crates/al-cli",
     "crates/al-media",
     "crates/al-dataset",
+    "crates/al-locate",
 ]
 
 [workspace.package]
@@ -18,5 +19,6 @@ al-core = { path = "crates/al-core" }
 al-job = { path = "crates/al-job" }
 al-media = { path = "crates/al-media" }
 al-dataset = { path = "crates/al-dataset" }
+al-locate = { path = "crates/al-locate" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

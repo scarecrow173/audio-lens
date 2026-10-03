@@ -105,6 +105,7 @@ macro_rules! id_type {
 id_type!(JobId, "JOB");
 id_type!(ArtifactId, "ART");
 id_type!(InputId, "IN");
+id_type!(AlignmentId, "ALN");
 
 /// Error returned when an id does not match the expected shape.
 #[derive(Debug, Clone, PartialEq, Eq)]

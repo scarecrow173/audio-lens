@@ -30,6 +30,11 @@ pub struct ArrayMeta {
     pub chunk_shape: Vec<u64>,
     /// Storage order; `row_major` (last dim fastest) only.
     pub order: String,
+    /// Commit marker: `false` while a writer may still be writing
+    /// chunks. Readers reject uncommitted arrays so a crashed writer
+    /// can never pass a partially written tensor off as valid.
+    #[serde(default)]
+    pub committed: bool,
 }
 
 fn chunk_path(root: &Path, chunk_coords: &[u64]) -> PathBuf {
@@ -46,7 +51,10 @@ fn chunk_extent(meta: &ArrayMeta, chunk_coords: &[u64]) -> Vec<u64> {
     chunk_coords
         .iter()
         .enumerate()
-        .map(|(d, &c)| meta.chunk_shape[d].min(meta.shape[d] - c * meta.chunk_shape[d]))
+        .map(|(d, &c)| {
+            meta.chunk_shape[d]
+                .min(meta.shape[d].saturating_sub(c.saturating_mul(meta.chunk_shape[d])))
+        })
         .collect()
 }
 
@@ -120,6 +128,7 @@ impl TensorWriter {
                 shape: shape.to_vec(),
                 chunk_shape: chunk_shape.to_vec(),
                 order: "row_major".into(),
+                committed: false,
             },
         };
         w.flush_meta()?;
@@ -134,7 +143,10 @@ impl TensorWriter {
             return Err(bad_input("chunk coord ndim mismatch"));
         }
         for (d, &c) in chunk_coords.iter().enumerate() {
-            if c * meta.chunk_shape[d] >= meta.shape[d] {
+            let offset = c
+                .checked_mul(meta.chunk_shape[d])
+                .ok_or_else(|| bad_input(format!("chunk coord {chunk_coords:?} overflows")))?;
+            if offset >= meta.shape[d] {
                 return Err(bad_input(format!(
                     "chunk coord {chunk_coords:?} out of array"
                 )));
@@ -154,8 +166,10 @@ impl TensorWriter {
         write_durable(&path, &bytes)
     }
 
-    /// Re-write `array.json`. Call after the last `write_chunk`.
-    pub fn finish(self) -> io::Result<()> {
+    /// Mark the array committed and re-write `array.json`. Call after
+    /// the last `write_chunk`.
+    pub fn finish(mut self) -> io::Result<()> {
+        self.meta.committed = true;
         self.flush_meta()
     }
 
@@ -181,6 +195,24 @@ impl TensorReader {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!("unsupported array meta {meta:?}"),
+            ));
+        }
+        if !meta.committed {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "array.json is not committed (writer did not finish)",
+            ));
+        }
+        // On-disk meta is untrusted: a shorter/zero chunk_shape would
+        // otherwise panic inside read_range.
+        if meta.shape.is_empty()
+            || meta.shape.len() != meta.chunk_shape.len()
+            || meta.shape.contains(&0)
+            || meta.chunk_shape.contains(&0)
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid array shape/chunk_shape {meta:?}"),
             ));
         }
         Ok(Self {
@@ -268,10 +300,15 @@ impl TensorReader {
         let mut file = fs::File::open(&path)?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
-        if bytes.len() % 8 != 0 {
+        let expected = product(&chunk_extent(&self.meta, coords)) as usize * 8;
+        if bytes.len() != expected {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
-                format!("chunk {} size not a multiple of 8", path.display()),
+                format!(
+                    "chunk {} has {} bytes, expected {expected}",
+                    path.display(),
+                    bytes.len()
+                ),
             ));
         }
         Ok(bytes
@@ -334,6 +371,43 @@ mod tests {
         w.finish().unwrap();
         let r = TensorReader::open(&dir.join("a")).unwrap();
         assert!(r.read_range(&[[0, 9], [0, 4]]).is_err());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn corrupt_meta_and_chunks_fail_not_panic() {
+        let dir = std::env::temp_dir().join(format!("tns-c-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let root = dir.join("arr");
+        let mut w = TensorWriter::create(&root, &[4], &[2]).unwrap();
+        w.write_chunk(&[0], &[1.0, 2.0]).unwrap();
+        w.finish().unwrap();
+
+        // Uncommitted: rewrite array.json without the commit flag.
+        fs::write(
+            root.join("array.json"),
+            r#"{"dtype":"f64","shape":[4],"chunk_shape":[2],"order":"row_major","committed":false}"#,
+        )
+        .unwrap();
+        assert!(TensorReader::open(&root).is_err());
+
+        // Zero-length chunk_shape division would panic unguarded.
+        fs::write(
+            root.join("array.json"),
+            r#"{"dtype":"f64","shape":[4],"chunk_shape":[0],"order":"row_major","committed":true}"#,
+        )
+        .unwrap();
+        assert!(TensorReader::open(&root).is_err());
+
+        // Valid meta, truncated chunk file → explicit error on read.
+        fs::write(
+            root.join("array.json"),
+            r#"{"dtype":"f64","shape":[4],"chunk_shape":[2],"order":"row_major","committed":true}"#,
+        )
+        .unwrap();
+        fs::write(root.join("chunks").join("0.bin"), [0u8; 8]).unwrap();
+        let r = TensorReader::open(&root).unwrap();
+        assert!(r.read_range(&[[0, 4]]).is_err());
         fs::remove_dir_all(&dir).ok();
     }
 }

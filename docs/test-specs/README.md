@@ -11,4 +11,6 @@ Directory: `docs/test-specs`
 | TSPEC-034z87feL8uCPOIagychsT | dataset store 往復と部分読み出し | proposed | [dataset-store-roundtrip.md](./dataset-store-roundtrip.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
+| TSPEC-034z8k5ftvcMaUeWq1L4D4 | locate-method-consensus | proposed | [locate-method-consensus.md](./locate-method-consensus.md) |
+| TSPEC-034z8k5JiNwiAsnNVpk7vn | locate-tracking-residual | proposed | [locate-tracking-residual.md](./locate-tracking-residual.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
