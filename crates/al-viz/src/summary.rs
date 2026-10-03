@@ -20,8 +20,14 @@ pub struct Skipped {
 /// Build `summary.json` content: input list, produced roles,
 /// candidate/alignment counts, confidence/validity tallies, and the
 /// list of products written (dataset-relative paths only).
+///
+/// `roles_source` is the manifest being *written* by the producing
+/// stage, not the read snapshot: the read snapshot predates this
+/// run's `visualization` role, so role status would flip between
+/// the first and second run of the stage.
 pub fn summary_body(
     reader: &DatasetReader,
+    roles_source: &al_dataset::manifest::DatasetManifest,
     produced_products: &[String],
     skipped: &[Skipped],
 ) -> io::Result<serde_json::Value> {
@@ -37,8 +43,7 @@ pub fn summary_body(
         .collect();
 
     let produced_roles: Vec<String> = {
-        let mut v: Vec<String> = reader
-            .manifest()
+        let mut v: Vec<String> = roles_source
             .roles
             .iter()
             .filter(|(_, e)| e.status == al_dataset::manifest::RoleStatus::Produced)
