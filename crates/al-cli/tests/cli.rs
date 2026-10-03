@@ -254,6 +254,174 @@ fn locate_finds_source_embedded_in_capture() {
 }
 
 #[test]
+fn locate_emits_time_map_and_residual_artifacts() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("locate-tracking");
+    let jobs = dir.join("jobs");
+
+    // Source A: a 300-frame loop body, embedded contiguously three
+    // times starting at frame 1000 with descending gain so all methods
+    // vote the first pass as the primary position. Source B: a
+    // 200-frame clip embedded quietly *inside* the first pass, so the
+    // dominant loop masks it until residual subtraction removes the fit.
+    let body = noise_i16(17, 300, 20000.0);
+    let quiet = noise_i16(23, 200, 24000.0);
+    let mut capture = noise_i16(29, 4096, 3000.0);
+    for (rep, gain) in [(4i32, 5i32), (3, 5), (2, 5)].iter().enumerate() {
+        for (i, &s) in body.iter().enumerate() {
+            let at = 1000 + rep * 300 + i;
+            capture[at] = capture[at].saturating_add((s as i32 * gain.0 / gain.1) as i16);
+        }
+    }
+    for (i, &s) in quiet.iter().enumerate() {
+        capture[1050 + i] = capture[1050 + i].saturating_add((s as i32 / 4) as i16);
+    }
+    let loop_wav = dir.join("loop.wav");
+    let quiet_wav = dir.join("quiet.wav");
+    let cap_wav = dir.join("cap.wav");
+    std::fs::write(&loop_wav, wav_from_samples(&body)).unwrap();
+    std::fs::write(&quiet_wav, wav_from_samples(&quiet)).unwrap();
+    std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
+
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!(
+                "capture_bug:{},source_asset:{},source_asset:{}",
+                cap_wav.display(),
+                loop_wav.display(),
+                quiet_wav.display()
+            ),
+            "--stages",
+            "ingest,locate",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+    let job_dir = jobs.join(job_id);
+    let manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(job_dir.join("manifest.json")).unwrap())
+            .unwrap();
+    let artifacts = manifest["artifacts"].as_array().unwrap();
+    let input_id_of = |name: &str| {
+        artifacts
+            .iter()
+            .find(|a| {
+                a["role"].as_str() == Some("declared_input")
+                    && a["params"]["source_path"]
+                        .as_str()
+                        .is_some_and(|p| p.ends_with(name))
+            })
+            .and_then(|a| a["params"]["input_id"].as_str())
+            .unwrap_or_else(|| panic!("declared input for {name}"))
+            .to_owned()
+    };
+    let loop_id = input_id_of("loop.wav");
+    let quiet_id = input_id_of("quiet.wav");
+
+    // Every located pair registers full per-channel-pair evidence.
+    assert!(
+        artifacts
+            .iter()
+            .any(|a| a["role"].as_str() == Some("locate_evidence")),
+        "locate_evidence artifact missing"
+    );
+
+    // The loop pair produces a real piecewise time map: one anchor per
+    // detected pass, segments built by build_time_map.
+    let time_map_rec = artifacts
+        .iter()
+        .find(|a| {
+            a["role"].as_str() == Some("time_map")
+                && a["params"]["source_input_id"].as_str() == Some(loop_id.as_str())
+        })
+        .expect("time_map artifact for loop source");
+    let body_json: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(job_dir.join(time_map_rec["path"].as_str().unwrap())).unwrap(),
+    )
+    .unwrap();
+    let occurrences = body_json["loop_occurrences"].as_array().unwrap();
+    assert!(
+        occurrences.len() >= 3,
+        "expected >=3 loop occurrences, got {occurrences:?}"
+    );
+    // Detected positions are kept, not snapped to a capture-0 grid.
+    let positions: Vec<u64> = occurrences
+        .iter()
+        .map(|o| o["occurrence_position"].as_u64().unwrap())
+        .collect();
+    assert!(
+        positions.iter().any(|&p| p.abs_diff(1000) <= 256)
+            && positions.iter().any(|&p| p.abs_diff(1600) <= 256),
+        "occurrence positions {positions:?} should cover the three passes"
+    );
+    let anchors = body_json["anchors"].as_array().unwrap();
+    assert!(anchors.len() >= 3, "time map needs one anchor per pass");
+    let segments = body_json["time_map"]["segments"].as_array().unwrap();
+    assert!(
+        segments
+            .iter()
+            .any(|s| s["kind"].as_str() == Some("continuous")),
+        "contiguous passes should produce a continuous segment: {segments:?}"
+    );
+
+    // Residual search: subtracting the accepted loop exposes the quiet
+    // source; provenance links parent alignment and energies.
+    let residual_recs: Vec<_> = artifacts
+        .iter()
+        .filter(|a| a["role"].as_str() == Some("residual"))
+        .collect();
+    assert!(!residual_recs.is_empty(), "residual artifacts missing");
+    let residual = residual_recs
+        .iter()
+        .find(|a| {
+            a["params"]["parent_source"].as_str() == Some(loop_id.as_str())
+                && a["params"]["child_source"].as_str() == Some(quiet_id.as_str())
+        })
+        .expect("residual artifact for loop->quiet");
+    let res_json: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(job_dir.join(residual["path"].as_str().unwrap())).unwrap(),
+    )
+    .unwrap();
+    assert!(
+        res_json["parent_alignment"].as_str().is_some()
+            && !res_json["channel_transform"].as_array().unwrap().is_empty(),
+        "subtraction provenance incomplete: {res_json}"
+    );
+    let before = res_json["energy"]["before"].as_f64().unwrap();
+    let after = res_json["energy"]["after"].as_f64().unwrap();
+    assert!(after < before, "subtraction must remove energy");
+    // The child locate actually ran on the residual (all four methods
+    // produced evidence there) and unmasked the quiet source.
+    assert!(
+        res_json["child"]["evidence"].as_array().unwrap().len() >= 4,
+        "child locate evidence missing: {res_json}"
+    );
+    assert_eq!(res_json["child"]["accepted"].as_bool(), Some(true));
+    let child_start = res_json["child"]["capture_range"]["start"]
+        .as_u64()
+        .unwrap();
+    assert!(
+        child_start.abs_diff(1050) <= 256,
+        "quiet source located at {child_start}, expected ~1050"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn missing_or_invalid_config_is_an_explicit_error() {
     let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("cfg");

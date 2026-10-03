@@ -96,34 +96,48 @@ impl TimeMap {
 /// One identified loop occurrence.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LoopOccurrence {
-    /// Which repetition of the loop body (0 = first pass).
-    pub loop_index: u32,
-    /// Start position of this occurrence in the capture (samples).
+    /// Which repetition of the loop body, counted on the grid anchored
+    /// at the reference position: 0 = the pass containing the anchor,
+    /// negative = passes before it.
+    pub loop_index: i64,
+    /// Detected position of this occurrence in the capture (samples).
     pub occurrence_position: u64,
-    /// Phase of the source loop body at the occurrence start.
+    /// Offset of the detection into its pass's window on the anchored
+    /// grid (`0..body_len` samples).
     pub source_phase: u64,
-    /// Source time of the occurrence (samples, loop-relative).
+    /// Source time of the detection relative to the pass start
+    /// (samples, loop-relative).
     pub source_time: u64,
     /// Capture time of the occurrence (samples).
     pub capture_time: u64,
 }
 
-/// Identify loop occurrences: each acceptance `position` is an
-/// occurrence of the loop body; `loop_index` = `position /
-/// body_len`. Occurrences are never collapsed into one fuzzy match.
-pub fn identify_loop_occurrences(positions: &[u64], body_len: u64) -> Vec<LoopOccurrence> {
+/// Identify loop occurrences: each accepted `position` is an
+/// occurrence of the loop body. `anchor` is the reference capture
+/// position defining pass 0 and phase 0 — typically the primary
+/// accepted alignment — so `loop_index`/`source_phase` measure the
+/// pass grid relative to a real detection, not relative to capture
+/// sample 0. `occurrence_position` keeps the detected position as-is.
+/// Occurrences are never collapsed into one fuzzy match.
+pub fn identify_loop_occurrences(
+    positions: &[u64],
+    body_len: u64,
+    anchor: u64,
+) -> Vec<LoopOccurrence> {
     if body_len == 0 {
         return Vec::new();
     }
+    let body = body_len as i64;
     let mut out: Vec<LoopOccurrence> = positions
         .iter()
         .map(|&capture_time| {
-            let phase = capture_time % body_len;
+            let rel = capture_time as i64 - anchor as i64;
+            let source_phase = rel.rem_euclid(body) as u64;
             LoopOccurrence {
-                loop_index: (capture_time / body_len) as u32,
-                occurrence_position: capture_time - phase,
-                source_phase: phase,
-                source_time: phase,
+                loop_index: rel.div_euclid(body),
+                occurrence_position: capture_time,
+                source_phase,
+                source_time: source_phase,
                 capture_time,
             }
         })
@@ -137,8 +151,9 @@ pub fn identify_loop_occurrences(positions: &[u64], body_len: u64) -> Vec<LoopOc
 ///
 /// `rate_tolerance` is the allowed deviation of the local
 /// dcapture/dsource slope from 1.0 before a segment is split into
-/// `Drift`; slopes that cannot hold for `min_run` anchors are marked
-/// `Jitter`. Gaps between anchor capture positions larger than
+/// `Drift`; off-rate runs shorter than `min_run` anchors are marked
+/// `Jitter` instead, and single anchors (no observable slope) stay
+/// `Continuous`. Gaps between anchor capture positions larger than
 /// `gap_samples` become `Gap` segments; a source-position rewind
 /// after a gap becomes `Resume`.
 pub fn build_time_map(
@@ -224,8 +239,12 @@ fn finish_run(
         pieces.push(cur);
     }
     for piece in pieces {
-        let kind = if piece.len() < min_run {
-            SegmentKind::Jitter
+        // A single anchor has no observable slope: it marks a mapping,
+        // not jitter. Multi-anchor pieces are classified by their
+        // overall rate; an off-rate run shorter than `min_run` anchors
+        // is local jitter rather than sustained drift.
+        let kind = if piece.len() < 2 {
+            SegmentKind::Continuous
         } else {
             let ds = piece[piece.len() - 1]
                 .source
@@ -240,6 +259,8 @@ fn finish_run(
             };
             if rate.is_finite() && (rate - 1.0).abs() <= rate_tolerance {
                 SegmentKind::Continuous
+            } else if piece.len() < min_run {
+                SegmentKind::Jitter
             } else {
                 SegmentKind::Drift
             }
@@ -279,11 +300,41 @@ mod tests {
 
     #[test]
     fn loop_occurrences_are_individually_identified() {
-        let occ = identify_loop_occurrences(&[0, 1000, 2000], 1000);
+        let occ = identify_loop_occurrences(&[0, 1000, 2000], 1000, 0);
         assert_eq!(occ.len(), 3);
         assert_eq!(occ[1].loop_index, 1);
         assert_eq!(occ[2].loop_index, 2);
         assert_eq!(occ[2].source_phase, 0);
+    }
+
+    #[test]
+    fn occurrences_keep_detected_positions_with_nonzero_start() {
+        // A loop whose first detected pass starts at 500 must not be
+        // snapped back to the capture-0 grid: positions and capture
+        // times stay as detected, indices count from the anchor pass.
+        let occ = identify_loop_occurrences(&[500, 1500, 2500], 1000, 500);
+        assert_eq!(occ.len(), 3);
+        assert_eq!(
+            occ.iter()
+                .map(|o| o.occurrence_position)
+                .collect::<Vec<_>>(),
+            vec![500, 1500, 2500]
+        );
+        assert_eq!(
+            occ.iter().map(|o| o.loop_index).collect::<Vec<_>>(),
+            vec![0, 1, 2]
+        );
+        assert!(occ.iter().all(|o| o.source_phase == 0));
+    }
+
+    #[test]
+    fn passes_before_the_anchor_count_negative() {
+        let occ = identify_loop_occurrences(&[500, 1500, 2500], 1000, 1500);
+        assert_eq!(
+            occ.iter().map(|o| o.loop_index).collect::<Vec<_>>(),
+            vec![-1, 0, 1]
+        );
+        assert_eq!(occ[0].occurrence_position, 500);
     }
 
     #[test]
