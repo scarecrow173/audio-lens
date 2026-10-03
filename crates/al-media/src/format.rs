@@ -8,6 +8,8 @@
 pub enum MediaFormat {
     /// RIFF/WAVE container (`RIFF....WAVE`).
     Wav,
+    /// RIFF/AVI container (`RIFF....AVI `).
+    Avi,
 }
 
 /// Detect the container format from the leading bytes of `data`.
@@ -15,8 +17,12 @@ pub enum MediaFormat {
 /// Returns `None` when no known signature matches. Callers must treat that
 /// as `decode/input unavailable`, not as a soft failure.
 pub fn detect_format(data: &[u8]) -> Option<MediaFormat> {
-    if data.len() >= 12 && &data[0..4] == b"RIFF" && &data[8..12] == b"WAVE" {
-        return Some(MediaFormat::Wav);
+    if data.len() >= 12 && &data[0..4] == b"RIFF" {
+        return match &data[8..12] {
+            b"WAVE" => Some(MediaFormat::Wav),
+            b"AVI " => Some(MediaFormat::Avi),
+            _ => None,
+        };
     }
     None
 }
@@ -34,9 +40,17 @@ mod tests {
     }
 
     #[test]
+    fn detects_avi_signature() {
+        let mut bytes = vec![0u8; 64];
+        bytes[0..4].copy_from_slice(b"RIFF");
+        bytes[8..12].copy_from_slice(b"AVI ");
+        assert_eq!(detect_format(&bytes), Some(MediaFormat::Avi));
+    }
+
+    #[test]
     fn unknown_signature_is_not_detected() {
         assert_eq!(detect_format(b"PK\x03\x04...."), None);
-        assert_eq!(detect_format(b"RIFF\x00\x00\x00\x00AVI "), None);
+        assert_eq!(detect_format(b"RIFF\x00\x00\x00\x00WEBP"), None);
     }
 
     #[test]
