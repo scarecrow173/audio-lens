@@ -38,7 +38,7 @@ relations:
   derived-by: []
   verifies: []
   verified-by:
-    - "../test-specs/analysis-stages.md"
+    - "docs/test-specs/analysis-stages.md"
   references: []
   defers: []
   deferred-by: []

@@ -20,7 +20,7 @@ relations:
     - "docs/specs/analysis-export.md"
   implemented-by: []
   depends-on:
-    - "analysis-stages.md"
+    - "docs/plans/analysis-stages.md"
   blocks: []
   supersedes: []
   superseded-by: []
@@ -35,7 +35,7 @@ relations:
   derived-by: []
   verifies: []
   verified-by:
-    - "../test-specs/visualization-export.md"
+    - "docs/test-specs/visualization-export.md"
   references: []
   defers: []
   deferred-by: []
