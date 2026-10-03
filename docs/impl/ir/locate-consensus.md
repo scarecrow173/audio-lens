@@ -4,7 +4,7 @@ type: "impl"
 status: "completed"
 title: "locate-consensus"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-04"
 owners: []
 relations:
   source: []
@@ -55,8 +55,13 @@ metadata:
 
 ### Decisions During Implementation
 
-- クラスタリングは位置ソート+近接併合。最大クラスタが採用候補、
-  第2クラスタも閾値を満たす場合は曖昧として棄却(無言の選択をしない)
+- クラスタリングは位置ソート+クラスタ幅による近接併合(新規投票は
+  クラスタ先頭から `position_tolerance` 以内の場合のみ併合し、
+  クラスタ内の全ペア差が tolerance を超えないことを保証する。
+  レビュー修正: 以前は隣接差のみを見る single-link で、連鎖的に
+  tolerance を超える広がりを 1 クラスタに吸収していた)。
+  最大クラスタが採用候補、第2クラスタも閾値を満たす場合は
+  曖昧として棄却(無言の選択をしない)
 - 偶数クラスタの代表位置は下側中央値を採用
 
 ## Related Experiments

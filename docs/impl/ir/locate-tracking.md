@@ -4,7 +4,7 @@ type: "impl"
 status: "completed"
 title: "locate-tracking"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-04"
 owners: []
 relations:
   source: []
@@ -58,7 +58,14 @@ metadata:
 ### Decisions During Implementation
 
 - `build_time_map` は gap/rewind で区間を分割し、run 内のオフレート
-  窓でさらに分割。短い run は Jitter、単位速度から外れた run は Drift
+  窓でさらに分割。単位速度から外れた run は Drift、`min_run` 未満の
+  オフレート run は Jitter。単一 anchor の区間は傾きを観測できない
+  ため Continuous とする(レビュー修正: 以前は無条件に Jitter だった)
+- `identify_loop_occurrences` は第 3 引数の `anchor`(受理位置)を
+  パス 0 / 位相 0 の基準とし、`loop_index` は anchor 起点の符号付き
+  通し番号(anchor より前のパスは負)。`occurrence_position` は
+  検出位置をそのまま保持する(レビュー修正: 以前は capture 原点の
+  グリッドに吸着させ、実際の検出位置を失っていた)
 - ループ出現は fuzzy match にまとめず出現ごとにレコード化
 
 ## Related Experiments
