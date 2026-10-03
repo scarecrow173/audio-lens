@@ -7,9 +7,14 @@
 //! the expensive analysis families only inside those regions. Every
 //! result persists its trigger reasons, and output goes to
 //! `features/expensive` — cheap/reference rows are never overwritten.
+//!
+//! The stored `intermediate` tensors hold the cheap stage's coarse
+//! STFT; the expensive families need the fine-resolution window
+//! configured here, so spectra are recomputed inside each triggered
+//! region rather than upsampled from stored intermediates.
 
 use al_core::{Confidence, Validity};
-use al_dataset::types::{FeatureRecord, Range, ResolutionClass};
+use al_dataset::types::{ChannelSelector, FeatureRecord, Range, Resolution, ResolutionClass};
 
 use crate::events::{CandidateEvent, EventKind};
 use crate::records::{RecordBuilder, robust_summary};
@@ -60,7 +65,7 @@ impl ExpensiveConfig {
             c.event_window_s = v.max(0.001);
         }
         if let Some(v) = e.get("stft_window").and_then(|v| v.as_u64()) {
-            c.stft_window = (v as usize).max(256);
+            c.stft_window = (v as usize).clamp(256, 1 << 22);
             c.stft_hop = c.stft_window / 4;
         }
         if let Some(v) = e.get("stft_hop").and_then(|v| v.as_u64()) {
@@ -109,13 +114,21 @@ pub struct TriggeredRegion {
     pub triggers: Vec<String>,
 }
 
-/// Map an event kind to its trigger reason string.
-fn event_trigger(e: &CandidateEvent) -> String {
-    match e.kind {
-        EventKind::LargeResidual => "high_residual".into(),
-        EventKind::LowCoherence => "low_similarity".into(),
-        EventKind::LagJump | EventKind::TransferChangeCandidate => "abnormal_timing".into(),
+/// Map an event kind to its semantic trigger reason. The candidate
+/// id is always recorded alongside (`candidate:<id>`) so a merged
+/// region stays traceable to the specific event that raised it.
+fn event_triggers(e: &CandidateEvent) -> Vec<String> {
+    let semantic = match e.kind {
+        EventKind::LargeResidual => "high_residual".to_string(),
+        EventKind::LowCoherence => "low_similarity".to_string(),
+        EventKind::LagJump | EventKind::TransferChangeCandidate => "abnormal_timing".to_string(),
         _ => format!("candidate:{}", e.event_id),
+    };
+    let id_ref = format!("candidate:{}", e.event_id);
+    if semantic == id_ref {
+        vec![semantic]
+    } else {
+        vec![semantic, id_ref]
     }
 }
 
@@ -152,7 +165,7 @@ pub fn plan_regions(
         regions.push(TriggeredRegion {
             start_s: a.max(0.0),
             end_s: b.min(duration_s).max(a.max(0.0)),
-            triggers: vec![event_trigger(e)],
+            triggers: event_triggers(e),
         });
     }
     // Merge overlapping / abutting regions per input.
@@ -211,17 +224,6 @@ pub fn analyze_region(
     cfg: &ExpensiveConfig,
 ) -> ExpensiveResult {
     let mut out = ExpensiveResult::default();
-    let Some(mono) = chans.first().copied() else {
-        return out;
-    };
-    let s0 = (region.start_s * rate as f64) as usize;
-    let s1 = ((region.end_s * rate as f64) as usize).min(mono.len());
-    if s1 <= s0 || s1 - s0 < cfg.stft_window / 2 {
-        return out;
-    }
-    let seg = &mono[s0..s1];
-    let n = seg.len();
-
     let rb = |class: ResolutionClass| RecordBuilder::new(input_id, "expensive.v1", class);
     let range = Range {
         start: region.start_s,
@@ -244,12 +246,57 @@ pub fn analyze_region(
             reason,
             support,
         );
+        r.channels = Some(ChannelSelector::Channel(0));
         r.params = serde_json::json!({
             "region_s": [region.start_s, region.end_s],
             "triggers": region.triggers,
         });
         r
     };
+    // STFT-derived records additionally declare the fine-analysis
+    // resolution so consumers can compare across feature families.
+    let push_spec = |id: &str,
+                     value: f64,
+                     unit: &str,
+                     conf: Confidence,
+                     val: Validity,
+                     reason: Option<String>,
+                     support: u64| {
+        let mut r = push(id, value, unit, conf, val, reason, support);
+        r.resolution = Some(Resolution {
+            window: cfg.stft_window as u64,
+            hop: cfg.stft_hop as u64,
+        });
+        r
+    };
+    let Some(mono) = chans.first().copied() else {
+        out.records.push(push(
+            "exp.region_support",
+            f64::NAN,
+            "samples",
+            Confidence::High,
+            Validity::InsufficientSupport,
+            Some("no decoded channels for input".into()),
+            0,
+        ));
+        return out;
+    };
+    let s0 = (region.start_s * rate as f64) as usize;
+    let s1 = ((region.end_s * rate as f64) as usize).min(mono.len());
+    if s1 <= s0 || s1 - s0 < cfg.stft_window / 2 {
+        out.records.push(push(
+            "exp.region_support",
+            f64::NAN,
+            "samples",
+            Confidence::High,
+            Validity::InsufficientSupport,
+            Some("region shorter than minimum analysis window".into()),
+            s1.saturating_sub(s0) as u64,
+        ));
+        return out;
+    }
+    let seg = &mono[s0..s1];
+    let n = seg.len();
 
     // Mean power spectrum + PSD at fine resolution.
     let m = stft(seg, cfg.stft_window, cfg.stft_hop, rate);
@@ -257,6 +304,15 @@ pub fn analyze_region(
     let half = bins / 2;
     let frames = m.frames();
     if frames == 0 {
+        out.records.push(push(
+            "exp.region_support",
+            f64::NAN,
+            "samples",
+            Confidence::High,
+            Validity::InsufficientSupport,
+            Some("STFT produced no frames in region".into()),
+            n as u64,
+        ));
         return out;
     }
     let power = m.power();
@@ -265,21 +321,23 @@ pub fn analyze_region(
         .collect();
     let bin_hz = rate as f64 / bins as f64;
     let total_power: f64 = mean_power.iter().sum();
+    let one_sided_power: f64 = mean_power[..half].iter().sum();
 
     // ==== Precision transfer / cutoff ====
-    // Cutoff: lowest bin whose cumulative-above energy is < 1%.
-    if total_power > 0.0 {
+    // Cutoff: lowest bin whose cumulative-above energy is < 1% of
+    // the one-sided (below-Nyquist) spectrum.
+    if total_power > 0.0 && one_sided_power > 0.0 {
         let mut above = 0.0;
         let mut cutoff = 0usize;
         for k in (0..half).rev() {
             above += mean_power[k];
-            if above / total_power >= 0.01 {
+            if above / one_sided_power >= 0.01 {
                 cutoff = k;
                 break;
             }
         }
         let cutoff_hz = cutoff as f64 * bin_hz;
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.cutoff_hz",
             cutoff_hz,
             "hz",
@@ -317,6 +375,11 @@ pub fn analyze_region(
                     None,
                     n as u64,
                 );
+                r.channels = Some(ChannelSelector::Channel(0));
+                r.resolution = Some(Resolution {
+                    window: cfg.stft_window as u64,
+                    hop: cfg.stft_hop as u64,
+                });
                 r.params = serde_json::json!({
                     "region_s": [region.start_s, region.end_s],
                     "triggers": region.triggers,
@@ -342,7 +405,7 @@ pub fn analyze_region(
                 }
             }
         }
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.narrowband_peak_count",
             peaks as f64,
             "count",
@@ -351,7 +414,7 @@ pub fn analyze_region(
             None,
             frames as u64,
         ));
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.narrowband_notch_count",
             notches as f64,
             "count",
@@ -397,22 +460,38 @@ pub fn analyze_region(
                 .map(|(i, v)| (i + qmin, v))
                 .unwrap_or((qmin, &0.0));
             let baseline: f64 = re[qmin..=qmax].iter().sum::<f64>() / (qmax - qmin + 1) as f64;
-            out.records.push(push(
+            let prominence = if baseline.abs() > 1e-12 {
+                (peak - baseline) / baseline.abs()
+            } else {
+                0.0
+            };
+            // A flat/degenerate cepstrum still yields an argmax — only
+            // report a delay when the peak is clearly above baseline.
+            let supported = total_power > 0.0 && prominence > 0.5;
+            out.records.push(push_spec(
                 "exp.echo_delay_s",
-                qi as f64 / rate as f64,
+                if supported {
+                    qi as f64 / rate as f64
+                } else {
+                    f64::NAN
+                },
                 "seconds",
                 Confidence::Medium,
-                Validity::Valid,
-                None,
+                if supported {
+                    Validity::Valid
+                } else {
+                    Validity::InsufficientSupport
+                },
+                if supported {
+                    None
+                } else {
+                    Some("no significant cepstral peak".into())
+                },
                 frames as u64,
             ));
-            out.records.push(push(
+            out.records.push(push_spec(
                 "exp.cepstrum_prominence",
-                if baseline.abs() > 1e-12 {
-                    (peak - baseline) / baseline.abs()
-                } else {
-                    0.0
-                },
+                prominence,
                 "ratio",
                 Confidence::Medium,
                 Validity::Valid,
@@ -429,6 +508,7 @@ pub fn analyze_region(
         // content around the fold.
         let mut best_score = 0.0;
         let mut best_rate = 0.0;
+        let mut evaluated = false;
         for cand in [22_050.0, 24_000.0, 32_000.0, 44_100.0] {
             let fold = ((cand / 2.0) / bin_hz) as usize;
             if fold >= half || fold < 64 {
@@ -442,6 +522,7 @@ pub fn analyze_region(
                 .collect();
             let n_use = lo.len().min(hi.len());
             if n_use >= 32 {
+                evaluated = true;
                 let c = corr0(&lo[..n_use], &hi[..n_use]);
                 if c > best_score {
                     best_score = c;
@@ -449,22 +530,30 @@ pub fn analyze_region(
                 }
             }
         }
-        out.records.push(push(
+        let (src_val, src_reason) = if evaluated {
+            (Validity::Valid, None)
+        } else {
+            (
+                Validity::InsufficientSupport,
+                Some("no source-rate candidate has enough bins".into()),
+            )
+        };
+        out.records.push(push_spec(
             "exp.src_image_score",
-            best_score,
+            if evaluated { best_score } else { f64::NAN },
             "corr",
             Confidence::Medium,
-            Validity::Valid,
-            None,
+            src_val,
+            src_reason.clone(),
             frames as u64,
         ));
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.src_candidate_rate",
-            best_rate,
+            if evaluated { best_rate } else { f64::NAN },
             "hz",
             Confidence::Low,
-            Validity::Valid,
-            None,
+            src_val,
+            src_reason,
             frames as u64,
         ));
     }
@@ -510,7 +599,7 @@ pub fn analyze_region(
                     .iter()
                     .sum::<f64>();
             }
-            out.records.push(push(
+            out.records.push(push_spec(
                 "exp.thd_ratio",
                 harm / total_power,
                 "ratio",
@@ -524,7 +613,7 @@ pub fn analyze_region(
 
     // ==== Dynamics: short-term level range + attack/release ====
     {
-        let win = (0.02 * rate as f64) as usize; // 20 ms
+        let win = ((0.02 * rate as f64) as usize).max(1); // 20 ms
         if n >= 4 * win {
             let levels: Vec<f64> = seg
                 .chunks_exact(win)
@@ -593,7 +682,7 @@ pub fn analyze_region(
             ));
         }
         // Gaps: 5 ms windows below -80 dBFS.
-        let win = (0.005 * rate as f64) as usize;
+        let win = ((0.005 * rate as f64) as usize).max(1);
         let mut gaps = 0u64;
         let mut in_gap = false;
         for w in seg.chunks(win) {
@@ -622,7 +711,7 @@ pub fn analyze_region(
             let floor = maxp * 1e-4;
             let top = &mean_power[half / 2..half];
             let holes = top.iter().filter(|&&p| p < floor).count();
-            out.records.push(push(
+            out.records.push(push_spec(
                 "exp.spectral_hole_ratio",
                 holes as f64 / top.len().max(1) as f64,
                 "ratio",
@@ -694,7 +783,7 @@ pub fn analyze_region(
                 tonal += 1;
             }
         }
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.tonal_peak_count",
             tonal as f64,
             "count",
@@ -719,7 +808,7 @@ pub fn analyze_region(
                 }
             }
         }
-        out.records.push(push(
+        out.records.push(push_spec(
             "exp.hum_harmonic_count",
             hum as f64,
             "count",
@@ -763,19 +852,30 @@ pub fn analyze_region(
                         }
                     }
                 }
-                out.records.push(push(
+                let supported = coh_n > 0;
+                let mut rec = push_spec(
                     "exp.freq_lr_coherence",
-                    if coh_n > 0 {
+                    if supported {
                         coh_sum / coh_n as f64
                     } else {
-                        0.0
+                        f64::NAN
                     },
                     "coherence",
                     Confidence::Medium,
-                    Validity::Valid,
-                    None,
+                    if supported {
+                        Validity::Valid
+                    } else {
+                        Validity::InsufficientSupport
+                    },
+                    if supported {
+                        None
+                    } else {
+                        Some("no mid-band bins with energy in both channels".into())
+                    },
                     coh_n,
-                ));
+                );
+                rec.channels = Some(ChannelSelector::ChannelPair(0, 1));
+                out.records.push(rec);
             }
         }
     }
@@ -787,11 +887,16 @@ pub fn analyze_region(
 pub const CANDIDATE_ROLES: &[&str] = &["features/cheap", "features/reference"];
 
 /// Deserialize feature records stored by the cheap/reference stages
-/// (`{"records": [...]}`).
-pub fn parse_feature_records(body: &serde_json::Value) -> Vec<FeatureRecord> {
-    body.get("records")
-        .and_then(|v| serde_json::from_value(v.clone()).ok())
-        .unwrap_or_default()
+/// (`{"records": [...]}`). A malformed `records` field fails
+/// explicitly — silently returning an empty list would turn data
+/// corruption into "no candidates" (pre-release policy: fail, never
+/// guess).
+pub fn parse_feature_records(body: &serde_json::Value) -> std::io::Result<Vec<FeatureRecord>> {
+    let Some(records) = body.get("records") else {
+        return Ok(Vec::new());
+    };
+    serde_json::from_value(records.clone())
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))
 }
 
 /// Re-export for the stage: event extraction + config.
@@ -870,7 +975,12 @@ mod tests {
                 .iter()
                 .any(|t| t.starts_with("candidate:EVT-t-Clipping"))
         );
-        assert_eq!(r[1].triggers, vec!["low_similarity"]);
+        assert!(r[1].triggers.contains(&"low_similarity".to_string()));
+        assert!(
+            r[1].triggers
+                .iter()
+                .any(|t| t.starts_with("candidate:EVT-t-LowCoherence"))
+        );
     }
 
     fn noise(n: usize, seed: u64) -> Vec<f64> {

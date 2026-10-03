@@ -61,17 +61,21 @@ task `docs/tasks/analysis-candidate-events.md`、plan
 
 - `crates/al-analysis/src/events.rs`:
   - `CandidateEvent`: content-derived の安定 ID
-    (`EVT-<alg>-<input>-<ms>-<hash>`。入力 ID・特徴・時刻・
-    パラメータから導出)、kind、時間範囲、strength、
+    (`EVT-<alg>-<input>-<ms>-<hash>`。kind・入力 ID・時刻・
+    チャンネル範囲・ソース artifact・特徴から導出し、
+    ステレオ per-channel 行や異なる source/capture ペア由来の
+    行が衝突しないようにする)、kind、時間範囲、strength、
     validity、confidence、`{"artifact","rows"}` 証拠リンク
-  - `EventConfig`: 全閾値を `config.events.*` で
+  - `EventConfig`: 全閾値を `config.analysis.events.*` で
     オーバーレイ可能(`from_job`)
   - `extract_candidates`: spec の閾値ルール表(clip /
     discontinuity / silence-dropout / low-coherence /
     high-residual / lag-drift 等)を FeatureRecord に適用。
-    invalid 行はイベントを起こさず、有効行の validity は
-    依存元マッピングでイベントへ伝播、confidence は min
-    伝播
+    `time_range` を持たないセグメントレベル行は入力の
+    セグメント長までをイベント範囲とする(`segment_scope`
+    を params に記録)。invalid 行もイベントを起こし、
+    その validity をイベントへ伝播する(弱い観測を強い主張に
+    格上げしない)。confidence は min 伝播
   - `events_schema` / `events_to_rows`: events テーブルへの
     平坦化(行 = 1 イベント、証拠は JSON 文字列列)
 - `crates/al-dataset/src/types.rs`: `Value::Scalar(f64)` の
@@ -84,6 +88,10 @@ task `docs/tasks/analysis-candidate-events.md`、plan
   閾値(noise floor -40dB 等)で常時ヒットするバグだった。
   比較は生値に戻し、双方向量(lag drift)だけ `map: |v| v.abs()`
   で変換するよう Rule に `map` フィールドを追加した
+- `noise.floor_dbfs` のイベント kind は当初
+  `SilenceDropoutCandidate` としていたが、高ノイズフロアは
+  ドロップアウトではないため `ElevatedNoiseFloor` kind を
+  追加して割り当て直した
 - イベント永続化の責務は expensive ステージ側に置き、
   expensive 未選択時は events ロール自体が無い
   (`not_produced` と区別可能)という plan の分割を維持した

@@ -320,11 +320,33 @@ impl Stage for ExpensiveAnalysisStage {
         let reader = al_dataset::reader::DatasetReader::open(&root).map_err(err)?;
         let mut records = Vec::new();
 
+        // 0. Decode every input once: candidate extraction needs each
+        // input's segment duration and the region analysis reuses the
+        // same decoded channels.
+        let mut decoded: std::collections::HashMap<String, al_locate::decode::DecodedInput> =
+            std::collections::HashMap::new();
+        for input in &ctx.manifest.inputs {
+            if let Some(dec) = decode_input(input, ctx)
+                .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))?
+            {
+                decoded.insert(input.input_id.to_string(), dec);
+            }
+        }
+        let duration_of = |input_id: &str| -> Option<f64> {
+            let dec = decoded.get(input_id)?;
+            let n = dec.channel_samples.iter().map(|c| c.len()).max()?;
+            if n == 0 {
+                return None;
+            }
+            Some(n as f64 / dec.sample_rate as f64)
+        };
+
         // 1. Extract candidate events from the cheap/reference
         // feature stores and persist them under the `events` role.
         // The table is written even when empty so `role_produced`
         // distinguishes "ran" from `not_produced`.
         let mut all_events: Vec<events::CandidateEvent> = Vec::new();
+        let mut scanned: Vec<String> = Vec::new();
         for role in expensive::CANDIDATE_ROLES {
             for artifact in reader
                 .artifacts(role)
@@ -336,7 +358,12 @@ impl Stage for ExpensiveAnalysisStage {
                     .strip_prefix(&format!("{role}/"))
                     .unwrap_or(&artifact.path);
                 let body = reader.read_json(role, name).map_err(err)?;
-                let feat_records = expensive::parse_feature_records(&body);
+                let feat_records = expensive::parse_feature_records(&body).map_err(|e| {
+                    StageError::new(
+                        StageKind::ExpensiveAnalysis,
+                        format!("feature records in {} unreadable: {e}", artifact.path),
+                    )
+                })?;
                 // `features/cheap/<input>` maps to that input;
                 // `features/reference/<src>__<cap>` events apply to the
                 // capture side (the measured pipeline output). The
@@ -348,7 +375,9 @@ impl Stage for ExpensiveAnalysisStage {
                     &input_id,
                     &feat_records,
                     &c_cfg,
+                    duration_of(&input_id),
                 ));
+                scanned.push(artifact.path.clone());
             }
         }
         writer
@@ -361,31 +390,42 @@ impl Stage for ExpensiveAnalysisStage {
                     input_id: "job".into(),
                     algorithm_id: "events.v1".into(),
                     algorithm_version: "1".into(),
-                    params: serde_json::json!({}),
+                    params: serde_json::to_value(&c_cfg).unwrap_or_default(),
                     alignment_id: None,
-                    parents: Vec::new(),
+                    parents: scanned,
                 },
             )
             .map_err(err)?;
+        records.push(ArtifactRecord {
+            artifact_id: ctx.registry.issue(),
+            role: "candidate_events".into(),
+            path: PathBuf::from("analysis/events/candidates"),
+            produced_by: Some(StageKind::ExpensiveAnalysis),
+            inputs: Vec::new(),
+            params: serde_json::json!({"event_count": all_events.len()}),
+        });
 
         // 2. Plan triggered regions per input and deep-analyze them.
-        let dictionary = ctx
-            .config
-            .get("dictionary_text")
-            .and_then(|v| v.as_str())
-            .and_then(|text| al_media::Dictionary::from_json(text).ok());
+        // A configured dictionary must parse — silently dropping a
+        // malformed dictionary would hide the fact that dictionary
+        // matching never ran.
+        let dictionary = match ctx.config.get("dictionary_text").and_then(|v| v.as_str()) {
+            Some(text) => Some(al_media::Dictionary::from_json(text).map_err(|e| {
+                StageError::new(
+                    StageKind::ExpensiveAnalysis,
+                    format!("dictionary_text is malformed: {e}"),
+                )
+            })?),
+            None => None,
+        };
         for input in &ctx.manifest.inputs {
             let input_id = input.input_id.to_string();
-            let Some(dec) = decode_input(input, ctx)
-                .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))?
-            else {
+            let Some(dec) = decoded.get(&input_id) else {
                 continue;
             };
-            let n = dec.channel_samples.first().map_or(0, |c| c.len());
-            if n == 0 {
+            let Some(duration_s) = duration_of(&input_id) else {
                 continue;
-            }
-            let duration_s = n as f64 / dec.sample_rate as f64;
+            };
             let own_events: Vec<events::CandidateEvent> = all_events
                 .iter()
                 .filter(|e| e.input_id == input_id)
