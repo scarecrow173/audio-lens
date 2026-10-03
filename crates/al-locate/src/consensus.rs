@@ -12,6 +12,7 @@ use crate::result::{LocateResult, SampleRange};
 
 /// Consensus thresholds.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ConsensusConfig {
     /// Minimum number of methods that must agree on one position.
     pub min_agreeing_methods: u32,
