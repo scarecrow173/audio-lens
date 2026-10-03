@@ -368,3 +368,189 @@ fn failed_dataset_stage_is_resumable() {
     fs::remove_dir_all(&base).ok();
     fs::remove_dir_all(&wav_dir).ok();
 }
+
+/// open_or_create: a valid dataset reopens for appending; schema,
+/// inputs, or config mismatches fail explicitly.
+#[test]
+fn open_or_create_validates_identity() {
+    let dir = tmp("open");
+    let root = dir.join("ds");
+    let inputs = vec![InputReference {
+        input_id: "IN-1".into(),
+        role: "capture_bug".into(),
+        source_path: "/abs/cap.wav".into(),
+        source_sha256: "aa".repeat(32),
+    }];
+    let config = serde_json::json!({"stages": ["cheap"]});
+
+    // Create → reopen → append: artifacts accumulate.
+    let mut w = DatasetWriter::open_or_create(&root, inputs.clone(), config.clone()).unwrap();
+    w.write_table(
+        "features/cheap",
+        "rms",
+        &schema(),
+        &[vec![Cell::F64(1.0), Cell::I64(1), Cell::Null]],
+        prov(),
+    )
+    .unwrap();
+    w.finish().unwrap();
+
+    let mut w = DatasetWriter::open_or_create(&root, inputs.clone(), config.clone()).unwrap();
+    assert_eq!(w.manifest().artifacts.len(), 1);
+    w.write_json("locate", "r.json", &serde_json::json!({"x": 1}), prov())
+        .unwrap();
+    let m = w.finish().unwrap();
+    assert_eq!(m.artifacts.len(), 2);
+
+    // Schema version mismatch → explicit failure.
+    let mut tampered = DatasetManifest::load(&root).unwrap();
+    tampered.schema_version = 0;
+    tampered.save(&root).unwrap();
+    assert!(DatasetWriter::open_or_create(&root, inputs.clone(), config.clone()).is_err());
+    tampered.schema_version = al_dataset::manifest::SCHEMA_VERSION;
+    tampered.save(&root).unwrap();
+
+    // Inputs mismatch → explicit failure.
+    let other_inputs = vec![InputReference {
+        input_id: "IN-2".into(),
+        role: "capture_bug".into(),
+        source_path: "/abs/cap.wav".into(),
+        source_sha256: "aa".repeat(32),
+    }];
+    assert!(DatasetWriter::open_or_create(&root, other_inputs, config.clone()).is_err());
+
+    // Config mismatch → explicit failure.
+    assert!(
+        DatasetWriter::open_or_create(&root, inputs.clone(), serde_json::json!({"other": 1}))
+            .is_err()
+    );
+
+    // Corrupt manifest → explicit failure (no silent recreate).
+    fs::write(root.join("manifest.json"), b"{corrupt").unwrap();
+    assert!(DatasetWriter::open_or_create(&root, inputs, config).is_err());
+
+    fs::remove_dir_all(&dir).ok();
+}
+
+/// Store replacement: rewriting the same role/name replaces the
+/// physical store AND the manifest entry — even for orphan stores
+/// that were never registered.
+#[test]
+fn store_replacement_is_full_and_idempotent() {
+    let dir = tmp("replace");
+    let root = dir.join("ds");
+    let mut w = DatasetWriter::open_or_create(&root, vec![], serde_json::json!({})).unwrap();
+
+    // Orphan store: a leftover directory at the target path that is
+    // NOT in the manifest must still be wiped.
+    let orphan = root.join("features/cheap/orphan");
+    fs::create_dir_all(&orphan).unwrap();
+    fs::write(orphan.join("leftover.bin"), b"stale").unwrap();
+    w.write_table(
+        "features/cheap",
+        "orphan",
+        &schema(),
+        &[vec![Cell::F64(1.0), Cell::I64(1), Cell::Null]],
+        prov(),
+    )
+    .unwrap();
+    assert!(!orphan.join("leftover.bin").exists());
+
+    // Rewrite same role/name: table shrinks 3 → 1 row, manifest keeps
+    // a single artifact entry.
+    w.write_table(
+        "features/cheap",
+        "rms",
+        &schema(),
+        &[
+            vec![Cell::F64(1.0), Cell::I64(1), Cell::Null],
+            vec![Cell::F64(2.0), Cell::I64(2), Cell::Str("a".into())],
+            vec![Cell::F64(3.0), Cell::I64(3), Cell::Str("b".into())],
+        ],
+        prov(),
+    )
+    .unwrap();
+    w.write_table(
+        "features/cheap",
+        "rms",
+        &schema(),
+        &[vec![Cell::F64(9.0), Cell::I64(9), Cell::Null]],
+        prov(),
+    )
+    .unwrap();
+    let m = w.finish().unwrap();
+    assert_eq!(
+        m.artifacts
+            .iter()
+            .filter(|a| a.path == "features/cheap/rms")
+            .count(),
+        1
+    );
+
+    let r = DatasetReader::open(&root).unwrap();
+    let cols = r.read_table("features/cheap", "rms", 0, 1, None).unwrap();
+    assert_eq!(cols[0].len(), 1);
+    assert_eq!(cols[0][0], Cell::F64(9.0));
+
+    fs::remove_dir_all(&dir).ok();
+}
+
+/// Missing/corrupt manifest policy: when an upstream analysis stage
+/// already completed, the dataset stage must refuse to destroy
+/// `analysis/` rather than silently regenerate it.
+#[test]
+fn corrupt_manifest_with_completed_analysis_refuses() {
+    use al_job::manifest::Manifest;
+    use al_job::registry::ArtifactRegistry;
+    use al_job::stage::{Stage, StageContext};
+
+    let job_dir = tmp("corrupt-job");
+    let mut cap = input(InputRole::CaptureBug, job_dir.join("cap.wav"));
+    cap.source_sha256 = Some("aa".repeat(32));
+    let mut manifest = Manifest::new(
+        JobId::new(),
+        vec![cap],
+        serde_json::json!({}),
+        &[
+            StageKind::Ingest,
+            StageKind::CheapAnalysis,
+            StageKind::Dataset,
+        ],
+    );
+    manifest.stage_mut(StageKind::CheapAnalysis).unwrap().status = al_core::StageStatus::Completed;
+
+    // A populated analysis/ whose manifest is corrupt.
+    let analysis = job_dir.join("analysis");
+    fs::create_dir_all(&analysis).unwrap();
+    fs::write(analysis.join("manifest.json"), b"{corrupt").unwrap();
+    fs::write(analysis.join("precious.bin"), b"keep me").unwrap();
+
+    let registry = ArtifactRegistry::new(&job_dir);
+    let config = serde_json::json!({});
+    let ctx = StageContext {
+        manifest: &manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let err = DatasetStage::new().run(&ctx).unwrap_err();
+    assert!(
+        err.message.contains("refusing to destroy"),
+        "unexpected error: {err:?}"
+    );
+    // analysis/ was NOT wiped.
+    assert!(analysis.join("precious.bin").exists());
+
+    // Without a completed upstream analysis stage the same corrupt
+    // manifest is regenerated wholesale.
+    manifest.stage_mut(StageKind::CheapAnalysis).unwrap().status = al_core::StageStatus::Failed;
+    let ctx = StageContext {
+        manifest: &manifest,
+        registry: &registry,
+        config: &config,
+    };
+    DatasetStage::new().run(&ctx).unwrap();
+    assert!(DatasetManifest::load(&analysis).is_ok());
+    assert!(!analysis.join("precious.bin").exists());
+
+    fs::remove_dir_all(&job_dir).ok();
+}

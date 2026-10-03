@@ -1,0 +1,281 @@
+//! Complex STFT and derived spectral intermediates.
+//!
+//! The FFT kernel is `al_locate::dsp::fft` (radix-2), so every frame
+//! is zero-padded up to the next power of two when the analysis
+//! window is not already one. All products are deterministic and
+//! persistable as `intermediate`-role tensors.
+
+use al_locate::dsp::fft;
+
+/// One frame×bin complex matrix produced by [`stft`].
+#[derive(Debug, Clone)]
+pub struct StftMatrix {
+    /// Real part, `frames[frame][bin]` (bins = `fft_size`).
+    pub re: Vec<Vec<f64>>,
+    /// Imaginary part, same layout.
+    pub im: Vec<Vec<f64>>,
+    /// Analysis window length (samples, before padding).
+    pub window: u64,
+    /// Hop between successive frames (samples).
+    pub hop: u64,
+    /// FFT size (power of two, `>= window`).
+    pub fft_size: usize,
+    /// Sample rate of the source signal.
+    pub sample_rate: u32,
+}
+
+impl StftMatrix {
+    /// Number of frames.
+    pub fn frames(&self) -> usize {
+        self.re.len()
+    }
+
+    /// Bin center frequency (Hz) of `bin`.
+    pub fn bin_freq(&self, bin: usize) -> f64 {
+        bin as f64 * self.sample_rate as f64 / self.fft_size as f64
+    }
+
+    /// Squared window energy used for PSD normalization.
+    fn window_power(&self) -> f64 {
+        // Hann window energy = 3/8 * window; matches `hann()` below.
+        0.375 * self.window as f64
+    }
+
+    /// Power spectral density, `frames[frame][bin]` in |x|²/Hz.
+    /// One-sided interpretation is left to the caller — this is the
+    /// full `fft_size`-bin transform.
+    pub fn psd(&self) -> Vec<Vec<f64>> {
+        // Two-sided PSD normalization: |X[k]|² / (fs · Σw²). Summing
+        // all bins × bin width recovers the signal power.
+        let norm = self.window_power() * self.sample_rate as f64;
+        self.re
+            .iter()
+            .zip(&self.im)
+            .map(|(re, im)| {
+                re.iter()
+                    .zip(im)
+                    .map(|(&r, &i)| (r * r + i * i) / norm)
+                    .collect()
+            })
+            .collect()
+    }
+
+    /// Magnitude matrix.
+    pub fn magnitude(&self) -> Vec<Vec<f64>> {
+        self.re
+            .iter()
+            .zip(&self.im)
+            .map(|(re, im)| {
+                re.iter()
+                    .zip(im)
+                    .map(|(&r, &i)| (r * r + i * i).sqrt())
+                    .collect()
+            })
+            .collect()
+    }
+
+    /// Power (squared magnitude) matrix.
+    pub fn power(&self) -> Vec<Vec<f64>> {
+        self.re
+            .iter()
+            .zip(&self.im)
+            .map(|(re, im)| re.iter().zip(im).map(|(&r, &i)| r * r + i * i).collect())
+            .collect()
+    }
+}
+
+/// Hann window coefficients.
+pub fn hann(n: usize) -> Vec<f64> {
+    (0..n)
+        .map(|i| 0.5 - 0.5 * (2.0 * std::f64::consts::PI * i as f64 / n as f64).cos())
+        .collect()
+}
+
+/// Compute the complex STFT of `samples`.
+///
+/// Frames are Hann-windowed `window`-sample segments stepped by
+/// `hop`, zero-padded to the next power of two. A signal shorter
+/// than one window yields zero frames — callers decide the validity
+/// (`InsufficientSupport`), not this function.
+pub fn stft(samples: &[f64], window: usize, hop: usize, sample_rate: u32) -> StftMatrix {
+    let fft_size = window.next_power_of_two();
+    let win = hann(window);
+    let mut re = Vec::new();
+    let mut im = Vec::new();
+    if samples.len() >= window && window > 0 && hop > 0 {
+        for start in (0..=samples.len() - window).step_by(hop) {
+            let mut fre = vec![0.0; fft_size];
+            let mut fim = vec![0.0; fft_size];
+            for (i, &v) in samples[start..start + window].iter().enumerate() {
+                fre[i] = v * win[i];
+            }
+            fft(&mut fre, &mut fim, false);
+            re.push(fre);
+            im.push(fim);
+        }
+    }
+    StftMatrix {
+        re,
+        im,
+        window: window as u64,
+        hop: hop as u64,
+        fft_size,
+        sample_rate,
+    }
+}
+
+/// Integrate a power/PSD row into `[lo_hz, hi_hz)` bands. Returns one
+/// value per band; bands outside the bin range contribute zero.
+pub fn band_power(
+    row: &[f64],
+    sample_rate: u32,
+    fft_size: usize,
+    bands: &[(f64, f64)],
+) -> Vec<f64> {
+    let bin_hz = sample_rate as f64 / fft_size as f64;
+    bands
+        .iter()
+        .map(|&(lo, hi)| {
+            let b0 = (lo / bin_hz).floor() as usize;
+            let b1 = (hi / bin_hz).ceil() as usize;
+            (b0..b1.min(row.len())).map(|b| row[b]).sum::<f64>() * bin_hz
+        })
+        .collect()
+}
+
+/// Standard IEC 1/3-octave bands inside `[f_min, f_max]` as
+/// `(lower, upper)` edges around `f_c = 1000·2^(k/3)` centers.
+pub fn third_octave_bands(f_min: f64, f_max: f64) -> Vec<(f64, f64)> {
+    let mut bands = Vec::new();
+    let ratio = 2f64.powf(1.0 / 3.0);
+    let mut center = 1000.0;
+    // Step down below f_min, then walk upward.
+    while center / ratio.sqrt() > f_min {
+        center /= ratio;
+    }
+    while center * ratio.sqrt() <= f_max {
+        bands.push((center / ratio.sqrt(), center * ratio.sqrt()));
+        center *= ratio;
+    }
+    bands
+}
+
+/// Cross-spectral density of two aligned frames: `conj(x) * y`
+/// per bin (returns `(re, im)` pairs).
+pub fn csd(x_re: &[f64], x_im: &[f64], y_re: &[f64], y_im: &[f64]) -> Vec<(f64, f64)> {
+    x_re.iter()
+        .zip(x_im)
+        .zip(y_re.iter().zip(y_im))
+        .map(|((&xr, &xi), (&yr, &yi))| (xr * yr + xi * yi, xr * yi - xi * yr))
+        .collect()
+}
+
+/// Complex coherence `Pxy / sqrt(Pxx * Pyy)` per bin. Bins with zero
+/// auto-power in either signal return `0`.
+pub fn complex_coherence(pxx: &[f64], pyy: &[f64], pxy: &[(f64, f64)]) -> Vec<(f64, f64)> {
+    pxx.iter()
+        .zip(pyy)
+        .zip(pxy)
+        .map(|((&xx, &yy), &(pr, pi))| {
+            let denom = (xx * yy).sqrt();
+            if denom <= 0.0 {
+                (0.0, 0.0)
+            } else {
+                (pr / denom, pi / denom)
+            }
+        })
+        .collect()
+}
+
+/// Spectral envelope of a magnitude row: a smoothed log-frequency
+/// curve (moving average in linear magnitude over `bins`-wide
+/// windows), used for coarse shape comparison.
+pub fn envelope(magnitude_row: &[f64], bins: usize) -> Vec<f64> {
+    let bins = bins.max(1);
+    (0..magnitude_row.len())
+        .map(|i| {
+            let lo = i.saturating_sub(bins / 2);
+            let hi = (i + bins / 2 + 1).min(magnitude_row.len());
+            magnitude_row[lo..hi].iter().sum::<f64>() / (hi - lo) as f64
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stft_places_sine_in_the_right_bin() {
+        let rate = 48000;
+        let n = 2048;
+        let freq = 3000.0;
+        let samples: Vec<f64> = (0..n)
+            .map(|i| (2.0 * std::f64::consts::PI * freq * i as f64 / rate as f64).sin())
+            .collect();
+        let m = stft(&samples, 1024, 512, rate);
+        assert_eq!(m.frames(), 3);
+        assert_eq!(m.fft_size, 1024);
+        let mag = m.magnitude();
+        let (bin, _) = mag[0]
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .unwrap();
+        // 3000 Hz at 46.875 Hz/bin → bins 64/65 both close.
+        assert!((bin as i64 - 64).abs() <= 1);
+    }
+
+    #[test]
+    fn non_power_of_two_window_is_zero_padded() {
+        let samples = vec![1.0; 1500];
+        let m = stft(&samples, 1500, 500, 48000);
+        assert_eq!(m.fft_size, 2048);
+        assert_eq!(m.frames(), 1);
+    }
+
+    #[test]
+    fn psd_integrates_to_signal_power() {
+        // Parseval sanity: a unit sine's total power is 0.5.
+        let rate = 48000;
+        let n = 2048;
+        let samples: Vec<f64> = (0..n)
+            .map(|i| (2.0 * std::f64::consts::PI * 1000.0 * i as f64 / rate as f64).sin())
+            .collect();
+        let m = stft(&samples, 2048, 2048, rate);
+        let psd = m.psd();
+        let bin_hz = rate as f64 / m.fft_size as f64;
+        let total: f64 = psd[0].iter().sum::<f64>() * bin_hz;
+        assert!((total - 0.5).abs() < 0.15, "total power {total}");
+    }
+
+    #[test]
+    fn third_octave_bands_cover_range() {
+        let bands = third_octave_bands(20.0, 20000.0);
+        assert!(bands.len() > 25);
+        // Band edges straddle the range: first band starts at or
+        // below ~20 Hz, last band reaches the top of the range.
+        assert!(bands[0].0 <= 20.0 && bands[0].0 > 10.0);
+        assert!(bands.last().unwrap().1 > 16_000.0);
+    }
+
+    #[test]
+    fn coherence_is_one_for_identical_signals() {
+        let rate = 48000;
+        let n = 1024;
+        let samples: Vec<f64> = (0..n)
+            .map(|i| (2.0 * std::f64::consts::PI * 700.0 * i as f64 / rate as f64).sin())
+            .collect();
+        let m = stft(&samples, 1024, 1024, rate);
+        let p = m.power();
+        let pxy = csd(&m.re[0], &m.im[0], &m.re[0], &m.im[0]);
+        let coh = complex_coherence(&p[0], &p[0], &pxy);
+        let (bin, _) = p[0]
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .unwrap();
+        assert!((coh[bin].0 - 1.0).abs() < 1e-9);
+        assert!(coh[bin].1.abs() < 1e-9);
+    }
+}

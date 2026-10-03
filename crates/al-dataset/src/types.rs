@@ -48,6 +48,29 @@ pub struct Resolution {
     pub hop: u64,
 }
 
+/// Coarse resolution class a measurement belongs to. The class name
+/// and the exact window/hop are persisted together — the class is a
+/// stable axis for cross-feature comparison while window/hop carry
+/// the actual parameters used.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResolutionClass {
+    /// Per-sample measurements.
+    Sample,
+    /// ~5 ms windows.
+    Fine5ms,
+    /// ~20 ms windows.
+    Mid20ms,
+    /// ~100 ms windows.
+    Broad100ms,
+    /// ~500 ms windows.
+    Wide500ms,
+    /// ~1 s or longer windows.
+    Seconds,
+    /// Whole-segment summary (no windowing).
+    Segment,
+}
+
 /// Difference to a reference value, when meaningful.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Delta {
@@ -78,6 +101,8 @@ pub struct FeatureRecord {
     pub channels: Option<ChannelSelector>,
     /// Window / hop the measurement was computed with.
     pub resolution: Option<Resolution>,
+    /// Coarse resolution class (stable axis for cross-feature use).
+    pub resolution_class: ResolutionClass,
     /// Absolute measured (target) value.
     pub target: Option<f64>,
     /// Reference value used for comparison, when applicable.
@@ -126,6 +151,7 @@ mod tests {
                 window: 2048,
                 hop: 512,
             }),
+            resolution_class: ResolutionClass::Mid20ms,
             target: Some(-12.5),
             reference: Some(-10.0),
             delta: Some(Delta {
@@ -146,5 +172,21 @@ mod tests {
         let json = serde_json::to_string(&record).unwrap();
         let back: FeatureRecord = serde_json::from_str(&json).unwrap();
         assert_eq!(back, record);
+    }
+
+    #[test]
+    fn resolution_class_serializes_snake_case() {
+        assert_eq!(
+            serde_json::to_string(&ResolutionClass::Mid20ms).unwrap(),
+            "\"mid20ms\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ResolutionClass::Broad100ms).unwrap(),
+            "\"broad100ms\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ResolutionClass::Segment).unwrap(),
+            "\"segment\""
+        );
     }
 }

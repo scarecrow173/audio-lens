@@ -11,9 +11,9 @@
 
 use std::fs;
 use std::io;
-use std::path::Component;
 
 use al_core::ArtifactId;
+use al_job::fsutil::checked_job_path;
 use al_job::job::JobInput;
 use al_job::stage::StageContext;
 use al_media::metadata::SampleFormat;
@@ -47,21 +47,6 @@ pub fn format_scale(format: SampleFormat) -> f64 {
         SampleFormat::PcmS32 => 2_147_483_648.0,
         SampleFormat::Float32 | SampleFormat::Float64 | SampleFormat::Other => 1.0,
     }
-}
-
-/// Reject manifest paths that escape the job directory.
-fn safe_join(job_dir: &std::path::Path, rel: &std::path::Path) -> io::Result<std::path::PathBuf> {
-    if rel.is_absolute()
-        || rel
-            .components()
-            .any(|c| !matches!(c, Component::Normal(_) | Component::CurDir))
-    {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!("manifest artifact path escapes job dir: {}", rel.display()),
-        ));
-    }
-    Ok(job_dir.join(rel))
 }
 
 /// Restore `input`'s decoded PCM. Returns `Ok(None)` when the input
@@ -100,7 +85,7 @@ pub fn decode_input(
     });
     let scale = match metadata {
         Some(meta) => {
-            let text = fs::read_to_string(safe_join(job_dir, &meta.path)?)?;
+            let text = fs::read_to_string(checked_job_path(job_dir, &meta.path)?)?;
             let json: serde_json::Value =
                 serde_json::from_str(&text).map_err(|e| bad(e.to_string()))?;
             let format: SampleFormat = json
@@ -113,7 +98,7 @@ pub fn decode_input(
         None => 1.0,
     };
 
-    let bytes = fs::read(safe_join(job_dir, &decoded.path)?)?;
+    let bytes = fs::read(checked_job_path(job_dir, &decoded.path)?)?;
     if bytes.len() % 8 != 0 {
         return Err(bad(format!(
             "decoded_pcm has {} bytes, not a multiple of 8",
