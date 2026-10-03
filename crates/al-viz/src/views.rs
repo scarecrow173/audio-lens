@@ -67,6 +67,7 @@ pub fn transfer_views(reader: &DatasetReader, sample_rate: f64) -> io::Result<Ve
         let freq_hz: Vec<f64> = (0..bins).map(|k| k as f64 * bin_hz).collect();
 
         // Optional companions: coherence magnitude + band gain.
+        let coherence_path = format!("intermediate/{pair}/coherence");
         let coherence = read_full(reader, "intermediate", &format!("{pair}/coherence"))
             .ok()
             .map(|(s, d)| {
@@ -76,10 +77,19 @@ pub fn transfer_views(reader: &DatasetReader, sample_rate: f64) -> io::Result<Ve
                 let w = s[1] as usize;
                 d[..half.min(w)].to_vec()
             });
+        let band_gain_path = format!("intermediate/{pair}/band_gain_m2");
         let band_gain_db = read_full(reader, "intermediate", &format!("{pair}/band_gain_m2")).ok();
+        let mut parents = vec![a.path.clone()];
+        if coherence.is_some() {
+            parents.push(coherence_path);
+        }
+        if band_gain_db.is_some() {
+            parents.push(band_gain_path);
+        }
 
         out.push(JsonProduct {
             path: format!("visualization/views/transfer_{pair}.json"),
+            parents,
             body: serde_json::json!({
                 "pair": pair,
                 "sample_rate": sample_rate,
@@ -133,6 +143,7 @@ pub fn locate_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
                 "evidence": result["evidence"],
                 "source": a.path,
             }),
+            parents: vec![a.path.clone()],
         });
     }
     Ok(out)
@@ -199,6 +210,7 @@ pub fn stereo_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
                 "features": stereo,
                 "coherence_tiles": coherence_refs,
             }),
+            parents: vec![a.path.clone()],
         });
     }
     Ok(out)
@@ -232,6 +244,7 @@ pub fn residual_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
                 "residual": rname,
                 "artifacts": artifacts,
             }),
+            parents: artifacts.clone(),
         });
     }
     Ok(out)
@@ -249,6 +262,7 @@ pub fn events_view(reader: &DatasetReader) -> io::Result<Option<JsonProduct>> {
         return Ok(Some(JsonProduct {
             path: "visualization/views/events.json".into(),
             body: serde_json::json!({"markers": []}),
+            parents: vec!["events/candidates".into()],
         }));
     }
     // `read_range` is column-major: cols[col][row]. Resolve fields by
@@ -297,6 +311,7 @@ pub fn events_view(reader: &DatasetReader) -> io::Result<Option<JsonProduct>> {
     Ok(Some(JsonProduct {
         path: "visualization/views/events.json".into(),
         body: serde_json::json!({"markers": markers}),
+        parents: vec!["events/candidates".into()],
     }))
 }
 

@@ -17,7 +17,8 @@ pub const LOD_LEVELS: usize = 5;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct SeriesDecl {
-    /// What the series is indexed by: `sample`, `frame`, or `bucket`.
+    /// What the series is indexed by: `sample`, `frame`, `bucket`,
+    /// or `seconds`.
     pub unit: String,
     /// Analysis window in samples, when the series is frame-based.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -88,7 +89,9 @@ pub fn build(
     series.insert(
         "events".into(),
         SeriesDecl {
-            unit: "sample".into(),
+            // Event markers carry `start_s`/`end_s` in seconds, not
+            // sample positions.
+            unit: "seconds".into(),
             window: None,
             hop: None,
             samples_per_bucket: None,
