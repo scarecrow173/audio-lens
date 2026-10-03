@@ -10,6 +10,7 @@ al-job.workspace = true
 al-media.workspace = true
 al-dataset.workspace = true
 al-locate.workspace = true
+al-analysis.workspace = true
 serde_json.workspace = true
 
 [[bin]]
