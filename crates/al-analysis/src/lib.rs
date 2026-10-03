@@ -6,6 +6,8 @@
 //! `al_locate::dsp`, decoded input comes from `al_locate::decode`.
 
 pub mod cheap;
+pub mod events;
+pub mod expensive;
 pub mod records;
 pub mod reference;
 pub mod session;
