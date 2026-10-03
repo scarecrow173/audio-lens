@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nDhaSqoH2kao6D3Xz"
 type: "task"
-status: "todo"
+status: "done"
 title: "analysis ステージ CLI 配線 + depends_on"
 created: "2026-10-02"
 updated: "2026-10-02"

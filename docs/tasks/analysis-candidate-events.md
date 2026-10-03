@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nBEhJkL7a1GaPjUjG"
 type: "task"
-status: "todo"
+status: "done"
 title: "候補イベントモデル + 抽出/永続化"
 created: "2026-10-02"
 updated: "2026-10-02"

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nDLirh4B1Howag5Y1"
 type: "task"
-status: "todo"
+status: "done"
 title: "analysis パイプライン合成結合テスト"
 created: "2026-10-02"
 updated: "2026-10-02"
