@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034z8FkpJb4ejhkehZ3pgc"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "analysis-stages"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

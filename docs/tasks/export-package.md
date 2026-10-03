@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oICJD1cJoadJNGUhu"
 type: "task"
-status: "todo"
+status: "done"
 title: "ExportStage: 再配置可能パッケージ"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

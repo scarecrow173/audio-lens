@@ -38,6 +38,36 @@ pub struct TensorChunk {
     pub data: Vec<f64>,
 }
 
+/// Incremental tensor sink returned by
+/// [`DatasetWriter::create_tensor`]. Chunks land on disk as they are
+/// pushed; nothing is registered until [`TensorSink::finish`].
+pub struct TensorSink<'w> {
+    writer: &'w mut DatasetWriter,
+    inner: TensorWriter,
+    role: String,
+    name: String,
+}
+
+impl TensorSink<'_> {
+    /// Persist one whole chunk at `coords`. `data` length must equal
+    /// the chunk extent (smaller at array edges).
+    pub fn push(&mut self, coords: &[u64], data: &[f64]) -> io::Result<()> {
+        self.inner.write_chunk(coords, data)
+    }
+
+    /// Commit the array and register it under the role.
+    pub fn finish(self, provenance: Provenance) -> io::Result<()> {
+        self.inner.finish()?;
+        self.writer.register(
+            &self.role,
+            format!("{}/{}", self.role, self.name),
+            StoreKind::Tensor,
+            provenance,
+        );
+        Ok(())
+    }
+}
+
 /// Writes normalized stage output into a dataset root (`analysis/`).
 pub struct DatasetWriter {
     root: PathBuf,
@@ -189,23 +219,36 @@ impl DatasetWriter {
         chunks: &[TensorChunk],
         provenance: Provenance,
     ) -> io::Result<()> {
+        let mut sink = self.create_tensor(role, name, shape, chunk_shape)?;
+        for chunk in chunks {
+            sink.push(&chunk.coords, &chunk.data)?;
+        }
+        sink.finish(provenance)
+    }
+
+    /// Begin an incremental tensor write under `role/name`: chunks
+    /// are persisted as they are pushed, so a producer never needs
+    /// the whole array in memory. [`TensorSink::finish`] commits the
+    /// array and registers the artifact.
+    pub fn create_tensor(
+        &mut self,
+        role: &str,
+        name: &str,
+        shape: &[u64],
+        chunk_shape: &[u64],
+    ) -> io::Result<TensorSink<'_>> {
         let path = self.artifact_path(role, name)?;
         Self::reset_store(&path)?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
-        let mut tensor = TensorWriter::create(&path, shape, chunk_shape)?;
-        for chunk in chunks {
-            tensor.write_chunk(&chunk.coords, &chunk.data)?;
-        }
-        tensor.finish()?;
-        self.register(
-            role,
-            format!("{role}/{name}"),
-            StoreKind::Tensor,
-            provenance,
-        );
-        Ok(())
+        let inner = TensorWriter::create(&path, shape, chunk_shape)?;
+        Ok(TensorSink {
+            writer: self,
+            inner,
+            role: role.to_string(),
+            name: name.to_string(),
+        })
     }
 
     /// Persist audio under `role/name.wav`.

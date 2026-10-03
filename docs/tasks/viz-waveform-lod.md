@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oByaJjYPsnfEEUy8o"
 type: "task"
-status: "todo"
+status: "done"
 title: "波形 LOD ピラミッド(min/max/RMS)"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []
