@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nv6tpsfrUU5JDU9cD"
 type: "task"
-status: "todo"
+status: "done"
 title: "CheapAnalysisStage: 全特徴ファミリ実装"
 created: "2026-10-02"
 updated: "2026-10-02"
