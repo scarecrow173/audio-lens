@@ -61,6 +61,12 @@ metadata:
   窓でさらに分割。単位速度から外れた run は Drift、`min_run` 未満の
   オフレート run は Jitter。単一 anchor の区間は傾きを観測できない
   ため Continuous とする(レビュー修正: 以前は無条件に Jitter だった)
+- 連続するオフレート窓は同一 rate クラスの最大 run として 1 区間に
+  まとめ、クラス遷移時のみ共有 anchor を境界として再利用する
+  (レビュー修正: 以前はオフレート窓ごとに piece を確定して
+  `w[1]` を次 run に再投入し、anchor 重複と区間オーバーラップを
+  生じさせていた)。結果として segment は capture 時系列に単調で
+  非重複となる
 - `identify_loop_occurrences` は第 3 引数の `anchor`(受理位置)を
   パス 0 / 位相 0 の基準とし、`loop_index` は anchor 起点の符号付き
   通し番号(anchor より前のパスは負)。`occurrence_position` は
@@ -86,12 +92,14 @@ task `docs/tasks/locate-tracking.md`、spec
 ## Validation
 
 - `cargo test -p al-locate` 全 pass(ループ個別識別 / 連続区間の
-  線形写像 / drift+gap の区間化)
+  線形写像 / drift+gap の区間化 / 持続オフレート run の単一区間化 /
+  mixed rate 遷移・skip・resume の区間分割)
 
 ## Risks
 
-- anchor 生成は現状メソッド候補位置ベース。長尺ソースの密な
-  anchor 抽出(窓分割定位)は今後の精度改善余地
+- anchor 生成は stage 側の窓分割定位に移行済み(`locate-stage-cli`
+  参照)。窓スコアが合議閾値を満たさない区間は anchor 欠落となり、
+  稀に隣接 anchor 間の局所推定が粗くなる余地がある
 
 ## Follow-ups
 
