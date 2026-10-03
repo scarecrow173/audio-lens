@@ -12,6 +12,7 @@ use crate::result::{LocateResult, SampleRange};
 
 /// Consensus thresholds.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ConsensusConfig {
     /// Minimum number of methods that must agree on one position.
     #[serde(default = "default_min_agreeing")]
@@ -144,11 +145,12 @@ pub fn evaluate(
         );
     }
 
-    // Cluster votes within tolerance. A cluster's diameter (not just
-    // neighbour distance) is bounded by position_tolerance, so every
-    // member pair is within tolerance — no transitive chaining.
-    // Take the largest cluster; a tie or a second ≥min cluster at a
-    // distant position is ambiguity, not a silent pick.
+    // Cluster votes within tolerance. Membership requires the whole
+    // cluster to stay within `position_tolerance` — comparing only the
+    // newest vote (single-link) would let a chain of small steps bridge
+    // a spread far beyond tolerance. Take the largest cluster; a tie
+    // or a second ≥min cluster at a distant position is ambiguity,
+    // not a silent pick.
     let mut sorted = votes.clone();
     sorted.sort_unstable();
     let mut clusters: Vec<Vec<u64>> = Vec::new();
@@ -270,6 +272,28 @@ mod tests {
         e.candidates.clear();
         let r = evaluate(&[e], "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "1");
         assert!(!r.accepted);
+    }
+
+    #[test]
+    fn chained_votes_do_not_bridge_beyond_tolerance() {
+        // 0–100 and 100–200 are each within tolerance, but 0 and 200 are
+        // 200 apart. Single-link chaining would fuse them into one
+        // 3-method cluster with spread 200; the contract bounds the
+        // whole cluster's width.
+        let e = vec![
+            ev("ncc", 0, 0.9),
+            ev("phat", 100, 0.8),
+            ev("env", 200, 0.85),
+        ];
+        let cfg = ConsensusConfig {
+            min_agreeing_methods: 3,
+            position_tolerance: 100,
+            ..Default::default()
+        };
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg, "locate", "1");
+        assert!(!r.accepted);
+        assert_eq!(r.agreeing_methods, 2);
+        assert!(r.position_spread <= 100);
     }
 
     #[test]

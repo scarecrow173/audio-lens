@@ -86,9 +86,7 @@ pub fn subtract_fit(
 
 /// Run the two-stage residual search. `locate_residual` re-runs the
 /// method set on the residual capture (provided by the caller so the
-/// stage controls the configuration). Returns the search record and
-/// the residual channels (so callers can persist the residual signal
-/// itself without recomputing the fit).
+/// stage controls the configuration).
 pub fn residual_search(
     parent_source: &str,
     parent_alignment: AlignmentId,
@@ -96,7 +94,7 @@ pub fn residual_search(
     capture_channels: &[Vec<f64>],
     ridge: f64,
     locate_residual: impl FnOnce(&[Vec<f64>]) -> LocateResult,
-) -> Option<(ResidualSearch, Vec<Vec<f64>>)> {
+) -> Option<ResidualSearch> {
     let before = rms(capture_channels);
     let (residual, est) = subtract_fit(source_channels, capture_channels, ridge)?;
     let after = rms(&residual);
@@ -115,18 +113,15 @@ pub fn residual_search(
         .sum::<f64>()
         .sqrt();
     let child_accepted = f64::from(child.accepted as u8);
-    Some((
-        ResidualSearch {
-            parent_source: parent_source.to_string(),
-            parent_alignment,
-            estimated_gain: gain,
-            channel_transform: est.matrix,
-            energy: ResidualEnergy { before, after },
-            confidence: (0.5 * removed + 0.5 * child_accepted).min(1.0),
-            child,
-        },
-        residual,
-    ))
+    Some(ResidualSearch {
+        parent_source: parent_source.to_string(),
+        parent_alignment,
+        estimated_gain: gain,
+        channel_transform: est.matrix,
+        energy: ResidualEnergy { before, after },
+        confidence: (0.5 * removed + 0.5 * child_accepted).min(1.0),
+        child,
+    })
 }
 
 #[cfg(test)]
@@ -190,7 +185,7 @@ mod tests {
             algorithm_version: "0".into(),
             params: serde_json::json!({}),
         };
-        let (out, _residual) = residual_search(
+        let out = residual_search(
             "source-1",
             AlignmentId::new(),
             &[src],
