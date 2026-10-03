@@ -9,7 +9,25 @@
 use std::fs;
 use std::io;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Component, Path, PathBuf};
+
+/// Join `rel` to `job_dir`, rejecting paths that would escape it.
+///
+/// Persisted manifests are untrusted input on resume: an absolute path
+/// or `..` component must never read or write outside the job.
+pub fn checked_job_path(job_dir: &Path, rel: &Path) -> io::Result<PathBuf> {
+    if rel.is_absolute()
+        || rel
+            .components()
+            .any(|c| !matches!(c, Component::Normal(_) | Component::CurDir))
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("path escapes job dir: {}", rel.display()),
+        ));
+    }
+    Ok(job_dir.join(rel))
+}
 
 /// Write `bytes` to `path` atomically and durably.
 pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
@@ -60,6 +78,39 @@ pub fn tmp_path_for(path: &Path) -> std::path::PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn normal_relative_paths_pass() {
+        let job = Path::new("job");
+        assert_eq!(
+            checked_job_path(job, Path::new("artifacts/decoded.f64le")).unwrap(),
+            Path::new("job/artifacts/decoded.f64le")
+        );
+        assert_eq!(
+            checked_job_path(job, Path::new("./artifacts/x")).unwrap(),
+            Path::new("job/artifacts/x")
+        );
+    }
+
+    #[test]
+    fn traversal_is_rejected() {
+        let job = Path::new("job");
+        assert!(checked_job_path(job, Path::new("../escape")).is_err());
+        assert!(checked_job_path(job, Path::new("a/../../escape")).is_err());
+        assert!(checked_job_path(job, Path::new("..")).is_err());
+    }
+
+    #[test]
+    fn absolute_paths_are_rejected() {
+        let job = Path::new("job");
+        #[cfg(windows)]
+        let abs = Path::new(r"C:\tmp\evil.bin");
+        #[cfg(not(windows))]
+        let abs = Path::new("/tmp/evil.bin");
+        assert!(checked_job_path(job, abs).is_err());
+        #[cfg(windows)]
+        assert!(checked_job_path(job, Path::new(r"\\server\share")).is_err());
+    }
 
     // The create→finish rewrite paths (manifest.json, array.json) rely
     // on the rename replacing an existing destination atomically —

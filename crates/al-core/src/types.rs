@@ -90,7 +90,9 @@ pub enum Validity {
 }
 
 /// Confidence that a measured observation reflects a real phenomenon.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Ordered `Low < Medium < High` so downstream stages can take the
+/// weakest upstream confidence with `min`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Confidence {
     /// Little evidence.
@@ -125,6 +127,13 @@ mod tests {
         assert_eq!(json, "\"capture_bug\"");
         let back: InputRole = serde_json::from_str(&json).unwrap();
         assert_eq!(back, InputRole::CaptureBug);
+    }
+
+    #[test]
+    fn confidence_is_ordered_for_min_propagation() {
+        assert!(Confidence::Low < Confidence::Medium);
+        assert!(Confidence::Medium < Confidence::High);
+        assert_eq!(Confidence::Low.min(Confidence::High), Confidence::Low);
     }
 
     #[test]

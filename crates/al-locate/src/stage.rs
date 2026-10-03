@@ -1,22 +1,25 @@
 //! `LocateStage`: pairs `source_asset` inputs with `capture_*`
 //! inputs, runs the four locate methods per channel, evaluates
-//! consensus, fits the mix, identifies occurrences, and persists
-//! every result — accepted and rejected alike.
+//! consensus, fits the mix, identifies occurrences, builds the
+//! piecewise time map, runs the two-stage residual search, and
+//! persists every result — accepted and rejected alike.
 //!
 //! Sample-rate-mismatched pairs are never resampled: they get an
-//! explicit `DecodeInputUnavailable` result instead.
+//! explicit marked result instead. A pair whose decoded PCM is
+//! missing or empty is marked per-pair — one bad input never aborts
+//! the stage's other pairs.
 
 use std::fs;
 use std::path::PathBuf;
 
-use al_core::{Confidence, InputRole, StageKind, Validity};
+use al_core::{AlignmentId, Confidence, InputRole, StageKind, Validity};
 use al_job::manifest::ArtifactRecord;
 use al_job::stage::{Stage, StageContext, StageError};
-use al_media::metadata::SampleFormat;
 
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
-use crate::dsp::{deinterleave, ncc};
+use crate::decode::{DecodedInput, decode_input};
+use crate::dsp::ncc;
 use crate::methods::{default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
 use crate::residual::residual_search;
@@ -112,101 +115,37 @@ impl LocateStage {
     }
 }
 
-/// Decoded PCM of one input, with channel structure restored.
-struct DecodedInput {
-    input_id: String,
-    sample_rate: u32,
-    /// Deinterleaved channels, normalized to float range.
-    channel_samples: Vec<Vec<f64>>,
-    /// Artifact ids this input's PCM and metadata came from.
-    artifact_ids: Vec<al_core::ArtifactId>,
-}
-
 fn err(e: impl std::fmt::Display) -> StageError {
     StageError::new(StageKind::Locate, e.to_string())
 }
 
-/// Scale factor mapping one `SampleFormat` into `[-1, 1]` float.
-/// Integer PCM is stored integer-scaled; spectral-envelope
-/// comparisons and residual energies are absolute-scale-sensitive.
-fn format_scale(format: SampleFormat) -> f64 {
-    match format {
-        SampleFormat::PcmU8 => 128.0,
-        SampleFormat::PcmS16 => 32768.0,
-        SampleFormat::PcmS24 => 8_388_608.0,
-        SampleFormat::PcmS32 => 2_147_483_648.0,
-        SampleFormat::Float32 | SampleFormat::Float64 | SampleFormat::Other => 1.0,
-    }
-}
-
 impl LocateStage {
-    /// Restore one input's decoded PCM from ingest artifacts.
-    fn decoded(
+    /// Explicit non-accepted result for a pair that cannot be
+    /// evaluated (missing/empty decode, sample-rate mismatch).
+    fn marked_result(
         &self,
-        input: &al_job::job::JobInput,
-        ctx: &StageContext<'_>,
-    ) -> Result<Option<DecodedInput>, StageError> {
-        let input_artifact = ctx.manifest.input_artifact(&input.input_id);
-        let decoded = ctx.manifest.artifacts.iter().find(|a| {
-            a.role == "decoded_pcm"
-                && input_artifact
-                    .as_ref()
-                    .is_some_and(|ia| a.inputs.contains(ia))
-        });
-        let Some(decoded) = decoded else {
-            return Ok(None);
-        };
-        let sample_rate = decoded.params["sample_rate"]
-            .as_u64()
-            .ok_or_else(|| err("decoded_pcm artifact missing sample_rate"))?
-            as u32;
-        let channels = decoded.params["channels"]
-            .as_u64()
-            .ok_or_else(|| err("decoded_pcm artifact missing channels"))?
-            as u16;
-
-        // Sample format comes from the sibling ingest metadata —
-        // decoded PCM keeps the source-native integer scale, so the
-        // format decides the float normalization.
-        let metadata = ctx.manifest.artifacts.iter().find(|a| {
-            a.role == "ingest_metadata"
-                && input_artifact
-                    .as_ref()
-                    .is_some_and(|ia| a.inputs.contains(ia))
-        });
-        let scale = match metadata {
-            Some(meta) => {
-                let text =
-                    fs::read_to_string(ctx.registry.job_dir().join(&meta.path)).map_err(err)?;
-                let json: serde_json::Value = serde_json::from_str(&text).map_err(err)?;
-                let format: SampleFormat = json
-                    .pointer("/audio/sample_format")
-                    .cloned()
-                    .and_then(|v| serde_json::from_value(v).ok())
-                    .unwrap_or(SampleFormat::Other);
-                format_scale(format)
-            }
-            None => 1.0,
-        };
-
-        let bytes = fs::read(ctx.registry.job_dir().join(&decoded.path)).map_err(err)?;
-        let samples: Vec<f64> = bytes
-            .as_chunks::<8>()
-            .0
-            .iter()
-            .map(|b| f64::from_le_bytes(*b) / scale)
-            .collect();
-        let channel_samples = deinterleave(&samples, channels);
-        let mut artifact_ids = vec![decoded.artifact_id.clone()];
-        if let Some(m) = metadata {
-            artifact_ids.push(m.artifact_id.clone());
+        source_input_id: &str,
+        capture_input_id: &str,
+        validity: Validity,
+        reason: impl Into<String>,
+    ) -> LocateResult {
+        LocateResult {
+            alignment_id: AlignmentId::new(),
+            source_input_id: source_input_id.into(),
+            capture_input_id: capture_input_id.into(),
+            source_range: SampleRange { start: 0, end: 0 },
+            capture_range: SampleRange { start: 0, end: 0 },
+            evidence: vec![],
+            agreeing_methods: 0,
+            position_spread: 0,
+            confidence: Confidence::Low,
+            validity,
+            reject_reason: Some(reason.into()),
+            accepted: false,
+            algorithm_id: "locate-consensus".into(),
+            algorithm_version: "1".into(),
+            params: serde_json::to_value(&self.config).unwrap_or_default(),
         }
-        Ok(Some(DecodedInput {
-            input_id: input.input_id.to_string(),
-            sample_rate,
-            channel_samples,
-            artifact_ids,
-        }))
     }
 
     /// Run every method on every channel pair of
@@ -388,79 +327,66 @@ impl Stage for LocateStage {
             .iter()
             .filter(|i| matches!(i.role, InputRole::CaptureBug | InputRole::CaptureReference))
             .collect();
+        // Nothing to pair (capture-only or source-only job) →
+        // complete with empty output so the pipeline can continue to
+        // capture-only analysis.
         if sources.is_empty() || captures.is_empty() {
-            return Err(err(
-                "locate requires at least one source_asset and one capture_* input",
-            ));
+            return Ok(Vec::new());
         }
 
-        // Decode every source once up front; the residual pass needs
-        // them all after the per-pair results exist.
-        let mut decoded_sources = Vec::new();
-        for src_input in &sources {
-            let Some(source) = self.decoded(src_input, ctx)? else {
-                return Err(err(format!(
-                    "no decoded_pcm artifact for source {}",
-                    src_input.input_id
-                )));
-            };
-            decoded_sources.push(source);
+        // Decode every input once up front; the residual pass needs
+        // all sources after the per-pair results exist. A missing
+        // decode becomes a per-pair mark below, never an abort for
+        // the whole stage.
+        let mut decoded_sources = Vec::with_capacity(sources.len());
+        for input in &sources {
+            decoded_sources.push(decode_input(input, ctx).map_err(err)?);
+        }
+        let mut decoded_captures = Vec::with_capacity(captures.len());
+        for input in &captures {
+            decoded_captures.push(decode_input(input, ctx).map_err(err)?);
         }
 
         let mut records = Vec::new();
-        for cap_input in &captures {
-            let Some(capture) = self.decoded(cap_input, ctx)? else {
-                return Err(err(format!(
-                    "no decoded_pcm artifact for capture {}",
-                    cap_input.input_id
-                )));
+        for (cap_index, cap_input) in captures.iter().enumerate() {
+            // A capture with missing or empty decoded PCM marks every
+            // source pair; it never aborts the stage.
+            let capture_mark = match &decoded_captures[cap_index] {
+                None => Some((
+                    Validity::DecodeInputUnavailable,
+                    format!("no decoded_pcm artifact for capture {}", cap_input.input_id),
+                )),
+                Some(c)
+                    if c.channel_samples.is_empty()
+                        || c.channel_samples.iter().all(|ch| ch.is_empty()) =>
+                {
+                    Some((
+                        Validity::InsufficientSupport,
+                        "decoded PCM is empty".to_string(),
+                    ))
+                }
+                Some(_) => None,
             };
-            let capture_len = capture.channel_samples[0].len() as u64;
-            let tolerance = self.config.consensus.position_tolerance;
-            // Per-source results kept alive for the residual pass;
-            // accepted pairs additionally carry their `locate_result`
-            // artifact id for lineage.
-            let mut results: Vec<Option<LocateResult>> = Vec::new();
-            results.resize_with(decoded_sources.len(), || None);
-            let mut accepted: Vec<(usize, al_core::ArtifactId)> = Vec::new();
-            for (src_index, source) in decoded_sources.iter().enumerate() {
-                let dir = PathBuf::from("locate")
-                    .join(&source.input_id)
-                    .join(&capture.input_id);
-                let mut lineage = source.artifact_ids.clone();
-                lineage.extend(capture.artifact_ids.iter().cloned());
-
-                // Sample-rate mismatch: never resample — mark the pair
-                // explicitly instead.
-                if source.sample_rate != capture.sample_rate {
-                    let result = LocateResult {
-                        alignment_id: al_core::AlignmentId::new(),
-                        source_input_id: source.input_id.clone(),
-                        capture_input_id: capture.input_id.clone(),
-                        source_range: SampleRange { start: 0, end: 0 },
-                        capture_range: SampleRange { start: 0, end: 0 },
-                        evidence: vec![],
-                        agreeing_methods: 0,
-                        position_spread: 0,
-                        confidence: Confidence::Low,
-                        validity: Validity::DecodeInputUnavailable,
-                        reject_reason: Some(format!(
-                            "sample rate mismatch: source {} Hz vs capture {} Hz",
-                            source.sample_rate, capture.sample_rate
-                        )),
-                        accepted: false,
-                        algorithm_id: "locate-consensus".into(),
-                        algorithm_version: "1".into(),
-                        params: serde_json::to_value(&self.config).unwrap_or_default(),
-                    };
+            if let Some((validity, reason)) = capture_mark {
+                for (src_index, src_input) in sources.iter().enumerate() {
+                    let dir = PathBuf::from("locate")
+                        .join(src_input.input_id.to_string())
+                        .join(cap_input.input_id.to_string());
+                    let lineage = decoded_sources[src_index]
+                        .as_ref()
+                        .map(|s| s.artifact_ids.clone())
+                        .unwrap_or_default();
+                    let result = self.marked_result(
+                        &src_input.input_id.to_string(),
+                        &cap_input.input_id.to_string(),
+                        validity,
+                        reason.clone(),
+                    );
                     records.push(self.persist_json(
                         &dir,
                         "result.json",
                         "locate_result",
-                        &serde_json::json!({
-                            "result": result,
-                            "derived": {"sample_rate_mismatch": true},
-                        }),
+                        &serde_json::json!({"result": result, "derived": {}}),
                         &lineage,
                         serde_json::json!({
                             "source_input_id": result.source_input_id,
@@ -471,8 +397,83 @@ impl Stage for LocateStage {
                         }),
                         ctx,
                     )?);
+                }
+                continue;
+            }
+            let capture = decoded_captures[cap_index].as_ref().unwrap();
+            let capture_len = capture.channel_samples[0].len() as u64;
+            let tolerance = self.config.consensus.position_tolerance;
+            // Per-source results kept alive for the residual pass;
+            // accepted pairs additionally carry their `locate_result`
+            // artifact id for lineage.
+            let mut results: Vec<Option<LocateResult>> = Vec::new();
+            results.resize_with(decoded_sources.len(), || None);
+            let mut accepted: Vec<(usize, al_core::ArtifactId)> = Vec::new();
+            for (src_index, src_input) in sources.iter().enumerate() {
+                let dir = PathBuf::from("locate")
+                    .join(src_input.input_id.to_string())
+                    .join(cap_input.input_id.to_string());
+                let mut lineage = decoded_sources[src_index]
+                    .as_ref()
+                    .map(|s| s.artifact_ids.clone())
+                    .unwrap_or_default();
+                lineage.extend(capture.artifact_ids.iter().cloned());
+
+                // Missing or empty decode → per-pair explicit mark;
+                // sample-rate mismatch is never resampled — also a
+                // mark. One bad pair never aborts the others.
+                let mark = match &decoded_sources[src_index] {
+                    None => Some((
+                        Validity::DecodeInputUnavailable,
+                        format!("no decoded_pcm artifact for source {}", src_input.input_id),
+                        serde_json::json!({}),
+                    )),
+                    Some(s)
+                        if s.channel_samples.is_empty()
+                            || s.channel_samples.iter().all(|c| c.is_empty()) =>
+                    {
+                        Some((
+                            Validity::InsufficientSupport,
+                            "decoded PCM is empty".to_string(),
+                            serde_json::json!({"empty_input": true}),
+                        ))
+                    }
+                    Some(s) if s.sample_rate != capture.sample_rate => Some((
+                        Validity::OutOfSupportedFrequencyRange,
+                        format!(
+                            "sample rate mismatch: source {} Hz vs capture {} Hz",
+                            s.sample_rate, capture.sample_rate
+                        ),
+                        serde_json::json!({"sample_rate_mismatch": true}),
+                    )),
+                    Some(_) => None,
+                };
+                if let Some((validity, reason, derived)) = mark {
+                    let result = self.marked_result(
+                        &src_input.input_id.to_string(),
+                        &cap_input.input_id.to_string(),
+                        validity,
+                        reason,
+                    );
+                    records.push(self.persist_json(
+                        &dir,
+                        "result.json",
+                        "locate_result",
+                        &serde_json::json!({"result": result, "derived": derived}),
+                        &lineage,
+                        serde_json::json!({
+                            "source_input_id": result.source_input_id,
+                            "capture_input_id": result.capture_input_id,
+                            "accepted": result.accepted,
+                            "validity": result.validity,
+                            "alignment_id": result.alignment_id,
+                        }),
+                        ctx,
+                    )?);
+                    results[src_index] = Some(result);
                     continue;
                 }
+                let source = decoded_sources[src_index].as_ref().unwrap();
 
                 let pairs = self.locate_channels(
                     &source.channel_samples,
@@ -623,7 +624,7 @@ impl Stage for LocateStage {
                                 let pos = detected[i] as usize;
                                 let lo = pos.saturating_sub(tol);
                                 let hi = (pos + window + tol).min(cap_n);
-                                self.best_window_match(source, &capture, 0, window, lo, hi)
+                                self.best_window_match(source, capture, 0, window, lo, hi)
                                     .is_some()
                             }
                         })
@@ -648,7 +649,7 @@ impl Stage for LocateStage {
                     // real passes, so their windows unroll onto the
                     // pass grid.
                     let mut anchors = if loops.len() <= 1 {
-                        self.window_anchors_in(source, &capture, 0, cap_n, 0)
+                        self.window_anchors_in(source, capture, 0, cap_n, 0)
                     } else {
                         let min_v = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
                         loops
@@ -657,7 +658,7 @@ impl Stage for LocateStage {
                             .flat_map(|(i, o)| {
                                 let base = ((o.loop_index - min_v) * body_len as i64) as u64;
                                 let (lo, hi) = cell_of(&positions, i);
-                                self.window_anchors_in(source, &capture, lo, hi, base)
+                                self.window_anchors_in(source, capture, lo, hi, base)
                             })
                             .collect()
                     };
@@ -737,7 +738,9 @@ impl Stage for LocateStage {
             // source, alignment, transform, energies, child result) is
             // persisted per (parent, child) pair.
             for &(parent_idx, ref parent_artifact) in &accepted {
-                let parent = &decoded_sources[parent_idx];
+                let Some(parent) = &decoded_sources[parent_idx] else {
+                    continue;
+                };
                 let parent_result = results[parent_idx].as_ref().unwrap();
                 let start = parent_result.capture_range.start as usize;
                 let span =
@@ -750,7 +753,7 @@ impl Stage for LocateStage {
                 for (a, s) in aligned.iter_mut().zip(&parent.channel_samples) {
                     a[start..start + span].copy_from_slice(&s[..span]);
                 }
-                for child in &decoded_sources {
+                for child in decoded_sources.iter().flatten() {
                     if child.sample_rate != capture.sample_rate {
                         continue;
                     }

@@ -4,6 +4,7 @@
 
 pub mod candidate;
 pub mod consensus;
+pub mod decode;
 pub mod dsp;
 pub mod methods;
 pub mod mixer;
@@ -14,6 +15,7 @@ pub mod tracking;
 
 pub use candidate::{LocateCandidate, MethodEvidence};
 pub use consensus::{ConsensusConfig, evaluate};
+pub use decode::{DecodedInput, decode_input, format_scale};
 pub use dsp::{
     bandpass, condition_number, deinterleave, fft, gcc_phat, least_squares, ncc, spectral_envelope,
 };

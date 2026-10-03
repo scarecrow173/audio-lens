@@ -8,14 +8,20 @@ use serde::{Deserialize, Serialize};
 pub struct LocateCandidate {
     /// Capture sample offset of the candidate.
     pub position: u64,
-    /// Correlation score at the peak (`-1..=1` for NCC-like methods).
+    /// Correlation score at the peak (`-1..=1` for NCC-like methods;
+    /// negative scores indicate polarity-inverted matches).
     pub score: f64,
-    /// Peak value relative to the correlation background (median).
+    /// Peak magnitude relative to the correlation background (median).
     pub peak_to_background: f64,
     /// Width of the peak at half maximum, in samples.
     pub peak_width: u64,
-    /// First/second peak ratio when a second peak exists.
+    /// First/second peak ratio, recorded on the top-ranked candidate
+    /// when a second peak exists.
     pub peak_ratio_12: Option<f64>,
+    /// `[source_channel, capture_channel]` that produced this
+    /// candidate, when evaluated per channel pair.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub channel_pair: Option<[u32; 2]>,
 }
 
 /// Evidence produced by one independent locate method.
