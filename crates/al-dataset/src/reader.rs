@@ -122,13 +122,38 @@ impl DatasetReader {
 
     /// Decode an audio artifact.
     pub fn read_audio(&self, role: &str, name: &str) -> io::Result<DecodedAudio> {
+        read_wav(&self.resolve_audio(role, name)?)
+    }
+
+    /// Decode frames `[start_frame, end_frame)` of an audio artifact
+    /// without loading the whole file. Out-of-range reads fail.
+    pub fn read_audio_range(
+        &self,
+        role: &str,
+        name: &str,
+        start_frame: u64,
+        end_frame: u64,
+    ) -> io::Result<DecodedAudio> {
+        let mut file = std::fs::File::open(self.resolve_audio(role, name)?)?;
+        al_media::wav::read_wav_range(&mut file, start_frame, end_frame)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))
+    }
+
+    /// Frame count of an audio artifact, from the header alone.
+    pub fn audio_frames(&self, role: &str, name: &str) -> io::Result<u64> {
+        let mut file = std::fs::File::open(self.resolve_audio(role, name)?)?;
+        al_media::wav::wav_frame_count(&mut file)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))
+    }
+
+    fn resolve_audio(&self, role: &str, name: &str) -> io::Result<PathBuf> {
         let name = if name.ends_with(".wav") {
             name.to_string()
         } else {
             format!("{name}.wav")
         };
         let a = self.artifact(role, &name, StoreKind::Audio)?;
-        read_wav(&self.resolve(a)?)
+        self.resolve(a)
     }
 
     /// Read a JSON artifact.
