@@ -17,7 +17,7 @@ use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, FeatureRecord, Range, Resolution, ResolutionClass};
 
 use crate::events::{CandidateEvent, EventKind};
-use crate::records::{RecordBuilder, robust_summary};
+use crate::records::{RecordBuilder, propagate_confidence, propagate_validity, robust_summary};
 use crate::stft::{csd, stft, third_octave_bands};
 
 /// Expensive-stage configuration.
@@ -112,6 +112,14 @@ pub struct TriggeredRegion {
     /// Trigger reasons (`candidate:<id>`, `high_residual`,
     /// `low_similarity`, `abnormal_timing`, `manual`, `always_run`).
     pub triggers: Vec<String>,
+    /// Weakest validity among the upstream evidence that selected
+    /// this region. `manual` / `always_run` are independent triggers
+    /// and carry `Valid`; a candidate-selected region keeps the
+    /// event's validity so outputs never out-trust their trigger.
+    pub validity: Validity,
+    /// Weakest confidence among the selecting evidence (`High` for
+    /// `manual` / `always_run`).
+    pub confidence: Confidence,
 }
 
 /// Map an event kind to its semantic trigger reason. The candidate
@@ -132,10 +140,20 @@ fn event_triggers(e: &CandidateEvent) -> Vec<String> {
     }
 }
 
+/// Weakest of two upstream validity states: `Valid` loses to any
+/// non-`Valid` state — a merged region must not claim more trust
+/// than the least trustworthy evidence that selected it.
+fn weakest_validity(a: Validity, b: Validity) -> Validity {
+    if a == Validity::Valid { b } else { a }
+}
+
 /// Plan deep-analysis regions for one input from its events, manual
 /// ranges, and always-run flag. Overlapping regions merge and union
 /// their trigger reasons; output is sorted and clamped to
-/// `[0, duration_s]`.
+/// `[0, duration_s]`. Event-selected regions carry the events'
+/// validity/confidence (`manual` / `always_run` count as independent
+/// `Valid`/`High` triggers) so downstream never promotes weak
+/// evidence into strong claims.
 pub fn plan_regions(
     duration_s: f64,
     events: &[CandidateEvent],
@@ -147,6 +165,8 @@ pub fn plan_regions(
             start_s: 0.0,
             end_s: duration_s,
             triggers: vec!["always_run".into()],
+            validity: Validity::Valid,
+            confidence: Confidence::High,
         });
     }
     for &(a, b) in &cfg.manual_ranges {
@@ -154,6 +174,8 @@ pub fn plan_regions(
             start_s: a.max(0.0),
             end_s: b.min(duration_s),
             triggers: vec!["manual".into()],
+            validity: Validity::Valid,
+            confidence: Confidence::High,
         });
     }
     let half = cfg.event_window_s;
@@ -166,6 +188,8 @@ pub fn plan_regions(
             start_s: a.max(0.0),
             end_s: b.min(duration_s).max(a.max(0.0)),
             triggers: event_triggers(e),
+            validity: e.validity,
+            confidence: e.confidence,
         });
     }
     // Merge overlapping / abutting regions per input.
@@ -177,6 +201,8 @@ pub fn plan_regions(
             && r.start_s <= last.end_s
         {
             last.end_s = last.end_s.max(r.end_s);
+            last.validity = weakest_validity(last.validity, r.validity);
+            last.confidence = last.confidence.min(r.confidence);
             for t in r.triggers {
                 if !last.triggers.contains(&t) {
                     last.triggers.push(t);
@@ -229,6 +255,10 @@ pub fn analyze_region(
         start: region.start_s,
         end: region.end_s,
     };
+    // A region selected by non-`Valid` upstream evidence must not
+    // yield `Valid` estimates, and no record may exceed the
+    // confidence of the evidence that selected it.
+    let trigger_val = propagate_validity(region.validity);
     let push = |id: &str,
                 value: f64,
                 unit: &str,
@@ -236,12 +266,25 @@ pub fn analyze_region(
                 val: Validity,
                 reason: Option<String>,
                 support: u64| {
+        let (val, reason) = if val == Validity::Valid && trigger_val != Validity::Valid {
+            (
+                trigger_val,
+                Some(reason.unwrap_or_else(|| {
+                    format!(
+                        "selected by non-valid upstream evidence ({:?})",
+                        region.validity
+                    )
+                })),
+            )
+        } else {
+            (val, reason)
+        };
         let mut r = rb(ResolutionClass::Segment).scalar(
             id,
             value,
             unit,
             Some(range),
-            conf,
+            propagate_confidence(region.confidence, conf),
             val,
             reason,
             support,
@@ -365,21 +408,15 @@ pub fn analyze_region(
                 }
             }
             if let Some((d, ann)) = best {
-                let mut r = rb(ResolutionClass::Segment).scalar(
+                let mut r = push_spec(
                     "exp.dictionary_cutoff_delta_khz",
                     d,
                     "khz",
-                    Some(range),
                     Confidence::Medium,
                     Validity::Valid,
                     None,
                     n as u64,
                 );
-                r.channels = Some(ChannelSelector::Channel(0));
-                r.resolution = Some(Resolution {
-                    window: cfg.stft_window as u64,
-                    hop: cfg.stft_hop as u64,
-                });
                 r.params = serde_json::json!({
                     "region_s": [region.start_s, region.end_s],
                     "triggers": region.triggers,
@@ -908,15 +945,25 @@ mod tests {
     use crate::events::CandidateEvent;
 
     fn ev(kind: EventKind, start: f64, end: Option<f64>) -> CandidateEvent {
+        ev_with(kind, start, end, Validity::Valid, Confidence::High)
+    }
+
+    fn ev_with(
+        kind: EventKind,
+        start: f64,
+        end: Option<f64>,
+        validity: Validity,
+        confidence: Confidence,
+    ) -> CandidateEvent {
         CandidateEvent {
-            event_id: format!("EVT-t-{kind:?}"),
+            event_id: format!("EVT-t-{kind:?}-{validity:?}"),
             kind,
             input_id: "in".into(),
             start_s: start,
             end_s: end,
             strength: 1.0,
-            confidence: Confidence::High,
-            validity: Validity::Valid,
+            confidence,
+            validity,
             source_feature: "f".into(),
             frequency_range: None,
             channels: Vec::new(),
@@ -983,6 +1030,84 @@ mod tests {
         );
     }
 
+    #[test]
+    fn merged_regions_carry_the_weakest_trigger_trust() {
+        let cfg = ExpensiveConfig::default();
+        let events = vec![
+            ev_with(
+                EventKind::Clipping,
+                1.0,
+                None,
+                Validity::Valid,
+                Confidence::High,
+            ),
+            ev_with(
+                EventKind::LargeResidual,
+                1.1,
+                None,
+                Validity::AmbiguousAlignment,
+                Confidence::Low,
+            ),
+        ];
+        let r = plan_regions(10.0, &events, &cfg);
+        assert_eq!(r.len(), 1, "{r:?}");
+        assert_eq!(r[0].validity, Validity::AmbiguousAlignment);
+        assert_eq!(r[0].confidence, Confidence::Low);
+
+        // Non-Valid evidence alone still selects a region, flagged.
+        let r = plan_regions(
+            10.0,
+            &[ev_with(
+                EventKind::Clipping,
+                3.0,
+                None,
+                Validity::InsufficientSupport,
+                Confidence::Medium,
+            )],
+            &cfg,
+        );
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].validity, Validity::InsufficientSupport);
+        assert_eq!(r[0].confidence, Confidence::Medium);
+    }
+
+    #[test]
+    fn non_valid_trigger_propagates_into_region_outputs() {
+        let rate = 48_000u32;
+        let sig = noise(1 << 15, 0xf00d);
+        let chans: Vec<&[f64]> = vec![&sig];
+        let region = TriggeredRegion {
+            start_s: 0.0,
+            end_s: sig.len() as f64 / rate as f64,
+            triggers: vec!["candidate:EVT-t".into()],
+            validity: Validity::AmbiguousAlignment,
+            confidence: Confidence::Low,
+        };
+        let out = analyze_region(
+            "in",
+            &chans,
+            rate,
+            &region,
+            None,
+            &ExpensiveConfig::default(),
+        );
+        assert!(!out.records.is_empty());
+        for r in &out.records {
+            assert_ne!(
+                r.validity,
+                Validity::Valid,
+                "record {} must not claim Valid",
+                r.feature_id
+            );
+            assert_eq!(
+                r.confidence,
+                Confidence::Low,
+                "record {} must not out-trust its trigger",
+                r.feature_id
+            );
+        }
+    }
+
     fn noise(n: usize, seed: u64) -> Vec<f64> {
         let mut s = seed;
         (0..n)
@@ -1026,6 +1151,8 @@ mod tests {
             start_s: 0.0,
             end_s: echoed.len() as f64 / rate as f64,
             triggers: vec!["always_run".into()],
+            validity: Validity::Valid,
+            confidence: Confidence::High,
         };
         let out = analyze_region(
             "in",

@@ -122,6 +122,12 @@ task `docs/tasks/analysis-expensive-stage.md`、plan
   - 低サンプルレートでの `chunks(0)` パニックを `max(1)`
     で防止、`sample_rate`/`channels` = 0 の decoded_pcm は
     ローダーで明示拒否
+  - イベントの validity/confidence が `plan_regions` で捨てられ、
+    非 Valid な前提由来の区間でも Valid 出力が保存されていた
+    → `TriggeredRegion` が最弱の upstream validity/confidence を
+    保持し(`manual`/`always_run` は独立トリガとして
+    Valid/High)、`analyze_region` が全レコードへ
+    `propagate_validity`/`propagate_confidence` で伝播する
 - イベント抽出で tensor ストアを JSON として読む失敗が
   あったため、候補走査は `StoreKind::Json` のみに限定した
 - artifact path は `features/cheap/<input>.json` と拡張子を
