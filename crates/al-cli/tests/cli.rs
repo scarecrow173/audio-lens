@@ -185,6 +185,105 @@ fn noise_i16(seed: u64, n: usize, amp: f64) -> Vec<i16> {
         .collect()
 }
 
+fn input_id_of(artifacts: &[serde_json::Value], name: &str) -> String {
+    artifacts
+        .iter()
+        .find(|a| {
+            a["role"].as_str() == Some("declared_input")
+                && a["params"]["source_path"]
+                    .as_str()
+                    .is_some_and(|p| p.ends_with(name))
+        })
+        .and_then(|a| a["params"]["input_id"].as_str())
+        .unwrap_or_else(|| panic!("declared input for {name}"))
+        .to_owned()
+}
+
+/// Run `ingest,locate` over the given `role:path` inputs and return
+/// the job directory. `config` is an optional job config JSON file.
+fn run_ingest_locate(
+    al: &str,
+    jobs: &std::path::Path,
+    inputs: &str,
+    config: Option<&std::path::Path>,
+) -> PathBuf {
+    let mut args = vec![
+        "run".to_string(),
+        "--base-dir".to_string(),
+        jobs.to_str().unwrap().to_string(),
+        "--input".to_string(),
+        inputs.to_string(),
+        "--stages".to_string(),
+        "ingest,locate".to_string(),
+    ];
+    if let Some(config) = config {
+        args.push("--config".to_string());
+        args.push(config.to_str().unwrap().to_string());
+    }
+    let out = Command::new(al).args(&args).output().unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+    jobs.join(job_id)
+}
+
+fn manifest_artifacts(job_dir: &std::path::Path) -> Vec<serde_json::Value> {
+    let manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(job_dir.join("manifest.json")).unwrap())
+            .unwrap();
+    manifest["artifacts"].as_array().unwrap().clone()
+}
+
+/// Parsed body of the `time_map` artifact for one source input.
+fn time_map_body(
+    job_dir: &std::path::Path,
+    artifacts: &[serde_json::Value],
+    source_input_id: &str,
+) -> serde_json::Value {
+    let rec = artifacts
+        .iter()
+        .find(|a| {
+            a["role"].as_str() == Some("time_map")
+                && a["params"]["source_input_id"].as_str() == Some(source_input_id)
+        })
+        .unwrap_or_else(|| panic!("time_map artifact for {source_input_id}"));
+    serde_json::from_str(
+        &std::fs::read_to_string(job_dir.join(rec["path"].as_str().unwrap())).unwrap(),
+    )
+    .unwrap()
+}
+
+/// The TimeMap contract: segments are ordered and non-overlapping in
+/// capture time (ranges are half-open, so touching endpoints are
+/// fine), and source ranges never regress except across a Resume.
+fn assert_segments_ordered(segments: &[serde_json::Value]) {
+    let rng = |s: &serde_json::Value, key: &str| {
+        (s[key][0].as_u64().unwrap(), s[key][1].as_u64().unwrap())
+    };
+    for w in segments.windows(2) {
+        let (pc0, pc1) = rng(&w[0], "capture_range");
+        let (nc0, _) = rng(&w[1], "capture_range");
+        assert!(
+            pc0 <= pc1 && nc0 >= pc1,
+            "capture ranges unordered: {segments:?}"
+        );
+        let resumes =
+            w[0]["kind"].as_str() == Some("resume") || w[1]["kind"].as_str() == Some("resume");
+        if !resumes {
+            let (_, ps1) = rng(&w[0], "source_range");
+            let (ns0, _) = rng(&w[1], "source_range");
+            assert!(ns0 >= ps1, "source ranges overlap: {segments:?}");
+        }
+    }
+}
+
 #[test]
 fn locate_finds_source_embedded_in_capture() {
     let al = env!("CARGO_BIN_EXE_al");
@@ -315,21 +414,8 @@ fn locate_emits_time_map_and_residual_artifacts() {
         serde_json::from_str(&std::fs::read_to_string(job_dir.join("manifest.json")).unwrap())
             .unwrap();
     let artifacts = manifest["artifacts"].as_array().unwrap();
-    let input_id_of = |name: &str| {
-        artifacts
-            .iter()
-            .find(|a| {
-                a["role"].as_str() == Some("declared_input")
-                    && a["params"]["source_path"]
-                        .as_str()
-                        .is_some_and(|p| p.ends_with(name))
-            })
-            .and_then(|a| a["params"]["input_id"].as_str())
-            .unwrap_or_else(|| panic!("declared input for {name}"))
-            .to_owned()
-    };
-    let loop_id = input_id_of("loop.wav");
-    let quiet_id = input_id_of("quiet.wav");
+    let loop_id = input_id_of(artifacts, "loop.wav");
+    let quiet_id = input_id_of(artifacts, "quiet.wav");
 
     // Every located pair registers full per-channel-pair evidence.
     assert!(
@@ -417,6 +503,173 @@ fn locate_emits_time_map_and_residual_artifacts() {
         child_start.abs_diff(1050) <= 256,
         "quiet source located at {child_start}, expected ~1050"
     );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn locate_tracks_long_source_with_windowed_anchors() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("locate-long");
+    let jobs = dir.join("jobs");
+
+    // A 4096-frame source embedded once at frame 1500: long enough to
+    // split into per-window anchors, so the time map is piecewise
+    // instead of a single offset.
+    let source = noise_i16(31, 4096, 20000.0);
+    let mut capture = noise_i16(37, 12288, 3000.0);
+    for (i, &s) in source.iter().enumerate() {
+        capture[1500 + i] = capture[1500 + i].saturating_add((s as i32 * 3 / 5) as i16);
+    }
+    let src_wav = dir.join("src.wav");
+    let cap_wav = dir.join("cap.wav");
+    std::fs::write(&src_wav, wav_from_samples(&source)).unwrap();
+    std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
+
+    let job_dir = run_ingest_locate(
+        al,
+        &jobs,
+        &format!(
+            "capture_bug:{},source_asset:{}",
+            cap_wav.display(),
+            src_wav.display()
+        ),
+        None,
+    );
+    let artifacts = manifest_artifacts(&job_dir);
+    let src_id = input_id_of(&artifacts, "src.wav");
+    let body = time_map_body(&job_dir, &artifacts, &src_id);
+
+    let anchors = body["anchors"].as_array().unwrap();
+    assert!(
+        anchors.len() >= 4,
+        "long source needs multiple window anchors: {anchors:?}"
+    );
+    let segments = body["time_map"]["segments"].as_array().unwrap();
+    assert!(
+        segments
+            .iter()
+            .all(|s| s["kind"].as_str() == Some("continuous")),
+        "uniform insertion should stay continuous: {segments:?}"
+    );
+    assert_segments_ordered(segments);
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn locate_tracks_linear_drift_as_drift_segment() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("locate-drift");
+    let jobs = dir.join("jobs");
+
+    // Linear drift modelled as a staircase: each 512-frame block is
+    // embedded at 1.1x its source offset, so capture time advances
+    // faster than source time. Within a block the offset is exact,
+    // so per-window anchors stay sharp.
+    let source = noise_i16(41, 4096, 20000.0);
+    let mut capture = noise_i16(43, 8192, 3000.0);
+    for (k, chunk) in source.chunks(512).enumerate() {
+        let at = 1500 + (k as f64 * 512.0 * 1.1).round() as usize;
+        for (i, &s) in chunk.iter().enumerate() {
+            capture[at + i] = capture[at + i].saturating_add((s as i32 * 3 / 5) as i16);
+        }
+    }
+    let src_wav = dir.join("src.wav");
+    let cap_wav = dir.join("cap.wav");
+    std::fs::write(&src_wav, wav_from_samples(&source)).unwrap();
+    std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
+    // Whole-source correlation smears over the drift, so the agreeing
+    // methods land ~270 samples apart: widen the consensus position
+    // tolerance for this job to let the insertion be accepted.
+    let cfg = dir.join("config.json");
+    std::fs::write(
+        &cfg,
+        r#"{"locate":{"consensus":{"position_tolerance":512}}}"#,
+    )
+    .unwrap();
+
+    let job_dir = run_ingest_locate(
+        al,
+        &jobs,
+        &format!(
+            "capture_bug:{},source_asset:{}",
+            cap_wav.display(),
+            src_wav.display()
+        ),
+        Some(&cfg),
+    );
+    let artifacts = manifest_artifacts(&job_dir);
+    let src_id = input_id_of(&artifacts, "src.wav");
+    let body = time_map_body(&job_dir, &artifacts, &src_id);
+
+    let segments = body["time_map"]["segments"].as_array().unwrap();
+    let drift = segments
+        .iter()
+        .find(|s| s["kind"].as_str() == Some("drift"))
+        .unwrap_or_else(|| panic!("drift segment missing: {segments:?}"));
+    let rate = drift["rate"].as_f64().unwrap();
+    assert!(
+        (1.05..=1.15).contains(&rate),
+        "drift rate {rate} should be ~1.1: {segments:?}"
+    );
+    assert_segments_ordered(segments);
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn locate_tracks_skip_and_resume_piecewise() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("locate-skip");
+    let jobs = dir.join("jobs");
+
+    // The source is inserted in three pieces: [0,2500) contiguous at
+    // 1000, [3000,4000) at 6000 (skipping source 2500..3000 behind an
+    // unmapped capture gap), and the skipped span itself replayed at
+    // 9500 — a rewind, i.e. a resume at an earlier source position.
+    let source = noise_i16(47, 4096, 20000.0);
+    let mut capture = noise_i16(53, 12288, 3000.0);
+    for &(s_from, s_to, at) in &[
+        (0usize, 2500usize, 1000usize),
+        (3000, 4000, 6000),
+        (2500, 3000, 9500),
+    ] {
+        for i in 0..s_to - s_from {
+            capture[at + i] =
+                capture[at + i].saturating_add((source[s_from + i] as i32 * 3 / 5) as i16);
+        }
+    }
+    let src_wav = dir.join("src.wav");
+    let cap_wav = dir.join("cap.wav");
+    std::fs::write(&src_wav, wav_from_samples(&source)).unwrap();
+    std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
+
+    let job_dir = run_ingest_locate(
+        al,
+        &jobs,
+        &format!(
+            "capture_bug:{},source_asset:{}",
+            cap_wav.display(),
+            src_wav.display()
+        ),
+        None,
+    );
+    let artifacts = manifest_artifacts(&job_dir);
+    let src_id = input_id_of(&artifacts, "src.wav");
+    let body = time_map_body(&job_dir, &artifacts, &src_id);
+
+    let segments = body["time_map"]["segments"].as_array().unwrap();
+    let kinds: Vec<_> = segments.iter().map(|s| s["kind"].as_str()).collect();
+    assert!(
+        kinds.contains(&Some("gap")),
+        "gap segment missing: {kinds:?}"
+    );
+    assert!(
+        kinds.contains(&Some("resume")),
+        "resume segment missing: {kinds:?}"
+    );
+    assert_segments_ordered(segments);
 
     std::fs::remove_dir_all(&dir).ok();
 }

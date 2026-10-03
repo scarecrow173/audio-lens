@@ -14,10 +14,10 @@ use al_job::manifest::ArtifactRecord;
 use al_job::stage::{Stage, StageContext, StageError};
 use al_media::metadata::SampleFormat;
 
-use crate::candidate::MethodEvidence;
+use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
-use crate::dsp::deinterleave;
-use crate::methods::default_methods;
+use crate::dsp::{deinterleave, ncc};
+use crate::methods::{default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
 use crate::residual::residual_search;
 use crate::result::{LocateResult, SampleRange};
@@ -40,6 +40,20 @@ pub struct LocateConfig {
     /// off-rate runs are `Jitter`.
     #[serde(default = "default_min_run")]
     pub min_run: usize,
+    /// Source window length for per-window anchor extraction
+    /// (samples). A source that fits at least two windows gets one
+    /// anchor per window, so drift, jitter, skips, gaps and resumes
+    /// inside a single occurrence stay observable; shorter sources
+    /// keep one anchor per occurrence.
+    #[serde(default = "default_anchor_window")]
+    pub anchor_window: u64,
+    /// Hop between successive anchor windows (samples).
+    #[serde(default = "default_anchor_hop")]
+    pub anchor_hop: u64,
+    /// Slack between the source and capture advances of consecutive
+    /// anchors before their boundary becomes `Gap`/`Skip` (samples).
+    #[serde(default = "default_anchor_gap")]
+    pub anchor_gap: u64,
 }
 
 fn default_ridge() -> f64 {
@@ -54,6 +68,18 @@ fn default_min_run() -> usize {
     3
 }
 
+fn default_anchor_window() -> u64 {
+    512
+}
+
+fn default_anchor_hop() -> u64 {
+    512
+}
+
+fn default_anchor_gap() -> u64 {
+    256
+}
+
 impl Default for LocateConfig {
     fn default() -> Self {
         Self {
@@ -61,6 +87,9 @@ impl Default for LocateConfig {
             ridge: default_ridge(),
             rate_tolerance: default_rate_tolerance(),
             min_run: default_min_run(),
+            anchor_window: default_anchor_window(),
+            anchor_hop: default_anchor_hop(),
+            anchor_gap: default_anchor_gap(),
         }
     }
 }
@@ -205,6 +234,77 @@ impl LocateStage {
             }
         }
         pairs
+    }
+
+    /// Best full-band NCC peak of `source[..][w_off..w_off+window]`
+    /// inside `capture[..][lo..hi]`, taken across every channel pair.
+    /// Returns the absolute capture position and score when the peak
+    /// clears the consensus thresholds, `None` otherwise.
+    fn best_window_match(
+        &self,
+        source: &DecodedInput,
+        capture: &DecodedInput,
+        w_off: usize,
+        window: usize,
+        lo: usize,
+        hi: usize,
+    ) -> Option<(u64, f64)> {
+        if hi.saturating_sub(lo) < window || w_off + window > source.channel_samples[0].len() {
+            return None;
+        }
+        let mut best: Option<LocateCandidate> = None;
+        for src_ch in &source.channel_samples {
+            let template = &src_ch[w_off..w_off + window];
+            for cap_ch in &capture.channel_samples {
+                let corr = ncc(template, &cap_ch[lo..hi], hi - lo - window);
+                if let Some(c) = peaks_from_correlation(&corr, 1).into_iter().next()
+                    && best.as_ref().is_none_or(|b| c.score > b.score)
+                {
+                    best = Some(c);
+                }
+            }
+        }
+        let c = best?;
+        (c.score >= self.config.consensus.min_score
+            && c.peak_to_background >= self.config.consensus.min_peak_to_background)
+            .then(|| (lo as u64 + c.position, c.score))
+    }
+
+    /// One anchor per source window, each located inside
+    /// `capture[lo..hi]`. Anchor source coordinates are `base + w_off`
+    /// so callers can place them on the unrolled pass grid; windows
+    /// whose peak stays below the consensus thresholds contribute no
+    /// anchor. Returns an empty list when the source fits fewer than
+    /// two windows.
+    fn window_anchors_in(
+        &self,
+        source: &DecodedInput,
+        capture: &DecodedInput,
+        lo: usize,
+        hi: usize,
+        base: u64,
+    ) -> Vec<Anchor> {
+        let window = self.config.anchor_window as usize;
+        let hop = self.config.anchor_hop.max(1) as usize;
+        let n = source.channel_samples[0].len();
+        if window == 0 || n < window + hop {
+            return Vec::new();
+        }
+        let mut offsets: Vec<usize> = (0..=n - window).step_by(hop).collect();
+        if offsets.last().copied() != Some(n - window) {
+            offsets.push(n - window);
+        }
+        offsets
+            .iter()
+            .filter_map(|&w_off| {
+                self.best_window_match(source, capture, w_off, window, lo, hi)
+                    .map(|(capture, score)| Anchor {
+                        source: base + w_off as u64,
+                        capture,
+                        score,
+                    })
+            })
+            .collect()
     }
 
     /// Persist one JSON artifact under `dir` and return its record.
@@ -486,21 +586,77 @@ impl Stage for LocateStage {
                     let body_len = source_len.max(1);
                     let loops = identify_loop_occurrences(&occurrence_positions, body_len, primary);
                     let min_index = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
-                    let mut anchors: Vec<Anchor> = loops
-                        .iter()
-                        .map(|o| Anchor {
-                            source: ((o.loop_index - min_index) * body_len as i64) as u64,
-                            capture: o.occurrence_position,
-                            score: scores.get(&o.occurrence_position).copied().unwrap_or(0.0),
+                    // A source long enough to split into windows gets
+                    // one anchor per window, so drift, jitter, skips,
+                    // gaps and resumes inside a single occurrence
+                    // stay observable. Each occurrence owns the
+                    // capture region between the midpoints to its
+                    // neighbours; an occurrence is only real when the
+                    // body start window matches inside its region —
+                    // secondary correlation peaks are not replays.
+                    // With one verified occurrence the mapping is
+                    // tracked in plain source coordinates; several
+                    // verified occurrences are real passes, so their
+                    // windows unroll onto the pass grid.
+                    let cap_n = capture.channel_samples[0].len();
+                    let positions: Vec<u64> = loops.iter().map(|o| o.occurrence_position).collect();
+                    let cell_of = |i: usize| -> (usize, usize) {
+                        let lo = if i == 0 {
+                            0
+                        } else {
+                            ((positions[i - 1] + positions[i]) / 2) as usize
+                        };
+                        let hi = if i + 1 == positions.len() {
+                            cap_n
+                        } else {
+                            ((positions[i] + positions[i + 1]) / 2) as usize
+                        };
+                        (lo, hi)
+                    };
+                    let window = self.config.anchor_window as usize;
+                    let verified: Vec<usize> = (0..loops.len())
+                        .filter(|&i| {
+                            positions[i] == primary || {
+                                let (lo, hi) = cell_of(i);
+                                self.best_window_match(source, &capture, 0, window, lo, hi)
+                                    .is_some()
+                            }
                         })
                         .collect();
+                    let mut anchors = if verified.len() <= 1 {
+                        self.window_anchors_in(source, &capture, 0, cap_n, 0)
+                    } else {
+                        let min_v = verified
+                            .iter()
+                            .map(|&i| loops[i].loop_index)
+                            .min()
+                            .unwrap_or(0);
+                        verified
+                            .iter()
+                            .flat_map(|&i| {
+                                let base = ((loops[i].loop_index - min_v) * body_len as i64) as u64;
+                                let (lo, hi) = cell_of(i);
+                                self.window_anchors_in(source, &capture, lo, hi, base)
+                            })
+                            .collect()
+                    };
+                    if anchors.is_empty() {
+                        // Short sources (and sources whose windows all
+                        // failed to match) keep one anchor per
+                        // occurrence on the unrolled pass grid.
+                        for o in &loops {
+                            anchors.push(Anchor {
+                                source: ((o.loop_index - min_index) * body_len as i64) as u64,
+                                capture: o.occurrence_position,
+                                score: scores.get(&o.occurrence_position).copied().unwrap_or(0.0),
+                            });
+                        }
+                    }
                     anchors.sort_by_key(|a| a.capture);
-                    // Consecutive passes sit one body apart; spacing
-                    // beyond body + tolerance is unmapped capture.
                     let time_map = build_time_map(
                         &anchors,
                         self.config.rate_tolerance,
-                        body_len.saturating_add(tolerance),
+                        self.config.anchor_gap,
                         self.config.min_run,
                     );
                     time_map_body = Some(serde_json::json!({

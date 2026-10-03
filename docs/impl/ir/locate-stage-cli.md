@@ -68,6 +68,23 @@ sample_format を復元して ch 単位で定位する。fs 不一致ペアは
   `time_map` artifact(time_map.json)として分離登録する
   (レビュー修正: 以前は anchor が常に source=0 の擬似区間で、
   drift/jitter/skip/gap/resume を表現できなかった)
+- anchor はソースを `anchor_window`/`anchor_hop` の窓に分割して
+  窓ごとに NCC 定位して生成する(`best_window_match` /
+  `window_anchors_in`)。合議スコア・ピーク比の閾値を窓単位で
+  適用し、長尺ソース内の drift/jitter/skip/gap/resume を
+  観測可能にする(レビュー修正: 以前は発生ごとに 1 anchor のみで
+  内部のずれを表現できなかった)。窓 anchor が得られない場合は
+  従来の出現 anchor にフォールバックする
+- 合議が検出した出現位置の Voronoi セルを取り、主出現以外の
+  出現はソース先頭窓がそのセル内で実際に一致するかで検証する。
+  検証済み出現が 2 件以上なら出現ごとのセル内で窓定位し、
+  ループグリッド上に展開した source 座標で anchor を構成する。
+  1 件なら capture 全域を走査してプレーンなソース座標で構成する
+  (レビュー修正: 検証なしの出現クラスタをそのまま使うと
+  偽ピークが擬似パス化し anchor 列が破壊されていた)
+- `LocateConfig` に `anchor_window`/`anchor_hop`/`anchor_gap`
+  (既定 512/512/256)を追加。`ConsensusConfig` に container 級の
+  `#[serde(default)]` を付け、部分オーバーレイ設定を可能にした
 - 受理ペアごとに残差探索を実行: 受理アライメント窓の混合を減算し、
   残差キャプチャに全ソースを再定位。減算来歴(親ソース・
   alignment・チャンネル変換・エネルギー・子 locate)は
