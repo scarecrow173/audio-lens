@@ -22,9 +22,9 @@
 *.gif binary
 *.pdf binary
 
-# Audio fixtures and intermediates
-*.wav binary
-*.flac binary
+# Audio fixtures and intermediates (Git LFS)
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
 *.mp3 binary
 *.ogg binary
 *.opus binary
