@@ -37,6 +37,9 @@ pub enum EventKind {
     SilenceDropoutCandidate,
     /// Transfer/gain change over time.
     TransferChangeCandidate,
+    /// Noise floor above the expected level (elevated floor, not a
+    /// dropout).
+    ElevatedNoiseFloor,
 }
 
 /// Pointer from an event back to the measurement that produced it.
@@ -96,7 +99,7 @@ pub struct CandidateEvent {
 
 /// Config-overlayable extraction thresholds. Defaults are
 /// conservative; `config.events.*` overrides them.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct EventConfig {
     /// `dig.clipping_rate` above this flags clipping.
     pub clipping_rate: f64,
@@ -148,10 +151,10 @@ impl Default for EventConfig {
 }
 
 impl EventConfig {
-    /// Overlay `config.events.*` onto the defaults.
+    /// Overlay `config.analysis.events.*` onto the defaults.
     pub fn from_job(config: &serde_json::Value) -> Self {
         let mut c = Self::default();
-        let Some(e) = config.get("events") else {
+        let Some(e) = config.get("analysis").and_then(|a| a.get("events")) else {
             return c;
         };
         macro_rules! ov {
@@ -312,7 +315,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         feature_id: "noise.floor_dbfs",
-        kind: EventKind::SilenceDropoutCandidate,
+        kind: EventKind::ElevatedNoiseFloor,
         above: true,
         threshold: |c| c.noise_floor_dbfs,
         map: |v| v,
@@ -329,21 +332,28 @@ const RULES: &[Rule] = &[
 ];
 
 /// Content-derived, stable event id. Hash inputs: kind, input,
-/// times, source feature, and params — never wall-clock/random.
+/// times, channel scope, source artifact and feature — never
+/// wall-clock/random. Two records that differ in any of these
+/// fields must produce different ids.
+#[allow(clippy::too_many_arguments)]
 fn event_id(
     algorithm: &str,
+    artifact: &str,
     input_id: &str,
     kind: EventKind,
     start_s: f64,
     end_s: Option<f64>,
     source_feature: &str,
+    channels: &[u16],
 ) -> String {
     let canonical = serde_json::json!([
         format!("{kind:?}"),
+        artifact,
         input_id,
         start_s,
         end_s,
         source_feature,
+        channels,
     ]);
     let hash = &sha256_hex(canonical.to_string().as_bytes())[..12];
     let start_ms = (start_s * 1_000.0).round() as i64;
@@ -356,11 +366,17 @@ fn event_id(
 /// by row index. Records that are not `Valid` still produce events —
 /// the event carries their propagated validity so downstream never
 /// upgrades a weak observation into a strong claim.
+///
+/// `segment_s` is the measured segment's duration when known:
+/// records without a `time_range` are segment-scoped, so their
+/// events span the whole segment rather than collapsing to a point
+/// at t=0. `None` marks them as point events.
 pub fn extract_candidates(
     artifact: &str,
     input_id: &str,
     records: &[FeatureRecord],
     cfg: &EventConfig,
+    segment_s: Option<f64>,
 ) -> Vec<CandidateEvent> {
     let mut events = Vec::new();
     for (row, r) in records.iter().enumerate() {
@@ -380,10 +396,10 @@ pub fn extract_candidates(
         if !hit {
             continue;
         }
-        let (start_s, end_s) = r
+        let (start_s, end_s, segment_scope) = r
             .time_range
-            .map(|t| (t.start, Some(t.end)))
-            .unwrap_or((0.0, None));
+            .map(|t| (t.start, Some(t.end), false))
+            .unwrap_or((0.0, segment_s, segment_s.is_some()));
         let freq = r.freq_range.map(|f| (f.start, f.end));
         let channels = r
             .channels
@@ -392,20 +408,26 @@ pub fn extract_candidates(
                 al_dataset::types::ChannelSelector::ChannelPair(a, b) => vec![a, b],
             })
             .unwrap_or_default();
+        let strength = {
+            let s = (rule.strength)(mapped, threshold);
+            if s.is_finite() { s.max(0.0) } else { 0.0 }
+        };
         events.push(CandidateEvent {
             event_id: event_id(
                 "events.v1",
+                artifact,
                 input_id,
                 rule.kind,
                 start_s,
                 end_s,
                 &r.feature_id,
+                &channels,
             ),
             kind: rule.kind,
             input_id: input_id.to_string(),
             start_s,
             end_s,
-            strength: (rule.strength)(mapped, threshold),
+            strength,
             confidence: propagate_confidence(Confidence::High, r.confidence),
             validity: r.validity,
             source_feature: r.feature_id.clone(),
@@ -420,6 +442,7 @@ pub fn extract_candidates(
             params: serde_json::json!({
                 "threshold": threshold,
                 "measured": value,
+                "segment_scope": segment_scope,
             }),
         });
     }
@@ -516,31 +539,58 @@ mod tests {
     fn event_ids_are_deterministic() {
         let a = event_id(
             "events.v1",
+            "features/cheap/in1",
             "in1",
             EventKind::Clipping,
             1.25,
             Some(2.0),
             "f",
+            &[0],
         );
         let b = event_id(
             "events.v1",
+            "features/cheap/in1",
             "in1",
             EventKind::Clipping,
             1.25,
             Some(2.0),
             "f",
+            &[0],
         );
         let c = event_id(
             "events.v1",
+            "features/cheap/in1",
             "in1",
             EventKind::Clipping,
             1.26,
             Some(2.0),
             "f",
+            &[0],
         );
         assert_eq!(a, b);
         assert_ne!(a, c);
         assert!(a.starts_with("EVT-events.v1-in1-1250ms-"));
+    }
+
+    #[test]
+    fn event_ids_differ_by_channel_and_artifact() {
+        let base = |artifact: &str, channels: &[u16]| {
+            event_id(
+                "events.v1",
+                artifact,
+                "in1",
+                EventKind::RepeatedBlockCandidate,
+                0.0,
+                Some(4.0),
+                "dig.stuck_run_max",
+                channels,
+            )
+        };
+        let ch0 = base("features/cheap/in1", &[0]);
+        let ch1 = base("features/cheap/in1", &[1]);
+        let ref_src = base("features/reference/src__in1", &[0]);
+        assert_ne!(ch0, ch1);
+        assert_ne!(ch0, ref_src);
     }
 
     #[test]
@@ -554,6 +604,7 @@ mod tests {
             "in1",
             &records,
             &EventConfig::default(),
+            Some(8.0),
         );
         assert_eq!(events.len(), 1);
         let e = &events[0];
@@ -582,9 +633,29 @@ mod tests {
             "in1",
             &records,
             &EventConfig::default(),
+            Some(8.0),
         );
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].validity, Validity::InsufficientSupport);
+    }
+
+    #[test]
+    fn segment_scoped_event_covers_whole_segment() {
+        // A segment-level record (no time_range) must produce an
+        // event spanning the whole segment, not a point at t=0 —
+        // otherwise deep analysis would only look at [0, window].
+        let records = vec![record("dig.clipping_rate", 0.01, Validity::Valid)];
+        let events = extract_candidates(
+            "features/cheap/in1",
+            "in1",
+            &records,
+            &EventConfig::default(),
+            Some(30.0),
+        );
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].start_s, 0.0);
+        assert_eq!(events[0].end_s, Some(30.0));
+        assert_eq!(events[0].params["segment_scope"], true);
     }
 
     #[test]
@@ -598,6 +669,7 @@ mod tests {
             "in1",
             &records,
             &EventConfig::default(),
+            Some(8.0),
         );
         assert!(events.is_empty());
     }
@@ -605,8 +677,13 @@ mod tests {
     #[test]
     fn events_flatten_to_table_rows() {
         let records = vec![record("ref.lag_step_candidates", 3.0, Validity::Valid)];
-        let events =
-            extract_candidates("features/ref/in1", "in1", &records, &EventConfig::default());
+        let events = extract_candidates(
+            "features/ref/in1",
+            "in1",
+            &records,
+            &EventConfig::default(),
+            Some(8.0),
+        );
         let schema = events_schema();
         let rows = events_to_rows(&events);
         assert_eq!(rows.len(), 1);

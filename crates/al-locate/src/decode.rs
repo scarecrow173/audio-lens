@@ -73,9 +73,15 @@ pub fn decode_input(
         .as_u64()
         .ok_or_else(|| bad("decoded_pcm artifact missing sample_rate"))?
         as u32;
+    if sample_rate == 0 {
+        return Err(bad("decoded_pcm artifact has sample_rate 0"));
+    }
     let channels = decoded.params["channels"]
         .as_u64()
         .ok_or_else(|| bad("decoded_pcm artifact missing channels"))? as u16;
+    if channels == 0 {
+        return Err(bad("decoded_pcm artifact has 0 channels"));
+    }
 
     let metadata = ctx.manifest.artifacts.iter().find(|a| {
         a.role == "ingest_metadata"

@@ -173,7 +173,7 @@ fn suppressed_triggers_write_events_but_no_expensive() {
     let mut fx = fixture(&cap);
     let registry = ArtifactRegistry::new(&fx.dir);
     let config = serde_json::json!({
-        "events": {"noise_floor_dbfs": -10.0}
+        "analysis": {"events": {"noise_floor_dbfs": -10.0}}
     });
 
     let cheap_recs = al_analysis::stage::CheapAnalysisStage::new()
@@ -193,6 +193,49 @@ fn suppressed_triggers_write_events_but_no_expensive() {
     assert!(
         !recs.iter().any(|r| r.role == "expensive_features"),
         "unexpected expensive artifacts: {recs:?}"
+    );
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn manual_ranges_analyze_without_any_candidate() {
+    // No candidates expected from a quiet sine — the manual range
+    // alone must select the region and stamp `manual` as trigger.
+    let cap: Vec<f64> = (0..24_000)
+        .map(|i| 0.1 * (2.0 * std::f64::consts::PI * 440.0 * i as f64 / 48_000.0).sin())
+        .collect();
+    let mut fx = fixture(&cap);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({
+        "analysis": {
+            "events": {"noise_floor_dbfs": -10.0},
+            "expensive": {"manual_ranges": [[0.0, 0.25]]}
+        }
+    });
+
+    let cheap_recs = al_analysis::stage::CheapAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("cheap stage");
+    for rec in cheap_recs {
+        fx.manifest.register_artifact(rec);
+    }
+
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("expensive stage");
+
+    let exp: Vec<_> = recs
+        .iter()
+        .filter(|r| r.role == "expensive_features")
+        .collect();
+    assert_eq!(exp.len(), 1, "artifacts: {recs:?}");
+    assert!(
+        exp[0].params["triggers"]
+            .as_array()
+            .is_some_and(|t| t.iter().any(|v| v == "manual")),
+        "triggers: {}",
+        exp[0].params
     );
 
     fs::remove_dir_all(&fx.dir).ok();
