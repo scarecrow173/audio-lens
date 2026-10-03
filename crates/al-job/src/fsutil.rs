@@ -17,12 +17,19 @@ pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
         fs::create_dir_all(parent)?;
     }
     let tmp = tmp_path_for(path);
-    {
-        let mut file = fs::File::create(&tmp)?;
-        file.write_all(bytes)?;
-        file.sync_all()?;
+    let result = (|| {
+        {
+            let mut file = fs::File::create(&tmp)?;
+            file.write_all(bytes)?;
+            file.sync_all()?;
+        }
+        rename_durable(&tmp, path)
+    })();
+    if result.is_err() {
+        // A failed write must not leave the temp file behind.
+        let _ = fs::remove_file(&tmp);
     }
-    rename_durable(&tmp, path)
+    result
 }
 
 /// Rename an already-synced temp file over `path`, then flush the

@@ -278,6 +278,20 @@ fn run_and_resume_materializes_dataset() {
     assert_eq!(ds.manifest().inputs[0].role, "capture_bug");
     assert!(ds.role_produced("inputs"));
     assert!(!ds.role_produced("locate"));
+
+    // The decoded PCM is materialized as WAV under analysis/inputs.
+    let wav_artifacts = ds
+        .manifest()
+        .artifacts
+        .iter()
+        .filter(|a| a.store == al_dataset::manifest::StoreKind::Audio)
+        .count();
+    assert_eq!(wav_artifacts, 1);
+    let audio = ds
+        .read_audio("inputs", &format!("{}.wav", def.inputs[0].input_id))
+        .unwrap();
+    assert_eq!(audio.samples, vec![0.0, 1000.0, -1000.0]);
+    assert_eq!(audio.sample_rate, 8000);
     let dataset_record = manifest
         .artifacts
         .iter()
@@ -296,6 +310,60 @@ fn run_and_resume_materializes_dataset() {
         .unwrap();
     assert_eq!(ds_record.status, al_core::StageStatus::Completed);
     assert!(DatasetManifest::load(&analysis).is_ok());
+
+    fs::remove_dir_all(&base).ok();
+    fs::remove_dir_all(&wav_dir).ok();
+}
+
+/// A failed dataset stage leaves a partial `analysis/` behind; resume
+/// must regenerate it wholesale instead of failing on `AlreadyExists`.
+#[test]
+fn failed_dataset_stage_is_resumable() {
+    let base = tmp("re");
+    let wav_dir = tmp("rewav");
+    let wav_path = wav_dir.join("cap.wav");
+    {
+        use std::io::Write as _;
+        let cursor = std::io::Cursor::new(Vec::new());
+        let mut w = al_media::wav::WavWriter::new(cursor, WavEncoding::PcmS16, 1, 8000).unwrap();
+        w.write_samples(&[1.0, 2.0]).unwrap();
+        let mut f = std::fs::File::create(&wav_path).unwrap();
+        f.write_all(&w.finish().unwrap().into_inner()).unwrap();
+    }
+
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, &wav_path)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest, StageKind::Dataset],
+    )
+    .unwrap();
+    let runner = StageRunner::new(&base);
+    let mut stages: Vec<Box<dyn al_job::stage::Stage>> =
+        vec![Box::new(IngestStage::new()), Box::new(DatasetStage::new())];
+    runner.run(&def, &mut stages).unwrap();
+
+    // Simulate a crashed dataset stage: partial `analysis/` contents
+    // remain and the manifest records the stage as failed.
+    let job_dir = base.join(def.job_id.to_string());
+    let analysis = job_dir.join("analysis");
+    fs::remove_dir_all(&analysis).unwrap();
+    fs::create_dir_all(analysis.join("inputs")).unwrap();
+    fs::write(analysis.join("manifest.json"), b"{partial").unwrap();
+    let mut manifest = al_job::manifest::Manifest::load(&job_dir).unwrap();
+    manifest.stage_mut(StageKind::Dataset).unwrap().status = al_core::StageStatus::Failed;
+    manifest.save(&job_dir).unwrap();
+
+    let mut stages2: Vec<Box<dyn al_job::stage::Stage>> =
+        vec![Box::new(IngestStage::new()), Box::new(DatasetStage::new())];
+    let resumed = runner.resume(&def, &mut stages2).unwrap();
+    let ds_record = resumed
+        .stages
+        .iter()
+        .find(|s| s.stage == StageKind::Dataset)
+        .unwrap();
+    assert_eq!(ds_record.status, al_core::StageStatus::Completed);
+    // The dataset is fully regenerated, not the leftover partial.
+    assert!(DatasetReader::open(&analysis).is_ok());
 
     fs::remove_dir_all(&base).ok();
     fs::remove_dir_all(&wav_dir).ok();

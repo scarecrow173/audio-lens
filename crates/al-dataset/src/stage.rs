@@ -1,11 +1,10 @@
 //! `DatasetStage`: materializes `<job_dir>/analysis/` — the canonical
 //! analysis dataset — and registers one artifact record per store root.
 //!
-//! Declared inputs stay references (path + SHA-256, never copied) while
-//! ingest-produced `decoded_pcm` / `ingest_metadata` artifacts are
-//! materialized under `analysis/inputs/` as WAV audio plus a JSON
-//! metadata sibling. Until upstream analysis stages land, every other
-//! role stays `not_produced` rather than pretending content exists.
+//! Declared inputs are recorded by reference (path + SHA-256, never
+//! copied); decoded PCM from ingest is materialized as WAV plus a JSON
+//! metadata sibling under `analysis/inputs/` — the dataset's decoded-
+//! audio role. Upstream roles without producers stay `not_produced`.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -185,36 +184,60 @@ impl Stage for DatasetStage {
         let job_dir = ctx.registry.job_dir();
         let analysis = job_dir.join("analysis");
 
+        // A pre-existing analysis dir can only come from a previous
+        // failed attempt of this stage (Completed stages are skipped
+        // by the runner). The dataset is regenerated wholesale, so the
+        // partial output is removed — resume must actually be able to
+        // complete.
+        if analysis.exists() {
+            fs::remove_dir_all(&analysis).map_err(err)?;
+        }
+
+        let mut declared_lineage = Vec::new();
         let inputs: Vec<InputReference> = ctx
             .manifest
             .inputs
             .iter()
-            .map(|input| InputReference {
-                input_id: input.input_id.to_string(),
-                role: serde_json::to_value(input.role)
-                    .ok()
-                    .and_then(|v| v.as_str().map(str::to_owned))
-                    .unwrap_or_else(|| format!("{:?}", input.role)),
-                source_path: input.path.display().to_string(),
-                source_sha256: input.source_sha256.clone().unwrap_or_default(),
+            .map(|input| {
+                // The runner validates pinning, but a stage must not
+                // silently record an unpinned reference either.
+                let source_sha256 = input.source_sha256.clone().ok_or_else(|| {
+                    StageError::new(
+                        StageKind::Dataset,
+                        format!("input {} has no pinned source hash", input.input_id),
+                    )
+                })?;
+                if let Some(a) = ctx.manifest.input_artifact(&input.input_id) {
+                    declared_lineage.push(a);
+                }
+                Ok(InputReference {
+                    input_id: input.input_id.to_string(),
+                    role: serde_json::to_value(input.role)
+                        .ok()
+                        .and_then(|v| v.as_str().map(str::to_owned))
+                        .unwrap_or_else(|| format!("{:?}", input.role)),
+                    source_path: input.path.display().to_string(),
+                    source_sha256,
+                })
             })
-            .collect();
+            .collect::<Result<_, StageError>>()?;
 
         let mut writer =
             DatasetWriter::create(&analysis, inputs.clone(), ctx.config.clone()).map_err(err)?;
+        let prov = |input_id: &str, parents: &[al_core::ArtifactId]| Provenance {
+            input_id: input_id.to_string(),
+            algorithm_id: "dataset-materialize".into(),
+            algorithm_version: SCHEMA_VERSION.to_string(),
+            params: serde_json::json!({}),
+            alignment_id: None,
+            parents: parents.iter().map(|a| a.as_str().to_string()).collect(),
+        };
         writer
             .write_json(
                 "inputs",
                 "declared",
                 &serde_json::json!({ "inputs": inputs }),
-                Provenance {
-                    input_id: "job".into(),
-                    algorithm_id: "dataset-materialize".into(),
-                    algorithm_version: SCHEMA_VERSION.to_string(),
-                    params: serde_json::json!({}),
-                    alignment_id: None,
-                    parents: vec![],
-                },
+                prov("job", &declared_lineage),
             )
             .map_err(err)?;
 
@@ -249,6 +272,10 @@ impl Stage for DatasetStage {
                 ctx.registry,
             )?);
         }
+        let mut all_lineage = declared_lineage.clone();
+        for record in &produced {
+            all_lineage.extend(record.inputs.iter().cloned());
+        }
 
         let manifest = writer.finish().map_err(err)?;
 
@@ -258,7 +285,7 @@ impl Stage for DatasetStage {
                 role: "analysis_dataset".into(),
                 path: PathBuf::from("analysis"),
                 produced_by: Some(StageKind::Dataset),
-                inputs: vec![],
+                inputs: all_lineage.clone(),
                 params: serde_json::json!({
                     "schema_version": manifest.schema_version,
                     "artifact_count": manifest.artifacts.len(),
@@ -266,10 +293,20 @@ impl Stage for DatasetStage {
             },
             ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
+                role: "dataset_manifest".into(),
+                path: PathBuf::from("analysis/manifest.json"),
+                produced_by: Some(StageKind::Dataset),
+                inputs: all_lineage.clone(),
+                params: serde_json::json!({
+                    "schema_version": manifest.schema_version,
+                }),
+            },
+            ArtifactRecord {
+                artifact_id: ctx.registry.issue(),
                 role: "dataset_inputs".into(),
                 path: PathBuf::from("analysis/inputs/declared.json"),
                 produced_by: Some(StageKind::Dataset),
-                inputs: vec![],
+                inputs: declared_lineage,
                 params: serde_json::json!({
                     "input_count": inputs.len(),
                     "by_reference": true,
