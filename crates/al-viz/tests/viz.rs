@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 
 use al_core::{Confidence, InputRole, JobId, StageKind, Validity};
 use al_dataset::provenance::{self, Provenance};
+use al_dataset::tensor::TensorReader;
 use al_dataset::writer::{DatasetWriter, TensorChunk};
 use al_job::job::input;
 use al_job::manifest::Manifest;
@@ -451,6 +452,198 @@ fn export_shrinks_absolute_paths_inside_config() {
     let dir_fwd = fx.dir.to_string_lossy().replace('\\', "/");
     let dir_back = fx.dir.to_string_lossy().replace('/', "\\");
     assert!(!body.contains(&dir_fwd) && !body.contains(&dir_back));
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn validity_mask_marks_invalid_frames_and_covers_whole_spectrogram() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+    // Replace the cheap records with one invalid record covering
+    // 0.0..0.03 s — frames 0..2 at the default 1024-sample hop —
+    // while the seeded spectrogram has 4 frames.
+    let mut w = open_writer(&fx, &config);
+    w.write_json(
+        "features/cheap",
+        &fx.input_id,
+        &serde_json::json!({"records": [{
+            "feature_id": "level.rms_dbfs",
+            "value": {"scalar": null},
+            "unit": "dbfs",
+            "time_range": {"start": 0.0, "end": 0.03},
+            "freq_range": null,
+            "channels": null,
+            "resolution": null,
+            "resolution_class": "mid20ms",
+            "target": null,
+            "reference": null,
+            "delta": null,
+            "confidence": "low",
+            "validity": "low_coherence",
+            "invalid_reason": "test",
+            "support_count": 0,
+            "algorithm_id": "cheap.v1",
+            "algorithm_version": "1",
+            "params": {},
+            "input_id": fx.input_id,
+            "alignment_id": null,
+            "lineage": []
+        }]}),
+        prov(&fx.input_id),
+    )
+    .unwrap();
+    w.finish().unwrap();
+
+    al_viz::stage::VisualizationStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("visualization stage");
+
+    let mask_dir =
+        analysis_root(&fx).join(format!("visualization/spectrogram/{}/mask", fx.input_id));
+    let mask = TensorReader::open(&mask_dir).expect("validity mask tensor");
+    assert_eq!(
+        mask.meta().shape,
+        vec![4],
+        "mask must cover the spectrogram's full frame count"
+    );
+    let (data, _) = mask.read_range(&[[0, 4]]).unwrap();
+    assert_eq!(data, vec![0.0, 0.0, 1.0, 1.0]);
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn timeline_declares_event_series_in_seconds() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+
+    al_viz::stage::VisualizationStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("visualization stage");
+
+    let tl: serde_json::Value = serde_json::from_slice(
+        &fs::read(analysis_root(&fx).join("visualization/timeline.json")).unwrap(),
+    )
+    .unwrap();
+    // Markers carry start_s/end_s in seconds; the shared timeline
+    // must not declare them as sample positions.
+    assert_eq!(tl["series"]["events"]["unit"], "seconds");
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn visualization_provenance_parents_trace_to_source_artifacts() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+
+    al_viz::stage::VisualizationStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("visualization stage");
+
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(analysis_root(&fx).join("manifest.json")).unwrap())
+            .unwrap();
+    let artifacts = manifest["artifacts"].as_array().unwrap();
+    let find = |path: &str| -> &serde_json::Value {
+        artifacts
+            .iter()
+            .find(|a| a["path"].as_str() == Some(path))
+            .unwrap_or_else(|| panic!("missing artifact {path}"))
+    };
+    let parents = |path: &str| find(path)["provenance"]["parents"].clone();
+
+    let audio = format!("inputs/{}.wav", fx.input_id);
+    assert_eq!(
+        parents("visualization/timeline.json"),
+        serde_json::json!([audio])
+    );
+    assert_eq!(
+        parents(&format!("visualization/waveform/{}/ch0/l0", fx.input_id)),
+        serde_json::json!([audio])
+    );
+    assert_eq!(
+        parents(&format!(
+            "visualization/spectrogram/{}/ch0/magnitude",
+            fx.input_id
+        )),
+        serde_json::json!([format!("intermediate/{}/ch0/magnitude", fx.input_id)])
+    );
+    assert_eq!(
+        parents("visualization/views/events.json"),
+        serde_json::json!(["events/candidates"])
+    );
+    assert!(
+        !parents("visualization/summary.json")
+            .as_array()
+            .unwrap()
+            .is_empty(),
+        "summary.json must record its product parents"
+    );
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn tile_tensors_are_chunked_and_range_readable() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+
+    // A second magnitude tensor large enough to force a multi-chunk
+    // tile (1024x256 > the ~1 MiB element cap).
+    let (rows, bins) = (1024u64, 256u64);
+    let mut w = open_writer(&fx, &config);
+    let data: Vec<f64> = (0..rows * bins).map(|i| 0.01 + i as f64 * 1e-6).collect();
+    w.write_tensor(
+        "intermediate",
+        &format!("{}/ch1/magnitude", fx.input_id),
+        &[rows, bins],
+        &[rows, bins],
+        &[TensorChunk {
+            coords: vec![0, 0],
+            data,
+        }],
+        prov(&fx.input_id),
+    )
+    .unwrap();
+    w.finish().unwrap();
+
+    al_viz::stage::VisualizationStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("visualization stage");
+
+    let tile_dir = analysis_root(&fx).join(format!(
+        "visualization/spectrogram/{}/ch1/magnitude",
+        fx.input_id
+    ));
+    let tile = TensorReader::open(&tile_dir).expect("spectrogram tile");
+    assert_eq!(tile.meta().shape, vec![rows, bins]);
+    assert_eq!(
+        tile.meta().chunk_shape,
+        vec![512, bins],
+        "time dim must split into size-capped chunks"
+    );
+    let chunk_files = fs::read_dir(tile_dir.join("chunks")).unwrap().count();
+    assert_eq!(chunk_files, 2, "expected two chunk files");
+
+    // A range read across the chunk boundary returns dB-mapped data.
+    let (vals, region) = tile.read_range(&[[510, 514], [0, 64]]).unwrap();
+    assert_eq!(region, vec![4, 64]);
+    let expect = 20.0 * (0.01 + (510 * bins) as f64 * 1e-6).log10();
+    assert!(
+        (vals[0] - expect).abs() < 1e-9,
+        "expected {expect}, got {}",
+        vals[0]
+    );
 
     fs::remove_dir_all(&fx.dir).ok();
 }

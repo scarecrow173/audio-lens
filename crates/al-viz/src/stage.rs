@@ -12,7 +12,7 @@ use al_job::manifest::ArtifactRecord;
 use al_job::stage::{Stage, StageContext, StageError};
 
 use crate::package::ExportConfig;
-use crate::{lod, summary, tiles, timeline, views};
+use crate::{StreamedTensor, lod, summary, tiles, timeline, views};
 
 fn invalid(msg: impl Into<String>) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, msg.into())
@@ -27,6 +27,9 @@ fn write_json(
     writer.write_json("visualization", name, body, prov)
 }
 
+/// Persist `data` as a chunked `[time, freq, …]` tensor: only the
+/// leading (time) dim is split, so each chunk is a contiguous slice
+/// and no chunk exceeds `tiles::TILE_CHUNK_ELEMS` elements.
 fn write_tensor(
     writer: &mut DatasetWriter,
     name: &str,
@@ -37,40 +40,67 @@ fn write_tensor(
     if data.is_empty() {
         return Ok(());
     }
-    let chunk = al_dataset::writer::TensorChunk {
-        coords: vec![0; shape.len()],
-        data: data.to_vec(),
-    };
-    writer.write_tensor("visualization", name, shape, shape, &[chunk], prov)
+    let chunk_shape = tiles::chunk_shape_for(shape);
+    let mut sink = writer.create_tensor("visualization", name, shape, &chunk_shape)?;
+    let inner = shape[1..].iter().product::<u64>() as usize;
+    for c0 in 0..shape[0].div_ceil(chunk_shape[0]) {
+        let start = c0 * chunk_shape[0];
+        let end = (start + chunk_shape[0]).min(shape[0]);
+        let mut coords = vec![0u64; shape.len()];
+        coords[0] = c0;
+        sink.push(&coords, &data[start as usize * inner..end as usize * inner])?;
+    }
+    sink.finish(prov)
 }
 
-fn prov(input_id: &str) -> Provenance {
+fn prov(input_id: &str, parents: Vec<String>) -> Provenance {
     Provenance {
         input_id: input_id.to_string(),
         algorithm_id: "viz.v1".into(),
         algorithm_version: "1".into(),
         params: serde_json::json!({}),
         alignment_id: None,
-        parents: Vec::new(),
+        parents,
     }
 }
 
-/// Persist one derived product; returns the registered dataset path.
+fn viz_name(path: &str) -> io::Result<&str> {
+    path.strip_prefix("visualization/")
+        .ok_or_else(|| invalid(format!("product path outside visualization role: {path}")))
+}
+
+/// Persist one derived JSON / in-memory-tensor product; returns the
+/// registered dataset path. `parents` records the dataset-relative
+/// artifact paths the product derives from so tensor tiles and views
+/// stay traceable to their source measurements.
 fn persist(
     writer: &mut DatasetWriter,
     path: &str,
+    parents: Vec<String>,
     body: Option<&serde_json::Value>,
     tensor: Option<(&[u64], &[f64])>,
 ) -> io::Result<String> {
-    let name = path
-        .strip_prefix("visualization/")
-        .ok_or_else(|| invalid(format!("product path outside visualization role: {path}")))?;
+    let name = viz_name(path)?;
     if let Some(b) = body {
-        write_json(writer, name, b, prov("job"))?;
+        write_json(writer, name, b, prov("job", parents))?;
     } else if let Some((shape, data)) = tensor {
-        write_tensor(writer, name, shape, data, prov("job"))?;
+        write_tensor(writer, name, shape, data, prov("job", parents))?;
     }
     Ok(path.to_string())
+}
+
+/// Persist a streamed tensor product chunk-by-chunk: the source
+/// tensor is converted through ranged reads and each finished chunk
+/// lands on disk before the next is read.
+fn persist_stream(writer: &mut DatasetWriter, t: StreamedTensor) -> io::Result<String> {
+    let name = viz_name(&t.path)?;
+    let mut sink = writer.create_tensor("visualization", name, &t.shape, &t.chunk_shape)?;
+    for chunk in t.chunks {
+        let chunk = chunk?;
+        sink.push(&chunk.coords, &chunk.data)?;
+    }
+    sink.finish(prov("job", t.parents))?;
+    Ok(t.path)
 }
 
 /// The visualization stage.
@@ -157,9 +187,22 @@ impl Stage for VisualizationStage {
             let tl = timeline::build(&reader, &cap_id, ctx.config).map_err(err)?;
             sample_rate = Some(f64::from(tl.sample_rate));
             let body = serde_json::to_value(&tl).map_err(|e| invalid(e.to_string()))?;
+            let cap_audio = reader
+                .artifacts("inputs")
+                .into_iter()
+                .find(|a| {
+                    a.store == al_dataset::manifest::StoreKind::Audio
+                        && a.path
+                            .strip_prefix("inputs/")
+                            .and_then(|p| p.strip_suffix(".wav"))
+                            == Some(cap_id.as_str())
+                })
+                .map(|a| vec![a.path.clone()])
+                .unwrap_or_default();
             produced.push(persist(
                 &mut writer,
                 "visualization/timeline.json",
+                cap_audio,
                 Some(&body),
                 None,
             )?);
@@ -176,10 +219,11 @@ impl Stage for VisualizationStage {
                 let rel = a.path.strip_prefix("inputs/").unwrap_or(&a.path);
                 let name = rel.strip_suffix(".wav").unwrap_or(rel).to_string();
                 let pyramid = lod::build(&reader, &name).map_err(err)?;
-                for t in lod::products(&name, &pyramid) {
+                for t in lod::products(&name, &a.path, &pyramid) {
                     produced.push(persist(
                         &mut writer,
                         &t.path,
+                        t.parents.clone(),
                         None,
                         Some((&t.shape, &t.data)),
                     )?);
@@ -196,15 +240,12 @@ impl Stage for VisualizationStage {
             skip("waveform_lod", "inputs", "role not produced");
         }
 
-        // Tiles + validity masks.
+        // Tiles + validity masks. Tile tensors stream chunk-by-chunk
+        // so long spectrograms are converted and stored without a
+        // full-tensor load on either side.
         if reader.role_produced("intermediate") {
             for t in tiles::build(&reader).map_err(err)? {
-                produced.push(persist(
-                    &mut writer,
-                    &t.path,
-                    None,
-                    Some((&t.shape, &t.data)),
-                )?);
+                produced.push(persist_stream(&mut writer, t)?);
             }
         } else {
             skip("spectrogram_tiles", "intermediate", "role not produced");
@@ -218,6 +259,7 @@ impl Stage for VisualizationStage {
                 produced.push(persist(
                     &mut writer,
                     &t.path,
+                    t.parents.clone(),
                     None,
                     Some((&t.shape, &t.data)),
                 )?);
@@ -229,35 +271,65 @@ impl Stage for VisualizationStage {
         // Views.
         if reader.role_produced("intermediate") {
             for v in views::transfer_views(&reader, sample_rate.unwrap_or(48_000.0)).map_err(err)? {
-                produced.push(persist(&mut writer, &v.path, Some(&v.body), None)?);
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
             }
         } else {
             skip("transfer_view", "intermediate", "role not produced");
         }
         if reader.role_produced("locate") {
             for v in views::locate_views(&reader).map_err(err)? {
-                produced.push(persist(&mut writer, &v.path, Some(&v.body), None)?);
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
             }
         } else {
             skip("locate_view", "locate", "role not produced");
         }
         if reader.role_produced("features/cheap") {
             for v in views::stereo_views(&reader).map_err(err)? {
-                produced.push(persist(&mut writer, &v.path, Some(&v.body), None)?);
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
             }
         } else {
             skip("stereo_view", "features/cheap", "role not produced");
         }
         if reader.role_produced("residual") {
             for v in views::residual_views(&reader).map_err(err)? {
-                produced.push(persist(&mut writer, &v.path, Some(&v.body), None)?);
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
             }
         } else {
             skip("residual_view", "residual", "role not produced");
         }
         if reader.role_produced("events") {
             if let Some(v) = views::events_view(&reader).map_err(err)? {
-                produced.push(persist(&mut writer, &v.path, Some(&v.body), None)?);
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
             }
         } else {
             skip("event_markers", "events", "role not produced");
@@ -269,9 +341,13 @@ impl Stage for VisualizationStage {
         }
 
         // skipped.json + summary.json (paths are dataset-relative).
+        // skipped.json is bookkeeping over absent roles — it has no
+        // source artifacts; the summary aggregates every produced
+        // product, which are its parents.
         produced.push(persist(
             &mut writer,
             "visualization/skipped.json",
+            Vec::new(),
             Some(&serde_json::json!({"skipped_products": skipped})),
             None,
         )?);
@@ -280,6 +356,7 @@ impl Stage for VisualizationStage {
         produced.push(persist(
             &mut writer,
             "visualization/summary.json",
+            produced.clone(),
             Some(&body),
             None,
         )?);

@@ -144,8 +144,9 @@ pub fn build(reader: &DatasetReader, input_id: &str) -> io::Result<Pyramid> {
 }
 
 /// Flatten the pyramid into tensor products: per level and channel a
-/// `[buckets, 4]` matrix (min / max / rms / count).
-pub fn products(input_id: &str, p: &Pyramid) -> Vec<TensorProduct> {
+/// `[buckets, 4]` matrix (min / max / rms / count). `source` is the
+/// dataset-relative audio artifact the pyramid was built from.
+pub fn products(input_id: &str, source: &str, p: &Pyramid) -> Vec<TensorProduct> {
     let mut out = Vec::new();
     for (level, chans) in p.levels.iter().enumerate() {
         for (c, buckets) in chans.iter().enumerate() {
@@ -157,6 +158,7 @@ pub fn products(input_id: &str, p: &Pyramid) -> Vec<TensorProduct> {
                 path: format!("visualization/waveform/{input_id}/ch{c}/l{level}"),
                 shape: vec![buckets.len() as u64, 4],
                 data,
+                parents: vec![source.to_string()],
             });
         }
     }
