@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oIf37uS3sViutmBaX"
 type: "task"
-status: "todo"
+status: "done"
 title: "VisualizationStage + CLI 配線"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oHpFZMcAeDWVmSBMF"
 type: "task"
-status: "todo"
+status: "done"
 title: "伝達/タイムマップ/ステレオ/残差/locate ビュー"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

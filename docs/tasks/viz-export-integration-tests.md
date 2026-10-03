@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oJ2ngcyfGSgbNPcrX"
 type: "task"
-status: "todo"
+status: "done"
 title: "viz/export 結合 + ゴールデンテスト"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

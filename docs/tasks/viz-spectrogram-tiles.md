@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oBYoDVIWGp8h2kY9n"
 type: "task"
-status: "todo"
+status: "done"
 title: "スペクトログラムタイル + 差分/帯域ヒートマップ"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

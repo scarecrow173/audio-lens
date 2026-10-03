@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034z8FkQ8VWjuojrvS0HhT"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "visualization-export"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []
