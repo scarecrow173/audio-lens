@@ -508,6 +508,84 @@ fn locate_emits_time_map_and_residual_artifacts() {
 }
 
 #[test]
+fn capture_only_runs_through_cheap_analysis_and_dataset() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("cheap");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest,cheap_analysis,dataset",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+
+    // Cheap feature records land under analysis/features/cheap.
+    let cheap_dir = jobs.join(job_id).join("analysis/features/cheap");
+    let entries: Vec<_> = std::fs::read_dir(&cheap_dir)
+        .expect("features/cheap dir")
+        .collect();
+    assert!(
+        entries.iter().any(|e| e
+            .as_ref()
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .ends_with(".json")),
+        "no cheap feature JSON written"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn stage_plan_missing_dependency_is_rejected() {
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("dep");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    // cheap_analysis requires ingest earlier in the plan.
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "cheap_analysis",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        !out.status.success(),
+        "missing ingest dependency should fail at the entry"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn locate_tracks_long_source_with_windowed_anchors() {
     let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate-long");

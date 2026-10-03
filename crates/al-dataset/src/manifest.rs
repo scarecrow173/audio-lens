@@ -118,8 +118,18 @@ impl DatasetManifest {
         }
     }
 
-    /// Register an artifact and update its role status.
+    /// Register an artifact and update its role status. An existing
+    /// entry with the same `(role, path)` is replaced — rewriting a
+    /// store is idempotent and must not inflate the artifact count.
     pub fn register(&mut self, artifact: DatasetArtifact) {
+        if let Some(existing) = self
+            .artifacts
+            .iter_mut()
+            .find(|a| a.role == artifact.role && a.path == artifact.path)
+        {
+            *existing = artifact;
+            return;
+        }
         let entry = self
             .roles
             .entry(artifact.role.clone())

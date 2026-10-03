@@ -3,9 +3,23 @@
 version = 4
 
 [[package]]
+name = "al-analysis"
+version = "0.1.0"
+dependencies = [
+ "al-core",
+ "al-dataset",
+ "al-job",
+ "al-locate",
+ "al-media",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "al-cli"
 version = "0.1.0"
 dependencies = [
+ "al-analysis",
  "al-core",
  "al-dataset",
  "al-job",

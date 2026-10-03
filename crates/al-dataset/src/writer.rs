@@ -16,13 +16,17 @@ use std::path::PathBuf;
 use al_media::wav::WavEncoding;
 
 use crate::audio::write_wav;
-use crate::manifest::{DatasetArtifact, DatasetManifest, StoreKind};
+use crate::manifest::{DatasetArtifact, DatasetManifest, MANIFEST_FILE, SCHEMA_VERSION, StoreKind};
 use crate::provenance::{InputReference, Provenance};
 use crate::table::{Cell, Column, TableWriter};
 use crate::tensor::TensorWriter;
 
 fn bad_input(msg: impl Into<String>) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, msg.into())
+}
+
+fn invalid_data(msg: impl Into<String>) -> io::Error {
+    io::Error::new(io::ErrorKind::InvalidData, msg.into())
 }
 
 /// One tensor chunk to persist: chunk coordinates plus row-major f64
@@ -63,6 +67,54 @@ impl DatasetWriter {
         })
     }
 
+    /// Open an existing dataset (after validating manifest identity)
+    /// or create a fresh one when no manifest exists.
+    ///
+    /// An existing manifest must match `inputs`, `config`, and the
+    /// current [`SCHEMA_VERSION`] exactly — a mismatch or an
+    /// unparseable manifest fails explicitly (pre-release rule: no
+    /// compat layer, no migration, no silent recreation). A missing
+    /// manifest under a non-empty root leaves orphan stores on disk;
+    /// they are lazily replaced by the write-replacement rules, so a
+    /// clean create is still correct.
+    pub fn open_or_create(
+        root: &std::path::Path,
+        inputs: Vec<InputReference>,
+        config: serde_json::Value,
+    ) -> io::Result<Self> {
+        if root.join(MANIFEST_FILE).exists() {
+            let manifest = DatasetManifest::load(root)?;
+            if manifest.schema_version != SCHEMA_VERSION {
+                return Err(invalid_data(format!(
+                    "dataset schema version {} != {} — regenerate the dataset",
+                    manifest.schema_version, SCHEMA_VERSION
+                )));
+            }
+            if manifest.inputs != inputs {
+                return Err(invalid_data(
+                    "dataset manifest inputs differ from the job manifest",
+                ));
+            }
+            if manifest.config != config {
+                return Err(invalid_data(
+                    "dataset manifest config differs from the job config",
+                ));
+            }
+            Ok(Self {
+                root: root.to_path_buf(),
+                manifest,
+            })
+        } else {
+            fs::create_dir_all(root)?;
+            let manifest = DatasetManifest::new(inputs, config);
+            manifest.save(root)?;
+            Ok(Self {
+                root: root.to_path_buf(),
+                manifest,
+            })
+        }
+    }
+
     /// The manifest as built so far.
     pub fn manifest(&self) -> &DatasetManifest {
         &self.manifest
@@ -91,6 +143,18 @@ impl DatasetWriter {
         });
     }
 
+    /// Remove an existing store at `path` (registered or orphan) so a
+    /// rewrite fully replaces the physical store — retries never merge
+    /// into partial leftovers.
+    fn reset_store(path: &PathBuf) -> io::Result<()> {
+        if path.is_dir() {
+            fs::remove_dir_all(path)?;
+        } else if path.exists() {
+            fs::remove_file(path)?;
+        }
+        Ok(())
+    }
+
     /// Persist a columnar table of `rows` under `role/name`.
     pub fn write_table(
         &mut self,
@@ -101,6 +165,7 @@ impl DatasetWriter {
         provenance: Provenance,
     ) -> io::Result<()> {
         let path = self.artifact_path(role, name)?;
+        Self::reset_store(&path)?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -125,6 +190,7 @@ impl DatasetWriter {
         provenance: Provenance,
     ) -> io::Result<()> {
         let path = self.artifact_path(role, name)?;
+        Self::reset_store(&path)?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -160,6 +226,7 @@ impl DatasetWriter {
             format!("{name}.wav")
         };
         let path = self.artifact_path(role, &name)?;
+        Self::reset_store(&path)?;
         write_wav(&path, encoding, channels, sample_rate, samples)?;
         self.register(role, format!("{role}/{name}"), StoreKind::Audio, provenance);
         Ok(())
@@ -179,6 +246,7 @@ impl DatasetWriter {
             format!("{name}.json")
         };
         let path = self.artifact_path(role, &name)?;
+        Self::reset_store(&path)?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
