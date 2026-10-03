@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nuJ4U5rxECJrXf3yj"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-analysis: 複素 STFT + スペクトル中間生成物"
 created: "2026-10-02"
 updated: "2026-10-02"

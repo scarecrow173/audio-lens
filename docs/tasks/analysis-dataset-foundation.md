@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9novQ1qbeZc0x58nsX"
 type: "task"
-status: "todo"
+status: "done"
 title: "analysis 基盤: DatasetWriter open_or_create + FeatureRecord 拡張"
 created: "2026-10-02"
 updated: "2026-10-02"
