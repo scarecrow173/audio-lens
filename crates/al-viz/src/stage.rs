@@ -165,16 +165,16 @@ impl Stage for VisualizationStage {
             )?);
         }
 
-        // Waveform LOD per materialized input.
+        // Waveform LOD per materialized input (audio stores only —
+        // the role also carries declared-input JSON records).
         if reader.role_produced("inputs") {
-            for a in reader.artifacts("inputs") {
-                let name = a
-                    .path
-                    .strip_prefix("inputs/")
-                    .unwrap_or(&a.path)
-                    .strip_suffix(".wav")
-                    .unwrap_or(&a.path)
-                    .to_string();
+            for a in reader
+                .artifacts("inputs")
+                .into_iter()
+                .filter(|a| a.store == al_dataset::manifest::StoreKind::Audio)
+            {
+                let rel = a.path.strip_prefix("inputs/").unwrap_or(&a.path);
+                let name = rel.strip_suffix(".wav").unwrap_or(rel).to_string();
                 let pyramid = lod::build(&reader, &name).map_err(err)?;
                 for t in lod::products(&name, &pyramid) {
                     produced.push(persist(
@@ -275,7 +275,8 @@ impl Stage for VisualizationStage {
             Some(&serde_json::json!({"skipped_products": skipped})),
             None,
         )?);
-        let body = summary::summary_body(&reader, &produced, &skipped).map_err(err)?;
+        let body =
+            summary::summary_body(&reader, writer.manifest(), &produced, &skipped).map_err(err)?;
         produced.push(persist(
             &mut writer,
             "visualization/summary.json",
