@@ -1,7 +1,7 @@
 ---
 id: "TASK-034z9nCqVubu7pBmp7vaOT"
 type: "task"
-status: "todo"
+status: "done"
 title: "ExpensiveAnalysisStage: トリガ + 深掘り解析"
 created: "2026-10-02"
 updated: "2026-10-02"

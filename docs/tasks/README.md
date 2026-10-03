@@ -2,19 +2,20 @@
 
 
 
+
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
-| TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | todo | [analysis-candidate-events.md](./analysis-candidate-events.md) |
+| TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
-| TASK-034z9nDhaSqoH2kao6D3Xz | analysis ステージ CLI 配線 + depends_on | todo | [analysis-cli-wiring.md](./analysis-cli-wiring.md) |
+| TASK-034z9nDhaSqoH2kao6D3Xz | analysis ステージ CLI 配線 + depends_on | done | [analysis-cli-wiring.md](./analysis-cli-wiring.md) |
 | TASK-034z9novQ1qbeZc0x58nsX | analysis 基盤: DatasetWriter open_or_create + FeatureRecord 拡張 | done | [analysis-dataset-foundation.md](./analysis-dataset-foundation.md) |
 | TASK-034z9nuJ4U5rxECJrXf3yj | al-analysis: 複素 STFT + スペクトル中間生成物 | done | [analysis-dsp-intermediates.md](./analysis-dsp-intermediates.md) |
-| TASK-034z9nCqVubu7pBmp7vaOT | ExpensiveAnalysisStage: トリガ + 深掘り解析 | todo | [analysis-expensive-stage.md](./analysis-expensive-stage.md) |
-| TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | todo | [analysis-integration-tests.md](./analysis-integration-tests.md) |
+| TASK-034z9nCqVubu7pBmp7vaOT | ExpensiveAnalysisStage: トリガ + 深掘り解析 | done | [analysis-expensive-stage.md](./analysis-expensive-stage.md) |
+| TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | done | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
