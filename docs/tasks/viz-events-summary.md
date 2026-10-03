@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oHPHHVPCNKwoMJp5c"
 type: "task"
-status: "todo"
+status: "done"
 title: "イベントマーカ + 決定的サマリ + skipped.json"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

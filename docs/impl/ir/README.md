@@ -27,6 +27,7 @@ Directory: `docs/impl/ir`
 | dataset-skeleton | [dataset-skeleton.md](./dataset-skeleton.md) |
 | dataset-stage | [dataset-stage.md](./dataset-stage.md) |
 | dataset-writer-provenance | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
+| export-package | [export-package.md](./export-package.md) |
 | ingest-integration-tests | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | ingest-stage-and-cli-wiring | [ingest-stage-and-cli-wiring.md](./ingest-stage-and-cli-wiring.md) |
 | init-rust-workspace | [init-rust-workspace.md](./init-rust-workspace.md) |
@@ -44,5 +45,12 @@ Directory: `docs/impl/ir`
 | resume-reproduction-tests | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | stage-runner | [stage-runner.md](./stage-runner.md) |
 | timing-observation | [timing-observation.md](./timing-observation.md) |
+| viz-dataset-reads | [viz-dataset-reads.md](./viz-dataset-reads.md) |
+| viz-events-summary | [viz-events-summary.md](./viz-events-summary.md) |
+| viz-export-integration-tests | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |
+| viz-spectrogram-tiles | [viz-spectrogram-tiles.md](./viz-spectrogram-tiles.md) |
+| viz-stage-cli | [viz-stage-cli.md](./viz-stage-cli.md) |
+| viz-views | [viz-views.md](./viz-views.md) |
+| viz-waveform-lod | [viz-waveform-lod.md](./viz-waveform-lod.md) |
 | wav-audio-store | [wav-audio-store.md](./wav-audio-store.md) |
 | wav-decode-and-hash | [wav-decode-and-hash.md](./wav-decode-and-hash.md) |

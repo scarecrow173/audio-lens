@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034z7Go0WvShlVKkU7NCCH"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "Analysis Dataset ストアの実装"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

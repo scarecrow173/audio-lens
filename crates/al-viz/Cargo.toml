@@ -1,0 +1,17 @@
+[package]
+name = "al-viz"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+al-core.workspace = true
+al-job.workspace = true
+al-media.workspace = true
+al-dataset.workspace = true
+al-locate.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+al-analysis.workspace = true

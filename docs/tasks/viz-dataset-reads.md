@@ -1,10 +1,10 @@
 ---
 id: "TASK-034z9oB8rhYcBdeSRvtsKy"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-viz: dataset 範囲/チャンク読み出し基盤"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: []
 relations:
   source: []

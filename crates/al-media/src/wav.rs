@@ -3,7 +3,7 @@
 //! Only uncompressed PCM (format tag 1) and IEEE float (tag 3) are decoded.
 //! Anything else fails explicitly as `decode/input unavailable`.
 
-use std::io::{self, Seek, SeekFrom, Write};
+use std::io::{self, Read, Seek, SeekFrom, Write};
 
 use crate::metadata::{MediaError, SampleFormat};
 
@@ -152,41 +152,63 @@ fn decode_samples(
     Ok((sample_format, codec.to_owned(), samples))
 }
 
-/// Decode a RIFF/WAVE file into pre-normalization PCM.
-pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
-    if data.len() < 12 || &data[0..4] != b"RIFF" || &data[8..12] != b"WAVE" {
+/// Located WAV structure: parsed `fmt ` plus the `data` chunk's byte
+/// range, so sample decoding can target a sub-range without holding
+/// the whole file.
+struct WavLayout {
+    fmt: FmtChunk,
+    data_offset: u64,
+    data_len: u64,
+}
+
+/// Walk RIFF chunk headers from a seekable source. Only the `fmt `
+/// body is read; `data` and unknown chunks are skipped by offset.
+fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaError> {
+    let file_len = r
+        .seek(SeekFrom::End(0))
+        .map_err(|e| MediaError::malformed(format!("cannot seek WAV source: {e}")))?;
+    let read_at = |r: &mut R, at: u64, buf: &mut [u8]| -> Result<(), MediaError> {
+        r.seek(SeekFrom::Start(at))
+            .and_then(|_| r.read_exact(buf))
+            .map_err(|e| MediaError::malformed(format!("cannot read WAV at {at}: {e}")))
+    };
+    let mut head = [0u8; 12];
+    read_at(r, 0, &mut head).map_err(|_| MediaError::input_unavailable("not a RIFF/WAVE file"))?;
+    if &head[0..4] != b"RIFF" || &head[8..12] != b"WAVE" {
         return Err(MediaError::input_unavailable("not a RIFF/WAVE file"));
     }
     // The RIFF size field declares the whole file minus its own header.
-    let riff_size = read_u32(data, 4)? as usize;
-    if riff_size != data.len() - 8 {
+    let riff_size = u64::from(u32::from_le_bytes(head[4..8].try_into().unwrap()));
+    if file_len < 12 || riff_size != file_len - 8 {
         return Err(MediaError::malformed(
             "RIFF size does not match file length",
         ));
     }
 
+    // A fmt body beyond this is not a PCM header anyone produces.
+    const MAX_FMT_BYTES: u64 = 4096;
     let mut fmt: Option<FmtChunk> = None;
-    let mut pcm: Option<&[u8]> = None;
-    let mut offset = 12usize;
-    while offset + 8 <= data.len() {
-        let id = &data[offset..offset + 4];
-        let size = read_u32(data, offset + 4)? as usize;
+    let mut pcm: Option<(u64, u64)> = None;
+    let mut offset = 12u64;
+    while offset + 8 <= file_len {
+        let mut h = [0u8; 8];
+        read_at(r, offset, &mut h)?;
+        let size = u64::from(u32::from_le_bytes(h[4..8].try_into().unwrap()));
         let body_start = offset + 8;
         let body_end = body_start
             .checked_add(size)
             .ok_or_else(|| MediaError::malformed("chunk size overflow"))?;
-        if body_end > data.len() {
+        if body_end > file_len {
             return Err(MediaError::malformed("chunk extends past end of file"));
         }
         // An odd-sized chunk must be followed by its word-alignment pad
         // byte — including the last chunk.
-        if body_end + (size % 2) > data.len() {
+        if body_end + (size % 2) > file_len {
             return Err(MediaError::malformed(
                 "missing pad byte after odd-sized chunk",
             ));
         }
-        let body = &data[body_start..body_end];
-        match id {
+        match &h[0..4] {
             // Duplicate fmt/data are rejected rather than silently
             // last-wins: dropping an earlier `data` chunk would discard
             // part of the input, breaking the no-loss decode contract.
@@ -194,20 +216,25 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
                 if fmt.is_some() {
                     return Err(MediaError::malformed("duplicate fmt chunk"));
                 }
-                fmt = Some(parse_fmt(body)?);
+                if size > MAX_FMT_BYTES {
+                    return Err(MediaError::malformed("fmt chunk unreasonably large"));
+                }
+                let mut body = vec![0u8; size as usize];
+                read_at(r, body_start, &mut body)?;
+                fmt = Some(parse_fmt(&body)?);
             }
             b"data" => {
                 if pcm.is_some() {
                     return Err(MediaError::malformed("duplicate data chunk"));
                 }
-                pcm = Some(body);
+                pcm = Some((body_start, size));
             }
             _ => {}
         }
         // Chunks are word-aligned: an odd size is followed by a pad byte.
         offset = body_end + (size % 2);
     }
-    if offset != data.len() {
+    if offset != file_len {
         return Err(MediaError::malformed(
             "trailing bytes after last RIFF chunk",
         ));
@@ -220,9 +247,19 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
     if fmt.sample_rate == 0 {
         return Err(MediaError::malformed("fmt declares zero sample rate"));
     }
-    let pcm = pcm.ok_or_else(|| MediaError::malformed("missing data chunk"))?;
-    let (sample_format, codec, samples) = decode_samples(&fmt, pcm)?;
+    let (data_offset, data_len) = pcm.ok_or_else(|| MediaError::malformed("missing data chunk"))?;
+    if !data_len.is_multiple_of(u64::from(fmt.block_align)) {
+        return Err(MediaError::malformed("data chunk ends mid-frame"));
+    }
+    Ok(WavLayout {
+        fmt,
+        data_offset,
+        data_len,
+    })
+}
 
+fn decoded(fmt: &FmtChunk, body: &[u8]) -> Result<DecodedAudio, MediaError> {
+    let (sample_format, codec, samples) = decode_samples(fmt, body)?;
     Ok(DecodedAudio {
         samples,
         channels: fmt.channels,
@@ -231,6 +268,43 @@ pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
         sample_format,
         codec,
     })
+}
+
+/// Decode a RIFF/WAVE file into pre-normalization PCM.
+pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
+    let layout = wav_layout(&mut io::Cursor::new(data))?;
+    let body = &data[layout.data_offset as usize..(layout.data_offset + layout.data_len) as usize];
+    decoded(&layout.fmt, body)
+}
+
+/// Number of PCM frames in the file, from the header alone.
+pub fn wav_frame_count<R: Read + Seek>(r: &mut R) -> Result<u64, MediaError> {
+    let layout = wav_layout(r)?;
+    Ok(layout.data_len / u64::from(layout.fmt.block_align))
+}
+
+/// Decode frames `[start_frame, end_frame)` without loading the whole
+/// file. Out-of-range or empty ranges fail explicitly.
+pub fn read_wav_range<R: Read + Seek>(
+    r: &mut R,
+    start_frame: u64,
+    end_frame: u64,
+) -> Result<DecodedAudio, MediaError> {
+    let layout = wav_layout(r)?;
+    let block = u64::from(layout.fmt.block_align);
+    let total = layout.data_len / block;
+    if start_frame >= end_frame || end_frame > total {
+        return Err(MediaError::malformed(format!(
+            "frame range [{start_frame}, {end_frame}) outside {total} frames"
+        )));
+    }
+    let byte_len = (end_frame - start_frame) * block;
+    r.seek(SeekFrom::Start(layout.data_offset + start_frame * block))
+        .map_err(|e| MediaError::malformed(format!("cannot seek WAV data: {e}")))?;
+    let mut buf = vec![0u8; byte_len as usize];
+    r.read_exact(&mut buf)
+        .map_err(|e| MediaError::malformed(format!("cannot read WAV data: {e}")))?;
+    decoded(&layout.fmt, &buf)
 }
 
 /// Output encoding for [`WavWriter`].
@@ -449,6 +523,30 @@ mod tests {
         assert_eq!(audio.samples[0], 16384.0);
         assert_eq!(audio.samples[1], -16384.0);
         assert_eq!(audio.samples[3], 32767.0);
+    }
+
+    #[test]
+    fn range_read_matches_full_decode() {
+        let frames: Vec<i16> = vec![100, -200, 300, -400, 500, -600, 700, -800];
+        let wav = make_wav(2, 48000, 16, &frames); // 4 stereo frames
+        let mut c = io::Cursor::new(&wav);
+        assert_eq!(wav_frame_count(&mut c).unwrap(), 4);
+        let part = read_wav_range(&mut c, 1, 3).unwrap();
+        assert_eq!(part.channels, 2);
+        assert_eq!(part.frames(), 2);
+        assert_eq!(part.samples, vec![300.0, -400.0, 500.0, -600.0]);
+    }
+
+    #[test]
+    fn range_read_rejects_out_of_range() {
+        let wav = make_wav(1, 48000, 16, &[1, 2, 3]);
+        let mut c = io::Cursor::new(&wav);
+        assert!(read_wav_range(&mut c, 2, 9).is_err());
+        assert!(read_wav_range(&mut c, 2, 2).is_err());
+        assert!(read_wav_range(&mut c, 0, 0).is_err());
+        // The tail range is still allowed.
+        let tail = read_wav_range(&mut c, 1, 3).unwrap();
+        assert_eq!(tail.samples, vec![2.0, 3.0]);
     }
 
     #[test]

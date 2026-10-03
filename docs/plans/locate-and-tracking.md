@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034z7HA18FxYMCQPBZ6Gg2"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "ソース定位・トラッキングの実装"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-03"
 owners: ["scarecrow173"]
 relations:
   source: []
