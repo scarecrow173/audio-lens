@@ -4,7 +4,7 @@ type: "impl"
 status: "completed"
 title: "analysis-expensive-stage"
 created: "2026-10-03"
-updated: "2026-10-03"
+updated: "2026-10-04"
 owners: []
 relations:
   source: []
@@ -128,6 +128,14 @@ task `docs/tasks/analysis-expensive-stage.md`、plan
     保持し(`manual`/`always_run` は独立トリガとして
     Valid/High)、`analyze_region` が全レコードへ
     `propagate_validity`/`propagate_confidence` で伝播する
+  - validity 降格だけでは plan 規約「上流が非 Valid → 下流は
+    推定せず無効な観測として記録(数値は出さない)」を満たさず、
+    非 Valid トリガのみの区間でも有限値を invalid record に
+    保存していた → `TriggeredRegion.has_valid_trigger` を追加し、
+    `Valid` トリガ(`manual`/`always_run`/`Valid` イベント)を
+    持たない区間では推定を早期終了して全 feature を
+    `Value::Scalar(NaN)` + 依存元マッピング済み validity の
+    無効な観測として記録するよう修正
 - イベント抽出で tensor ストアを JSON として読む失敗が
   あったため、候補走査は `StoreKind::Json` のみに限定した
 - artifact path は `features/cheap/<input>.json` と拡張子を
@@ -159,11 +167,12 @@ task `docs/tasks/analysis-expensive-stage.md`、plan
     always_run/manual_ranges、既知エコー遅延(120 サンプル
     = 2.5ms @48kHz)をケプストラムで回復、セグメント全域
     イベント、チャンネル/artifact でイベント ID 分離
-  - 結合(`tests/expensive.rs` 4 件): clipping 候補が
+  - 結合(`tests/expensive.rs` 5 件): clipping 候補が
     expensive 区間を起動し cheap 出力を上書きしない、
     抑制時は events 空テーブルのみ、always_run が reference
     なしで全入力を解析、manual_ranges が候補なしでも
-    `manual` トリガで区間を生成
+    `manual` トリガで区間を生成、非 Valid 候補のみの区間は
+    全レコード null スカラ + 非 Valid validity の無効な観測
 - `cargo test --workspace` 全 pass
 - `cargo clippy --workspace --all-targets -- -D warnings` clean
 
