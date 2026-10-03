@@ -343,6 +343,22 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
     assert_eq!(meta["video"]["fps"], 10.0);
     assert_eq!(meta["video"]["width"], 64);
 
+    // movi packet order is persisted as per-stream clock observations.
+    let timing = meta["av_timing"].as_array().expect("av_timing array");
+    assert_eq!(timing.len(), 2);
+    let v = timing
+        .iter()
+        .find(|t| t["stream_type"] == "vids")
+        .expect("video timing");
+    assert_eq!(v["observation"]["clock"], "video");
+    assert_eq!(v["observation"]["timestamp_count"], 20);
+    let a = timing
+        .iter()
+        .find(|t| t["stream_type"] == "auds")
+        .expect("audio timing");
+    assert_eq!(a["observation"]["clock"], "audio");
+    assert_eq!(a["observation"]["timestamp_count"], 1);
+
     // WAV inputs never carry a video section.
     assert!(meta["video"].is_object());
 

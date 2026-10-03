@@ -10,7 +10,7 @@ pub mod timing;
 pub mod wav;
 
 pub use al_core::sha256_hex;
-pub use avi::{AviMedia, AviSpec, VideoInfo, decode_avi, write_avi};
+pub use avi::{AviMedia, AviSpec, StreamTiming, VideoInfo, decode_avi, write_avi};
 pub use dictionary::{Annotation, DictEntry, Dictionary, EntryMatch};
 pub use format::{MediaFormat, detect_format};
 pub use metadata::{AudioMetadata, IntegrityObservation, MediaError, SampleFormat};

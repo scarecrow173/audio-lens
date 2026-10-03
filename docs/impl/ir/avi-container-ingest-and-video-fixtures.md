@@ -69,6 +69,24 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
     `movi` LIST 内の `NNwb`(音声)/`NNdb`,`NNdc`(映像)チャンクを
     ストリーム番号で仕分けする。`movi` 欠落や音声ストリームなしは
     明示失敗
+  - チャンク走査は Result を返す `Chunks` イテレータに統一し、
+    WAV パーサと同じ厳密さで検証する: RIFF 宣言サイズと実長の一致、
+    各チャンクの `8+size+pad` 境界(切り詰め body・欠落 pad バイト・
+    末尾ゴミはすべて `Malformed`)
+  - `movi` パケットはストリーム番号付きで収集し、**最初の `auds`
+    ストリームの `NNwb` のみ**を mux 順で連結する。他 `auds`
+    ストリームのパケットは PCM に混入しない
+  - `decode_waveformatex` の `InputUnavailable`(非 PCM/IEEE-float
+    コーデック)は kind を変えずに伝播する(メッセージに AVI 文脈を
+    付与)。ファイル破損(`Malformed`)と未対応コーデックを区別する
+    ingest 契約を維持する
+  - `StreamTiming`: レガシー AVI はパケット単位の PTS を持たない
+    ため、各 `movi` パケットのストリーム時刻を mux 順の累積
+    `strh` ユニット(映像フレームは 1 パケット = `dwScale` tick、
+    `dwSampleSize` ストリームは `len*scale/sample_size` tick、
+    `dwStart` を初期オフセット)から導出し、`crate::timing` の
+    `observe_timing` で CFR 非依存の観測として記録する。
+    `metadata.json` の `av_timing` セクションに永続化する
   - `write_avi` + `AviSpec`: CFR 非圧縮映像 + PCM 音声の AVI を
     書き出すフィクスチャ用ライター(avih/strh/strf/movi を生成)
 - `crates/al-media/src/wav.rs`: `parse_fmt` / `decode_samples` /
@@ -76,8 +94,10 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
   `decode_waveformatex` を追加(AVI `strf` と共通の構造のため再利用)
 - `format.rs`: `MediaFormat::Avi` と `RIFF....AVI ` シグネチャ検出
 - `stage.rs`: ingest のデコードを `ingest_decoded` に共通化。
-  `metadata.json` に `"video"` セクションを追加(VideoInfo、
-  音声のみの入力では null)。container 文字列は `"wav"`/`"avi"`
+  `metadata.json` に `"video"` セクション(VideoInfo、
+  音声のみの入力では null)と `"av_timing"` セクション
+  (`StreamTiming` の配列、WAV 入力では空)を追加。
+  container 文字列は `"wav"`/`"avi"`
 - `crates/al-cli/examples/gen_samples.rs`: `to_s16le` /
   `video_frame` / `write_avi_file` / `bgm` / `gameplay_audio`
   を追加し、動画 3 本と元音源 1 本を生成
@@ -96,7 +116,16 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
   は WAV `fmt ` と同一構造のため、表現ドリフトを避けて変換処理を
   一箇所に保つ
 - **ストリーム選択は先頭のみ**。`auds`/`vids` が複数ある場合は最初の
-  1 ストリームを使う。fixture 用途では十分で、曖昧さを増やさない
+  1 ストリームを使う。fixture 用途では十分で、曖昧さを増やさない。
+  選択は `strl` 宣言順で解決し、選ばれた `auds` の `NNwb` パケット
+  のみを mux 順で連結する(他ストリームの音声は観測されても
+  PCM には混入しない)
+- **パケットタイミングは mux 順由来の導出値**。レガシー AVI には
+  明示的な PTS/DTS が存在しないため、タイムスタンプ系列は
+  「`movi` 内のパケット出現順 + `strh` クロック」からの一次観測と
+  して記録する。パケットの不規則なサイズ・宣言 `dwLength` と実
+  フレーム数の差異はそのまま観測に現れるが、コンテナ内に刻まれた
+  時刻そのものではない点に注意。`idx1` インデックスは解釈しない
 - **圧縮コーデックは未対応のまま明示失敗**。`auds` が PCM/
   IEEE-float 以外なら `decode_waveformatex` が拒否し、MP4/H.264 等は
   シグネチャ検出の段階で `decode/input unavailable` になる
@@ -117,7 +146,7 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
 
 ## Validation
 
-- `cargo test -p al-media`: 43 tests pass(avi.rs 3 + ingest.rs 2 追加)
+- `cargo test -p al-media`: 58 tests pass(avi.rs 12 + ingest.rs 9 含む)
 - `cargo clippy -p al-media --all-targets -- -D warnings`: clean
 - `cargo fmt --check`: clean
 - E2E(`samples/_runs/`):
@@ -132,8 +161,10 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
 
 ## Risks
 
-- マルチ `auds`/`vids` ストリームや idx1 の PTS は扱わない
-  (fixture 範囲外)
+- `auds`/`vids` のデコード・メタデータ採用は先頭ストリームのみ
+  (2 本目以降は `av_timing` で観測されるが音声 PCM 化しない)
+- パケットタイミングは mux 順からの導出値であり、真の PTS では
+  ない。idx1 / OpenDML (`AVIX`) / `rec ` リストは解釈しない
 - 非圧縮 BGR24 のみを想定したライターのため、実機キャプチャ
   (H.264/AAC)は引き続き未対応
 
