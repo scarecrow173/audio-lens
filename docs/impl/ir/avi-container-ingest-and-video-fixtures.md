@@ -86,6 +86,10 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
     `dwSampleSize` ストリームは `len*scale/sample_size` tick、
     `dwStart` を初期オフセット)から導出し、`crate::timing` の
     `observe_timing` で CFR 非依存の観測として記録する。
+    導出した per-packet タイムスタンプ列そのものも
+    `movi_order_timestamps`(`start_tick` = `dwStart*dwScale` の
+    初期オフセット付き)として保持するので、metadata だけから
+    各パケット / フレームのストリーム時刻をアドレスできる。
     `metadata.json` の `av_timing` セクションに永続化する
   - `write_avi` + `AviSpec`: CFR 非圧縮映像 + PCM 音声の AVI を
     書き出すフィクスチャ用ライター(avih/strh/strf/movi を生成)
@@ -146,7 +150,7 @@ unavailable` で明示失敗)に従い、依存ライブラリを追加せず
 
 ## Validation
 
-- `cargo test -p al-media`: 58 tests pass(avi.rs 12 + ingest.rs 9 含む)
+- `cargo test -p al-media`: 59 tests pass(avi.rs 13 + ingest.rs 9 含む)
 - `cargo clippy -p al-media --all-targets -- -D warnings`: clean
 - `cargo fmt --check`: clean
 - E2E(`samples/_runs/`):

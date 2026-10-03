@@ -82,6 +82,10 @@ relations:
   正規化 / リサンプリング操作を履歴として記録
 - 映像ストリーム → フレーム PTS / 間隔系列の抽出 → VFR / ドリフト /
   ドロップフレーム候補の観測
+- コンテナが明示的な PTS を持たない場合(レガシー AVI)、mux 順と
+  `strh` クロックから導出した per-packet タイムスタンプ列そのものを
+  観測統計とともに保持し、導出値であることをフィールド名
+  (`movi_order_timestamps` + `start_tick`)で明示する
 - 各観測は artifact-dictionary と照合して注釈を付与するが、
   生計測は抑制しない
 - 成果物は `analysis/inputs/` と `analysis/intermediate/` に出力し、
