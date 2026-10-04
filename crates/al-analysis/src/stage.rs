@@ -194,22 +194,7 @@ impl Stage for ReferenceAnalysisStage {
             .iter()
             .filter(|a| a.role == "locate_result")
         {
-            let text =
-                std::fs::read_to_string(checked_job_path(job_dir, &artifact.path).map_err(err)?)
-                    .map_err(err)?;
-            let body: serde_json::Value = serde_json::from_str(&text).map_err(|e| {
-                StageError::new(
-                    StageKind::ReferenceAnalysis,
-                    format!("locate result {} unreadable: {e}", artifact.path.display()),
-                )
-            })?;
-            let result: LocateResult =
-                serde_json::from_value(body["result"].clone()).map_err(|e| {
-                    StageError::new(
-                        StageKind::ReferenceAnalysis,
-                        format!("locate result {} malformed: {e}", artifact.path.display()),
-                    )
-                })?;
+            let result = read_locate_result(StageKind::ReferenceAnalysis, job_dir, artifact)?;
             let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
             let feature_path = format!("features/reference/{pair}");
 
@@ -374,6 +359,7 @@ impl Stage for ExpensiveAnalysisStage {
         let err = |e: io::Error| StageError::new(StageKind::ExpensiveAnalysis, e.to_string());
         let e_cfg = ExpensiveConfig::from_job(ctx.config);
         let c_cfg = EventConfig::from_job(ctx.config);
+        let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let root = ctx.registry.job_dir().join("analysis");
         let reader = al_dataset::reader::DatasetReader::open(&root).map_err(err)?;
@@ -465,6 +451,76 @@ impl Stage for ExpensiveAnalysisStage {
         });
 
         // 2. Plan triggered regions per input and deep-analyze them.
+        // Assemble optional source→capture pair evidence for the
+        // pair-dependent families. `locate_result` manifest artifacts
+        // define the (source, capture) alignments; reference-stage
+        // `intermediate/{pair}/transfer_h` tensors supply H(f) when
+        // the job ran ReferenceAnalysis. Both are strictly optional —
+        // see `expensive::PairEvidence` for why the DAG dependency
+        // is intentionally absent. Jobs without locate/reference
+        // simply get no pair evidence and the families emit
+        // `pair evidence unavailable` invalid records instead.
+        let job_dir = ctx.registry.job_dir();
+        let mut pairs: std::collections::HashMap<String, expensive::PairEvidence> =
+            std::collections::HashMap::new();
+        for artifact in ctx
+            .manifest
+            .artifacts
+            .iter()
+            .filter(|a| a.role == "locate_result")
+        {
+            let result = read_locate_result(StageKind::ExpensiveAnalysis, job_dir, artifact)?;
+            if pairs.contains_key(&result.capture_input_id) {
+                continue; // first locate result per capture wins
+            }
+            let pair_name = format!(
+                "{}__{}",
+                result.source_input_id, result.capture_input_id
+            );
+            let (aligned_src, len): (Vec<&[f64]>, usize) = if result.accepted {
+                match decoded.get(&result.source_input_id) {
+                    Some(src_dec) => {
+                        let s_start = result.source_range.start as usize;
+                        let want = (result.source_range.end - result.source_range.start)
+                            .min(result.capture_range.end - result.capture_range.start)
+                            as usize;
+                        let segs: Vec<&[f64]> = src_dec
+                            .channel_samples
+                            .iter()
+                            .map(|c| &c[s_start.min(c.len())..(s_start + want).min(c.len())])
+                            .collect();
+                        // `len` is the true common aligned span —
+                        // `aligned_slice` slices by it, so it must
+                        // never exceed the shortest channel view.
+                        let len = segs.iter().map(|c| c.len()).min().unwrap_or(0);
+                        (segs, len)
+                    }
+                    None => (Vec::new(), 0),
+                }
+            } else {
+                (Vec::new(), 0)
+            };
+            let transfer_h = read_transfer_h(&reader, &pair_name).map_err(err)?;
+            pairs.insert(
+                result.capture_input_id.clone(),
+                expensive::PairEvidence {
+                    pair: pair_name,
+                    alignment_id: result.alignment_id.as_str().to_string(),
+                    accepted: result.accepted,
+                    validity: if result.accepted {
+                        Validity::Valid
+                    } else {
+                        Validity::AmbiguousAlignment
+                    },
+                    confidence: result.confidence,
+                    aligned_src,
+                    cap_start: result.capture_range.start as usize,
+                    len,
+                    transfer_h,
+                },
+            );
+        }
+
         // A configured dictionary must parse — silently dropping a
         // malformed dictionary would hide the fact that dictionary
         // matching never ran.
@@ -493,15 +549,34 @@ impl Stage for ExpensiveAnalysisStage {
             let regions = expensive::plan_regions(duration_s, &own_events, &e_cfg);
             let chans: Vec<&[f64]> = dec.channel_samples.iter().map(|c| c.as_slice()).collect();
             for (i, region) in regions.iter().enumerate() {
+                let name = format!("{input_id}__r{i:03}");
                 let out = expensive::analyze_region(
                     &input_id,
+                    &name,
                     &chans,
                     dec.sample_rate,
                     region,
                     dictionary.as_ref(),
+                    pairs.get(&input_id),
                     &e_cfg,
                 );
-                let name = format!("{input_id}__r{i:03}");
+                let prov = al_dataset::provenance::Provenance {
+                    input_id: input_id.clone(),
+                    algorithm_id: "expensive.v1".into(),
+                    algorithm_version: "1".into(),
+                    params: serde_json::json!({
+                        "triggers": region.triggers,
+                    }),
+                    alignment_id: None,
+                    parents: dec
+                        .artifact_ids
+                        .iter()
+                        .map(|a| a.as_str().to_string())
+                        .collect(),
+                };
+                for tensor in &out.tensors {
+                    write_tensor(&mut writer, tensor, prov.clone(), chunk_bytes).map_err(err)?;
+                }
                 writer
                     .write_json(
                         "features/expensive",
@@ -511,20 +586,7 @@ impl Stage for ExpensiveAnalysisStage {
                             "triggers": region.triggers,
                             "records": out.records,
                         }),
-                        al_dataset::provenance::Provenance {
-                            input_id: input_id.clone(),
-                            algorithm_id: "expensive.v1".into(),
-                            algorithm_version: "1".into(),
-                            params: serde_json::json!({
-                                "triggers": region.triggers,
-                            }),
-                            alignment_id: None,
-                            parents: dec
-                                .artifact_ids
-                                .iter()
-                                .map(|a| a.as_str().to_string())
-                                .collect(),
-                        },
+                        prov,
                     )
                     .map_err(err)?;
                 records.push(ArtifactRecord {
@@ -541,6 +603,66 @@ impl Stage for ExpensiveAnalysisStage {
         writer.finish().map_err(err)?;
         Ok(records)
     }
+}
+
+/// Read and parse one `locate_result` artifact body
+/// (`{"result": LocateResult, ...}`). `kind` selects which stage the
+/// `StageError` blames — the same parse is shared by the reference
+/// and expensive stages.
+fn read_locate_result(
+    kind: StageKind,
+    job_dir: &std::path::Path,
+    artifact: &ArtifactRecord,
+) -> Result<LocateResult, StageError> {
+    let text = std::fs::read_to_string(
+        checked_job_path(job_dir, &artifact.path)
+            .map_err(|e| StageError::new(kind, e.to_string()))?,
+    )
+    .map_err(|e| StageError::new(kind, e.to_string()))?;
+    let body: serde_json::Value = serde_json::from_str(&text).map_err(|e| {
+        StageError::new(
+            kind,
+            format!("locate result {} unreadable: {e}", artifact.path.display()),
+        )
+    })?;
+    serde_json::from_value(body["result"].clone()).map_err(|e| {
+        StageError::new(
+            kind,
+            format!("locate result {} malformed: {e}", artifact.path.display()),
+        )
+    })
+}
+
+/// Read `intermediate/{pair}/transfer_h` — `[re, im] × bins`, the
+/// Welch-averaged H(f) written by `ReferenceAnalysisStage` — when the
+/// tensor exists in the analysis dataset. `Ok(None)` when the job
+/// never ran reference analysis; pair evidence then lacks H(f) and
+/// deconvolution-based families degrade to invalid records.
+fn read_transfer_h(
+    reader: &al_dataset::reader::DatasetReader,
+    pair: &str,
+) -> io::Result<Option<Vec<(f64, f64)>>> {
+    let name = format!("{pair}/transfer_h");
+    let path = format!("intermediate/{name}");
+    if !reader
+        .artifacts("intermediate")
+        .iter()
+        .any(|a| a.path == path)
+    {
+        return Ok(None);
+    }
+    let t = reader.open_tensor("intermediate", &name)?;
+    let shape = t.meta().shape.clone();
+    if shape.len() != 2 || shape[0] != 2 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("transfer_h tensor {path} has unexpected shape {shape:?}"),
+        ));
+    }
+    let bins = shape[1] as usize;
+    let (data, _) = reader.read_tensor("intermediate", &name, &[[0, 2], [0, shape[1]]])?;
+    let h = (0..bins).map(|k| (data[k], data[bins + k])).collect();
+    Ok(Some(h))
 }
 
 /// Default persisted-tensor chunk budget (~4 MiB), overridable via
@@ -572,17 +694,23 @@ fn tensor_chunk_shape(shape: [u64; 2], bytes: u64) -> [u64; 2] {
     [rows, cols]
 }
 
-/// Split a tensor's `intermediate/...`, `features/cheap/...`, or
-/// `residual/...` path into role/name and persist it chunked along
-/// the time axis under `provenance` (producer algorithm + alignment
-/// + parents supplied by the calling stage).
+/// Split a tensor's `intermediate/...`, `features/cheap/...`,
+/// `features/expensive/...`, or `residual/...` path into role/name
+/// and persist it chunked along the time axis under `provenance`
+/// (producer algorithm + alignment + parents supplied by the
+/// calling stage).
 fn write_tensor(
     writer: &mut DatasetWriter,
     tensor: &cheap::NamedTensor,
     provenance: al_dataset::provenance::Provenance,
     chunk_bytes: u64,
 ) -> io::Result<()> {
-    let (role, name) = ["intermediate/", "features/cheap/", "residual/"]
+    let (role, name) = [
+        "intermediate/",
+        "features/cheap/",
+        "features/expensive/",
+        "residual/",
+    ]
         .iter()
         .find_map(|prefix| {
             tensor
