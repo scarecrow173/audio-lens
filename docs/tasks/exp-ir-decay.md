@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFD0xQrwpuxDxVEjiO"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-ir: IR 候補 + early/late + decay"
 created: "2026-10-04"
 updated: "2026-10-04"

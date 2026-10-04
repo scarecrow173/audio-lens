@@ -321,17 +321,16 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let n_w = src_db.len() as f64;
         let mx = src_db.iter().sum::<f64>() / n_w;
         let my = gain_db.iter().sum::<f64>() / n_w;
-        let (sxy, sxx, syy) =
-            src_db
-                .iter()
-                .zip(&gain_db)
-                .fold((0.0, 0.0, 0.0), |a, (&x, &y)| {
-                    (
-                        a.0 + (x - mx) * (y - my),
-                        a.1 + (x - mx) * (x - mx),
-                        a.2 + (y - my) * (y - my),
-                    )
-                });
+        let (sxy, sxx, syy) = src_db
+            .iter()
+            .zip(&gain_db)
+            .fold((0.0, 0.0, 0.0), |a, (&x, &y)| {
+                (
+                    a.0 + (x - mx) * (y - my),
+                    a.1 + (x - mx) * (x - mx),
+                    a.2 + (y - my) * (y - my),
+                )
+            });
         let slope = if sxx > 0.0 { sxy / sxx } else { 0.0 };
         // Pearson r on the scatter — the cosine variant (`corr0`)
         // includes the means and cannot read the slope's sign.

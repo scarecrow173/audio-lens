@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFTNVqwkFuTpDA07oM"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-timing: click/splice + stuck buffer 深掘り"
 created: "2026-10-04"
 updated: "2026-10-04"

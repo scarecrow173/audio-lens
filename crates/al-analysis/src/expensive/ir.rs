@@ -175,11 +175,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     let mut re: Vec<f64> = h.iter().map(|v| v.0).collect();
     let mut im: Vec<f64> = h.iter().map(|v| v.1).collect();
     al_locate::dsp::fft(&mut re, &mut im, true);
-    let mag2: Vec<f64> = re
-        .iter()
-        .zip(&im)
-        .map(|(r, i)| r * r + i * i)
-        .collect();
+    let mag2: Vec<f64> = re.iter().zip(&im).map(|(r, i)| r * r + i * i).collect();
     let (peak, _) = mag2
         .iter()
         .enumerate()

@@ -149,9 +149,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             // back at every m·qi, so those replicas are the first
             // reflection's harmonics, not evidence of a second one.
             let guard = (qi / 8).max(qmin / 2).max(4);
-            let harmonic = |q: usize| {
-                qi > 0 && (2..=qmax / qi).any(|m| q.abs_diff(m * qi) <= guard)
-            };
+            let harmonic =
+                |q: usize| qi > 0 && (2..=qmax / qi).any(|m| q.abs_diff(m * qi) <= guard);
             let (qi2, &peak2) = re[qmin..=qmax]
                 .iter()
                 .enumerate()
@@ -191,7 +190,11 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             ));
             out.records.push(e.push_spec(
                 "exp.echo2_level_ratio",
-                if supported2 { peak2 / peak.max(1e-30) } else { f64::NAN },
+                if supported2 {
+                    peak2 / peak.max(1e-30)
+                } else {
+                    f64::NAN
+                },
                 "ratio",
                 Confidence::Low,
                 if supported2 {
@@ -243,8 +246,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 // the onset, relative to right after it. A clean
                 // transient has near-zero pre energy.
                 let pre_lo = onset.saturating_sub(2);
-                let pre_e = hb[pre_lo..onset].iter().sum::<f64>()
-                    / (onset - pre_lo).max(1) as f64;
+                let pre_e = hb[pre_lo..onset].iter().sum::<f64>() / (onset - pre_lo).max(1) as f64;
                 let post_hi = (onset + 3).min(fr);
                 let post_e = hb[onset + 1..post_hi].iter().sum::<f64>()
                     / (post_hi - onset - 1).max(1) as f64;

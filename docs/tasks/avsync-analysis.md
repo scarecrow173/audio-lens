@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFAJYK7iYyxVUmUpoL"
 type: "task"
-status: "todo"
+status: "done"
 title: "avsync: 音声イベント↔映像イベント照合"
 created: "2026-10-04"
 updated: "2026-10-04"

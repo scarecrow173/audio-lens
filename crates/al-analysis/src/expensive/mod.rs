@@ -597,10 +597,7 @@ pub fn analyze_region(
     let total_power: f64 = mean_power.iter().sum();
     let one_sided_power: f64 = mean_power[..half].iter().sum();
 
-    let segs: Vec<&[f64]> = chans
-        .iter()
-        .map(|c| &c[s0..s1.min(c.len())])
-        .collect();
+    let segs: Vec<&[f64]> = chans.iter().map(|c| &c[s0..s1.min(c.len())]).collect();
     let ctx = RegionCtx {
         region_name,
         rate,

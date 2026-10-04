@@ -82,8 +82,18 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let n_ch = seg.len().min(oseg.len());
         if n_ch >= ctx.stft.window as usize {
             let bands = third_octave_bands(100.0, rate as f64 / 2.0 * 0.9);
-            let mb = stft(&seg[..n_ch], ctx.stft.window as usize, ctx.stft.hop as usize, rate);
-            let ob = stft(&oseg[..n_ch], ctx.stft.window as usize, ctx.stft.hop as usize, rate);
+            let mb = stft(
+                &seg[..n_ch],
+                ctx.stft.window as usize,
+                ctx.stft.hop as usize,
+                rate,
+            );
+            let ob = stft(
+                &oseg[..n_ch],
+                ctx.stft.window as usize,
+                ctx.stft.hop as usize,
+                rate,
+            );
             let fr = mb.frames().min(ob.frames());
             if fr > 0 {
                 // Frequency-dependent L/R coherence in the mid band.
@@ -161,11 +171,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             .filter(|&k| {
                 mean_power[k] > med * 10.0
                     && mean_power[k]
-                        >= mean_power[k - 8..k + 8]
-                            .iter()
-                            .copied()
-                            .fold(0.0, f64::max)
-                            * 0.999
+                        >= mean_power[k - 8..k + 8].iter().copied().fold(0.0, f64::max) * 0.999
             })
             .collect();
         peaks.sort_by(|&a, &b| mean_power[b].total_cmp(&mean_power[a]));
@@ -182,14 +188,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             for p in [
                 f_hi - f_lo,
                 (f_hi + f_lo).min(half - 1),
-                f_hi
-                    .saturating_mul(2)
-                    .saturating_sub(f_lo)
-                    .min(half - 1),
-                f_lo
-                    .saturating_mul(2)
-                    .saturating_sub(f_hi)
-                    .min(half - 1),
+                f_hi.saturating_mul(2).saturating_sub(f_lo).min(half - 1),
+                f_lo.saturating_mul(2).saturating_sub(f_hi).min(half - 1),
             ] {
                 if p > 0 && !positions.contains(&p) {
                     positions.push(p);
@@ -315,14 +315,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             );
             return;
         }
-        let mss: Vec<_> = src_segs
-            .iter()
-            .map(|s| stft(s, w, h, rate))
-            .collect();
-        let mcs: Vec<_> = cap_segs
-            .iter()
-            .map(|s| stft(s, w, h, rate))
-            .collect();
+        let mss: Vec<_> = src_segs.iter().map(|s| stft(s, w, h, rate)).collect();
+        let mcs: Vec<_> = cap_segs.iter().map(|s| stft(s, w, h, rate)).collect();
         let fr = mss
             .iter()
             .chain(&mcs)
@@ -401,8 +395,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     .iter()
                     .enumerate()
                     .max_by(|a, b| {
-                        (a.1.0 * a.1.0 + a.1.1 * a.1.1)
-                            .total_cmp(&(b.1.0 * b.1.0 + b.1.1 * b.1.1))
+                        (a.1.0 * a.1.0 + a.1.1 * a.1.1).total_cmp(&(b.1.0 * b.1.0 + b.1.1 * b.1.1))
                     })
                     .map(|(i, &w)| (i, w))
                     .unwrap_or((0, (0.0, 0.0)));
@@ -557,5 +550,12 @@ fn csolve(a: &[Vec<(f64, f64)>], b: &[(f64, f64)]) -> Option<(Vec<(f64, f64)>, f
         }
         w[row] = cdiv((m[row][n].0 - s.0, m[row][n].1 - s.1), m[row][row]);
     }
-    Some((w, if piv_min > 0.0 { piv_max / piv_min } else { f64::INFINITY }))
+    Some((
+        w,
+        if piv_min > 0.0 {
+            piv_max / piv_min
+        } else {
+            f64::INFINITY
+        },
+    ))
 }

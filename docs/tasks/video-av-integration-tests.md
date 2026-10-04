@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFByhnoqebVdh0M46q"
 type: "task"
-status: "todo"
+status: "done"
 title: "video/A-V 結合テスト(合成 AVI)"
 created: "2026-10-04"
 updated: "2026-10-04"
