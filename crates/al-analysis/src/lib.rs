@@ -5,6 +5,7 @@
 //! All DSP is implemented in-tree — spectral primitives reuse
 //! `al_locate::dsp`, decoded input comes from `al_locate::decode`.
 
+pub mod avsync;
 pub mod cheap;
 pub mod events;
 pub mod expensive;

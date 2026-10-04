@@ -85,8 +85,6 @@ pub enum SampleFormat {
 /// Audio stream metadata recorded at ingest.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct AudioMetadata {
-    /// Container name (e.g. `wav`).
-    pub container: String,
     /// Codec name (e.g. `pcm_s16le`).
     pub codec: String,
     /// Sample rate in Hz.
