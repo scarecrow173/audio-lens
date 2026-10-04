@@ -17,7 +17,7 @@
 //! order is the primary fact; nothing is reconstructed from a nominal
 //! frame rate. The derived timestamp column itself is persisted
 //! (`StreamTiming::start_tick` + `stream_timestamps` with origin
-//! label `movi_order`) so per-packet positions stay addressable from
+//! `movi_order`) so per-packet positions stay addressable from
 //! `metadata.json` alone.
 //!
 //! Partial ingest: a missing or undecodable `auds` stream no longer
@@ -53,10 +53,30 @@ pub struct VideoInfo {
     pub duration_secs: Option<f64>,
 }
 
-/// CFR-free timing observation for one declared stream, derived from
-/// `movi` packet order and the stream's `strh` clock.
+/// Where a persisted timestamp column came from.
 ///
-/// Timestamps are in `strh`-rate ticks (one tick = `1/dwRate` seconds):
+/// The label keeps derived timelines honest: a mux-order position and a
+/// container-stored timestamp are different facts, and consumers must
+/// be able to tell them apart without knowing the container type.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TimestampOrigin {
+    /// Derived from AVI `movi` mux order (cumulative `strh` ticks), not
+    /// a container-stored PTS.
+    MoviOrder,
+    /// MP4 sample-table decode-order DTS (cumulative `stts` deltas).
+    SampleTable,
+    /// MP4 `ctts`-derived presentation timestamps, sorted into
+    /// presentation order so the column stays monotonic.
+    SampleTablePts,
+}
+
+/// CFR-free timing observation for one declared stream.
+///
+/// The same container-neutral shape serves every container: which
+/// stream, on which clock, where the timestamps came from
+/// (`timestamp_origin`), and the observation over them. For AVI the
+/// timestamps are in `strh`-rate ticks (one tick = `1/dwRate` seconds):
 /// video frame chunks advance the clock by `dwScale` each, `dwSampleSize`
 /// streams (e.g. PCM audio) advance by `len*dwScale/dwSampleSize`.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -65,21 +85,19 @@ pub struct StreamTiming {
     pub stream: u32,
     /// Stream kind fourcc as text (`vids`, `auds`, ...).
     pub stream_type: String,
+    /// How `stream_timestamps` was produced (see [`TimestampOrigin`]).
+    pub timestamp_origin: TimestampOrigin,
     /// Initial stream-clock position: `strh` `dwStart` converted to
     /// rate-domain ticks (`dwStart * dwScale`), the base offset of
     /// `stream_timestamps`. Kept even when the stream has no
     /// `movi` packets.
     pub start_tick: i64,
-    /// How `stream_timestamps` was derived — a container-neutral
-    /// origin label so other containers reuse this shape: `movi_order`
-    /// for legacy AVI (mux order + `strh` clock).
-    pub timestamps_origin: String,
     /// Per-packet timestamps on this stream's clock, in
-    /// `observation.timebase_hz` ticks. Element `i` is the position of
-    /// this stream's `i`-th `movi` packet, derived from `movi` mux
-    /// order (cumulative `strh` ticks consumed by earlier packets of
-    /// the same stream, starting at `start_tick`) — not a
-    /// container-stored PTS.
+    /// `observation.timebase_hz` ticks. For `movi_order` origins,
+    /// element `i` is the position of this stream's `i`-th `movi`
+    /// packet, derived from `movi` mux order (cumulative `strh` ticks
+    /// consumed by earlier packets of the same stream, starting at
+    /// `start_tick`) — not a container-stored PTS.
     pub stream_timestamps: Vec<i64>,
     /// Observation over the packet timeline; see `crate::timing`.
     pub observation: TimingObservation,
@@ -287,8 +305,8 @@ fn stream_timings(
             Some(StreamTiming {
                 stream: i as u32,
                 stream_type: String::from_utf8_lossy(&s.fcc_type).into_owned(),
+                timestamp_origin: TimestampOrigin::MoviOrder,
                 start_tick: i64::from(s.start) * i64::from(s.scale),
-                timestamps_origin: "movi_order".into(),
                 stream_timestamps: std::mem::take(&mut pts[i]),
                 observation,
             })
@@ -684,7 +702,7 @@ mod tests {
         // aggregate observation: one entry per packet, dwStart-based,
         // with its container-neutral origin label.
         assert_eq!(v.start_tick, 0);
-        assert_eq!(v.timestamps_origin, "movi_order");
+        assert_eq!(v.timestamp_origin, TimestampOrigin::MoviOrder);
         assert_eq!(v.stream_timestamps, (0..30).collect::<Vec<i64>>());
 
         // Audio stream 1: a single wb packet covering its PCM, on the
