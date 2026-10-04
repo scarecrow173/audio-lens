@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-IR 候補推定(deconvolution/H(f) ベース)と early/late エネルギー比・decay 傾きを `expensive/ir.rs` に実装する。数値不安定は条件数/support で防御する。
+IR 候補推定と early/late エネルギー比・decay 傾きを `expensive/ir.rs` に実装する。リファレンスペア成果物(transfer_h 等)がある場合は deconvolution ベース、ない場合は homomorphic フォールバック(cepstrum 系)か invalid(`pair evidence unavailable`)とする。数値不安定は条件数/support で防御する。
 
 ## Classification
 

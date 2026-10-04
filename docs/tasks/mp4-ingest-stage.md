@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-format 検出・IngestStage への MP4 配線・メタデータ/タイミング成果物の記録を実装する。
+format 検出(ftyp 由来のみ)・IngestStage への MP4 配線・メタデータ/タイミング成果物の記録を実装する。部分 ingest 契約に従い、全トラック圧縮でも ingest は metadata/timing を記録して完了し decoded_pcm を省略する。永続化タイミングのフィールド名はコンテナ中立名に一般化する。
 
 ## Classification
 
@@ -67,6 +67,7 @@ format 検出・IngestStage への MP4 配線・メタデータ/タイミング�
 ## Done When
 
 - [ ] MP4 入力で metadata/timing 成果物が記録される
+- [ ] 全トラック圧縮の MP4 でも ingest が失敗せず decode/input unavailable が integrity 観測として記録される
 - [ ] resume でも一貫して動作する
 
 ## Verification

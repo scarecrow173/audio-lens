@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-帯域ごとの最小二乗混合係数(周波数依存混合行列)と intermodulation 証拠(強トーン周辺の実用的範囲)を `expensive/channel.rs` に実装する。
+帯域ごとの最小二乗混合係数(周波数依存混合行列)と intermodulation 証拠(強トーン周辺の実用的範囲)を `expensive/channel.rs` に実装する。混合行列は source→capture のペア証拠が必要で、リファレンスペア不在時は invalid(`pair evidence unavailable`)とする。係数の符号を極性ルーティング証拠としても記録する。
 
 ## Classification
 
@@ -62,7 +62,7 @@ relations:
 
 ## Done When
 
-- [ ] 既知混合で帯域係数が回復される
+- [ ] 既知混合で帯域係数(符号含む)が回復される
 - [ ] 条件数の悪い推定は valid にならない
 
 ## Verification

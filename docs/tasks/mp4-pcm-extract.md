@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-非圧縮 PCM サンプルエントリ(sowt/twos/lpcm 等)を mdat から取り出す。圧縮コーデックは `decode/input unavailable` で明示失敗する。
+非圧縮 PCM サンプルエントリ(sowt=LE/twos=BE/lpcm=フラグ解釈)を mdat から取り出し、整数スケール f64 + `SampleFormat` で返す(`decode_input` が format_scale で割る前正規化契約。二重正規化禁止)。複数 soun では最初の PCM-decodable トラックのみ対象とする。圧縮コーデックは `decode/input unavailable` を記録する。
 
 ## Classification
 
@@ -63,7 +63,7 @@ relations:
 
 ## Done When
 
-- [ ] PCM エントリが decoded PCM として取り出せる
+- [ ] sowt/twos/lpcm エントリが正しいエンディアン/スケールで decoded PCM として取り出せる
 - [ ] 圧縮コーデックの decode 要求が明示失敗
 
 ## Verification

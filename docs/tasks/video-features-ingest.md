@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-算出した映像特徴を IngestStage の成果物 `video_features` として永続化する。フレーム時刻は `StreamTiming`/`TimingObservation` と同一ストリームクロックで記録する。
+算出した映像特徴を IngestStage の成果物 `video_features` として永続化する。イベント種別(scene_change/luminance_step/motion_onset)を列挙して記録する。フレーム時刻は `StreamTiming`/`TimingObservation` と同一ストリームクロックで記録する。**部分 ingest 契約を導入する**: デコード失敗を `StageError` にせず、metadata/timing/video_features は decode 可否と独立に記録し PCM のみ `Option` 化する。1 入力の失敗が他入力を巻き込まない。
 
 ## Classification
 
@@ -63,8 +63,10 @@ relations:
 
 ## Done When
 
-- [ ] `video_features` 成果物がフレーム時刻付きで記録される
+- [ ] `video_features` 成果物がフレーム時刻+イベント種別付きで記録される
 - [ ] vids がない/圧縮の入力でも ingest が完結する
+- [ ] auds が欠損・デコード不可でも映像観測とメタデータが記録される(decoded_pcm のみ省略)
+- [ ] コンテナ中立のタイミング命名(stream_timestamps + 由来ラベル)に一般化される
 
 ## Verification
 

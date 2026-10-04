@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-spec の video/A-V ケース行列を実装する(CFR/VFR タイムスタンプ、既知 A/V offset/drift、dup/drop メタデータ)。
+spec の video/A-V ケース行列を実装する(CFR/VFR タイムスタンプ、PCM パディング/dwStart 由来の既知 A/V offset、drift、dup/drop メタデータ)。パラメタ化 AVI/MP4 writer を使う。
 
 ## Classification
 

@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-`al-analysis` に avsync 照合を実装する。ingest の映像イベント時刻系列と cheap の音声オンセットを、設定可能な探索窓の最近傍で対応付け、ペアごとの差分・確度と、系列の median/MAD・線形フィットによる drift 傾きを `avsync.*` レコードとして記録する。
+`al-analysis` に avsync 照合を実装する。ingest の映像イベント時刻系列と cheap の音声オンセットを、設定可能な探索窓の最近傍で対応付け、ペアごとの差分・確度と、系列の median/MAD・線形フィットによる drift 傾きを `avsync.*` レコードとして記録する。照合前に両系列を各ストリームクロック由来の秒時刻へリベースし、`dwStart≠0` のコンテナレベルオフセットが delta に混入しないようにする。
 
 ## Classification
 
@@ -65,6 +65,7 @@ relations:
 ## Done When
 
 - [ ] 音声/映像イベントのペアに delta と confidence が記録される
+- [ ] auds/vids の dwStart≠0 fixture で delta が両クロックの差だけずれない
 - [ ] 映像系列がない場合は validity で明示される
 - [ ] 分布 median/MAD と drift 傾きが記録される
 

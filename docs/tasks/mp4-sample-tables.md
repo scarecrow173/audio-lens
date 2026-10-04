@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-stts/ctts/stss/stsz/stsc/stco(co64)からサンプル時刻列を構築し、`SequenceTimestamps`/`observe_timing` で `TimingObservation` を生成する。
+stts/ctts/stss/stsz/stsc/stco(co64)からサンプル時刻列を構築する。`observe_timing` には decode order の DTS 系列(単調)を適用し、ctts 由来 PTS 系列は別ラベルで記録する。B フレーム再並びを含む fixture で偽 discontinuity が出ないことを検証する。
 
 ## Classification
 
@@ -65,6 +65,7 @@ stts/ctts/stss/stsz/stsc/stco(co64)からサンプル時刻列を構築し、`Se
 
 - [ ] 既知 stts/ctts の時刻列が回復される
 - [ ] VFR 的な時刻列が nominal FPS 演算なしで観測される
+- [ ] ctts で再並びする fixture で DTS 系列に偽 discontinuity が記録されない
 
 ## Verification
 

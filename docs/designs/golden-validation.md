@@ -21,7 +21,10 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "mp4-ingest.md"
+    - "video-features.md"
+    - "expensive-families.md"
   refines: []
   refined-by: []
   derives-from:
@@ -52,11 +55,24 @@ video-A/V の既知ケース行列と「既知パラメータに対する数値�
 - 共有の合成信号/チャンネル操作ビルダ(ゲイン・EQ・遅延・
   jitter・極性・ch swap/mix・SRC・クリップ・drop/repeat/
   stuck ブロック・ノイズ)
-- コンテナ fixture(WAV 既存・AVI は `write_avi`・MP4 は
-  テスト用 writer)の再利用可能化
+- コンテナ fixture の再利用可能化。**現行 `write_avi`/`AviSpec`
+  は CFR かつ `dwStart=0` 固定・movi パケット列を制御不能で、
+  spec が要求する VFR・dwStart≠0 オフセット・0 長 dup チャンク・
+  drop ギャップを生成できない**。testkit 側にパラメタ化 AVI
+  writer(movi パケット列・per-stream dwStart・チャンクサイズを
+  指定可能)と MP4 writer(stts/ctts/stss 等を指定可能)を提供
+  する。`write_avi`/`AviSpec` は本番 API かつ `al-cli` の
+  `gen_samples` 例が使うが、fixture 知識を本番コードから外す
+  方針に従い `al-testkit` へ移し、`al-cli` は dev-dependency で
+  参照する(既存呼び出しは re-export/移動で対応)
 - ケース名・既知パラメータ・期待メトリクス・許容誤差を
   対にした回帰検証パターン
 - spec が列挙する locate/reference/video-A/V ケースの網羅
+- spec `validation-strategy.md` の「固定すべき過去の失敗モード」
+  3 件を名前付きケースとして明示する:
+  1. 無音/強周期信号での偽相関ピーク受理
+  2. 非コヒーレントな PSD 比による高域リフト偽装
+  3. 低コヒーレンス時の optimal-lag 過大推定
 
 ### Out of Scope
 
@@ -69,11 +85,18 @@ video-A/V の既知ケース行列と「既知パラメータに対する数値�
 - `al-testkit`(dev-dependency のみの補助クレート): 信号生成・
   変換(ゲイン/EQ/遅延/極性/mix/SRC/クリップ/drop/repeat/
   stuck)・コンテナ/メディア fixture・期待値検証ヘルパ。
-  本番クレートからは参照しない
+  本番クレートからは参照しない。`write_avi`/`AviSpec` は
+  `al-media` から本クレートへ移し、`al-cli` の `gen_samples`
+  例は dev-dependency で参照する。MP4 writer は WS-C
+  (`mp4-ingest`)が所有する合成 writer を共有/移管する形で
+  集約する(兄弟 design 参照: `related`)
 - 各クレートの tests は `al-testkit` で fixture を生成し、
   `expect` 系ヘルパで既知メトリクスと許容誤差を対にして検証
 - 境界: fixture/期待値はテスト領域にのみ存在し、本番コードに
-  fixture 知識を持ち込まない
+  fixture 知識を持ち込まない。なお各クレートに点在する既存の
+  `noise`/`wav_bytes` ヘルパ重複は本 WS では移行せず、
+  既存テストは維持する(plan どおり)。新規 fixture は
+  testkit に集約する
 
 ## Data and Control Flow
 

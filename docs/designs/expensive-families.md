@@ -52,13 +52,38 @@ spec `../specs/expensive-analysis.md` の要求ファミリのうち、
 ### In Scope
 
 - impulse-response 候補推定と early/late energy・decay 記述子
+- 二次エコー遅延/レベル(cepstrum 副次ピークを既存の
+  `exp.echo_delay_s`/`exp.cepstrum_prominence` に追加して記録。
+  現状は主ピーク 1 件のみで spec の「二次エコー」要件を
+  満たさない)
 - click/splice 定位と stuck/repeated buffer 候補の深掘り
+- 高分解能の局所 time map(リージョン内の局所 lag/オフセット
+  軌跡を系列として記録。spec のタイミング系先頭項目で、
+  locate の `build_time_map` とは別物)
 - pre-echo 候補と transient smear
 - compressor/limiter transfer-curve 候補と pumping/ducking 変調記述子
 - level-dependent transfer(入力レベル→伝達の依存性)
 - intermodulation 証拠(強トーン周辺の実用的な範囲)
 - ノイズ分解の stationary / tonal / modulated 分類
-- 周波数依存の混合行列(サポート可能な帯域で)
+- 周波数依存の混合行列(サポート可能な帯域で)。係数の符号は
+  位相/極性ルーティング証拠としても記録する
+
+### ペア依存ファミリの扱い
+
+IR/deconvolution・level-dependent transfer・周波数依存混合行列は
+**リファレンスペア信号(source→capture)を必要とする**ファミリと
+する。`analyze_region` は単一入力の PCM/STFT しか持たないため、
+これらは expensive stage が locate/reference の成果物
+(`intermediate/{pair}/transfer_h` 等)が存在する場合にのみ読み、
+ペア証拠がないジョブでは推定せず invalid 観測
+(`pair evidence unavailable`)を記録する。単一入力で
+推定可能な残りのファミリ(pre-echo/smear・dynamics・noise・
+timing 系・IR の homomorphic フォールバック)は従来どおり
+per-input で動作する。expensive stage の `depends_on` に
+`ReferenceAnalysis` を追加するか、成果物の存在確認による
+オプショナル読み込みとするかは実装時に `al-job` の DAG 制約
+(reference 非存在ジョブで stage を skip させない)を確認して
+決める。
 
 ### Out of Scope
 
@@ -71,14 +96,29 @@ spec `../specs/expensive-analysis.md` の要求ファミリのうち、
 - `al-analysis::expensive` を `expensive.rs` 単体から
   `expensive/` サブモジュール群に分割する。ルート側は
   config・trigger・`plan_regions`・`analyze_region` の
-  オーケストレーションを保持し、各ファミリは
-  `expensive/{ir,codec,dynamics,noise,channel,timing}.rs` に
-  置く。既存ファミリの振る舞いは変えない
+  オーケストレーションを保持する。ファミリ→ファイル対応表:
+
+  | ファイル | ファミリ |
+  | --- | --- |
+  | `expensive/ir.rs` | IR 候補推定・early/late エネルギー・decay |
+  | `expensive/codec.rs` | pre-echo・transient smear・二次エコー |
+  | `expensive/dynamics.rs` | transfer-curve・pumping/ducking・level-dependent |
+  | `expensive/noise.rs` | stationary/tonal/modulated 分解 |
+  | `expensive/channel.rs` | 周波数依存混合行列・極性ルーティング証拠・intermodulation |
+  | `expensive/timing.rs` | click/splice・stuck/repeated・local time map・`exp.src_*` |
+  | `expensive/transfer.rs` | 既存の cutoff/narrowband/THD 等のスペクトル系を移設 |
+
+  既存ファミリ(`exp.cutoff_hz`・`narrowband_*`・`exp.src_*`・
+  `exp.thd_ratio` 等)も対応ファイルへ移し、振る舞いは変えない
 - 各ファミリは `analyze_region` と同じ push 規約
   (特徴 id・単位・confidence・validity・support・resolution
   メタデータ)でレコードを emit する
 - 境界: 入力は region の PCM/STFT/既存スペクトル中間物。
   dataset 永続化形状は既存と同じ
+- 注意: 非 Valid トリガ時の invalid 観測は現在ハードコードされた
+  特徴 id リストで emit される(`expensive.rs` 該当分岐)。
+  新ファミリはそのリストにも登録しないと非 Valid 領域で
+  スキーマがずれる。実装時に必ず対応づける
 
 ## Data and Control Flow
 
