@@ -34,7 +34,7 @@ Directory: `docs/tasks`
 | TASK-034AaFURCQqe9DBwLB4N0J | expensive 追加ファミリの既知ケース検証 | done | [expensive-families-tests.md](./expensive-families-tests.md) |
 | TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | done | [expensive-module-split.md](./expensive-module-split.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
-| TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | in-progress | [golden-av-matrix.md](./golden-av-matrix.md) |
+| TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
