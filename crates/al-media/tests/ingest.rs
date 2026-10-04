@@ -355,7 +355,7 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
     // The movi-order-derived timestamp column itself is persisted:
     // metadata alone can address each frame's position on its clock.
     assert_eq!(v["start_tick"], 0);
-    assert_eq!(v["timestamps_origin"], "movi_order");
+    assert_eq!(v["timestamp_origin"], "movi_order");
     let vts: Vec<i64> = v["stream_timestamps"]
         .as_array()
         .expect("stream_timestamps array")
