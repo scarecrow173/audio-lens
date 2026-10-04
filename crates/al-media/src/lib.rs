@@ -7,6 +7,7 @@ pub mod format;
 pub mod metadata;
 pub mod stage;
 pub mod timing;
+pub mod video;
 pub mod wav;
 
 pub use al_core::sha256_hex;
@@ -18,5 +19,9 @@ pub use stage::IngestStage;
 pub use timing::{
     ClockKind, Discontinuity, IntervalStats, SequenceTimestamps, TimestampSource,
     TimingObservation, observe_source, observe_timing,
+};
+pub use video::{
+    VideoEvent, VideoEventKind, VideoFeatureArtifact, VideoFeatureConfig, VideoFeatureReport,
+    VideoFeatures,
 };
 pub use wav::{DecodedAudio, decode_wav};

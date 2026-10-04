@@ -1,12 +1,13 @@
-//! RIFF/AVI demuxing: PCM audio extraction plus video stream metadata.
+//! RIFF/AVI demuxing: PCM audio extraction, video stream metadata,
+//! timing observation, and uncompressed-frame feature extraction.
 //!
 //! Scope: legacy AVI (`RIFF 'AVI '`). The audio stream must carry PCM
 //! or IEEE-float data (its `strf` chunk is a WAVEFORMATEX, the same
-//! layout as a WAV `fmt ` chunk); other audio codecs fail explicitly
-//! as `decode/input unavailable`. The video stream is never decoded —
-//! only its declared facts (codec fourcc, dimensions, nominal frame
-//! rate, frame count) are recorded, matching the ingest spec's
-//! container-level observation role.
+//! layout as a WAV `fmt ` chunk); other audio codecs are recorded as
+//! `decode/input unavailable` without failing the demux. The first
+//! `vids` stream's declared facts (codec fourcc, dimensions, nominal
+//! frame rate, frame count) are recorded, and uncompressed `db`/`dc`
+//! frames are decoded to coarse features by [`crate::video`].
 //!
 //! Timing: legacy AVI carries no per-packet PTS. Each `movi` packet's
 //! position on its stream clock is derived from the mux order — the
@@ -15,11 +16,20 @@
 //! (audio packet timestamps and video frame positions alike). The mux
 //! order is the primary fact; nothing is reconstructed from a nominal
 //! frame rate. The derived timestamp column itself is persisted
-//! (`StreamTiming::start_tick` + `movi_order_timestamps`) so per-packet
-//! positions stay addressable from `metadata.json` alone.
+//! (`StreamTiming::start_tick` + `stream_timestamps` with origin
+//! label `movi_order`) so per-packet positions stay addressable from
+//! `metadata.json` alone.
+//!
+//! Partial ingest: a missing or undecodable `auds` stream no longer
+//! fails the demux — `AviMedia::audio` is `None` and
+//! `audio_unavailable` records the `decode/input unavailable` reason
+//! while timing and video features still surface. Structural
+//! corruption (bad chunks, size mismatch, missing `movi`) stays
+//! `Malformed`.
 
 use crate::metadata::MediaError;
 use crate::timing::{ClockKind, TimingObservation, observe_timing};
+use crate::video::{self, VideoFeatureArtifact, VideoFeatureConfig, VideoFrame, codec_fourcc};
 use crate::wav::{DecodedAudio, decode_waveformatex, read_u16, read_u32};
 
 /// Video stream facts declared by the container (no frame decode).
@@ -57,27 +67,38 @@ pub struct StreamTiming {
     pub stream_type: String,
     /// Initial stream-clock position: `strh` `dwStart` converted to
     /// rate-domain ticks (`dwStart * dwScale`), the base offset of
-    /// `movi_order_timestamps`. Kept even when the stream has no
+    /// `stream_timestamps`. Kept even when the stream has no
     /// `movi` packets.
     pub start_tick: i64,
+    /// How `stream_timestamps` was derived — a container-neutral
+    /// origin label so other containers reuse this shape: `movi_order`
+    /// for legacy AVI (mux order + `strh` clock).
+    pub timestamps_origin: String,
     /// Per-packet timestamps on this stream's clock, in
     /// `observation.timebase_hz` ticks. Element `i` is the position of
     /// this stream's `i`-th `movi` packet, derived from `movi` mux
     /// order (cumulative `strh` ticks consumed by earlier packets of
     /// the same stream, starting at `start_tick`) — not a
     /// container-stored PTS.
-    pub movi_order_timestamps: Vec<i64>,
+    pub stream_timestamps: Vec<i64>,
     /// Observation over the packet timeline; see `crate::timing`.
     pub observation: TimingObservation,
 }
 
-/// Demuxed AVI: decoded audio plus declared video metadata.
+/// Demuxed AVI: optional decoded audio, declared video metadata,
+/// coarse video features, and per-stream packet timing.
 #[derive(Debug, Clone)]
 pub struct AviMedia {
-    /// PCM decoded from the first `auds` stream.
-    pub audio: DecodedAudio,
+    /// PCM decoded from the first `auds` stream, when that stream
+    /// exists and its codec is decodable.
+    pub audio: Option<DecodedAudio>,
+    /// Why `audio` is absent (`decode/input unavailable` detail).
+    pub audio_unavailable: Option<String>,
     /// First `vids` stream's declared metadata, if present.
     pub video: Option<VideoInfo>,
+    /// Coarse features of the first `vids` stream — decoded series or
+    /// an explicit `unavailable` record — when a `vids` stream exists.
+    pub video_features: Option<VideoFeatureArtifact>,
     /// Packet timing observations for each `auds`/`vids` stream,
     /// in `hdrl` order. Each keeps its own clock — audio and video
     /// timestamps are never merged.
@@ -101,16 +122,6 @@ struct MoviPacket<'a> {
     /// Chunk kind (the `id[2..4]` suffix: `wb`, `db`, `dc`, ...).
     kind: [u8; 2],
     body: &'a [u8],
-}
-
-fn fourcc(codec: u32) -> String {
-    let b = codec.to_le_bytes();
-    if codec == 0 {
-        return "rawvideo".into();
-    }
-    String::from_utf8_lossy(&b)
-        .trim_end_matches(['\0', ' '])
-        .to_string()
 }
 
 /// Iterate `(id, body)` chunk pairs inside a RIFF chunk region.
@@ -200,7 +211,7 @@ fn video_info(head: &StreamHead, movi_frames: u64) -> Result<VideoInfo, MediaErr
     let fps = (scale > 0).then(|| rate as f64 / scale as f64);
     let frames = u64::from(head.length).max(movi_frames);
     Ok(VideoInfo {
-        codec: fourcc(read_u32(bih, 16)?),
+        codec: codec_fourcc(read_u32(bih, 16)?),
         width: read_u32(bih, 4)?,
         height: (read_u32(bih, 8)? as i32).unsigned_abs(),
         bits_per_pixel: read_u16(bih, 14)?,
@@ -221,27 +232,44 @@ fn tick_advance(head: &StreamHead, body_len: usize) -> i64 {
     }
 }
 
-/// Build per-stream packet timing observations from `movi` mux order.
-///
-/// A packet's position is the cumulative stream time consumed by that
-/// stream's earlier packets, offset by `strh` `dwStart`. Observation is
-/// delegated to `crate::timing` — clocks stay separate and nothing is
-/// resampled to a nominal rate.
-fn stream_timings(streams: &[StreamHead], packets: &[MoviPacket<'_>]) -> Vec<StreamTiming> {
+/// Stream-clock position of every `movi` packet, in mux order — the
+/// cumulative `strh` ticks consumed by earlier packets of the same
+/// stream, offset by `dwStart`. `None` for packets of streams that are
+/// neither `vids` nor `auds` (they own no timeline slot). This is the
+/// single source of packet positions: `stream_timings` and the video
+/// frame extractor both read it, so frame indices and timestamps can
+/// never drift apart.
+fn packet_ticks(streams: &[StreamHead], packets: &[MoviPacket<'_>]) -> Vec<Option<i64>> {
     let mut next: Vec<i64> = streams
         .iter()
         .map(|s| i64::from(s.start) * i64::from(s.scale))
         .collect();
+    packets
+        .iter()
+        .map(|p| match streams.get(p.stream_no) {
+            Some(head) if matches!(&head.fcc_type, b"vids" | b"auds") => {
+                let t = next[p.stream_no];
+                next[p.stream_no] += tick_advance(head, p.body.len());
+                Some(t)
+            }
+            _ => None,
+        })
+        .collect()
+}
+
+/// Build per-stream packet timing observations from the derived
+/// per-packet positions. Observation is delegated to `crate::timing` —
+/// clocks stay separate and nothing is resampled to a nominal rate.
+fn stream_timings(
+    streams: &[StreamHead],
+    packets: &[MoviPacket<'_>],
+    ticks: &[Option<i64>],
+) -> Vec<StreamTiming> {
     let mut pts: Vec<Vec<i64>> = streams.iter().map(|_| Vec::new()).collect();
-    for p in packets {
-        let Some(head) = streams.get(p.stream_no) else {
-            continue;
-        };
-        if !matches!(&head.fcc_type, b"vids" | b"auds") {
-            continue;
+    for (p, tick) in packets.iter().zip(ticks) {
+        if let Some(t) = tick {
+            pts[p.stream_no].push(*t);
         }
-        pts[p.stream_no].push(next[p.stream_no]);
-        next[p.stream_no] += tick_advance(head, p.body.len());
     }
     streams
         .iter()
@@ -260,16 +288,26 @@ fn stream_timings(streams: &[StreamHead], packets: &[MoviPacket<'_>]) -> Vec<Str
                 stream: i as u32,
                 stream_type: String::from_utf8_lossy(&s.fcc_type).into_owned(),
                 start_tick: i64::from(s.start) * i64::from(s.scale),
-                movi_order_timestamps: std::mem::take(&mut pts[i]),
+                timestamps_origin: "movi_order".into(),
+                stream_timestamps: std::mem::take(&mut pts[i]),
                 observation,
             })
         })
         .collect()
 }
 
-/// Demux an AVI file: decode the first PCM audio stream and record the
-/// first video stream's declared metadata plus per-stream packet timing.
-pub fn decode_avi(data: &[u8]) -> Result<AviMedia, MediaError> {
+/// Demux an AVI file: decode the first PCM audio stream when possible,
+/// record the first video stream's declared metadata plus per-stream
+/// packet timing, and extract coarse features from uncompressed `vids`
+/// frames. `video_cfg` carries the event-detection thresholds persisted
+/// into the `video_features` artifact.
+///
+/// A missing or undecodable `auds` stream is *not* an error — the
+/// container's observations (metadata, timing, video features) are
+/// valid regardless, so `AviMedia::audio` stays `None` with the reason
+/// in `audio_unavailable`. Errors mean the container itself is
+/// unusable: bad RIFF/chunk structure or a missing `movi` list.
+pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedia, MediaError> {
     if data.len() < 12 || &data[0..4] != b"RIFF" || &data[8..12] != b"AVI " {
         return Err(MediaError::input_unavailable("not a RIFF/AVI file"));
     }
@@ -354,36 +392,33 @@ pub fn decode_avi(data: &[u8]) -> Result<AviMedia, MediaError> {
         return Err(MediaError::malformed("missing movi list"));
     }
 
+    let ticks = packet_ticks(&streams, &movi_packets);
+    let timing = stream_timings(&streams, &movi_packets, &ticks);
+
     // Only the first `auds` stream is decoded; its `NNwb` packets are
     // concatenated in mux order so interleaved packets of other streams
-    // never leak into the PCM.
-    let audio_idx = streams
-        .iter()
-        .position(|s| &s.fcc_type == b"auds")
-        .ok_or_else(|| MediaError::input_unavailable("AVI has no audio stream"))?;
-    let mut audio_pcm: Vec<u8> = Vec::new();
-    for p in &movi_packets {
-        if p.stream_no == audio_idx && &p.kind == b"wb" {
-            audio_pcm.extend_from_slice(p.body);
+    // never leak into the PCM. Any decode-level failure — no audio
+    // stream, an unsupported codec, corrupt stream headers — is
+    // recorded as `audio_unavailable` instead of aborting the demux:
+    // metadata, timing, and video observations stay valid on their own.
+    let (audio, audio_unavailable) = match streams.iter().position(|s| &s.fcc_type == b"auds") {
+        Some(audio_idx) => {
+            let mut audio_pcm: Vec<u8> = Vec::new();
+            for p in &movi_packets {
+                if p.stream_no == audio_idx && &p.kind == b"wb" {
+                    audio_pcm.extend_from_slice(p.body);
+                }
+            }
+            match decode_waveformatex(&streams[audio_idx].format, &audio_pcm) {
+                Ok(a) => (Some(a), None),
+                Err(e) => (None, Some(format!("AVI audio stream: {e}"))),
+            }
         }
-    }
-    // A structurally valid AVI whose audio codec is not PCM/IEEE-float
-    // stays `decode/input unavailable`; genuine corruption stays
-    // `Malformed`. Only the message gains AVI context.
-    let audio =
-        decode_waveformatex(&streams[audio_idx].format, &audio_pcm).map_err(|e| match e {
-            MediaError::InputUnavailable { reason } => {
-                MediaError::input_unavailable(format!("AVI audio stream: {reason}"))
-            }
-            MediaError::Malformed { reason } => {
-                MediaError::malformed(format!("AVI audio stream: {reason}"))
-            }
-            other => other,
-        })?;
+        None => (None, Some("AVI has no audio stream".into())),
+    };
 
-    let video = streams
-        .iter()
-        .position(|s| &s.fcc_type == b"vids")
+    let vidx = streams.iter().position(|s| &s.fcc_type == b"vids");
+    let video = vidx
         .map(|vidx| {
             let counted = movi_packets
                 .iter()
@@ -393,11 +428,35 @@ pub fn decode_avi(data: &[u8]) -> Result<AviMedia, MediaError> {
         })
         .transpose()?;
 
-    let timing = stream_timings(&streams, &movi_packets);
+    // Frame-carrying chunks (`db`/`dc`) are the only ones handed to the
+    // decoder; non-frame chunks (`pc` palette changes etc.) keep their
+    // timeline slot in `ticks` but never shift the frame index.
+    let video_features = vidx.map(|vidx| {
+        let head = &streams[vidx];
+        let frames: Vec<VideoFrame<'_>> = movi_packets
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| p.stream_no == vidx && matches!(&p.kind, b"db" | b"dc"))
+            .map(|(i, p)| VideoFrame {
+                time_ticks: ticks[i].unwrap_or(0),
+                body: p.body,
+            })
+            .collect();
+        video::extract_features(
+            vidx as u32,
+            &head.format,
+            u64::from(head.rate),
+            i64::from(head.start) * i64::from(head.scale),
+            &frames,
+            video_cfg,
+        )
+    });
 
     Ok(AviMedia {
         audio,
+        audio_unavailable,
         video,
+        video_features,
         timing,
     })
 }
@@ -415,33 +474,51 @@ mod tests {
         write_avi(&AviSpec::cfr(64, 48, 10, vec![frame; 30], audio, 1, 48_000))
     }
 
+    fn decode(data: &[u8]) -> Result<AviMedia, MediaError> {
+        decode_avi(data, &VideoFeatureConfig::default())
+    }
+
     #[test]
     fn roundtrip_decodes_audio_and_video_meta() {
         let bytes = fixture();
-        let m = decode_avi(&bytes).unwrap();
-        assert_eq!(m.audio.sample_rate, 48_000);
-        assert_eq!(m.audio.channels, 1);
-        assert_eq!(m.audio.samples.len(), 960);
+        let m = decode(&bytes).unwrap();
+        let audio = m.audio.expect("PCM decoded");
+        assert_eq!(audio.sample_rate, 48_000);
+        assert_eq!(audio.channels, 1);
+        assert_eq!(audio.samples.len(), 960);
         let v = m.video.unwrap();
         assert_eq!(v.codec, "rawvideo");
         assert_eq!(v.frames, 30);
         assert_eq!(v.fps, Some(10.0));
         assert_eq!((v.width, v.height), (64, 48));
+        // Uncompressed vids frames also produce a decoded feature set.
+        let crate::video::VideoFeatureArtifact::Decoded(f) =
+            m.video_features.as_ref().expect("video_features present")
+        else {
+            panic!("expected decoded video features")
+        };
+        assert_eq!(f.luminance.len(), 30);
+        assert_eq!(f.frame_timestamps.len(), 30);
     }
 
     #[test]
-    fn missing_audio_stream_fails_explicitly() {
+    fn missing_audio_stream_is_partial_ingest_not_error() {
         let mut spec_bytes = fixture();
         // Corrupt the audio stream's fccType so no 'auds' stream exists.
         let pos = spec_bytes.windows(4).position(|w| w == b"auds").unwrap();
         spec_bytes[pos] = b'x';
-        let e = decode_avi(&spec_bytes).unwrap_err();
-        assert!(matches!(e, MediaError::InputUnavailable { .. }));
+        let m = decode(&spec_bytes).unwrap();
+        assert!(m.audio.is_none());
+        assert!(m.audio_unavailable.is_some());
+        // Video metadata, timing, and frame features still surface.
+        assert!(m.video.is_some());
+        assert!(m.video_features.is_some());
+        assert!(m.timing.iter().any(|t| t.stream_type == "vids"));
     }
 
     #[test]
     fn truncated_movi_is_malformed() {
-        let e = decode_avi(b"RIFF\x04\0\0\0AVI ").unwrap_err();
+        let e = decode(b"RIFF\x04\0\0\0AVI ").unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
@@ -509,7 +586,7 @@ mod tests {
     fn riff_size_mismatch_is_malformed() {
         let mut bytes = fixture();
         bytes[4] = bytes[4].wrapping_add(8);
-        let e = decode_avi(&bytes).unwrap_err();
+        let e = decode(&bytes).unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
@@ -522,14 +599,14 @@ mod tests {
         bytes.truncate(bytes.len() - 100);
         let riff = (bytes.len() - 8) as u32;
         bytes[4..8].copy_from_slice(&riff.to_le_bytes());
-        let e = decode_avi(&bytes).unwrap_err();
+        let e = decode(&bytes).unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
     #[test]
     fn chunk_body_overrunning_region_is_malformed() {
         let avi = avi_with_tail(b"JUNK\x10\0\0\0ab");
-        let e = decode_avi(&avi).unwrap_err();
+        let e = decode(&avi).unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
@@ -542,7 +619,7 @@ mod tests {
         tail.extend_from_slice(b"JUNK");
         tail.extend_from_slice(&3u32.to_le_bytes());
         tail.extend_from_slice(&[9, 9, 9]);
-        let e = decode_avi(&avi_with_tail(&tail)).unwrap_err();
+        let e = decode(&avi_with_tail(&tail)).unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
@@ -551,17 +628,26 @@ mod tests {
         let mut tail = Vec::new();
         push_chunk(&mut tail, b"JUNK", &[1, 2, 3, 4]);
         tail.extend_from_slice(b"ab"); // shorter than a chunk header
-        let e = decode_avi(&avi_with_tail(&tail)).unwrap_err();
+        let e = decode(&avi_with_tail(&tail)).unwrap_err();
         assert!(matches!(e, MediaError::Malformed { .. }));
     }
 
     #[test]
-    fn unsupported_audio_codec_is_input_unavailable() {
+    fn unsupported_audio_codec_is_partial_ingest_not_error() {
         // format_tag 2 (ADPCM): a structurally valid AVI with an
-        // unsupported codec is `input unavailable`, not `malformed`.
+        // unsupported codec keeps its observations — audio is simply
+        // absent with the `decode/input unavailable` reason recorded.
         let avi = audio_only_avi(2, &[0u8; 64]);
-        let e = decode_avi(&avi).unwrap_err();
-        assert!(matches!(e, MediaError::InputUnavailable { .. }));
+        let m = decode(&avi).unwrap();
+        assert!(m.audio.is_none());
+        assert!(
+            m.audio_unavailable
+                .as_deref()
+                .is_some_and(|r| r.contains("decode/input unavailable"))
+        );
+        // The audio stream's timing observation still surfaces.
+        assert_eq!(m.timing.len(), 1);
+        assert_eq!(m.timing[0].stream_type, "auds");
     }
 
     #[test]
@@ -571,11 +657,12 @@ mod tests {
         // stream 1's PCM.
         let audio_a: Vec<u8> = (0..40i16).flat_map(|v| (v + 100).to_le_bytes()).collect();
         let audio_b: Vec<u8> = (0..80i16).flat_map(|v| (v - 500).to_le_bytes()).collect();
-        let m = decode_avi(&multi_stream_avi(&audio_a, &audio_b)).unwrap();
+        let m = decode(&multi_stream_avi(&audio_a, &audio_b)).unwrap();
+        let audio = m.audio.expect("PCM decoded");
 
-        assert_eq!(m.audio.channels, 1);
+        assert_eq!(audio.channels, 1);
         let expected: Vec<f64> = (0..40i16).map(|v| f64::from(v + 100)).collect();
-        assert_eq!(m.audio.samples, expected);
+        assert_eq!(audio.samples, expected);
         // Stream 2's packets keep their own timing entry, never PCM.
         let s2 = m.timing.iter().find(|t| t.stream == 2).unwrap();
         assert_eq!(s2.observation.timestamp_count, 1);
@@ -583,7 +670,7 @@ mod tests {
 
     #[test]
     fn packet_timing_is_observed_per_stream_clock() {
-        let m = decode_avi(&fixture()).unwrap();
+        let m = decode(&fixture()).unwrap();
         assert_eq!(m.timing.len(), 2);
 
         // Video stream 0: 30 frames of 1 tick at a 10 Hz clock.
@@ -594,9 +681,11 @@ mod tests {
         assert!(v.observation.intervals.iter().all(|&i| i == 1));
         assert_eq!(v.observation.drift_ppm, Some(0.0));
         // The derived per-packet column is persisted, not just the
-        // aggregate observation: one entry per packet, dwStart-based.
+        // aggregate observation: one entry per packet, dwStart-based,
+        // with its container-neutral origin label.
         assert_eq!(v.start_tick, 0);
-        assert_eq!(v.movi_order_timestamps, (0..30).collect::<Vec<i64>>());
+        assert_eq!(v.timestamps_origin, "movi_order");
+        assert_eq!(v.stream_timestamps, (0..30).collect::<Vec<i64>>());
 
         // Audio stream 1: a single wb packet covering its PCM, on the
         // byte-rate clock (block_align scale, byte_rate rate).
@@ -605,17 +694,17 @@ mod tests {
         assert_eq!(a.observation.timebase_hz, 96_000);
         assert_eq!(a.observation.timestamp_count, 1);
         assert_eq!(a.start_tick, 0);
-        assert_eq!(a.movi_order_timestamps, vec![0]);
+        assert_eq!(a.stream_timestamps, vec![0]);
 
         // Interleaved packet order maps to cumulative stream positions:
         // stream 1's two wb packets sit at 0 and len(first) ticks.
         let audio_a: Vec<u8> = (0..40i16).flat_map(|v| (v + 100).to_le_bytes()).collect();
         let half = audio_a.len() / 2;
-        let m2 = decode_avi(&multi_stream_avi(&audio_a, &[7u8; 32])).unwrap();
+        let m2 = decode(&multi_stream_avi(&audio_a, &[7u8; 32])).unwrap();
         let a1 = m2.timing.iter().find(|t| t.stream == 1).unwrap();
         assert_eq!(a1.observation.timestamp_count, 2);
         assert_eq!(a1.observation.intervals, vec![half as i64]);
-        assert_eq!(a1.movi_order_timestamps, vec![0, half as i64]);
+        assert_eq!(a1.stream_timestamps, vec![0, half as i64]);
     }
 
     #[test]
@@ -640,12 +729,102 @@ mod tests {
         let mut body = Vec::new();
         push_list(&mut body, b"hdrl", &hdrl);
         push_list(&mut body, b"movi", &movi);
-        let m = decode_avi(&avi_with_tail(&body)).unwrap();
+        let m = decode(&avi_with_tail(&body)).unwrap();
 
         let v = m.timing.iter().find(|t| t.stream_type == "vids").unwrap();
         assert_eq!(v.start_tick, 10); // dwStart * dwScale
-        assert_eq!(v.movi_order_timestamps, vec![10, 12, 14]);
+        assert_eq!(v.stream_timestamps, vec![10, 12, 14]);
         assert_eq!(v.observation.intervals, vec![2, 2]);
+    }
+
+    /// BITMAPINFOHEADER body for uncompressed-video fixtures.
+    fn bih(width: i32, height: i32, bpp: u16, compression: u32) -> Vec<u8> {
+        let mut b = vec![0u8; 40];
+        b[4..8].copy_from_slice(&width.to_le_bytes());
+        b[8..12].copy_from_slice(&height.to_le_bytes());
+        b[14..16].copy_from_slice(&bpp.to_le_bytes());
+        b[16..20].copy_from_slice(&compression.to_le_bytes());
+        b
+    }
+
+    #[test]
+    fn non_frame_vids_chunks_dont_desync_frame_indices() {
+        // movi: db, pc, db — the `pc` palette chunk keeps a timeline
+        // slot but must never count as a frame.
+        let frame_a = vec![0u8; 8]; // 2x1 24bpp black (stride 8)
+        let frame_b = vec![200u8; 8];
+        let mut hdrl = Vec::new();
+        let mut vstrl = Vec::new();
+        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 1, 10, 0, 3, 0));
+        push_chunk(&mut vstrl, b"strf", &bih(2, 1, 24, 0));
+        push_list(&mut hdrl, b"strl", &vstrl);
+        let mut astrl = Vec::new();
+        push_chunk(&mut astrl, b"strh", &strh_body(b"auds", 2, 96_000, 0, 0, 2));
+        push_chunk(&mut astrl, b"strf", &wavefmt_body(1, 1, 48_000, 16));
+        push_list(&mut hdrl, b"strl", &astrl);
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"00db", &frame_a);
+        push_chunk(&mut movi, b"00pc", &[0u8; 8]); // palette change: a packet, not a frame
+        push_chunk(&mut movi, b"00db", &frame_b);
+        push_chunk(&mut movi, b"01wb", &[0u8; 64]);
+        let mut body = Vec::new();
+        push_list(&mut body, b"hdrl", &hdrl);
+        push_list(&mut body, b"movi", &movi);
+        let m = decode(&avi_with_tail(&body)).unwrap();
+
+        // Every vids packet owns a timeline slot — including `pc`.
+        let v = m.timing.iter().find(|t| t.stream_type == "vids").unwrap();
+        assert_eq!(v.stream_timestamps, vec![0, 1, 2]);
+        // But only db/dc chunks produce frames — each tagged with its
+        // own stream-clock position, not a sequential index.
+        let crate::video::VideoFeatureArtifact::Decoded(f) =
+            m.video_features.as_ref().expect("video_features")
+        else {
+            panic!("expected decoded video features")
+        };
+        assert_eq!(f.frame_timestamps, vec![0, 2]);
+        assert_eq!(f.luminance.len(), 2);
+        assert_eq!(f.diff.len(), 2);
+        // The cut at frame 1 sits at tick 2 (after the pc slot), and
+        // the event carries that stream-clock time.
+        assert!(
+            f.events
+                .iter()
+                .any(|e| e.kind == crate::video::VideoEventKind::SceneChange && e.time_ticks == 2)
+        );
+    }
+
+    #[test]
+    fn compressed_vids_is_explicit_unavailable() {
+        // MJPG-compressed vids: metadata and timing are recorded, and
+        // video_features says `unavailable` instead of failing.
+        let mut hdrl = Vec::new();
+        let mut vstrl = Vec::new();
+        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 1, 10, 0, 1, 0));
+        push_chunk(
+            &mut vstrl,
+            b"strf",
+            &bih(2, 1, 24, u32::from_le_bytes(*b"MJPG")),
+        );
+        push_list(&mut hdrl, b"strl", &vstrl);
+        let mut astrl = Vec::new();
+        push_chunk(&mut astrl, b"strh", &strh_body(b"auds", 2, 96_000, 0, 0, 2));
+        push_chunk(&mut astrl, b"strf", &wavefmt_body(1, 1, 48_000, 16));
+        push_list(&mut hdrl, b"strl", &astrl);
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"00dc", &[0u8; 16]);
+        push_chunk(&mut movi, b"01wb", &[0u8; 64]);
+        let mut body = Vec::new();
+        push_list(&mut body, b"hdrl", &hdrl);
+        push_list(&mut body, b"movi", &movi);
+        let m = decode(&avi_with_tail(&body)).unwrap();
+
+        assert!(m.audio.is_some());
+        assert_eq!(m.video.as_ref().unwrap().codec, "MJPG");
+        assert!(matches!(
+            m.video_features,
+            Some(crate::video::VideoFeatureArtifact::Unavailable { .. })
+        ));
     }
 
     /// Two-audio-stream AVI (video + mono auds + stereo auds) with
