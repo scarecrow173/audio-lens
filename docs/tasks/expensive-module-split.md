@@ -40,7 +40,7 @@ relations:
 
 ## Work
 
-`src/expensive.rs` をルート mod(config/trigger/plan_regions/analyze_region)+`src/expensive/` サブモジュールに分割する。振る舞いは変えず、既存ファミリもサブモジュールへ移す。
+`src/expensive.rs` をルート mod(config/trigger/plan_regions/analyze_region)+`src/expensive/` サブモジュール(ir/codec/dynamics/noise/channel/timing/transfer)に分割する。既存のスペクトル系(cutoff/narrowband/THD)は transfer.rs、`exp.src_*` は timing.rs へ。振る舞いは変えず、非 Valid トリガの invalid 観測リストも全ファミリ分を網羅して移す。
 
 ## Classification
 

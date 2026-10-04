@@ -19,14 +19,17 @@ relations:
   implemented-by: []
   depends-on:
     - "ingest-av.md"
+    - "analysis-stages.md"
   blocks: []
   supersedes: []
   superseded-by: []
   related: []
-  refines: []
+  refines:
+    - "ingest-av.md"
   refined-by: []
   derives-from:
     - "../specs/video-av-timing.md"
+    - "../specs/candidate-event-model.md"
     - "../discovery/video-av-feature-gaps.md"
     - "../adr/avi.md"
     - "../adr/implementation-stack.md"
@@ -54,13 +57,26 @@ A/V 同期を設計する。
 ### In Scope
 
 - 非圧縮 AVI の `vids` フレームデコード(BI_RGB 系、24/32bpp、
-  bottom-up / top-down)
+  bottom-up / top-down)。height の符号で行順序を判別し、
+  24bpp 行の DWORD パディングを正しく扱う。フレームを運ぶ
+  チャンク(db/dc)と非フレームチャンクを区別し、タイムスタンプ
+  系列とフレーム index のずれを防ぐ
 - フレーム単位の粗い特徴: 平均輝度系列・frame-to-frame 変化量
   (モーション/アクティビティ)・シーンチェンジ候補タイムスタンプ
-- 映像イベント時刻系列の永続化(タイムスタンプはストリーム
-  クロック由来、公称 FPS 演算に依らない)
+- 映像イベント時刻系列の永続化。生成するイベント種別を列挙:
+  `scene_change`(差分閾値超過)・`luminance_step`(輝度階段、
+  spec のフラッシュ例に対応)・`motion_onset`(差分の連続上昇
+  開始)。タイムスタンプはストリームクロック由来、
+  公称 FPS 演算に依らない
 - 音声オンセット/イベントと映像イベント時刻の汎用照合
-  (差分・確度・分布・ドリフト傾き)
+  (差分・確度・分布・ドリフト傾き)。照合前に両系列を各々の
+  ストリームの `start_tick`/first timestamp で共通クロックに
+  リベースする(下記 Data and Control Flow)
+- コンテナレベルのオフセット(auds/vids の `start_tick` 差)は
+  既存 `StreamTiming` の per-stream 値から導出可能なため、
+  専用レコードは追加せず導出元事実として永続化済み値を使う
+- 部分 ingest 契約(下記): `auds` が欠損・デコード不可でも
+  映像観測を記録して ingest を完結させる
 - 映像証拠が利用不能な場合の explicit な `decode/input
   unavailable` または not-applicable 記録
 
@@ -78,32 +94,52 @@ A/V 同期を設計する。
   デコードと同じパスで粗い特徴を生成するためフレームを
   ストアしない
 - `al-media` ingest 成果物: `video_features`(フレームごとの
-  輝度・変化量・シーンチェンジ候補フラグ)を既存
+  輝度・変化量・シーンチェンジ候補フラグ・イベント種別)を既存
   `StreamTiming` / `TimingObservation` と同じクロックで永続化
-- `al-analysis::avsync` コンポーネント: ingest の映像イベント
-  時刻系列と cheap の音声オンセット(`trans.onset_times`)を
-  照合する。音声側・映像側イベント系列がそろわない場合は
-  該当レコードを validity で明示する
+- 部分 ingest 契約: 現行 `IngestStage` は `auds` デコード失敗を
+  `StageError` に伝播し、成果物が一切登録されない。本設計では
+  コンテナ観測(metadata・タイミング)は decode の可否と独立に
+  記録し、PCM のみ `Option` として扱う。`auds` が欠損・圧縮・
+  デコード不可でも `video_features` とメタデータ/タイミングは
+  永続化され、decoded PCM は省略される。1 入力の失敗は他入力の
+  記録を巻き込まない(per-input isolation)
+- `al-analysis::avsync` コンポーネント(cheap stage 内):
+  ingest の映像イベント時刻系列と cheap の音声オンセット
+  (`trans.onset_times`)を照合する。音声側・映像側イベント系列が
+  そろわない場合は該当レコードを validity で明示する
 - 境界: `al-media` はコンテナとフレームだけを知り、音声解析を
   知らない。`al-analysis` は ingest 成果物と cheap 特徴だけを
-  読み、コンテナを直接読まない
+  読み、コンテナを直接読まない。`ingest-av.md` の
+  「内容解析は解析ステージの責務」との整合: 本設計が ingest に
+  置くのはフレームデコードと不可分の粗い特徴(輝度/差分/
+  シーンチェンジ候補)であり、意味的なイベント照合は
+  `al-analysis` に置く。この境界明確化をもって `refines`
+  関係を宣言する
 
 ## Data and Control Flow
 
 - ingest: `vids` が非圧縮ならフレームごとに輝度・差分を算出し
   `video_features` として永続化(圧縮なら decode 不可を記録)
-- cheap: 音声オンセット系列を既存どおり算出
+- cheap: 音声オンセット系列を既存どおり算出。onset 時刻は
+  PCM 開始からの秒であり、`auds` の `start_tick`/timebase で
+  オフセットした場合はストリームクロックに揃えてから照合する
 - avsync(cheap stage 内): 各音声イベントに対し設定可能な探索窓内
   の最近傍映像イベントを対応付け、ペアごとに
   `avsync.audio_time` / `avsync.video_time` / `avsync.delta` /
-  confidence を記録。系列が複数ある場合は対応ペア列から
+  confidence を記録。両系列は照合前に各ストリームクロック由来の
+  秒時刻へリベースし、`dwStart≠0` のようなコンテナレベル
+  オフセットが delta に混入しないようにする。対応ペア列から
   median/MAD と線形フィットによる drift 傾きをサマリ化
 - すべて秒単位のストリームクロック時刻で扱い、nominal FPS を
   時刻計算に使わない
 
 ## Non-Functional Constraints
 
-- フレームデコードはストリーミング(全フレームをメモリに持たない)
+- フレームは特徴算出後に保持しない(追加分のメモリ確保を増やさ
+  ない)。なお現行 ingest は入力ファイル全体を `fs::read` で
+  バッファしており、本 WS はその I/O モデルを変えない。
+  全入力バッファリング自体は別 ADR で扱う既知のスケーリング
+  制限として記録する
 - シーンチェンジ閾値は設定可能、かつ採用値を成果物に記録
 - 音声解析は映像証拠がなくても完結する(映像欠如は
   ブロッカーではなく validity)
@@ -123,7 +159,9 @@ A/V 同期を設計する。
 - 圧縮コーデック対応 | 外部依存の要否が未決 | MP4/コーデック
   方針の決定時 | 実用キャプチャでの映像特徴欠如が続く
 - ユーザー提供の映像マーカー入力形式 | 需要未確認 | 要求発生時 |
-  手動マーカーとの照合ができない
+  手動マーカーとの照合ができない。照合機構そのものは
+  タイムスタンプ付きイベント系列なら入力を選ばないため、
+  保留するのはマーカーのファイル形式だけである
 
 ## Verification Notes
 

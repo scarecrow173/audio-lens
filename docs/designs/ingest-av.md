@@ -23,7 +23,8 @@ relations:
   superseded-by: []
   related: []
   refines: []
-  refined-by: []
+  refined-by:
+    - "video-features.md"
   derives-from:
     - "../specs/media-ingest.md"
     - "../specs/video-av-timing.md"

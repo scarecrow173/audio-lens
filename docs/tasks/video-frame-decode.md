@@ -40,7 +40,7 @@ relations:
 
 ## Work
 
-`al-media` に非圧縮 AVI vids フレームのデコードを実装する。BI_RGB 系 24/32bpp、bottom-up/top-down を扱い、フレームごとの平均輝度・前フレーム差分・シーンチェンジ候補フラグをストリーミング算出する(フレーム全体は保持しない)。
+`al-media` に非圧縮 AVI vids フレームのデコードを実装する。BI_RGB 系 24/32bpp、bottom-up/top-down(BITMAPINFOHEADER height の符号)を扱い、24bpp 行の DWORD パディングを正しく処理する。movi の非フレームチャンク(pc 等)はタイムスタンプ消費とフレーム index をずらさないよう区別する。フレームごとの平均輝度・前フレーム差分・シーンチェンジ候補フラグを算出する(フレーム全体は保持しない)。
 
 ## Classification
 
@@ -64,6 +64,8 @@ relations:
 ## Done When
 
 - [ ] 非圧縮 AVI の各フレームで輝度・差分・シーンチェンジ候補が算出される
+- [ ] top-down DIB と 24bpp パディング入り行が正しくデコードされる
+- [ ] 非フレーム vids チャンクでフレーム index がずれない
 - [ ] 圧縮 vids は `decode/input unavailable` として扱われる
 
 ## Verification

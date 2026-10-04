@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-spec の reference ケース行列を testkit fixture で実装する(既知 gain/EQ/位相/固定・jitter 遅延/SRC drift/極性/ch swap/低コヒーレンスノイズ/clip/comb/echo/SRC alias/drop/repeat/stuck)。
+spec の reference ケース行列を testkit fixture で実装する(既知 gain/EQ/位相/固定・jitter 遅延/SRC drift/極性/ch swap/低コヒーレンスノイズ/clip/comb/echo/SRC alias/drop/repeat/stuck)。ピン留め失敗モード「非コヒーレントな PSD 比による高域リフト偽装」を名前付きケースとして含める。
 
 ## Classification
 

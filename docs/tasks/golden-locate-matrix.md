@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-spec の locate ケース行列を testkit fixture で実装する(exact/gain/EQ 挿入、silence 境界、強周期偽ピーク、loop、repeated、長尺 offset/drift、skip+resume、multichannel downmix、BGM マスキング+残差探索)。
+spec の locate ケース行列を testkit fixture で実装する(exact/gain/EQ 挿入、silence 境界、強周期偽ピーク、loop、repeated、長尺 offset/drift、skip+resume、multichannel downmix、BGM マスキング+残差探索)。ピン留め失敗モード「無音/強周期での偽相関ピーク受理」と「低コヒーレンス時の optimal-lag 過大推定」を名前付きケースとして含める。
 
 ## Classification
 

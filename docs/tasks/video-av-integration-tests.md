@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-シーンチェンジ・輝度変化・既知 A/V オフセットを持つ合成 AVI fixture を作り、ingest→cheap→avsync の E2E を検証する。
+シーンチェンジ・輝度変化・既知 A/V オフセット(PCM パディング型と `dwStart≠0` 型の両方)を持つ合成 AVI fixture を作り、ingest→cheap→avsync の E2E を検証する。
 
 ## Classification
 

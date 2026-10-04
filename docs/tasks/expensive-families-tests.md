@@ -46,7 +46,7 @@ relations:
 
 ## Work
 
-各ファミリの既知合成ケースを整備し、test-spec の Rules/Examples を検証する結合テストを実装する。
+各ファミリの既知合成ケースを整備し、test-spec の Rules/Examples を検証する結合テストを実装する。ペア依存ファミリはペアあり/なし両方を検証し、非 Valid トリガの invalid 観測が新ファミリでもスキーマどおり emit されることを確認する。
 
 ## Classification
 

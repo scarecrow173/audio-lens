@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-オンセット前の pre-echo 候補と transient smear を `expensive/codec.rs` に実装する。
+オンセット前の pre-echo 候補・transient smear・cepstrum 副次ピークによる二次エコー遅延/レベルを `expensive/codec.rs` に実装する。
 
 ## Classification
 
@@ -64,6 +64,7 @@ relations:
 
 - [ ] pre-echo 的な高域エネルギーが観測される
 - [ ] トランジェントの時間的にじみが記録される
+- [ ] 既知エコーで二次遅延/レベルが記録される
 
 ## Verification
 

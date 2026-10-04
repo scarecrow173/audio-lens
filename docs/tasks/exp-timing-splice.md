@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-click/splice の定位と stuck/repeated buffer 候補の深掘りを `expensive/timing.rs` に実装する。
+click/splice の定位・stuck/repeated buffer 候補の深掘り・リージョン内局所 time map(局所 lag 軌跡)を `expensive/timing.rs` に実装する。既存 `exp.src_*` もこのモジュールに移設する。
 
 ## Classification
 
@@ -64,6 +64,7 @@ click/splice の定位と stuck/repeated buffer 候補の深掘りを `expensive
 
 - [ ] 既知 splice 位置が記録される
 - [ ] stuck/repeat ブロック候補が記録される
+- [ ] 局所 time map が系列として記録される
 
 ## Verification
 

@@ -41,7 +41,7 @@ relations:
 
 ## Work
 
-compressor/limiter の transfer-curve 候補(入出力ゲイン散布の折れ)、pumping/ducking の低周波変調、level-dependent transfer を `expensive/dynamics.rs` に実装する。
+compressor/limiter の transfer-curve 候補(入出力ゲイン散布の折れ)、pumping/ducking の低周波変調、level-dependent transfer を `expensive/dynamics.rs` に実装する。level-dependent はペア証拠が必要なため、リファレンスペア不在時は invalid 観測とする。
 
 ## Classification
 
