@@ -241,6 +241,207 @@ fn manual_ranges_analyze_without_any_candidate() {
     fs::remove_dir_all(&fx.dir).ok();
 }
 
+/// Two-input fixture: `source_asset` + `capture_bug` decoded PCM.
+struct PairFixture {
+    dir: PathBuf,
+    manifest: Manifest,
+    source_input_id: String,
+    capture_input_id: String,
+}
+
+fn pair_fixture(source: &[f64], capture: &[f64]) -> PairFixture {
+    let dir = std::env::temp_dir().join(format!("al-exp-pair-{}", JobId::new()));
+    fs::create_dir_all(&dir).unwrap();
+
+    let mut src_input = input(InputRole::SourceAsset, dir.join("src.bin"));
+    let mut cap_input = input(InputRole::CaptureBug, dir.join("cap.bin"));
+    src_input.source_sha256 = Some("aa".repeat(32));
+    cap_input.source_sha256 = Some("bb".repeat(32));
+    let source_input_id = src_input.input_id.to_string();
+    let capture_input_id = cap_input.input_id.to_string();
+    let input_ids = [src_input.input_id.clone(), cap_input.input_id.clone()];
+    let manifest = Manifest::new(
+        JobId::new(),
+        vec![src_input, cap_input],
+        serde_json::json!({}),
+        &[
+            StageKind::Ingest,
+            StageKind::Locate,
+            StageKind::CheapAnalysis,
+            StageKind::ExpensiveAnalysis,
+        ],
+    );
+    let mut manifest = manifest;
+    for (idx, (rel, samples)) in [("inputs/src.f64le", source), ("inputs/cap.f64le", capture)]
+        .into_iter()
+        .enumerate()
+    {
+        write_pcm(&dir, rel, samples);
+        let declared = manifest.input_artifact(&input_ids[idx]).unwrap();
+        manifest.register_artifact(ArtifactRecord {
+            artifact_id: al_core::ArtifactId::new(),
+            role: "decoded_pcm".into(),
+            path: PathBuf::from(rel),
+            produced_by: Some(StageKind::Ingest),
+            inputs: vec![declared],
+            params: serde_json::json!({"sample_rate": 48_000, "channels": 1}),
+        });
+    }
+    PairFixture {
+        dir,
+        manifest,
+        source_input_id,
+        capture_input_id,
+    }
+}
+
+fn pctx<'a>(
+    fx: &'a PairFixture,
+    registry: &'a ArtifactRegistry,
+    config: &'a serde_json::Value,
+) -> StageContext<'a> {
+    StageContext {
+        manifest: &fx.manifest,
+        registry,
+        config,
+    }
+}
+
+#[test]
+fn pair_evidence_populates_pair_dependent_families() {
+    // capture = 0.5× source, aligned at sample 0 (identity
+    // alignment written by hand). The locate artifact is present
+    // but no reference stage ran, so `transfer_h` is absent: IR
+    // stays `pair evidence unavailable` while the level-transfer,
+    // mixing-matrix and time-map families measure.
+    let n = 32_000usize;
+    let source: Vec<f64> = noise(n, 0x51)
+        .iter()
+        .enumerate()
+        .map(|(i, &v)| v * (0.1 + 0.9 * i as f64 / n as f64))
+        .collect();
+    let capture: Vec<f64> = source.iter().map(|&v| 0.5 * v).collect();
+    let mut fx = pair_fixture(&source, &capture);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({
+        "analysis": {
+            "events": {"noise_floor_dbfs": 1e9, "zero_run_samples": 1e9, "stuck_run_samples": 1e9},
+            "expensive": {"always_run": true}
+        }
+    });
+
+    let rel = PathBuf::from("locate")
+        .join(&fx.source_input_id)
+        .join(&fx.capture_input_id)
+        .join("result.json");
+    fs::create_dir_all(fx.dir.join(rel.parent().unwrap())).unwrap();
+    fs::write(
+        fx.dir.join(&rel),
+        serde_json::to_string(&serde_json::json!({
+            "result": {
+                "alignment_id": "aln-ok",
+                "source_input_id": fx.source_input_id,
+                "capture_input_id": fx.capture_input_id,
+                "source_range": {"start": 0, "end": n},
+                "capture_range": {"start": 0, "end": n},
+                "evidence": [],
+                "agreeing_methods": 1,
+                "position_spread": 0,
+                "confidence": "high",
+                "validity": "valid",
+                "reject_reason": null,
+                "accepted": true,
+                "algorithm_id": "locate.v1",
+                "algorithm_version": "1",
+                "params": {},
+            }
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    fx.manifest.register_artifact(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "locate_result".into(),
+        path: rel,
+        produced_by: Some(StageKind::Locate),
+        inputs: vec![],
+        params: serde_json::json!({}),
+    });
+
+    for rec in al_analysis::stage::CheapAnalysisStage::new()
+        .run(&pctx(&fx, &registry, &config))
+        .expect("cheap stage")
+    {
+        fx.manifest.register_artifact(rec);
+    }
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&pctx(&fx, &registry, &config))
+        .expect("expensive stage");
+
+    // The capture's region carries pair-derived records stamped
+    // with the locate alignment id.
+    let exp = recs
+        .iter()
+        .find(|r| {
+            r.role == "expensive_features"
+                && r.path.to_string_lossy().contains(&*fx.capture_input_id)
+        })
+        .expect("capture region produced");
+    let body: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&exp.path)).unwrap()).unwrap();
+    let records = body["records"].as_array().unwrap();
+    let find = |id: &str| {
+        records
+            .iter()
+            .find(|r| r["feature_id"] == id)
+            .unwrap_or_else(|| panic!("missing {id} in {records:?}"))
+    };
+    // Pair-dependent families measured against the accepted pair.
+    for id in [
+        "exp.level_transfer_slope",
+        "exp.mix_polarity",
+        "exp.local_time_map",
+    ] {
+        let r = find(id);
+        assert_eq!(
+            r["validity"].as_str(),
+            Some("valid"),
+            "{id} must be measured: {r}"
+        );
+        assert_eq!(
+            r["alignment_id"].as_str(),
+            Some("aln-ok"),
+            "{id} must reference the locate alignment"
+        );
+    }
+    // The mixing matrix fit is near-exact for a pure scalar mix.
+    assert_eq!(find("exp.mix_polarity")["value"]["scalar"], 1.0);
+    assert!(
+        find("exp.mix_fit_quality")["value"]["scalar"]
+            .as_f64()
+            .unwrap()
+            < 0.05
+    );
+    // The local time map is a tensor reference; the tensor landed
+    // under features/expensive.
+    assert!(
+        find("exp.local_time_map")["value"]["tensor"]["array"]
+            .as_str()
+            .is_some_and(|p| p.contains("time_map"))
+    );
+    // IR is pair-dependent on the reference `transfer_h` artifact —
+    // locate alone is not enough, so it stays invalid with the
+    // pair-evidence reason.
+    let ir = find("exp.ir_early_late_ratio");
+    assert_ne!(ir["validity"].as_str(), Some("valid"));
+    assert_eq!(
+        ir["invalid_reason"].as_str(),
+        Some("pair evidence unavailable")
+    );
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
 #[test]
 fn non_valid_candidate_region_records_invalid_observations() {
     // Digital silence: `level.integrated_dbfs` (-240 dBFS) trips the
