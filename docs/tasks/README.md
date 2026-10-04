@@ -1,14 +1,12 @@
 # TASK Documents
 
-
-
-
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | todo | [al-testkit-crate.md](./al-testkit-crate.md) |
 | TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
 | TASK-034z9nDhaSqoH2kao6D3Xz | analysis ステージ CLI 配線 + depends_on | done | [analysis-cli-wiring.md](./analysis-cli-wiring.md) |
@@ -18,6 +16,7 @@ Directory: `docs/tasks`
 | TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | done | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
+| TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | todo | [avsync-analysis.md](./avsync-analysis.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
@@ -26,7 +25,18 @@ Directory: `docs/tasks`
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
 | TASK-034z889vFy9QDdh0EG6Nj4 | DatasetStage 実装と CLI 接続 | done | [dataset-stage.md](./dataset-stage.md) |
 | TASK-034z888EftCjwJOLuS09K0 | provenance レコードと dataset-writer | done | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
+| TASK-034AaFTafwUqSb6Zp9Pr8J | exp-channel: 周波数依存混合行列 + intermod 証拠 | todo | [exp-channel-matrix.md](./exp-channel-matrix.md) |
+| TASK-034AaFEfKrZkVSHWqbJo7H | exp-codec: pre-echo + transient smear | todo | [exp-codec-preecho.md](./exp-codec-preecho.md) |
+| TASK-034AaFDINCaNF95aiWa0oQ | exp-dynamics: transfer-curve + pumping + level依存 | todo | [exp-dynamics-curve.md](./exp-dynamics-curve.md) |
+| TASK-034AaFD0xQrwpuxDxVEjiO | exp-ir: IR 候補 + early/late + decay | todo | [exp-ir-decay.md](./exp-ir-decay.md) |
+| TASK-034AaFSu2D4Mw7dqcQ6qW6 | exp-noise: stationary/tonal/modulated 分類 | todo | [exp-noise-decomp.md](./exp-noise-decomp.md) |
+| TASK-034AaFTNVqwkFuTpDA07oM | exp-timing: click/splice + stuck buffer 深掘り | todo | [exp-timing-splice.md](./exp-timing-splice.md) |
+| TASK-034AaFURCQqe9DBwLB4N0J | expensive 追加ファミリの既知ケース検証 | todo | [expensive-families-tests.md](./expensive-families-tests.md) |
+| TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | todo | [expensive-module-split.md](./expensive-module-split.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
+| TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | todo | [golden-av-matrix.md](./golden-av-matrix.md) |
+| TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | todo | [golden-locate-matrix.md](./golden-locate-matrix.md) |
+| TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | todo | [golden-reference-matrix.md](./golden-reference-matrix.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
@@ -42,9 +52,18 @@ Directory: `docs/tasks`
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |
 | TASK-034yZBGR8sboPsFlB6FpMr | 最小 CLI(run / resume / inspect)の実装 | done | [minimal-cli.md](./minimal-cli.md) |
+| TASK-034AaFVy7YRTQZiKi04T2q | mp4: box パーサ + trak メタデータ | todo | [mp4-box-parser.md](./mp4-box-parser.md) |
+| TASK-034AaFY7vtgsBOWZeYX4ez | mp4: 合成 fixture writer + 既知ケース検証 | todo | [mp4-fixtures-tests.md](./mp4-fixtures-tests.md) |
+| TASK-034AaFXpJRZWcxVPOfKCdh | mp4: ingest stage 配線 + 成果物記録 | todo | [mp4-ingest-stage.md](./mp4-ingest-stage.md) |
+| TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | todo | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
+| TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | todo | [mp4-sample-tables.md](./mp4-sample-tables.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
+| TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | todo | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
+| TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | todo | [video-av-integration-tests.md](./video-av-integration-tests.md) |
+| TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | todo | [video-features-ingest.md](./video-features-ingest.md) |
+| TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | todo | [video-frame-decode.md](./video-frame-decode.md) |
 | TASK-034z9oB8rhYcBdeSRvtsKy | al-viz: dataset 範囲/チャンク読み出し基盤 | done | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | TASK-034z9oHPHHVPCNKwoMJp5c | イベントマーカ + 決定的サマリ + skipped.json | done | [viz-events-summary.md](./viz-events-summary.md) |
 | TASK-034z9oJ2ngcyfGSgbNPcrX | viz/export 結合 + ゴールデンテスト | done | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |
