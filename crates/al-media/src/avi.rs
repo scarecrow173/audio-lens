@@ -402,171 +402,17 @@ pub fn decode_avi(data: &[u8]) -> Result<AviMedia, MediaError> {
     })
 }
 
-/// Specification for [`write_avi`]: a CFR uncompressed-video + PCM-audio
-/// AVI suitable for fixtures and samples.
-pub struct AviSpec {
-    /// Frame width in pixels (must satisfy `width * 3 % 4 == 0` for
-    /// unpadded BGR24 rows).
-    pub width: u32,
-    /// Frame height in pixels.
-    pub height: u32,
-    /// Frames per second (integer CFR).
-    pub fps: u32,
-    /// BGR24 frames (bottom-up rows, `width*height*3` bytes each).
-    pub frames: Vec<Vec<u8>>,
-    /// Interleaved PCM s16 audio bytes.
-    pub audio: Vec<u8>,
-    /// Audio channel count.
-    pub channels: u16,
-    /// Audio sample rate.
-    pub sample_rate: u32,
-}
-
-fn push_chunk(out: &mut Vec<u8>, id: &[u8; 4], body: &[u8]) {
-    out.extend_from_slice(id);
-    out.extend_from_slice(&(body.len() as u32).to_le_bytes());
-    out.extend_from_slice(body);
-    if body.len() % 2 == 1 {
-        out.push(0);
-    }
-}
-
-fn push_list(out: &mut Vec<u8>, kind: &[u8; 4], body: &[u8]) {
-    out.extend_from_slice(b"LIST");
-    out.extend_from_slice(&((body.len() + 4) as u32).to_le_bytes());
-    out.extend_from_slice(kind);
-    out.extend_from_slice(body);
-}
-
-/// Serialize an [`AviSpec`] into a legacy AVI file.
-pub fn write_avi(spec: &AviSpec) -> Vec<u8> {
-    let usec_per_frame = 1_000_000u32 / spec.fps.max(1);
-    let block_align = spec.channels * 2;
-    let byte_rate = spec.sample_rate * u32::from(block_align);
-    let frame_bytes = (spec.width * spec.height * 3) as usize;
-
-    // avih
-    let mut avih = Vec::with_capacity(56);
-    avih.extend_from_slice(&usec_per_frame.to_le_bytes());
-    avih.extend_from_slice(&0u32.to_le_bytes()); // max bytes/sec
-    avih.extend_from_slice(&0u32.to_le_bytes()); // padding granularity
-    avih.extend_from_slice(&0x10u32.to_le_bytes()); // AVIF_HASINDEX
-    avih.extend_from_slice(&(spec.frames.len() as u32).to_le_bytes());
-    avih.extend_from_slice(&0u32.to_le_bytes()); // initial frames
-    avih.extend_from_slice(&2u32.to_le_bytes()); // streams
-    avih.extend_from_slice(&0u32.to_le_bytes()); // suggested buffer
-    avih.extend_from_slice(&spec.width.to_le_bytes());
-    avih.extend_from_slice(&spec.height.to_le_bytes());
-    avih.extend_from_slice(&[0u8; 16]);
-
-    // video strh (fccType 'vids', handler 'DIB ')
-    let mut vstrh = Vec::with_capacity(56);
-    vstrh.extend_from_slice(b"vids");
-    vstrh.extend_from_slice(b"DIB ");
-    vstrh.extend_from_slice(&0u32.to_le_bytes()); // flags
-    vstrh.extend_from_slice(&0u16.to_le_bytes()); // priority
-    vstrh.extend_from_slice(&0u16.to_le_bytes()); // language
-    vstrh.extend_from_slice(&0u32.to_le_bytes()); // initial frames
-    vstrh.extend_from_slice(&1u32.to_le_bytes()); // scale
-    vstrh.extend_from_slice(&spec.fps.to_le_bytes()); // rate
-    vstrh.extend_from_slice(&0u32.to_le_bytes()); // start
-    vstrh.extend_from_slice(&(spec.frames.len() as u32).to_le_bytes()); // length
-    vstrh.extend_from_slice(&(frame_bytes as u32).to_le_bytes()); // suggested buffer
-    vstrh.extend_from_slice(&u32::MAX.to_le_bytes()); // quality
-    vstrh.extend_from_slice(&0u32.to_le_bytes()); // sample size
-    vstrh.extend_from_slice(&0i16.to_le_bytes()); // rcFrame left/top
-    vstrh.extend_from_slice(&0i16.to_le_bytes());
-    vstrh.extend_from_slice(&(spec.width as i16).to_le_bytes());
-    vstrh.extend_from_slice(&(spec.height as i16).to_le_bytes());
-
-    // video strf: BITMAPINFOHEADER
-    let mut vstrf = Vec::with_capacity(40);
-    vstrf.extend_from_slice(&40u32.to_le_bytes());
-    vstrf.extend_from_slice(&(spec.width as i32).to_le_bytes());
-    vstrf.extend_from_slice(&(spec.height as i32).to_le_bytes());
-    vstrf.extend_from_slice(&1u16.to_le_bytes()); // planes
-    vstrf.extend_from_slice(&24u16.to_le_bytes()); // bit count
-    vstrf.extend_from_slice(&0u32.to_le_bytes()); // compression = BI_RGB
-    vstrf.extend_from_slice(&(frame_bytes as u32).to_le_bytes());
-    vstrf.extend_from_slice(&[0u8; 16]); // resolution + palette
-
-    let mut vstrl = Vec::new();
-    push_chunk(&mut vstrl, b"strh", &vstrh);
-    push_chunk(&mut vstrl, b"strf", &vstrf);
-
-    // audio strh (fccType 'auds')
-    let audio_frames = spec.audio.len() as u32 / u32::from(block_align).max(1);
-    let mut astrh = Vec::with_capacity(56);
-    astrh.extend_from_slice(b"auds");
-    astrh.extend_from_slice(&0u32.to_le_bytes()); // handler
-    astrh.extend_from_slice(&0u32.to_le_bytes());
-    astrh.extend_from_slice(&0u16.to_le_bytes());
-    astrh.extend_from_slice(&0u16.to_le_bytes());
-    astrh.extend_from_slice(&0u32.to_le_bytes());
-    astrh.extend_from_slice(&u32::from(block_align).to_le_bytes()); // scale
-    astrh.extend_from_slice(&byte_rate.to_le_bytes()); // rate
-    astrh.extend_from_slice(&0u32.to_le_bytes()); // start
-    astrh.extend_from_slice(&audio_frames.to_le_bytes()); // length
-    astrh.extend_from_slice(&0u32.to_le_bytes());
-    astrh.extend_from_slice(&u32::MAX.to_le_bytes());
-    astrh.extend_from_slice(&u32::from(block_align).to_le_bytes()); // sample size
-    astrh.extend_from_slice(&[0u8; 8]); // rcFrame
-
-    // audio strf: WAVEFORMATEX (PCM s16)
-    let mut astrf = Vec::with_capacity(18);
-    astrf.extend_from_slice(&1u16.to_le_bytes());
-    astrf.extend_from_slice(&spec.channels.to_le_bytes());
-    astrf.extend_from_slice(&spec.sample_rate.to_le_bytes());
-    astrf.extend_from_slice(&byte_rate.to_le_bytes());
-    astrf.extend_from_slice(&block_align.to_le_bytes());
-    astrf.extend_from_slice(&16u16.to_le_bytes());
-    astrf.extend_from_slice(&0u16.to_le_bytes()); // cbSize
-
-    let mut astrl = Vec::new();
-    push_chunk(&mut astrl, b"strh", &astrh);
-    push_chunk(&mut astrl, b"strf", &astrf);
-
-    let mut hdrl = Vec::new();
-    push_chunk(&mut hdrl, b"avih", &avih);
-    push_list(&mut hdrl, b"strl", &vstrl);
-    push_list(&mut hdrl, b"strl", &astrl);
-
-    let mut movi = Vec::new();
-    for f in &spec.frames {
-        push_chunk(&mut movi, b"00db", f);
-    }
-    push_chunk(&mut movi, b"01wb", &spec.audio);
-
-    let mut body = Vec::new();
-    push_list(&mut body, b"hdrl", &hdrl);
-    push_list(&mut body, b"movi", &movi);
-
-    let mut out = Vec::with_capacity(body.len() + 12);
-    out.extend_from_slice(b"RIFF");
-    out.extend_from_slice(&(body.len() as u32 + 4).to_le_bytes());
-    out.extend_from_slice(b"AVI ");
-    out.extend_from_slice(&body);
-    out
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use al_testkit::media::{AviSpec, push_chunk, push_list, write_avi};
 
     fn fixture() -> Vec<u8> {
         let frame = vec![7u8; 64 * 48 * 3];
         let audio: Vec<u8> = (0..960i16)
             .flat_map(|v| (v % 200 - 100).to_le_bytes())
             .collect();
-        write_avi(&AviSpec {
-            width: 64,
-            height: 48,
-            fps: 10,
-            frames: vec![frame; 30],
-            audio,
-            channels: 1,
-            sample_rate: 48_000,
-        })
+        write_avi(&AviSpec::cfr(64, 48, 10, vec![frame; 30], audio, 1, 48_000))
     }
 
     #[test]

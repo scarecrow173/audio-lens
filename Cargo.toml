@@ -9,6 +9,7 @@ members = [
     "crates/al-locate",
     "crates/al-analysis",
     "crates/al-viz",
+    "crates/al-testkit",
 ]
 
 [workspace.package]
@@ -24,5 +25,6 @@ al-dataset = { path = "crates/al-dataset" }
 al-locate = { path = "crates/al-locate" }
 al-analysis = { path = "crates/al-analysis" }
 al-viz = { path = "crates/al-viz" }
+al-testkit = { path = "crates/al-testkit" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

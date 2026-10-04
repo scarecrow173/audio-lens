@@ -1,0 +1,10 @@
+[package]
+name = "al-testkit"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+# テスト専用の fixture クレート。本番クレートからは dev-dependency
+# としてのみ参照すること。外部依存を持たない(決定性のため全て
+# インライン実装)。
+[dependencies]
