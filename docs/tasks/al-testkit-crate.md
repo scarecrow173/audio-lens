@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFYEyp2hJkFmKrHAYS"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-testkit: 補助クレート + 信号/メディアビルダ"
 created: "2026-10-04"
 updated: "2026-10-04"

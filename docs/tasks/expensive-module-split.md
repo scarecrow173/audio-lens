@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFCh7tNIivN73GA2cF"
 type: "task"
-status: "todo"
+status: "done"
 title: "expensive: サブモジュール分割(振る舞い不変)"
 created: "2026-10-04"
 updated: "2026-10-04"

@@ -9,7 +9,6 @@ owners: []
 relations:
   source:
     - "../specs/expensive-analysis.md"
-    - "../../crates/al-analysis/src/expensive.rs"
 
   changes:
     added: []

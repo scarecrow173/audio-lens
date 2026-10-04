@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFZQVKvQFjEmAbNfog"
 type: "task"
-status: "todo"
+status: "done"
 title: "golden: locate ケース行列"
 created: "2026-10-04"
 updated: "2026-10-04"

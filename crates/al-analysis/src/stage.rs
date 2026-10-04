@@ -473,10 +473,7 @@ impl Stage for ExpensiveAnalysisStage {
             if pairs.contains_key(&result.capture_input_id) {
                 continue; // first locate result per capture wins
             }
-            let pair_name = format!(
-                "{}__{}",
-                result.source_input_id, result.capture_input_id
-            );
+            let pair_name = format!("{}__{}", result.source_input_id, result.capture_input_id);
             let (aligned_src, len): (Vec<&[f64]>, usize) = if result.accepted {
                 match decoded.get(&result.source_input_id) {
                     Some(src_dec) => {
@@ -711,19 +708,19 @@ fn write_tensor(
         "features/expensive/",
         "residual/",
     ]
-        .iter()
-        .find_map(|prefix| {
-            tensor
-                .path
-                .strip_prefix(prefix)
-                .map(|name| (prefix.trim_end_matches('/'), name))
-        })
-        .ok_or_else(|| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                format!("tensor path outside known roles: {}", tensor.path),
-            )
-        })?;
+    .iter()
+    .find_map(|prefix| {
+        tensor
+            .path
+            .strip_prefix(prefix)
+            .map(|name| (prefix.trim_end_matches('/'), name))
+    })
+    .ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!("tensor path outside known roles: {}", tensor.path),
+        )
+    })?;
     if tensor.data.is_empty() {
         return Ok(());
     }

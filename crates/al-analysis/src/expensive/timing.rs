@@ -169,15 +169,9 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     // energy floor keeps digital silence's edge steps out.
     {
         let win = ((0.002 * rate as f64) as usize).max(1);
-        let mut sorted: Vec<f64> = seg
-            .windows(2)
-            .map(|w| (w[1] - w[0]).abs())
-            .collect();
+        let mut sorted: Vec<f64> = seg.windows(2).map(|w| (w[1] - w[0]).abs()).collect();
         sorted.sort_by(|a, b| a.total_cmp(b));
-        let med = sorted
-            .get(sorted.len() / 2)
-            .copied()
-            .unwrap_or(0.0);
+        let med = sorted.get(sorted.len() / 2).copied().unwrap_or(0.0);
         let thresh = (4.0 * med).max(0.15);
         let refrac = (0.001 * rate as f64) as usize + 1;
         let mut last = 0usize;
@@ -246,8 +240,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         if supported {
             let blocks: Vec<&[f64]> = seg.chunks_exact(block).collect();
             for w in blocks.windows(2) {
-                let same = rms(w[0]) > 1e-4
-                    && w[0].iter().zip(w[1]).all(|(&a, &b)| (a - b).abs() < 1e-9);
+                let same =
+                    rms(w[0]) > 1e-4 && w[0].iter().zip(w[1]).all(|(&a, &b)| (a - b).abs() < 1e-9);
                 if same {
                     cur += 1;
                     max_len = max_len.max(cur + 1);
@@ -299,26 +293,25 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     // `exp.local_time_map` record. No pair → invalid record.
     {
         let path = format!("features/expensive/{}/time_map", ctx.region_name);
-        let mut unavailable = |val: Validity,
-                               reason: &str,
-                               pair: Option<&super::PairEvidence<'_>>| {
-            let conf = pair.map_or(Confidence::Medium, |p| {
-                propagate_confidence(p.confidence, Confidence::Medium)
-            });
-            let mut r = e.push(
-                "exp.local_time_map",
-                f64::NAN,
-                "tensor_ref",
-                conf,
-                val,
-                Some(reason.to_string()),
-                0,
-            );
-            if let Some(p) = pair {
-                r.alignment_id = Some(p.alignment_id.clone());
-            }
-            out.records.push(r);
-        };
+        let mut unavailable =
+            |val: Validity, reason: &str, pair: Option<&super::PairEvidence<'_>>| {
+                let conf = pair.map_or(Confidence::Medium, |p| {
+                    propagate_confidence(p.confidence, Confidence::Medium)
+                });
+                let mut r = e.push(
+                    "exp.local_time_map",
+                    f64::NAN,
+                    "tensor_ref",
+                    conf,
+                    val,
+                    Some(reason.to_string()),
+                    0,
+                );
+                if let Some(p) = pair {
+                    r.alignment_id = Some(p.alignment_id.clone());
+                }
+                out.records.push(r);
+            };
         match ctx.pair {
             None => unavailable(
                 Validity::InsufficientSupport,
@@ -369,11 +362,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                                     best_l = l;
                                 }
                             }
-                            rows.push(vec![
-                                w as f64 / rate as f64,
-                                best_l as f64,
-                                best_c,
-                            ]);
+                            rows.push(vec![w as f64 / rate as f64, best_l as f64, best_c]);
                             w += hop;
                         }
                     }

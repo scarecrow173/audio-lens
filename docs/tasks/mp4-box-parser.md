@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFVy7YRTQZiKi04T2q"
 type: "task"
-status: "todo"
+status: "done"
 title: "mp4: box パーサ + trak メタデータ"
 created: "2026-10-04"
 updated: "2026-10-04"

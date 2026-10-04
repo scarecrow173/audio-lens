@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFzOsSmhBfpjb1kM9F"
 type: "task"
-status: "todo"
+status: "done"
 title: "video_features 成果物を ingest で永続化"
 created: "2026-10-04"
 updated: "2026-10-04"

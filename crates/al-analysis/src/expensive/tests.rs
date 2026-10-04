@@ -584,10 +584,7 @@ fn codec_secondary_echo_is_detected() {
     let chans: Vec<&[f64]> = vec![&echoed];
     let out = run_region(&chans, rate, None);
     let e1 = val(record(&out, "exp.echo_delay_s"));
-    assert!(
-        (e1 - 0.020).abs() < 0.002,
-        "primary echo delay {e1}"
-    );
+    assert!((e1 - 0.020).abs() < 0.002, "primary echo delay {e1}");
     let e2 = record(&out, "exp.echo2_delay_s");
     assert_eq!(
         e2.validity,
@@ -620,10 +617,7 @@ fn level_transfer_detects_compression() {
     let pair = aligned_pair(&srcs, n);
     let out = run_region(&chans, rate, Some(&pair));
     let slope = val(record(&out, "exp.level_transfer_slope"));
-    assert!(
-        (-0.9..-0.3).contains(&slope),
-        "compressor slope {slope}"
-    );
+    assert!((-0.9..-0.3).contains(&slope), "compressor slope {slope}");
     let corr = val(record(&out, "exp.level_transfer_corr"));
     assert!(corr < -0.8, "corr {corr}");
     assert_eq!(
@@ -732,10 +726,7 @@ fn local_time_map_tracks_constant_residual_delay() {
     assert!(rows > 0);
     let lags: Vec<f64> = (0..rows).map(|r| t.data[r * 3 + 1]).collect();
     let mean_lag = lags.iter().sum::<f64>() / rows as f64;
-    assert!(
-        (mean_lag - 5.0).abs() < 2.0,
-        "mean residual lag {mean_lag}"
-    );
+    assert!((mean_lag - 5.0).abs() < 2.0, "mean residual lag {mean_lag}");
 }
 
 #[test]
@@ -767,7 +758,10 @@ fn noise_classification_scores_known_signals() {
     let base = noise(n2, 0x570a);
     let modulated: Vec<f64> = (0..n2)
         .map(|i| {
-            let m = 0.1 + 0.9 * (0.5 + 0.5 * (2.0 * std::f64::consts::PI * 2.0 * i as f64 / rate as f64).sin());
+            let m = 0.1
+                + 0.9
+                    * (0.5
+                        + 0.5 * (2.0 * std::f64::consts::PI * 2.0 * i as f64 / rate as f64).sin());
             base[i] * m
         })
         .collect();
