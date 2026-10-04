@@ -11,6 +11,7 @@ dependencies = [
  "al-job",
  "al-locate",
  "al-media",
+ "al-testkit",
  "serde",
  "serde_json",
 ]
@@ -25,6 +26,7 @@ dependencies = [
  "al-job",
  "al-locate",
  "al-media",
+ "al-testkit",
  "al-viz",
  "serde_json",
 ]
@@ -64,6 +66,7 @@ dependencies = [
  "al-core",
  "al-job",
  "al-media",
+ "al-testkit",
  "serde",
  "serde_json",
 ]
@@ -74,9 +77,14 @@ version = "0.1.0"
 dependencies = [
  "al-core",
  "al-job",
+ "al-testkit",
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "al-testkit"
+version = "0.1.0"
 
 [[package]]
 name = "al-viz"
