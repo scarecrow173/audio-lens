@@ -54,6 +54,9 @@ fixture と許容誤差付き期待値で回帰可能であることを保証す
 - Rule: spec 列挙ケースが対応するテストとして存在する
 - Rule: 偽受理・低相関ケースは期待どおり
   invalid/low confidence になる
+- Rule: 中間成果物(スペクトル・局所 time map 等のテンソル)は
+  値だけでなく shape/メタデータ(次元・単位・dtype)も検証する
+  (validation strategy の中間成果物保持要求との整合)
 
 ## Examples
 
