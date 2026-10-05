@@ -273,6 +273,79 @@ fn non_valid_trigger_marks_stereo_features_invalid_too() {
 }
 
 #[test]
+fn freq_lr_coherence_is_low_for_independent_channels() {
+    // Regression: a single-frame CSD always satisfies
+    // |CSD|^2 == Pxx * Pyy, so averaging per-frame magnitudes
+    // degenerates to a constant 1.0. Coherence must be accumulated
+    // across frames (Welch-style); independent noise reads low.
+    let rate = 48_000u32;
+    let a = noise(1 << 15, 0x1);
+    let b = noise(1 << 15, 0x2);
+    let chans: Vec<&[f64]> = vec![&a, &b];
+    let region = TriggeredRegion {
+        start_s: 0.0,
+        end_s: a.len() as f64 / rate as f64,
+        triggers: vec!["manual".into()],
+        validity: Validity::Valid,
+        confidence: Confidence::High,
+        has_valid_trigger: true,
+    };
+    let out = analyze_region(
+        "in",
+        "in__r000",
+        &chans,
+        rate,
+        &region,
+        None,
+        None,
+        &ExpensiveConfig::default(),
+    );
+    let coh = record(&out, "exp.freq_lr_coherence");
+    match coh.value {
+        Value::Scalar(v) => {
+            assert!(v.is_finite(), "coherence must be finite: {v}");
+            assert!(
+                v < 0.5,
+                "independent channels must read low coherence, got {v}"
+            );
+        }
+        _ => panic!("scalar expected"),
+    }
+}
+
+#[test]
+fn freq_lr_coherence_is_high_for_identical_channels() {
+    let rate = 48_000u32;
+    let a = noise(1 << 15, 0x3);
+    let chans: Vec<&[f64]> = vec![&a, &a];
+    let region = TriggeredRegion {
+        start_s: 0.0,
+        end_s: a.len() as f64 / rate as f64,
+        triggers: vec!["manual".into()],
+        validity: Validity::Valid,
+        confidence: Confidence::High,
+        has_valid_trigger: true,
+    };
+    let out = analyze_region(
+        "in",
+        "in__r000",
+        &chans,
+        rate,
+        &region,
+        None,
+        None,
+        &ExpensiveConfig::default(),
+    );
+    let coh = record(&out, "exp.freq_lr_coherence");
+    match coh.value {
+        Value::Scalar(v) => {
+            assert!(v > 0.95, "identical channels must read ~1, got {v}");
+        }
+        _ => panic!("scalar expected"),
+    }
+}
+
+#[test]
 fn manual_trigger_still_estimates_when_merged_with_non_valid_event() {
     let rate = 48_000u32;
     let raw = noise(1 << 16, 0xabc);
@@ -586,7 +659,7 @@ fn channel_mix_recovers_signed_band_coeffs() {
                 && r.channels == Some(ChannelSelector::Channel(0))
                 && r.validity == Validity::Valid
         })
-        .map(|r| val(r))
+        .map(val)
         .collect();
     assert!(!coeffs.is_empty(), "expected per-band coeff records");
     let max_c = coeffs.iter().copied().fold(0.0, f64::max);
@@ -637,9 +710,7 @@ fn local_time_map_tracks_constant_residual_delay() {
     // Capture is locally delayed by +5 samples vs the alignment —
     // the time map should read lag ≈ +5.
     let mut cap = vec![0.0f64; n];
-    for i in 5..n {
-        cap[i] = src[i - 5];
-    }
+    cap[5..].copy_from_slice(&src[..n - 5]);
     let srcs: Vec<&[f64]> = vec![&src];
     let chans: Vec<&[f64]> = vec![&cap];
     let pair = aligned_pair(&srcs, n - 64);

@@ -338,8 +338,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         },
                         Some(pair),
                     );
-                } else {
-                    let (o0, o1, src_segs) = aligned.unwrap();
+                } else if let Some((o0, o1, src_segs)) = aligned {
                     let cap = ctx.chans[0];
                     let win = ((0.02 * rate as f64) as usize).max(64);
                     let hop = (win / 2).max(1);
