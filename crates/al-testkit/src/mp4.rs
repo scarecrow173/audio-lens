@@ -161,12 +161,12 @@ fn sound_entry_body(spec: &Mp4EntrySpec) -> Vec<u8> {
         b.extend_from_slice(&0u32.to_be_bytes()); // lpcmFramesPerPacket
     }
     if let Some((flags, size)) = pcmc {
+        // ISO/IEC 23003-5 pcmC: FullBox header (4) + format_flags (1)
+        // + PCM_sample_size (1) — a 6-byte body, nothing else.
         let mut c = Vec::new();
         c.extend_from_slice(&0u32.to_be_bytes()); // version/flags
         c.push(*flags);
         c.push(*size);
-        c.extend_from_slice(&u32::from(*channels).to_be_bytes());
-        c.extend_from_slice(&rate.to_be_bytes());
         put_box(&mut b, b"pcmC", &c);
     }
     b

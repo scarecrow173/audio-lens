@@ -99,9 +99,18 @@ spec `../specs/media-ingest.md` は video capture files を要求するが、
   可否と独立に記録し、PCM のみ `Option` として扱う。全トラック
   が圧縮の主流ケースでも ingest は metadata/timing 成果物を
   永続化して完了し、`decoded_pcm` 成果物は省略される
-  (後段は `decode_input` → `Ok(None)` →
-  `DecodeInputUnavailable` 記録の既存経路で処理する)。
-  1 入力の失敗は他入力の記録を巻き込まない
+  (分析ステージは `decode_input` → `Ok(None)` →
+  `DecodeInputUnavailable` 記録の既存経路で処理する。
+  dataset / visualization / export の metadata-only 通過は
+  既存経路に含まれず、`video-av-features` 側の部分 ingest
+  タスク(`docs/tasks/video-features-ingest.md`)が追加実装する
+  下流伝播に依存する)。
+  1 入力の失敗は他入力の記録を巻き込まない。
+  **エラー境界の不変条件**: コンテナ構造の破損(ボックス不整合・
+  サンプルテーブルの矛盾)は `Malformed` で致命的のまま、
+  サンプルデータ層の欠損・デコード不可(コーデック非対応・
+  mdat 打ち切り等)は `decode/input unavailable` の integrity
+  観測として記録し ingest を完走させる
 - 永続化するストリームタイミングのフィールド名は
   AVI 固有の `movi_order_timestamps` ではなく、コンテナ中立の
   命名(例: `stream_timestamps` + 由来ラベル

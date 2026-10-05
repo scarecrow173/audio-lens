@@ -6,7 +6,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
 
-use super::{Emit, ExpensiveResult, RegionCtx};
+use super::{Emit, ExpensiveResult, RegionCtx, emit_unsupported};
 
 /// Emit this family's invalid schema for a region selected by
 /// non-`Valid` evidence (same ids `run` would produce, as NaN
@@ -296,7 +296,27 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     },
                     fr as u64,
                 ));
+            } else {
+                emit_unsupported(
+                    e,
+                    &mut out.records,
+                    &[
+                        ("exp.pre_echo_ratio", "ratio"),
+                        ("exp.transient_smear_ms", "ms"),
+                    ],
+                    "insufficient fine-STFT frames or no high band bins",
+                );
             }
+        } else {
+            emit_unsupported(
+                e,
+                &mut out.records,
+                &[
+                    ("exp.pre_echo_ratio", "ratio"),
+                    ("exp.transient_smear_ms", "ms"),
+                ],
+                "region shorter than two fine-analysis windows",
+            );
         }
     }
 
