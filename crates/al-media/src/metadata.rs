@@ -68,6 +68,8 @@ impl From<io::Error> for MediaError {
 pub enum SampleFormat {
     /// Unsigned 8-bit PCM.
     PcmU8,
+    /// Signed 8-bit PCM.
+    PcmS8,
     /// Signed 16-bit PCM.
     PcmS16,
     /// Signed 24-bit PCM.

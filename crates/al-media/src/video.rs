@@ -347,6 +347,17 @@ pub fn extract_features(
         Err(reason) => return unavailable(reason),
     };
 
+    // The declared frame size must fit inside the largest frame chunk
+    // before any plane is allocated — corrupt BITMAPINFOHEADER
+    // dimensions otherwise drive an unbounded allocation.
+    let max_body = frames.iter().map(|f| f.body.len()).max().unwrap_or(0);
+    if dib.frame_bytes() > max_body {
+        return unavailable(format!(
+            "DIB frame needs {} bytes, largest frame chunk holds {}",
+            dib.frame_bytes(),
+            max_body
+        ));
+    }
     let pixels = dib.width as usize * dib.height as usize;
     let mut luma_plane = Vec::with_capacity(pixels);
     let mut prev: Option<Vec<f64>> = None;
@@ -502,10 +513,10 @@ mod tests {
         let stride = (4 * 3 + 3) & !3;
         let mut body = vec![0u8; stride * 2];
         // Bottom-up storage: the first stored row is the bottom row.
-        for px in body[..stride].chunks_exact_mut(3) {
+        for px in body[..stride].as_chunks_mut::<3>().0 {
             px.fill(bottom_row);
         }
-        for px in body[stride..].chunks_exact_mut(3) {
+        for px in body[stride..].as_chunks_mut::<3>().0 {
             px.fill(top_row);
         }
         body
