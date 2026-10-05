@@ -312,6 +312,7 @@ impl<'a> Emit<'a> {
     /// to the mapped trigger validity — untrusted upstream evidence
     /// must not yield `Valid` numbers — and no record may exceed the
     /// confidence of the evidence that selected the region.
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn push(
         &self,
         id: &str,
@@ -356,6 +357,7 @@ impl<'a> Emit<'a> {
 
     /// [`Emit::push`] plus the fine-analysis STFT resolution stamp so
     /// consumers can compare across feature families.
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn push_spec(
         &self,
         id: &str,

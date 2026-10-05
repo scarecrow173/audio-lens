@@ -42,6 +42,7 @@ pub(crate) fn emit_invalid(e: &Emit<'_>, records: &mut Vec<FeatureRecord>, reaso
 
 /// Push one pair-derived record: carries the locate alignment id and
 /// never exceeds the pair's own confidence.
+#[allow(clippy::too_many_arguments)]
 fn push_pair(
     e: &Emit<'_>,
     pair: &super::PairEvidence<'_>,

@@ -87,8 +87,12 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             let fr = mb.frames().min(ob.frames());
             if fr > 0 {
                 // Frequency-dependent L/R coherence in the mid band.
-                let mut coh_sum = 0.0;
-                let mut coh_n = 0u64;
+                // Magnitude-squared coherence needs cross-frame power
+                // accumulation — a single-frame cross-spectrum is
+                // identically 1 and carries no information.
+                let mut sxy = vec![(0.0f64, 0.0f64); half];
+                let mut sxx = vec![0.0f64; half];
+                let mut syy = vec![0.0f64; half];
                 let band_bins: Vec<usize> = bands
                     .iter()
                     .map(|&(lo, hi)| ((lo / bin_hz) as usize, (hi / bin_hz) as usize))
@@ -99,11 +103,20 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     for &k in band_bins.iter().take(half) {
                         let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
                         let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
-                        if aa * bb > 0.0 {
-                            let num = c[k].0 * c[k].0 + c[k].1 * c[k].1;
-                            coh_sum += (num / (aa * bb)).sqrt();
-                            coh_n += 1;
-                        }
+                        sxy[k].0 += c[k].0;
+                        sxy[k].1 += c[k].1;
+                        sxx[k] += aa;
+                        syy[k] += bb;
+                    }
+                }
+                let mut coh_sum = 0.0;
+                let mut coh_n = 0u64;
+                for &k in &band_bins {
+                    let den = sxx[k] * syy[k];
+                    if den > 0.0 {
+                        let num = sxy[k].0 * sxy[k].0 + sxy[k].1 * sxy[k].1;
+                        coh_sum += (num / den).sqrt();
+                        coh_n += 1;
                     }
                 }
                 let supported = coh_n > 0;
@@ -528,11 +541,10 @@ fn csolve(a: &[Vec<(f64, f64)>], b: &[(f64, f64)]) -> Option<(Vec<(f64, f64)>, f
         m.swap(col, pivot);
         for row in col + 1..n {
             let f = cdiv(m[row][col], m[col][col]);
-            for c in col..=n {
-                m[row][c] = (
-                    m[row][c].0 - cmul(f, m[col][c]).0,
-                    m[row][c].1 - cmul(f, m[col][c]).1,
-                );
+            let (head, tail) = m.split_at_mut(row);
+            let pivot_row = &head[col];
+            for (c, v) in tail[0].iter_mut().enumerate().take(n + 1).skip(col) {
+                *v = (v.0 - cmul(f, pivot_row[c]).0, v.1 - cmul(f, pivot_row[c]).1);
             }
         }
     }
