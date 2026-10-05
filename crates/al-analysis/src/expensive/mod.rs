@@ -377,6 +377,29 @@ impl<'a> Emit<'a> {
     }
 }
 
+/// Emit `ids` as `InsufficientSupport` when a family's own support
+/// gate fails on an otherwise-valid trigger — the invalid schema must
+/// mirror what the valid path would have produced, not silently
+/// omit the records.
+pub(crate) fn emit_unsupported(
+    e: &Emit<'_>,
+    records: &mut Vec<FeatureRecord>,
+    ids: &[(&str, &str)],
+    reason: &str,
+) {
+    for &(id, unit) in ids {
+        records.push(e.push(
+            id,
+            f64::NAN,
+            unit,
+            Confidence::High,
+            Validity::InsufficientSupport,
+            Some(reason.to_string()),
+            0,
+        ));
+    }
+}
+
 /// Source→capture pair evidence for the pair-dependent families
 /// (IR deconvolution, level-dependent transfer, band mixing matrix,
 /// local time map).
@@ -597,10 +620,7 @@ pub fn analyze_region(
     let total_power: f64 = mean_power.iter().sum();
     let one_sided_power: f64 = mean_power[..half].iter().sum();
 
-    let segs: Vec<&[f64]> = chans
-        .iter()
-        .map(|c| &c[s0..s1.min(c.len())])
-        .collect();
+    let segs: Vec<&[f64]> = chans.iter().map(|c| &c[s0..s1.min(c.len())]).collect();
     let ctx = RegionCtx {
         region_name,
         rate,
