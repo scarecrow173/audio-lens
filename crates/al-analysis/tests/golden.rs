@@ -329,7 +329,7 @@ fn case_jitter_delay() {
     // ベース遅延は locate の位置に吸収され、整列後は
     // ジッタのばらつきだけが残る。
     let raw = signal::noise(16_384, 37, 1.0);
-    let source = Biquad::lowpass(RATE, 4_000.0, 0.7071).apply(&raw);
+    let source = Biquad::lowpass(RATE, 4_000.0, std::f64::consts::FRAC_1_SQRT_2).apply(&raw);
     let cap_body = signal::jitter_delay(&source, 60.0, 25.0, 1_024, 41);
     let capture = capture_with(&cap_body, 4_000, 43);
     let mut fx = mono_fixture("jitter", source, capture, serde_json::json!({}));
@@ -361,7 +361,7 @@ fn case_src_time_scale() {
     // 低速再生(1.002 倍速)相当: cap[i] = src[i * 1.002]
     let ratio = 1.002f64;
     let raw = signal::noise(16_384, 47, 1.0);
-    let source = Biquad::lowpass(RATE, 500.0, 0.7071).apply(&raw);
+    let source = Biquad::lowpass(RATE, 500.0, std::f64::consts::FRAC_1_SQRT_2).apply(&raw);
     let cap_body = signal::resample_linear(&source, ratio);
     let capture = capture_with(&cap_body, 4_000, 53);
     let mut fx = mono_fixture("src-scale", source, capture, serde_json::json!({}));
@@ -569,7 +569,7 @@ fn case_src_alias_image() {
     // なので高域 coherence が落ち、PSD 比のリフトはフラグが立つはず。
     // (Welch 平均回数を稼ぐため stft を小窓にする)
     let raw = signal::noise(16_384, 131, 1.0);
-    let lp = Biquad::lowpass(RATE, 6_000.0, 0.7071);
+    let lp = Biquad::lowpass(RATE, 6_000.0, std::f64::consts::FRAC_1_SQRT_2);
     let source = lp.apply(&lp.apply(&lp.apply(&lp.apply(&raw))));
     let dec = signal::resample_linear(&source, 2.0);
     let cap_body = signal::zero_stuff(&dec, 2); // 16384 サンプル
@@ -722,9 +722,10 @@ fn pinned_noncoherent_psd_lift_not_valid_eq() {
     let source = raw.clone();
     // 急峻な LP(6 kHz, x4 段)でコヒーレントな高域を消し、
     // 無相関ノイズを載せる
-    let lp = Biquad::lowpass(RATE, 6_000.0, 0.7071);
+    let lp = Biquad::lowpass(RATE, 6_000.0, std::f64::consts::FRAC_1_SQRT_2);
     let mut low = lp.apply(&lp.apply(&lp.apply(&lp.apply(&raw))));
-    let hiss = Biquad::highpass(RATE, 8_000.0, 0.7071).apply(&signal::noise(16_384, 191, 1.0));
+    let hiss = Biquad::highpass(RATE, 8_000.0, std::f64::consts::FRAC_1_SQRT_2)
+        .apply(&signal::noise(16_384, 191, 1.0));
     for (i, v) in low.iter_mut().enumerate() {
         *v += 0.4 * hiss[i];
     }
