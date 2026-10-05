@@ -627,7 +627,7 @@ fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
         let pos = position(&body);
         expect_true(
             "periodic accept is phase-consistent",
-            pos % period as u64 == 0,
+            pos.is_multiple_of(period as u64),
             format!("accepted at non-period-aligned position {pos}"),
         );
     }
