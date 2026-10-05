@@ -305,15 +305,15 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
     let audio: Vec<u8> = (0..960i16)
         .flat_map(|v| (v % 400 - 200).to_le_bytes())
         .collect();
-    let avi_bytes = al_media::write_avi(&al_media::AviSpec {
-        width: 64,
-        height: 48,
-        fps: 10,
-        frames: vec![vec![7u8; 64 * 48 * 3]; 20],
+    let avi_bytes = al_testkit::media::write_avi(&al_testkit::media::AviSpec::cfr(
+        64,
+        48,
+        10,
+        vec![vec![7u8; 64 * 48 * 3]; 20],
         audio,
-        channels: 1,
-        sample_rate: 48_000,
-    });
+        1,
+        48_000,
+    ));
     let avi = write_fixture(&dir, "cap.avi", &avi_bytes);
 
     let job_dir = temp_dir("job-avi");
