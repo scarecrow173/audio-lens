@@ -9,7 +9,7 @@ use al_job::job::{JobDefinition, input};
 use al_job::runner::StageRunner;
 use al_job::stage::Stage;
 use al_media::{
-    IngestStage, MediaError, MediaFormat, TimestampOrigin, decode_mp4, detect_format,
+    IngestStage, MediaError, MediaFormat, SampleFormat, TimestampOrigin, decode_mp4, detect_format,
 };
 use al_testkit::mp4::{
     Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4,
@@ -307,6 +307,68 @@ fn compressed_soun_is_an_integrity_observation_not_a_failure() {
             .filter(|t| t.timestamp_origin == TimestampOrigin::SampleTable)
             .count(),
         2
+    );
+}
+
+#[test]
+fn signed_8bit_pcm_decodes_as_pcm_s8() {
+    // twos with bits=8: signed single bytes; endianness is moot.
+    let pcm: Vec<u8> = vec![0x00, 0x7f, 0x80, 0xfe, 0x01];
+    let mut t = soun_pcm_track(1, *b"twos", 1, 8000, &pcm);
+    let Mp4EntrySpec::Sound { bits, .. } = &mut t.entry else {
+        unreachable!()
+    };
+    *bits = 8;
+    t.table = Mp4TableSpec::uniform(pcm, 5, 1, 1);
+    let m = decode_mp4(&write_mp4(&base_spec(vec![t]))).unwrap();
+    let a = m.audio.as_ref().expect("s8 decoded");
+    assert_eq!(a.codec, "pcm_s8");
+    assert_eq!(a.sample_format, SampleFormat::PcmS8);
+    assert_eq!(a.samples, vec![0.0, 127.0, -128.0, -2.0, 1.0]);
+}
+
+#[test]
+fn unsupported_pcm_width_is_integrity_observation_not_failure() {
+    // twos with a 12-bit entry: the layout resolves but the width is
+    // unsupported — metadata and timing survive as observations.
+    let mut t = soun_pcm_track(1, *b"twos", 1, 8000, &[0x12, 0x34]);
+    let Mp4EntrySpec::Sound { bits, .. } = &mut t.entry else {
+        unreachable!()
+    };
+    *bits = 12;
+    let m = decode_mp4(&write_mp4(&base_spec(vec![t]))).unwrap();
+    assert!(m.audio.is_none());
+    assert!(
+        m.integrity.iter().any(|o| {
+            o.kind == "decode/input unavailable"
+                && o.detail["reason"]
+                    .as_str()
+                    .is_some_and(|r| r.contains("unsupported PCM width"))
+        }),
+        "integrity: {:?}",
+        m.integrity
+    );
+    assert_eq!(m.facts.tracks.len(), 1);
+    assert!(!m.timing.is_empty());
+}
+
+#[test]
+fn oversized_sample_count_is_malformed_not_an_alloc_bomb() {
+    // stsz declares more samples than the file holds bytes: reject
+    // before the size table expands.
+    let spec = base_spec(vec![soun_pcm_track(1, *b"sowt", 1, 8000, &[0u8; 8])]);
+    let mut bytes = write_mp4(&spec);
+    // Locate the stsz body and inflate its declared sample count.
+    let tag = bytes
+        .windows(4)
+        .position(|w| w == b"stsz")
+        .expect("stsz box");
+    let count_at = tag + 4 + 4 + 4 + 4;
+    bytes[count_at..count_at + 4].copy_from_slice(&u32::MAX.to_be_bytes());
+    let err = decode_mp4(&bytes).unwrap_err();
+    assert!(
+        matches!(err, MediaError::Malformed { .. }),
+        "expected malformed, got {err:?}"
     );
 }
 

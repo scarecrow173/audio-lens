@@ -427,7 +427,15 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
                     audio_pcm.extend_from_slice(p.body);
                 }
             }
-            match decode_waveformatex(&streams[audio_idx].format, &audio_pcm) {
+            // An auds stream with no wb payloads is undecodable input,
+            // not a zero-length decode.
+            match if audio_pcm.is_empty() {
+                Err(MediaError::input_unavailable(
+                    "audio stream carries no wb packets",
+                ))
+            } else {
+                decode_waveformatex(&streams[audio_idx].format, &audio_pcm)
+            } {
                 Ok(a) => (Some(a), None),
                 Err(e) => (None, Some(format!("AVI audio stream: {e}"))),
             }

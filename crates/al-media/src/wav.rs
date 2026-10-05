@@ -102,6 +102,14 @@ pub(crate) fn decode_samples(
             }
         };
 
+    // A header declaring no channels, no rate, or a zero frame size
+    // cannot describe a decodable stream — corrupt, not merely empty.
+    if fmt.channels == 0 || fmt.sample_rate == 0 || fmt.block_align == 0 {
+        return Err(MediaError::malformed(format!(
+            "fmt declares channels={} sample_rate={} block_align={}",
+            fmt.channels, fmt.sample_rate, fmt.block_align
+        )));
+    }
     // Cross-check the declared frame layout: a header that contradicts
     // itself is corrupt, not merely unusual.
     let expected_block = fmt.channels as usize * bytes_per_sample;

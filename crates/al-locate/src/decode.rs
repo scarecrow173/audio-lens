@@ -41,7 +41,7 @@ pub struct DecodedInput {
 /// comparisons and residual energies are absolute-scale-sensitive.
 pub fn format_scale(format: SampleFormat) -> f64 {
     match format {
-        SampleFormat::PcmU8 => 128.0,
+        SampleFormat::PcmU8 | SampleFormat::PcmS8 => 128.0,
         SampleFormat::PcmS16 => 32768.0,
         SampleFormat::PcmS24 => 8_388_608.0,
         SampleFormat::PcmS32 => 2_147_483_648.0,

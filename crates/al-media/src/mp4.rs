@@ -440,12 +440,20 @@ fn cts_series(ctts: &[(u32, i64)]) -> Vec<i64> {
 }
 
 /// Parse `stsz`: uniform sample size or per-sample sizes.
-fn parse_stsz(body: &[u8]) -> Result<Vec<u32>, MediaError> {
+/// `file_len` bounds the declared count: every real sample needs at
+/// least one payload byte, so a table cannot name more samples than
+/// the file holds.
+fn parse_stsz(body: &[u8], file_len: usize) -> Result<Vec<u32>, MediaError> {
     if body.len() < 12 {
         return Err(MediaError::malformed("stsz shorter than header"));
     }
     let uniform = be_u32(body, 4)?;
     let count = be_u32(body, 8)? as usize;
+    if count > file_len {
+        return Err(MediaError::malformed(
+            "stsz declares more samples than bytes in file",
+        ));
+    }
     if uniform != 0 {
         return Ok(vec![uniform; count]);
     }
@@ -771,6 +779,7 @@ fn decode_pcm_bytes(
         // 8-bit unsigned keeps the WAV PcmU8 label; wider unsigned was
         // offset onto the signed scale above and reports as signed.
         (false, false, 8) => SampleFormat::PcmU8,
+        (false, true, 8) => SampleFormat::PcmS8,
         (false, _, 16) => SampleFormat::PcmS16,
         (false, _, 24) => SampleFormat::PcmS24,
         (false, _, 32) => SampleFormat::PcmS32,
@@ -784,6 +793,7 @@ fn pcm_codec_name(layout: &PcmLayout, format: SampleFormat) -> String {
     let endian = if layout.big_endian { "be" } else { "le" };
     match format {
         SampleFormat::PcmU8 => "pcm_u8".into(),
+        SampleFormat::PcmS8 => "pcm_s8".into(),
         SampleFormat::Float32 => format!("pcm_f32{endian}"),
         SampleFormat::Float64 => format!("pcm_f64{endian}"),
         SampleFormat::PcmS16 => format!("pcm_s16{endian}"),
@@ -879,7 +889,7 @@ fn parse_stbl(
                 ctts = Some(parse_run_table(b, signed, "ctts")?);
             }
             b"stss" => stss = Some(parse_stss(b)?),
-            b"stsz" => stsz = Some(parse_stsz(b)?),
+            b"stsz" => stsz = Some(parse_stsz(b, data.len())?),
             b"stsc" => stsc = Some(parse_stsc(b)?),
             b"stco" => offsets = Some(parse_chunk_offsets(b, false)?),
             b"co64" => offsets = Some(parse_chunk_offsets(b, true)?),
@@ -904,6 +914,17 @@ fn parse_stbl(
         ));
     }
     if let (Some(stts), Some(stsz), Some(stsc), Some(offsets)) = (stts, stsz, stsc, offsets) {
+        // Run tables expand before use; a declared total above the
+        // file length can only come from a corrupt box.
+        let declared: u64 = stts.iter().map(|e| u64::from(e.0)).sum();
+        let declared_cts: u64 = ctts
+            .as_ref()
+            .map_or(0, |c| c.iter().map(|e| u64::from(e.0)).sum());
+        if declared > data.len() as u64 || declared_cts > data.len() as u64 {
+            return Err(MediaError::malformed(
+                "stts/ctts declares more samples than bytes in file",
+            ));
+        }
         let table = SampleTable {
             dts: dts_series(&stts),
             cts_offsets: ctts.map(|c| cts_series(&c)),
@@ -1204,17 +1225,49 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
             });
             continue;
         }
-        let map = build_chunk_map(&trak.table)?;
-        let bytes = extract_sample_bytes(data, &map, sd_index)?;
-        let (samples, sample_format) = decode_pcm_bytes(&layout, &bytes)?;
-        audio = Some(DecodedAudio {
-            samples,
-            channels: layout.channels,
-            sample_rate: layout.sample_rate,
-            bits_per_sample: layout.bits.max(entry.bits),
-            sample_format,
-            codec: pcm_codec_name(&layout, sample_format),
-        });
+        if layout.channels == 0 || layout.sample_rate == 0 {
+            integrity.push(IntegrityObservation {
+                kind: "decode/input unavailable".into(),
+                detail: serde_json::json!({
+                    "track_index": ti as u32,
+                    "handler": "soun",
+                    "codec": fourcc_text(&entry.format),
+                    "reason": "PCM entry declares zero channels or sample rate",
+                }),
+            });
+            continue;
+        }
+        // A decodable layout can still fail at the data layer
+        // (unsupported width, mid-sample truncation): that is a
+        // decode/input observation, while structural table corruption
+        // stays Malformed — the same boundary as compressed tracks.
+        let extracted = build_chunk_map(&trak.table)
+            .and_then(|map| extract_sample_bytes(data, &map, sd_index))
+            .and_then(|bytes| decode_pcm_bytes(&layout, &bytes));
+        match extracted {
+            Ok((samples, sample_format)) => {
+                audio = Some(DecodedAudio {
+                    samples,
+                    channels: layout.channels,
+                    sample_rate: layout.sample_rate,
+                    bits_per_sample: layout.bits.max(entry.bits),
+                    sample_format,
+                    codec: pcm_codec_name(&layout, sample_format),
+                });
+            }
+            Err(MediaError::InputUnavailable { reason }) => {
+                integrity.push(IntegrityObservation {
+                    kind: "decode/input unavailable".into(),
+                    detail: serde_json::json!({
+                        "track_index": ti as u32,
+                        "handler": "soun",
+                        "codec": fourcc_text(&entry.format),
+                        "reason": reason,
+                    }),
+                });
+            }
+            Err(e) => return Err(e),
+        }
     }
 
     let tracks: Vec<Mp4Track> = traks.into_iter().map(|t| t.track).collect();
