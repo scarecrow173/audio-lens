@@ -64,6 +64,8 @@ spec の未実装 expensive ファミリを、既存契約を保ったまま
 
 - `crates/al-analysis/src/expensive.rs` - config/trigger/
   plan_regions/analyze_region オーケストレーション(分割後も保持)
+- `crates/al-analysis/src/expensive/transfer.rs` - 精密伝達 /
+  カットオフ推定(既存ファミリの退避先)
 - `crates/al-analysis/src/expensive/ir.rs` - IR 候補・early/late・
   decay
 - `crates/al-analysis/src/expensive/codec.rs` - pre-echo・
@@ -113,7 +115,10 @@ spec の未実装 expensive ファミリを、既存契約を保ったまま
 
 ## Self-Review
 
-- [x] Every spec requirement maps to a task.
+- [x] Every spec requirement maps to a task **or** is explicitly
+  deferred in `docs/discovery/expensive-family-gaps.md`
+  (精密スペクトル自己相関の独立指標化・エイリアス/折り返し独立
+  記述子・ナイキスト領域構造・ドロップアウト/ギャップ形状精緻化)。
 - [x] No placeholders remain.
 - [x] File paths, relations, status values, and terminology are consistent.
 

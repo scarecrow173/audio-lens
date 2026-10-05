@@ -56,6 +56,10 @@ MP4(ISO-BMFF)の demux とサンプルタイミング観測
 - Rule: 圧縮コーデックの decode 要求は
   `decode/input unavailable` で明示失敗する
 - Rule: 非圧縮 PCM サンプルエントリは PCM として取り出せる
+- Scope: ctts version 0(符号なしオフセット)のみ検証対象。
+  version 1(符号付きオフセット)は今期スコープ外であり、
+  負のオフセットを持つ入力は demux 時に検出して扱うこと
+  (designs/mp4-ingest.md の境界参照)
 
 ## Examples
 
