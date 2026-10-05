@@ -93,6 +93,7 @@ pub fn push_list(out: &mut Vec<u8>, kind: &[u8; 4], body: &[u8]) {
 /// 56-byte AVISTREAMHEADER のボディを組み立てる低水準ヘルパ。
 /// `start` は `dwStart`、`sample_size` は `dwSampleSize`
 /// (PCM 音声では block align)。
+#[allow(clippy::too_many_arguments)]
 pub fn strh_body(
     fcc_type: &[u8; 4],
     handler: &[u8; 4],

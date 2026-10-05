@@ -7,4 +7,5 @@
 
 pub mod expect;
 pub mod media;
+pub mod mp4;
 pub mod signal;

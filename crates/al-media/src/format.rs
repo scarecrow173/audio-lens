@@ -10,12 +10,19 @@ pub enum MediaFormat {
     Wav,
     /// RIFF/AVI container (`RIFF....AVI `).
     Avi,
+    /// ISO-BMFF / MP4 container whose first box is `ftyp`.
+    Mp4,
 }
 
 /// Detect the container format from the leading bytes of `data`.
 ///
 /// Returns `None` when no known signature matches. Callers must treat that
 /// as `decode/input unavailable`, not as a soft failure.
+///
+/// MP4 is identified only by a leading `ftyp` box: the box type field at
+/// offset 4. Files that start directly with `free`/`wide`/`styp`/`mdat`
+/// (legal ISO-BMFF without an `ftyp`) stay `None` — we do not attempt
+/// MP4 observation on containers we cannot positively identify.
 pub fn detect_format(data: &[u8]) -> Option<MediaFormat> {
     if data.len() >= 12 && &data[0..4] == b"RIFF" {
         return match &data[8..12] {
@@ -23,6 +30,9 @@ pub fn detect_format(data: &[u8]) -> Option<MediaFormat> {
             b"AVI " => Some(MediaFormat::Avi),
             _ => None,
         };
+    }
+    if data.len() >= 8 && &data[4..8] == b"ftyp" {
+        return Some(MediaFormat::Mp4);
     }
     None
 }
@@ -45,6 +55,26 @@ mod tests {
         bytes[0..4].copy_from_slice(b"RIFF");
         bytes[8..12].copy_from_slice(b"AVI ");
         assert_eq!(detect_format(&bytes), Some(MediaFormat::Avi));
+    }
+
+    #[test]
+    fn detects_mp4_ftyp_signature() {
+        let mut bytes = vec![0u8; 24];
+        bytes[0..4].copy_from_slice(&24u32.to_be_bytes());
+        bytes[4..8].copy_from_slice(b"ftyp");
+        bytes[8..12].copy_from_slice(b"isom");
+        assert_eq!(detect_format(&bytes), Some(MediaFormat::Mp4));
+    }
+
+    #[test]
+    fn mp4_without_leading_ftyp_is_not_detected() {
+        // Legal ISO-BMFF may start with free/mdat/styp, but we only
+        // claim formats we positively identify.
+        for tag in [b"free", b"wide", b"styp", b"mdat", b"moov"] {
+            let mut bytes = vec![0u8; 16];
+            bytes[4..8].copy_from_slice(tag);
+            assert_eq!(detect_format(&bytes), None, "{tag:?}");
+        }
     }
 
     #[test]

@@ -14,6 +14,7 @@ use al_locate::decode::decode_input;
 use al_locate::result::LocateResult;
 use al_media::wav::WavEncoding;
 
+use crate::avsync::{self, AvSyncConfig};
 use crate::cheap::{self, CheapConfig};
 use crate::events::{self, EventConfig};
 use crate::expensive::{self, ExpensiveConfig};
@@ -44,6 +45,7 @@ impl Stage for CheapAnalysisStage {
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
         let err = |e: io::Error| StageError::new(StageKind::CheapAnalysis, e.to_string());
         let cfg = CheapConfig::from_job(ctx.config);
+        let av_cfg = AvSyncConfig::from_job(ctx.config);
         let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let mut records = Vec::new();
@@ -52,6 +54,20 @@ impl Stage for CheapAnalysisStage {
             let decoded = decode_input(input, ctx)
                 .map_err(|e| StageError::new(StageKind::CheapAnalysis, e.to_string()))?;
             let feature_path = format!("features/cheap/{}", input.input_id);
+            // A/V sync consumes the ingest-side video_features artifact
+            // independently of audio decode success — missing evidence
+            // becomes an explicit invalid record, never silence.
+            let video = load_video_features(input, ctx)?;
+            let mut lineage: Vec<String> = ctx
+                .manifest
+                .input_artifact(&input.input_id)
+                .iter()
+                .map(|a| a.as_str().to_string())
+                .collect();
+            if let Some((_, artifact_id)) = &video {
+                lineage.push(artifact_id.clone());
+            }
+            let video_features = video.map(|(f, _)| f);
             let Some(dec) = decoded else {
                 // Never ingested: record the failure as an invalid
                 // observation, not a stage error.
@@ -78,11 +94,19 @@ impl Stage for CheapAnalysisStage {
                     alignment_id: None,
                     lineage: Vec::new(),
                 };
+                let mut all = vec![rec];
+                all.extend(avsync::sync_records(
+                    &input.input_id.to_string(),
+                    None,
+                    video_features.as_ref(),
+                    &av_cfg,
+                    lineage,
+                ));
                 writer
                     .write_json(
                         "features/cheap",
                         &input.input_id.to_string(),
-                        &serde_json::json!({"records": [rec]}),
+                        &serde_json::json!({"records": all}),
                         prov(input, ctx),
                     )
                     .map_err(err)?;
@@ -90,7 +114,23 @@ impl Stage for CheapAnalysisStage {
                 continue;
             };
 
-            let out = cheap::analyze_input(&dec, &cfg);
+            let mut out = cheap::analyze_input(&dec, &cfg);
+            // A/V sync: the persisted onset_times tensor is the audio
+            // event series; video events come from ingest. Both are
+            // rebased to their own stream clock inside `sync_records`.
+            let onset_times: Vec<f64> = out
+                .tensors
+                .iter()
+                .find(|t| t.path == format!("features/cheap/{}/onset_times", dec.input_id))
+                .map(|t| t.data.clone())
+                .unwrap_or_default();
+            out.records.extend(avsync::sync_records(
+                &dec.input_id,
+                Some(&onset_times),
+                video_features.as_ref(),
+                &av_cfg,
+                lineage,
+            ));
             for tensor in &out.tensors {
                 write_tensor(&mut writer, tensor, prov_dec(&dec), chunk_bytes).map_err(err)?;
             }
@@ -579,6 +619,44 @@ fn write_tensor(
         }
     }
     writer.write_tensor(role, name, &tensor.shape, &chunk_shape, &chunks, provenance)
+}
+
+/// Load this input's ingest-side `video_features` artifact, if one
+/// was produced. Returns `(features, artifact_id)` so the consumer can
+/// extend its lineage. An absent artifact is `Ok(None)` — the input
+/// simply has no video stream.
+fn load_video_features(
+    input: &al_job::job::JobInput,
+    ctx: &StageContext<'_>,
+) -> Result<Option<(al_media::VideoFeatureArtifact, String)>, StageError> {
+    let job_dir = ctx.registry.job_dir();
+    let prefix = PathBuf::from("inputs").join(input.input_id.as_str());
+    let Some(artifact) = ctx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "video_features" && a.path.starts_with(&prefix))
+    else {
+        return Ok(None);
+    };
+    let path = checked_job_path(job_dir, &artifact.path)
+        .map_err(|e| StageError::new(StageKind::CheapAnalysis, e.to_string()))?;
+    let text = std::fs::read_to_string(&path).map_err(|e| {
+        StageError::new(
+            StageKind::CheapAnalysis,
+            format!("video features {} unreadable: {e}", artifact.path.display()),
+        )
+    })?;
+    let report: al_media::VideoFeatureReport = serde_json::from_str(&text).map_err(|e| {
+        StageError::new(
+            StageKind::CheapAnalysis,
+            format!("video features {} malformed: {e}", artifact.path.display()),
+        )
+    })?;
+    Ok(Some((
+        report.features,
+        artifact.artifact_id.as_str().to_string(),
+    )))
 }
 
 fn prov(

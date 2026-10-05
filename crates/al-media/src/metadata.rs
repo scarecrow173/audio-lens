@@ -68,6 +68,8 @@ impl From<io::Error> for MediaError {
 pub enum SampleFormat {
     /// Unsigned 8-bit PCM.
     PcmU8,
+    /// Signed 8-bit PCM.
+    PcmS8,
     /// Signed 16-bit PCM.
     PcmS16,
     /// Signed 24-bit PCM.
@@ -85,8 +87,6 @@ pub enum SampleFormat {
 /// Audio stream metadata recorded at ingest.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct AudioMetadata {
-    /// Container name (e.g. `wav`).
-    pub container: String,
     /// Codec name (e.g. `pcm_s16le`).
     pub codec: String,
     /// Sample rate in Hz.

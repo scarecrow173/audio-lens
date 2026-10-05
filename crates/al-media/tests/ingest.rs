@@ -335,7 +335,7 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
     let meta_path = runner.job_dir(&manifest.job_id).join(&meta_record.path);
     let meta: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(meta_path).unwrap()).unwrap();
-    assert_eq!(meta["audio"]["container"], "avi");
+    assert_eq!(meta["container"], "avi");
     assert_eq!(meta["audio"]["codec"], "pcm_s16le");
     assert_eq!(meta["audio"]["frames"], 960);
     assert_eq!(meta["video"]["codec"], "rawvideo");
@@ -355,9 +355,10 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
     // The movi-order-derived timestamp column itself is persisted:
     // metadata alone can address each frame's position on its clock.
     assert_eq!(v["start_tick"], 0);
-    let vts: Vec<i64> = v["movi_order_timestamps"]
+    assert_eq!(v["timestamp_origin"], "movi_order");
+    let vts: Vec<i64> = v["stream_timestamps"]
         .as_array()
-        .expect("movi_order_timestamps array")
+        .expect("stream_timestamps array")
         .iter()
         .map(|t| t.as_i64().unwrap())
         .collect();
@@ -368,10 +369,110 @@ fn ingest_avi_produces_pcm_metadata_and_video_facts() {
         .expect("audio timing");
     assert_eq!(a["observation"]["clock"], "audio");
     assert_eq!(a["observation"]["timestamp_count"], 1);
-    assert_eq!(a["movi_order_timestamps"], serde_json::json!([0]));
+    assert_eq!(a["stream_timestamps"], serde_json::json!([0]));
 
-    // WAV inputs never carry a video section.
-    assert!(meta["video"].is_object());
+    // The uncompressed vids stream produced a standalone video
+    // features artifact, summarized (never inlined) in metadata.
+    assert_eq!(meta["video_features"]["status"], "decoded");
+    assert_eq!(meta["video_features"]["frames"], 20);
+    let vf_record = manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "video_features")
+        .expect("video_features artifact");
+    let vf_path = runner.job_dir(&manifest.job_id).join(&vf_record.path);
+    let vf: al_media::VideoFeatureReport =
+        serde_json::from_str(&std::fs::read_to_string(vf_path).unwrap()).unwrap();
+    let al_media::VideoFeatureArtifact::Decoded(vf) = vf.features else {
+        panic!("rawvideo AVI must produce decoded video features")
+    };
+    assert_eq!(vf.luminance.len(), 20);
+    assert_eq!(vf.frame_timestamps, (0..20).collect::<Vec<i64>>());
+    assert!(vf.diff.iter().all(|&d| d == 0.0)); // identical frames
+    assert!(vf.events.is_empty());
+
+    std::fs::remove_dir_all(&dir).ok();
+    std::fs::remove_dir_all(&job_dir).ok();
+}
+
+/// Patch the `wFormatTag` of the second `strf` (the audio stream's
+/// WAVEFORMATEX) in an AVI produced by `write_avi`.
+fn set_audio_format_tag(avi: &mut [u8], tag: u16) {
+    let mut strf_seen = 0;
+    for i in 0..avi.len().saturating_sub(12) {
+        if &avi[i..i + 4] == b"strf" {
+            strf_seen += 1;
+            if strf_seen == 2 {
+                avi[i + 8..i + 10].copy_from_slice(&tag.to_le_bytes());
+                return;
+            }
+        }
+    }
+    panic!("audio strf not found in fixture");
+}
+
+#[test]
+fn avi_with_undecodable_audio_still_ingests_observations() {
+    // Partial ingest: an unsupported audio codec does not fail the
+    // stage. Metadata, timing, and video features persist; only the
+    // `decoded_pcm` artifact is absent — which `decode_input` surfaces
+    // as `Ok(None)` → `DecodeInputUnavailable` downstream.
+    let dir = temp_dir("avi-partial");
+    let mut avi_bytes = al_testkit::media::write_avi(&al_testkit::media::AviSpec::cfr(
+        64,
+        48,
+        10,
+        vec![vec![7u8; 64 * 48 * 3]; 10],
+        vec![0u8; 960],
+        1,
+        48_000,
+    ));
+    set_audio_format_tag(&mut avi_bytes, 2); // ADPCM: not decodable
+    let avi = write_fixture(&dir, "cap.avi", &avi_bytes);
+
+    let job_dir = temp_dir("job-avi-partial");
+    let runner = StageRunner::new(&job_dir);
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, &avi)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    )
+    .unwrap();
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(IngestStage::new())];
+
+    let manifest = runner.run(&def, &mut stages).unwrap();
+    assert_eq!(
+        manifest.stage(StageKind::Ingest).unwrap().status,
+        StageStatus::Completed
+    );
+    // No PCM artifact, but metadata and video features were produced.
+    assert!(!manifest.artifacts.iter().any(|a| a.role == "decoded_pcm"));
+    assert!(
+        manifest
+            .artifacts
+            .iter()
+            .any(|a| a.role == "video_features")
+    );
+
+    let meta_record = manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "ingest_metadata")
+        .expect("ingest_metadata artifact");
+    let meta_path = runner.job_dir(&manifest.job_id).join(&meta_record.path);
+    let meta: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(meta_path).unwrap()).unwrap();
+    assert_eq!(meta["container"], "avi");
+    assert!(meta["audio"].is_null());
+    // Timing observations persist even without decodable audio.
+    assert_eq!(meta["av_timing"].as_array().unwrap().len(), 2);
+    // The absence is recorded explicitly.
+    let integrity = meta["integrity"].as_array().expect("integrity array");
+    assert!(
+        integrity
+            .iter()
+            .any(|o| o["kind"] == "audio_decode_unavailable")
+    );
 
     std::fs::remove_dir_all(&dir).ok();
     std::fs::remove_dir_all(&job_dir).ok();
