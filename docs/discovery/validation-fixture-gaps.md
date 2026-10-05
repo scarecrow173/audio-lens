@@ -51,7 +51,7 @@ issue #13(検証戦略・ゴールデン fixture)は幅広い合成/ゴールデ
 - 実装済み: 各クレートの単体/結合テスト(合成信号の既知パラメータ
   検証あり)、決定的 WAV フィクスチャ 7 件 + AVI フィクスチャ
   (samples/)、export の決定的ハッシュスナップショット
-  (`al-viz/golden.rs`)
+  (`crates/al-viz/tests/viz.rs` のスナップショットテスト)
 - 未整備(issue #13 要求):
   - locate 要求ケースの網羅(gain 変更/EQ フィルタ挿入、
     強周期信号の偽ピーク、skip+resume、multichannel downmix、
