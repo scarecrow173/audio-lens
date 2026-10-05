@@ -157,13 +157,17 @@ impl Stage for VisualizationStage {
         let json = |a: &al_dataset::manifest::DatasetArtifact| {
             a.store == al_dataset::manifest::StoreKind::Json
         };
-        let audio = |a: &al_dataset::manifest::DatasetArtifact| {
+        let audio_or_json = |a: &al_dataset::manifest::DatasetArtifact| {
             a.store == al_dataset::manifest::StoreKind::Audio
+                || a.store == al_dataset::manifest::StoreKind::Json
         };
         let table = |a: &al_dataset::manifest::DatasetArtifact| {
             a.store == al_dataset::manifest::StoreKind::Table
         };
-        expect("inputs", audio).map_err(err)?;
+        // Partial-ingest contract: an input whose PCM was undecodable
+        // contributes only its metadata JSON, so `inputs` may hold
+        // Json stores with zero Audio stores.
+        expect("inputs", audio_or_json).map_err(err)?;
         expect("intermediate", tensor).map_err(err)?;
         expect("features/cheap", json).map_err(err)?;
         expect("residual", tensor).map_err(err)?;
@@ -178,34 +182,41 @@ impl Stage for VisualizationStage {
             .find(|i| matches!(i.role, InputRole::CaptureBug | InputRole::CaptureReference))
             .or_else(|| ctx.manifest.inputs.first());
         // The capture's own rate drives second-based conversions; it
-        // only exists once `inputs` audio is materialized.
+        // only exists once `inputs` audio is materialized. When the
+        // capture itself was undecodable there is no timebase — the
+        // timeline product is skipped rather than failed.
         let mut sample_rate: Option<f64> = None;
+        let capture_audio = |cap_id: &str| {
+            reader.artifacts("inputs").into_iter().find(|a| {
+                a.store == al_dataset::manifest::StoreKind::Audio
+                    && a.path
+                        .strip_prefix("inputs/")
+                        .and_then(|p| p.strip_suffix(".wav"))
+                        == Some(cap_id)
+            })
+        };
         if let Some(cap) = capture
             && reader.role_produced("inputs")
         {
             let cap_id = cap.input_id.to_string();
-            let tl = timeline::build(&reader, &cap_id, ctx.config).map_err(err)?;
-            sample_rate = Some(f64::from(tl.sample_rate));
-            let body = serde_json::to_value(&tl).map_err(|e| invalid(e.to_string()))?;
-            let cap_audio = reader
-                .artifacts("inputs")
-                .into_iter()
-                .find(|a| {
-                    a.store == al_dataset::manifest::StoreKind::Audio
-                        && a.path
-                            .strip_prefix("inputs/")
-                            .and_then(|p| p.strip_suffix(".wav"))
-                            == Some(cap_id.as_str())
-                })
-                .map(|a| vec![a.path.clone()])
-                .unwrap_or_default();
-            produced.push(persist(
-                &mut writer,
-                "visualization/timeline.json",
-                cap_audio,
-                Some(&body),
-                None,
-            )?);
+            if let Some(cap_audio) = capture_audio(&cap_id) {
+                let tl = timeline::build(&reader, &cap_id, ctx.config).map_err(err)?;
+                sample_rate = Some(f64::from(tl.sample_rate));
+                let body = serde_json::to_value(&tl).map_err(|e| invalid(e.to_string()))?;
+                produced.push(persist(
+                    &mut writer,
+                    "visualization/timeline.json",
+                    vec![cap_audio.path.clone()],
+                    Some(&body),
+                    None,
+                )?);
+            } else {
+                skip(
+                    "timeline",
+                    "inputs",
+                    "capture input has no materialized audio",
+                );
+            }
         }
 
         // Waveform LOD per materialized input (audio stores only —

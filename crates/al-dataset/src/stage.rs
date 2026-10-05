@@ -34,25 +34,36 @@ impl DatasetStage {
 
 /// WAV encoding that holds the decoded samples losslessly for a
 /// given source codec. Integer sources keep integer-scale values;
-/// `pcm_u8` (decoded to a signed range) fits in s16. Float sources
-/// stay float.
+/// 8-bit samples (decoded to a signed range) fit in s16. Float
+/// sources stay float. The decoded PCM artifact carries
+/// integer-scale f64 regardless of byte order, so the selection keys
+/// on the codec family (`pcm_s16{le,be}`, `pcm_s8`, …), not on the
+/// wire endianness.
 fn encoding_for(codec: &str) -> Option<WavEncoding> {
-    Some(match codec {
-        "pcm_u8" | "pcm_s16le" => WavEncoding::PcmS16,
-        "pcm_s24le" => WavEncoding::PcmS24,
-        "pcm_s32le" => WavEncoding::PcmS32,
-        "pcm_f32le" => WavEncoding::Float32,
-        "pcm_f64le" => WavEncoding::Float64,
-        _ => return None,
-    })
+    let c = codec.strip_prefix("pcm_").unwrap_or(codec);
+    if c == "u8" || c == "s8" || c.starts_with("s16") {
+        Some(WavEncoding::PcmS16)
+    } else if c.starts_with("s24") {
+        Some(WavEncoding::PcmS24)
+    } else if c.starts_with("s32") {
+        Some(WavEncoding::PcmS32)
+    } else if c.starts_with("f32") {
+        Some(WavEncoding::Float32)
+    } else if c.starts_with("f64") {
+        Some(WavEncoding::Float64)
+    } else {
+        None
+    }
 }
 
 impl DatasetStage {
     /// Materialize one input's decoded PCM as `inputs/<id>.wav` plus a
-    /// `<id>.metadata.json` sibling. Both ingest artifacts are
-    /// required — an input that ingest could not decode is an upstream
-    /// failure, not a silently-skipped store. Returns the lineage ids
-    /// and the manifest records the materialized pair derives from.
+    /// `<id>.metadata.json` sibling. Partial-ingest contract: an input
+    /// whose audio decode was unavailable still gets its metadata
+    /// store — it is recorded as `dataset_input_unavailable` instead
+    /// of `dataset_input_audio`, so the stage completes while the
+    /// absence stays explicit. Returns the lineage ids and the
+    /// manifest records the materialized artifacts derive from.
     fn materialize_pcm(
         &self,
         input: &al_job::job::JobInput,
@@ -72,70 +83,92 @@ impl DatasetStage {
             .manifest
             .artifacts
             .iter()
-            .find(|a| a.role == "decoded_pcm" && a.inputs.contains(&declared))
-            .ok_or_else(|| fail(format!("ingest produced no decoded_pcm for {input_id}")))?;
+            .find(|a| a.role == "decoded_pcm" && a.inputs.contains(&declared));
         let meta = ctx
             .manifest
             .artifacts
             .iter()
             .find(|a| a.role == "ingest_metadata" && a.inputs.contains(&declared))
             .ok_or_else(|| fail(format!("ingest produced no ingest_metadata for {input_id}")))?;
+        let mut lineage = vec![declared.clone(), meta.artifact_id.clone()];
+        let mut produced = Vec::new();
+        if let Some(decoded) = decoded {
+            let pcm_path = checked_job_path(job_dir, &decoded.path).map_err(err)?;
+            let bytes = fs::read(&pcm_path).map_err(err)?;
+            let (frames, rest) = bytes.as_chunks::<8>();
+            if !rest.is_empty() {
+                return Err(fail(format!(
+                    "decoded PCM {} is not f64-aligned",
+                    pcm_path.display()
+                )));
+            }
+            let samples: Vec<f64> = frames.iter().map(|b| f64::from_le_bytes(*b)).collect();
 
-        let pcm_path = checked_job_path(job_dir, &decoded.path).map_err(err)?;
-        let bytes = fs::read(&pcm_path).map_err(err)?;
-        let (frames, rest) = bytes.as_chunks::<8>();
-        if !rest.is_empty() {
-            return Err(fail(format!(
-                "decoded PCM {} is not f64-aligned",
-                pcm_path.display()
-            )));
-        }
-        let samples: Vec<f64> = frames.iter().map(|b| f64::from_le_bytes(*b)).collect();
-
-        let param_u64 = |key: &str| {
-            decoded
+            let param_u64 = |key: &str| {
+                decoded
+                    .params
+                    .get(key)
+                    .and_then(|v| v.as_u64())
+                    .ok_or_else(|| fail(format!("decoded_pcm params for {input_id} lack {key}")))
+            };
+            let codec = decoded
                 .params
-                .get(key)
-                .and_then(|v| v.as_u64())
-                .ok_or_else(|| fail(format!("decoded_pcm params for {input_id} lack {key}")))
-        };
-        let codec = decoded
-            .params
-            .get("codec")
-            .and_then(|v| v.as_str())
-            .ok_or_else(|| fail(format!("decoded_pcm params for {input_id} lack codec")))?
-            .to_string();
-        let channels = u16::try_from(param_u64("channels")?)
-            .map_err(|_| fail(format!("channels out of range for {input_id}")))?;
-        let sample_rate = u32::try_from(param_u64("sample_rate")?)
-            .map_err(|_| fail(format!("sample_rate out of range for {input_id}")))?;
-        let encoding = encoding_for(&codec)
-            .ok_or_else(|| fail(format!("unsupported decoded codec {codec}")))?;
+                .get("codec")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| fail(format!("decoded_pcm params for {input_id} lack codec")))?
+                .to_string();
+            let channels = u16::try_from(param_u64("channels")?)
+                .map_err(|_| fail(format!("channels out of range for {input_id}")))?;
+            let sample_rate = u32::try_from(param_u64("sample_rate")?)
+                .map_err(|_| fail(format!("sample_rate out of range for {input_id}")))?;
+            let encoding = encoding_for(&codec)
+                .ok_or_else(|| fail(format!("unsupported decoded codec {codec}")))?;
 
-        let lineage = vec![
-            declared,
-            decoded.artifact_id.clone(),
-            meta.artifact_id.clone(),
-        ];
-
-        writer
-            .write_audio(
-                "inputs",
-                input_id,
-                encoding,
-                channels,
-                sample_rate,
-                &samples,
-                Provenance {
-                    input_id: input_id.into(),
-                    algorithm_id: "dataset-materialize".into(),
-                    algorithm_version: SCHEMA_VERSION.to_string(),
-                    params: decoded.params.clone(),
-                    alignment_id: None,
-                    parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
-                },
-            )
-            .map_err(err)?;
+            lineage.push(decoded.artifact_id.clone());
+            writer
+                .write_audio(
+                    "inputs",
+                    input_id,
+                    encoding,
+                    channels,
+                    sample_rate,
+                    &samples,
+                    Provenance {
+                        input_id: input_id.into(),
+                        algorithm_id: "dataset-materialize".into(),
+                        algorithm_version: SCHEMA_VERSION.to_string(),
+                        params: decoded.params.clone(),
+                        alignment_id: None,
+                        parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
+                    },
+                )
+                .map_err(err)?;
+            produced.push(ArtifactRecord {
+                artifact_id: ctx.registry.issue(),
+                role: "dataset_input_audio".into(),
+                path: PathBuf::from("analysis/inputs").join(format!("{input_id}.wav")),
+                produced_by: Some(StageKind::Dataset),
+                inputs: vec![decoded.artifact_id.clone()],
+                params: serde_json::json!({
+                    "input_id": input_id,
+                    "codec": codec,
+                    "channels": channels,
+                    "sample_rate": sample_rate,
+                }),
+            });
+        } else {
+            produced.push(ArtifactRecord {
+                artifact_id: ctx.registry.issue(),
+                role: "dataset_input_unavailable".into(),
+                path: PathBuf::from("analysis/inputs").join(format!("{input_id}.metadata.json")),
+                produced_by: Some(StageKind::Dataset),
+                inputs: vec![declared, meta.artifact_id.clone()],
+                params: serde_json::json!({
+                    "input_id": input_id,
+                    "reason": "ingest produced no decoded_pcm",
+                }),
+            });
+        }
 
         let meta_path = checked_job_path(job_dir, &meta.path).map_err(err)?;
         let meta_value: serde_json::Value =
@@ -156,30 +189,14 @@ impl DatasetStage {
                 },
             )
             .map_err(err)?;
-
-        let produced = vec![
-            ArtifactRecord {
-                artifact_id: ctx.registry.issue(),
-                role: "dataset_input_audio".into(),
-                path: PathBuf::from("analysis/inputs").join(format!("{input_id}.wav")),
-                produced_by: Some(StageKind::Dataset),
-                inputs: vec![decoded.artifact_id.clone()],
-                params: serde_json::json!({
-                    "input_id": input_id,
-                    "codec": codec,
-                    "channels": channels,
-                    "sample_rate": sample_rate,
-                }),
-            },
-            ArtifactRecord {
-                artifact_id: ctx.registry.issue(),
-                role: "dataset_input_metadata".into(),
-                path: PathBuf::from("analysis/inputs").join(format!("{input_id}.metadata.json")),
-                produced_by: Some(StageKind::Dataset),
-                inputs: vec![meta.artifact_id.clone()],
-                params: serde_json::json!({ "input_id": input_id }),
-            },
-        ];
+        produced.push(ArtifactRecord {
+            artifact_id: ctx.registry.issue(),
+            role: "dataset_input_metadata".into(),
+            path: PathBuf::from("analysis/inputs").join(format!("{input_id}.metadata.json")),
+            produced_by: Some(StageKind::Dataset),
+            inputs: vec![meta.artifact_id.clone()],
+            params: serde_json::json!({ "input_id": input_id }),
+        });
         Ok((lineage, produced))
     }
 
