@@ -453,7 +453,7 @@ mod tests {
         let rate = 48_000u32;
         let lo = sine(1_000.0, 4096, rate, 1.0);
         let hi = sine(15_000.0, 4096, rate, 1.0);
-        let lp = Biquad::lowpass(rate, 4_000.0, 0.7071);
+        let lp = Biquad::lowpass(rate, 4_000.0, std::f64::consts::FRAC_1_SQRT_2);
         let lo_out = lp.apply(&lo);
         let hi_out = lp.apply(&hi);
         let e = |v: &[f64]| v.iter().map(|x| x * x).sum::<f64>();
