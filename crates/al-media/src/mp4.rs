@@ -629,7 +629,9 @@ fn parse_sound_entry(body: &[u8], format: [u8; 4]) -> Result<SoundEntry, MediaEr
         for h in child_boxes(body, children_at, body.len(), "sound sample entry")? {
             if &h.tag == b"pcmC" {
                 let b = &body[h.body_start..h.body_end];
-                if b.len() >= 14 {
+                // ISO/IEC 23003-5 pcmC: FullBox header (4) +
+                // format_flags (1) + PCM_sample_size (1) = 6 bytes.
+                if b.len() >= 6 {
                     entry.pcmc = Some((b[4], b[5]));
                 }
             }
@@ -734,7 +736,9 @@ fn decode_pcm_bytes(
         }
     };
     if !data.len().is_multiple_of(width) {
-        return Err(MediaError::malformed("PCM sample data ends mid-sample"));
+        return Err(MediaError::input_unavailable(
+            "PCM sample data ends mid-sample",
+        ));
     }
     let signed_int = |raw: u64, bits: u16| -> f64 {
         let shift = 64 - bits;
@@ -816,7 +820,7 @@ fn extract_sample_bytes(data: &[u8], map: &ChunkMap, sd_index: u32) -> Result<Ve
             .ok_or_else(|| MediaError::malformed("sample offset overflows"))?;
         let body = data
             .get(offset as usize..end as usize)
-            .ok_or_else(|| MediaError::malformed("sample extends past end of file"))?;
+            .ok_or_else(|| MediaError::input_unavailable("sample extends past end of file"))?;
         out.extend_from_slice(body);
     }
     Ok(out)

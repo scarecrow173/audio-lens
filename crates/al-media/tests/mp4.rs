@@ -11,9 +11,7 @@ use al_job::stage::Stage;
 use al_media::{
     IngestStage, MediaError, MediaFormat, SampleFormat, TimestampOrigin, decode_mp4, detect_format,
 };
-use al_testkit::mp4::{
-    Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4,
-};
+use al_testkit::mp4::{Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4};
 
 fn temp_dir(tag: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("al-mp4-{tag}-{}", al_core::JobId::new()));
@@ -287,6 +285,49 @@ fn ipcm_decodes_via_pcmc_flags() {
         a.samples,
         samples.iter().map(|&v| f64::from(v)).collect::<Vec<_>>()
     );
+}
+
+#[test]
+fn mid_sample_pcm_data_is_integrity_observation_not_failure() {
+    // A 3-byte stsz sample for a 16-bit soun track: extracted bytes
+    // cannot end on a sample boundary. That is a data-layer failure —
+    // an integrity observation, not a demux-aborting Malformed.
+    let mut t = soun_pcm_track(1, *b"sowt", 1, 48000, &[0u8; 6]);
+    t.table = Mp4TableSpec::uniform(vec![0u8; 3], 1, 3, 1);
+    let m = decode_mp4(&write_mp4(&base_spec(vec![t]))).unwrap();
+    assert!(m.audio.is_none());
+    assert!(m.integrity.iter().any(|o| {
+        o.kind == "decode/input unavailable"
+            && o.detail["reason"]
+                .as_str()
+                .is_some_and(|r| r.contains("mid-sample"))
+    }));
+}
+
+#[test]
+fn sample_past_eof_is_integrity_observation_not_failure() {
+    // A corrupt stco offset pointing beyond EOF: declared layout is
+    // structurally consistent, the mdat data is just absent — again a
+    // data-layer observation, while metadata/timing still record.
+    let t = soun_pcm_track(1, *b"sowt", 1, 48000, &[1u8; 8]);
+    let mut bytes = write_mp4(&base_spec(vec![t]));
+    let mut patched = false;
+    for i in 0..bytes.len().saturating_sub(16) + 1 {
+        if &bytes[i..i + 4] == b"stco" {
+            bytes[i + 12..i + 16].copy_from_slice(&u32::MAX.to_be_bytes());
+            patched = true;
+            break;
+        }
+    }
+    assert!(patched, "stco not found in fixture");
+    let m = decode_mp4(&bytes).unwrap();
+    assert!(m.audio.is_none());
+    assert!(m.integrity.iter().any(|o| {
+        o.kind == "decode/input unavailable"
+            && o.detail["reason"]
+                .as_str()
+                .is_some_and(|r| r.contains("past end"))
+    }));
 }
 
 #[test]
