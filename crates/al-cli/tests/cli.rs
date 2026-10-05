@@ -241,6 +241,52 @@ fn manifest_artifacts(job_dir: &std::path::Path) -> Vec<serde_json::Value> {
     manifest["artifacts"].as_array().unwrap().clone()
 }
 
+/// Compressed-only MP4: video `avc1` + audio `mp4a`, no PCM anywhere.
+fn compressed_mp4_bytes() -> Vec<u8> {
+    use al_testkit::mp4::{
+        Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4,
+    };
+    let vide = Mp4TrackSpec {
+        track_id: 1,
+        handler: *b"vide",
+        timescale: 90000,
+        duration: 150_000,
+        language: mp4_language(b"und"),
+        entry: Mp4EntrySpec::Video {
+            codec: *b"avc1",
+            width: 320,
+            height: 240,
+        },
+        table: Mp4TableSpec::uniform(vec![0u8; 50], 5, 10, 3000),
+        extra_trak_boxes: vec![],
+    };
+    let aac = Mp4TrackSpec {
+        track_id: 2,
+        handler: *b"soun",
+        timescale: 48000,
+        duration: 48_000,
+        language: mp4_language(b"und"),
+        entry: Mp4EntrySpec::Sound {
+            codec: *b"mp4a",
+            channels: 2,
+            bits: 16,
+            rate: 48000,
+            version: 0,
+            lpcm_flags: 0,
+            pcmc: None,
+        },
+        table: Mp4TableSpec::uniform(vec![0u8; 48], 24, 2, 1024),
+        extra_trak_boxes: vec![],
+    };
+    write_mp4(&Mp4Spec {
+        major_brand: *b"isom",
+        compatible_brands: vec![*b"isom", *b"mp41"],
+        movie_timescale: 1000,
+        tracks: vec![vide, aac],
+        extra_top_boxes: vec![],
+    })
+}
+
 /// Parsed body of the `time_map` artifact for one source input.
 fn time_map_body(
     job_dir: &std::path::Path,
@@ -603,6 +649,91 @@ fn full_pipeline_reaches_visualization_and_export() {
     .unwrap();
     assert_eq!(manifest["inputs"][0]["file_name"].as_str(), Some("cap.wav"));
 
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
+    // Partial-ingest contract: an MP4 with no decodable PCM still
+    // completes the full default stage plan — the dataset keeps the
+    // metadata store, visualization records the skipped timeline, and
+    // the export package is still produced.
+    let al = env!("CARGO_BIN_EXE_al");
+    let dir = temp_dir("mp4-e2e");
+    let mp4 = dir.join("cap.mp4");
+    std::fs::write(&mp4, compressed_mp4_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = Command::new(al)
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", mp4.display()),
+            "--stages",
+            "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,\
+             dataset,visualization,export",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line");
+    let job_dir = jobs.join(job_id);
+
+    let artifacts = manifest_artifacts(&job_dir);
+    assert!(
+        artifacts
+            .iter()
+            .all(|a| a["role"].as_str() != Some("decoded_pcm")),
+        "compressed-only MP4 must not yield decoded_pcm"
+    );
+    let input_id = input_id_of(&artifacts, "cap.mp4");
+    assert!(
+        artifacts
+            .iter()
+            .any(|a| a["role"].as_str() == Some("dataset_input_unavailable")),
+        "dataset must record the unavailable input explicitly"
+    );
+
+    // Metadata store is materialized even without audio.
+    assert!(
+        job_dir
+            .join(format!("analysis/inputs/{input_id}.metadata.json"))
+            .exists(),
+        "inputs/{input_id}.metadata.json missing"
+    );
+    assert!(
+        !job_dir
+            .join(format!("analysis/inputs/{input_id}.wav"))
+            .exists(),
+        "no audio store may be written for an undecoded input"
+    );
+
+    // The timeline product is skipped with a reason, not a failure.
+    let skipped: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(job_dir.join("analysis/visualization/skipped.json")).unwrap(),
+    )
+    .unwrap();
+    let skipped_text = serde_json::to_string(&skipped).unwrap();
+    assert!(
+        skipped_text.contains("timeline"),
+        "timeline skip must be recorded: {skipped_text}"
+    );
+
+    assert!(
+        job_dir
+            .join("export/analysis/export_manifest.json")
+            .exists()
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 

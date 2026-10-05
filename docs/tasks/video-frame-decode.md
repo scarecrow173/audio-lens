@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFzhq1S2Z7tm0XFXSc"
 type: "task"
-status: "todo"
+status: "done"
 title: "video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ"
 created: "2026-10-04"
 updated: "2026-10-04"

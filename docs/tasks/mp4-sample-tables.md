@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFWfHy1QUJblugAdk5"
 type: "task"
-status: "todo"
+status: "done"
 title: "mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列"
 created: "2026-10-04"
 updated: "2026-10-04"

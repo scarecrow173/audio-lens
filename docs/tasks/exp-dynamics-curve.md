@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFDINCaNF95aiWa0oQ"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-dynamics: transfer-curve + pumping + level依存"
 created: "2026-10-04"
 updated: "2026-10-04"

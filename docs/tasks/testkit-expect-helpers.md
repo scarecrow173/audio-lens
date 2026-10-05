@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFZgLvWhJ4wJdv5pXt"
 type: "task"
-status: "todo"
+status: "done"
 title: "testkit: 期待メトリクス検証ヘルパ"
 created: "2026-10-04"
 updated: "2026-10-04"

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFTafwUqSb6Zp9Pr8J"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-channel: 周波数依存混合行列 + intermod 証拠"
 created: "2026-10-04"
 updated: "2026-10-04"

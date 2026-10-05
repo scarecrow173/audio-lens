@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaG0wyqS2s6eM05bcTA"
 type: "task"
-status: "todo"
+status: "done"
 title: "golden: reference ケース行列"
 created: "2026-10-04"
 updated: "2026-10-04"
