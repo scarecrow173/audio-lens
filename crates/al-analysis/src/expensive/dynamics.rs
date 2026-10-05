@@ -8,7 +8,7 @@ use al_dataset::types::FeatureRecord;
 
 use crate::records::{propagate_confidence, propagate_validity, robust_summary};
 
-use super::{Emit, ExpensiveResult, RegionCtx, rms};
+use super::{Emit, ExpensiveResult, RegionCtx, emit_unsupported, rms};
 
 /// Emit this family's invalid schema for a region selected by
 /// non-`Valid` evidence (same ids `run` would produce, as NaN
@@ -116,6 +116,17 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 None,
                 levels.len() as u64,
             ));
+        } else {
+            emit_unsupported(
+                e,
+                &mut out.records,
+                &[
+                    ("exp.dynamic_range_db", "db"),
+                    ("exp.attack_db_per_20ms", "db"),
+                    ("exp.release_db_per_20ms", "db"),
+                ],
+                "region shorter than four 20 ms level windows",
+            );
         }
     }
 
@@ -207,11 +218,17 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         },
                         levels.len() as u64,
                     ));
-                    // |X[k]|·2 approximates peak-to-peak depth of a
-                    // sinusoidal modulation, in dB.
+                    // The forward DFT is unnormalized: a modulation of
+                    // peak amplitude A dB over n windows gives
+                    // |X[k]| = A·n/2, so peak-to-peak depth is
+                    // 4·|X[k]|/n (dB).
                     out.records.push(e.push(
                         "exp.pumping_mod_depth_db",
-                        if supported { 2.0 * best_a } else { f64::NAN },
+                        if supported {
+                            4.0 * best_a / levels.len() as f64
+                        } else {
+                            f64::NAN
+                        },
                         "db",
                         Confidence::Low,
                         if supported {
@@ -226,8 +243,30 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         },
                         levels.len() as u64,
                     ));
+                } else {
+                    emit_unsupported(
+                        e,
+                        &mut out.records,
+                        &[
+                            ("exp.pumping_mod_hz", "hz"),
+                            ("exp.pumping_mod_depth_db", "db"),
+                        ],
+                        "level trajectory too flat or too short for modulation estimate",
+                    );
                 }
             }
+        } else {
+            emit_unsupported(
+                e,
+                &mut out.records,
+                &[
+                    ("exp.transfer_knee_db", "dbfs"),
+                    ("exp.transfer_slope_above_knee", "ratio"),
+                    ("exp.pumping_mod_hz", "hz"),
+                    ("exp.pumping_mod_depth_db", "db"),
+                ],
+                "region shorter than eight 20 ms level windows",
+            );
         }
     }
 
@@ -277,7 +316,13 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             unavailable(
                 &mut out.records,
                 Some(pair),
-                up_val,
+                // A valid trigger whose pair simply does not overlap the
+                // region is still unsupported — never Valid.
+                if up_val == Validity::Valid {
+                    Validity::InsufficientSupport
+                } else {
+                    up_val
+                },
                 if up_val != Validity::Valid {
                     "pair alignment not accepted"
                 } else {
@@ -321,17 +366,16 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let n_w = src_db.len() as f64;
         let mx = src_db.iter().sum::<f64>() / n_w;
         let my = gain_db.iter().sum::<f64>() / n_w;
-        let (sxy, sxx, syy) =
-            src_db
-                .iter()
-                .zip(&gain_db)
-                .fold((0.0, 0.0, 0.0), |a, (&x, &y)| {
-                    (
-                        a.0 + (x - mx) * (y - my),
-                        a.1 + (x - mx) * (x - mx),
-                        a.2 + (y - my) * (y - my),
-                    )
-                });
+        let (sxy, sxx, syy) = src_db
+            .iter()
+            .zip(&gain_db)
+            .fold((0.0, 0.0, 0.0), |a, (&x, &y)| {
+                (
+                    a.0 + (x - mx) * (y - my),
+                    a.1 + (x - mx) * (x - mx),
+                    a.2 + (y - my) * (y - my),
+                )
+            });
         let slope = if sxx > 0.0 { sxy / sxx } else { 0.0 };
         // Pearson r on the scatter — the cosine variant (`corr0`)
         // includes the means and cannot read the slope's sign.
