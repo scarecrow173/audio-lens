@@ -11,9 +11,7 @@ use al_job::stage::Stage;
 use al_media::{
     IngestStage, MediaError, MediaFormat, SampleFormat, TimestampOrigin, decode_mp4, detect_format,
 };
-use al_testkit::mp4::{
-    Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4,
-};
+use al_testkit::mp4::{Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4};
 
 fn temp_dir(tag: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("al-mp4-{tag}-{}", al_core::JobId::new()));

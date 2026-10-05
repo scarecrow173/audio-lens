@@ -417,17 +417,19 @@ fn parse_run_table(body: &[u8], signed: bool, name: &str) -> Result<Vec<(u32, i6
 }
 
 /// Expand `stts` runs into the per-sample DTS series.
-fn dts_series(stts: &[(u32, i64)]) -> Vec<i64> {
+fn dts_series(stts: &[(u32, i64)]) -> Result<Vec<i64>, MediaError> {
     let total: usize = stts.iter().map(|e| e.0 as usize).sum();
     let mut dts = Vec::with_capacity(total);
     let mut t = 0i64;
     for &(count, delta) in stts {
         for _ in 0..count {
             dts.push(t);
-            t += delta;
+            t = t
+                .checked_add(delta)
+                .ok_or_else(|| MediaError::malformed("stts dts overflows i64"))?;
         }
     }
-    dts
+    Ok(dts)
 }
 
 /// Expand `ctts` runs into per-sample composition offsets.
@@ -568,7 +570,9 @@ fn build_chunk_map(table: &SampleTable) -> Result<ChunkMap, MediaError> {
                 ));
             };
             samples.push((offset, size, sd));
-            offset += u64::from(size);
+            offset = offset
+                .checked_add(u64::from(size))
+                .ok_or_else(|| MediaError::malformed("chunk offset overflows"))?;
             idx += 1;
         }
     }
@@ -807,6 +811,7 @@ fn pcm_codec_name(layout: &PcmLayout, format: SampleFormat) -> String {
 /// order, concatenated — the PCM sample stream.
 fn extract_sample_bytes(data: &[u8], map: &ChunkMap, sd_index: u32) -> Result<Vec<u8>, MediaError> {
     let mut out = Vec::new();
+    let mut total: u64 = 0;
     for &(offset, size, sd) in &map.samples {
         if sd != sd_index {
             continue;
@@ -814,6 +819,18 @@ fn extract_sample_bytes(data: &[u8], map: &ChunkMap, sd_index: u32) -> Result<Ve
         let end = offset
             .checked_add(u64::from(size))
             .ok_or_else(|| MediaError::malformed("sample offset overflows"))?;
+        // Real PCM samples are disjoint ranges of the same file, so a
+        // declared total above the file length can only come from
+        // overlapping/corrupt tables — reject before the output
+        // buffer grows without bound.
+        total = total
+            .checked_add(u64::from(size))
+            .ok_or_else(|| MediaError::malformed("sample byte total overflows"))?;
+        if total > data.len() as u64 {
+            return Err(MediaError::malformed(
+                "declared sample bytes exceed file length",
+            ));
+        }
         let body = data
             .get(offset as usize..end as usize)
             .ok_or_else(|| MediaError::malformed("sample extends past end of file"))?;
@@ -926,7 +943,7 @@ fn parse_stbl(
             ));
         }
         let table = SampleTable {
-            dts: dts_series(&stts),
+            dts: dts_series(&stts)?,
             cts_offsets: ctts.map(|c| cts_series(&c)),
             sizes: stsz,
             chunk_offsets: offsets,
@@ -1163,7 +1180,14 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
             observation: observe_timing(clock, u64::from(trak.track.timescale), dts, None),
         });
         if let Some(offsets) = &trak.table.cts_offsets {
-            let mut pts: Vec<i64> = dts.iter().zip(offsets.iter()).map(|(d, o)| d + o).collect();
+            let mut pts: Vec<i64> = dts
+                .iter()
+                .zip(offsets.iter())
+                .map(|(d, o)| {
+                    d.checked_add(*o)
+                        .ok_or_else(|| MediaError::malformed("ctts pts overflows i64"))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
             pts.sort_unstable();
             timing.push(StreamTiming {
                 stream: trak.track.track_index,
@@ -1186,7 +1210,19 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
             continue;
         }
         if audio.is_some() {
-            // Later soun tracks stay metadata+timing only.
+            // Later soun tracks stay metadata+timing only, but the
+            // fact they were not decoded is still an observation so
+            // every undecoded entry leaves a record.
+            if !trak.sound.is_empty() {
+                integrity.push(IntegrityObservation {
+                    kind: "decode/input unavailable".into(),
+                    detail: serde_json::json!({
+                        "track_index": ti as u32,
+                        "handler": "soun",
+                        "reason": "secondary soun track; first PCM-decodable track already selected",
+                    }),
+                });
+            }
             continue;
         }
         let chosen = trak

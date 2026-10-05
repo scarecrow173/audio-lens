@@ -242,12 +242,13 @@ fn video_info(head: &StreamHead, movi_frames: u64) -> Result<VideoInfo, MediaErr
 /// Advance one stream's clock past a `movi` packet, in `strh`-rate
 /// ticks. A `dwSampleSize` stream (PCM audio) covers `len/sample_size`
 /// samples of `dwScale` ticks each; every other packet is one frame.
-fn tick_advance(head: &StreamHead, body_len: usize) -> i64 {
-    if head.sample_size > 0 {
-        body_len as i64 * i64::from(head.scale) / i64::from(head.sample_size)
+fn tick_advance(head: &StreamHead, body_len: usize) -> Result<i64, MediaError> {
+    let t = if head.sample_size > 0 {
+        (body_len as u64 * u64::from(head.scale)) / u64::from(head.sample_size)
     } else {
-        i64::from(head.scale)
-    }
+        u64::from(head.scale)
+    };
+    i64::try_from(t).map_err(|_| MediaError::malformed("stream clock advance overflows i64"))
 }
 
 /// Stream-clock position of every `movi` packet, in mux order — the
@@ -257,20 +258,29 @@ fn tick_advance(head: &StreamHead, body_len: usize) -> i64 {
 /// single source of packet positions: `stream_timings` and the video
 /// frame extractor both read it, so frame indices and timestamps can
 /// never drift apart.
-fn packet_ticks(streams: &[StreamHead], packets: &[MoviPacket<'_>]) -> Vec<Option<i64>> {
-    let mut next: Vec<i64> = streams
-        .iter()
-        .map(|s| i64::from(s.start) * i64::from(s.scale))
-        .collect();
+fn packet_ticks(
+    streams: &[StreamHead],
+    packets: &[MoviPacket<'_>],
+) -> Result<Vec<Option<i64>>, MediaError> {
+    let mut next = Vec::with_capacity(streams.len());
+    for s in streams {
+        next.push(
+            i64::from(s.start)
+                .checked_mul(i64::from(s.scale))
+                .ok_or_else(|| MediaError::malformed("stream start offset overflows i64"))?,
+        );
+    }
     packets
         .iter()
         .map(|p| match streams.get(p.stream_no) {
             Some(head) if matches!(&head.fcc_type, b"vids" | b"auds") => {
                 let t = next[p.stream_no];
-                next[p.stream_no] += tick_advance(head, p.body.len());
-                Some(t)
+                next[p.stream_no] = t
+                    .checked_add(tick_advance(head, p.body.len())?)
+                    .ok_or_else(|| MediaError::malformed("stream clock overflows i64"))?;
+                Ok(Some(t))
             }
-            _ => None,
+            _ => Ok(None),
         })
         .collect()
 }
@@ -410,7 +420,7 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
         return Err(MediaError::malformed("missing movi list"));
     }
 
-    let ticks = packet_ticks(&streams, &movi_packets);
+    let ticks = packet_ticks(&streams, &movi_packets)?;
     let timing = stream_timings(&streams, &movi_packets, &ticks);
 
     // Only the first `auds` stream is decoded; its `NNwb` packets are

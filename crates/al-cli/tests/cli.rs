@@ -655,9 +655,9 @@ fn full_pipeline_reaches_visualization_and_export() {
 #[test]
 fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
     // Partial-ingest contract: an MP4 with no decodable PCM still
-    // completes ingest and every downstream stage — the dataset keeps
-    // the metadata store, visualization records the skipped timeline,
-    // and the export package is still produced.
+    // completes the full default stage plan — the dataset keeps the
+    // metadata store, visualization records the skipped timeline, and
+    // the export package is still produced.
     let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("mp4-e2e");
     let mp4 = dir.join("cap.mp4");
@@ -672,7 +672,8 @@ fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
             "--input",
             &format!("capture_bug:{}", mp4.display()),
             "--stages",
-            "ingest,cheap_analysis,dataset,visualization,export",
+            "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,\
+             dataset,visualization,export",
         ])
         .output()
         .unwrap();
