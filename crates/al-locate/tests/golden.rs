@@ -402,7 +402,7 @@ fn case_long_source_linear_drift() {
     let ratio = 1.005f64;
     let expected_rate = 1.0 / ratio;
     let src = signal::noise(8_192, 71, 1.0);
-    let source = Biquad::lowpass(RATE, 1_000.0, 0.7071).apply(&src);
+    let source = Biquad::lowpass(RATE, 1_000.0, std::f64::consts::FRAC_1_SQRT_2).apply(&src);
     let stretched = signal::resample_linear(&source, ratio);
     let embed_at = 8_000usize;
     let mut capture = signal::noise(24_576, 73, 0.02);
@@ -627,7 +627,7 @@ fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
         let pos = position(&body);
         expect_true(
             "periodic accept is phase-consistent",
-            pos % period as u64 == 0,
+            pos.is_multiple_of(period as u64),
             format!("accepted at non-period-aligned position {pos}"),
         );
     }
