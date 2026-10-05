@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFEfKrZkVSHWqbJo7H"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-codec: pre-echo + transient smear"
 created: "2026-10-04"
 updated: "2026-10-04"

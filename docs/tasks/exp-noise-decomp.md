@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFSu2D4Mw7dqcQ6qW6"
 type: "task"
-status: "todo"
+status: "done"
 title: "exp-noise: stationary/tonal/modulated 分類"
 created: "2026-10-04"
 updated: "2026-10-04"

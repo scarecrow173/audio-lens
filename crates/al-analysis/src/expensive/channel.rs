@@ -110,7 +110,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     .collect();
                 for f in 0..fr {
                     let c = csd(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f]);
-                    for &k in band_bins.iter().take(half) {
+                    for &k in &band_bins {
                         let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
                         let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
                         sxy[k].0 += c[k].0;
@@ -129,7 +129,10 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         coh_n += 1;
                     }
                 }
-                let supported = coh_n > 0;
+                // One STFT frame is still the degenerate case —
+                // coherence is identically 1 by construction, so the
+                // record needs at least two frames of support.
+                let supported = coh_n > 0 && fr >= 2;
                 let mut rec = e.push_spec(
                     "exp.freq_lr_coherence",
                     if supported {
@@ -147,7 +150,10 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     if supported {
                         None
                     } else {
-                        Some("no mid-band bins with energy in both channels".into())
+                        Some(format!(
+                            "coherence needs >=2 frames and mid-band bins \
+                             with energy in both channels (frames={fr}, bins={coh_n})"
+                        ))
                     },
                     coh_n,
                 );

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFXpJRZWcxVPOfKCdh"
 type: "task"
-status: "todo"
+status: "done"
 title: "mp4: ingest stage 配線 + 成果物記録"
 created: "2026-10-04"
 updated: "2026-10-04"

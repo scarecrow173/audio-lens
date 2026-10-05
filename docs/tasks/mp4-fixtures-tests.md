@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFY7vtgsBOWZeYX4ez"
 type: "task"
-status: "todo"
+status: "done"
 title: "mp4: 合成 fixture writer + 既知ケース検証"
 created: "2026-10-04"
 updated: "2026-10-04"

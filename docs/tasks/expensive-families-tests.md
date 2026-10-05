@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFURCQqe9DBwLB4N0J"
 type: "task"
-status: "todo"
+status: "done"
 title: "expensive 追加ファミリの既知ケース検証"
 created: "2026-10-04"
 updated: "2026-10-04"

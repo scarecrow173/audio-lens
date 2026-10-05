@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaG1gz22ttDMRbpSJsW"
 type: "task"
-status: "todo"
+status: "done"
 title: "golden: video/A-V + コンテナケース行列"
 created: "2026-10-04"
 updated: "2026-10-04"

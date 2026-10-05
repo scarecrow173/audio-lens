@@ -1,7 +1,7 @@
 ---
 id: "TASK-034AaFWPLKohMACaTcKkDv"
 type: "task"
-status: "todo"
+status: "done"
 title: "mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗"
 created: "2026-10-04"
 updated: "2026-10-04"
