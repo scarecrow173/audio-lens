@@ -61,6 +61,14 @@ relations:
 - `crates/al-media/src/stage.rs`
 - `crates/al-media/src/metadata.rs`
 
+## Ownership
+
+本タスクが部分 ingest 契約(`stage.rs` での decode 失敗→
+integrity 観測化・`stream_timestamps` への命名一般化・
+`decoded_pcm` 不在時の dataset/viz 下流伝播)を所有する。
+`docs/tasks/mp4-ingest-stage.md` はこの契約の消費側であり、
+契約自体の stage.rs 変更は二重実装しない。
+
 ## Done When
 
 - [ ] `video_features` 成果物がフレーム時刻+イベント種別付きで記録される

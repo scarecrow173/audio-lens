@@ -42,7 +42,7 @@ relations:
 
 ## Work
 
-format 検出(ftyp 由来のみ)・IngestStage への MP4 配線・メタデータ/タイミング成果物の記録を実装する。部分 ingest 契約に従い、全トラック圧縮でも ingest は metadata/timing を記録して完了し decoded_pcm を省略する。永続化タイミングのフィールド名はコンテナ中立名に一般化する。
+format 検出(ftyp 由来のみ)・IngestStage への MP4 配線・メタデータ/タイミング成果物の記録を実装する。部分 ingest 契約に従い、全トラック圧縮でも ingest は metadata/timing を記録して完了し decoded_pcm を省略する。契約自体の `stage.rs` 変更(decode 失敗→integrity 観測化・`stream_timestamps` 一般化・下流 dataset/viz 伝播)は `docs/tasks/video-features-ingest.md` が所有し、本タスクはその契約上での MP4 側実装のみを行う。
 
 ## Classification
 

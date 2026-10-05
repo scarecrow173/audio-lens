@@ -454,15 +454,16 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
     };
 
     let vidx = streams.iter().position(|s| &s.fcc_type == b"vids");
-    let video = vidx
-        .map(|vidx| {
-            let counted = movi_packets
-                .iter()
-                .filter(|p| p.stream_no == vidx && matches!(&p.kind, b"db" | b"dc"))
-                .count() as u64;
-            video_info(&streams[vidx], counted)
-        })
-        .transpose()?;
+    // A corrupt/truncated video `strf` degrades like the audio path:
+    // `video` metadata is dropped and `extract_features` records an
+    // explicit `unavailable` — it is not a fatal container error.
+    let video = vidx.and_then(|vidx| {
+        let counted = movi_packets
+            .iter()
+            .filter(|p| p.stream_no == vidx && matches!(&p.kind, b"db" | b"dc"))
+            .count() as u64;
+        video_info(&streams[vidx], counted).ok()
+    });
 
     // Frame-carrying chunks (`db`/`dc`) are the only ones handed to the
     // decoder; non-frame chunks (`pc` palette changes etc.) keep their
@@ -535,6 +536,27 @@ mod tests {
         };
         assert_eq!(f.luminance.len(), 30);
         assert_eq!(f.frame_timestamps.len(), 30);
+    }
+
+    #[test]
+    fn truncated_video_strf_degrades_instead_of_failing_demux() {
+        // A `vids` strf shorter than BITMAPINFOHEADER is a stream-level
+        // failure, not container corruption: video metadata drops to
+        // None, video_features records `unavailable`, and audio PCM +
+        // timing survive — the same boundary as a corrupt audio strf.
+        let frame = vec![7u8; 64 * 48 * 3];
+        let audio: Vec<u8> = (0..960i16)
+            .flat_map(|v| (v % 200 - 100).to_le_bytes())
+            .collect();
+        let mut spec = AviSpec::cfr(64, 48, 10, vec![frame; 4], audio, 1, 48_000);
+        spec.streams[0].format = vec![0u8; 20];
+        let m = decode(&write_avi(&spec)).unwrap();
+        assert!(m.video.is_none());
+        assert!(m.audio.is_some());
+        assert!(matches!(
+            m.video_features,
+            Some(crate::video::VideoFeatureArtifact::Unavailable { .. })
+        ));
     }
 
     #[test]

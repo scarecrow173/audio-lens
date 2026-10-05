@@ -323,7 +323,13 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 let aligned = pair.aligned_slice(ctx.s0, ctx.s1);
                 if up_val != Validity::Valid || aligned.is_none() {
                     unavailable(
-                        up_val,
+                        // A valid trigger whose pair does not overlap
+                        // the region is still unsupported — never Valid.
+                        if up_val == Validity::Valid {
+                            Validity::InsufficientSupport
+                        } else {
+                            up_val
+                        },
                         if up_val != Validity::Valid {
                             "pair alignment not accepted"
                         } else {

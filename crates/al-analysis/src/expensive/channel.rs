@@ -95,7 +95,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 rate,
             );
             let fr = mb.frames().min(ob.frames());
-            if fr > 0 {
+            if fr >= 2 {
                 // Frequency-dependent L/R coherence in the mid band.
                 // Magnitude-squared coherence needs cross-frame power
                 // accumulation — a single-frame cross-spectrum is
@@ -159,7 +159,31 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 );
                 rec.channels = Some(ChannelSelector::ChannelPair(0, 1));
                 out.records.push(rec);
+            } else {
+                let mut rec = e.push_spec(
+                    "exp.freq_lr_coherence",
+                    f64::NAN,
+                    "coherence",
+                    Confidence::High,
+                    Validity::InsufficientSupport,
+                    Some("fewer than two STFT frames for coherence".into()),
+                    0,
+                );
+                rec.channels = Some(ChannelSelector::ChannelPair(0, 1));
+                out.records.push(rec);
             }
+        } else {
+            let mut rec = e.push_spec(
+                "exp.freq_lr_coherence",
+                f64::NAN,
+                "coherence",
+                Confidence::High,
+                Validity::InsufficientSupport,
+                Some("region shorter than one STFT window".into()),
+                0,
+            );
+            rec.channels = Some(ChannelSelector::ChannelPair(0, 1));
+            out.records.push(rec);
         }
     }
 
@@ -292,7 +316,13 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             unavailable(
                 &mut out.records,
                 Some(pair),
-                up_val,
+                // A valid trigger whose pair does not overlap the region
+                // is still unsupported — never Valid.
+                if up_val == Validity::Valid {
+                    Validity::InsufficientSupport
+                } else {
+                    up_val
+                },
                 if up_val != Validity::Valid {
                     "pair alignment not accepted"
                 } else {

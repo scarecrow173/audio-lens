@@ -40,7 +40,7 @@ relations:
 
 ## Work
 
-dev-dependency 専用の補助クレート `al-testkit` を作り、信号生成/変換(gain/EQ/delay/jitter/polarity/mix/SRC/clip/drop/repeat/stuck/noise)とメディア fixture を提供する。`AviSpec`/`write_avi` を `al-media` から移管し、パラメタ化 AVI writer(movi パケット列・per-stream dwStart・0 長チャンク指定可能)へ拡張する。`al-cli` の gen_samples 例は dev-dependency で参照する。MP4 writer は WS-C の成果物を集約する。
+dev-dependency 専用の補助クレート `al-testkit` を作り、信号生成/変換(gain/EQ/delay/jitter/polarity/mix/SRC/clip/drop/repeat/stuck/noise)とメディア fixture を提供する。`AviSpec`/`write_avi` を `al-media` から移管し、パラメタ化 AVI writer(movi パケット列・per-stream dwStart・0 長チャンク指定可能)へ拡張する。`al-cli` の gen_samples 例は dev-dependency で参照する。MP4 writer(`Mp4Spec`/`write_mp4`)は WS-C(`docs/plans/mp4-ingest.md` 系のタスク)が実装し、本タスクはその成果物を al-testkit へ集約する。したがって本タスクの完了は WS-C の writer 移管に依存する(クロス WS の暗黙依存であり、タスクグラフは同一 plan 内のみ追跡する)。
 
 ## Classification
 
@@ -53,7 +53,8 @@ dev-dependency 専用の補助クレート `al-testkit` を作り、信号生成
 
 ## Dependencies
 
-- none
+- 暗黙(クロス WS): `docs/plans/mp4-ingest.md` の MP4 writer 実装
+  (同一 plan 内の depends-on グラフ対象外のため本文に記録)
 
 ## Affected Files
 
