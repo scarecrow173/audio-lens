@@ -11,6 +11,9 @@
     "render:freeze": "remotion render GameCaptureBugFreeze out/bugs/game-capture-freeze.mp4",
     "render:variants": "node scripts/render-variants.ts",
     "inspect:kaykit": "node scripts/inspect-kaykit.ts",
+    "audio:gen": "node scripts/audio/gen-audio.ts",
+    "audio:voice": "uv run scripts/audio/gen_voice.py && node scripts/audio/postprocess-voice.ts",
+    "audio:all": "npm run audio:voice && npm run audio:gen",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
