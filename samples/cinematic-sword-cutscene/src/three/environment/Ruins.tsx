@@ -51,13 +51,13 @@ export const Ruins: React.FC = () => {
   return (
     <group>
       <instancedMesh ref={debrisRef} args={[debrisGeo, undefined, debrisM.length]}>
-        <meshStandardMaterial color="#1a222d" roughness={1} />
+        <meshStandardMaterial color="#2e3948" roughness={1} />
       </instancedMesh>
       {machines.map((mc, i) => (
         <group key={i} position={mc.pos}>
           <mesh>
             <boxGeometry args={mc.size} />
-            <meshStandardMaterial color="#131a23" roughness={0.85} metalness={0.25} />
+            <meshStandardMaterial color="#26303e" roughness={0.85} metalness={0.25} />
           </mesh>
           {/* status light strip */}
           <mesh position={[0, mc.size[1] / 2 - 0.12, mc.size[2] / 2 + 0.01]}>
@@ -73,7 +73,7 @@ export const Ruins: React.FC = () => {
       {structures.map((st, i) => (
         <mesh key={i} position={st.pos}>
           <boxGeometry args={st.size} />
-          <meshStandardMaterial color="#0c1118" roughness={1} />
+          <meshStandardMaterial color="#1b2531" roughness={1} />
         </mesh>
       ))}
     </group>

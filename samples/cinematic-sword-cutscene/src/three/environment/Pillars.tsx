@@ -80,13 +80,13 @@ export const Pillars: React.FC = () => {
   return (
     <group>
       <instancedMesh ref={intactRef} args={[pillarGeo, undefined, intact.length]}>
-        <meshStandardMaterial color="#1c2530" roughness={0.9} />
+        <meshStandardMaterial color="#333f50" roughness={0.9} />
       </instancedMesh>
       <instancedMesh ref={brokenRef} args={[pillarGeo, undefined, broken.length]}>
-        <meshStandardMaterial color="#232d3a" roughness={0.95} />
+        <meshStandardMaterial color="#3d4a5c" roughness={0.95} />
       </instancedMesh>
       <instancedMesh ref={beamRef} args={[beamGeo, undefined, beams.length]}>
-        <meshStandardMaterial color="#151c26" roughness={0.95} />
+        <meshStandardMaterial color="#28323f" roughness={0.95} />
       </instancedMesh>
     </group>
   );

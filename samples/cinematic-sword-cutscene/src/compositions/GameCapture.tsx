@@ -7,6 +7,7 @@ import {
 } from 'remotion';
 import {useFrame, useThree} from '@react-three/fiber';
 import {ThreeCanvas} from '@remotion/three';
+import * as THREE from 'three';
 import {preloadAssets} from '../assets';
 import {MASTER_TIMELINE, TEST_TIMELINE} from '../data/masterTimeline';
 import {BugProfile, NO_BUG} from '../bugs/bugs';
@@ -80,6 +81,10 @@ export const GameCapture: React.FC<GameCaptureProps> = ({
           gl={{antialias: true, alpha: false, preserveDrawingBuffer: true}}
           camera={{fov: 42, position: [0, 2, 6], near: 0.1, far: 80}}
           style={{position: 'absolute', inset: 0}}
+          onCreated={(state) => {
+            state.gl.toneMapping = THREE.ACESFilmicToneMapping;
+            state.gl.toneMappingExposure = 1.45;
+          }}
         >
           {ready ? (
             <>

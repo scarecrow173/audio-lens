@@ -161,8 +161,16 @@ const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
       <pointLight
         position={[0, 1.6, -0.9]}
         color={rimColor}
-        intensity={2.2}
-        distance={3.5}
+        intensity={3.4}
+        distance={4}
+        decay={2}
+      />
+      {/* soft front fill keeps faces readable in close-ups */}
+      <pointLight
+        position={[0, 1.4, 1.1]}
+        color="#8fb8c9"
+        intensity={0.9}
+        distance={3}
         decay={2}
       />
     </group>
