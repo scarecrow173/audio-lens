@@ -55,21 +55,5 @@ export const Root: React.FC = () => (
         } satisfies GameCaptureProps
       }
     />
-    <Composition
-      id="GameCaptureBugFreeze"
-      component={GameCapture}
-      width={W}
-      height={H}
-      fps={FPS}
-      durationInFrames={1500}
-      defaultProps={
-        {
-          timelineId: 'master',
-          // freeze 32.0s - 33.0s (mid sword-combo)
-          bug: {type: 'freeze', startFrame: 960, endFrame: 990},
-          debug: false,
-        } satisfies GameCaptureProps
-      }
-    />
   </>
 );
