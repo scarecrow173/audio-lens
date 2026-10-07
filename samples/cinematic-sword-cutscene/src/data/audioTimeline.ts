@@ -2,9 +2,10 @@
 // Single source of truth shared by <AudioTrack/> (Remotion) and
 // scripts/audio/gen-audio.ts (out/metadata/audio.json).
 //
-// All times are SECONDS of source timeline. Bug variants keep the same
-// audio track — bug profiles remap only the rendered video frame, so
-// audio stays identical across variants by design.
+// All times are SECONDS of source timeline. Video BugProfiles remap only
+// the rendered frame, so the event-level track stays identical; audio bug
+// variants bypass this event track and play a pre-mixed DSP-transformed
+// WAV instead (see src/bugs/audioBugs.ts).
 
 export type AudioEvent = {
   id: string;

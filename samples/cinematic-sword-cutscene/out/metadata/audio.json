@@ -653,5 +653,68 @@
       "seed": 500,
       "loop": true
     }
+  ],
+  "masterMix": "audio/generated/master/mix-normal.wav",
+  "audioBugVariants": [
+    {
+      "id": "audio-dropout",
+      "file": "audio/generated/master/mix-audio-dropout.wav",
+      "bug": {
+        "type": "dropout",
+        "startSec": 32,
+        "endSec": 33
+      },
+      "description": "32.0-33.0s soundtrack drops to silence mid sword-combo"
+    },
+    {
+      "id": "audio-desync",
+      "file": "audio/generated/master/mix-audio-desync.wav",
+      "bug": {
+        "type": "desync",
+        "offsetSec": 0.25
+      },
+      "description": "soundtrack runs +0.25s late against the picture"
+    },
+    {
+      "id": "audio-clip",
+      "file": "audio/generated/master/mix-audio-clip.wav",
+      "bug": {
+        "type": "clipping",
+        "gainDb": 14
+      },
+      "description": "+14dB digital clipping on the whole soundtrack"
+    },
+    {
+      "id": "audio-reverb",
+      "file": "audio/generated/master/mix-audio-reverb.wav",
+      "bug": {
+        "type": "reverb",
+        "wet": 0.6,
+        "decaySec": 0.9
+      },
+      "description": "unintended hall reverb on the master bus"
+    },
+    {
+      "id": "audio-filter",
+      "file": "audio/generated/master/mix-audio-filter.wav",
+      "bug": {
+        "type": "filter",
+        "kind": "lowpass",
+        "cutoffHz": 700
+      },
+      "description": "700Hz low-pass muffle on the whole soundtrack"
+    },
+    {
+      "id": "audio-clicks",
+      "file": "audio/generated/master/mix-audio-clicks.wav",
+      "bug": {
+        "type": "clicks",
+        "seed": 4242,
+        "count": 16,
+        "startSec": 8,
+        "endSec": 50
+      },
+      "description": "buffer-underrun clicks scattered over 8-50s"
+    }
   ]
 }

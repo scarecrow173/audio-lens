@@ -11,8 +11,10 @@ import {readFileSync, existsSync, mkdirSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {generateBgm} from './gen-bgm.ts';
+import {generateBugMixes} from './gen-bug-audio.ts';
 import {type GenInfo, SFX_REGISTRY, generateSfx} from './gen-sfx.ts';
 import {AUDIO_MASTER, AUDIO_TEST, type AudioEvent} from '../../src/data/audioTimeline.ts';
+import {AUDIO_BUG_VARIANTS, audioMixFile} from '../../src/bugs/audioBugs.ts';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '../..');
 const FPS = 30;
@@ -37,6 +39,7 @@ const VOICE_INFO: Record<string, Omit<GenInfo, 'file' | 'durationSec'>> = {
 
 generateSfx(root);
 const bgm = generateBgm(root);
+generateBugMixes(root);
 
 const genByFile = new Map<string, GenInfo>();
 for (const g of SFX_REGISTRY) genByFile.set(g.file, g);
@@ -70,6 +73,13 @@ const meta = {
   events: AUDIO_MASTER.map(toMeta),
   testTimeline: 'test',
   testEvents: AUDIO_TEST.map(toMeta),
+  masterMix: 'audio/generated/master/mix-normal.wav',
+  audioBugVariants: AUDIO_BUG_VARIANTS.map((v) => ({
+    id: v.id,
+    file: audioMixFile(v.id),
+    bug: v.bug,
+    description: v.description,
+  })),
 };
 
 mkdirSync(join(root, 'out/metadata'), {recursive: true});

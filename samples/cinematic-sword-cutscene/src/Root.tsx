@@ -2,6 +2,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {GameCapture, GameCaptureProps} from './compositions/GameCapture';
 import {NO_BUG} from './bugs/bugs';
+import {AUDIO_BUG_VARIANTS, audioMixFile} from './bugs/audioBugs';
 
 const W = 640;
 const H = 360;
@@ -55,5 +56,25 @@ export const Root: React.FC = () => (
         } satisfies GameCaptureProps
       }
     />
+    {/* Audio bug variants: identical picture, transformed soundtrack. */}
+    {AUDIO_BUG_VARIANTS.map((v) => (
+      <Composition
+        key={v.id}
+        id={v.composition}
+        component={GameCapture}
+        width={W}
+        height={H}
+        fps={FPS}
+        durationInFrames={1500}
+        defaultProps={
+          {
+            timelineId: 'master',
+            bug: NO_BUG,
+            audioMix: audioMixFile(v.id),
+            debug: false,
+          } satisfies GameCaptureProps
+        }
+      />
+    ))}
   </>
 );
