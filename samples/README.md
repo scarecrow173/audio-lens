@@ -116,3 +116,35 @@ target/release/al run --base-dir samples/_runs \
 `samples/_runs/` は gitignore 済み。各ジョブは
 `samples/_runs/<dir>/<JOB-*>/{manifest.json, analysis/, export/}` に
 出力される。
+
+## cinematic-sword-cutscene/
+
+Remotion + Three.js(React Three Fiber)で生成する、決定論的な
+「ゲームキャプチャ風」映像フィクスチャ群。KayKit Character Pack:
+Adventurers(CC0)のキャラクター / アニメーションを使用し、
+輝度変化・フレーム差分・明確なシーンチェンジを持つ 50 s /
+640x360 / 30 fps の剣戟カットシーンをレンダリングする。
+
+正常系(`GameCaptureNormal`)がマスタータイムライン
+(`src/data/masterTimeline.ts`)をそのまま再生し、異常系は
+`BugProfile` のフレームリマップ / ポストプロセスとして非破壊的に
+注入されるため、バグ区間以外のピクセルは正常系と一致する。
+
+| ファイル | ロール | 内容 |
+| --- | --- | --- |
+| `out/normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
+| `out/bugs/game-capture-freeze.mp4` | `capture_bug` | 32.0-33.0 s をフリーズ |
+| `out/test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX 検証 |
+| `out/metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
+
+再生成:
+
+```bash
+cd samples/cinematic-sword-cutscene
+npm install
+npm run render:variants    # test / normal / freeze を順にレンダリング
+```
+
+デバッグ表示付きプレビューは `GameCaptureBugPreview` composition
+(`debug` prop)。任意のバグプロファイルは `--props '{"bug":{...}}'`
+で `remotion render` に渡せる。

@@ -1,0 +1,74 @@
+// Renders the demo variants and writes machine-readable metadata.
+// Run: node scripts/render-variants.ts [variantId ...]
+//      (no args renders all variants)
+import {execSync} from 'node:child_process';
+import {mkdirSync, writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const root = join(fileURLToPath(new URL('.', import.meta.url)), '..');
+const FPS = 30;
+
+type Variant = {
+  id: string;
+  composition: string;
+  out: string;
+  durationFrames: number;
+  bug?: Record<string, unknown>;
+};
+
+const VARIANTS: Variant[] = [
+  {
+    id: 'test',
+    composition: 'GameCaptureTest',
+    out: 'out/test/game-capture-test.mp4',
+    durationFrames: 300,
+  },
+  {
+    id: 'normal',
+    composition: 'GameCaptureNormal',
+    out: 'out/normal/game-capture-normal.mp4',
+    durationFrames: 1500,
+  },
+  {
+    id: 'freeze',
+    composition: 'GameCaptureBugFreeze',
+    out: 'out/bugs/game-capture-freeze.mp4',
+    durationFrames: 1500,
+    bug: {type: 'freeze', startFrame: 960, endFrame: 990},
+  },
+];
+
+const wanted = process.argv.slice(2);
+const targets = wanted.length
+  ? VARIANTS.filter((v) => wanted.includes(v.id))
+  : VARIANTS;
+
+if (targets.length === 0) {
+  console.error(`Unknown variant(s): ${wanted.join(', ')}`);
+  process.exit(1);
+}
+
+mkdirSync(join(root, 'out/metadata'), {recursive: true});
+
+for (const v of targets) {
+  console.log(`\n=== render ${v.id} -> ${v.out} ===`);
+  execSync(`npx remotion render ${v.composition} ${v.out}`, {
+    cwd: root,
+    stdio: 'inherit',
+    shell: process.platform === 'win32' ? 'cmd.exe' : undefined,
+  });
+  const meta: Record<string, unknown> = {
+    variant: v.id === 'test' ? 'test' : v.bug ? (v.bug.type as string) : 'normal',
+    width: 640,
+    height: 360,
+    fps: FPS,
+    durationFrames: v.durationFrames,
+    composition: v.composition,
+    file: v.out,
+  };
+  if (v.bug) meta.bug = v.bug;
+  const metaPath = join(root, 'out/metadata', `${v.id}.json`);
+  writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n');
+  console.log(`metadata -> ${metaPath}`);
+}
