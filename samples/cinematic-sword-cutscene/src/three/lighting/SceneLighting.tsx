@@ -22,7 +22,7 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
         warn = Math.max(warn, Math.sin((dt / w.dur) * Math.PI));
       }
     }
-    if (warningRef.current) warningRef.current.intensity = warn * 60;
+    if (warningRef.current) warningRef.current.intensity = warn * 90;
 
     // impact flash lights
     let flash = 0;
@@ -38,7 +38,7 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
       }
     }
     if (flashRef.current) {
-      flashRef.current.intensity = flash * 90;
+      flashRef.current.intensity = flash * 130;
       flashRef.current.position.set(...flashPos);
     }
 
@@ -50,21 +50,24 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
         pw = t <= end ? clamp((t - start) / 1.8) : Math.max(0, 1 - (t - end) / 0.6);
       }
     }
-    if (powerRef.current) powerRef.current.intensity = pw * 40;
-    if (ambientRef.current) ambientRef.current.intensity = 0.7 + warn * 0.15 + pw * 0.25;
-    if (keyRef.current) keyRef.current.intensity = 1.35 + pw * 0.35;
+    if (powerRef.current) powerRef.current.intensity = pw * 55;
+    if (ambientRef.current) ambientRef.current.intensity = 1.35 + warn * 0.2 + pw * 0.3;
+    if (keyRef.current) keyRef.current.intensity = 2.3 + pw * 0.45;
   });
 
   return (
     <group>
-      <ambientLight ref={ambientRef} intensity={0.7} color="#2a4460" />
+      <ambientLight ref={ambientRef} intensity={1.35} color="#40597a" />
+      <hemisphereLight args={['#5a8fa3', '#1c2530', 0.85]} />
       <directionalLight
         ref={keyRef}
         position={[4, 9, 5]}
-        intensity={1.35}
-        color="#7fd6de"
+        intensity={2.3}
+        color="#9adfe8"
       />
-      <directionalLight position={[-6, 6, -4]} intensity={0.35} color="#31435f" />
+      <directionalLight position={[-6, 6, -4]} intensity={0.8} color="#4a6284" />
+      {/* camera-side fill so faces never fall to black */}
+      <directionalLight position={[0, 4, 12]} intensity={0.55} color="#3d5a70" />
       {/* warning light — back wall */}
       <pointLight
         ref={warningRef}
@@ -93,7 +96,10 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
         decay={2}
       />
       {/* low teal fill over the arena */}
-      <pointLight position={[0, 3.2, 1.5]} color="#1e4e5c" intensity={6} distance={16} decay={2} />
+      <pointLight position={[0, 3.2, 1.5]} color="#2a6a7d" intensity={16} distance={18} decay={2} />
+      {/* overhead practicals along the arena so the room reads as lit */}
+      <pointLight position={[-6, 6.8, -4]} color="#3d7f8f" intensity={10} distance={14} decay={2} />
+      <pointLight position={[6, 6.8, -4]} color="#3d7f8f" intensity={10} distance={14} decay={2} />
     </group>
   );
 };

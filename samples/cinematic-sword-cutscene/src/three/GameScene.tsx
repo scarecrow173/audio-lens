@@ -25,8 +25,8 @@ export const GameScene: React.FC<{
 }> = ({timeline, handles}) => {
   return (
     <>
-      <color attach="background" args={['#070b13']} />
-      <fogExp2 attach="fog" args={['#0a1220', 0.045]} />
+      <color attach="background" args={['#0e1622']} />
+      <fogExp2 attach="fog" args={['#13202e', 0.034]} />
       <SceneLighting timeline={timeline} />
       <Environment />
       {/* trails subscribe before characters so they sample past poses first;
