@@ -133,7 +133,6 @@ Adventurers(CC0)のキャラクター / アニメーションを使用し、
 | ファイル | ロール | 内容 |
 | --- | --- | --- |
 | `out/normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
-| `out/bugs/game-capture-freeze.mp4` | `capture_bug` | 32.0-33.0 s をフリーズ |
 | `out/test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX 検証 |
 | `out/metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
 
@@ -144,7 +143,7 @@ cd samples/cinematic-sword-cutscene
 npm install
 npm run audio:gen          # SE/Ambience/BGM を procedural 生成
 npm run audio:voice        # Voice を Chatterbox で生成(要 uv/python)
-npm run render:variants    # test / normal / freeze を順にレンダリング
+npm run render:variants    # test / normal を順にレンダリング
 ```
 
 デバッグ表示付きプレビューは `GameCaptureBugPreview` composition

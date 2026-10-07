@@ -30,13 +30,6 @@ const VARIANTS: Variant[] = [
     out: 'out/normal/game-capture-normal.mp4',
     durationFrames: 1500,
   },
-  {
-    id: 'freeze',
-    composition: 'GameCaptureBugFreeze',
-    out: 'out/bugs/game-capture-freeze.mp4',
-    durationFrames: 1500,
-    bug: {type: 'freeze', startFrame: 960, endFrame: 990},
-  },
 ];
 
 const wanted = process.argv.slice(2);
