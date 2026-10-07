@@ -134,6 +134,7 @@ Adventurers(CC0)のキャラクター / アニメーションを使用し、
 | --- | --- | --- |
 | `out/normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
 | `out/test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX 検証 |
+| `out/bugs/game-capture-audio-*.mp4` | `capture_bug` | 音声バグ系(映像は正常系と同一) |
 | `out/metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
 
 再生成:
@@ -143,7 +144,7 @@ cd samples/cinematic-sword-cutscene
 npm install
 npm run audio:gen          # SE/Ambience/BGM を procedural 生成
 npm run audio:voice        # Voice を Chatterbox で生成(要 uv/python)
-npm run render:variants    # test / normal を順にレンダリング
+npm run render:variants    # test / normal / 音声バグ6種を順にレンダリング
 ```
 
 デバッグ表示付きプレビューは `GameCaptureBugPreview` composition
@@ -154,8 +155,23 @@ npm run render:variants    # test / normal を順にレンダリング
 
 配置は `src/data/audioTimeline.ts` が唯一の参照元で、
 `src/audio/AudioTrack.tsx` が `<Sequence>/<Audio>` へ展開する。
-バグプロファイルは映像フレームのみ remap するため、音声トラックは
-全バリアントで同一(音声は正常のまま維持される)設計。
+
+音声バグ系(`AudioBugProfile`, `src/bugs/audioBugs.ts`)は映像を
+正常系のまま、サウンドトラックのみを差し替える。全イベントを
+deterministic にプリミックスした `mix-normal.wav` を基準に、
+`gen-bug-audio.ts` が各バグをDSP変換として適用した
+`mix-<variant>.wav` を生成する(クリッピング等の非線形処理は
+イベント単位では再現できないためプリミックス方式)。バリアントは
+`AUDIO_BUG_VARIANTS` で宣言的に定義される:
+
+| バリアント | 異常 |
+| --- | --- |
+| `audio-dropout` | 32.0-33.0 s 全音声が無音に落ちる |
+| `audio-desync` | 音声全体が +0.25 s 遅れる |
+| `audio-clip` | 全体 +14 dB デジタルクリッピング |
+| `audio-reverb` | マスターバスに意図しない残響 |
+| `audio-filter` | 全体に 700 Hz ローパス(籠り) |
+| `audio-clicks` | 8-50 s にバッファアンダーラン風のプチノイズ |
 
 | 種別 | 生成 | 出力 |
 | --- | --- | --- |

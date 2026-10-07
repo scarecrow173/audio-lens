@@ -1,8 +1,10 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   AbsoluteFill,
+  Audio,
   continueRender,
   delayRender,
+  staticFile,
   useVideoConfig,
 } from 'remotion';
 import {useFrame, useThree} from '@react-three/fiber';
@@ -60,12 +62,17 @@ const KickRender: React.FC = () => {
 export type GameCaptureProps = {
   timelineId: 'master' | 'test';
   bug: BugProfile;
+  // When set, plays this pre-mixed WAV (relative to assets/) instead of
+  // the per-event AudioTrack — used by audio bug variants whose
+  // soundtrack differs from the master while the picture stays normal.
+  audioMix?: string;
   debug: boolean;
 };
 
 export const GameCapture: React.FC<GameCaptureProps> = ({
   timelineId = 'master',
   bug = NO_BUG,
+  audioMix,
   debug = false,
 }) => {
   const ready = useReady();
@@ -97,7 +104,11 @@ export const GameCapture: React.FC<GameCaptureProps> = ({
           ) : null}
         </ThreeCanvas>
         <GameHUD timeline={timeline} />
-        <AudioTrack events={timelineId === 'test' ? AUDIO_TEST : AUDIO_MASTER} />
+        {audioMix ? (
+          <Audio src={staticFile(audioMix)} />
+        ) : (
+          <AudioTrack events={timelineId === 'test' ? AUDIO_TEST : AUDIO_MASTER} />
+        )}
         {debug ? <DebugOverlay timeline={timeline} bug={bug} /> : null}
       </AbsoluteFill>
     </BugRenderer>

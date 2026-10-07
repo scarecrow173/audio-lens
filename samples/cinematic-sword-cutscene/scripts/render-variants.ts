@@ -5,6 +5,7 @@ import {execSync} from 'node:child_process';
 import {mkdirSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {AUDIO_BUG_VARIANTS} from '../src/bugs/audioBugs.ts';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const FPS = 30;
@@ -15,6 +16,7 @@ type Variant = {
   out: string;
   durationFrames: number;
   bug?: Record<string, unknown>;
+  audioBug?: Record<string, unknown>;
 };
 
 const VARIANTS: Variant[] = [
@@ -30,6 +32,14 @@ const VARIANTS: Variant[] = [
     out: 'out/normal/game-capture-normal.mp4',
     durationFrames: 1500,
   },
+  // Audio bug variants: identical picture, transformed soundtrack.
+  ...AUDIO_BUG_VARIANTS.map((v) => ({
+    id: v.id,
+    composition: v.composition,
+    out: `out/bugs/game-capture-${v.id}.mp4`,
+    durationFrames: 1500,
+    audioBug: v.bug as unknown as Record<string, unknown>,
+  })),
 ];
 
 const wanted = process.argv.slice(2);
@@ -52,7 +62,7 @@ for (const v of targets) {
     shell: process.platform === 'win32' ? 'cmd.exe' : undefined,
   });
   const meta: Record<string, unknown> = {
-    variant: v.id === 'test' ? 'test' : v.bug ? (v.bug.type as string) : 'normal',
+    variant: v.id === 'test' ? 'test' : v.bug ? (v.bug.type as string) : v.audioBug ? (v.audioBug.type as string) : 'normal',
     width: 640,
     height: 360,
     fps: FPS,
@@ -61,6 +71,7 @@ for (const v of targets) {
     file: v.out,
   };
   if (v.bug) meta.bug = v.bug;
+  if (v.audioBug) meta.audioBug = v.audioBug;
   const metaPath = join(root, 'out/metadata', `${v.id}.json`);
   writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n');
   console.log(`metadata -> ${metaPath}`);
