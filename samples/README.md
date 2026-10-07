@@ -142,9 +142,37 @@ Adventurers(CC0)のキャラクター / アニメーションを使用し、
 ```bash
 cd samples/cinematic-sword-cutscene
 npm install
+npm run audio:gen          # SE/Ambience/BGM を procedural 生成
+npm run audio:voice        # Voice を Chatterbox で生成(要 uv/python)
 npm run render:variants    # test / normal / freeze を順にレンダリング
 ```
 
 デバッグ表示付きプレビューは `GameCaptureBugPreview` composition
 (`debug` prop)。任意のバグプロファイルは `--props '{"bug":{...}}'`
 で `remotion render` に渡せる。
+
+### 音声パイプライン
+
+配置は `src/data/audioTimeline.ts` が唯一の参照元で、
+`src/audio/AudioTrack.tsx` が `<Sequence>/<Audio>` へ展開する。
+バグプロファイルは映像フレームのみ remap するため、音声トラックは
+全バリアントで同一(音声は正常のまま維持される)設計。
+
+| 種別 | 生成 | 出力 |
+| --- | --- | --- |
+| Voice | Chatterbox Multilingual (`gen_voice.py`) + DSP ポスト処理 | `assets/audio/generated/voice/` |
+| SE | procedural DSP (`scripts/audio/gen-sfx.ts`) | `assets/audio/generated/sfx/` |
+| Ambience | procedural DSP(24 s シームレスループ) | `assets/audio/generated/ambience/` |
+| BGM | procedural synth 50 s (`gen-bgm.ts`) | `assets/audio/generated/bgm/` |
+
+Voice は Resemble AI **Chatterbox Multilingual TTS**(`chatterbox-tts`
+0.1.7, **MIT License**)を `language_id="ja"` でローカル実行。
+モデルウェイトは初回実行時に HuggingFace から取得されローカルに
+キャッシュされる(実行時のクラウドAPI依存はない)。Perth 透かしの
+オプションモジュールが環境により import できない場合は
+DummyWatermarker へフォールバックする(fixture用途のため透かし不要)。
+KAEL は +0.5st相当の明るめ・ドライ、VAREN は -2.8st相当の低音強化・
+小部屋リバーブで声色を分離(いずれも特定人物の声の模倣ではなく
+モデル標準音声+DSPチェーン)。SE/Ambience/BGM は生成AIを使わず
+seeded oscillator/noise/filter のみで合成し、seed・generator・
+startFrame を `out/metadata/audio.json` に記録する。

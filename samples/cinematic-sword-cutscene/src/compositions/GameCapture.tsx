@@ -15,6 +15,8 @@ import {BugRenderer} from '../bugs/BugRenderer';
 import {GameScene, createSceneHandles} from '../three/GameScene';
 import {GameHUD} from '../hud/GameHUD';
 import {DebugOverlay} from '../hud/DebugOverlay';
+import {AudioTrack} from '../audio/AudioTrack';
+import {AUDIO_MASTER, AUDIO_TEST} from '../data/audioTimeline';
 
 // Assets are fully parsed before the scene mounts so nothing suspends
 // mid-frame; captures stay deterministic.
@@ -95,6 +97,7 @@ export const GameCapture: React.FC<GameCaptureProps> = ({
           ) : null}
         </ThreeCanvas>
         <GameHUD timeline={timeline} />
+        <AudioTrack events={timelineId === 'test' ? AUDIO_TEST : AUDIO_MASTER} />
         {debug ? <DebugOverlay timeline={timeline} bug={bug} /> : null}
       </AbsoluteFill>
     </BugRenderer>
