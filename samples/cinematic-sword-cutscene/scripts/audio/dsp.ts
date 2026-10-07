@@ -367,10 +367,10 @@ export const normalize = (buf: Stereo, peak = 0.89): Stereo => {
 
 // ---------- WAV I/O ----------
 
-// Read a PCM16 WAV (mono or stereo) into Stereo at its own rate;
-// callers resample if needed.
+// Read a WAV (PCM16 or IEEE float32, mono or stereo) into Stereo.
 export const readWav = (path: string): {buf: Stereo; sr: number} => {
   const b = readFileSync(path);
+  const fmt = b.readUInt16LE(20);
   const channels = b.readUInt16LE(22);
   const sr = b.readUInt32LE(24);
   const bits = b.readUInt16LE(34);
@@ -388,12 +388,17 @@ export const readWav = (path: string): {buf: Stereo; sr: number} => {
     }
     off += 8 + size;
   }
-  const n = Math.floor(dataSize / (bits / 8) / channels);
+  const bytesPerSample = bits / 8;
+  const n = Math.floor(dataSize / bytesPerSample / channels);
   const out = mkBuf(n / sr);
+  const readSample = (i: number, ch: number): number => {
+    const off = dataOff + (i * channels + ch) * bytesPerSample;
+    if (fmt === 3) return b.readFloatLE(off); // IEEE float
+    return b.readInt16LE(off) / 32768; // PCM16
+  };
   for (let i = 0; i < n; i++) {
-    const l = b.readInt16LE(dataOff + i * channels * 2) / 32768;
-    const r =
-      channels > 1 ? b.readInt16LE(dataOff + (i * channels + 1) * 2) / 32768 : l;
+    const l = readSample(i, 0);
+    const r = channels > 1 ? readSample(i, 1) : l;
     out.l[i] = l;
     out.r[i] = r;
   }
