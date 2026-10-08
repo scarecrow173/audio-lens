@@ -117,25 +117,38 @@ target/release/al run --base-dir samples/_runs \
 `samples/_runs/<dir>/<JOB-*>/{manifest.json, analysis/, export/}` に
 出力される。
 
-## cinematic-sword-cutscene/
+## game-capture/
 
-Remotion + Three.js(React Three Fiber)で生成する、決定論的な
-「ゲームキャプチャ風」映像フィクスチャ群。KayKit Character Pack:
-Adventurers(CC0)のキャラクター / アニメーションを使用し、
-輝度変化・フレーム差分・明確なシーンチェンジを持つ 50 s /
-640x360 / 30 fps の剣戟カットシーンをレンダリングする。
-
-正常系(`GameCaptureNormal`)がマスタータイムライン
-(`src/data/masterTimeline.ts`)をそのまま再生し、異常系は
-`BugProfile` のフレームリマップ / ポストプロセスとして非破壊的に
-注入されるため、バグ区間以外のピクセルは正常系と一致する。
+`samples/cinematic-sword-cutscene/` が生成する決定論的な
+「ゲームキャプチャ風」fixture(50 s / 640x360 / 30 fps / AAC 音声)。
+映像は全バリアントで正常系と同一で、異常はサウンドトラックのみに
+注入される。
 
 | ファイル | ロール | 内容 |
 | --- | --- | --- |
-| `out/normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
-| `out/test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX 検証 |
-| `out/bugs/game-capture-audio-*.mp4` | `capture_bug` | 音声バグ系(映像は正常系と同一) |
-| `out/metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
+| `normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
+| `bugs/game-capture-audio-dropout.mp4` | `capture_bug` | 32.0-33.0 s 全音声が無音に落ちる |
+| `bugs/game-capture-audio-desync.mp4` | `capture_bug` | 音声全体が +0.25 s 遅れる |
+| `bugs/game-capture-audio-clip.mp4` | `capture_bug` | 全体 +14 dB デジタルクリッピング |
+| `bugs/game-capture-audio-reverb.mp4` | `capture_bug` | マスターバスに意図しない残響 |
+| `bugs/game-capture-audio-filter.mp4` | `capture_bug` | 全体に 700 Hz ローパス(籠り) |
+| `bugs/game-capture-audio-clicks.mp4` | `capture_bug` | 8-50 s にバッファアンダーラン風のプチノイズ |
+| `test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX / 音声検証 |
+| `metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
+
+## cinematic-sword-cutscene/
+
+`game-capture/` fixtureの生成プロジェクト。Remotion + Three.js
+(React Three Fiber)で KayKit Character Pack: Adventurers(CC0)の
+キャラクター / アニメーションを駆動し、輝度変化・フレーム差分・
+明確なシーンチェンジを持つ剣戟カットシーンをレンダリングする。
+
+正常系(`GameCaptureNormal`)がマスタータイムライン
+(`src/data/masterTimeline.ts`)をそのまま再生する。異常系は2系統:
+映像バグは `BugProfile` のフレームリマップ / ポストプロセスとして
+非破壊注入、音声バグはプリミックスしたサウンドトラックへの
+deterministic DSP変換(`AudioBugProfile`)として注入される。
+出力は `samples/game-capture/` に集約される。
 
 再生成:
 
@@ -190,4 +203,4 @@ KAEL は +0.5st相当の明るめ・ドライ、VAREN は -2.8st相当の低音�
 小部屋リバーブで声色を分離(いずれも特定人物の声の模倣ではなく
 モデル標準音声+DSPチェーン)。SE/Ambience/BGM は生成AIを使わず
 seeded oscillator/noise/filter のみで合成し、seed・generator・
-startFrame を `out/metadata/audio.json` に記録する。
+startFrame を `metadata/audio.json` に記録する。

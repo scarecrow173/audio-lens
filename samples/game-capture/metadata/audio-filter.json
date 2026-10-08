@@ -5,7 +5,7 @@
   "fps": 30,
   "durationFrames": 1500,
   "composition": "GameCaptureAudioFilter",
-  "file": "out/bugs/game-capture-audio-filter.mp4",
+  "file": "game-capture/bugs/game-capture-audio-filter.mp4",
   "audioBug": {
     "type": "filter",
     "kind": "lowpass",

@@ -5,7 +5,7 @@
   "fps": 30,
   "durationFrames": 1500,
   "composition": "GameCaptureAudioDropout",
-  "file": "out/bugs/game-capture-audio-dropout.mp4",
+  "file": "game-capture/bugs/game-capture-audio-dropout.mp4",
   "audioBug": {
     "type": "dropout",
     "startSec": 32,
