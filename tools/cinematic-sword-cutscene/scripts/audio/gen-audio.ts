@@ -7,8 +7,8 @@
 // files are tolerated — their events are still recorded.
 //
 // Run: npx tsx scripts/audio/gen-audio.ts
-import {readFileSync, existsSync, mkdirSync, writeFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {copyFileSync, readFileSync, existsSync, mkdirSync, writeFileSync} from 'node:fs';
+import {basename, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {generateBgm} from './gen-bgm.ts';
 import {generateBugMixes} from './gen-bug-audio.ts';
@@ -45,6 +45,11 @@ const genByFile = new Map<string, GenInfo>();
 for (const g of SFX_REGISTRY) genByFile.set(g.file, g);
 genByFile.set(bgm.file, bgm);
 
+// Each embedded source asset is also copied next to the normal fixture
+// (samples/normal/source-<name>.wav) so al can locate where the source
+// lands in the capture and diff it against the mixed soundtrack.
+const sourceFileFor = (e: AudioEvent) => `normal/source-${basename(e.file)}`;
+
 const toMeta = (e: AudioEvent) => {
   const voiceId = e.file.split('/').pop()?.replace('.wav', '') ?? '';
   const gen =
@@ -57,6 +62,7 @@ const toMeta = (e: AudioEvent) => {
     id: e.id,
     type: e.type,
     filename: e.file,
+    sourceFile: sourceFileFor(e),
     startFrame: Math.round(e.startSec * FPS),
     durationSec: +(realDur ?? e.durationSec).toFixed(3),
     volume: e.volume,
@@ -67,6 +73,36 @@ const toMeta = (e: AudioEvent) => {
   };
 };
 
+// --- emit source assets into samples/normal/ -------------------------
+const samplesDir = join(root, '..', '..', 'samples');
+const normalDir = join(samplesDir, 'normal');
+mkdirSync(normalDir, {recursive: true});
+
+const sources: {file: string; type: string; sourceFile: string}[] = [];
+const seen = new Set<string>();
+for (const e of [...AUDIO_MASTER, ...AUDIO_TEST]) {
+  if (seen.has(e.file)) continue;
+  seen.add(e.file);
+  const src = join(root, 'assets', e.file);
+  if (!existsSync(src)) {
+    console.warn(`missing source skipped: ${e.file}`);
+    continue;
+  }
+  copyFileSync(src, join(samplesDir, sourceFileFor(e)));
+  sources.push({file: e.file, type: e.type, sourceFile: sourceFileFor(e)});
+}
+// The full premix as it is heard in the capture.
+copyFileSync(
+  join(root, 'assets/audio/generated/master/mix-normal.wav'),
+  join(normalDir, 'source-mix.wav')
+);
+sources.unshift({
+  file: 'audio/generated/master/mix-normal.wav',
+  type: 'premix',
+  sourceFile: 'normal/source-mix.wav',
+});
+console.log(`copied ${sources.length} source assets -> samples/normal/`);
+
 const meta = {
   fps: FPS,
   timeline: 'master',
@@ -74,6 +110,7 @@ const meta = {
   testTimeline: 'test',
   testEvents: AUDIO_TEST.map(toMeta),
   masterMix: 'audio/generated/master/mix-normal.wav',
+  sources,
   audioBugVariants: AUDIO_BUG_VARIANTS.map((v) => ({
     id: v.id,
     file: audioMixFile(v.id),
@@ -83,7 +120,7 @@ const meta = {
 };
 
 // Metadata lands with the fixture outputs (samples/metadata/).
-const metaDir = join(root, '..', '..', 'samples', 'metadata');
+const metaDir = join(samplesDir, 'metadata');
 mkdirSync(metaDir, {recursive: true});
 writeFileSync(
   join(metaDir, 'audio.json'),

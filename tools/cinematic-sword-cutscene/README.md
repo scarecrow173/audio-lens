@@ -16,6 +16,10 @@ Adventurers(CC0)のキャラクター / アニメーションを駆動し、輝�
 
 出力は `samples/<scenario>/` に集約される(バグ種別ごとの
 サブディレクトリ + `samples/normal/` + `samples/metadata/`)。
+`gen-audio.ts` は動画内で鳴っている音素材(source_asset)も
+`samples/normal/source-*.wav` として同梱する(premix 全体 +
+イベント単位の個別素材)。locate で素材の出現位置を特定し、
+capture 内の音が素材からどう変化したかを解析する用途。
 
 ## 再生成
 
