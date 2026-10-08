@@ -45,10 +45,11 @@ const genByFile = new Map<string, GenInfo>();
 for (const g of SFX_REGISTRY) genByFile.set(g.file, g);
 genByFile.set(bgm.file, bgm);
 
-// Each embedded source asset is also copied next to the normal fixture
-// (samples/normal/source-<name>.wav) so al can locate where the source
-// lands in the capture and diff it against the mixed soundtrack.
-const sourceFileFor = (e: AudioEvent) => `normal/source-${basename(e.file)}`;
+// Each embedded source asset is also copied next to the reference
+// fixture (samples/reference/source-<name>.wav) so al can locate where
+// the source lands in the capture and diff it against the mixed
+// soundtrack.
+const sourceFileFor = (e: AudioEvent) => `reference/source-${basename(e.file)}`;
 
 const toMeta = (e: AudioEvent) => {
   const voiceId = e.file.split('/').pop()?.replace('.wav', '') ?? '';
@@ -73,10 +74,10 @@ const toMeta = (e: AudioEvent) => {
   };
 };
 
-// --- emit source assets into samples/normal/ -------------------------
+// --- emit source assets into samples/reference/ ----------------------
 const samplesDir = join(root, '..', '..', 'samples');
-const normalDir = join(samplesDir, 'normal');
-mkdirSync(normalDir, {recursive: true});
+const refDir = join(samplesDir, 'reference');
+mkdirSync(refDir, {recursive: true});
 
 const sources: {file: string; type: string; sourceFile: string}[] = [];
 const seen = new Set<string>();
@@ -91,17 +92,7 @@ for (const e of [...AUDIO_MASTER, ...AUDIO_TEST]) {
   copyFileSync(src, join(samplesDir, sourceFileFor(e)));
   sources.push({file: e.file, type: e.type, sourceFile: sourceFileFor(e)});
 }
-// The full premix as it is heard in the capture.
-copyFileSync(
-  join(root, 'assets/audio/generated/master/mix-normal.wav'),
-  join(normalDir, 'source-mix.wav')
-);
-sources.unshift({
-  file: 'audio/generated/master/mix-normal.wav',
-  type: 'premix',
-  sourceFile: 'normal/source-mix.wav',
-});
-console.log(`copied ${sources.length} source assets -> samples/normal/`);
+console.log(`copied ${sources.length} source assets -> samples/reference/`);
 
 const meta = {
   fps: FPS,

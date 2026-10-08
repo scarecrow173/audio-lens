@@ -32,7 +32,7 @@ const VARIANTS: Variant[] = [
   {
     id: 'normal',
     composition: 'GameCaptureNormal',
-    out: 'normal/game-capture-normal.mp4',
+    out: 'reference/game-capture-normal.mp4',
     durationFrames: 1500,
   },
   // Audio bug variants: identical picture, transformed soundtrack.
