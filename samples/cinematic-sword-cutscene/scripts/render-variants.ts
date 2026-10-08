@@ -8,6 +8,9 @@ import {fileURLToPath} from 'node:url';
 import {AUDIO_BUG_VARIANTS} from '../src/bugs/audioBugs.ts';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '..');
+// Fixture outputs live in the samples/<scenario>/ convention dir next to
+// this generator project, so consumers only need samples/game-capture/.
+const OUT_ROOT = join(root, '..', 'game-capture');
 const FPS = 30;
 
 type Variant = {
@@ -23,20 +26,20 @@ const VARIANTS: Variant[] = [
   {
     id: 'test',
     composition: 'GameCaptureTest',
-    out: 'out/test/game-capture-test.mp4',
+    out: 'test/game-capture-test.mp4',
     durationFrames: 300,
   },
   {
     id: 'normal',
     composition: 'GameCaptureNormal',
-    out: 'out/normal/game-capture-normal.mp4',
+    out: 'normal/game-capture-normal.mp4',
     durationFrames: 1500,
   },
   // Audio bug variants: identical picture, transformed soundtrack.
   ...AUDIO_BUG_VARIANTS.map((v) => ({
     id: v.id,
     composition: v.composition,
-    out: `out/bugs/game-capture-${v.id}.mp4`,
+    out: `bugs/game-capture-${v.id}.mp4`,
     durationFrames: 1500,
     audioBug: v.bug as unknown as Record<string, unknown>,
   })),
@@ -52,11 +55,12 @@ if (targets.length === 0) {
   process.exit(1);
 }
 
-mkdirSync(join(root, 'out/metadata'), {recursive: true});
+mkdirSync(join(OUT_ROOT, 'metadata'), {recursive: true});
 
 for (const v of targets) {
-  console.log(`\n=== render ${v.id} -> ${v.out} ===`);
-  execSync(`npx remotion render ${v.composition} ${v.out}`, {
+  const outPath = join(OUT_ROOT, v.out);
+  console.log(`\n=== render ${v.id} -> ${outPath} ===`);
+  execSync(`npx remotion render ${v.composition} "${outPath}"`, {
     cwd: root,
     stdio: 'inherit',
     shell: process.platform === 'win32' ? 'cmd.exe' : undefined,
@@ -68,11 +72,11 @@ for (const v of targets) {
     fps: FPS,
     durationFrames: v.durationFrames,
     composition: v.composition,
-    file: v.out,
+    file: `game-capture/${v.out}`,
   };
   if (v.bug) meta.bug = v.bug;
   if (v.audioBug) meta.audioBug = v.audioBug;
-  const metaPath = join(root, 'out/metadata', `${v.id}.json`);
+  const metaPath = join(OUT_ROOT, 'metadata', `${v.id}.json`);
   writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n');
   console.log(`metadata -> ${metaPath}`);
 }

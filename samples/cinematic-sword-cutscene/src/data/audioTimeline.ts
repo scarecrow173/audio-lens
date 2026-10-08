@@ -1,6 +1,6 @@
 // Audio event placement on the master/test timelines.
 // Single source of truth shared by <AudioTrack/> (Remotion) and
-// scripts/audio/gen-audio.ts (out/metadata/audio.json).
+// scripts/audio/gen-audio.ts (samples/game-capture/metadata/audio.json).
 //
 // All times are SECONDS of source timeline. Video BugProfiles remap only
 // the rendered frame, so the event-level track stays identical; audio bug

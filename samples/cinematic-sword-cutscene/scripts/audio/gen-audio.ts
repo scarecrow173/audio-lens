@@ -1,6 +1,6 @@
-// Generates all procedural audio (sfx + ambience + bgm) and writes
-// out/metadata/audio.json by merging generation info with the placed
-// audio events from src/data/audioTimeline.ts.
+// Generates all procedural audio (sfx + ambience + bgm + bug mixes) and
+// writes samples/game-capture/metadata/audio.json by merging generation
+// info with the placed audio events from src/data/audioTimeline.ts.
 //
 // Voice WAVs are produced separately by gen_voice.py (Chatterbox);
 // this script reads their WAV headers for durations. Missing voice
@@ -82,9 +82,11 @@ const meta = {
   })),
 };
 
-mkdirSync(join(root, 'out/metadata'), {recursive: true});
+// Metadata lands with the fixture outputs (samples/game-capture/).
+const metaDir = join(root, '..', 'game-capture', 'metadata');
+mkdirSync(metaDir, {recursive: true});
 writeFileSync(
-  join(root, 'out/metadata/audio.json'),
+  join(metaDir, 'audio.json'),
   JSON.stringify(meta, null, 2) + '\n'
 );
-console.log(`wrote out/metadata/audio.json (${meta.events.length} master events)`);
+console.log(`wrote game-capture/metadata/audio.json (${meta.events.length} master events)`);

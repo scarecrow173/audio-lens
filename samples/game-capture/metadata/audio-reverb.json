@@ -5,7 +5,7 @@
   "fps": 30,
   "durationFrames": 1500,
   "composition": "GameCaptureAudioReverb",
-  "file": "out/bugs/game-capture-audio-reverb.mp4",
+  "file": "game-capture/bugs/game-capture-audio-reverb.mp4",
   "audioBug": {
     "type": "reverb",
     "wet": 0.6,

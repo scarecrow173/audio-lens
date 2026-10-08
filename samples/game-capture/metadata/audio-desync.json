@@ -5,7 +5,7 @@
   "fps": 30,
   "durationFrames": 1500,
   "composition": "GameCaptureAudioDesync",
-  "file": "out/bugs/game-capture-audio-desync.mp4",
+  "file": "game-capture/bugs/game-capture-audio-desync.mp4",
   "audioBug": {
     "type": "desync",
     "offsetSec": 0.25

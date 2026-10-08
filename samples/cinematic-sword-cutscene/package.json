@@ -6,8 +6,8 @@
   "description": "Deterministic game-capture style demo video generator for audio-lens comparison fixtures",
   "scripts": {
     "dev": "remotion studio",
-    "render:test": "remotion render GameCaptureTest out/test/game-capture-test.mp4",
-    "render:normal": "remotion render GameCaptureNormal out/normal/game-capture-normal.mp4",
+    "render:test": "remotion render GameCaptureTest ../game-capture/test/game-capture-test.mp4",
+    "render:normal": "remotion render GameCaptureNormal ../game-capture/normal/game-capture-normal.mp4",
     "render:variants": "node scripts/render-variants.ts",
     "inspect:kaykit": "node scripts/inspect-kaykit.ts",
     "audio:gen": "node scripts/audio/gen-audio.ts",
