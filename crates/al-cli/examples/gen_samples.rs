@@ -94,11 +94,13 @@ fn main() {
         .nth(1)
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("samples"));
-    std::fs::create_dir_all(&dir).unwrap();
+    for sub in ["tone", "clipping", "dropout", "locate-mono", "locate-stereo", "video"] {
+        std::fs::create_dir_all(dir.join(sub)).unwrap();
+    }
 
     // 1. クリーンな 440 Hz 正弦波(capture 単独・ベースライン)
     write_wav(
-        &dir.join("capture-tone-440hz.wav"),
+        &dir.join("tone/capture-tone-440hz.wav"),
         1,
         &sine(440.0, RATE as usize, RATE, 8_000.0),
     );
@@ -110,12 +112,12 @@ fn main() {
     for (i, &v) in source.iter().enumerate() {
         cap[9_600 + i] += 0.5 * v;
     }
-    write_wav(&dir.join("source-noise-burst.wav"), 1, &source);
-    write_wav(&dir.join("capture-embedded.wav"), 1, &cap);
+    write_wav(&dir.join("locate-mono/source-noise-burst.wav"), 1, &source);
+    write_wav(&dir.join("locate-mono/capture-embedded.wav"), 1, &cap);
 
     // 3. クリッピング: フルスケール超過の正弦波 → i16 飽和でハードクリップ
     write_wav(
-        &dir.join("capture-clipped.wav"),
+        &dir.join("clipping/capture-clipped.wav"),
         1,
         &sine(1_000.0, RATE as usize, RATE, 60_000.0),
     );
@@ -125,7 +127,7 @@ fn main() {
     for v in &mut drop[24_000..38_400] {
         *v = 0.0;
     }
-    write_wav(&dir.join("capture-dropout.wav"), 1, &drop);
+    write_wav(&dir.join("dropout/capture-dropout.wav"), 1, &drop);
 
     // 5. ステレオ: source を L=0.6 / R=-0.3(極性反転)でダウンミックス
     let src_l = noise(8_192, 21, 18_000.0);
@@ -147,13 +149,13 @@ fn main() {
         stereo_cap.push(l);
         stereo_cap.push(r);
     }
-    write_wav(&dir.join("source-stereo-pair.wav"), 2, &stereo_src);
-    write_wav(&dir.join("capture-stereo-mixed.wav"), 2, &stereo_cap);
+    write_wav(&dir.join("locate-stereo/source-stereo-pair.wav"), 2, &stereo_src);
+    write_wav(&dir.join("locate-stereo/capture-stereo-mixed.wav"), 2, &stereo_cap);
 
     // 6. 動画ワークフロー用: 元音源 BGM アセット(2 s)と、それを内蔵した
     //    ゲームプレイ動画 3 本。映像は BGR24 非圧縮・音声は PCM s16。
     let bgm_asset = bgm(RATE as usize * 2, 24_000.0);
-    write_wav(&dir.join("source-bgm.wav"), 1, &bgm_asset);
+    write_wav(&dir.join("video/source-bgm.wav"), 1, &bgm_asset);
 
     /// capture ベッドノイズに BGM を `offset` から `gain` で重畳するヘルパー。
     fn gameplay_audio(seed: u64, frames: usize, bgm: &[f64], offset: usize, gain: f64) -> Vec<f64> {
@@ -168,7 +170,7 @@ fn main() {
 
     // 6a. 正常動画: BGM を 0.4 s 目から 0.5 ゲインで内蔵
     let normal = gameplay_audio(41, RATE as usize * 3, &bgm_asset, 19_200, 0.5);
-    write_avi_file(&dir.join("video-gameplay-normal.avi"), &normal, 4, 15);
+    write_avi_file(&dir.join("video/video-gameplay-normal.avi"), &normal, 4, 15);
 
     // 6b. バグ動画: 同一レシピ + 1.0-1.5 s ドロップアウト + 2.2-2.4 s クリップ
     let mut bug = gameplay_audio(41, RATE as usize * 3, &bgm_asset, 19_200, 0.5);
@@ -178,7 +180,7 @@ fn main() {
     for v in &mut bug[105_600..115_200] {
         *v *= 40.0;
     }
-    write_avi_file(&dir.join("video-gameplay-bug.avi"), &bug, 4, 15);
+    write_avi_file(&dir.join("video/video-gameplay-bug.avi"), &bug, 4, 15);
 
     // 6c. 非同一リプレイ動画: 別テイク — BGM 位置・ゲイン・テンポ、
     //     ノイズ床、映像の掃引速度がすべて微妙に異なる
@@ -193,5 +195,5 @@ fn main() {
         }
     }
     let run2 = gameplay_audio(43, RATE as usize * 3, &bgm_shrunk, 28_800, 0.45);
-    write_avi_file(&dir.join("video-gameplay-run2.avi"), &run2, 5, 8);
+    write_avi_file(&dir.join("video/video-gameplay-run2.avi"), &run2, 5, 8);
 }
