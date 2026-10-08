@@ -17,6 +17,8 @@ AAC 音声の剣戟カットシーン)。映像は全バリアントで正常系
 | ファイル | ロール | 内容 |
 | --- | --- | --- |
 | `game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
+| `source-mix.wav` | `source_asset` | 動画音声のプリミックス(ミックス済み素材) |
+| `source-<name>.wav` | `source_asset` | 動画内で実際に鳴っている各音素材(voice 5 + sfx 13 + ambience + bgm)。出現位置・音量は `metadata/audio.json` の各イベント(`startFrame` / `volume`)がground truth |
 
 ## dropout/
 
@@ -71,7 +73,8 @@ AAC 音声の剣戟カットシーン)。映像は全バリアントで正常系
 # バグ動画 vs 正常動画(例: dropout)
 target/release/al run --base-dir samples/_runs \
   --input capture_bug:samples/dropout/game-capture-audio-dropout.mp4,\
-capture_reference:samples/normal/game-capture-normal.mp4
+capture_reference:samples/normal/game-capture-normal.mp4,\
+source_asset:samples/normal/source-bgm.wav
 ```
 
 `samples/_runs/` は gitignore 済み。各ジョブは
