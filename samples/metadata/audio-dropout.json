@@ -1,0 +1,14 @@
+{
+  "variant": "dropout",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioDropout",
+  "file": "dropout/game-capture-audio-dropout.mp4",
+  "audioBug": {
+    "type": "dropout",
+    "startSec": 32,
+    "endSec": 33
+  }
+}

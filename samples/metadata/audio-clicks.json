@@ -1,0 +1,16 @@
+{
+  "variant": "clicks",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioClicks",
+  "file": "clicks/game-capture-audio-clicks.mp4",
+  "audioBug": {
+    "type": "clicks",
+    "seed": 4242,
+    "count": 16,
+    "startSec": 8,
+    "endSec": 50
+  }
+}

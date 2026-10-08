@@ -1,206 +1,79 @@
 # Samples
 
-動作確認用の合成メディア。音声はすべて 48 kHz / 16-bit PCM、
-`cargo run -p al-cli --example gen_samples -- samples/` で
-シード固定の決定的信号として再生成できる(実マテリアル非含有)。
+動作確認用fixtureメディア。ユースケース(検証シナリオ)ごとの
+サブディレクトリに整理し、各ディレクトリはそのシナリオに必要な
+入力だけを持つ。
 
-`*.wav` / `*.avi` 等は `.gitattributes` により拡張子単位で Git LFS
+`*.wav` / `*.mp4` 等は `.gitattributes` により拡張子単位で Git LFS
 管理。clone/pull には `git lfs` が必要。
 
-ファイルはユースケース(検証シナリオ)ごとのサブディレクトリに
-整理する。各ディレクトリは、そのシナリオに必要な入力だけを持つ。
+以下のfixtureはすべて `tools/cinematic-sword-cutscene/` が生成する
+決定論的な「ゲームキャプチャ風」映像(50 s / 640x360 / 30 fps /
+AAC 音声の剣戟カットシーン)。映像は全バリアントで正常系と同一で、
+異常はサウンドトラックのみに注入される。
 
-## tone/
+## normal/
 
-| ファイル | パターン | 期待される検出 |
+| ファイル | ロール | 内容 |
 | --- | --- | --- |
-| `capture-tone-440hz.wav` | 1.0 s クリーン 440 Hz 正弦波(capture 単独) | イベントなし・ベースライン特徴 |
-
-## clipping/
-
-| ファイル | パターン | 期待される検出 |
-| --- | --- | --- |
-| `capture-clipped.wav` | フルスケール超過 1 kHz 正弦波(i16 飽和) | `clipping` イベント |
+| `game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
 
 ## dropout/
 
-| ファイル | パターン | 期待される検出 |
+| ファイル | ロール | 内容 |
 | --- | --- | --- |
-| `capture-dropout.wav` | 500 Hz 正弦波の 0.5-0.8 s を無音化 | `silence_dropout_candidate` イベント |
+| `game-capture-audio-dropout.mp4` | `capture_bug` | 32.0-33.0 s 全音声が無音に落ちる |
 
-## locate-mono/
+## desync/
 
-モノラル source + capture の位置特定ペア。
-
-| ファイル | パターン | 期待される検出 |
+| ファイル | ロール | 内容 |
 | --- | --- | --- |
-| `source-noise-burst.wav` + `capture-embedded.wav` | 4096 frame のノイズ source を capture の 9600 frame 目(0.2 s)に 0.5 ゲインで埋め込み + 背景ノイズ | locate 受理(capture_range.start≈9600)、reference/expensive 解析、残差生成 |
+| `game-capture-audio-desync.mp4` | `capture_bug` | 音声全体が +0.25 s 遅れる(AV同期ずれ) |
 
-## locate-stereo/
+## clipping/
 
-ステレオ混合の位置特定ペア。
-
-| ファイル | パターン | 期待される検出 |
+| ファイル | ロール | 内容 |
 | --- | --- | --- |
-| `source-stereo-pair.wav` + `capture-stereo-mixed.wav` | ステレオ source を 3 s capture の 1.0 s 目に L=0.6 / R=-0.3(極性反転)で混入 | locate 受理 + 符号付き混合行列 |
+| `game-capture-audio-clip.mp4` | `capture_bug` | 全体 +14 dB デジタルクリッピング |
 
-## video/
+## reverb/
 
-ゲームプレイ解析のユースケースを模した動画一式(非圧縮 AVI +
-PCM 音声)。映像は BGR24 非圧縮(縦グラデーション + 掃引バー +
-フラッシュフレーム)、音声は PCM s16 で BGM アセットを内蔵する。
-3 s / 10 fps / 128×96。同一ファイル群で 3 つのケース(A/B/C)を
-実行できる。
+| ファイル | ロール | 内容 |
+| --- | --- | --- |
+| `game-capture-audio-reverb.mp4` | `capture_bug` | マスターバスに意図しない残響 |
 
-| ファイル | ロール | 内容 | 期待される検出 |
-| --- | --- | --- | --- |
-| `source-bgm.wav` | `source_asset` | 元音源 BGM(2 s 和音フレーズ) | — |
-| `video-gameplay-normal.avi` | `capture_reference` | 正常動画。BGM を 0.4 s 目から 0.5 ゲインで内蔵 | locate 受理(start≈19200) |
-| `video-gameplay-bug.avi` | `capture_bug` | 同一レシピ + 1.0-1.5 s ドロップアウト + 2.2-2.4 s クリップ | locate 受理 + `clipping` / `silence_dropout_candidate` 等のイベント |
-| `video-gameplay-run2.avi` | `capture_reference` 等 | 同一セッションの別テイク。BGM 位置(0.6 s)・ゲイン(0.45)・テンポ(約 +1%)・ノイズ床・映像掃引速度がすべて微妙に異なる | 元 BGM との locate は low confidence で reject(テンポ差により完全一致しないためアライメントを強制しない) |
+## filter/
 
-動画コンテナのサポート範囲は **レガシー AVI のみ**(PCM 音声 +
-宣言メタデータとしての非圧縮映像)。映像フレームの内容は解析せず、
-コーデック・解像度・フレーム数・公称 fps を `metadata.json` の
-`video` セクションに記録する。加えて、`movi` のパケット出現順と
-`strh` クロックから導出したストリーム別タイミング観測(音声
-パケット位置・映像フレーム位置・間隔・不連続候補)を `av_timing`
-セクションに記録する。各エントリは導出済みの per-packet
-タイムスタンプ列(`start_tick` = `dwStart` 由来の初期オフセット +
-`movi_order_timestamps`)も保持し、metadata だけから各パケット /
-フレームのストリーム時刻をアドレスできる。レガシー AVI は明示的な
-PTS を持たないため、これは mux 順由来の一次観測であり CFR も
-仮定しない。音声・映像が複数ある場合は先頭ストリームのみを
-採用する。MP4/H.264 等の圧縮
-形式は未対応で、`decode/input unavailable` として明示的に失敗
-する。
+| ファイル | ロール | 内容 |
+| --- | --- | --- |
+| `game-capture-audio-filter.mp4` | `capture_bug` | 全体に 700 Hz ローパス(籠り) |
+
+## clicks/
+
+| ファイル | ロール | 内容 |
+| --- | --- | --- |
+| `game-capture-audio-clicks.mp4` | `capture_bug` | 8-50 s にバッファアンダーラン風のプチノイズ |
+
+## test/
+
+| ファイル | 内容 |
+| --- | --- |
+| `game-capture-test.mp4` | 10 s のアニメーション / VFX / 音声 技術テスト |
+
+## metadata/
+
+バリエーション・バグ注入位置・音声イベントの機械可読メタデータ
+(`<variant>.json` と音声イベント一覧 `audio.json`)。
 
 ## 動作確認コマンド
 
 ```bash
-# 再生成
-cargo run -p al-cli --example gen_samples -- samples/
-
-# capture 単独(cheap → イベント → dataset → 可視化 → export)
+# バグ動画 vs 正常動画(例: dropout)
 target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/tone/capture-tone-440hz.wav \
-  --stages ingest,cheap_analysis,expensive_analysis,dataset,visualization,export
-
-# source + capture フルパイプライン(locate 含む)
-target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/locate-mono/capture-embedded.wav,source_asset:samples/locate-mono/source-noise-burst.wav \
-  --stages ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset,visualization,export
-```
-
-### 動画ユースケース
-
-```bash
-# ケース A: バグ動画 vs 正常動画 + 元音源(フルパイプライン)
-target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/video/video-gameplay-bug.avi,\
-capture_reference:samples/video/video-gameplay-normal.avi,\
-source_asset:samples/video/source-bgm.wav
-
-# ケース B: バグ動画 vs 非同一リプレイ動画 + 元音源
-#          → run2 の locate はテンポ差で reject(low confidence)される
-target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/video/video-gameplay-bug.avi,\
-capture_reference:samples/video/video-gameplay-run2.avi,\
-source_asset:samples/video/source-bgm.wav
-
-# ケース C: バグ動画単独(ソースなし、異常検出のみ)
-target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/video/video-gameplay-bug.avi
+  --input capture_bug:samples/dropout/game-capture-audio-dropout.mp4,\
+capture_reference:samples/normal/game-capture-normal.mp4
 ```
 
 `samples/_runs/` は gitignore 済み。各ジョブは
 `samples/_runs/<dir>/<JOB-*>/{manifest.json, analysis/, export/}` に
 出力される。
-
-## game-capture/
-
-`samples/cinematic-sword-cutscene/` が生成する決定論的な
-「ゲームキャプチャ風」fixture(50 s / 640x360 / 30 fps / AAC 音声)。
-映像は全バリアントで正常系と同一で、異常はサウンドトラックのみに
-注入される。
-
-| ファイル | ロール | 内容 |
-| --- | --- | --- |
-| `normal/game-capture-normal.mp4` | `capture_reference` | 正常系 50 s 本編 |
-| `bugs/game-capture-audio-dropout.mp4` | `capture_bug` | 32.0-33.0 s 全音声が無音に落ちる |
-| `bugs/game-capture-audio-desync.mp4` | `capture_bug` | 音声全体が +0.25 s 遅れる |
-| `bugs/game-capture-audio-clip.mp4` | `capture_bug` | 全体 +14 dB デジタルクリッピング |
-| `bugs/game-capture-audio-reverb.mp4` | `capture_bug` | マスターバスに意図しない残響 |
-| `bugs/game-capture-audio-filter.mp4` | `capture_bug` | 全体に 700 Hz ローパス(籠り) |
-| `bugs/game-capture-audio-clicks.mp4` | `capture_bug` | 8-50 s にバッファアンダーラン風のプチノイズ |
-| `test/game-capture-test.mp4` | 技術テスト | 10 s のアニメーション / VFX / 音声検証 |
-| `metadata/*.json` | — | バリエーション・バグ注入位置の機械可読メタデータ |
-
-## cinematic-sword-cutscene/
-
-`game-capture/` fixtureの生成プロジェクト。Remotion + Three.js
-(React Three Fiber)で KayKit Character Pack: Adventurers(CC0)の
-キャラクター / アニメーションを駆動し、輝度変化・フレーム差分・
-明確なシーンチェンジを持つ剣戟カットシーンをレンダリングする。
-
-正常系(`GameCaptureNormal`)がマスタータイムライン
-(`src/data/masterTimeline.ts`)をそのまま再生する。異常系は2系統:
-映像バグは `BugProfile` のフレームリマップ / ポストプロセスとして
-非破壊注入、音声バグはプリミックスしたサウンドトラックへの
-deterministic DSP変換(`AudioBugProfile`)として注入される。
-出力は `samples/game-capture/` に集約される。
-
-再生成:
-
-```bash
-cd samples/cinematic-sword-cutscene
-npm install
-npm run audio:gen          # SE/Ambience/BGM を procedural 生成
-npm run audio:voice        # Voice を Chatterbox で生成(要 uv/python)
-npm run render:variants    # test / normal / 音声バグ6種を順にレンダリング
-```
-
-デバッグ表示付きプレビューは `GameCaptureBugPreview` composition
-(`debug` prop)。任意のバグプロファイルは `--props '{"bug":{...}}'`
-で `remotion render` に渡せる。
-
-### 音声パイプライン
-
-配置は `src/data/audioTimeline.ts` が唯一の参照元で、
-`src/audio/AudioTrack.tsx` が `<Sequence>/<Audio>` へ展開する。
-
-音声バグ系(`AudioBugProfile`, `src/bugs/audioBugs.ts`)は映像を
-正常系のまま、サウンドトラックのみを差し替える。全イベントを
-deterministic にプリミックスした `mix-normal.wav` を基準に、
-`gen-bug-audio.ts` が各バグをDSP変換として適用した
-`mix-<variant>.wav` を生成する(クリッピング等の非線形処理は
-イベント単位では再現できないためプリミックス方式)。バリアントは
-`AUDIO_BUG_VARIANTS` で宣言的に定義される:
-
-| バリアント | 異常 |
-| --- | --- |
-| `audio-dropout` | 32.0-33.0 s 全音声が無音に落ちる |
-| `audio-desync` | 音声全体が +0.25 s 遅れる |
-| `audio-clip` | 全体 +14 dB デジタルクリッピング |
-| `audio-reverb` | マスターバスに意図しない残響 |
-| `audio-filter` | 全体に 700 Hz ローパス(籠り) |
-| `audio-clicks` | 8-50 s にバッファアンダーラン風のプチノイズ |
-
-| 種別 | 生成 | 出力 |
-| --- | --- | --- |
-| Voice | Chatterbox Multilingual (`gen_voice.py`) + DSP ポスト処理 | `assets/audio/generated/voice/` |
-| SE | procedural DSP (`scripts/audio/gen-sfx.ts`) | `assets/audio/generated/sfx/` |
-| Ambience | procedural DSP(24 s シームレスループ) | `assets/audio/generated/ambience/` |
-| BGM | procedural synth 50 s (`gen-bgm.ts`) | `assets/audio/generated/bgm/` |
-
-Voice は Resemble AI **Chatterbox Multilingual TTS**(`chatterbox-tts`
-0.1.7, **MIT License**)を `language_id="ja"` でローカル実行。
-モデルウェイトは初回実行時に HuggingFace から取得されローカルに
-キャッシュされる(実行時のクラウドAPI依存はない)。Perth 透かしの
-オプションモジュールが環境により import できない場合は
-DummyWatermarker へフォールバックする(fixture用途のため透かし不要)。
-KAEL は +0.5st相当の明るめ・ドライ、VAREN は -2.8st相当の低音強化・
-小部屋リバーブで声色を分離(いずれも特定人物の声の模倣ではなく
-モデル標準音声+DSPチェーン)。SE/Ambience/BGM は生成AIを使わず
-seeded oscillator/noise/filter のみで合成し、seed・generator・
-startFrame を `metadata/audio.json` に記録する。

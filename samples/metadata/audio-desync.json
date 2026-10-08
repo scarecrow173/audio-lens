@@ -1,0 +1,13 @@
+{
+  "variant": "desync",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioDesync",
+  "file": "desync/game-capture-audio-desync.mp4",
+  "audioBug": {
+    "type": "desync",
+    "offsetSec": 0.25
+  }
+}

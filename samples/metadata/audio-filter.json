@@ -1,0 +1,14 @@
+{
+  "variant": "filter",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioFilter",
+  "file": "filter/game-capture-audio-filter.mp4",
+  "audioBug": {
+    "type": "filter",
+    "kind": "lowpass",
+    "cutoffHz": 700
+  }
+}
