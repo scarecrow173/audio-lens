@@ -1,0 +1,14 @@
+{
+  "variant": "reverb",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioReverb",
+  "file": "reverb/game-capture-audio-reverb.mp4",
+  "audioBug": {
+    "type": "reverb",
+    "wet": 0.6,
+    "decaySec": 0.9
+  }
+}

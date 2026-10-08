@@ -1,0 +1,13 @@
+{
+  "variant": "clipping",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "durationFrames": 1500,
+  "composition": "GameCaptureAudioClip",
+  "file": "clipping/game-capture-audio-clip.mp4",
+  "audioBug": {
+    "type": "clipping",
+    "gainDb": 14
+  }
+}
