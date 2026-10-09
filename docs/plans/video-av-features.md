@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034AaBrlpxZEKpyEGpUmmk"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "映像フレーム特徴と A/V 同期の実装"
 created: "2026-10-04"
 updated: "2026-10-04"

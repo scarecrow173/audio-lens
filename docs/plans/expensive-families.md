@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034AaBrYBgbeSTDlZzbaGl"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "Expensive 追加解析ファミリの実装"
 created: "2026-10-04"
 updated: "2026-10-04"
