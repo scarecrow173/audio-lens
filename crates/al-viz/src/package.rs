@@ -229,7 +229,12 @@ pub fn build(
         serde_json::to_string_pretty(&export_manifest)?,
     )?;
 
-    // 5. Portability gate: no declared absolute path may survive in
+    // 5. Self-contained HTML report: report.html + report.data.js at
+    //    the package root. Data is read back from the copied analysis
+    //    so the report embeds only shrunk, package-local references.
+    crate::report::generate(&dest)?;
+
+    // 6. Portability gate: no declared absolute path may survive in
     //    any text file inside the package.
     let forbidden: Vec<String> = manifest
         .inputs
@@ -249,7 +254,11 @@ pub fn build(
         let path = dest.join(rel);
         // Binary chunk files cannot hold stray text paths; scan text
         // outputs only.
-        let text_ok = path.extension().is_some_and(|e| e == "json" || e == "txt");
+        // Text outputs include the report pair: report.data.js embeds
+        // JSON bodies wholesale, so it must pass the same scan.
+        let text_ok = path
+            .extension()
+            .is_some_and(|e| matches!(e.to_str(), Some("json" | "txt" | "js" | "html")));
         if !text_ok {
             continue;
         }

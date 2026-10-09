@@ -84,28 +84,53 @@ pub fn subtract_fit(
     Some((residual, est))
 }
 
-/// Run the two-stage residual search. `locate_residual` re-runs the
-/// method set on the residual capture (provided by the caller so the
-/// stage controls the configuration).
-pub fn residual_search(
-    parent_source: &str,
-    parent_alignment: AlignmentId,
+/// Capture-minus-fitted-parent residual plus the fit metadata.
+///
+/// The residual depends only on the parent alignment, so the stage
+/// prepares it once and re-runs every child source's locate methods
+/// over it — recomputing the subtraction per child would repeat the
+/// same fit dozens of times.
+pub struct PreparedResidual {
+    /// Residual channels after subtracting the fitted parent mix.
+    pub channels: Vec<Vec<f64>>,
+    /// The fitted mix that was subtracted.
+    pub estimate: MixerEstimate,
+    /// Pre/post subtraction energy.
+    pub energy: ResidualEnergy,
+}
+
+/// Fit the parent's mix onto the capture and subtract it.
+/// Returns `None` when the fit cannot be solved.
+pub fn prepare_residual(
     source_channels: &[Vec<f64>],
     capture_channels: &[Vec<f64>],
     ridge: f64,
-    locate_residual: impl FnOnce(&[Vec<f64>]) -> LocateResult,
-) -> Option<ResidualSearch> {
+) -> Option<PreparedResidual> {
     let before = rms(capture_channels);
     let (residual, est) = subtract_fit(source_channels, capture_channels, ridge)?;
     let after = rms(&residual);
-    let child = locate_residual(&residual);
+    Some(PreparedResidual {
+        channels: residual,
+        estimate: est,
+        energy: ResidualEnergy { before, after },
+    })
+}
 
-    let removed = if before > 0.0 {
-        (1.0 - after / before).clamp(0.0, 1.0)
+/// Assemble the residual-search record for one child locate result
+/// computed over a [`PreparedResidual`].
+pub fn assemble_residual_search(
+    parent_source: &str,
+    parent_alignment: AlignmentId,
+    prepared: &PreparedResidual,
+    child: LocateResult,
+) -> ResidualSearch {
+    let removed = if prepared.energy.before > 0.0 {
+        (1.0 - prepared.energy.after / prepared.energy.before).clamp(0.0, 1.0)
     } else {
         0.0
     };
-    let gain = est
+    let gain = prepared
+        .estimate
         .matrix
         .iter()
         .flat_map(|r| r.iter())
@@ -113,15 +138,15 @@ pub fn residual_search(
         .sum::<f64>()
         .sqrt();
     let child_accepted = f64::from(child.accepted as u8);
-    Some(ResidualSearch {
+    ResidualSearch {
         parent_source: parent_source.to_string(),
         parent_alignment,
         estimated_gain: gain,
-        channel_transform: est.matrix,
-        energy: ResidualEnergy { before, after },
+        channel_transform: prepared.estimate.matrix.clone(),
+        energy: prepared.energy.clone(),
         confidence: (0.5 * removed + 0.5 * child_accepted).min(1.0),
         child,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -185,15 +210,13 @@ mod tests {
             algorithm_version: "0".into(),
             params: serde_json::json!({}),
         };
-        let out = residual_search(
+        let prepared = prepare_residual(&[src], &[cap], 1e-4).unwrap();
+        let out = assemble_residual_search(
             "source-1",
             AlignmentId::new(),
-            &[src],
-            &[cap],
-            1e-4,
-            child_locate,
-        )
-        .unwrap();
+            &prepared,
+            child_locate(&prepared.channels),
+        );
         assert_eq!(out.parent_source, "source-1");
         assert!((out.estimated_gain - 0.5).abs() < 0.05);
         assert_eq!(out.channel_transform.len(), 1);

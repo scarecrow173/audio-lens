@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>AudioLens Report</title>
+<style>
+  body { font: 13px/1.5 'Segoe UI', monospace; background: #12141a; color: #d5dae3; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 28px 0 8px; border-bottom: 1px solid #333; padding-bottom: 4px; color: #9db7ff; }
+  .card { background: #1a1e28; border: 1px solid #2a3040; border-radius: 6px; padding: 12px 16px; margin: 8px 0; }
+  details.card > summary { cursor: pointer; font-size: 14px; }
+  details.card > summary::marker { color: #8a92a3; }
+  details.card[open] > summary { margin-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px,1fr)); gap: 12px; }
+  canvas { width: 100%; image-rendering: pixelated; background: #0c0e12; border-radius: 4px; display:block; }
+  canvas.chart { image-rendering: auto; height: 160px; }
+  table { border-collapse: collapse; font-size: 12px; width: 100%; }
+  td, th { border: 1px solid #2a3040; padding: 3px 8px; text-align: left; }
+  th { color: #9db7ff; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-right: 6px; }
+  .ok { background: #14502e; } .bad { background: #5c2626; } .warn { background: #5c4a1e; }
+  .mut { color: #8a92a3; }
+  canvas.seekable { cursor: crosshair; }
+  /* player: video frame and controls share one 640px-wide column */
+  .player { width: 640px; max-width: 100%; background: #0c0e12; border: 1px solid #2a3040;
+            border-radius: 6px; overflow: hidden; margin: 8px 0; }
+  canvas.vframe { image-rendering: pixelated; display: block; width: 100%; }
+  canvas.luma { display: block; width: 100%; height: 44px; cursor: pointer; }
+  #seektrack { position: relative; height: 10px; background: #1a1e28; cursor: pointer; }
+  #seektrack .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+                     background: #2f5d3a; }
+  #seektrack .head { position: absolute; top: 50%; left: 0; width: 12px; height: 12px;
+                     background: #7bd88f; border-radius: 50%; transform: translate(-50%,-50%); }
+  #controls { display: flex; align-items: center; gap: 10px; padding: 6px 12px;
+              background: #1a1e28; }
+  #controls .t { color: #7bd88f; font-weight: bold; min-width: 56px; }
+  #playbtn { background: none; border: none; color: #d5dae3; border-radius: 4px;
+             padding: 0 4px; cursor: pointer; font: inherit; font-size: 16px; }
+  #playbtn:hover { color: #fff; }
+  .pinfo { padding: 4px 12px; font-size: 12px; background: #1a1e28;
+           border-top: 1px solid #2a3040; }
+  /* timeline tab: player left, parallel info right */
+  .tlrow { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+  .tlside { flex: 1; min-width: 280px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+  .chip { border: 1px solid #3a4154; border-radius: 10px; padding: 1px 8px; font-size: 12px; }
+  .chip.hi { border-color: #ff5a5a; color: #ff8a8a; }
+  .chip.mid { border-color: #ffbe5a; color: #ffcf8a; }
+  .chip.lo { color: #8a92a3; }
+  .tlside details { margin-top: 4px; font-size: 12px; }
+  .tlside div.card details > div { margin: 4px 0 2px 14px; color: #b8bfcc; }
+  .tlside summary { cursor: pointer; color: #8a92a3; }
+  .lanes { margin-top: 8px; display: grid; gap: 2px; }
+  .lane { display: block; }
+  .lane .track { position: relative; height: 14px; background: #161a22; border-radius: 2px; cursor: pointer; }
+  .lane .lbl { position: absolute; left: 4px; top: 0; line-height: 14px; z-index: 2;
+               font-size: 10px; color: #d5dae3; background: rgba(12,14,18,.7); padding: 0 3px;
+               border-radius: 2px; pointer-events: none; max-width: 45%;
+               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lane .lbl.tog { pointer-events: auto; cursor: pointer; }
+  .lane .lbl.tog:hover { color: #fff; }
+  .lane .bar { position: absolute; top: 0; bottom: 0; border-radius: 2px; opacity: .85; min-width: 2px; }
+  .lane .cur { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #7bd88f; z-index: 3; }
+  .srcwf { margin: 2px 0 8px; }
+  .srcwf .mut { margin-top: 4px; }
+  .tabbar { display: flex; gap: 4px; margin: 12px 0 16px; border-bottom: 1px solid #2a3040; }
+  .tabbtn { background: none; border: none; color: #8a92a3; font: inherit; padding: 6px 14px;
+            cursor: pointer; border-bottom: 2px solid transparent; }
+  .tabbtn:hover { color: #d5dae3; }
+  .tabbtn.active { color: #9db7ff; border-bottom-color: #9db7ff; }
+  .tabpane { display: none; }
+  .tabpane.active { display: block; }
+</style>
+</head>
+<body>
+<h1>AudioLens Report</h1>
+<div id="root">loading…</div>
+<script src="report.data.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const R = window.REPORT;
+
+// ---------- embedded tensor decode ----------
+function b64bytes(s) {
+  const bin = atob(s), n = bin.length, out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
+}
+function tensor(path) {
+  const t = R.tensors[path];
+  if (!t) return null;
+  const buf = b64bytes(t.b64);
+  const data = t.dtype === 'f64' ? new Float64Array(buf) : new Float32Array(buf);
+  return { rows: t.shape[0], cols: t.shape[1] ?? 1, data, src_rows: t.src_shape?.[0] ?? t.shape[0] };
+}
+function tensorKeys(prefix) {
+  return Object.keys(R.tensors).filter(k => k.startsWith(prefix));
+}
+
+// ---------- colormap (viridis-ish) ----------
+const VMAP = [[0,0,0],[72,35,116],[59,82,139],[33,145,140],[94,201,98],[253,231,37]];
+function cmap(t) {
+  t = Math.max(0, Math.min(1, t)) * (VMAP.length - 1);
+  const i = Math.min(VMAP.length - 2, Math.floor(t)), f = t - i, a = VMAP[i], b = VMAP[i+1];
+  return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f];
+}
+function heatmap(parent, m, {lo=null, hi=null, height=200} = {}) {
+  const cv = el('canvas'); parent.appendChild(cv);
+  const W = Math.min(1200, m.cols), H = Math.min(400, m.rows);
+  cv.width = W; cv.height = height; cv.style.height = height + 'px';
+  const ctx = cv.getContext('2d');
+  // render at tensor resolution then let CSS scale
+  cv.height = H;
+  const img = ctx.createImageData(W, H);
+  let l = lo, h = hi;
+  if (l == null || h == null) {
+    const s = Array.from(m.data).filter(Number.isFinite).sort((a,b)=>a-b);
+    if (!s.length) { parent.appendChild(el('div','mut','no finite data')); return; }
+    l = l ?? s[Math.floor(s.length*0.02)]; h = h ?? s[Math.floor(s.length*0.98)];
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const r = Math.floor(y * m.rows / H), c = Math.floor(x * m.cols / W);
+    const v = m.data[r * m.cols + c];
+    const p = (y*W+x)*4;
+    if (!Number.isFinite(v)) { img.data[p+3] = 40; continue; }
+    const t = (v - l) / (h - l);
+    const [rr,gg,bb] = cmap(t);
+    img.data[p]=rr; img.data[p+1]=gg; img.data[p+2]=bb; img.data[p+3]=255;
+  }
+  ctx.putImageData(img, 0, 0);
+  parent.appendChild(el('div','mut',`${m.rows} × ${m.cols}  range ${l.toFixed(1)}…${h.toFixed(1)}`));
+}
+
+// ---------- line chart ----------
+function chart(parent, series, {height=160, logX=false, ylabel=''} = {}) {
+  const cv = el('canvas','chart'); parent.appendChild(cv);
+  const W = cv.width = (parent.clientWidth||800)*2, H = cv.height = height*2, P = 40;
+  cv.style.height = height+'px';
+  const ctx = cv.getContext('2d');
+  const colors = ['#7fb0ff','#ffb86b','#7bd88f','#ff7f7f','#c792ea','#7fd8d8'];
+  const all = series.flatMap(s=>s.y.filter(Number.isFinite));
+  if (!all.length) { parent.appendChild(el('div','mut','no data')); return; }
+  let lo=Math.min(...all), hi=Math.max(...all); if (lo===hi){lo-=1;hi+=1;}
+  const xm = Math.max(...series.map(s=>{const xs=s.x??s.y.map((_,k)=>k);return xs[xs.length-1]||1;}));
+  ctx.strokeStyle='#2a3040'; ctx.strokeRect(P,8,W-P-8,H-30);
+  series.forEach((s,i)=>{
+    ctx.strokeStyle=colors[i%colors.length]; ctx.lineWidth=2; ctx.beginPath();
+    const xs = s.x ?? s.y.map((_,k)=>k);
+    let started=false;
+    s.y.forEach((v,k)=>{
+      if(!Number.isFinite(v)){started=false;return;}
+      let x=xs[k]; if(logX) x = x>0 ? Math.log10(x) : 0;
+      const px = P + (W-P-8) * (logX ? x/Math.log10(xm) : x/xm);
+      const py = 8 + (H-38) * (1 - (v-lo)/(hi-lo));
+      started ? ctx.lineTo(px,py) : ctx.moveTo(px,py); started=true;
+    });
+    ctx.stroke();
+  });
+  parent.appendChild(el('div','mut',
+    series.map((s,i)=>`<span style="color:${colors[i%colors.length]}">■</span> ${s.name}`).join('  ')
+    + `   y: ${lo.toFixed(2)}…${hi.toFixed(2)} ${ylabel}`));
+}
+
+// ---------- shared seek state ----------
+// One stream-clock-free position, in seconds on the audio timeline.
+// Every waveform redraw and the details panel follow it.
+const seek = { t: 0, dur: 0 };
+const seekRedraws = [];   // fns that repaint a cursor
+const seekFollowers = []; // fns that update detail widgets
+const play = { on: false, raf: 0, last: 0 };
+function notifySeek() {
+  for (const f of seekRedraws) f();
+  for (const f of seekFollowers) f();
+  const tb = $('#controls .t'); if (tb) tb.textContent = seek.t.toFixed(3) + ' s';
+  const tr = $('#seektrack');
+  if (tr && seek.dur > 0) {
+    const p = Math.min(100, seek.t / seek.dur * 100) + '%';
+    tr.querySelector('.fill').style.width = p;
+    tr.querySelector('.head').style.left = p;
+  }
+  const dl = $('#seekdur'); if (dl) dl.textContent = seek.dur.toFixed(2) + ' s';
+}
+
+// Scrub behaviour shared by the seek track, waveforms, and the video
+// luma strip: pointerdown seeks, drag keeps scrubbing via capture.
+function scrubbable(elm, getDur, getOff = () => 0) {
+  const upd = e => {
+    const r = elm.getBoundingClientRect();
+    const d = getDur();
+    if (d > 0) {
+      const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      seek.t = getOff() + f * d;
+      notifySeek();
+    }
+  };
+  elm.addEventListener('pointerdown', e => {
+    elm.setPointerCapture(e.pointerId);
+    upd(e);
+  });
+  elm.addEventListener('pointermove', e => { if (e.buttons) upd(e); });
+}
+
+function setPlay(on) {
+  play.on = on;
+  const b = $('#playbtn'); if (b) b.textContent = on ? '⏸' : '▶';
+  if (!on) cancelAnimationFrame(play.raf);
+}
+function playTick(now) {
+  if (!play.on) return;
+  seek.t = Math.min(seek.dur, seek.t + (now - play.last) / 1000);
+  play.last = now;
+  notifySeek();
+  if (seek.t >= seek.dur) { setPlay(false); return; }
+  play.raf = requestAnimationFrame(playTick);
+}
+function togglePlay() {
+  if (play.on) { setPlay(false); return; }
+  if (seek.t >= seek.dur) seek.t = 0;
+  play.last = performance.now();
+  setPlay(true);
+  play.raf = requestAnimationFrame(playTick);
+}
+
+// ---------- waveform LOD ----------
+// off+base place a source-local waveform on the shared capture
+// timeline: the envelope is drawn only across [off, off+len) of a
+// canvas that spans [0, base). len=0 uses the source's true duration;
+// base=0 makes the canvas span [0, trueDur).
+function waveform(parent, lod, events, sr, spb, off = 0, base = 0, len = 0) {
+  const cv = el('canvas','seekable'); parent.appendChild(cv);
+  const W = cv.width = (parent.clientWidth||900)*2, H = cv.height = 160, mid = H/2;
+  cv.style.height='80px';
+  const ctx=cv.getContext('2d');
+  // auto-scale: decoded PCM may be in native sample units (e.g. i16)
+  let peak = 1e-9;
+  for (let i = 0; i < lod.rows; i++) {
+    const mn = Math.abs(lod.data[i*4]||0), mx = Math.abs(lod.data[i*4+1]||0);
+    peak = Math.max(peak, mn, mx);
+  }
+  // src_rows recovers the true duration: report tensors are row-strided
+  // so lod.rows no longer equals total buckets.
+  const dur = (lod.src_rows ?? lod.rows) * spb / sr;
+  if (dur > seek.dur) seek.dur = dur;
+  const span = base || dur;
+  const seg = len || dur;           // on-axis length of the drawn envelope
+  const segX = f => off + f * seg;  // local fraction [0,1] -> axis seconds
+  const evX = s => off + s / dur * seg; // source-local seconds -> axis seconds
+  const x = t => t / span * W;
+  function draw() {
+    // event regions first: faint full-height tint, kept behind the waveform
+    if (events) for (const ev of events) {
+      const x0 = x(evX(ev.start_s));
+      const w = Math.max(2, x(evX(ev.end_s)) - x0);
+      ctx.fillStyle = ev.confidence==='high' ? 'rgba(255,90,90,.15)' : 'rgba(255,190,90,.10)';
+      ctx.fillRect(x0, 0, w, H);
+    }
+    // filled envelope: solid columns stay visible after CSS downscaling
+    ctx.fillStyle='#4da3ff';
+    for(let b=0;b<lod.rows;b++){
+      const o=b*4;
+      const mn=lod.data[o]/peak, mx=lod.data[o+1]/peak;
+      if(!Number.isFinite(mn)||!Number.isFinite(mx)) continue;
+      const x0=Math.floor(x(segX(b/lod.rows))), x2=Math.max(x0+1, Math.floor(x(segX((b+1)/lod.rows))));
+      ctx.fillRect(x0, mid - mx*mid*0.9, x2-x0, Math.max(1,(mx-mn)*mid*0.9));
+    }
+    // solid marker strip along the top edge
+    if (events) for (const ev of events) {
+      const x0 = x(evX(ev.start_s));
+      const w = Math.max(2, x(evX(ev.end_s)) - x0);
+      ctx.fillStyle = ev.confidence==='high' ? '#ff5a5a' : '#ffbe5a';
+      ctx.fillRect(x0, 0, w, 8);
+    }
+    // seek cursor on top of everything
+    const cx = x(seek.t);
+    if (cx >= 0 && cx <= W) {
+      ctx.strokeStyle='#7bd88f'; ctx.lineWidth=2; ctx.beginPath();
+      ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+    }
+  }
+  draw();
+  seekRedraws.push(() => { ctx.clearRect(0,0,W,H); draw(); });
+  scrubbable(cv, () => span);
+}
+
+// ---------- video preview ----------
+function drawThumb(cv, thumbs, j) {
+  const {width:w, height:h} = thumbs;
+  const bytes = new Uint8Array(b64bytes(thumbs.frames_rgb24_b64[j]));
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  for (let i = 0; i < w*h; i++) {
+    img.data[i*4]   = bytes[i*3];
+    img.data[i*4+1] = bytes[i*3+1];
+    img.data[i*4+2] = bytes[i*3+2];
+    img.data[i*4+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// Index of the thumbnail frame nearest to `t` seconds on the stream
+// clock (`frame_times_ticks` are already timebase ticks).
+function nearestThumb(thumbs, t) {
+  const ts = thumbs.frame_times_ticks, hz = thumbs.timebase_hz;
+  let best = 0, bd = Infinity;
+  for (let j = 0; j < ts.length; j++) {
+    const d = Math.abs(ts[j] / hz - t);
+    if (d < bd) { bd = d; best = j; }
+  }
+  return best;
+}
+
+// ---------- main ----------
+(function main(){
+  const root = $('#root'); root.innerHTML='';
+  const names = {}; for (const i of R.inputs) names[i.input_id] = `${i.file_name} [${i.role}]`;
+  const label = id => names[id] || id;
+  const sr = R.timeline?.sample_rate ?? 48000;
+
+  // ---- tab skeleton ----
+  // Tabs group the report into Summary / Timeline / Spectra /
+  // Compare / Locate / Events. Empty panes hide their button at the
+  // end, so a tab never opens onto a blank page.
+  const tabDefs = [
+    ['summary','Summary'],
+    ['timeline','Timeline'],
+    ['spectra','Spectra'],
+    ['compare','Compare'],
+    ['locate','Locate'],
+    ['events','Events'],
+  ];
+  const tabBar = el('div','tabbar'); root.appendChild(tabBar);
+  const panes = {}, tabBtns = {};
+  const paneOf = id => panes[id] ??= (() => {
+    const s = el('section','tabpane'); s.id = `tab-${id}`; root.appendChild(s); return s;
+  })();
+  for (const [id, text] of tabDefs) {
+    const b = el('button','tabbtn',text);
+    b.addEventListener('click', () => {
+      for (const s of Object.values(panes)) s.classList.remove('active');
+      for (const o of Object.values(tabBtns)) o.classList.remove('active');
+      paneOf(id).classList.add('active'); b.classList.add('active');
+      // Canvases rendered while hidden measured 0px: repaint them now.
+      for (const f of seekRedraws) f();
+      notifySeek();
+    });
+    tabBtns[id] = b; tabBar.appendChild(b);
+  }
+
+  // header summary
+  {
+    const tp = paneOf('summary');
+    if (R.summary) {
+      const s = R.summary;
+      const hd = el('div','card');
+      hd.innerHTML = `<b>alignments</b> accepted=${s.alignments?.accepted ?? '—'} rejected=${s.alignments?.rejected ?? '—'}
+        &nbsp; <b>events</b> ${s.candidate_events ?? '—'}
+        &nbsp; <b>confidence</b> ${Object.entries(s.confidence_tally||{}).map(([k,v])=>`${k}:${v}`).join(' / ')}
+        &nbsp; <b>validity</b> ${Object.entries(s.validity_tally||{}).map(([k,v])=>`${k}:${v}`).join(' / ')}`;
+      tp.appendChild(hd);
+      if (s.skipped_products?.length) {
+        tp.appendChild(el('div','card mut','<b>skipped:</b> '+s.skipped_products.map(p=>`${p.product}(${p.reason})`).join(', ')));
+      }
+    }
+    tp.appendChild(el('div','card','<b>inputs:</b><br>'+R.inputs.map(i=>`${i.input_id} = ${i.file_name} <span class="mut">[${i.role}]</span>`).join('<br>')));
+  }
+
+  const evs = R.views?.['views/events']?.markers ?? [];
+
+  // ---- video preview + seek detail ----
+  const vks = Object.keys(R.views).filter(k=>k.startsWith('views/video_')).sort();
+  const seekDetails = el('div');
+  const tlSide = el('div','tlside');
+  {
+    const tp = paneOf('timeline');
+    // Player left, seek-position details in the right-hand column.
+    const row = el('div','tlrow'); tp.appendChild(row);
+    const player = el('div','player'); row.appendChild(player);
+    const strips = [];   // per-video luma strips + info, rendered below controls
+    if (vks.length) {
+      for (const k of vks) {
+        const v = R.views[k];
+        const f = v.features;
+        if (f?.status !== 'decoded') {
+          player.appendChild(el('div','pinfo mut',
+            `<b>${label(v.input_id)}</b> — video unavailable: ${f?.codec ?? '—'} — ${f?.reason ?? 'no video stream'}`));
+          continue;
+        }
+        const thumbs = v.thumbs;
+        const cv = el('canvas','vframe'); player.appendChild(cv);
+        const info = el('div','pinfo mut');
+        const lumaCv = el('canvas','luma');
+        const legend = el('div','pinfo mut',
+          '<span style="color:#7fb0ff">■</span> luminance <span style="color:#ffb86b">■</span> diff <span style="color:#ff5a5a">|</span> video events');
+        strips.push(lumaCv, legend, info);
+        // luminance + diff strip under the frame
+        {
+          const W = lumaCv.width = 1280, H = lumaCv.height = 88;
+          const lctx = lumaCv.getContext('2d');
+          const n = f.luminance.length;
+          const lMax = Math.max(...f.luminance, 1), dMax = Math.max(...f.diff, 1);
+          const drawStrip = () => {
+            lctx.clearRect(0,0,W,H);
+            lctx.strokeStyle='#7fb0ff'; lctx.beginPath();
+            f.luminance.forEach((v,i)=>{const x=i/(n-1)*W,y=H-6-(v/lMax)*(H-24);i?lctx.lineTo(x,y):lctx.moveTo(x,y);});
+            lctx.stroke();
+            lctx.strokeStyle='#ffb86b'; lctx.beginPath();
+            f.diff.forEach((v,i)=>{const x=i/(n-1)*W,y=H-6-(v/dMax)*(H-24);i?lctx.lineTo(x,y):lctx.moveTo(x,y);});
+            lctx.stroke();
+            for (const e of f.events??[]) {
+              const x = (e.time_ticks / f.timebase_hz) / (f.frame_timestamps.at(-1)/f.timebase_hz||1) * W;
+              lctx.fillStyle='rgba(255,90,90,.5)'; lctx.fillRect(x-1,0,2,H);
+            }
+            const cx = seek.t * f.timebase_hz / (f.frame_timestamps.at(-1)||1) * W;
+            lctx.strokeStyle='#7bd88f'; lctx.lineWidth=2;
+            lctx.beginPath(); lctx.moveTo(cx,0); lctx.lineTo(cx,H); lctx.stroke();
+          };
+          drawStrip();
+          seekRedraws.push(drawStrip);
+          lumaCv.classList.add('seekable');
+          const vDur = f.frame_timestamps.at(-1) / f.timebase_hz;
+          if (vDur > seek.dur) seek.dur = vDur;
+          scrubbable(lumaCv, () => vDur);
+        }
+        const showAt = () => {
+          if (!thumbs?.frame_times_ticks?.length) { info.textContent = 'no thumbnails'; return; }
+          const j = nearestThumb(thumbs, seek.t);
+          drawThumb(cv, thumbs, j);
+          const fi = thumbs.frame_indices[j], tick = thumbs.frame_times_ticks[j];
+          const t = tick / thumbs.timebase_hz;
+          const vev = (f.events??[]).filter(e=>Math.abs(e.time_ticks/f.timebase_hz - t)<1e-6);
+          info.innerHTML =
+            `frame ${fi}  t=${t.toFixed(3)}s  (tick ${tick}/${thumbs.timebase_hz}Hz)<br>` +
+            `luma=${f.luminance[fi]?.toFixed(1) ?? '—'} diff=${f.diff[fi]?.toFixed(1) ?? '—'}` +
+            (vev.length ? `<br>⚑ ` + vev.map(e=>e.kind).join(', ') : '');
+        };
+        seekFollowers.push(showAt); showAt();
+      }
+    }
+    // progress bar flush under the frame, controls below it
+    player.appendChild(el('div', null,
+      '<div id="seektrack"><div class="fill"></div><div class="head"></div></div>' +
+      '<div id="controls"><button id="playbtn">▶</button> <span class="t">0.000 s</span>' +
+      '<span class="mut">/ <span id="seekdur">—</span></span>' +
+      '<span class="mut" style="margin-left:auto">Space: 再生 / ←→: ±0.1s</span></div>'));
+    for (const s of strips) player.appendChild(s);
+    $('#playbtn').addEventListener('click', togglePlay);
+    scrubbable($('#seektrack'), () => seek.dur);
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'ArrowLeft') { seek.t = Math.max(0, seek.t - 0.1); notifySeek(); }
+      else if (e.key === 'ArrowRight') { seek.t = Math.min(seek.dur, seek.t + 0.1); notifySeek(); }
+      else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    });
+    // ---- seek detail panel: lives beside the player ----
+    row.appendChild(tlSide);
+    tlSide.appendChild(el('h2',null,'シーク位置の詳細'));
+    tlSide.appendChild(seekDetails);
+    seekDetails.className='card';
+    // Hierarchy: chips give the at-a-glance summary; per-item lists live
+    // inside collapsible <details> blocks whose open state survives seeks.
+    const openDt = new Set();
+    seekDetails.addEventListener('toggle', e => {
+      const k = e.target.dataset?.k; if (!k) return;
+      e.target.open ? openDt.add(k) : openDt.delete(k);
+    }, true);
+    seekFollowers.push(() => {
+      const t = seek.t;
+      const hit = evs.filter(e=>e.start_s<=t && t<=e.end_s);
+      const near = evs.filter(e=>!(e.start_s<=t && t<=e.end_s) && Math.abs(e.start_s-t)<0.5);
+      const aligned = [];
+      for (const k of Object.keys(R.views).filter(k=>k.startsWith('views/locate_'))) {
+        const l = R.views[k];
+        const s0=(l.capture_range?.start??0)/sr, s1=(l.capture_range?.end??0)/sr;
+        if (t>=s0 && t<=s1) aligned.push(l);
+      }
+      // one chip per event kind; color = strongest confidence present
+      const byKind = {};
+      for (const e of hit) (byKind[e.kind] ??= []).push(e);
+      const rank = l => l.some(e=>e.confidence==='high') ? 'hi' : l.some(e=>e.confidence==='medium') ? 'mid' : 'lo';
+      const chips = Object.entries(byKind).map(([k,l]) =>
+        `<span class="chip ${rank(l)}" title="${l.map(e=>`${label(e.input_id)} (${e.confidence})`).join('&#10;')}">${k}${l.length>1 ? ` ×${l.length}` : ''}</span>`).join('');
+      const det = (key, sum, body) =>
+        `<details data-k="${key}"${openDt.has(key) ? ' open' : ''}><summary>${sum}</summary><div>${body}</div></details>`;
+      let h = `<b>t = ${t.toFixed(3)} s</b>` +
+        (chips ? `<div class="chips">${chips}</div>` : ' <span class="mut">— events なし</span>');
+      if (hit.length) h += det('ev', `イベント内訳 (${hit.length})`,
+        hit.map(e=>`${e.kind} — ${label(e.input_id)} (${e.confidence}) ${e.start_s.toFixed(2)}–${e.end_s.toFixed(2)}s`).join('<br>'));
+      if (near.length) h += det('near', `近傍 ±0.5s (${near.length})`,
+        near.map(e=>`${e.kind} @${e.start_s.toFixed(2)}s — ${label(e.input_id)}`).join('<br>'));
+      if (aligned.length) h += det('al', `アライメント (${aligned.length})`,
+        aligned.map(l=>`${label(l.source_input_id)} → ${label(l.capture_input_id)} ${l.accepted?'✓':'✗'}`).join('<br>'));
+      seekDetails.innerHTML = h;
+    });
+    seekFollowers.at(-1)();
+  }
+
+  // ---- waveform timeline, grouped by capture ----
+  const wk = tensorKeys('waveform/');
+  if (wk.length) {
+    tlSide.appendChild(el('h2',null,'共通タイムライン: waveform LOD + event markers'));
+    const spb = R.timeline?.series?.waveform_lod?.samples_per_bucket ?? [256];
+    const lvl = Math.min(2, spb.length-1);
+    const byInput = {};
+    for (const k of wk) { const m = k.match(/^waveform\/([^/]+)\/(ch\d+)\/l(\d+)$/); if (m && +m[3]===lvl) (byInput[m[1]] ??= []).push({ch:m[2],k}); }
+    // source→capture placements taken from the locate views
+    const locViews = Object.values(R.views).filter(v=>v.capture_input_id && v.source_input_id && v.capture_range);
+    const captures = R.inputs.filter(i=>i.role.startsWith('capture'));
+    const PALETTE = ['#4da3ff','#ffb86b','#7bd88f','#ff7ab8','#b58cff','#5ad4d4','#e8d15a','#ff8a5a'];
+    const pal = id => PALETTE[[...id].reduce((a,c)=>a+c.charCodeAt(0),0) % PALETTE.length];
+    const dur = () => seek.dur || 1;
+    for (const cap of captures) {
+      const id = cap.input_id;
+      const c = el('details','card');
+      c.open = true;
+      const sum = el('summary',null,`<b>${label(id)}</b> <span class="mut">${cap.role}</span>`);
+      c.appendChild(sum);
+      tlSide.appendChild(c);
+      for (const {ch,k} of (byInput[id] ?? []).sort((a,b)=>a.ch.localeCompare(b.ch))) {
+        c.appendChild(el('div','mut',ch));
+        waveform(c, tensor(k), evs.filter(e=>e.input_id===id), sr, spb[lvl], 0, dur());
+      }
+      // placement lanes: which source_asset sounds where in this capture
+      const rows = locViews.filter(v=>v.capture_input_id===id)
+        .sort((a,b)=>a.capture_range.start-b.capture_range.start);
+      if (rows.length) {
+        const lanes = el('div','lanes'); c.appendChild(lanes);
+        const cursors = [];
+        for (const l of rows) {
+          const ranges = (l.occurrences?.length ? l.occurrences : [l])
+            .map(o=>o.capture_range ?? o.range).filter(Boolean);
+          const lane = el('div','lane');
+          const tr = el('div','track');
+          const srcWfs = byInput[l.source_input_id] ?? [];
+          const lbl = el('span','lbl',
+            (srcWfs.length ? '▸ ' : '') + label(l.source_input_id));
+          tr.appendChild(lbl);
+          for (const r of ranges) {
+            const s0=r.start/sr, s1=r.end/sr;
+            const bar = el('i','bar');
+            const upd = () => { bar.style.left=(s0/dur()*100)+'%'; bar.style.width=(Math.max(s1-s0,0.02)/dur()*100)+'%'; };
+            upd(); seekFollowers.push(upd);
+            if (l.accepted) bar.style.background = pal(l.source_input_id);
+            else { bar.style.border = `1px dashed ${pal(l.source_input_id)}`; bar.style.opacity = .45; }
+            bar.title = `${label(l.source_input_id)}  ${s0.toFixed(2)}–${s1.toFixed(2)}s  ${l.accepted?'accepted':'rejected'} (${l.confidence})`;
+            tr.appendChild(bar);
+          }
+          const cur = el('i','cur'); tr.appendChild(cur); cursors.push(cur);
+          scrubbable(tr, dur);
+          lane.appendChild(tr); lanes.appendChild(lane);
+          // expandable: the source's own waveform, offset so its cursor
+          // maps onto where it sounds inside this capture. The lane
+          // label doubles as the expand toggle.
+          if (srcWfs.length && ranges.length) {
+            const off = ranges[0].start / sr;
+            const body = el('div','srcwf');
+            body.hidden = true;
+            const segLen = (ranges[0].end - ranges[0].start) / sr;
+            for (const {ch,k} of srcWfs.sort((a,b)=>a.ch.localeCompare(b.ch))) {
+              body.appendChild(el('div','mut',ch));
+              waveform(body, tensor(k), evs.filter(e=>e.input_id===l.source_input_id), sr, spb[lvl], off, dur(), segLen);
+            }
+            lbl.classList.add('tog');
+            lbl.addEventListener('pointerdown', e => e.stopPropagation());
+            lbl.addEventListener('click', e => {
+              e.stopPropagation();
+              body.hidden = !body.hidden;
+              lbl.textContent = (body.hidden ? '▸ ' : '▾ ') + label(l.source_input_id);
+            });
+            lanes.appendChild(body);
+          }
+        }
+        const updCur = () => { for (const cu of cursors) cu.style.left=(seek.t/dur()*100)+'%'; };
+        seekFollowers.push(updCur); updCur();
+      }
+      const sev = evs.filter(e=>e.input_id===id);
+      if (sev.length) c.appendChild(el('div','mut',sev.map(e=>`⚑ ${e.kind} @${e.start_s.toFixed(2)}s (${e.confidence})`).join('　')));
+    }
+  }
+
+  // ---- spectrograms ----
+  const sg = tensorKeys('spectrogram/');
+  if (sg.length) {
+    const tp = paneOf('spectra');
+    tp.appendChild(el('h2',null,'スペクトログラム'));
+    const g = el('div','grid'); tp.appendChild(g);
+    for (const k of sg) {
+      const m = k.match(/^spectrogram\/([^/]+)\/(ch\d+)\/(\w+)$/); if (!m) continue;
+      const c = el('div','card',`<b>${label(m[1])}</b> ${m[2]} ${m[3]}`); g.appendChild(c);
+      heatmap(c, tensor(k));
+    }
+  }
+
+  // ---- band ----
+  const bk = tensorKeys('band/');
+  if (bk.length) {
+    const tp = paneOf('spectra');
+    tp.appendChild(el('h2',null,'1/3 オクターブ帯域'));
+    const g = el('div','grid'); tp.appendChild(g);
+    for (const k of bk) {
+      const m = k.match(/^band\/([^/]+)\/(ch\d+)\/(\w+)$/); if (!m) continue;
+      const c = el('div','card',`<b>${label(m[1])}</b> ${m[2]}`); g.appendChild(c);
+      heatmap(c, tensor(k));
+    }
+  }
+
+  // ---- transfer views ----
+  const tfs = Object.keys(R.views).filter(k=>k.startsWith('views/transfer_'));
+  if (tfs.length) {
+    const tp = paneOf('compare');
+    tp.appendChild(el('h2',null,'伝達特性 H(f)'));
+    for (const k of tfs) {
+      const tf = R.views[k];
+      const c = el('div','card',`<b>${tf.pair?.split('__').map(label).join(' → ') ?? k}</b>`); tp.appendChild(c);
+      const n = Math.min(tf.freq_hz?.length ?? 0, 4096);
+      if (n) {
+        chart(c, [
+          {name:'|H| dB', x:tf.freq_hz.slice(1,n), y:tf.magnitude_db.slice(1,n)},
+          {name:'coherence', x:tf.freq_hz.slice(1,n), y:tf.coherence.slice(1,n)},
+        ], {logX:true, ylabel:'dB / coherence'});
+        chart(c, [{name:'phase rad', x:tf.freq_hz.slice(1,n), y:tf.phase_rad.slice(1,n)}], {logX:true});
+      }
+      if (tf.band_gain) {
+        const bg = tf.band_gain, rows = bg.shape[0], cols = bg.shape[1];
+        const fr = bg.values.slice(0,cols);
+        const series = [];
+        for (let r=1; r<rows; r++) series.push({name:`band gain ch${r-1}`, x:fr, y:bg.values.slice(r*cols,(r+1)*cols)});
+        chart(c, series, {logX:true, ylabel:'linear gain'});
+      }
+    }
+  }
+
+  // ---- diff ----
+  const dk = tensorKeys('diff/');
+  if (dk.length) {
+    const tp = paneOf('compare');
+    tp.appendChild(el('h2',null,'差分'));
+    const g = el('div','grid'); tp.appendChild(g);
+    for (const k of dk) {
+      const pair = k.split('/')[1];
+      const c = el('div','card',`<b>${pair.split('__').map(label).join(' ↔ ')}</b> ${k.split('/').pop()}`); g.appendChild(c);
+      heatmap(c, tensor(k));
+    }
+  }
+
+  // ---- residuals ----
+  const rk = tensorKeys('residual/');
+  if (rk.length) {
+    const tp = paneOf('compare');
+    tp.appendChild(el('h2',null,'残差段 (PSD dB 平均)'));
+    const pairs = [...new Set(rk.map(k=>k.split('/')[1]))];
+    for (const pair of pairs) {
+      const c = el('div','card',`<b>${pair.split('__').map(label).join(' → ')}</b>`); tp.appendChild(c);
+      const series=[];
+      for (const k of rk.filter(x=>x.startsWith(`residual/${pair}/`) && x.endsWith('/psd_db')).sort()) {
+        const m = tensor(k), stage = k.split('/')[2].toUpperCase();
+        const mean = Array.from({length:m.cols}, (_,cc)=>{
+          let s=0,n2=0; for(let rr=0;rr<m.rows;rr++){const v=m.data[rr*m.cols+cc]; if(Number.isFinite(v)){s+=v;n2++;}} return n2?s/n2:NaN;
+        });
+        series.push({name:stage, y:mean, x:mean.map((_,i)=>i*sr/2/m.cols)});
+      }
+      chart(c, series, {logX:true, ylabel:'dB'});
+      const bg = el('div','grid'); c.appendChild(bg);
+      for (const k of rk.filter(x=>x.startsWith(`residual/${pair}/`) && x.endsWith('/band_energy_db')).sort()) {
+        const cc = el('div','card',`<b>${k.split('/')[2]}</b> band energy`); bg.appendChild(cc);
+        heatmap(cc, tensor(k));
+      }
+    }
+  }
+
+  // ---- coherence ----
+  const ck = tensorKeys('coherence/');
+  if (ck.length) {
+    const tp = paneOf('compare');
+    tp.appendChild(el('h2',null,'コヒーレンス'));
+    const g = el('div','grid'); tp.appendChild(g);
+    for (const k of ck) {
+      const seg = k.split('/')[1];
+      const c = el('div','card',`<b>${seg.split('__').map(label).join(' ↔ ')||label(seg)}</b> ${k.split('/').slice(2).join('/')}`); g.appendChild(c);
+      heatmap(c, tensor(k), {lo:0,hi:1});
+    }
+  }
+
+  // ---- locate ----
+  const lks = Object.keys(R.views).filter(k=>k.startsWith('views/locate_'));
+  if (lks.length) {
+    const tp = paneOf('locate');
+    tp.appendChild(el('h2',null,'Locate'));
+    for (const k of lks) {
+      const l = R.views[k], c = el('div','card');
+      c.innerHTML = `<b>${label(l.source_input_id)} → ${label(l.capture_input_id)}</b>
+        <span class="tag ${l.accepted?'ok':'bad'}">${l.accepted?'ACCEPTED':'REJECTED'}</span>
+        confidence=${l.confidence}  agreeing=${l.agreeing_methods}  spread=${l.position_spread}
+        capture=${l.capture_range?.start}…${l.capture_range?.end} samples (${((l.capture_range?.start??0)/sr).toFixed(2)}s)`;
+      if (l.reject_reason) c.innerHTML += ` <span class="warn tag">reject: ${l.reject_reason}</span>`;
+      const tb = el('table','', '<tr><th>method</th><th>pos</th><th>score</th><th>pk/bg</th><th>width</th><th>pk1/2</th><th>validity</th></tr>');
+      for (const ev of l.evidence ?? []) {
+        const cand = ev.candidates?.[0];
+        tb.innerHTML += `<tr><td>${ev.method}</td><td>${cand?cand.position:'—'}</td><td>${cand?cand.score.toFixed(3):'—'}</td>
+          <td>${cand?cand.peak_to_background?.toFixed(1):'—'}</td><td>${cand?cand.peak_width:'—'}</td>
+          <td>${cand?.peak_ratio_12?cand.peak_ratio_12.toFixed(1):'—'}</td><td>${ev.validity}</td></tr>`;
+      }
+      c.appendChild(tb);
+      if (l.time_map?.segments?.length) {
+        c.appendChild(el('div','mut','time_map: '+l.time_map.segments.map(s=>`${s.kind}[${s.capture_range?.[0]}…${s.capture_range?.[1]}]`).join(' ')));
+      }
+      tp.appendChild(c);
+    }
+  }
+
+  // ---- events ----
+  if (evs.length) {
+    const tp = paneOf('events');
+    tp.appendChild(el('h2',null,'候補イベント'));
+    const et = el('table','', '<tr><th>kind</th><th>input</th><th>t[s]</th><th>strength</th><th>conf</th><th>validity</th><th>feature</th></tr>');
+    for (const e of evs)
+      et.innerHTML += `<tr><td>${e.kind}</td><td>${label(e.input_id)}</td><td>${e.start_s?.toFixed(3)}–${e.end_s?.toFixed(3)}</td>
+        <td>${e.strength?.toFixed(2)}</td><td>${e.confidence}</td><td>${e.validity}</td><td>${e.source_feature}</td></tr>`;
+    tp.appendChild(et);
+  }
+
+  // Hide tabs whose pane never got content, then open the first
+  // non-empty one (summary normally, timeline when only media views
+  // exist).
+  for (const [id] of tabDefs) {
+    if (!panes[id]?.children.length) tabBtns[id].style.display = 'none';
+  }
+  const first = tabDefs.find(([id]) => panes[id]?.children.length);
+  if (first) tabBtns[first[0]].click();
+})();
+</script>
+</body>
+</html>

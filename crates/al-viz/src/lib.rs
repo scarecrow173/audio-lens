@@ -7,6 +7,7 @@
 pub mod golden;
 pub mod lod;
 pub mod package;
+pub mod report;
 pub mod stage;
 pub mod summary;
 pub mod tiles;
