@@ -94,7 +94,14 @@ fn main() {
         .nth(1)
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("samples"));
-    for sub in ["tone", "clipping", "dropout", "locate-mono", "locate-stereo", "video"] {
+    for sub in [
+        "tone",
+        "clipping",
+        "dropout",
+        "locate-mono",
+        "locate-stereo",
+        "video",
+    ] {
         std::fs::create_dir_all(dir.join(sub)).unwrap();
     }
 
@@ -149,8 +156,16 @@ fn main() {
         stereo_cap.push(l);
         stereo_cap.push(r);
     }
-    write_wav(&dir.join("locate-stereo/source-stereo-pair.wav"), 2, &stereo_src);
-    write_wav(&dir.join("locate-stereo/capture-stereo-mixed.wav"), 2, &stereo_cap);
+    write_wav(
+        &dir.join("locate-stereo/source-stereo-pair.wav"),
+        2,
+        &stereo_src,
+    );
+    write_wav(
+        &dir.join("locate-stereo/capture-stereo-mixed.wav"),
+        2,
+        &stereo_cap,
+    );
 
     // 6. 動画ワークフロー用: 元音源 BGM アセット(2 s)と、それを内蔵した
     //    ゲームプレイ動画 3 本。映像は BGR24 非圧縮・音声は PCM s16。
