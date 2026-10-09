@@ -141,6 +141,54 @@ pub struct VideoFrame<'a> {
     pub body: &'a [u8],
 }
 
+/// Decode one frame chunk into packed RGB24 (top-down row order), then
+/// nearest-neighbour downscale so the result is at most `max_width`
+/// pixels wide. Returns `(w, h, rgb)`.
+fn decode_rgb_thumb(
+    dib: &DibFormat,
+    body: &[u8],
+    max_width: u32,
+) -> Result<(u32, u32, Vec<u8>), String> {
+    let need = dib.frame_bytes();
+    if body.len() < need {
+        return Err(format!(
+            "frame chunk holds {} bytes, need {need} ({}x{} {}bpp)",
+            body.len(),
+            dib.width,
+            dib.height,
+            dib.bits_per_pixel
+        ));
+    }
+    let (w, h, stride, step) = (
+        dib.width,
+        dib.height,
+        dib.row_stride(),
+        dib.bits_per_pixel as usize / 8,
+    );
+    let scale = w.div_ceil(max_width).max(1);
+    let (tw, th) = (w.div_ceil(scale), h.div_ceil(scale));
+    let mut rgb = vec![0u8; tw as usize * th as usize * 3];
+    for ty in 0..th as usize {
+        let sy = ty * scale as usize;
+        // BI_RGB stores rows bottom-up unless biHeight was negative.
+        let src_row = if dib.top_down {
+            sy
+        } else {
+            h as usize - 1 - sy
+        };
+        let row = &body[src_row * stride..src_row * stride + w as usize * step];
+        for tx in 0..tw as usize {
+            let px = &row[tx * scale as usize * step..][..step];
+            // DIB pixel order is BGR(A); emit RGB.
+            let o = (ty * tw as usize + tx) * 3;
+            rgb[o] = px[2];
+            rgb[o + 1] = px[1];
+            rgb[o + 2] = px[0];
+        }
+    }
+    Ok((tw, th, rgb))
+}
+
 /// Event detection tunables; every used value is persisted in the
 /// artifact (`config.ingest.video.*` overrides).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -247,6 +295,33 @@ pub struct VideoFeatures {
     pub params: VideoFeatureConfig,
 }
 
+/// Downscaled RGB24 thumbnail frames for preview/report rendering.
+/// Frames are strided so at most [`MAX_THUMB_FRAMES`] are retained and
+/// each is nearest-neighbour downscaled to at most [`MAX_THUMB_WIDTH`]
+/// pixels wide. Pixel payloads are base64 so the artifact stays JSON.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct VideoThumbs {
+    /// Thumbnail width in pixels.
+    pub width: u32,
+    /// Thumbnail height in pixels.
+    pub height: u32,
+    /// Ticks per second of the stream clock (same as `VideoFeatures`).
+    pub timebase_hz: u64,
+    /// Source frame index of each thumbnail (indexes
+    /// `frame_timestamps`).
+    pub frame_indices: Vec<u32>,
+    /// Stream-clock tick of each embedded frame.
+    pub frame_times_ticks: Vec<i64>,
+    /// One base64-encoded packed RGB24 image per frame
+    /// (row-major, top-down, `width * height * 3` bytes decoded).
+    pub frames_rgb24_b64: Vec<String>,
+}
+
+/// Upper bound on retained thumbnail frames.
+pub const MAX_THUMB_FRAMES: usize = 90;
+/// Upper bound on thumbnail width in pixels.
+pub const MAX_THUMB_WIDTH: u32 = 160;
+
 /// `video_features` artifact payload: either the decoded series or an
 /// explicit unavailability record — never silent absence.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -320,10 +395,21 @@ fn detect_events(
     events
 }
 
+/// Output of [`extract_features`]: the coarse feature series plus
+/// downscaled preview thumbnails (`None` when the stream cannot be
+/// decoded at all).
+#[derive(Debug)]
+pub struct VideoExtraction {
+    /// Decoded series or explicit unavailability record.
+    pub features: VideoFeatureArtifact,
+    /// Preview thumbnails; absent on decode failure.
+    pub thumbs: Option<VideoThumbs>,
+}
+
 /// Decode `frames` (the `db`/`dc` chunks of one `vids` stream, in mux
 /// order, already tagged with stream-clock ticks) into a coarse
-/// feature set. Every video-side failure becomes
-/// [`VideoFeatureArtifact::Unavailable`].
+/// feature set plus strided preview thumbnails. Every video-side
+/// failure becomes [`VideoFeatureArtifact::Unavailable`].
 pub fn extract_features(
     stream: u32,
     strf: &[u8],
@@ -331,16 +417,19 @@ pub fn extract_features(
     start_tick: i64,
     frames: &[VideoFrame<'_>],
     cfg: &VideoFeatureConfig,
-) -> VideoFeatureArtifact {
+) -> VideoExtraction {
     let codec = if strf.len() >= 20 {
         codec_fourcc(read_u32(strf, 16).unwrap_or(0))
     } else {
         codec_fourcc(0)
     };
-    let unavailable = |reason: String| VideoFeatureArtifact::Unavailable {
-        stream,
-        codec: codec.clone(),
-        reason,
+    let unavailable = |reason: String| VideoExtraction {
+        features: VideoFeatureArtifact::Unavailable {
+            stream,
+            codec: codec.clone(),
+            reason,
+        },
+        thumbs: None,
     };
     let dib = match dib_format(strf) {
         Ok(d) => d,
@@ -364,9 +453,25 @@ pub fn extract_features(
     let mut frame_timestamps = Vec::with_capacity(frames.len());
     let mut luminance = Vec::with_capacity(frames.len());
     let mut diff = Vec::with_capacity(frames.len());
-    for frame in frames {
+    // Stride the thumbnail set so long captures stay bounded.
+    let thumb_step = frames.len().div_ceil(MAX_THUMB_FRAMES).max(1);
+    let mut thumb_indices = Vec::new();
+    let mut thumb_times = Vec::new();
+    let mut thumb_frames = Vec::new();
+    let (mut tw, mut th) = (0u32, 0u32);
+    for (i, frame) in frames.iter().enumerate() {
         if let Err(reason) = decode_luma(&dib, frame.body, &mut luma_plane) {
             return unavailable(reason);
+        }
+        if i % thumb_step == 0 {
+            // Thumbnail decode failure skips that frame only — the
+            // preview degrades but the feature series stays whole.
+            if let Ok((w, h, rgb)) = decode_rgb_thumb(&dib, frame.body, MAX_THUMB_WIDTH) {
+                (tw, th) = (w, h);
+                thumb_indices.push(i as u32);
+                thumb_times.push(frame.time_ticks);
+                thumb_frames.push(al_core::b64::encode(&rgb));
+            }
         }
         frame_timestamps.push(frame.time_ticks);
         luminance.push(luma_plane.iter().sum::<f64>() / pixels as f64);
@@ -385,20 +490,31 @@ pub fn extract_features(
         prev = Some(std::mem::take(&mut luma_plane));
     }
     let events = detect_events(&luminance, &diff, &frame_timestamps, cfg);
-    VideoFeatureArtifact::Decoded(VideoFeatures {
-        stream,
-        codec,
-        width: dib.width,
-        height: dib.height,
-        bits_per_pixel: dib.bits_per_pixel,
+    let thumbs = (!thumb_frames.is_empty()).then_some(VideoThumbs {
+        width: tw,
+        height: th,
         timebase_hz,
-        start_tick,
-        frame_timestamps,
-        luminance,
-        diff,
-        events,
-        params: *cfg,
-    })
+        frame_indices: thumb_indices,
+        frame_times_ticks: thumb_times,
+        frames_rgb24_b64: thumb_frames,
+    });
+    VideoExtraction {
+        features: VideoFeatureArtifact::Decoded(VideoFeatures {
+            stream,
+            codec,
+            width: dib.width,
+            height: dib.height,
+            bits_per_pixel: dib.bits_per_pixel,
+            timebase_hz,
+            start_tick,
+            frame_timestamps,
+            luminance,
+            diff,
+            events,
+            params: *cfg,
+        }),
+        thumbs,
+    }
 }
 
 #[cfg(test)]
@@ -494,18 +610,28 @@ mod tests {
         // MJPG fourcc in biCompression.
         let mjpg = bih(4, 4, 24, u32::from_le_bytes(*b"MJPG"));
         let out = extract_features(0, &mjpg, 10, 0, &frames, &VideoFeatureConfig::default());
-        assert!(matches!(out, VideoFeatureArtifact::Unavailable { .. }));
-        if let VideoFeatureArtifact::Unavailable { codec, .. } = &out {
+        assert!(matches!(
+            out.features,
+            VideoFeatureArtifact::Unavailable { .. }
+        ));
+        assert!(out.thumbs.is_none());
+        if let VideoFeatureArtifact::Unavailable { codec, .. } = &out.features {
             assert_eq!(codec, "MJPG");
         }
         // 16bpp BI_RGB is not a supported pixel format.
         let bpp16 = bih(4, 4, 16, 0);
         let out = extract_features(0, &bpp16, 10, 0, &frames, &VideoFeatureConfig::default());
-        assert!(matches!(out, VideoFeatureArtifact::Unavailable { .. }));
+        assert!(matches!(
+            out.features,
+            VideoFeatureArtifact::Unavailable { .. }
+        ));
         // Truncated frame body.
         let ok = bih(4, 4, 24, 0);
         let out = extract_features(0, &ok, 10, 0, &frames, &VideoFeatureConfig::default());
-        assert!(matches!(out, VideoFeatureArtifact::Unavailable { .. }));
+        assert!(matches!(
+            out.features,
+            VideoFeatureArtifact::Unavailable { .. }
+        ));
     }
 
     /// Fill one row of a 4-wide 24bpp padded frame body with `v`.
@@ -545,8 +671,8 @@ mod tests {
             .map(|(i, b)| frame(i as i64, b))
             .collect();
         let out = extract_features(0, &strf, 10, 0, &frames, &VideoFeatureConfig::default());
-        let VideoFeatureArtifact::Decoded(f) = out else {
-            panic!("expected decoded features: {out:?}")
+        let VideoFeatureArtifact::Decoded(f) = out.features else {
+            panic!("expected decoded features")
         };
         assert_eq!(f.luminance.len(), 8);
         assert!(f.luminance[0].abs() < 1e-9);
@@ -574,6 +700,31 @@ mod tests {
         // The adopted thresholds are persisted with the artifact.
         assert_eq!(f.params.scene_change_threshold, 40.0);
         assert_eq!(f.timebase_hz, 10);
+        // Preview thumbnails cover every frame (8 < MAX_THUMB_FRAMES).
+        let t = out.thumbs.expect("decoded stream keeps thumbnails");
+        assert_eq!(t.frame_indices.len(), 8);
+        assert_eq!(t.frame_times_ticks, (0..8).collect::<Vec<i64>>());
+        assert!(t.width <= MAX_THUMB_WIDTH);
+        assert_eq!(t.timebase_hz, 10);
+    }
+
+    #[test]
+    fn thumbnails_decode_rgb_in_top_down_order() {
+        // 2x2 bottom-up BGR24: stored rows are bottom, top. Stored
+        // bottom row is red (B=0,G=0,R=255), top row is green.
+        let dib = dib_format(&bih(2, 2, 24, 0)).unwrap();
+        let stride = dib.row_stride();
+        let mut body = vec![0u8; stride * 2];
+        for px in body[..stride].as_chunks_mut::<3>().0 {
+            px.copy_from_slice(&[0, 0, 255]); // bottom row = red
+        }
+        for px in body[stride..].as_chunks_mut::<3>().0 {
+            px.copy_from_slice(&[0, 255, 0]); // top row = green
+        }
+        let (w, h, rgb) = decode_rgb_thumb(&dib, &body, MAX_THUMB_WIDTH).unwrap();
+        assert_eq!((w, h), (2, 2));
+        assert_eq!(&rgb[0..3], &[0, 255, 0]); // top-left = green
+        assert_eq!(&rgb[6..9], &[255, 0, 0]); // bottom-left = red
     }
 
     #[test]
@@ -590,7 +741,7 @@ mod tests {
         );
         let report = VideoFeatureReport {
             input_id: "IN-x".into(),
-            features: out,
+            features: out.features,
         };
         let json = serde_json::to_value(&report).unwrap();
         assert_eq!(json["features"]["status"], "decoded");
