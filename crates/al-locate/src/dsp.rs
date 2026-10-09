@@ -45,15 +45,37 @@ pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
     if t_norm == 0.0 {
         return vec![0.0; max_lag + 1];
     }
+    // Cross-correlation numerator via FFT (same layout as gcc_phat):
+    // corr[lag] = sum_j template[j] * signal[lag + j].
+    let size = (signal.len() + n - 1).next_power_of_two();
+    let mut re = vec![0.0; size];
+    let mut im = vec![0.0; size];
+    let mut re_s = vec![0.0; size];
+    let mut im_s = vec![0.0; size];
+    re[..n].copy_from_slice(template);
+    re_s[..signal.len()].copy_from_slice(signal);
+    fft(&mut re, &mut im, false);
+    fft(&mut re_s, &mut im_s, false);
+    for k in 0..size {
+        let pr = re[k] * re_s[k] + im[k] * im_s[k];
+        let pi = re[k] * im_s[k] - im[k] * re_s[k];
+        re[k] = pr;
+        im[k] = pi;
+    }
+    fft(&mut re, &mut im, true);
+    let corr = re;
+    // Sliding signal energy via cumulative squares.
+    let mut cum = vec![0.0; signal.len() + 1];
+    for (i, &v) in signal.iter().enumerate() {
+        cum[i + 1] = cum[i] + v * v;
+    }
     (0..=max_lag)
         .map(|lag| {
-            let window = &signal[lag..lag + n];
-            let s_energy: f64 = window.iter().map(|v| v * v).sum();
+            let s_energy = (cum[lag + n] - cum[lag]).max(0.0);
             if s_energy == 0.0 {
                 return 0.0;
             }
-            let dot: f64 = template.iter().zip(window).map(|(a, b)| a * b).sum();
-            dot / (t_norm * s_energy.sqrt())
+            corr[lag] / (t_norm * s_energy.sqrt())
         })
         .collect()
 }

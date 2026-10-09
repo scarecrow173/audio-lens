@@ -1,5 +1,6 @@
 //! AudioLens shared core types.
 
+pub mod b64;
 pub mod hash;
 pub mod ids;
 pub mod types;

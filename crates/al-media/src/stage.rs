@@ -15,7 +15,7 @@ use crate::dictionary::Dictionary;
 use crate::format::{MediaFormat, detect_format};
 use crate::metadata::{AudioMetadata, IntegrityObservation};
 use crate::mp4::{Mp4Facts, decode_mp4};
-use crate::video::{VideoFeatureArtifact, VideoFeatureConfig, VideoFeatureReport};
+use crate::video::{VideoFeatureArtifact, VideoFeatureConfig, VideoFeatureReport, VideoThumbs};
 use crate::wav::{DecodedAudio, decode_wav};
 
 /// Optional mux-level observations a container may carry alongside the
@@ -28,6 +28,9 @@ struct MuxObservations {
     video: Option<VideoInfo>,
     av_timing: Vec<StreamTiming>,
     video_features: Option<VideoFeatureArtifact>,
+    /// Downscaled preview thumbnails of the decoded `vids` stream —
+    /// `Some` only when `video_features` is `Decoded`.
+    video_thumbs: Option<VideoThumbs>,
     /// `decode/input unavailable` detail for the audio stream — the
     /// partial-ingest contract records this instead of failing.
     audio_unavailable: Option<String>,
@@ -153,6 +156,7 @@ impl IngestStage {
                         video: media.video,
                         av_timing: media.timing,
                         video_features: media.video_features,
+                        video_thumbs: media.video_thumbs,
                         audio_unavailable: media.audio_unavailable,
                         ..Default::default()
                     },
@@ -372,6 +376,40 @@ impl IngestStage {
                 produced_by: Some(StageKind::Ingest),
                 inputs: lineage.clone(),
                 params: video_feature_summary(features),
+            });
+        }
+
+        if let Some(thumbs) = &mux.video_thumbs {
+            // Preview thumbnails ride alongside `video_features.json`
+            // so the dataset/report can render the decoded stream
+            // without re-decoding the container.
+            let vt_rel = PathBuf::from("inputs")
+                .join(input.input_id.as_str())
+                .join("video_thumbs.json");
+            let vt_text = serde_json::to_string_pretty(&serde_json::json!({
+                "input_id": input.input_id,
+                "thumbs": thumbs,
+            }))
+            .map_err(|e| {
+                StageError::new(
+                    StageKind::Ingest,
+                    format!("cannot serialize video thumbs: {e}"),
+                )
+            })?;
+            al_job::fsutil::write_durable(&job_dir.join(&vt_rel), vt_text.as_bytes()).map_err(
+                |e| StageError::new(StageKind::Ingest, format!("cannot write video thumbs: {e}")),
+            )?;
+            records.push(ArtifactRecord {
+                artifact_id: ctx.registry.issue(),
+                role: "video_thumbs".into(),
+                path: vt_rel,
+                produced_by: Some(StageKind::Ingest),
+                inputs: lineage.clone(),
+                params: serde_json::json!({
+                    "frames": thumbs.frame_indices.len(),
+                    "width": thumbs.width,
+                    "height": thumbs.height,
+                }),
             });
         }
 

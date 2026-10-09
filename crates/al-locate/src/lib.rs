@@ -21,7 +21,10 @@ pub use dsp::{
 };
 pub use methods::{BandNcc, FullNcc, GccPhat, LocateMethod, SpectralEnvelope, default_methods};
 pub use mixer::{MixerEstimate, fit_mix};
-pub use residual::{ResidualEnergy, ResidualSearch, residual_search, subtract_fit};
+pub use residual::{
+    PreparedResidual, ResidualEnergy, ResidualSearch, assemble_residual_search, prepare_residual,
+    subtract_fit,
+};
 pub use result::{LocateResult, SampleRange};
 pub use stage::{LocateConfig, LocateStage};
 pub use tracking::{

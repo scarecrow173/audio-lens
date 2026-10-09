@@ -22,7 +22,7 @@ use crate::decode::{DecodedInput, decode_input};
 use crate::dsp::ncc;
 use crate::methods::{default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
-use crate::residual::residual_search;
+use crate::residual::{assemble_residual_search, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
 use crate::tracking::{Anchor, build_time_map, identify_loop_occurrences};
 
@@ -160,19 +160,29 @@ impl LocateStage {
         capture_channels: &[Vec<f64>],
         sample_rate: u32,
     ) -> Vec<PairEvidence> {
-        let mut pairs = Vec::new();
-        for method in default_methods() {
-            for (source_channel, src_ch) in source_channels.iter().enumerate() {
-                for (capture_channel, cap_ch) in capture_channels.iter().enumerate() {
-                    pairs.push(PairEvidence {
-                        source_channel,
-                        capture_channel,
-                        evidence: method.locate(src_ch, cap_ch, sample_rate),
-                    });
+        // Tasks are (method, source_channel, capture_channel) tuples,
+        // method-major so the result order matches the sequential
+        // declaration order that merged_votes expects.
+        let n_src = source_channels.len();
+        let n_cap = capture_channels.len();
+        let n_methods = default_methods().len();
+        let mut tasks = Vec::with_capacity(n_methods * n_src * n_cap);
+        for m in 0..n_methods {
+            for src_ch in source_channels {
+                for cap_ch in capture_channels {
+                    tasks.push((m, src_ch.as_slice(), cap_ch.as_slice(), sample_rate));
                 }
             }
         }
-        pairs
+        run_method_tasks(&tasks)
+            .into_iter()
+            .enumerate()
+            .map(|(idx, evidence)| PairEvidence {
+                source_channel: (idx / n_cap) % n_src,
+                capture_channel: idx % n_cap,
+                evidence,
+            })
+            .collect()
     }
 
     /// Best full-band NCC peak of `source[..][w_off..w_off+window]`
@@ -209,12 +219,17 @@ impl LocateStage {
             .then(|| (lo as u64 + c.position, c.score))
     }
 
-    /// One anchor per source window, each located inside
-    /// `capture[lo..hi]`. Anchor source coordinates are `base + w_off`
-    /// so callers can place them on the unrolled pass grid; windows
-    /// whose peak stays below the consensus thresholds contribute no
-    /// anchor. Returns an empty list when the source fits fewer than
-    /// two windows.
+    /// One anchor per source window, located inside `capture[lo..hi]`
+    /// around its expected position. `origin` is the capture position
+    /// where the occurrence's body start lands; each window's search
+    /// range is `origin + w_off` widened by the accumulated rate
+    /// drift, position tolerance and gap slack — searching the whole
+    /// capture per window is both costlier and less correct, since a
+    /// few-hundred-sample window can false-match anywhere. Anchor
+    /// source coordinates are `base + w_off` so callers can place
+    /// them on the unrolled pass grid; windows whose peak stays below
+    /// the consensus thresholds contribute no anchor. Returns an
+    /// empty list when the source fits fewer than two windows.
     fn window_anchors_in(
         &self,
         source: &DecodedInput,
@@ -222,6 +237,7 @@ impl LocateStage {
         lo: usize,
         hi: usize,
         base: u64,
+        origin: u64,
     ) -> Vec<Anchor> {
         let window = self.config.anchor_window as usize;
         let hop = self.config.anchor_hop.max(1) as usize;
@@ -229,21 +245,45 @@ impl LocateStage {
         if window == 0 || n < window + hop {
             return Vec::new();
         }
+        // Bound the window count for long sources: a dense grid over
+        // tens of seconds of audio buys no extra map resolution.
+        const MAX_WINDOWS: usize = 512;
+        let hop = hop.max((n - window) / MAX_WINDOWS);
         let mut offsets: Vec<usize> = (0..=n - window).step_by(hop).collect();
         if offsets.last().copied() != Some(n - window) {
             offsets.push(n - window);
         }
-        offsets
-            .iter()
-            .filter_map(|&w_off| {
-                self.best_window_match(source, capture, w_off, window, lo, hi)
-                    .map(|(capture, score)| Anchor {
-                        source: base + w_off as u64,
-                        capture,
-                        score,
-                    })
-            })
-            .collect()
+        let tol = self.config.consensus.position_tolerance;
+        let gap = self.config.anchor_gap;
+        let rate_tol = self.config.rate_tolerance;
+        run_pool(offsets.len(), &|i| {
+            let w_off = offsets[i];
+            let slack = (w_off as f64 * rate_tol) as u64 + tol + gap;
+            let expected = origin + w_off as u64;
+            let w_lo = expected.saturating_sub(slack).max(lo as u64) as usize;
+            let w_hi = (expected + window as u64 + slack).min(hi as u64) as usize;
+            // Narrow first; widen ×8 so jumps still land before paying
+            // for the caller's whole range, which misses and large
+            // deviations still reach.
+            self.best_window_match(source, capture, w_off, window, w_lo, w_hi)
+                .or_else(|| {
+                    let slack8 = slack.saturating_mul(8);
+                    let m_lo = expected.saturating_sub(slack8).max(lo as u64) as usize;
+                    let m_hi = (expected + window as u64 + slack8).min(hi as u64) as usize;
+                    ((m_lo, m_hi) != (w_lo, w_hi))
+                        .then(|| self.best_window_match(source, capture, w_off, window, m_lo, m_hi))
+                        .flatten()
+                })
+                .or_else(|| self.best_window_match(source, capture, w_off, window, lo, hi))
+                .map(|(capture, score)| Anchor {
+                    source: base + w_off as u64,
+                    capture,
+                    score,
+                })
+        })
+        .into_iter()
+        .flatten()
+        .collect()
     }
 
     /// Persist one JSON artifact under `dir` and return its record.
@@ -284,6 +324,48 @@ struct PairEvidence {
     capture_channel: usize,
     #[serde(flatten)]
     evidence: MethodEvidence,
+}
+
+/// Run `n_tasks` independent units of work over a worker pool,
+/// collecting one result per task in input order.
+fn run_pool<T: Send>(n_tasks: usize, work: &(dyn Fn(usize) -> T + Sync)) -> Vec<T> {
+    let slots: Vec<std::sync::Mutex<Option<T>>> =
+        (0..n_tasks).map(|_| std::sync::Mutex::new(None)).collect();
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let workers = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(n_tasks);
+    std::thread::scope(|scope| {
+        for _ in 0..workers {
+            scope.spawn(|| {
+                loop {
+                    let idx = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    if idx >= n_tasks {
+                        return;
+                    }
+                    *slots[idx].lock().unwrap() = Some(work(idx));
+                }
+            });
+        }
+    });
+    slots
+        .into_iter()
+        .map(|s| s.into_inner().unwrap().unwrap())
+        .collect()
+}
+
+/// Run `(method_index, template, signal, sample_rate)` tasks over a
+/// worker pool, returning one [`MethodEvidence`] per task in input
+/// order. Locate methods are pure but not `Send`, so each worker
+/// builds its own method set and only evidence crosses the thread
+/// boundary.
+fn run_method_tasks(tasks: &[(usize, &[f64], &[f64], u32)]) -> Vec<MethodEvidence> {
+    run_pool(tasks.len(), &|idx| {
+        let methods = default_methods();
+        let (m, template, signal, rate) = tasks[idx];
+        methods[m].locate(template, signal, rate)
+    })
 }
 
 /// Keep, per method, the evidence of the strongest channel pair.
@@ -649,7 +731,7 @@ impl Stage for LocateStage {
                     // real passes, so their windows unroll onto the
                     // pass grid.
                     let mut anchors = if loops.len() <= 1 {
-                        self.window_anchors_in(source, capture, 0, cap_n, 0)
+                        self.window_anchors_in(source, capture, 0, cap_n, 0, primary)
                     } else {
                         let min_v = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
                         loops
@@ -658,7 +740,7 @@ impl Stage for LocateStage {
                             .flat_map(|(i, o)| {
                                 let base = ((o.loop_index - min_v) * body_len as i64) as u64;
                                 let (lo, hi) = cell_of(&positions, i);
-                                self.window_anchors_in(source, capture, lo, hi, base)
+                                self.window_anchors_in(source, capture, lo, hi, base, positions[i])
                             })
                             .collect()
                     };
@@ -753,37 +835,63 @@ impl Stage for LocateStage {
                 for (a, s) in aligned.iter_mut().zip(&parent.channel_samples) {
                     a[start..start + span].copy_from_slice(&s[..span]);
                 }
-                for child in decoded_sources.iter().flatten() {
-                    if child.sample_rate != capture.sample_rate {
-                        continue;
+                // The residual depends only on the parent — compute it
+                // once, then run every child's method tasks over it in
+                // one shared pool.
+                let Some(prepared) =
+                    prepare_residual(&aligned, &capture.channel_samples, self.config.ridge)
+                else {
+                    continue;
+                };
+                let children: Vec<&DecodedInput> = decoded_sources
+                    .iter()
+                    .flatten()
+                    .filter(|c| c.sample_rate == capture.sample_rate)
+                    .collect();
+                let n_methods = default_methods().len();
+                let n_cap = prepared.channels.len();
+                let mut tasks = Vec::new();
+                for child in &children {
+                    for m in 0..n_methods {
+                        for src_ch in &child.channel_samples {
+                            for cap_ch in &prepared.channels {
+                                tasks.push((
+                                    m,
+                                    src_ch.as_slice(),
+                                    cap_ch.as_slice(),
+                                    child.sample_rate,
+                                ));
+                            }
+                        }
                     }
+                }
+                let mut evidences = run_method_tasks(&tasks).into_iter();
+                for child in children {
+                    let n_src = child.channel_samples.len();
+                    let pairs: Vec<PairEvidence> = (0..n_methods * n_src * n_cap)
+                        .map(|idx| PairEvidence {
+                            source_channel: (idx / n_cap) % n_src,
+                            capture_channel: idx % n_cap,
+                            evidence: evidences.next().unwrap(),
+                        })
+                        .collect();
                     let child_len = child.channel_samples[0].len() as u64;
-                    let Some(search) = residual_search(
+                    let child_result = evaluate(
+                        &merged_votes(&pairs),
+                        &child.input_id,
+                        &capture.input_id,
+                        child_len,
+                        capture_len,
+                        &self.config.consensus,
+                        "locate-consensus",
+                        "1",
+                    );
+                    let search = assemble_residual_search(
                         &parent.input_id,
                         parent_result.alignment_id.clone(),
-                        &aligned,
-                        &capture.channel_samples,
-                        self.config.ridge,
-                        |residual| {
-                            let pairs = self.locate_channels(
-                                &child.channel_samples,
-                                residual,
-                                child.sample_rate,
-                            );
-                            evaluate(
-                                &merged_votes(&pairs),
-                                &child.input_id,
-                                &capture.input_id,
-                                child_len,
-                                capture_len,
-                                &self.config.consensus,
-                                "locate-consensus",
-                                "1",
-                            )
-                        },
-                    ) else {
-                        continue;
-                    };
+                        &prepared,
+                        child_result,
+                    );
                     let dir = PathBuf::from("locate")
                         .join(&child.input_id)
                         .join(&capture.input_id);

@@ -68,13 +68,29 @@ AAC 音声の剣戟カットシーン)。映像は全バリアントで正常系
 
 ## 動作確認コマンド
 
+MP4 は H.264+AAC のため al-media ではコーデックデコードできない
+(ADR: demux とタイミング観測のみ)。音声解析・映像プレビューを
+通すには ffmpeg で非圧縮 AVI へ派生変換する(出力は gitignore 済みの
+`samples/_runs/decoded/` に置く):
+
 ```bash
-# バグ動画 vs 正常動画(例: dropout)
+FF=tools/cinematic-sword-cutscene/node_modules/@remotion/compositor-win32-x64-msvc/ffmpeg.exe
+$FF -i samples/reference/game-capture-normal.mp4 \
+  -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 \
+  -c:a pcm_s16le -ar 48000 samples/_runs/decoded/normal.avi
+$FF -i samples/dropout/game-capture-audio-dropout.mp4 \
+  -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 \
+  -c:a pcm_s16le -ar 48000 samples/_runs/decoded/dropout.avi
+
+# バグ動画 vs 正常動画 + 元 BGM 素材
 target/release/al run --base-dir samples/_runs \
-  --input capture_bug:samples/dropout/game-capture-audio-dropout.mp4,\
-capture_reference:samples/reference/game-capture-normal.mp4,\
+  --input capture_bug:samples/_runs/decoded/dropout.avi,\
+capture_reference:samples/_runs/decoded/normal.avi,\
 source_asset:samples/reference/source-bgm.wav
 ```
+
+export の `analysis/report.html` は `report.data.js` と同じ
+ディレクトリに置かれた状態でブラウザ直開きできる(file:// 可)。
 
 `samples/_runs/` は gitignore 済み。各ジョブは
 `samples/_runs/<dir>/<JOB-*>/{manifest.json, analysis/, export/}` に

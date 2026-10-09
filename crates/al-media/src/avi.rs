@@ -29,7 +29,9 @@
 
 use crate::metadata::MediaError;
 use crate::timing::{ClockKind, TimingObservation, observe_timing};
-use crate::video::{self, VideoFeatureArtifact, VideoFeatureConfig, VideoFrame, codec_fourcc};
+use crate::video::{
+    self, VideoFeatureArtifact, VideoFeatureConfig, VideoFrame, VideoThumbs, codec_fourcc,
+};
 use crate::wav::{DecodedAudio, decode_waveformatex, read_u16, read_u32};
 
 /// Video stream facts declared by the container (no frame decode).
@@ -117,6 +119,9 @@ pub struct AviMedia {
     /// Coarse features of the first `vids` stream — decoded series or
     /// an explicit `unavailable` record — when a `vids` stream exists.
     pub video_features: Option<VideoFeatureArtifact>,
+    /// Downscaled preview thumbnails of that same stream, when it
+    /// decoded successfully.
+    pub video_thumbs: Option<VideoThumbs>,
     /// Packet timing observations for each `auds`/`vids` stream,
     /// in `hdrl` order. Each keeps its own clock — audio and video
     /// timestamps are never merged.
@@ -468,7 +473,7 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
     // Frame-carrying chunks (`db`/`dc`) are the only ones handed to the
     // decoder; non-frame chunks (`pc` palette changes etc.) keep their
     // timeline slot in `ticks` but never shift the frame index.
-    let video_features = vidx.map(|vidx| {
+    let video_extraction = vidx.map(|vidx| {
         let head = &streams[vidx];
         let frames: Vec<VideoFrame<'_>> = movi_packets
             .iter()
@@ -488,12 +493,17 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
             video_cfg,
         )
     });
+    let (video_features, video_thumbs) = match video_extraction {
+        Some(e) => (Some(e.features), e.thumbs),
+        None => (None, None),
+    };
 
     Ok(AviMedia {
         audio,
         audio_unavailable,
         video,
         video_features,
+        video_thumbs,
         timing,
     })
 }
