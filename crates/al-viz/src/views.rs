@@ -216,6 +216,43 @@ pub fn stereo_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
     Ok(out)
 }
 
+/// Video views: one JSON per input with materialized `video_features`
+/// observations — decoded frame series plus preview thumbnails, or an
+/// explicit `unavailable` record. The viewer renders the persisted
+/// payload verbatim; no re-decode, no new analysis.
+pub fn video_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
+    let mut out = Vec::new();
+    for a in reader.artifacts("inputs") {
+        if a.store != al_dataset::manifest::StoreKind::Json {
+            continue;
+        }
+        let rel = a.path.strip_prefix("inputs/").unwrap_or(&a.path);
+        let Some(input) = rel.strip_suffix(".video_features.json") else {
+            continue;
+        };
+        let features = reader.read_json("inputs", &format!("{input}.video_features"))?;
+        // Thumbnails are emitted only for successfully decoded
+        // streams; an `unavailable` feature record has no sibling.
+        let thumbs_name = format!("{input}.video_thumbs");
+        let thumbs = reader.read_json("inputs", &thumbs_name).ok();
+        let mut parents = vec![a.path.clone()];
+        if thumbs.is_some() {
+            parents.push(format!("inputs/{thumbs_name}.json"));
+        }
+        out.push(JsonProduct {
+            path: format!("visualization/views/video_{input}.json"),
+            body: serde_json::json!({
+                "input_id": features["input_id"],
+                "features": features["features"],
+                "thumbs": thumbs.map(|t| t["thumbs"].clone()),
+                "source": a.path,
+            }),
+            parents,
+        });
+    }
+    Ok(out)
+}
+
 /// Residual views: per residual stage name, index its artifacts
 /// (waveform, PSD/band tensors) and the stored energies.
 pub fn residual_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
