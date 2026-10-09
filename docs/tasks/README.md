@@ -6,8 +6,11 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-035eXcVbNmAsDfGhJkLzQ | al-math: 相関/NCC/bandpass カーネル | todo | [al-math-correlation.md](./al-math-correlation.md) |
+| TASK-035dQwErTyUiOpAsDfGhJk | al-math: FFT カーネル(複素/実数) | todo | [al-math-fft.md](./al-math-fft.md) |
+| TASK-035fPlMnOkJiHgFeDcBaZ | al-math: least_squares を Householder QR 化 | todo | [al-math-qr.md](./al-math-qr.md) |
+| TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | todo | [al-math-skeleton.md](./al-math-skeleton.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
-| TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
 | TASK-034z9nDhaSqoH2kao6D3Xz | analysis ステージ CLI 配線 + depends_on | done | [analysis-cli-wiring.md](./analysis-cli-wiring.md) |
 | TASK-034z9novQ1qbeZc0x58nsX | analysis 基盤: DatasetWriter open_or_create + FeatureRecord 拡張 | done | [analysis-dataset-foundation.md](./analysis-dataset-foundation.md) |
@@ -16,6 +19,8 @@ Directory: `docs/tasks`
 | TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | done | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
+| TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | todo | [band-lag-gain.md](./band-lag-gain.md) |
+| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | todo | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | done | [avsync-analysis.md](./avsync-analysis.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
@@ -41,15 +46,19 @@ Directory: `docs/tasks`
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
+| TASK-035gHnMnKlJhGfDsAqWe | locate: 帯域キャッシュ + coarse-to-fine 間引き探索 | todo | [locate-coarse-fine.md](./locate-coarse-fine.md) |
 | TASK-034z8kB6w92jCsle2QoqKe | 合議受理 + 失敗モードフラグ | done | [locate-consensus.md](./locate-consensus.md) |
 | TASK-034z8kK3Fu6B5tJ0qnORg0 | locate 結合テスト(合成 fixture) | done | [locate-integration-tests.md](./locate-integration-tests.md) |
 | TASK-034z8kAawdMoi8AxPYZjrB | locate-methods 4手法 + 候補/証拠型 | done | [locate-methods.md](./locate-methods.md) |
 | TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | done | [locate-mixer.md](./locate-mixer.md) |
+| TASK-035hJkLmNpQrStUvWxYz | locate: サンプルレート正規化(リジェクト→リサンプル統一) | todo | [locate-resample-normalize.md](./locate-resample-normalize.md) |
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | done | [locate-residual.md](./locate-residual.md) |
 | TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | done | [locate-result-schema.md](./locate-result-schema.md) |
 | TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | done | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
 | TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | done | [locate-stage-cli.md](./locate-stage-cli.md) |
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
+| TASK-036aQwErTyUiOpAsDfGhJk | MediaDecoder トレイト + レジストリ設計の ADR(#36 フェーズ0) | todo | [media-decoder-adr.md](./media-decoder-adr.md) |
+| TASK-036bZxCvBnMqWeRtYuIo | 既存 WAV/AVI/MP4 を MediaDecoder native バックエンドへ移行(#36 フェーズ1) | todo | [media-decoder-native.md](./media-decoder-native.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |
 | TASK-034yZBGR8sboPsFlB6FpMr | 最小 CLI(run / resume / inspect)の実装 | done | [minimal-cli.md](./minimal-cli.md) |
 | TASK-034AaFVy7YRTQZiKi04T2q | mp4: box パーサ + trak メタデータ | done | [mp4-box-parser.md](./mp4-box-parser.md) |
@@ -64,6 +73,7 @@ Directory: `docs/tasks`
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
 | TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | done | [video-frame-decode.md](./video-frame-decode.md) |
+| TASK-036cAsDfGhJkLzQwErTy | video: ROI 輝度追跡(#39) | todo | [video-roi-luma.md](./video-roi-luma.md) |
 | TASK-034z9oB8rhYcBdeSRvtsKy | al-viz: dataset 範囲/チャンク読み出し基盤 | done | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | TASK-034z9oHPHHVPCNKwoMJp5c | イベントマーカ + 決定的サマリ + skipped.json | done | [viz-events-summary.md](./viz-events-summary.md) |
 | TASK-034z9oJ2ngcyfGSgbNPcrX | viz/export 結合 + ゴールデンテスト | done | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |
