@@ -240,12 +240,23 @@ impl Stage for VisualizationStage {
                     )?);
                 }
             }
-            // Video-series products cannot exist: the job stores no
-            // video track in the dataset.
+            // Video frame series materialized under `inputs` become
+            // per-input video views (features + preview thumbnails).
+            for v in views::video_views(&reader).map_err(err)? {
+                produced.push(persist(
+                    &mut writer,
+                    &v.path,
+                    v.parents.clone(),
+                    Some(&v.body),
+                    None,
+                )?);
+            }
+            // Video-series *tensor* products cannot exist: the dataset
+            // carries no per-frame pixel tensor.
             skip(
                 "video_series",
                 "inputs",
-                "no video stream is materialized in the dataset",
+                "no video frame tensor is materialized in the dataset",
             );
         } else {
             skip("waveform_lod", "inputs", "role not produced");
