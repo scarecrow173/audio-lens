@@ -234,10 +234,10 @@ impl LocateMethod for BandNcc {
                 continue;
             }
             let t = dsp::bandpass(template, sample_rate, lo, hi.min(nyquist));
-            let s = dsp::bandpass(signal, sample_rate, lo, hi.min(nyquist));
             if energy(&t) < MIN_ENERGY {
                 continue; // band absent in the template — skip, not reject
             }
+            let s = dsp::bandpass(signal, sample_rate, lo, hi.min(nyquist));
             let corr = dsp::ncc(&t, &s, s.len().saturating_sub(t.len()));
             for (a, c) in acc.iter_mut().zip(&corr) {
                 *a += c;
@@ -317,10 +317,12 @@ impl LocateMethod for SpectralEnvelope {
         }
         let t_env = dsp::spectral_envelope(&normalize_gain(template), self.fft_size, self.bins);
         // Slide a template-length window over the signal; envelope NCC
-        // per position. Hop keeps the scan bounded.
+        // per position. Hop keeps the scan bounded even for very short
+        // templates, where win/16 alone would explode the lag count.
+        const MAX_WINDOWS: usize = 2048;
         let win = template.len();
-        let hop = (win / 16).max(1);
         let max_lag = signal.len() - win;
+        let hop = (win / 16).max(1).max(max_lag / MAX_WINDOWS);
         let mut corr = vec![0.0; max_lag + 1];
         for lag in (0..=max_lag).step_by(hop) {
             let s_env = dsp::spectral_envelope(
