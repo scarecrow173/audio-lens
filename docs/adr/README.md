@@ -12,3 +12,4 @@ Directory: `docs/adr`
 | ADR-034yYy5vgxc67xWxy1A4kH | 観測出力を評決より優先する | proposed | [measurement-over-verdict.md](measurement-over-verdict.md) |
 | ADR-034AapIjxqSGmopfqOgcJ5 | MP4 は demux とタイミング観測のみ対応しコーデック decode は行わない | accepted | [mp4-demux-decode.md](mp4-demux-decode.md) |
 | ADR-034yYy6pBGTFj1fMRdqJdg | locate 受理に複数手法の合議を要求する | proposed | [multi-method-locate-consensus.md](multi-method-locate-consensus.md) |
+| ADR-035pQkRfVwXyZaBcDeFgHjK | 独自 SIMD 算術クレートの基盤に pulp を採用する | accepted | [simd-arithmetic-pulp.md](simd-arithmetic-pulp.md) |
