@@ -200,6 +200,67 @@ impl DatasetStage {
         Ok((lineage, produced))
     }
 
+    /// Copy each input's ingest-side video artifacts
+    /// (`video_features` + `video_thumbs`) into the `inputs` role so
+    /// the dataset alone carries what the decoded `vids` stream
+    /// observed — the export package and report never touch job
+    /// scratch artifacts.
+    fn materialize_video(
+        &self,
+        ctx: &StageContext<'_>,
+        writer: &mut DatasetWriter,
+    ) -> Result<Vec<al_core::ArtifactId>, StageError> {
+        let err = |e: std::io::Error| StageError::new(StageKind::Dataset, e.to_string());
+        let job_dir = ctx.registry.job_dir();
+        let mut lineage = Vec::new();
+        for artifact in ctx
+            .manifest
+            .artifacts
+            .iter()
+            .filter(|a| matches!(a.role.as_str(), "video_features" | "video_thumbs"))
+        {
+            let text = fs::read_to_string(checked_job_path(job_dir, &artifact.path).map_err(err)?)
+                .map_err(err)?;
+            let body: serde_json::Value = serde_json::from_str(&text).map_err(|e| {
+                StageError::new(
+                    StageKind::Dataset,
+                    format!(
+                        "video artifact {} is not valid JSON: {e}",
+                        artifact.path.display()
+                    ),
+                )
+            })?;
+            let input_id = body["input_id"].as_str().unwrap_or("unknown").to_string();
+            // `inputs/<id>.video_features.json` — keep the artifact
+            // basename so the dataset path states its origin.
+            let name = artifact
+                .path
+                .file_name()
+                .map(|f| f.to_string_lossy().to_string())
+                .unwrap_or_else(|| format!("{input_id}.video.json"));
+            let name = format!("{input_id}.{}", name.trim_end_matches(".json"));
+            let mut parents: Vec<String> = vec![artifact.artifact_id.as_str().to_string()];
+            parents.extend(artifact.inputs.iter().map(|a| a.as_str().to_string()));
+            writer
+                .write_json(
+                    "inputs",
+                    &name,
+                    &body,
+                    Provenance {
+                        input_id: input_id.clone(),
+                        algorithm_id: "dataset-materialize".into(),
+                        algorithm_version: SCHEMA_VERSION.to_string(),
+                        params: serde_json::json!({"source": artifact.role}),
+                        alignment_id: None,
+                        parents,
+                    },
+                )
+                .map_err(err)?;
+            lineage.push(artifact.artifact_id.clone());
+        }
+        Ok(lineage)
+    }
+
     /// Copy every `locate_result` artifact into the `locate` role as
     /// JSON plus a `locate/summary` table of all alignments.
     fn materialize_locate(
@@ -394,6 +455,11 @@ impl Stage for DatasetStage {
             all_lineage.extend(lineage);
             produced.extend(records);
         }
+
+        // Materialize video observations (features + preview
+        // thumbnails) so the dataset carries everything the decoded
+        // `vids` stream produced.
+        all_lineage.extend(self.materialize_video(ctx, &mut writer)?);
 
         // Materialize locate results so the dataset alone explains
         // every alignment the pipeline used.
