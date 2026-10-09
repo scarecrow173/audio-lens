@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034AaBsJ00thIonv8bp54N"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "MP4 demux とタイミング観測の実装"
 created: "2026-10-04"
 updated: "2026-10-04"
