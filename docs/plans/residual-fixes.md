@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034dLdqZ28TeDZBM9XH3rg"
 type: "plan"
-status: "draft"
+status: "approved"
 title: "残存 Issue #28〜#33 の修正・仕様判断計画"
 created: "2026-10-10"
 updated: "2026-10-10"

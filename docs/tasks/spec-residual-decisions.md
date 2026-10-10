@@ -1,7 +1,7 @@
 ---
 id: "TASK-034dLdqYw5JFCrkMD5dSPk"
 type: "task"
-status: "blocked"
+status: "todo"
 title: "spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate"
 created: "2026-10-10"
 updated: "2026-10-10"
@@ -52,7 +52,7 @@ relations:
 
 ## Dependencies
 
-spec/ADR と design/plan の承認を待つため status blocked。承認前は実行しない。
+spec/ADR はチェーンの受理可能な status を満たし、design/plan と test-spec は承認済みのため status todo。
 
 三項目それぞれの選択肢と承認結果を先に記録する。依存追加が必要なら許可を得る。仕様改訂を選ぶ場合も利用者価値・理由・対応 AC を review し、既存仕様を黙って緩和しない。
 

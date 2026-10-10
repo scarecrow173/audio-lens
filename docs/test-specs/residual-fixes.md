@@ -1,7 +1,7 @@
 ---
 id: "TSPEC-034dLdqZ82hOq5hqHwU8MC"
 type: "test-spec"
-status: "draft"
+status: "approved"
 title: "残存課題の契約回帰検証"
 created: "2026-10-10"
 updated: "2026-10-10"

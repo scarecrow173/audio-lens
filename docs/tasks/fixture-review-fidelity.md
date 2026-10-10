@@ -1,7 +1,7 @@
 ---
 id: "TASK-034dLdqYq2QFIc8WBq2KLP"
 type: "task"
-status: "blocked"
+status: "todo"
 title: "al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW)"
 created: "2026-10-10"
 updated: "2026-10-10"
@@ -52,7 +52,7 @@ relations:
 
 ## Dependencies
 
-spec/ADR と design/plan の承認を待つため status blocked。承認前は実行しない。
+spec/ADR はチェーンの受理可能な status を満たし、design/plan と test-spec は承認済みのため status todo。
 
 ## Affected Files
 

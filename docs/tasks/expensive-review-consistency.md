@@ -1,7 +1,7 @@
 ---
 id: "TASK-034dLdqYk3HXx4PdtOgnVz"
 type: "task"
-status: "blocked"
+status: "todo"
 title: "al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW)"
 created: "2026-10-10"
 updated: "2026-10-10"
@@ -52,7 +52,7 @@ relations:
 
 ## Dependencies
 
-spec/ADR と design/plan の承認を待つため status blocked。承認前は実行しない。
+spec/ADR はチェーンの受理可能な status を満たし、design/plan と test-spec は承認済みのため status todo。
 
 ## Affected Files
 
