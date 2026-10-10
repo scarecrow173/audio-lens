@@ -25,7 +25,7 @@ pub use timing::{
     TimingObservation, observe_source, observe_timing,
 };
 pub use video::{
-    VideoEvent, VideoEventKind, VideoExtraction, VideoFeatureArtifact, VideoFeatureConfig,
-    VideoFeatureReport, VideoFeatures, VideoThumbs,
+    RoiLuminance, VideoEvent, VideoEventKind, VideoExtraction, VideoFeatureArtifact,
+    VideoFeatureConfig, VideoFeatureReport, VideoFeatures, VideoRoi, VideoRoiRect, VideoThumbs,
 };
 pub use wav::{DecodedAudio, decode_wav};

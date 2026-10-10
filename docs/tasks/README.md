@@ -80,7 +80,7 @@ Directory: `docs/tasks`
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
 | TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | done | [video-frame-decode.md](./video-frame-decode.md) |
-| TASK-036cAsDfGhJkLzQwErTy | video: ROI 輝度追跡(#39) | todo | [video-roi-luma.md](./video-roi-luma.md) |
+| TASK-036cAsDfGhJkLzQwErTy | video: ROI 輝度追跡(#39) | done | [video-roi-luma.md](./video-roi-luma.md) |
 | TASK-034z9oB8rhYcBdeSRvtsKy | al-viz: dataset 範囲/チャンク読み出し基盤 | done | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | TASK-034z9oHPHHVPCNKwoMJp5c | イベントマーカ + 決定的サマリ + skipped.json | done | [viz-events-summary.md](./viz-events-summary.md) |
 | TASK-034z9oJ2ngcyfGSgbNPcrX | viz/export 結合 + ゴールデンテスト | done | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |

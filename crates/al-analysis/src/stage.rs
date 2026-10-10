@@ -68,6 +68,26 @@ impl Stage for CheapAnalysisStage {
                 lineage.push(artifact_id.clone());
             }
             let video_features = video.map(|(f, _)| f);
+            let video_out = crate::video::roi_records(
+                &input.input_id.to_string(),
+                video_features.as_ref(),
+                lineage.clone(),
+            );
+            for tensor in &video_out.tensors {
+                let mut provenance = prov(input, ctx);
+                provenance.algorithm_id = "video.roi_luminance.v1".into();
+                provenance.parents = lineage.clone();
+                provenance.params = video_features
+                    .as_ref()
+                    .and_then(|v| match v {
+                        al_media::video::VideoFeatureArtifact::Decoded(v) => {
+                            serde_json::to_value(&v.params).ok()
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_else(|| serde_json::json!({}));
+                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
+            }
             let Some(dec) = decoded else {
                 // Never ingested: record the failure as an invalid
                 // observation, not a stage error.
@@ -95,6 +115,7 @@ impl Stage for CheapAnalysisStage {
                     lineage: Vec::new(),
                 };
                 let mut all = vec![rec];
+                all.extend(video_out.records);
                 all.extend(avsync::sync_records(
                     &input.input_id.to_string(),
                     None,
@@ -115,6 +136,7 @@ impl Stage for CheapAnalysisStage {
             };
 
             let mut out = cheap::analyze_input(&dec, &cfg);
+            out.records.extend(video_out.records);
             // A/V sync: the persisted onset_times tensor is the audio
             // event series; video events come from ingest. Both are
             // rebased to their own stream clock inside `sync_records`.
