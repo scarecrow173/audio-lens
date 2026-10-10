@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use al_core::{InputRole, JobId, StageKind};
+use al_core::{InputId, InputRole, JobId, StageKind};
 use al_dataset::DatasetStage;
 use al_job::job::{JobDefinition, JobInput};
 use al_job::manifest::{ArtifactRecord, Manifest};
@@ -15,7 +15,7 @@ al — AudioLens job runner (foundation CLI)
 
 USAGE:
   al run --base-dir <dir> --input <role>:<path>[,<role>:<path>...] \\
-        [--stages <stage>[,<stage>...]] [--config <file>]
+        [--stages <stage>[,<stage>...]] [--config <file>] [--input-ids <IN-...>[,<IN-...>...]]
   al resume --base-dir <dir> --job-id <JOB-...>
   al inspect --base-dir <dir> --job-id <JOB-...>
 
@@ -25,6 +25,10 @@ STAGES:
 
 CONFIG:
   A JSON file passed via --config. Keys:
+    analysis.avsync.markers
+                 [{input_id, clock: \"video_stream\", time_s, frame}].
+                 time_s includes video dwStart; frame is a decoded frame index.
+                 Use --input-ids to assign matching IDs in --input order.
     dictionary   Path to a capture-artifact dictionary JSON. The file's
                  content is snapshotted into the job at run time, so resume
                  does not depend on the file and the job stays reproducible.
@@ -180,7 +184,7 @@ fn cmd_run(args: &[String]) -> ExitCode {
     let Some(raw_inputs) = parse_flag(args, "--input") else {
         return fail("--input is required");
     };
-    let inputs = match raw_inputs
+    let mut inputs = match raw_inputs
         .split(',')
         .map(parse_input)
         .collect::<Result<Vec<_>, _>>()
@@ -188,6 +192,29 @@ fn cmd_run(args: &[String]) -> ExitCode {
         Ok(inputs) => inputs,
         Err(e) => return fail(e),
     };
+    if flag_present(args, "--input-ids") && parse_flag(args, "--input-ids").is_none() {
+        return fail("--input-ids requires a value");
+    }
+    if let Some(raw_ids) = parse_flag(args, "--input-ids") {
+        let ids = match raw_ids
+            .split(',')
+            .map(InputId::parse)
+            .collect::<Result<Vec<_>, _>>()
+        {
+            Ok(ids) => ids,
+            Err(e) => return fail(format!("invalid --input-ids: {e}")),
+        };
+        if ids.len() != inputs.len() {
+            return fail("--input-ids must provide one ID per --input entry");
+        }
+        let mut seen = std::collections::HashSet::new();
+        for (input, id) in inputs.iter_mut().zip(ids) {
+            if !seen.insert(id.clone()) {
+                return fail("--input-ids must be unique");
+            }
+            input.input_id = id;
+        }
+    }
     let stage_names: Vec<&str> = parse_flag(args, "--stages")
         .map(|s| s.split(',').collect())
         .unwrap_or_else(|| {

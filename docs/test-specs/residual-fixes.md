@@ -61,7 +61,7 @@ relations:
 | #28 | 未整列 auds を多数連結、非デコード MP4 の stsc/stco を破損 | 余りの累積時計を維持、破損構造の結果が codec に依存しない |
 | #29 | 有効 trigger、ch0 長=4096、ch1 長=512、rate=1024 Hz、窓=[1, 2)秒、stft_window=64 / hop=32 とし、ch0 の STFT が非空になる入力を与える。別ケースで ch0 が窓始点より短く ch1 のみ支持、条件数 > 1e3、splice count=0 | 前者は s0=1024、s1=2048 で早期 return を通過し、現行の ch1[1024..512] が panic する経路を検証する。修正後は panic なし、短い ch1 の未支持を validity に反映する。別ケースでは ch1 identity を保持、係数 demote、無支持を Valid にしない |
 | #30 | 奇数 LIST と stream 99/100、周期 fixture の全拒否、テスト失敗 | padding/境界の契約を守り、全拒否では失敗、cleanup が実行される |
-| #31 | 有限 marker と既知音声 onset を指定、別 run では未指定 | 指定 marker の差分が出る、未指定 run の既存結果と一致 |
+| #31 | video_stream marker、dwStart の異なる映像/音声、既知 onset、複数入力、未指定/空配列、未知 input_id/時計、非有限時刻、frame 範囲外・時刻不一致・映像欠落 | マーカーペアと入力来歴を保存、入力混入なし、未指定/空配列の全レコード一致、不正入力は stage error |
 | #32 | 既知の二音源を減算して元キャプチャと異なる残差で child を探索し、dataset を再 open して child alignment から PCM を再取得。別ケースで残差参照を欠落・不整合にする | 保存 residual と再取得した capture PCM が探索に使った減算信号と一致、元キャプチャとは異なる。search JSON と child alignment から使用 PCM と親の lineage を辿れ、参照欠落・不整合はエラー |
 | #33 | 三項目の採択記録と既知 fixture | 採択した契約を個別の assertion で固定、未決定を適合済みとしない |
 
@@ -112,3 +112,17 @@ OpenDML decoder 拡張は実施せず、rec LIST の明示的 unsupported を検
   レートの JSON round trip と欠落時の拒否を固定する。
 
 [選択肢・承認結果・実行結果](../tasks/spec-residual-decisions.md) を参照。
+
+
+### #31 の実装検証 (2026-10-11)
+
+- `al-analysis/tests/avsync.rs` の supplied_marker テストは dwStart の四組で
+  stream-clock の rebase と config path/input_id/clock/frame を確認する。
+- marker_boundary テストは二入力の隔離、元の time_s と三 artifact の lineage、
+  未知入力・frame 範囲外・時刻不一致・映像欠落の stage error を確認する。
+- marker_config テストは未知時計・欠落時計・非有限表現(null/NaN文字列)・
+  不正 input_id/frame・未知フィールドを拒否する。
+- avsync 単体テストは未指定/空配列の全レコード一致、検出イベントとの同時照合、
+  無効な音声原点・ゼロ映像 timebase で有効ペアを作らないことを確認する。
+- `al-cli/tests/cli.rs` は明示入力 ID の保存・個数/形式/重複検証と、CLI config
+  から実際の user_marker ペア出力までの経路を確認する。
