@@ -253,45 +253,23 @@ fn rejected_alignment_persists_invalid_rows_and_completes() {
     let registry = ArtifactRegistry::new(&fx.dir);
     let config = serde_json::json!({});
 
-    // Hand-written rejected locate result at the canonical path.
-    let rel = PathBuf::from("locate")
-        .join(&fx.source_input_id)
-        .join(&fx.capture_input_id)
-        .join("result.json");
-    fs::create_dir_all(fx.dir.join(rel.parent().unwrap())).unwrap();
-    fs::write(
-        fx.dir.join(&rel),
-        serde_json::to_string(&serde_json::json!({
-            "result": {
-                "alignment_id": "aln-rejected",
-                "source_input_id": fx.source_input_id,
-                "capture_input_id": fx.capture_input_id,
-                "source_range": {"start": 0, "end": 0},
-                "capture_range": {"start": 0, "end": 0},
-                "evidence": [],
-                "agreeing_methods": 0,
-                "position_spread": 0,
-                "confidence": "low",
-                "validity": "ambiguous_alignment",
-                "reject_reason": "no consensus",
-                "accepted": false,
-                "algorithm_id": "locate.v1",
-                "algorithm_version": "1",
-                "params": {},
-            }
-        }))
-        .unwrap(),
-    )
-    .unwrap();
-    fx.manifest.register_artifact(ArtifactRecord {
-        artifact_id: al_core::ArtifactId::new(),
-        role: "locate_result".into(),
-        path: rel,
-        produced_by: Some(StageKind::Locate),
-        inputs: vec![],
-        params: serde_json::json!({}),
-    });
+    for rec in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(rec);
+    }
 
+    let alignment_id = fx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "locate_result")
+        .unwrap()
+        .params["alignment_id"]
+        .as_str()
+        .unwrap()
+        .to_string();
     al_analysis::stage::ReferenceAnalysisStage::new()
         .run(&ctx(&fx, &registry, &config))
         .expect("stage must complete on rejected alignment");
@@ -303,11 +281,174 @@ fn rejected_alignment_persists_invalid_rows_and_completes() {
         assert_ne!(r["validity"], "valid", "record {}", r["feature_id"]);
         assert_eq!(
             r["alignment_id"].as_str(),
-            Some("aln-rejected"),
+            Some(alignment_id.as_str()),
             "record {} must reference the issued alignment",
             r["feature_id"]
         );
     }
 
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn normalized_alignment_survives_process_boundary() {
+    use al_locate::decode::read_alignment_pcm;
+    use al_locate::result::LocateResult;
+    const CHILD_ENV: &str = "AL_TEST_NORMALIZED_JOB";
+    if let Some(path) = std::env::var_os(CHILD_ENV) {
+        let dir = PathBuf::from(path);
+        let manifest: Manifest =
+            serde_json::from_slice(&fs::read(dir.join("snapshot.json")).unwrap()).unwrap();
+        let source_input_id = manifest.inputs[0].input_id.to_string();
+        let capture_input_id = manifest.inputs[1].input_id.to_string();
+        let fx = Fixture {
+            dir,
+            manifest,
+            source_input_id,
+            capture_input_id,
+        };
+        let registry = ArtifactRegistry::new(&fx.dir);
+        let config =
+            serde_json::json!({"analysis":{"expensive":{"always_run":true,"stft_window":512}}});
+        let artifact = fx
+            .manifest
+            .artifacts
+            .iter()
+            .find(|a| a.role == "locate_result")
+            .unwrap();
+        let body: serde_json::Value =
+            serde_json::from_slice(&fs::read(fx.dir.join(&artifact.path)).unwrap()).unwrap();
+        let result: LocateResult = serde_json::from_value(body["result"].clone()).unwrap();
+        let pcm = read_alignment_pcm(&result, &ctx(&fx, &registry, &config))
+            .unwrap()
+            .unwrap();
+        assert_eq!(pcm.0.params.original_sample_rate, 44100);
+        assert_eq!(pcm.0.params.sample_rate, 48000);
+        assert_eq!(result.source_range.end, 4410);
+        assert_eq!(result.normalized_source_range.end, 4800);
+        assert!(pcm.0.decoded.channel_samples[0].iter().any(|s| *s != 0.0));
+        let expected: Vec<f64> = fs::read(fx.dir.join("expected.f64le"))
+            .unwrap()
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b))
+            .collect();
+        assert_eq!(pcm.0.decoded.channel_samples[0], expected);
+        let records = al_analysis::stage::ReferenceAnalysisStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .unwrap();
+        for record in &records {
+            assert!(record.inputs.contains(&artifact.artifact_id));
+            assert!(record.inputs.contains(&pcm.0.record.artifact_id));
+            assert!(record.inputs.contains(&pcm.1.record.artifact_id));
+        }
+        let gain = scalar(&feature_records(&fx), "ref.gain_ls");
+        assert_eq!(gain["validity"], "valid", "{gain}");
+        assert!((scalar_value(&gain) - 0.5).abs() < 0.02);
+        let records = al_analysis::stage::ExpensiveAnalysisStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .unwrap();
+        let cap_record = records
+            .iter()
+            .find(|r| {
+                r.role == "expensive_features"
+                    && r.path.to_string_lossy().contains(&fx.capture_input_id)
+            })
+            .unwrap();
+        assert!(cap_record.inputs.contains(&artifact.artifact_id));
+        assert!(cap_record.inputs.contains(&pcm.0.record.artifact_id));
+        assert!(cap_record.inputs.contains(&pcm.1.record.artifact_id));
+        let body: serde_json::Value =
+            serde_json::from_slice(&fs::read(fx.dir.join(&cap_record.path)).unwrap()).unwrap();
+        let record = body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["feature_id"] == "exp.mix_fit_quality")
+            .unwrap();
+        assert_eq!(record["validity"], "valid", "{record}");
+        let mut inconsistent = result.clone();
+        inconsistent.source_range.end -= 1;
+        assert!(read_alignment_pcm(&inconsistent, &ctx(&fx, &registry, &config)).is_err());
+        inconsistent = result.clone();
+        inconsistent.normalized_source_range.end += 1;
+        assert!(read_alignment_pcm(&inconsistent, &ctx(&fx, &registry, &config)).is_err());
+        fs::remove_file(fx.dir.join(&pcm.0.record.path)).unwrap();
+        assert!(
+            al_analysis::stage::ReferenceAnalysisStage::new()
+                .run(&ctx(&fx, &registry, &config))
+                .is_err()
+        );
+        assert!(
+            al_analysis::stage::ExpensiveAnalysisStage::new()
+                .run(&ctx(&fx, &registry, &config))
+                .is_err()
+        );
+        return;
+    }
+    let source = noise(4410, 314);
+    let mut fx = fixture(&source, &[0.0; 9000]);
+    fx.manifest
+        .artifacts
+        .iter_mut()
+        .find(|a| a.role == "decoded_pcm")
+        .unwrap()
+        .params["sample_rate"] = serde_json::json!(44100);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let input =
+        al_locate::decode::decode_input(&fx.manifest.inputs[0], &ctx(&fx, &registry, &config))
+            .unwrap()
+            .unwrap();
+    let mut prepared = Vec::new();
+    let source_pcm = al_locate::normalize::prepare_input(
+        &input,
+        48000,
+        &mut prepared,
+        &ctx(&fx, &registry, &config),
+    )
+    .unwrap();
+    let mut capture = vec![0.0; 9000];
+    for (i, sample) in source_pcm.decoded.channel_samples[0].iter().enumerate() {
+        capture[1000 + i] = 0.5 * sample;
+    }
+    write_pcm(&fx.dir, "inputs/cap.f64le", &capture);
+    write_pcm(
+        &fx.dir,
+        "expected.f64le",
+        &source_pcm.decoded.channel_samples[0],
+    );
+    for r in prepared {
+        fx.manifest.register_artifact(r);
+    }
+    for r in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    // 元デコード値を変えても、後段比較は永続化した PCM を使う。
+    write_pcm(&fx.dir, "inputs/src.f64le", &[0.0; 4410]);
+    fs::write(
+        fx.dir.join("snapshot.json"),
+        serde_json::to_vec(&fx.manifest).unwrap(),
+    )
+    .unwrap();
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "normalized_alignment_survives_process_boundary",
+            "--nocapture",
+        ])
+        .env(CHILD_ENV, &fx.dir)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "child stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
     fs::remove_dir_all(&fx.dir).ok();
 }

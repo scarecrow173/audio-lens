@@ -6,6 +6,7 @@ license.workspace = true
 
 [dependencies]
 al-core.workspace = true
+al-math.workspace = true
 al-job.workspace = true
 al-media.workspace = true
 serde.workspace = true

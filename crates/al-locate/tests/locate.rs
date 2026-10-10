@@ -252,24 +252,43 @@ fn empty_capture_is_marked_not_panics() {
 }
 
 #[test]
-fn sample_rate_mismatch_is_marked_not_resampled() {
-    let source = noise(1_000, 37);
-    let mut capture = noise(6_000, 41);
-    for (i, &v) in source.iter().enumerate() {
-        capture[2_500 + i] += v;
+fn different_rates_locate_without_false_drift() {
+    // 同じ連続時間 chirp を別々のレートで標本化し、リサンプラ自身を正解生成に使わない。
+    let signal = |t: f64| (std::f64::consts::TAU * (500.0 * t + 40000.0 * t * t)).sin() * 0.7;
+    let source: Vec<f64> = (0..4410).map(|i| signal(i as f64 / 44100.0)).collect();
+    let mut capture = vec![0.0; 9600];
+    for i in 0..4800 {
+        capture[2400 + i] = signal(i as f64 / 48000.0);
     }
-    let fx = fixture(&source, &capture, (44_100, 48_000));
-    let (_records, body) = run_and_read(&fx);
+    let fx = fixture(&source, &capture, (44100, 48000));
+    let (records, body) = run_and_read(&fx);
     let result = &body["result"];
-    assert_eq!(result["accepted"], false);
-    assert_eq!(result["validity"], "out_of_supported_frequency_range");
+    assert_eq!(result["accepted"], true, "{result}");
     assert!(
-        result["reject_reason"]
-            .as_str()
+        result["capture_range"]["start"]
+            .as_u64()
             .unwrap()
-            .contains("sample rate mismatch")
+            .abs_diff(2400)
+            <= 2
     );
-
+    assert_eq!(result["source_range"]["end"], 4410);
+    assert_eq!(result["normalized_source_range"]["end"], 4800);
+    assert_eq!(body["derived"]["resampled"], true);
+    assert_eq!(
+        result["params"]["normalization"]["original_sample_rate"],
+        44100
+    );
+    assert_eq!(result["params"]["normalization"]["sample_rate"], 48000);
+    assert_eq!(
+        result["params"]["normalization"]["transform"]["algorithm_id"],
+        "polyphase-blackman-sinc"
+    );
+    let tm = records.iter().find(|r| r.role == "time_map").unwrap();
+    let tm: serde_json::Value =
+        serde_json::from_slice(&fs::read(fx.dir.join(&tm.path)).unwrap()).unwrap();
+    for segment in tm["time_map"]["segments"].as_array().unwrap() {
+        assert_eq!(segment["kind"], "continuous", "{segment}");
+    }
     fs::remove_dir_all(&fx.dir).ok();
 }
 
@@ -294,4 +313,173 @@ fn capture_only_job_completes_with_empty_output() {
     assert!(records.is_empty());
 
     fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn normalized_pcm_reuse_layout_coordinates_and_fail_closed_loading() {
+    use al_locate::decode::{decode_input, read_normalized_pcm};
+    use al_locate::normalize::prepare_input;
+    use al_locate::result::SampleRange;
+    let mut fx = fixture(&[0.25, -0.5, 1.2], &[0.0; 6], (44100, 48000));
+    let original = fx
+        .manifest
+        .artifacts
+        .iter_mut()
+        .find(|a| a.role == "decoded_pcm")
+        .unwrap();
+    original.params["channels"] = serde_json::json!(2);
+    write_pcm(
+        &fx.dir,
+        "inputs/src.f64le",
+        &[0.25, -0.25, -0.5, 0.5, 1.2, -1.2],
+    );
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let ctx = StageContext {
+        manifest: &fx.manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let source = decode_input(&fx.manifest.inputs[0], &ctx).unwrap().unwrap();
+    let mut records = Vec::new();
+    let identity = prepare_input(&source, 44100, &mut records, &ctx).unwrap();
+    let normalized = prepare_input(&source, 48000, &mut records, &ctx).unwrap();
+    let repeated = prepare_input(&source, 48000, &mut records, &ctx).unwrap();
+    assert_eq!(records.len(), 2);
+    assert_eq!(normalized.record.artifact_id, repeated.record.artifact_id);
+    assert_ne!(identity.record.artifact_id, normalized.record.artifact_id);
+    assert_eq!(identity.decoded.channel_samples, source.channel_samples);
+    assert_eq!(normalized.params.frames, 4);
+    assert_eq!(
+        normalized
+            .params
+            .original_range(SampleRange { start: 1, end: 2 })
+            .unwrap(),
+        SampleRange { start: 0, end: 2 }
+    );
+    assert_eq!(
+        normalized
+            .params
+            .original_range(SampleRange { start: 3, end: 4 })
+            .unwrap(),
+        SampleRange { start: 2, end: 3 }
+    );
+    assert_eq!(normalized.record.inputs, source.artifact_ids);
+    for record in records {
+        fx.manifest.register_artifact(record);
+    }
+    let ctx = StageContext {
+        manifest: &fx.manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let reference = normalized.reference();
+    let range = SampleRange { start: 0, end: 4 };
+    let loaded = read_normalized_pcm(&reference, range, &ctx).unwrap();
+    assert_eq!(
+        loaded.decoded.channel_samples,
+        normalized.decoded.channel_samples
+    );
+    assert!(
+        loaded.decoded.channel_samples[0]
+            .iter()
+            .zip(&loaded.decoded.channel_samples[1])
+            .all(|(a, b)| a == &-b)
+    );
+    assert!(read_normalized_pcm(&reference, SampleRange { start: 5, end: 4 }, &ctx).is_err());
+    assert!(read_normalized_pcm(&reference, SampleRange { start: 0, end: 5 }, &ctx).is_err());
+    let mut wrong = reference.clone();
+    wrong.sample_rate = 44100;
+    assert!(read_normalized_pcm(&wrong, range, &ctx).is_err());
+    wrong = reference.clone();
+    wrong.channels = 1;
+    assert!(read_normalized_pcm(&wrong, range, &ctx).is_err());
+    wrong = reference.clone();
+    wrong.artifact_id = al_core::ArtifactId::new();
+    assert!(read_normalized_pcm(&wrong, range, &ctx).is_err());
+    let index = fx
+        .manifest
+        .artifacts
+        .iter()
+        .position(|a| a.artifact_id == reference.artifact_id)
+        .unwrap();
+    for variant in 0..5 {
+        let mut manifest = fx.manifest.clone();
+        let record = &mut manifest.artifacts[index];
+        match variant {
+            0 => record.role = "decoded_pcm".into(),
+            1 => record.params["frames"] = serde_json::json!(3),
+            2 => record.params["transform"]["cutoff"] = serde_json::json!(0.5),
+            3 => record.inputs.clear(),
+            _ => record.path = PathBuf::from("../escape.f64le"),
+        }
+        let ctx = StageContext {
+            manifest: &manifest,
+            registry: &registry,
+            config: &config,
+        };
+        assert!(
+            read_normalized_pcm(&reference, range, &ctx).is_err(),
+            "variant {variant}"
+        );
+    }
+    fs::write(fx.dir.join(&normalized.record.path), [0; 8]).unwrap();
+    assert!(read_normalized_pcm(&reference, range, &ctx).is_err());
+    fs::remove_file(fx.dir.join(&normalized.record.path)).unwrap();
+    assert!(read_normalized_pcm(&reference, range, &ctx).is_err());
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn normalized_pcm_applies_integer_scale_once() {
+    use al_locate::decode::{decode_input, read_normalized_pcm};
+    use al_locate::normalize::prepare_input;
+    use al_locate::result::SampleRange;
+    let mut fx = fixture(&[16384.0, -32768.0], &[0.0; 2], (48000, 48000));
+    let meta_id = al_core::ArtifactId::new();
+    fs::write(
+        fx.dir.join("inputs/metadata.json"),
+        r#"{"audio":{"sample_format":"pcm_s16"}}"#,
+    )
+    .unwrap();
+    fx.manifest.register_artifact(ArtifactRecord {
+        artifact_id: meta_id.clone(),
+        role: "ingest_metadata".into(),
+        path: PathBuf::from("inputs/metadata.json"),
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![
+            fx.manifest
+                .input_artifact(&fx.manifest.inputs[0].input_id)
+                .unwrap(),
+        ],
+        params: serde_json::json!({}),
+    });
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let ctx = StageContext {
+        manifest: &fx.manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let original = decode_input(&fx.manifest.inputs[0], &ctx).unwrap().unwrap();
+    assert_eq!(original.channel_samples[0], [0.5, -1.0]);
+    let mut records = Vec::new();
+    let prepared = prepare_input(&original, 48000, &mut records, &ctx).unwrap();
+    assert!(prepared.record.inputs.contains(&meta_id));
+    for r in records {
+        fx.manifest.register_artifact(r);
+    }
+    let ctx = StageContext {
+        manifest: &fx.manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let loaded = read_normalized_pcm(
+        &prepared.reference(),
+        SampleRange { start: 0, end: 2 },
+        &ctx,
+    )
+    .unwrap();
+    assert_eq!(loaded.decoded.channel_samples[0], [0.5, -1.0]);
+    fs::remove_dir_all(&fx.dir).ok();
 }

@@ -6,6 +6,8 @@
 
 use std::sync::LazyLock;
 
+pub mod resample;
+
 pub use pulp::{Simd, WithSimd, c64};
 
 /// カーネルが利用する、実行時に選択された f64 ベクトル型。
