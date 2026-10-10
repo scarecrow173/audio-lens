@@ -967,3 +967,140 @@ fn missing_or_invalid_config_is_an_explicit_error() {
 
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn explicit_input_ids_are_pinned_and_invalid_assignments_fail() {
+    let dir = temp_dir("input-ids");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let ids = [al_core::InputId::new(), al_core::InputId::new()];
+    let inputs = format!("capture_bug:{0},capture_reference:{0}", wav.display());
+    let jobs = dir.join("jobs");
+    for assignment in [
+        format!("{},{}", ids[0], ids[1]),
+        ids[0].to_string(),
+        format!("{},{}", ids[0], ids[0]),
+        "invalid,invalid".into(),
+    ] {
+        let output = Command::new(env!("CARGO_BIN_EXE_al"))
+            .args([
+                "run",
+                "--base-dir",
+                jobs.to_str().unwrap(),
+                "--input",
+                &inputs,
+                "--input-ids",
+                &assignment,
+                "--stages",
+                "ingest",
+            ])
+            .output()
+            .unwrap();
+        if assignment == format!("{},{}", ids[0], ids[1]) {
+            assert!(output.status.success(), "{output:?}");
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let job_id = stdout
+                .lines()
+                .find_map(|l| l.strip_prefix("job_id="))
+                .unwrap();
+            let manifest: serde_json::Value = serde_json::from_slice(
+                &std::fs::read(jobs.join(job_id).join("manifest.json")).unwrap(),
+            )
+            .unwrap();
+            assert_eq!(manifest["inputs"][0]["input_id"], ids[0].to_string());
+            assert_eq!(manifest["inputs"][1]["input_id"], ids[1].to_string());
+        } else {
+            assert!(!output.status.success(), "{assignment} must fail");
+        }
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn cli_config_marker_produces_avsync_pair() {
+    use al_testkit::media::{AviSpec, AviStreamSpec, MoviPacket, write_avi};
+    let dir = temp_dir("marker");
+    let avi = dir.join("cap.avi");
+    let rate = 48_000u32;
+    let audio: Vec<u8> = (0..rate * 4)
+        .flat_map(|i| {
+            let sample = if i < 62_400 {
+                0
+            } else {
+                (0.5 * (2.0 * std::f64::consts::PI * 440.0 * i as f64 / rate as f64).sin()
+                    * 32767.0) as i16
+            };
+            sample.to_le_bytes()
+        })
+        .collect();
+    std::fs::write(
+        &avi,
+        write_avi(&AviSpec {
+            width: 64,
+            height: 48,
+            usec_per_frame: 100_000,
+            total_frames: None,
+            streams: vec![
+                AviStreamSpec::video(64, 48, 10).with_start(5),
+                AviStreamSpec::pcm_audio(1, rate).with_start(24_000),
+            ],
+            packets: (0..40)
+                .map(|_| MoviPacket::video_frame(0, vec![0; 64 * 48 * 3]))
+                .chain([MoviPacket::audio(1, audio)])
+                .collect(),
+        }),
+    )
+    .unwrap();
+    let id = al_core::InputId::new();
+    let config = dir.join("config.json");
+    std::fs::write(
+        &config,
+        serde_json::to_vec(&serde_json::json!({"analysis":{"avsync":{"markers":[{
+            "input_id":id,"clock":"video_stream","time_s":1.8,"frame":13
+        }]}}}))
+        .unwrap(),
+    )
+    .unwrap();
+    let jobs = dir.join("jobs");
+    let output = Command::new(env!("CARGO_BIN_EXE_al"))
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", avi.display()),
+            "--input-ids",
+            id.as_str(),
+            "--config",
+            config.to_str().unwrap(),
+            "--stages",
+            "ingest,cheap_analysis",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .unwrap();
+    let body: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(
+            jobs.join(job_id)
+                .join("analysis/features/cheap")
+                .join(format!("{id}.json")),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let delta = body["records"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| r["feature_id"] == "avsync.delta")
+        .unwrap();
+    assert_eq!(delta["params"]["event_kind"], "user_marker");
+    assert_eq!(delta["params"]["marker"]["input_id"], id.to_string());
+    assert!(delta["value"]["scalar"].as_f64().unwrap().abs() < 0.02);
+    std::fs::remove_dir_all(dir).unwrap();
+}

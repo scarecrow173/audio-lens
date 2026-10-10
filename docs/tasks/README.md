@@ -21,7 +21,7 @@ Directory: `docs/tasks`
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
 | TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | done | [avsync-analysis.md](./avsync-analysis.md) |
-| TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | todo | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
+| TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | done | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
 | TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | done | [band-lag-gain.md](./band-lag-gain.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
