@@ -4,7 +4,7 @@ type: "test-spec"
 status: "proposed"
 title: "メディア形式拡大・正規化アーキテクチャと解析精度拡張"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-10"
 owners: []
 relations:
   source: []
@@ -70,9 +70,9 @@ metadata:
 
 ### 帯域ラグ補償ゲイン(TASK-036d)
 
-- [ ] 帯域ごとの最良ラグ+LS ゲイン+上位半分中央値が出力される
-- [ ] coherence/support の validity メタデータが付く
-- [ ] 非コヒーレント帯域で PSD 比由来の過大評価が出ない
+- [x] 帯域ごとの最良ラグ+LS ゲイン+上位半分中央値が出力される
+- [x] coherence/support の validity メタデータが付く
+- [x] 非コヒーレント帯域で PSD 比由来の過大評価が出ない
 
 ### キャプチャ間校正(TASK-036e)
 
