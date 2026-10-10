@@ -4,7 +4,7 @@ type: "test-spec"
 status: "proposed"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-10"
 owners: []
 relations:
   source: []
@@ -58,10 +58,21 @@ metadata:
 
 ### FFT(TASK-035d)
 
-- [ ] 複素 FFT が現行 radix-2 と数値一致(許容誤差内)
-- [ ] 実数 FFT が複素経路の半分以下のコストで動く
-- [ ] `bench_dsp` で NumPy pocketfft 同等以上(~3× 現行比)
-- [ ] `fft` 往復・`gcc_phat` 等の既存テストがパス
+- [x] 複素 FFT が現行 radix-2 と数値一致(許容誤差内)
+- [x] 実数 FFT が複素経路の半分以下のコストで動く
+- [x] `bench_dsp` で NumPy pocketfft 同等以上(~3× 現行比)
+- [x] `fft` 往復・`gcc_phat` 等の既存テストがパス
+
+2026-10-10: [FFT task の検証結果](../tasks/al-math-fft.md)を参照。
+旧 radix-2/独立 DFT/scalar/dispatch の比較と既存 golden を再生成なしで検証。
+実数入力 rfft は同プロセス旧版 270.6 ms に対し 53.1 ms(5.10×)、
+NumPy pocketfft 参照値 157 ms 以下。
+
+「複素経路の半分以下」は coordinator の承認により、実信号 consumer の
+thin split wrapper(161.8 ms)比で判定する。rfft はその 32.8% で受入条件を満たす。
+同条件の係数再利用 c64 経路(99.5 ms)比では 53.4%(1.87×)であり、
+2× 未達は **non-blocking の最適化余地**として記録する。複素カーネルと
+配置変換/確保を含む wrapper の測定を区別し、全経路 3× とは判定しない。
 
 ### 相関/bandpass(TASK-035e)
 
