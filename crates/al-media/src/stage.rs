@@ -159,28 +159,7 @@ impl IngestStage {
 
         // Missing observations are recorded once, structurally —
         // downstream stages read facts, not implied absence.
-        let mut integrity: Vec<IntegrityObservation> = mux.integrity.clone();
-        if let Some(reason) = &mux.audio_unavailable {
-            integrity.push(IntegrityObservation {
-                kind: "audio_decode_unavailable".into(),
-                detail: serde_json::json!({ "reason": reason }),
-            });
-        }
-        if let Some(VideoFeatureArtifact::Unavailable {
-            stream,
-            codec,
-            reason,
-        }) = &mux.video_features
-        {
-            integrity.push(IntegrityObservation {
-                kind: "video_decode_unavailable".into(),
-                detail: serde_json::json!({
-                    "stream": stream,
-                    "codec": codec,
-                    "reason": reason,
-                }),
-            });
-        }
+        let integrity: Vec<IntegrityObservation> = mux.integrity.clone();
 
         let job_dir = ctx.registry.job_dir();
         let input_dir = job_dir.join("inputs").join(input.input_id.as_str());
@@ -235,6 +214,7 @@ impl IngestStage {
             "input_id": input.input_id,
             "role": input.role,
             "source_path": input.path,
+            "source_hash": source_hash,
             "container": container,
             "streams": mux.streams,
             "audio": audio_metadata,

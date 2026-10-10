@@ -471,15 +471,14 @@ fn avi_with_undecodable_audio_still_ingests_observations() {
         serde_json::from_str(&std::fs::read_to_string(meta_path).unwrap()).unwrap();
     assert_eq!(meta["container"], "avi");
     assert!(meta["audio"].is_null());
+    assert_eq!(meta["source_hash"], al_core::sha256_hex(&avi_bytes));
     // Timing observations persist even without decodable audio.
     assert_eq!(meta["av_timing"].as_array().unwrap().len(), 2);
     // The absence is recorded explicitly.
     let integrity = meta["integrity"].as_array().expect("integrity array");
-    assert!(
-        integrity
-            .iter()
-            .any(|o| o["kind"] == "audio_decode_unavailable")
-    );
+    assert!(integrity.iter().any(|o| o["kind"] == "decode_unavailable"
+        && o["detail"]["kind"] == "capability"
+        && o["detail"]["media_kind"] == "audio"));
 
     std::fs::remove_dir_all(&dir).ok();
     std::fs::remove_dir_all(&job_dir).ok();
