@@ -2,6 +2,8 @@
 //! and the versioned capture-artifact dictionary.
 
 pub mod avi;
+pub mod decoder;
+mod dib;
 pub mod dictionary;
 pub mod format;
 pub mod metadata;

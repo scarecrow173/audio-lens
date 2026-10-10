@@ -236,6 +236,12 @@ pub struct Mp4Facts {
 pub struct Mp4Media {
     /// Persisted container facts (`mp4` section of `metadata.json`).
     pub facts: Mp4Facts,
+    /// Probe で取得した既存 PCM 抽出能力（track order index）。
+    pub pcm_tracks: Vec<u32>,
+    /// 実際に PCM を抽出できた track。
+    pub audio_stream: Option<u32>,
+    /// 元 sample table の packet 長。
+    pub packet_lengths: Vec<Vec<u32>>,
     /// PCM extracted from the first PCM-decodable `soun` sample entry,
     /// `None` when every audio track is compressed or there is no
     /// audio track at all. `None` is not an error — it is the partial
@@ -716,6 +722,21 @@ fn pcm_layout(entry: &SoundEntry) -> Option<PcmLayout> {
     }
 }
 
+fn pcm_sample_width(layout: &PcmLayout) -> Result<usize, MediaError> {
+    match (layout.float, layout.bits) {
+        (true, 32) => Ok(4),
+        (true, 64) => Ok(8),
+        (false, 8) => Ok(1),
+        (false, 16) => Ok(2),
+        (false, 24) => Ok(3),
+        (false, 32) => Ok(4),
+        (float, bits) => Err(MediaError::input_unavailable(format!(
+            "unsupported PCM width {}-bit float={float}",
+            bits
+        ))),
+    }
+}
+
 /// Decode raw PCM bytes to integer-scale `f64` under `layout`, keeping
 /// the WAV pre-normalization contract: unsigned input is offset to a
 /// signed integer scale (u8 → −128..127 like WAV `PcmU8`; wider
@@ -725,20 +746,7 @@ fn decode_pcm_bytes(
     layout: &PcmLayout,
     data: &[u8],
 ) -> Result<(Vec<f64>, SampleFormat), MediaError> {
-    let width = match (layout.float, layout.bits) {
-        (true, 32) => 4,
-        (true, 64) => 8,
-        (false, 8) => 1,
-        (false, 16) => 2,
-        (false, 24) => 3,
-        (false, 32) => 4,
-        (float, bits) => {
-            return Err(MediaError::input_unavailable(format!(
-                "unsupported PCM width {}-bit float={float}",
-                bits
-            )));
-        }
-    };
+    let width = pcm_sample_width(layout)?;
     if !data.len().is_multiple_of(width) {
         return Err(MediaError::input_unavailable(
             "PCM sample data ends mid-sample",
@@ -1100,6 +1108,14 @@ fn parse_trak(
 /// integrity observation. Structural corruption stays `Malformed`;
 /// fragmented MP4 is `InputUnavailable` (explicitly unsupported).
 pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
+    parse_mp4(data, true)
+}
+
+pub(crate) fn probe_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
+    parse_mp4(data, false)
+}
+
+fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
     if data.len() < 8 || &data[4..8] != b"ftyp" {
         return Err(MediaError::input_unavailable(
             "not an ISO-BMFF file (no leading ftyp box)",
@@ -1207,10 +1223,22 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
     // PCM extraction: the first PCM-decodable soun sample entry wins
     // (matching AVI's first-auds rule). Undecodable soun entries are
     // integrity observations, never stage failures.
+    let pcm_tracks = traks
+        .iter()
+        .enumerate()
+        .filter(|(_, t)| {
+            t.sound.iter().find_map(pcm_layout).is_some_and(|layout| {
+                layout.channels > 0 && layout.sample_rate > 0 && pcm_sample_width(&layout).is_ok()
+            })
+        })
+        .map(|(i, _)| i as u32)
+        .collect();
+    let packet_lengths = traks.iter().map(|t| t.table.sizes.clone()).collect();
+    let mut audio_stream = None;
     let mut audio = None;
     let mut integrity = Vec::new();
     for (ti, trak) in traks.iter().enumerate() {
-        if &trak.handler != b"soun" {
+        if &trak.handler != b"soun" || !extract_pcm {
             continue;
         }
         if audio.is_some() {
@@ -1286,6 +1314,7 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
             .and_then(|bytes| decode_pcm_bytes(&layout, &bytes));
         match extracted {
             Ok((samples, sample_format)) => {
+                audio_stream = Some(ti as u32);
                 audio = Some(DecodedAudio {
                     samples,
                     channels: layout.channels,
@@ -1312,6 +1341,9 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
 
     let tracks: Vec<Mp4Track> = traks.into_iter().map(|t| t.track).collect();
     Ok(Mp4Media {
+        pcm_tracks,
+        audio_stream,
+        packet_lengths,
         facts: Mp4Facts {
             brands,
             movie_timescale: movie.map(|m| m.0),
