@@ -872,7 +872,7 @@ dependencies:
 - repo_url: scarecrow173/cheaper
   name: cheaper
   host: github.com
-  resolved_commit: 5c67c3f1385c79412b87b16cd1230b90a1cdd622
+  resolved_commit: 8e175318d12d96c0c1a72969d1746d7cafa02dfc
   resolved_ref: main
   version: 1.0.0
   virtual_path: packages/apm
@@ -887,19 +887,8 @@ dependencies:
   - .agents/skills/cheaper-doc-write/SKILL.md
   - .agents/skills/cheaper-usage
   - .agents/skills/cheaper-usage/SKILL.md
-  - .claude/hooks/apm/cheaper
   - .claude/hooks/apm/cheaper.ps1
-  - .claude/hooks/apm/cli/policy.yaml
-  - .claude/hooks/apm/cli/version.json
-  - .claude/hooks/apm/cli/workers/bulk-reader.md
-  - .claude/hooks/apm/cli/workers/code-writer.md
-  - .claude/hooks/apm/cli/workers/doc-writer.md
-  - .claude/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  - .claude/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  - .claude/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  - .claude/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  - .claude/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  - .claude/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
+  - .claude/hooks/apm/cheaper.sh
   - .claude/skills/cheaper-bulk-read
   - .claude/skills/cheaper-bulk-read/SKILL.md
   - .claude/skills/cheaper-code-write
@@ -908,121 +897,36 @@ dependencies:
   - .claude/skills/cheaper-doc-write/SKILL.md
   - .claude/skills/cheaper-usage
   - .claude/skills/cheaper-usage/SKILL.md
-  - .codex/hooks/apm/cheaper
   - .codex/hooks/apm/cheaper.ps1
-  - .codex/hooks/apm/cli/policy.yaml
-  - .codex/hooks/apm/cli/version.json
-  - .codex/hooks/apm/cli/workers/bulk-reader.md
-  - .codex/hooks/apm/cli/workers/code-writer.md
-  - .codex/hooks/apm/cli/workers/doc-writer.md
-  - .codex/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  - .codex/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  - .codex/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  - .codex/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  - .codex/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  - .codex/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
-  - .cursor/hooks/apm/cheaper
+  - .codex/hooks/apm/cheaper.sh
   - .cursor/hooks/apm/cheaper.ps1
-  - .cursor/hooks/apm/cli/policy.yaml
-  - .cursor/hooks/apm/cli/version.json
-  - .cursor/hooks/apm/cli/workers/bulk-reader.md
-  - .cursor/hooks/apm/cli/workers/code-writer.md
-  - .cursor/hooks/apm/cli/workers/doc-writer.md
-  - .cursor/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  - .cursor/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  - .cursor/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  - .cursor/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  - .cursor/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  - .cursor/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
+  - .cursor/hooks/apm/cheaper.sh
   - .github/hooks/apm-hooks.json
-  - .github/hooks/scripts/apm/cheaper
   - .github/hooks/scripts/apm/cheaper.ps1
-  - .github/hooks/scripts/apm/cli/policy.yaml
-  - .github/hooks/scripts/apm/cli/workers/bulk-reader.md
-  - .github/hooks/scripts/apm/cli/workers/code-writer.md
-  - .github/hooks/scripts/apm/cli/workers/doc-writer.md
-  - .windsurf/hooks/apm/cheaper
+  - .github/hooks/scripts/apm/cheaper.sh
   - .windsurf/hooks/apm/cheaper.ps1
-  - .windsurf/hooks/apm/cli/policy.yaml
-  - .windsurf/hooks/apm/cli/version.json
-  - .windsurf/hooks/apm/cli/workers/bulk-reader.md
-  - .windsurf/hooks/apm/cli/workers/code-writer.md
-  - .windsurf/hooks/apm/cli/workers/doc-writer.md
-  - .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  - .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  - .windsurf/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  - .windsurf/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  - .windsurf/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  - .windsurf/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
+  - .windsurf/hooks/apm/cheaper.sh
   deployed_file_hashes:
     .agents/skills/cheaper-bulk-read/SKILL.md: sha256:75d40edbe27b354d43b48ca0956df613a7299b77a27c3727215a87c58eed5f45
     .agents/skills/cheaper-code-write/SKILL.md: sha256:d3c9588706cea1ba2ae88aabc8afee49da77298d719b1a5aff1febc923ef0ef0
     .agents/skills/cheaper-doc-write/SKILL.md: sha256:89137ffe545afb402dc804f8b7dfa57bb26523cc999d9917092cad98a9b74d3f
-    .agents/skills/cheaper-usage/SKILL.md: sha256:dad709fde89d2b4a24c2aa3af54a5ceed09207c1b9cae9852d610b92eb3fc908
-    .claude/hooks/apm/cheaper: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-    .claude/hooks/apm/cheaper.ps1: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
-    .claude/hooks/apm/cli/policy.yaml: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-    .claude/hooks/apm/cli/version.json: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-    .claude/hooks/apm/cli/workers/bulk-reader.md: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-    .claude/hooks/apm/cli/workers/code-writer.md: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-    .claude/hooks/apm/cli/workers/doc-writer.md: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-    .claude/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-    .claude/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-    .claude/hooks/apm/cli/workers/schemas/code-writer.input.schema.json: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-    .claude/hooks/apm/cli/workers/schemas/code-writer.output.schema.json: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-    .claude/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-    .claude/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
+    .agents/skills/cheaper-usage/SKILL.md: sha256:17af6068766b2a26d06199548fa532d74369c8802197eea5e76a6d6e269a2147
+    .claude/hooks/apm/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .claude/hooks/apm/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
     .claude/skills/cheaper-bulk-read/SKILL.md: sha256:75d40edbe27b354d43b48ca0956df613a7299b77a27c3727215a87c58eed5f45
     .claude/skills/cheaper-code-write/SKILL.md: sha256:d3c9588706cea1ba2ae88aabc8afee49da77298d719b1a5aff1febc923ef0ef0
     .claude/skills/cheaper-doc-write/SKILL.md: sha256:89137ffe545afb402dc804f8b7dfa57bb26523cc999d9917092cad98a9b74d3f
-    .claude/skills/cheaper-usage/SKILL.md: sha256:dad709fde89d2b4a24c2aa3af54a5ceed09207c1b9cae9852d610b92eb3fc908
-    .codex/hooks/apm/cheaper: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-    .codex/hooks/apm/cheaper.ps1: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
-    .codex/hooks/apm/cli/policy.yaml: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-    .codex/hooks/apm/cli/version.json: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-    .codex/hooks/apm/cli/workers/bulk-reader.md: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-    .codex/hooks/apm/cli/workers/code-writer.md: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-    .codex/hooks/apm/cli/workers/doc-writer.md: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-    .codex/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-    .codex/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-    .codex/hooks/apm/cli/workers/schemas/code-writer.input.schema.json: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-    .codex/hooks/apm/cli/workers/schemas/code-writer.output.schema.json: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-    .codex/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-    .codex/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
-    .cursor/hooks/apm/cheaper: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-    .cursor/hooks/apm/cheaper.ps1: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
-    .cursor/hooks/apm/cli/policy.yaml: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-    .cursor/hooks/apm/cli/version.json: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-    .cursor/hooks/apm/cli/workers/bulk-reader.md: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-    .cursor/hooks/apm/cli/workers/code-writer.md: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-    .cursor/hooks/apm/cli/workers/doc-writer.md: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-    .cursor/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-    .cursor/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-    .cursor/hooks/apm/cli/workers/schemas/code-writer.input.schema.json: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-    .cursor/hooks/apm/cli/workers/schemas/code-writer.output.schema.json: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-    .cursor/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-    .cursor/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
-    .github/hooks/apm-hooks.json: sha256:97ccaa8fb13bfa52c0e451f68840c21cd328429a0c450b334ef7e322b4fdef18
-    .github/hooks/scripts/apm/cheaper: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-    .github/hooks/scripts/apm/cheaper.ps1: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
-    .github/hooks/scripts/apm/cli/policy.yaml: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-    .github/hooks/scripts/apm/cli/workers/bulk-reader.md: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-    .github/hooks/scripts/apm/cli/workers/code-writer.md: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-    .github/hooks/scripts/apm/cli/workers/doc-writer.md: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-    .windsurf/hooks/apm/cheaper: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-    .windsurf/hooks/apm/cheaper.ps1: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
-    .windsurf/hooks/apm/cli/policy.yaml: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-    .windsurf/hooks/apm/cli/version.json: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-    .windsurf/hooks/apm/cli/workers/bulk-reader.md: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-    .windsurf/hooks/apm/cli/workers/code-writer.md: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-    .windsurf/hooks/apm/cli/workers/doc-writer.md: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-    .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-    .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-    .windsurf/hooks/apm/cli/workers/schemas/code-writer.input.schema.json: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-    .windsurf/hooks/apm/cli/workers/schemas/code-writer.output.schema.json: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-    .windsurf/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-    .windsurf/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
-  content_hash: sha256:566679d350112687dc88a3485e484dce1f96d6abf919e31a1a6af0f4aaab5ea2
+    .claude/skills/cheaper-usage/SKILL.md: sha256:17af6068766b2a26d06199548fa532d74369c8802197eea5e76a6d6e269a2147
+    .codex/hooks/apm/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .codex/hooks/apm/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+    .cursor/hooks/apm/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .cursor/hooks/apm/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+    .github/hooks/apm-hooks.json: sha256:5efcb29f5093659747391a581e12098830a73ab04382e10e722f8959d0c13baf
+    .github/hooks/scripts/apm/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .github/hooks/scripts/apm/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+    .windsurf/hooks/apm/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .windsurf/hooks/apm/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:8da748966cfbaa968fe2d3aeed314628ec06f49e84b18ef72f0033340904042e
 - repo_url: addyosmani/agent-skills
   name: ci-cd-and-automation
   host: github.com
@@ -2301,7 +2205,7 @@ deployments:
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:dad709fde89d2b4a24c2aa3af54a5ceed09207c1b9cae9852d610b92eb3fc908
+  content_hash: sha256:17af6068766b2a26d06199548fa532d74369c8802197eea5e76a6d6e269a2147
 - kind: project-relative
   target: agents
   value: .agents/skills/ci-cd-and-automation
@@ -4527,121 +4431,22 @@ deployments:
   content_hash: sha256:f6cded3e7eef97ad8fff06208bcfd5a0beafb9cfe810f78e10294c90e16fd8ae
 - kind: project-relative
   target: claude
-  value: .claude/hooks/apm/cheaper
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-- kind: project-relative
-  target: claude
   value: .claude/hooks/apm/cheaper.ps1
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
 - kind: project-relative
   target: claude
-  value: .claude/hooks/apm/cli/policy.yaml
+  value: .claude/hooks/apm/cheaper.sh
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/version.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/bulk-reader.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/code-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/doc-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-- kind: project-relative
-  target: claude
-  value: .claude/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: project-relative
   target: claude
   value: .claude/skills/adr-doc
@@ -5226,7 +5031,7 @@ deployments:
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:dad709fde89d2b4a24c2aa3af54a5ceed09207c1b9cae9852d610b92eb3fc908
+  content_hash: sha256:17af6068766b2a26d06199548fa532d74369c8802197eea5e76a6d6e269a2147
 - kind: project-relative
   target: claude
   value: .claude/skills/ci-cd-and-automation
@@ -7452,121 +7257,22 @@ deployments:
   content_hash: sha256:0b4bec64f7c6ab70df3841237928eaccfb927789d45300870ce56163230498c4
 - kind: project-relative
   target: codex
-  value: .codex/hooks/apm/cheaper
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-- kind: project-relative
-  target: codex
   value: .codex/hooks/apm/cheaper.ps1
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
 - kind: project-relative
   target: codex
-  value: .codex/hooks/apm/cli/policy.yaml
+  value: .codex/hooks/apm/cheaper.sh
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/version.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/bulk-reader.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/code-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/doc-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-- kind: project-relative
-  target: codex
-  value: .codex/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: project-relative
   target: copilot
   value: .github/agents/apm-expert.agent.md
@@ -7584,16 +7290,7 @@ deployments:
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:97ccaa8fb13bfa52c0e451f68840c21cd328429a0c450b334ef7e322b4fdef18
-- kind: project-relative
-  target: copilot
-  value: .github/hooks/scripts/apm/cheaper
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
+  content_hash: sha256:5efcb29f5093659747391a581e12098830a73ab04382e10e722f8959d0c13baf
 - kind: project-relative
   target: copilot
   value: .github/hooks/scripts/apm/cheaper.ps1
@@ -7602,43 +7299,16 @@ deployments:
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
 - kind: project-relative
   target: copilot
-  value: .github/hooks/scripts/apm/cli/policy.yaml
+  value: .github/hooks/scripts/apm/cheaper.sh
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-- kind: project-relative
-  target: copilot
-  value: .github/hooks/scripts/apm/cli/workers/bulk-reader.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-- kind: project-relative
-  target: copilot
-  value: .github/hooks/scripts/apm/cli/workers/code-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-- kind: project-relative
-  target: copilot
-  value: .github/hooks/scripts/apm/cli/workers/doc-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: project-relative
   target: cursor
   value: .cursor/agents/apm-expert.md
@@ -7650,121 +7320,22 @@ deployments:
   content_hash: sha256:f6cded3e7eef97ad8fff06208bcfd5a0beafb9cfe810f78e10294c90e16fd8ae
 - kind: project-relative
   target: cursor
-  value: .cursor/hooks/apm/cheaper
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
-- kind: project-relative
-  target: cursor
   value: .cursor/hooks/apm/cheaper.ps1
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
 - kind: project-relative
   target: cursor
-  value: .cursor/hooks/apm/cli/policy.yaml
+  value: .cursor/hooks/apm/cheaper.sh
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/version.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/bulk-reader.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/code-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/doc-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-- kind: project-relative
-  target: cursor
-  value: .cursor/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: uri
   target: mcp
   value: mise
@@ -7855,15 +7426,6 @@ deployments:
   - .
   active_owner: .
   content_hash: null
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cheaper
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:f67b9d8a24ce418bb91abc11a28264ba26c97e6aa2e7cbb8399ffb52d520c0c1
 - kind: project-relative
   target: windsurf
   value: .windsurf/hooks/apm/cheaper.ps1
@@ -7872,106 +7434,16 @@ deployments:
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b17bf477cf3c103e13afd9845228e6d5da2ca3f1d8003d7bdb86772375ccc83d
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
 - kind: project-relative
   target: windsurf
-  value: .windsurf/hooks/apm/cli/policy.yaml
+  value: .windsurf/hooks/apm/cheaper.sh
   runtime: null
   scope: project
   owners:
   - scarecrow173/cheaper/packages/apm
   active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7d7beaf4d8d52af652ed184fafe749123a61219de6a3dbf3df42cbe5e3709142
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/version.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:604335dd696d3f9c802c55bfa2a195857a839d8169f5060a2541f166b2245fcb
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/bulk-reader.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f785a0446423c258be6e26dad4f62120cab8672f61b9e71dd760ee599e8254a
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/code-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:77120cf51b4a98c416c716e26c074753d52af856c30364b56e70811043ba8d7f
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/doc-writer.md
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:87279238fd337b84cf1e62866871d8d5f81a2330d5ae78c65029d2970533c9c8
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:b02fbde5cd99397c8755be6eab63ca02963c680155584f2640d254d8e0205feb
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/bulk-reader.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:e62adea3ec762f66a0bf594c006ea9152d2db07d73de1bdeb08d72b244f43921
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/code-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:1e4b83d653ce68b2cec151559ac9e78b8e5fc40e8cf05a265639f8457f92ddd9
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/code-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:7b03f791e1f52a395ad944c81156803d3811fb1be69a8d654b2676bb8cc6789d
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/doc-writer.input.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:d83a98c8922a7695d20617bc8899d58f24b07b4bc34099aeb4b944813bfdeba0
-- kind: project-relative
-  target: windsurf
-  value: .windsurf/hooks/apm/cli/workers/schemas/doc-writer.output.schema.json
-  runtime: null
-  scope: project
-  owners:
-  - scarecrow173/cheaper/packages/apm
-  active_owner: scarecrow173/cheaper/packages/apm
-  content_hash: sha256:0f16f5081e39e1054738510055f4fdfe8c7d89112530dbf25883ed97beb01538
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 mcp_servers:
 - mise
 - serena
