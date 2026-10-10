@@ -4,7 +4,7 @@ type: "test-spec"
 status: "proposed"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-10"
 owners: []
 relations:
   source: []
@@ -71,9 +71,9 @@ metadata:
 
 ### QR(TASK-035f)
 
-- [ ] ill-conditioned 入力で係数が正規方程式版より安定
-- [ ] `condition_number` が引き続き記録される
-- [ ] mixer/残差減算の golden がパス
+- [x] ill-conditioned 入力で係数が正規方程式版より安定
+- [x] `condition_number` が引き続き記録される
+- [x] mixer/残差減算の golden がパス
 
 ### coarse-to-fine + キャッシュ(TASK-035g)
 
