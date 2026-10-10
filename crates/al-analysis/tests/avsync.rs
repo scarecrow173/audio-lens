@@ -2,8 +2,7 @@
 //! Ingest → CheapAnalysis stages, and the persisted `avsync.*` records
 //! must recover the planted audio/video offset.
 //!
-//! The fixture carries `video_start != 0` so the test also proves the
-//! container-level `dwStart` offset cancels out of `avsync.delta`.
+//! auds/vids の共通原点だけを相殺し、dwStart の実相対 offset を保持する。
 
 use std::fs;
 use std::path::PathBuf;
@@ -48,24 +47,27 @@ fn scalar(rec: &serde_json::Value) -> f64 {
 
 #[test]
 fn ingest_then_cheap_recovers_planted_av_offset() {
-    run_offset_fixture(false, true);
+    for (video_start, audio_start) in [(0, 0), (5, 0), (5, 24000), (5, 48000)] {
+        run_offset_fixture(false, true, video_start, audio_start);
+    }
 }
 
 #[test]
 fn roi_series_tensor_and_event_reach_avsync() {
-    run_offset_fixture(true, true);
+    for (video_start, audio_start) in [(0, 0), (5, 0), (5, 24000), (5, 48000)] {
+        run_offset_fixture(true, true, video_start, audio_start);
+    }
 }
 
 #[test]
 fn roi_tensor_survives_missing_audio() {
-    run_offset_fixture(true, false);
+    run_offset_fixture(true, false, 5, 0);
 }
 
-fn run_offset_fixture(roi: bool, has_audio: bool) {
+fn run_offset_fixture(roi: bool, has_audio: bool, video_start: u32, audio_start: u32) {
     // 4 s of 10 fps video: dark frames 0-14, bright 15-39 → a scene
     // change (and luminance step) at frame 15 → 1.5 s on the vids
-    // clock. dwStart = 5 ticks declares a container-level offset that
-    // must cancel out. Audio: tone onset at 1.3 s → delta +0.2 s.
+    // clock. 音声 onset 1.3 s に対し内容差 0.2 s と stream 原点差を検証する。
     let fps = 10u32;
     let dark = vec![0u8; 64 * 48 * 3];
     let mut bright = vec![200u8; 64 * 48 * 3];
@@ -80,6 +82,8 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
         .map(|f| if f < 15 { dark.clone() } else { bright.clone() })
         .collect();
     let rate = 48_000u32;
+    let relative_start = video_start as f64 / fps as f64 - audio_start as f64 / rate as f64;
+    let expected_delta = 0.2 + relative_start;
     let audio = tone_after_silence(rate, 1.3, 4.0);
     let mut packets: Vec<MoviPacket> = frames
         .into_iter()
@@ -94,8 +98,8 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
         usec_per_frame: 1_000_000 / fps,
         total_frames: None,
         streams: vec![
-            AviStreamSpec::video(64, 48, fps).with_start(5),
-            AviStreamSpec::pcm_audio(1, rate),
+            AviStreamSpec::video(64, 48, fps).with_start(video_start),
+            AviStreamSpec::pcm_audio(1, rate).with_start(audio_start),
         ],
         packets,
     });
@@ -109,11 +113,11 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
     let def = JobDefinition::create(
         vec![input(InputRole::CaptureBug, &avi)],
         if roi {
-            serde_json::json!({"ingest": {"video": {"rois": [
+            serde_json::json!({"analysis": {"avsync": {"match_window_s": 1.0}}, "ingest": {"video": {"rois": [
                 {"name": "字幕/表示", "rect": {"x": 0, "y": 46, "width": 8, "height": 2}}
             ]}}})
         } else {
-            serde_json::json!({})
+            serde_json::json!({"analysis": {"avsync": {"match_window_s": 1.0}}})
         },
         vec![StageKind::Ingest, StageKind::CheapAnalysis],
     )
@@ -138,7 +142,7 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
     let al_media::VideoFeatureArtifact::Decoded(f) = &vf.features else {
         panic!("uncompressed AVI must decode video features")
     };
-    assert_eq!(f.start_tick, 5);
+    assert_eq!(f.start_tick, i64::from(video_start));
     let scene = f
         .events
         .iter()
@@ -151,7 +155,7 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
                 }
         })
         .expect("scene change detected");
-    assert_eq!(scene.time_ticks, 5 + 15); // raw stream clock keeps dwStart
+    assert_eq!(scene.time_ticks, i64::from(video_start) + 15); // raw stream clock keeps dwStart
 
     // The cheap feature file carries the avsync records.
     let input_id = &def.inputs[0].input_id;
@@ -222,7 +226,7 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
     let onset = find(records, "trans.onset_times");
     assert!(onset["support_count"].as_u64().unwrap() >= 1);
 
-    // Matched pair(s), delta ≈ +0.2 s, container offset cancelled.
+    // ペア delta は内容差 0.2 s と stream 原点差を含む。
     let count = find(records, "avsync.pair_count");
     assert!(scalar(count) >= 1.0);
     let deltas: Vec<f64> = records
@@ -232,16 +236,24 @@ fn run_offset_fixture(roi: bool, has_audio: bool) {
         .collect();
     assert!(!deltas.is_empty());
     for d in &deltas {
-        assert!((d - 0.2).abs() <= 0.02, "delta {d} should be ≈0.2 s");
+        assert!(
+            (d - expected_delta).abs() <= 0.02,
+            "delta {d} should be {expected_delta} s"
+        );
     }
     let delta = find(records, "avsync.delta");
     assert_eq!(delta["validity"], "valid");
+    assert_eq!(delta["params"]["clock_origin"], "audio_pcm_start");
+    assert_eq!(
+        delta["params"]["audio_start_s"],
+        audio_start as f64 / rate as f64
+    );
     let median = find(records, "avsync.median_delta");
-    assert!((scalar(median) - 0.2).abs() <= 0.02);
+    assert!((scalar(median) - expected_delta).abs() <= 0.02);
     let audio_time = find(records, "avsync.audio_time");
     assert!((scalar(audio_time) - 1.3).abs() <= 0.02);
     let video_time = find(records, "avsync.video_time");
-    assert!((scalar(video_time) - 1.5).abs() < 1e-9);
+    assert!((scalar(video_time) - (1.5 + relative_start)).abs() < 1e-9);
 
     fs::remove_dir_all(&dir).ok();
     fs::remove_dir_all(&job_dir).ok();

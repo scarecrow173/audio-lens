@@ -25,7 +25,7 @@ Directory: `docs/tasks`
 | TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | done | [band-lag-gain.md](./band-lag-gain.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
-| TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | todo | [container-review-edge-cases.md](./container-review-edge-cases.md) |
+| TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
 | TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | done | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |

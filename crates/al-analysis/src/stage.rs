@@ -68,6 +68,17 @@ impl Stage for CheapAnalysisStage {
                 lineage.push(artifact_id.clone());
             }
             let video_features = video.map(|(f, _)| f);
+            let audio_start_s = if decoded.is_some()
+                && matches!(
+                    video_features,
+                    Some(al_media::VideoFeatureArtifact::Decoded(_))
+                ) {
+                let (origin, metadata_id) = load_audio_origin(input, ctx)?;
+                lineage.push(metadata_id);
+                origin
+            } else {
+                0.0
+            };
             let video_out = crate::video::roi_records(
                 &input.input_id.to_string(),
                 video_features.as_ref(),
@@ -120,6 +131,7 @@ impl Stage for CheapAnalysisStage {
                     &input.input_id.to_string(),
                     None,
                     video_features.as_ref(),
+                    audio_start_s,
                     &av_cfg,
                     lineage,
                 ));
@@ -139,7 +151,7 @@ impl Stage for CheapAnalysisStage {
             out.records.extend(video_out.records);
             // A/V sync: the persisted onset_times tensor is the audio
             // event series; video events come from ingest. Both are
-            // rebased to their own stream clock inside `sync_records`.
+            // converted to a shared audio PCM origin inside `sync_records`.
             let onset_times: Vec<f64> = out
                 .tensors
                 .iter()
@@ -150,6 +162,7 @@ impl Stage for CheapAnalysisStage {
                 &dec.input_id,
                 Some(&onset_times),
                 video_features.as_ref(),
+                audio_start_s,
                 &av_cfg,
                 lineage,
             ));
@@ -952,6 +965,48 @@ fn load_video_features(
         report.features,
         artifact.artifact_id.as_str().to_string(),
     )))
+}
+
+/// 選択された音声 stream の時計を ingest の正本から読む。
+/// secondary audio の原点を first audio と取り違えない。
+fn load_audio_origin(
+    input: &al_job::job::JobInput,
+    ctx: &StageContext<'_>,
+) -> Result<(f64, String), StageError> {
+    let fail = |msg: String| StageError::new(StageKind::CheapAnalysis, msg);
+    let declared = ctx
+        .manifest
+        .input_artifact(&input.input_id)
+        .ok_or_else(|| fail("missing declared input".into()))?;
+    let artifact = ctx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "ingest_metadata" && a.inputs.contains(&declared))
+        .ok_or_else(|| fail("missing ingest metadata for audio clock".into()))?;
+    let path = checked_job_path(ctx.registry.job_dir(), &artifact.path)
+        .map_err(|e| fail(e.to_string()))?;
+    let metadata: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(path).map_err(|e| fail(e.to_string()))?)
+            .map_err(|e| fail(e.to_string()))?;
+    let streams: Vec<al_media::decoder::StreamResult> =
+        serde_json::from_value(metadata["decoder"]["streams"].clone())
+            .map_err(|e| fail(e.to_string()))?;
+    let timings: Vec<al_media::StreamTiming> =
+        serde_json::from_value(metadata["av_timing"].clone()).map_err(|e| fail(e.to_string()))?;
+    let selected = streams
+        .iter()
+        .find(|s| s.kind == "audio" && s.decoded)
+        .and_then(|s| s.stream);
+    let origin = timings
+        .iter()
+        .find(|t| {
+            Some(t.stream) == selected && t.observation.clock == al_media::timing::ClockKind::Audio
+        })
+        .filter(|t| t.observation.timebase_hz > 0)
+        .map(|t| t.start_tick as f64 / t.observation.timebase_hz as f64)
+        .unwrap_or(f64::NAN);
+    Ok((origin, artifact.artifact_id.to_string()))
 }
 
 fn prov(

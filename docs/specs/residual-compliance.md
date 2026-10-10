@@ -74,7 +74,7 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 
 ## Acceptance Criteria
 
-- [ ] AC-28: #28: 未整列 AVI 音声パケットの時刻が累積有理時計と一致する。MP4 の非デコードトラックにも同じテーブル検証が適用される。音声が unavailable でも入力ハッシュと利用不能理由が残る。luma の再利用、非フレーム時刻、dwStart、OpenDML、integrity 名称、二次音声、欠落 timeline の扱いを各境界ケースで検証する。
+- [x] AC-28: #28: 未整列 AVI 音声パケットの時刻が累積有理時計と一致する。MP4 の非デコードトラックにも同じテーブル検証が適用される。音声が unavailable でも入力ハッシュと利用不能理由が残る。luma の再利用、非フレーム時刻、dwStart、OpenDML、integrity 名称、二次音声、欠落 timeline の扱いを各境界ケースで検証する。
 - [ ] AC-29: #29: 不均一チャネル長で panic とチャネル誤ラベルが起きない。ill-conditioned 帯域の係数にも妥当性が反映され、支持数ゼロや候補なしの測定を NaN/0 + Valid として出さない。IR の窓、ペア summary のチャネル意味、暗黙スキップとコメントの整合を fixture で検証する。
 - [ ] AC-30: #30: 奇数 LIST、stream 99/100、index フラグ、DIB stride と rcFrame が生成するメディアの契約と一致する。周期 fixture は全拒否で成功しない。失敗時も一時ディレクトリが回収され、合成 source hash の意味と defer 項目の受け皿が明記される。
 - [ ] AC-31: #31: ユーザー供給 visual marker が avsync のペア出力に反映される。未指定時の検出イベント経路と出力は変化しない。有限時刻・クロック・入力来歴を検証し、ゲーム固有 detector を core に追加しない。
@@ -94,6 +94,14 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 ## Sources and Relations
 
 2026-10-10 に取得した open Issue #28〜#33 が棚卸しの証拠。既存仕様への references と残件処理 ADR への related を記録する。status proposed は提案提出であり承認を意味しない。
+
+## AC-28 の実施結果
+
+#28 は native registry/direct parser 共通境界で修正し、全14項目の
+結果・承認・回帰検証を [task](../tasks/container-review-edge-cases.md#項目別の結果と証拠)
+に記録した。dwStart は音声 PCM 開始を共通原点として実相対 offset を保持する。
+OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応とする。
+利用不能とデータ不正の区分は共通 UnavailableKind に従う。
 
 ## AC-33 の実施判断 (2026-10-11)
 

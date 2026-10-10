@@ -75,6 +75,25 @@ Issue ごとの修正境界と検証設計。#33 の方式判断を実装修正�
 | #32 | residual_search と audio store、alignment PCM 読込境界 | 減算済みチャネルを既存 residual ロールで保存し、残差を独立した signal version として child alignment の使用 PCM に明示参照する。search JSON と親 source/alignment の lineage を同時に登録する |
 | #33 | stage orchestration と dataset schema | 承認済み: 候補検出を論理段として fused 実行を仕様化、FLAC 保存を defer、Resolution.sample_rate を u32 で第一級化 |
 
+### #28 の実施契約(2026-10-11)
+
+native registry と direct parser は AVI layout / MP4 parse-stbl を共有し、
+時計・構造検証を呼出側で補償しない。利用不能 integrity の組立は
+`IntegrityObservation::decode_unavailable` に集約し、型付き
+`UnavailableKind` を provenance と同じ分類で保持する。
+luma は共通特徴抽出から decoder へ二枚の buffer を交互に返して再利用する。
+dataset metadata は一パス一 artifact とし、PCM 不在時の役割を
+`dataset_input_unavailable` にする。codec は native decoder が出力する
+完全名だけを受理する。viz は declared JSON を入力検証証拠にせず、
+各入力の Audio または metadata JSON を確認し、timeline がない全経路を
+skipped に記録する。
+
+時計・非フレーム packet-slot・dwStart・rec LIST・overflow の判断は
+coordinator の question `msg_7c43909b855e` reply で承認済み。
+#28 は task 分割せず、項目別証拠と論理別コミットで追跡する。
+共通原点の具体式は [video-features.md](./video-features.md)、
+MP4 の構造/局所失敗境界は [mp4-ingest.md](./mp4-ingest.md) を参照する。
+
 ## Data and Control Flow
 
 #32 は残差を元キャプチャとは別の signal version として保存する方式を採る。

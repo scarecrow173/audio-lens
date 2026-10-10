@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "MP4 demux とタイミング観測設計"
 created: "2026-10-04"
-updated: "2026-10-04"
+updated: "2026-10-11"
 owners: []
 relations:
   source: []
@@ -107,10 +107,15 @@ spec `../specs/media-ingest.md` は video capture files を要求するが、
   下流伝播に依存する)。
   1 入力の失敗は他入力の記録を巻き込まない。
   **エラー境界の不変条件**: コンテナ構造の破損(ボックス不整合・
-  サンプルテーブルの矛盾)は `Malformed` で致命的のまま、
-  サンプルデータ層の欠損・デコード不可(コーデック非対応・
-  mdat 打ち切り等)は `decode/input unavailable` の integrity
-  観測として記録し ingest を完走させる
+  サンプルテーブルの矛盾・stco/co64 の EOF 外参照)は codec に
+  関係なく probe/direct decode 共通境界で `Malformed` として拒否する。
+  stsc の先頭・昇順・非ゼロ samples_per_chunk・stsd index・stsz 件数を
+  全トラックで検証する。空の完全テーブルは有効。
+  サンプルデータ層のデコード不可は `decode_unavailable` integrity
+  観測として記録し ingest を完走させる。detail.kind は registry と
+  共通の `UnavailableKind` (`capability`/`malformed`/`io`) で、codec
+  非対応は capability、不完全 PCM sample/frame やゼロ rate/channel は
+  局所 malformed。構造検証後の PCM decode だけを局所失敗境界とする
 - 永続化するストリームタイミングのフィールド名は
   AVI 固有の `movi_order_timestamps` ではなく、コンテナ中立の
   命名(例: `stream_timestamps` + 由来ラベル
@@ -132,7 +137,7 @@ spec `../specs/media-ingest.md` は video capture files を要求するが、
   エンディアン/符号を解釈して整数スケール f64 + `SampleFormat`
   で decoded PCM として後段へ渡す
 - 圧縮トラックはメタデータ+タイミングのみ記録する。decode が
-  行えなくても ingest 自体は成功し、`decode/input unavailable`
+  行えなくても ingest 自体は成功し、`decode_unavailable`
   はメタデータの integrity 観測として記録される
 
 ## Non-Functional Constraints

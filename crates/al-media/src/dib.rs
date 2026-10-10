@@ -192,10 +192,10 @@ pub fn extract_features(
         )));
     }
     let thumb_step = frames.len().div_ceil(MAX_THUMB_FRAMES).max(1);
-    let decoded = frames.iter().enumerate().map(|(i, frame)| {
-        let mut luma = Vec::new();
+    let decoded = |i: usize, mut luma: Vec<f64>| {
+        let frame = &frames[i];
         decode_luma(&dib, frame.body, &mut luma).map_err(MediaError::malformed)?;
-        let preview = if i % thumb_step == 0 {
+        let preview = if i.is_multiple_of(thumb_step) {
             decode_rgb_thumb(&dib, frame.body, MAX_THUMB_WIDTH).ok()
         } else {
             None
@@ -205,7 +205,7 @@ pub fn extract_features(
             luma,
             preview,
         })
-    });
+    };
     extract_decoded_features(
         VideoFrameInfo {
             stream,
