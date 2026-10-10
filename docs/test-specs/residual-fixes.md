@@ -4,7 +4,7 @@ type: "test-spec"
 status: "approved"
 title: "残存課題の契約回帰検証"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -76,3 +76,13 @@ task の原文 inventory 全項目をケースに対応付ける。上表は代�
 ## Risk
 
 検証を省くと信号欠落、時計ドリフト、チャネル誤ラベル、無効値の Valid 化、fixture 偽成功が回帰する。
+
+## #28 の実施証拠
+
+原文14項目のテスト・文書化・承認記録は
+[container-review-edge-cases.md](../tasks/container-review-edge-cases.md#項目別の結果と証拠)
+に対応付ける。direct parser と registry probe/decode の一致、空 MP4
+テーブル、PCM mid-sample/mid-frame の局所 malformed、四組の auds/vids
+原点、luma buffer の容量・ポインタ再利用、dataset 一パス一 identity、
+不正 codec と declared-only viz、capture/input 不在の skipped を検証する。
+OpenDML decoder 拡張は実施せず、rec LIST の明示的 unsupported を検証する。
