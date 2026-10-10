@@ -7,6 +7,7 @@
 
 pub mod avsync;
 mod band_gain;
+mod calibration;
 pub mod cheap;
 pub mod events;
 pub mod expensive;

@@ -471,6 +471,119 @@ impl Stage for ExpensiveAnalysisStage {
             std::collections::HashMap::new();
         let mut pair_captures = std::collections::HashMap::new();
         let mut pair_lineage = std::collections::HashMap::new();
+        let mut calibration_evidence = Vec::new();
+        for (artifact, result, pcm) in &loaded_alignments {
+            if !result.accepted || result.validity != Validity::Valid {
+                continue;
+            }
+            let Some((_, capture)) = pcm else { continue };
+            let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
+            let path = format!("intermediate/{pair}/transfer_h");
+            // H/coherence はこの locate の alignment から生成されたものだけを採用する。
+            let current_alignment = [&path, &format!("intermediate/{pair}/coherence")]
+                .iter()
+                .all(|path| {
+                    reader.artifacts("intermediate").into_iter().any(|a| {
+                        a.path == **path
+                            && a.provenance.alignment_id.as_deref()
+                                == Some(result.alignment_id.as_str())
+                    })
+                });
+            let mut h = if current_alignment {
+                read_transfer_h(&reader, &pair).map_err(err)?
+            } else {
+                None
+            };
+            if let Some(values) = &mut h {
+                let coherence = read_complex_tensor(&reader, &pair, "coherence").map_err(err)?;
+                if let Some(coherence) = coherence.filter(|c| c.len() == values.len()) {
+                    for (value, (msc, _)) in values.iter_mut().zip(coherence) {
+                        if !msc.is_finite() || msc < crate::calibration::MIN_COHERENCE {
+                            *value = (f64::NAN, f64::NAN);
+                        }
+                    }
+                } else {
+                    h = None;
+                }
+            }
+            let mut lineage = vec![artifact.artifact_id.as_str().to_string()];
+            if h.is_some() {
+                lineage.extend([path, format!("intermediate/{pair}/coherence")]);
+            }
+            calibration_evidence.push(crate::calibration::TransferEvidence {
+                source: result.source_input_id.clone(),
+                capture: result.capture_input_id.clone(),
+                rate: capture.decoded.sample_rate,
+                h,
+                confidence: result.confidence,
+                lineage,
+            });
+        }
+        // キャプチャ間比較は job 全体の成果物。既存のペア選択・観測は変更しない。
+        let mut captures: Vec<_> = ctx
+            .manifest
+            .inputs
+            .iter()
+            .filter(|i| {
+                matches!(
+                    i.role,
+                    al_core::InputRole::CaptureBug | al_core::InputRole::CaptureReference
+                )
+            })
+            .collect();
+        captures.sort_by_key(|i| {
+            (
+                i.role != al_core::InputRole::CaptureReference,
+                i.input_id.as_str(),
+            )
+        });
+        for (i, reference) in captures.iter().enumerate() {
+            for target in &captures[i + 1..] {
+                let (comparison, tensor) = crate::calibration::compare(
+                    reference.input_id.as_str(),
+                    target.input_id.as_str(),
+                    &calibration_evidence,
+                );
+                let name = format!("{}__{}", reference.input_id, target.input_id);
+                let provenance = al_dataset::provenance::Provenance {
+                    input_id: "job".into(),
+                    algorithm_id: "cross_capture.path_gain.v1".into(),
+                    algorithm_version: "1".into(),
+                    params: comparison.records[0].params.clone(),
+                    alignment_id: None,
+                    parents: comparison.records[0].lineage.clone(),
+                };
+                if let Some(tensor) = tensor {
+                    write_tensor(&mut writer, &tensor, provenance.clone(), chunk_bytes)
+                        .map_err(err)?;
+                }
+                writer
+                    .write_json(
+                        "features/cross_capture",
+                        &name,
+                        &serde_json::to_value(&comparison)
+                            .map_err(io::Error::other)
+                            .map_err(err)?,
+                        provenance,
+                    )
+                    .map_err(err)?;
+                records.push(ArtifactRecord {
+                    artifact_id: ctx.registry.issue(),
+                    role: "cross_capture_features".into(),
+                    path: PathBuf::from(format!("analysis/features/cross_capture/{name}.json")),
+                    produced_by: Some(StageKind::ExpensiveAnalysis),
+                    inputs: loaded_alignments
+                        .iter()
+                        .filter(|(_, r, _)| {
+                            r.capture_input_id == reference.input_id.as_str()
+                                || r.capture_input_id == target.input_id.as_str()
+                        })
+                        .map(|(a, _, _)| a.artifact_id.clone())
+                        .collect(),
+                    params: serde_json::json!({"reference_capture_id": reference.input_id, "target_capture_id": target.input_id}),
+                });
+            }
+        }
         for (artifact, result, pcm) in &loaded_alignments {
             if pairs.contains_key(&result.capture_input_id) {
                 continue; // first locate result per capture wins
@@ -666,7 +779,15 @@ fn read_transfer_h(
     reader: &al_dataset::reader::DatasetReader,
     pair: &str,
 ) -> io::Result<Option<Vec<(f64, f64)>>> {
-    let name = format!("{pair}/transfer_h");
+    read_complex_tensor(reader, pair, "transfer_h")
+}
+
+fn read_complex_tensor(
+    reader: &al_dataset::reader::DatasetReader,
+    pair: &str,
+    kind: &str,
+) -> io::Result<Option<Vec<(f64, f64)>>> {
+    let name = format!("{pair}/{kind}");
     let path = format!("intermediate/{name}");
     if !reader
         .artifacts("intermediate")
@@ -680,7 +801,7 @@ fn read_transfer_h(
     if shape.len() != 2 || shape[0] != 2 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("transfer_h tensor {path} has unexpected shape {shape:?}"),
+            format!("{kind} tensor {path} has unexpected shape {shape:?}"),
         ));
     }
     let bins = shape[1] as usize;
