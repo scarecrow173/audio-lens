@@ -4,7 +4,7 @@ type: "adr"
 status: "proposed"
 title: "Analysis Dataset の保存形式を分割する"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -133,3 +133,12 @@ Chosen option: "JSON メタデータ + Parquet 表形式 + チャンクテンソ
 推奨レイアウトと validity セマンティクスは
 `../specs/analysis-dataset.md`、可搬性要件は
 `../specs/analysis-export.md` を参照。
+
+## #33 の音声保存形式の実施判断 (2026-10-11)
+
+保存ロールの WAV/FLAC 方針は維持するが、FLAC 保存は coordinator 承認済み
+defer とする。現行は WAV のみを実装し、#32 の減算後残差は Float64 WAV と
+provenance で保持する。FLAC 圧縮を実装済みとは扱わず、保存容量・I/O の
+実測と浮動小数解析値の保持方式を review し、新 codec 依存は明示承認を得る。
+RIFF 上限超過はエラーとし、別形式への暗黙変換は行わない。
+[詳細と証拠](../tasks/spec-residual-decisions.md) を参照。

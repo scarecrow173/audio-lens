@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "候補イベントモデルと確度伝播"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -144,3 +144,12 @@ AudioLens をバグ分類器にしないための規範を定める。
 `cheap-analysis-features.md` と `reference-analysis.md` の特徴を
 入力として `expensive-analysis.md` のトリガを生成する。データセット
 契約は `analysis-dataset.md` を参照。
+
+## #33 の実行境界
+
+候補検出は論理段であり、`ExpensiveAnalysisStage` 内で候補生成・保存を
+高コスト解析のトリガ評価より先に実行する。独立 StageKind は要求しない。
+候補なしでも空の `events/candidates` を保存して未実行と区別し、
+高コスト解析が抑制されても候補を保持する。元の連続特徴を変更せず、
+候補テーブルの provenance.parents から走査した特徴へ辿れる契約を維持する。
+[承認と検証証拠](../tasks/spec-residual-decisions.md) を参照。

@@ -241,7 +241,7 @@ pub(crate) fn analyze(
                     "reference.band_lag_ls.v1",
                     ResolutionClass::Segment,
                 )
-                .resolution(window as u64, hop as u64)
+                .resolution(window as u64, hop as u64, rate)
                 .scalar(
                     "ref.band_gain_m2",
                     gain,

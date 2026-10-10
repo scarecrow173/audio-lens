@@ -275,6 +275,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             region: vec![[0, 1], [0, rms_traj.len() as u64]],
         };
         rec.resolution = Some(Resolution {
+            sample_rate: rate,
             window: level_window as u64,
             hop: level_hop as u64,
         });
@@ -284,7 +285,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         if let Some(s) = robust_summary(&rms_traj) {
             let rb = || {
                 RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Mid20ms)
-                    .resolution(level_window as u64, level_hop as u64)
+                    .resolution(level_window as u64, level_hop as u64, rate)
                     .lineage(lineage.iter().cloned())
             };
             push({
@@ -357,7 +358,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 .map(|f| (f.iter().map(|v| v * v).sum::<f64>() / f.len() as f64).sqrt())
                 .collect();
             let mut r = RecordBuilder::new(&dec.input_id, "cheap.v1", class)
-                .resolution(win as u64, (win / 2) as u64)
+                .resolution(win as u64, (win / 2) as u64, rate)
                 .lineage(lineage.iter().cloned())
                 .scalar(
                     id,
@@ -766,7 +767,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
 
         let rb = RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Mid20ms)
-            .resolution(cfg.stft_window as u64, cfg.stft_hop as u64)
+            .resolution(cfg.stft_window as u64, cfg.stft_hop as u64, rate)
             .lineage(lineage.iter().cloned());
         let mut spec_rec = |id: &str, vals: &[f64], unit: &str| {
             if let Some(s) = robust_summary(vals) {
@@ -1163,6 +1164,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 );
                 cr.channels = pair_sel;
                 cr.resolution = Some(Resolution {
+                    sample_rate: rate,
                     window: cfg.stft_window as u64,
                     hop: cfg.stft_hop as u64,
                 });
@@ -1187,7 +1189,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
     if !channel_rms.is_empty() && !channel_rms[0].is_empty() {
         let rms = &channel_rms[0];
         let rb = RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Mid20ms)
-            .resolution(level_window as u64, level_hop as u64)
+            .resolution(level_window as u64, level_hop as u64, rate)
             .lineage(lineage.iter().cloned());
         // Onset strength: positive RMS-trajectory derivative peaks.
         let mut onsets = Vec::new();
@@ -1289,7 +1291,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                     - lags.iter().copied().fold(f64::MAX, f64::min);
                 let mut lr =
                     RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Broad100ms)
-                        .resolution(block as u64, block as u64)
+                        .resolution(block as u64, block as u64, rate)
                         .lineage(lineage.iter().cloned())
                         .scalar(
                             "mod.lag_drift_samples",
@@ -1331,6 +1333,33 @@ mod tests {
             .iter()
             .find(|r| r.feature_id == id)
             .unwrap_or_else(|| panic!("missing record {id}"))
+    }
+
+    #[test]
+    fn windowed_records_persist_the_decoded_sample_rate() {
+        for rate in [32_000, 44_100] {
+            let samples: Vec<f64> = (0..8192)
+                .map(|i| 0.5 * (2.0 * std::f64::consts::PI * 440.0 * i as f64 / rate as f64).sin())
+                .collect();
+            let out = analyze_input(
+                &dec(vec![samples.clone(), samples], rate),
+                &CheapConfig::default(),
+            );
+            let windowed: Vec<_> = out
+                .records
+                .iter()
+                .filter(|r| r.resolution.is_some())
+                .collect();
+            assert!(!windowed.is_empty());
+            for record in windowed {
+                let json = serde_json::to_value(record).unwrap();
+                assert_eq!(
+                    json["resolution"]["sample_rate"], rate,
+                    "{}",
+                    record.feature_id
+                );
+            }
+        }
     }
 
     #[test]
