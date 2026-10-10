@@ -4,7 +4,7 @@ type: "design"
 status: "draft"
 title: "AudioLens 設計概要"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-10"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -49,6 +49,8 @@ relations:
 | [dataset-schema.md](./dataset-schema.md) | manifest・表・テンソル・音声の構造 | データセット spec、ストレージ ADR |
 | [analysis-stages.md](./analysis-stages.md) | cheap / reference / expensive・イベント | 解析系 spec、観測主義 ADR |
 | [visualization-export.md](./visualization-export.md) | 可視化派生データ・サマリ・パッケージ | 可視化・エクスポート・検証 spec、派生 ADR |
+
+| [residual-fixes.md](./residual-fixes.md) | #28〜#33 の残存契約修正・仕様判断(draft) | 残件 spec、責務境界 ADR |
 
 ## 層構造と依存
 
