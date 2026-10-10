@@ -28,6 +28,7 @@ relations:
     - "docs/specs/media-ingest.md"
     - "docs/specs/reference-analysis.md"
     - "docs/adr/mp4-demux-decode.md"
+    - "docs/designs/media-format-analysis-extensions.md"
   derived-by: []
   verifies: []
   verified-by:
