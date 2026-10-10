@@ -1,7 +1,7 @@
 ---
 id: "DESIGN-034DlyKvtWhb8oy1WLAsPV"
 type: "design"
-status: "draft"
+status: "approved"
 title: "残存課題の責務境界と検証設計"
 created: "2026-10-10"
 updated: "2026-10-10"
