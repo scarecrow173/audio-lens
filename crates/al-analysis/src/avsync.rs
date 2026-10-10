@@ -1,11 +1,9 @@
 //! A/V event synchronization: match cheap audio onsets against the
 //! ingest-side `video_features` event list and measure the offset.
 //!
-//! Both sides are rebased onto their own stream clock before
-//! comparison: video events are converted from `vids` stream-clock
-//! ticks minus `start_tick`, audio onsets are already seconds from PCM
-//! start (the `auds` stream's own origin). Container-level `dwStart`
-//! offsets therefore cancel and cannot leak into `avsync.delta`.
+//! 音声 PCM の開始を共通原点とする。映像 tick は自身の timebase で秒に
+//! 変換してから音声 stream の start_tick/timebase を引く。音声 onset は
+//! PCM 開始からの秒のままなので、auds/vids の実相対 offset を保持する。
 //!
 //! Matching is deterministic nearest-neighbor: every onset↔event
 //! candidate inside `match_window_s` is considered, pairs are greedily
@@ -45,28 +43,27 @@ impl AvSyncConfig {
     }
 }
 
-/// One video event rebased onto the `vids` stream clock, in seconds.
+/// 共通の音声 PCM 原点へ変換した映像イベント。
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct VideoEventS {
     /// Event classification (kept verbatim from ingest).
     pub kind: VideoEventKind,
     /// Frame index in the decoded series.
     pub frame: u32,
-    /// Seconds since the stream's declared origin (`start_tick`).
+    /// Seconds since the audio PCM origin.
     pub time_s: f64,
 }
 
-/// Rebase `events` from stream-clock ticks to seconds since
-/// `start_tick`. The stream's own clock is the only fact used — no
-/// nominal FPS reconstruction.
-pub fn rebase_events(video: &VideoFeatures) -> Vec<VideoEventS> {
+/// 映像 stream の tick を音声 PCM 原点からの秒へ変換する。
+/// nominal FPS を使用せず、両 stream の宣言時計の相対 offset を保つ。
+pub fn rebase_events(video: &VideoFeatures, audio_start_s: f64) -> Vec<VideoEventS> {
     video
         .events
         .iter()
         .map(|e| VideoEventS {
             kind: e.kind,
             frame: e.frame,
-            time_s: (e.time_ticks - video.start_tick) as f64 / video.timebase_hz as f64,
+            time_s: e.time_ticks as f64 / video.timebase_hz as f64 - audio_start_s,
         })
         .collect()
 }
@@ -76,7 +73,7 @@ pub fn rebase_events(video: &VideoFeatures) -> Vec<VideoEventS> {
 pub struct AvSyncPair {
     /// Onset position, seconds from PCM start.
     pub audio_time_s: f64,
-    /// Event position, seconds on the rebased `vids` clock.
+    /// Event position, seconds since the audio PCM origin.
     pub video_time_s: f64,
     /// `video_time_s − audio_time_s` — the A/V offset estimate.
     pub delta_s: f64,
@@ -106,7 +103,7 @@ fn pair_confidence(abs_delta: f64, window_s: f64) -> Confidence {
 }
 
 /// Greedily match `onsets` (seconds from PCM start) to `events`
-/// (rebased `vids` seconds) one-to-one within `window_s`. Pairs are
+/// (audio-PCM-origin seconds) one-to-one within `window_s`. Pairs are
 /// returned in audio-time order.
 pub fn match_events(onsets: &[f64], events: &[VideoEventS], window_s: f64) -> Vec<AvSyncPair> {
     // Every candidate inside the window, nearest first — greedy
@@ -181,6 +178,7 @@ pub fn sync_records(
     input_id: &str,
     onset_times: Option<&[f64]>,
     video: Option<&VideoFeatureArtifact>,
+    audio_start_s: f64,
     cfg: &AvSyncConfig,
     lineage: Vec<String>,
 ) -> Vec<FeatureRecord> {
@@ -202,6 +200,14 @@ pub fn sync_records(
                 Validity::DecodeInputUnavailable,
                 format!("video features unavailable: {reason}"),
             )),
+            Some(VideoFeatureArtifact::Decoded(v))
+                if v.timebase_hz == 0 || !audio_start_s.is_finite() =>
+            {
+                Some((
+                    Validity::ComputationFailed,
+                    "A/V stream clock origin unavailable or invalid".into(),
+                ))
+            }
             Some(VideoFeatureArtifact::Decoded(_)) => None,
         }
     };
@@ -244,7 +250,7 @@ pub fn sync_records(
         Some(VideoFeatureArtifact::Decoded(v)) => v,
         _ => unreachable!("blocked cases returned above"),
     };
-    let events = rebase_events(video);
+    let events = rebase_events(video, audio_start_s);
     let pairs = match_events(onsets, &events, cfg.match_window_s);
 
     // Per-pair evidence: each accepted pair contributes audio_time,
@@ -255,6 +261,8 @@ pub fn sync_records(
             "pair": i,
             "event_kind": p.event_kind,
             "event_frame": p.event_frame,
+            "clock_origin": "audio_pcm_start",
+            "audio_start_s": audio_start_s,
         });
         for (id, value) in [
             ("avsync.audio_time", p.audio_time_s),
@@ -417,6 +425,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -449,15 +458,15 @@ mod tests {
     }
 
     #[test]
-    fn dwstart_offset_never_contaminates_delta() {
-        // Same fixture but the video stream declares dwStart = 100
-        // ticks: rebasing must cancel it exactly.
+    fn equal_stream_origins_cancel_without_discarding_relative_offset() {
+        // 両 stream の共通シフト 10 s のみが相殺される。
         let v = features(&[(105, VideoEventKind::SceneChange)], 100);
         let onsets = [0.6];
         let records = sync_records(
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            10.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -485,6 +494,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -504,6 +514,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -518,7 +529,14 @@ mod tests {
     #[test]
     fn missing_or_undecodable_video_is_explicit() {
         // No vids stream at all → NotApplicable.
-        let records = sync_records("IN-1", Some(&[0.5]), None, &AvSyncConfig::default(), vec![]);
+        let records = sync_records(
+            "IN-1",
+            Some(&[0.5]),
+            None,
+            0.0,
+            &AvSyncConfig::default(),
+            vec![],
+        );
         assert_eq!(
             find(&records, "avsync.median_delta").validity,
             Validity::NotApplicable
@@ -532,6 +550,7 @@ mod tests {
                 codec: "MJPG".into(),
                 reason: "compressed video codec MJPG is not decodable".into(),
             }),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -543,6 +562,7 @@ mod tests {
             "IN-1",
             None,
             Some(&VideoFeatureArtifact::Decoded(features(&[], 0))),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -550,5 +570,25 @@ mod tests {
             find(&records, "avsync.median_delta").validity,
             Validity::DecodeInputUnavailable
         );
+    }
+
+    #[test]
+    fn unavailable_clock_origin_does_not_produce_valid_sync() {
+        for (origin, hz) in [(f64::NAN, 10), (0.0, 0)] {
+            let v = features_at(&[(5, VideoEventKind::SceneChange)], 0, hz);
+            let records = sync_records(
+                "IN-1",
+                Some(&[0.5]),
+                Some(&VideoFeatureArtifact::Decoded(v)),
+                origin,
+                &AvSyncConfig::default(),
+                vec![],
+            );
+            assert_eq!(
+                find(&records, "avsync.median_delta").validity,
+                Validity::ComputationFailed
+            );
+            assert!(!records.iter().any(|r| r.feature_id == "avsync.delta"));
+        }
     }
 }
