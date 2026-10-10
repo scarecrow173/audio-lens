@@ -390,6 +390,7 @@ fn pair_evidence_populates_pair_dependent_families() {
             Some(alignment_id.as_str()),
             "{id} must reference the locate alignment"
         );
+        assert!(r["channels"].is_null(), "{id} is a pair summary: {r}");
     }
     // The mixing matrix fit is near-exact for a pure scalar mix.
     assert_eq!(find("exp.mix_polarity")["value"]["scalar"], 1.0);
@@ -410,6 +411,7 @@ fn pair_evidence_populates_pair_dependent_families() {
     // locate alone is not enough, so it stays invalid with the
     // pair-evidence reason.
     let ir = find("exp.ir_early_late_ratio");
+    assert!(ir["channels"].is_null());
     assert_ne!(ir["validity"].as_str(), Some("valid"));
     assert_eq!(
         ir["invalid_reason"].as_str(),
