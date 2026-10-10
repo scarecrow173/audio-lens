@@ -9,7 +9,7 @@ Directory: `docs/tasks`
 | TASK-035eXcVbNmAsDfGhJkLzQ | al-math: 相関/NCC/bandpass カーネル | todo | [al-math-correlation.md](./al-math-correlation.md) |
 | TASK-035dQwErTyUiOpAsDfGhJk | al-math: FFT カーネル(複素/実数) | todo | [al-math-fft.md](./al-math-fft.md) |
 | TASK-035fPlMnOkJiHgFeDcBaZ | al-math: least_squares を Householder QR 化 | todo | [al-math-qr.md](./al-math-qr.md) |
-| TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | todo | [al-math-skeleton.md](./al-math-skeleton.md) |
+| TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | in-progress | [al-math-skeleton.md](./al-math-skeleton.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
 | TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |

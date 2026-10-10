@@ -1,10 +1,10 @@
 ---
 id: "TASK-035cMnBvCxZaSdFgHjKlQp"
 type: "task"
-status: "todo"
+status: "in-progress"
 title: "al-math: クレート骨格 + pulp dispatch 基盤"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-10"
 owners: []
 relations:
   source: []
