@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "残存課題の責務境界と検証設計"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -41,6 +41,18 @@ relations:
 ## Context
 
 #28〜#33 の共通の完了条件は、計測の意味と来歴を守り、仕様との残差を明示することである。spec と ADR の各 1 件を直接の derives-from とし、既存領域仕様は spec 経由で参照する。
+
+### #30 の承認済み具体化 (2026-10-11)
+
+fixture writer が RIFF word padding と packet stream 0..=99 を強制する。
+index を出力しない AVI は HASINDEX を立てず、未パディング BGR24 は
+DWORD 整列幅に限定する。video の rcFrame は寸法の正本である strf から
+導出し、audio はゼロを維持する。周期 fixture の現行 ambiguous_alignment
+を明示固定し、同じテストの非周期対照の受理で全拒否への回帰を検出する。
+TempDir が作成直後から回収を所有し、構築途中と assertion の unwind を
+含むスコープ終了を扱う。合成 hash は原入力の検証証拠と混同しない。
+四つの未実装記述子は expensive-analysis spec の defer backlog に保持する。
+承認と項目別証拠は fixture-review-fidelity task に記録する。
 
 ## Scope
 

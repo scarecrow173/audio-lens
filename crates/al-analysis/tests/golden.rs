@@ -6,6 +6,11 @@
 //! `features/reference/<src>__<cap>.json` の feature record を
 //! 許容誤差付きで検証する。
 //!
+//! ingest を省略し decoded_pcm を直接登録する合成 fixture。
+//! src.bin / cap.bin は実在する入力を指さず、source_sha256 の aa/bb は
+//! 入力識別用のダミー値で、PCM や原ファイルの SHA-256 ではない。
+//! 来歴の実ファイル検証は ingest 結合テストが担当する。
+//!
 //! ケース一覧(spec `validation-strategy.md` の reference 行列):
 //! - scalar gain / band EQ / phase(all-pass) / fixed delay / jitter /
 //!   SRC time-scale / polarity / channel matrix mix / low-coherence
@@ -29,11 +34,12 @@ use al_locate::stage::LocateStage;
 use al_testkit::expect::{Tolerance, expect_between, expect_close, expect_true};
 use al_testkit::media::pcm_f64le;
 use al_testkit::signal::{self, Biquad};
+use al_testkit::temp::TempDir;
 
 const RATE: u32 = 48_000;
 
 struct Fixture {
-    dir: PathBuf,
+    dir: TempDir,
     manifest: Manifest,
     config: serde_json::Value,
     source_id: String,
@@ -54,8 +60,7 @@ fn fixture(
     capture_channels: &[Vec<f64>],
     config: serde_json::Value,
 ) -> Fixture {
-    let dir = std::env::temp_dir().join(format!("al-ref-golden-{tag}-{}", JobId::new()));
-    fs::create_dir_all(&dir).unwrap();
+    let dir = TempDir::new(&format!("al-ref-golden-{tag}"));
 
     let mut src_input = input(InputRole::SourceAsset, dir.join("src.bin"));
     let mut cap_input = input(InputRole::CaptureBug, dir.join("cap.bin"));
@@ -114,7 +119,7 @@ fn ctx<'a>(fx: &'a Fixture, registry: &'a ArtifactRegistry) -> StageContext<'a> 
 /// locate → (register) → reference analysis → persisted feature
 /// records + locate result body を返す。
 fn run(fx: &mut Fixture) -> (serde_json::Value, serde_json::Value) {
-    let registry = ArtifactRegistry::new(&fx.dir);
+    let registry = ArtifactRegistry::new(fx.dir.as_ref());
     for rec in LocateStage::new().run(&ctx(fx, &registry)).expect("locate") {
         fx.manifest.register_artifact(rec);
     }
@@ -214,7 +219,6 @@ fn case_scalar_gain() {
         scalar(record(&body, "ref.rms_ratio")),
         Tolerance::abs_rel(0.03, 0.1),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 帯域別 EQ ====
@@ -257,7 +261,6 @@ fn case_band_eq() {
         scalar(flat).abs(),
         Tolerance::abs_rel(0.15, 0.2),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 位相 / all-pass ====
@@ -297,7 +300,6 @@ fn case_phase_allpass() {
         median,
         Tolerance::abs_rel(0.2, 0.25),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 固定遅延 ====
@@ -332,7 +334,6 @@ fn case_fixed_delay() {
             scalar(record(&body, "ref.similarity_fullband"))
         ),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ジッタ遅延 ====
@@ -365,7 +366,6 @@ fn case_jitter_delay() {
             scalar(record(&body, "ref.lag_p95"))
         ),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== サンプルレート不一致 / 時間伸縮ドリフト ====
@@ -396,7 +396,6 @@ fn case_src_time_scale() {
         spread > 8.0,
         format!("lag spread {spread}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 極性反転 ====
@@ -419,7 +418,6 @@ fn case_polarity_inversion() {
         scalar(record(&body, "ref.gain_ls")),
         Tolerance::abs_rel(0.1, 0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== チャンネル入れ替え / 行列ミックス ====
@@ -466,7 +464,6 @@ fn case_channel_swap_matrix() {
         m[1][1].as_f64().unwrap(),
         Tolerance::abs(0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 低コヒーレンス加算ノイズ ====
@@ -494,7 +491,6 @@ fn case_added_noise() {
         scalar(record(&body, "ref.gain_ls")),
         Tolerance::abs_rel(0.1, 0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== クリッピング / リミッタ ====
@@ -512,7 +508,6 @@ fn case_clipping() {
         0.98,
         scalar(record(&body, "ref.similarity_fullband")),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 既知遅延のコムフィルタ ====
@@ -550,7 +545,6 @@ fn case_comb_filter() {
         hi / lo.max(1e-9) > 1.15,
         format!("band gains {lo}..{hi}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 既知遅延のエコー ====
@@ -574,7 +568,6 @@ fn case_echo() {
         0.97,
         scalar(record(&body, "ref.similarity_fullband")),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 意図的な SRC エイリアス / イメージ ====
@@ -628,7 +621,6 @@ fn case_src_alias_image() {
         })
         .expect("band containing 1 kHz");
     assert_eq!(mid["validity"], "valid", "1k band: {mid}");
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ドロップしたブロック(バッファアンダーラン = 無音化)====
@@ -653,7 +645,6 @@ fn case_dropped_block_silence() {
         scalar(record(&body, "ref.lag_step_candidates")),
         Tolerance::abs(0.5),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ドロップしたブロック(内容が本当に欠落 = lag ステップ)====
@@ -678,7 +669,6 @@ fn case_dropped_block_step() {
         p95 - p05 > 128.0,
         format!("lag p05={p05} p95={p95}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== バッファ反復 ====
@@ -702,7 +692,6 @@ fn case_repeated_buffer() {
         p95 - p05 > 128.0,
         format!("lag p05={p05} p95={p95}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== スタックサンプル ====
@@ -726,7 +715,6 @@ fn case_stuck_samples() {
         scalar(record(&body, "ref.lag_step_candidates")),
         Tolerance::abs(0.5),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 非コヒーレント PSD 比の高域リフト ====
@@ -783,7 +771,6 @@ fn pinned_noncoherent_psd_lift_not_valid_eq() {
             ),
         );
     }
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 低コヒーレンス時の optimal-lag 水増し ====
@@ -808,5 +795,4 @@ fn pinned_low_coherence_no_inflated_lag() {
         lag["validity"] != "valid",
         format!("lag_median validity {}", lag["validity"]),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
