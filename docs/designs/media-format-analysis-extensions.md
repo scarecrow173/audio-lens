@@ -1,7 +1,7 @@
 ---
 id: "DESIGN-034DlwOAFNKWY4VRafyYzo"
 type: "design"
-status: "draft"
+status: "approved"
 title: "メディア形式拡大・正規化アーキテクチャと解析精度拡張"
 created: "2026-10-10"
 updated: "2026-10-10"

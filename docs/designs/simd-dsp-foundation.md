@@ -1,7 +1,7 @@
 ---
 id: "DESIGN-034Dlsvf9IuZSuybyJHn8w"
 type: "design"
-status: "draft"
+status: "approved"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-10"
 updated: "2026-10-10"
