@@ -64,6 +64,7 @@ name = "al-locate"
 version = "0.1.0"
 dependencies = [
  "al-core",
+ "al-dataset",
  "al-job",
  "al-math",
  "al-media",

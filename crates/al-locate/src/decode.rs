@@ -22,7 +22,7 @@ use crate::dsp::deinterleave;
 use crate::normalize::{NormalizedParams, PreparedInput, bad};
 use crate::result::{LocateResult, PcmReference, SampleRange};
 
-/// artifact ID を解決し、期待する配置と区間を検証して再取得する。
+/// normalized PCM または残差 signal version を artifact ID で解決し、配置と区間を検証する。
 pub fn read_normalized_pcm(
     reference: &PcmReference,
     range: SampleRange,
@@ -47,6 +47,9 @@ pub(crate) fn read_normalized_record(
     record: &al_job::manifest::ArtifactRecord,
     ctx: &StageContext<'_>,
 ) -> io::Result<PreparedInput> {
+    if record.role == "residual" {
+        return read_residual_record(record, ctx);
+    }
     if record.role != "normalized_pcm" || record.produced_by != Some(al_core::StageKind::Locate) {
         return Err(bad("artifact is not locate normalized_pcm"));
     }
@@ -127,6 +130,105 @@ pub(crate) fn read_normalized_record(
     })
 }
 
+/// 減算を再実行せず、保存された残差 signal version を検証して復元する。
+fn read_residual_record(
+    record: &al_job::manifest::ArtifactRecord,
+    ctx: &StageContext<'_>,
+) -> io::Result<PreparedInput> {
+    use crate::residual::ResidualPcmParams;
+    let params: ResidualPcmParams = serde_json::from_value(record.params.clone()).map_err(bad)?;
+    params.pcm.validate()?;
+    let expected_path = std::path::PathBuf::from(format!(
+        "locate/residual/{}_{}.wav",
+        params.parent_source, record.artifact_id
+    ));
+    if record.produced_by != Some(al_core::StageKind::Locate)
+        || params.encoding != "wav-f64le"
+        || record.path != expected_path
+        || record.inputs
+            != vec![
+                params.source_pcm.artifact_id.clone(),
+                params.original_capture_pcm.artifact_id.clone(),
+                params.parent_artifact.clone(),
+            ]
+    {
+        return Err(bad("residual PCM layout or lineage inconsistent"));
+    }
+    // 親は必ず通常の normalized PCM。循環・残差の暗黙な再減算を拒否する。
+    let resolve_original = |reference: &PcmReference| -> io::Result<PreparedInput> {
+        let original = ctx
+            .manifest
+            .artifacts
+            .iter()
+            .find(|a| a.artifact_id == reference.artifact_id)
+            .ok_or_else(|| bad("residual original PCM missing"))?;
+        if original.role != "normalized_pcm" {
+            return Err(bad("residual original PCM role inconsistent"));
+        }
+        read_normalized_pcm(reference, SampleRange { start: 0, end: 0 }, ctx)
+    };
+    let source = resolve_original(&params.source_pcm)?;
+    let capture = resolve_original(&params.original_capture_pcm)?;
+    let parent = ctx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.artifact_id == params.parent_artifact)
+        .ok_or_else(|| bad("residual parent alignment missing"))?;
+    if parent.role != "locate_result" || parent.produced_by != Some(al_core::StageKind::Locate) {
+        return Err(bad("residual parent alignment role inconsistent"));
+    }
+    let body: serde_json::Value = serde_json::from_slice(&fs::read(checked_job_path(
+        ctx.registry.job_dir(),
+        &parent.path,
+    )?)?)
+    .map_err(bad)?;
+    let alignment: LocateResult = serde_json::from_value(body["result"].clone()).map_err(bad)?;
+    if !alignment.accepted
+        || alignment.alignment_id != params.parent_alignment
+        || alignment.source_input_id != params.parent_source
+        || alignment.source_pcm.as_ref() != Some(&params.source_pcm)
+        || alignment.capture_pcm.as_ref() != Some(&params.original_capture_pcm)
+        || !parent.inputs.contains(&params.source_pcm.artifact_id)
+        || !parent
+            .inputs
+            .contains(&params.original_capture_pcm.artifact_id)
+        || source.params.input_id != params.parent_source
+        || alignment.capture_input_id != params.pcm.input_id
+        || capture.params != params.pcm
+        || params.channel_transform.len() != params.pcm.channels as usize
+        || params.channel_transform.iter().any(|row| {
+            row.len() != source.params.channels as usize || row.iter().any(|v| !v.is_finite())
+        })
+        || !params.energy.before.is_finite()
+        || !params.energy.after.is_finite()
+        || params.energy.before < 0.0
+        || params.energy.after < 0.0
+    {
+        return Err(bad("residual subtraction lineage inconsistent"));
+    }
+    let audio = al_dataset::read_wav(&checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
+    if audio.sample_format != SampleFormat::Float64
+        || audio.sample_rate != params.pcm.sample_rate
+        || audio.channels != params.pcm.channels
+        || audio.samples.len() as u128 != params.pcm.frames as u128 * params.pcm.channels as u128
+        || audio.samples.iter().any(|v| !v.is_finite())
+    {
+        return Err(bad("residual WAV inconsistent with PCM layout"));
+    }
+    Ok(PreparedInput {
+        decoded: DecodedInput {
+            input_id: params.pcm.input_id.clone(),
+            sample_rate: audio.sample_rate,
+            channels: audio.channels,
+            channel_samples: deinterleave(&audio.samples, audio.channels),
+            artifact_ids: vec![record.artifact_id.clone()],
+        },
+        record: record.clone(),
+        params: params.pcm,
+    })
+}
+
 /// alignment 比較の共有読込境界。元 PCM への fallback は行わない。
 pub fn read_alignment_pcm(
     result: &LocateResult,
@@ -151,7 +253,13 @@ pub fn read_alignment_pcm(
     };
     let source = read_normalized_pcm(src, result.normalized_source_range, ctx)?;
     let capture = read_normalized_pcm(cap, result.capture_range, ctx)?;
-    if source.params.input_id != result.source_input_id
+    let residual_parent = &result.params["residual_parent_alignment"];
+    if source.record.role != "normalized_pcm"
+        || (capture.record.role == "residual"
+            && (residual_parent.is_null()
+                || residual_parent != &capture.record.params["parent_alignment"]))
+        || (capture.record.role != "residual" && !residual_parent.is_null())
+        || source.params.input_id != result.source_input_id
         || capture.params.input_id != result.capture_input_id
         || source.params.sample_rate != capture.params.sample_rate
         || capture.params.original_sample_rate != capture.params.sample_rate
