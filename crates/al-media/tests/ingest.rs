@@ -100,6 +100,13 @@ fn ingest_wav_produces_pcm_and_metadata_artifacts() {
     assert_eq!(meta["audio"]["sample_rate"], 48000);
     assert_eq!(meta["audio"]["channels"], 2);
     assert_eq!(meta["audio"]["source_hash"].as_str().unwrap().len(), 64);
+    assert_eq!(meta["decoder"]["backend"], "native");
+    assert_eq!(meta["decoder"]["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(meta["decoder"]["source_hash"], meta["audio"]["source_hash"]);
+    assert_eq!(meta["decoder"]["fallback"], false);
+    assert_eq!(meta["decoder"]["attempts"][0]["executed"], true);
+    assert_eq!(pcm.params["decoder"], meta["decoder"]);
+    assert_eq!(meta_record.params["decoder"], meta["decoder"]);
     // Dictionary provenance (version + content hash) is recorded.
     assert_eq!(meta["dictionary"]["sha256"].as_str().unwrap().len(), 64);
     // The dictionary annotates, never alters raw measurements.
