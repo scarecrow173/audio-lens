@@ -229,16 +229,24 @@ impl LocateMethod for BandNcc {
         let nyquist = f64::from(sample_rate) / 2.0;
         let mut acc = vec![0.0; signal.len() - template.len() + 1];
         let mut bands_used = 0usize;
-        for &(lo, hi) in Self::BANDS {
-            if lo >= nyquist {
-                continue;
-            }
-            let t = dsp::bandpass(template, sample_rate, lo, hi.min(nyquist));
-            if energy(&t) < MIN_ENERGY {
-                continue; // band absent in the template — skip, not reject
-            }
-            let s = dsp::bandpass(signal, sample_rate, lo, hi.min(nyquist));
-            let corr = dsp::ncc(&t, &s, s.len().saturating_sub(t.len()));
+        let bands: Vec<_> = Self::BANDS
+            .iter()
+            .copied()
+            .filter(|&(lo, _)| lo < nyquist)
+            .map(|(lo, hi)| (lo, hi.min(nyquist)))
+            .collect();
+        let templates = dsp::bandpass_many(template, sample_rate, &bands);
+        // 素材に存在する帯域だけキャプチャを処理する。区間と FFT grid は従来と同じ。
+        let active: Vec<_> = bands
+            .iter()
+            .copied()
+            .zip(templates)
+            .filter(|(_, t)| energy(t) >= MIN_ENERGY)
+            .collect();
+        let active_bands: Vec<_> = active.iter().map(|(band, _)| *band).collect();
+        let signals = dsp::bandpass_many(signal, sample_rate, &active_bands);
+        for ((_, t), s) in active.iter().zip(signals) {
+            let corr = dsp::ncc(t, &s, s.len().saturating_sub(t.len()));
             for (a, c) in acc.iter_mut().zip(&corr) {
                 *a += c;
             }
@@ -372,6 +380,20 @@ mod tests {
         let ev = FullNcc.locate(&template, &signal, 48000);
         assert_eq!(ev.validity, Validity::Valid);
         assert_eq!(ev.candidates[0].position, 1500);
+    }
+
+    #[test]
+    fn correlation_methods_rank_inverted_source_by_magnitude_and_keep_signed_score() {
+        let signal = noise_signal(7, 4097);
+        let template: Vec<_> = signal[1500..2001].iter().map(|v| -v).collect();
+        let methods: Vec<Box<dyn LocateMethod>> =
+            vec![Box::new(FullNcc), Box::new(BandNcc), Box::new(GccPhat)];
+        for method in methods {
+            let evidence = method.locate(&template, &signal, 48000);
+            assert_eq!(evidence.validity, Validity::Valid, "{}", method.id());
+            assert_eq!(evidence.candidates[0].position, 1500, "{}", method.id());
+            assert!(evidence.candidates[0].score < 0.0, "{}", method.id());
+        }
     }
 
     #[test]

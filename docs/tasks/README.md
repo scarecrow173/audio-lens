@@ -6,7 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
-| TASK-035eXcVbNmAsDfGhJkLzQ | al-math: 相関/NCC/bandpass カーネル | todo | [al-math-correlation.md](./al-math-correlation.md) |
+| TASK-035eXcVbNmAsDfGhJkLzQ | al-math: 相関/NCC/bandpass カーネル | done | [al-math-correlation.md](./al-math-correlation.md) |
 | TASK-035dQwErTyUiOpAsDfGhJk | al-math: FFT カーネル(複素/実数) | done | [al-math-fft.md](./al-math-fft.md) |
 | TASK-035fPlMnOkJiHgFeDcBaZ | al-math: least_squares を Householder QR 化 | done | [al-math-qr.md](./al-math-qr.md) |
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | done | [al-math-skeleton.md](./al-math-skeleton.md) |
