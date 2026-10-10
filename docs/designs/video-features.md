@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "映像フレーム特徴と A/V 同期設計"
 created: "2026-10-04"
-updated: "2026-10-04"
+updated: "2026-10-11"
 owners: []
 relations:
   source: []
@@ -70,8 +70,8 @@ A/V 同期を設計する。
   公称 FPS 演算に依らない
 - 音声オンセット/イベントと映像イベント時刻の汎用照合
   (差分・確度・分布・ドリフト傾き)。照合前に両系列を各々の
-  ストリームの `start_tick`/first timestamp で共通クロックに
-  リベースする(下記 Data and Control Flow)
+  宣言時計を秒に変換し、音声 PCM 開始を共通原点にする
+  (下記 Data and Control Flow)
 - コンテナレベルのオフセット(auds/vids の `start_tick` 差)は
   既存 `StreamTiming` の per-stream 値から導出可能なため、
   専用レコードは追加せず導出元事実として永続化済み値を使う
@@ -121,14 +121,17 @@ A/V 同期を設計する。
 - ingest: `vids` が非圧縮ならフレームごとに輝度・差分を算出し
   `video_features` として永続化(圧縮なら decode 不可を記録)
 - cheap: 音声オンセット系列を既存どおり算出。onset 時刻は
-  PCM 開始からの秒であり、`auds` の `start_tick`/timebase で
-  オフセットした場合はストリームクロックに揃えてから照合する
+  PCM 開始からの秒のまま扱う。選択された音声 stream の
+  `start_tick / timebase_hz` は ingest metadata の decoder 選択結果と
+  `StreamTiming` から読む(secondary stream の原点と取り違えない)
 - avsync(cheap stage 内): 各音声イベントに対し設定可能な探索窓内
   の最近傍映像イベントを対応付け、ペアごとに
   `avsync.audio_time` / `avsync.video_time` / `avsync.delta` /
-  confidence を記録。両系列は照合前に各ストリームクロック由来の
-  秒時刻へリベースし、`dwStart≠0` のようなコンテナレベル
-  オフセットが delta に混入しないようにする。対応ペア列から
+  confidence を記録。映像は `event_tick / video_timebase_hz -
+  audio_start_tick / audio_timebase_hz` で音声 PCM 開始を共通原点とする。
+  両 stream の共通シフトのみ相殺し、非ゼロ `dwStart` が表す実相対
+  offset は delta に保持する(#28 判断承認: 2026-10-11)。時計が不明・
+  不正なら `ComputationFailed` とし、ゼロ原点を補わない。対応ペア列から
   median/MAD と線形フィットによる drift 傾きをサマリ化
 - すべて秒単位のストリームクロック時刻で扱い、nominal FPS を
   時刻計算に使わない

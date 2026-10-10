@@ -2,8 +2,8 @@
 //! Ingest → CheapAnalysis stages, and the persisted `avsync.*` records
 //! must recover the planted audio/video offset.
 //!
-//! The fixture carries `video_start != 0` so the test also proves the
-//! container-level `dwStart` offset cancels out of `avsync.delta`.
+//! 両 stream の非ゼロ dwStart、共通シフト、異なる原点を検証し、
+//! 相対 offset が avsync.delta に保持されることを確認する。
 
 use std::fs;
 use std::path::PathBuf;
@@ -48,117 +48,124 @@ fn scalar(rec: &serde_json::Value) -> f64 {
 
 #[test]
 fn ingest_then_cheap_recovers_planted_av_offset() {
-    // 4 s of 10 fps video: dark frames 0-14, bright 15-39 → a scene
-    // change (and luminance step) at frame 15 → 1.5 s on the vids
-    // clock. dwStart = 5 ticks declares a container-level offset that
-    // must cancel out. Audio: tone onset at 1.3 s → delta +0.2 s.
-    let fps = 10u32;
-    let dark = vec![0u8; 64 * 48 * 3];
-    let bright = vec![200u8; 64 * 48 * 3];
-    let frames: Vec<Vec<u8>> = (0..40)
-        .map(|f| if f < 15 { dark.clone() } else { bright.clone() })
-        .collect();
-    let rate = 48_000u32;
-    let audio = tone_after_silence(rate, 1.3, 4.0);
-    let mut packets: Vec<MoviPacket> = frames
-        .into_iter()
-        .map(|f| MoviPacket::video_frame(0, f))
-        .collect();
-    packets.push(MoviPacket::audio(1, audio));
-    let avi_bytes = write_avi(&AviSpec {
-        width: 64,
-        height: 48,
-        usec_per_frame: 1_000_000 / fps,
-        total_frames: None,
-        streams: vec![
-            AviStreamSpec::video(64, 48, fps).with_start(5),
-            AviStreamSpec::pcm_audio(1, rate),
-        ],
-        packets,
-    });
+    for (video_start, audio_start, relative_start) in
+        [(0, 0, 0.0), (5, 0, 0.5), (5, 24000, 0.0), (5, 48000, -0.5)]
+    {
+        let expected_delta = 0.2 + relative_start;
+        // 4 s of 10 fps video: dark frames 0-14, bright 15-39 → a scene
+        // change (and luminance step) at frame 15 → 1.5 s on the vids
+        // clock. Audio: tone onset at 1.3 s. dwStart 差を含む delta を検証する。
+        let fps = 10u32;
+        let dark = vec![0u8; 64 * 48 * 3];
+        let bright = vec![200u8; 64 * 48 * 3];
+        let frames: Vec<Vec<u8>> = (0..40)
+            .map(|f| if f < 15 { dark.clone() } else { bright.clone() })
+            .collect();
+        let rate = 48_000u32;
+        let audio = tone_after_silence(rate, 1.3, 4.0);
+        let mut packets: Vec<MoviPacket> = frames
+            .into_iter()
+            .map(|f| MoviPacket::video_frame(0, f))
+            .collect();
+        packets.push(MoviPacket::audio(1, audio));
+        let avi_bytes = write_avi(&AviSpec {
+            width: 64,
+            height: 48,
+            usec_per_frame: 1_000_000 / fps,
+            total_frames: None,
+            streams: vec![
+                AviStreamSpec::video(64, 48, fps).with_start(video_start),
+                AviStreamSpec::pcm_audio(1, rate).with_start(audio_start),
+            ],
+            packets,
+        });
 
-    let dir = temp_dir("e2e");
-    let avi = dir.join("cap.avi");
-    fs::write(&avi, &avi_bytes).unwrap();
+        let dir = temp_dir("e2e");
+        let avi = dir.join("cap.avi");
+        fs::write(&avi, &avi_bytes).unwrap();
 
-    let job_dir = temp_dir("job");
-    let runner = StageRunner::new(&job_dir);
-    let def = JobDefinition::create(
-        vec![input(InputRole::CaptureBug, &avi)],
-        serde_json::json!({}),
-        vec![StageKind::Ingest, StageKind::CheapAnalysis],
-    )
-    .unwrap();
-    let mut stages: Vec<Box<dyn Stage>> = vec![
-        Box::new(al_media::IngestStage::new()),
-        Box::new(al_analysis::stage::CheapAnalysisStage::new()),
-    ];
-    let manifest = runner.run(&def, &mut stages).expect("ingest + cheap");
+        let job_dir = temp_dir("job");
+        let runner = StageRunner::new(&job_dir);
+        let def = JobDefinition::create(
+            vec![input(InputRole::CaptureBug, &avi)],
+            serde_json::json!({"analysis": {"avsync": {"match_window_s": 1.0}}}),
+            vec![StageKind::Ingest, StageKind::CheapAnalysis],
+        )
+        .unwrap();
+        let mut stages: Vec<Box<dyn Stage>> = vec![
+            Box::new(al_media::IngestStage::new()),
+            Box::new(al_analysis::stage::CheapAnalysisStage::new()),
+        ];
+        let manifest = runner.run(&def, &mut stages).expect("ingest + cheap");
 
-    // The ingest stage persisted decoded video features.
-    let vf_artifact = manifest
-        .artifacts
-        .iter()
-        .find(|a| a.role == "video_features")
-        .expect("video_features artifact");
-    let vf: al_media::VideoFeatureReport = serde_json::from_str(
-        &fs::read_to_string(runner.job_dir(&manifest.job_id).join(&vf_artifact.path))
-            .expect("video_features readable"),
-    )
-    .expect("video_features parses");
-    let al_media::VideoFeatureArtifact::Decoded(f) = &vf.features else {
-        panic!("uncompressed AVI must decode video features")
-    };
-    assert_eq!(f.start_tick, 5);
-    let scene = f
-        .events
-        .iter()
-        .find(|e| e.kind == al_media::VideoEventKind::SceneChange)
-        .expect("scene change detected");
-    assert_eq!(scene.time_ticks, 5 + 15); // raw stream clock keeps dwStart
+        // The ingest stage persisted decoded video features.
+        let vf_artifact = manifest
+            .artifacts
+            .iter()
+            .find(|a| a.role == "video_features")
+            .expect("video_features artifact");
+        let vf: al_media::VideoFeatureReport = serde_json::from_str(
+            &fs::read_to_string(runner.job_dir(&manifest.job_id).join(&vf_artifact.path))
+                .expect("video_features readable"),
+        )
+        .expect("video_features parses");
+        let al_media::VideoFeatureArtifact::Decoded(f) = &vf.features else {
+            panic!("uncompressed AVI must decode video features")
+        };
+        assert_eq!(f.start_tick, i64::from(video_start));
+        let scene = f
+            .events
+            .iter()
+            .find(|e| e.kind == al_media::VideoEventKind::SceneChange)
+            .expect("scene change detected");
+        assert_eq!(scene.time_ticks, i64::from(video_start) + 15); // raw stream clock keeps dwStart
 
-    // The cheap feature file carries the avsync records.
-    let input_id = &def.inputs[0].input_id;
-    let feature_path = runner
-        .job_dir(&manifest.job_id)
-        .join("analysis")
-        .join("features")
-        .join("cheap")
-        .join(format!("{input_id}.json"));
-    let body: serde_json::Value =
-        serde_json::from_str(&fs::read_to_string(&feature_path).expect("cheap records"))
-            .expect("cheap records parse");
-    let records = body["records"].as_array().expect("records array");
+        // The cheap feature file carries the avsync records.
+        let input_id = &def.inputs[0].input_id;
+        let feature_path = runner
+            .job_dir(&manifest.job_id)
+            .join("analysis")
+            .join("features")
+            .join("cheap")
+            .join(format!("{input_id}.json"));
+        let body: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(&feature_path).expect("cheap records"))
+                .expect("cheap records parse");
+        let records = body["records"].as_array().expect("records array");
 
-    // The tone edge produces one or two onsets (10 ms hop
-    // quantization across the rising edge); every one must land on
-    // the planted A/V offset.
-    let onset = find(records, "trans.onset_times");
-    assert!(onset["support_count"].as_u64().unwrap() >= 1);
+        // The tone edge produces one or two onsets (10 ms hop
+        // quantization across the rising edge); every one must land on
+        // the planted A/V offset.
+        let onset = find(records, "trans.onset_times");
+        assert!(onset["support_count"].as_u64().unwrap() >= 1);
 
-    // Matched pair(s), delta ≈ +0.2 s, container offset cancelled.
-    let count = find(records, "avsync.pair_count");
-    assert!(scalar(count) >= 1.0);
-    let deltas: Vec<f64> = records
-        .iter()
-        .filter(|r| r["feature_id"] == "avsync.delta")
-        .map(scalar)
-        .collect();
-    assert!(!deltas.is_empty());
-    for d in &deltas {
-        assert!((d - 0.2).abs() <= 0.02, "delta {d} should be ≈0.2 s");
+        // ペア delta は内容差 0.2 s と stream 原点差を含む。
+        let count = find(records, "avsync.pair_count");
+        assert!(scalar(count) >= 1.0);
+        let deltas: Vec<f64> = records
+            .iter()
+            .filter(|r| r["feature_id"] == "avsync.delta")
+            .map(scalar)
+            .collect();
+        assert!(!deltas.is_empty());
+        for d in &deltas {
+            assert!(
+                (d - expected_delta).abs() <= 0.02,
+                "delta {d} should be {expected_delta} s"
+            );
+        }
+        let delta = find(records, "avsync.delta");
+        assert_eq!(delta["validity"], "valid");
+        let median = find(records, "avsync.median_delta");
+        assert!((scalar(median) - expected_delta).abs() <= 0.02);
+        let audio_time = find(records, "avsync.audio_time");
+        assert!((scalar(audio_time) - 1.3).abs() <= 0.02);
+        let video_time = find(records, "avsync.video_time");
+        assert!((scalar(video_time) - (1.5 + relative_start)).abs() < 1e-9);
+
+        fs::remove_dir_all(&dir).ok();
+        fs::remove_dir_all(&job_dir).ok();
     }
-    let delta = find(records, "avsync.delta");
-    assert_eq!(delta["validity"], "valid");
-    let median = find(records, "avsync.median_delta");
-    assert!((scalar(median) - 0.2).abs() <= 0.02);
-    let audio_time = find(records, "avsync.audio_time");
-    assert!((scalar(audio_time) - 1.3).abs() <= 0.02);
-    let video_time = find(records, "avsync.video_time");
-    assert!((scalar(video_time) - 1.5).abs() < 1e-9);
-
-    fs::remove_dir_all(&dir).ok();
-    fs::remove_dir_all(&job_dir).ok();
 }
 
 #[test]
