@@ -249,6 +249,41 @@ impl RealFft {
             spectrum: SpectrumBuffer::Input(input),
         });
     }
+
+    // 複合カーネルは一度選択した ISA を全変換で共有する。
+    #[inline(always)]
+    pub(crate) fn forward_with_simd<S: Simd>(
+        &mut self,
+        simd: S,
+        input: &[f64],
+        output: &mut [c64],
+    ) {
+        assert_eq!(input.len(), self.n);
+        assert_eq!(output.len(), self.n / 2 + 1);
+        RealTransform {
+            plan: self,
+            real: RealBuffer::Input(input),
+            spectrum: SpectrumBuffer::Output(output),
+        }
+        .with_simd(simd);
+    }
+
+    #[inline(always)]
+    pub(crate) fn inverse_with_simd<S: Simd>(
+        &mut self,
+        simd: S,
+        input: &[c64],
+        output: &mut [f64],
+    ) {
+        assert_eq!(output.len(), self.n);
+        assert_eq!(input.len(), self.n / 2 + 1);
+        RealTransform {
+            plan: self,
+            real: RealBuffer::Output(output),
+            spectrum: SpectrumBuffer::Input(input),
+        }
+        .with_simd(simd);
+    }
 }
 
 enum RealBuffer<'a> {
