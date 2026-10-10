@@ -4,7 +4,7 @@ type: "adr"
 status: "proposed"
 title: "残存課題を責務境界で修正し仕様判断を分離する"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -89,3 +89,13 @@ Artifact Graph が一意の spec/ADR/design/plan を選び、全 Issue の task 
 ## More Information
 
 対象は #28 #29 #30 #31 #32 #33。方式を選定する段階で本提案を再検討する。既存 SIMD/decoder 拡張の作業を混ぜない。
+
+## #28 の実施確認(2026-10-11)
+
+#28 の作業境界は parser/clock、native registry、metadata、dataset/viz と
+時計消費者 avsync。coordinator の question `msg_7c43909b855e` reply により、
+独立 task 分割は省略して項目別証拠と論理別コミットで追跡すること、
+packet-slot 文書化、dwStart 実相対 offset の保持、rec LIST 未対応の明示、
+i64 overflow の構造不正境界を承認した。
+[実施 task](../tasks/container-review-edge-cases.md) に全項目の証拠を記録する。
+本確認は #28 の実施判断であり、#33 等の未承認方式を採択しない。
