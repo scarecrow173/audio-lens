@@ -2,12 +2,12 @@
 
 use crate::avi::{StreamTiming, VideoInfo};
 use crate::format::{MediaFormat, detect_format};
-use crate::metadata::{IntegrityObservation, MediaError};
+use crate::metadata::{DECODE_UNAVAILABLE_KIND, IntegrityObservation, MediaError};
 use crate::mp4::Mp4Facts;
 use crate::video::{VideoFeatureArtifact, VideoFeatureConfig, VideoThumbs};
 use crate::wav::DecodedAudio;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnavailableKind {
     Capability,
@@ -15,7 +15,7 @@ pub enum UnavailableKind {
     Io,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Unavailable {
     pub kind: UnavailableKind,
     pub reason: String,
@@ -90,7 +90,7 @@ pub struct MediaProbe {
     pub backend: String,
 }
 
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct StreamResult {
     pub stream: Option<u32>,
     pub kind: String,
@@ -486,8 +486,20 @@ impl MediaDecoder for NativeDecoder {
             }
             if !result.provenance.streams.iter().any(|s| s.kind == kind) {
                 let unavailable = (!decoded).then(|| {
-                    stream
-                        .and_then(|s| s.decode.clone().err())
+                    result
+                        .integrity
+                        .iter()
+                        .find(|o| {
+                            o.kind == DECODE_UNAVAILABLE_KIND
+                                && o.detail["media_kind"] == kind
+                                && o.detail["track_index"].as_u64()
+                                    == stream.map(|s| u64::from(s.stream))
+                        })
+                        .map(|o| {
+                            serde_json::from_value::<Unavailable>(o.detail.clone())
+                                .expect("typed parser failure")
+                        })
+                        .or_else(|| stream.and_then(|s| s.decode.clone().err()))
                         .unwrap_or_else(|| {
                             Unavailable::capability(format!("{kind} decode unavailable"))
                         })
@@ -533,6 +545,29 @@ impl MediaDecoder for NativeDecoder {
             ));
         }
         result.streams = probe.streams.clone();
+        for stream in &result.provenance.streams {
+            if let Some(failure) = &stream.unavailable {
+                // MP4 direct parser はトラックごとの局所理由を既に保持する。
+                if !result.integrity.iter().any(|o| {
+                    o.kind == DECODE_UNAVAILABLE_KIND
+                        && o.detail["media_kind"] == stream.kind
+                        && o.detail["track_index"].as_u64() == stream.stream.map(u64::from)
+                }) {
+                    let codec = probe
+                        .streams
+                        .iter()
+                        .find(|s| Some(s.stream) == stream.stream)
+                        .and_then(|s| s.codec.as_deref());
+                    result
+                        .integrity
+                        .push(IntegrityObservation::decode_unavailable(
+                            &stream.kind,
+                            failure,
+                            serde_json::json!({ "track_index": stream.stream, "codec": codec }),
+                        ));
+                }
+            }
+        }
         result.provenance.settings = serde_json::json!({ "selection": "first_auds_first_vids_or_first_pcm_mp4", "transforms": [], "pcm": "unscaled_interleaved_f64le", "channel_layout": "unknown" });
         Ok(result)
     }

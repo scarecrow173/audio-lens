@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "インジェストとAVタイミング設計"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -86,7 +86,15 @@ relations:
 - コンテナが明示的な PTS を持たない場合(レガシー AVI)、mux 順と
   `strh` クロックから導出した per-packet タイムスタンプ列そのものを
   観測統計とともに保持し、導出値であることをフィールド名
-  (`movi_order_timestamps` + `start_tick`)で明示する
+  (`stream_timestamps` + `timestamp_origin: movi_order` + `start_tick`)で明示する。
+  `dwSampleSize > 0` の時計は分子の余りを stream ごとに繰り越す。
+  `vids` の `pc` 等も packet-slot を消費するため、db/dc だけを数える
+  frame index×scale から時刻を再構成しない。i64 に表現不能な宣言時計は
+  `Malformed`、movi 内の `LIST rec ` は明示的な OpenDML/nested rec
+  `InputUnavailable` とし、空パケット列に読み替えない。
+  入力 `source_hash` は audio null でも metadata の独立フィールドに残す。
+  AVI 二次 auds の codec/rate/channels/packet_lengths は registry probe
+  で観測し、非選択理由を共通 `decode_unavailable` integrity に残す
 - 各観測は artifact-dictionary と照合して注釈を付与するが、
   生計測は抑制しない
 - 成果物は `analysis/inputs/` と `analysis/intermediate/` に出力し、

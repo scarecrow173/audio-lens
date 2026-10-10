@@ -671,7 +671,7 @@ fn case_compressed_only_mp4_ingest() {
     assert!(
         integrity
             .iter()
-            .any(|o| o["kind"] == "decode/input unavailable" && o["detail"]["codec"] == "mp4a"),
+            .any(|o| o["kind"] == "decode_unavailable" && o["detail"]["codec"] == "mp4a"),
         "integrity: {integrity:?}"
     );
 }
