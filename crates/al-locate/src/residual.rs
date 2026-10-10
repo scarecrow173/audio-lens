@@ -193,6 +193,9 @@ mod tests {
             capture_input_id: "cap".into(),
             source_range: SampleRange { start: 0, end: 1 },
             capture_range: SampleRange { start: 0, end: 1 },
+            normalized_source_range: SampleRange { start: 0, end: 0 },
+            source_pcm: None,
+            capture_pcm: None,
             evidence: vec![MethodEvidence {
                 method: "stub".into(),
                 method_version: "0".into(),

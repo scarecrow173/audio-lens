@@ -116,6 +116,9 @@ pub fn evaluate(
                 }
             })
             .unwrap_or(SampleRange { start: 0, end: 0 }),
+        normalized_source_range: SampleRange { start: 0, end: 0 },
+        source_pcm: None,
+        capture_pcm: None,
         evidence: evidence.to_vec(),
         agreeing_methods: agreeing,
         position_spread: spread,

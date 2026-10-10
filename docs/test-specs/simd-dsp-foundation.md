@@ -4,7 +4,7 @@ type: "test-spec"
 status: "proposed"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-10"
 owners: []
 relations:
   source: []
@@ -82,9 +82,18 @@ metadata:
 
 ### リサンプル正規化(TASK-035h)
 
-- [ ] 44.1k×48k ペアがリジェクトされず locate される
-- [ ] provenance に元/変換後レートとリサンプラ種別が記録される
-- [ ] レート一致の既存 golden が変わらない
+- [x] 44.1k×48k ペアがリジェクトされず locate される
+- [x] provenance に元/変換後レートとリサンプラ種別が記録される
+- [x] レート一致の既存 golden が変わらない
+
+- [x] アンチエイリアス・image 抑制・群遅延補償・overshoot 非クリップ
+- [x] 正規化 PCM の identity、複数目標レート、元座標への丸め、lineage
+- [x] 別プロセスの reference/expensive が同じ保存 PCM を再取得
+- [x] PCM 参照欠落、role/レート/チャンネル/長さ/区間不整合でエラー
+
+実行済みの対象検証と既存 fmt 差分は
+[タスクの検証記録](../tasks/locate-resample-normalize.md#検証記録-2026-10-10)
+を参照。基盤全体の他タスクに関する未検証項目はこの結果に含めない。
 
 ## Verdict Criteria
 

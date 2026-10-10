@@ -19,6 +19,155 @@ use al_job::stage::StageContext;
 use al_media::metadata::SampleFormat;
 
 use crate::dsp::deinterleave;
+use crate::normalize::{NormalizedParams, PreparedInput, bad};
+use crate::result::{LocateResult, PcmReference, SampleRange};
+
+/// artifact ID を解決し、期待する配置と区間を検証して再取得する。
+pub fn read_normalized_pcm(
+    reference: &PcmReference,
+    range: SampleRange,
+    ctx: &StageContext<'_>,
+) -> io::Result<PreparedInput> {
+    let record = ctx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.artifact_id == reference.artifact_id)
+        .ok_or_else(|| bad("normalized_pcm reference missing from manifest"))?;
+    let pcm = read_normalized_record(record, ctx)?;
+    if reference.sample_rate != pcm.params.sample_rate || reference.channels != pcm.params.channels
+    {
+        return Err(bad("normalized_pcm reference rate/channels inconsistent"));
+    }
+    pcm.params.validate_range(range)?;
+    Ok(pcm)
+}
+
+pub(crate) fn read_normalized_record(
+    record: &al_job::manifest::ArtifactRecord,
+    ctx: &StageContext<'_>,
+) -> io::Result<PreparedInput> {
+    if record.role != "normalized_pcm" || record.produced_by != Some(al_core::StageKind::Locate) {
+        return Err(bad("artifact is not locate normalized_pcm"));
+    }
+    let params: NormalizedParams = serde_json::from_value(record.params.clone()).map_err(bad)?;
+    params.validate()?;
+    let input = ctx
+        .manifest
+        .inputs
+        .iter()
+        .find(|i| i.input_id.as_str() == params.input_id)
+        .ok_or_else(|| bad("normalized_pcm input missing"))?;
+    let declared = ctx
+        .manifest
+        .input_artifact(&input.input_id)
+        .ok_or_else(|| bad("normalized_pcm input artifact missing"))?;
+    let originals: Vec<_> = record
+        .inputs
+        .iter()
+        .map(|id| {
+            ctx.manifest
+                .artifacts
+                .iter()
+                .find(|a| &a.artifact_id == id)
+                .ok_or_else(|| bad("normalized_pcm original lineage missing"))
+        })
+        .collect::<io::Result<_>>()?;
+    if originals.iter().filter(|a| a.role == "decoded_pcm").count() != 1
+        || originals
+            .iter()
+            .filter(|a| a.role == "ingest_metadata")
+            .count()
+            > 1
+        || originals.iter().any(|a| {
+            !a.inputs.contains(&declared)
+                || !matches!(a.role.as_str(), "decoded_pcm" | "ingest_metadata")
+        })
+        || originals
+            .iter()
+            .filter(|a| a.role == "decoded_pcm")
+            .any(|a| {
+                a.params["sample_rate"].as_u64() != Some(params.original_sample_rate as u64)
+                    || a.params["channels"].as_u64() != Some(params.channels as u64)
+            })
+    {
+        return Err(bad("normalized_pcm original lineage inconsistent"));
+    }
+    let expected_path =
+        std::path::PathBuf::from(format!("locate/normalized/{}.f64le", record.artifact_id));
+    if record.path != expected_path {
+        return Err(bad("normalized_pcm path inconsistent with artifact id"));
+    }
+    let bytes = fs::read(checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
+    let length = params.frames as u128 * params.channels as u128 * 8;
+    if bytes.len() as u128 != length {
+        return Err(bad(
+            "normalized_pcm byte length inconsistent with frame layout",
+        ));
+    }
+    let samples: Vec<f64> = bytes
+        .as_chunks::<8>()
+        .0
+        .iter()
+        .map(|b| f64::from_le_bytes(*b))
+        .collect();
+    if samples.iter().any(|s| !s.is_finite()) {
+        return Err(bad("normalized_pcm has non-finite samples"));
+    }
+    Ok(PreparedInput {
+        decoded: DecodedInput {
+            input_id: params.input_id.clone(),
+            sample_rate: params.sample_rate,
+            channels: params.channels,
+            channel_samples: deinterleave(&samples, params.channels),
+            artifact_ids: vec![record.artifact_id.clone()],
+        },
+        record: record.clone(),
+        params,
+    })
+}
+
+/// alignment 比較の共有読込境界。元 PCM への fallback は行わない。
+pub fn read_alignment_pcm(
+    result: &LocateResult,
+    ctx: &StageContext<'_>,
+) -> io::Result<Option<(PreparedInput, PreparedInput)>> {
+    let (Some(src), Some(cap)) = (&result.source_pcm, &result.capture_pcm) else {
+        let empty = SampleRange { start: 0, end: 0 };
+        if !result.accepted
+            && result.source_pcm.is_none()
+            && result.capture_pcm.is_none()
+            && result.source_range == empty
+            && result.capture_range == empty
+            && result.normalized_source_range == empty
+            && matches!(
+                result.validity,
+                al_core::Validity::DecodeInputUnavailable | al_core::Validity::InsufficientSupport
+            )
+        {
+            return Ok(None); // 未デコード・空入力の明示的な mark
+        }
+        return Err(bad("alignment missing normalized PCM references"));
+    };
+    let source = read_normalized_pcm(src, result.normalized_source_range, ctx)?;
+    let capture = read_normalized_pcm(cap, result.capture_range, ctx)?;
+    if source.params.input_id != result.source_input_id
+        || capture.params.input_id != result.capture_input_id
+        || source.params.sample_rate != capture.params.sample_rate
+        || capture.params.original_sample_rate != capture.params.sample_rate
+        || result.params["normalization"] != source.record.params
+        || source
+            .params
+            .original_range(result.normalized_source_range)?
+            != result.source_range
+        || (result.accepted
+            && result.normalized_source_range.end - result.normalized_source_range.start
+                < result.capture_range.end - result.capture_range.start)
+    {
+        return Err(bad("alignment PCM coordinates inconsistent"));
+    }
+    Ok(Some((source, capture)))
+}
 
 /// Decoded PCM of one input, with channel structure restored.
 #[derive(Debug)]
