@@ -4,7 +4,7 @@ type: "test-spec"
 status: "approved"
 title: "残存課題の契約回帰検証"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -76,3 +76,22 @@ task の原文 inventory 全項目をケースに対応付ける。上表は代�
 ## Risk
 
 検証を省くと信号欠落、時計ドリフト、チャネル誤ラベル、無効値の Valid 化、fixture 偽成功が回帰する。
+
+## AC-33 の承認後の具体的検証 (2026-10-11)
+
+- 候補段: `clipping_candidate_triggers_expensive_without_overwriting_cheap` で
+  candidate_events が高コスト特徴より先に返され、events の provenance が
+  cheap 観測を参照し、元 cheap JSON が不変であることを検証する。
+  `suppressed_triggers_write_events_but_no_expensive` で候補テーブルを保存し、
+  高コスト特徴を生成しないことを検証する。独立 StageKind は要求しない。
+- FLAC: 承認済み defer のため圧縮テストは追加しない。
+  `residual_child_reopens_the_exact_subtracted_signal_and_lineage` で #32 の
+  Float64 WAV の完全一致・再取得・来歴・不整合時のエラーを再確認する。
+- 分解能: `windowed_records_persist_the_decoded_sample_rate` で 32/44.1 kHz の
+  cheap 分解能を検証する。`normalized_alignment_survives_process_boundary` で
+  44.1 kHz 原入力を 48 kHz へ正規化した reference/expensive 成果物のレートを
+  検証する。`windowed_expensive_records_keep_the_analysis_rate_even_when_invalid`
+  で 8/32 kHz の有効・無効分解能を検証する。`feature_record_round_trips` で
+  レートの JSON round trip と欠落時の拒否を固定する。
+
+[選択肢・承認結果・実行結果](../tasks/spec-residual-decisions.md) を参照。

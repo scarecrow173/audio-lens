@@ -392,6 +392,21 @@ fn normalized_alignment_survives_process_boundary() {
             assert!(record.inputs.contains(&pcm.0.record.artifact_id));
             assert!(record.inputs.contains(&pcm.1.record.artifact_id));
         }
+        let reference_body = feature_records(&fx);
+        let resolutions: Vec<_> = reference_body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
         let gain = scalar(&feature_records(&fx), "ref.gain_ls");
         assert_eq!(gain["validity"], "valid", "{gain}");
         assert!((scalar_value(&gain) - 0.5).abs() < 0.02);
@@ -410,6 +425,20 @@ fn normalized_alignment_survives_process_boundary() {
         assert!(cap_record.inputs.contains(&pcm.1.record.artifact_id));
         let body: serde_json::Value =
             serde_json::from_slice(&fs::read(fx.dir.join(&cap_record.path)).unwrap()).unwrap();
+        let resolutions: Vec<_> = body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
         let record = body["records"]
             .as_array()
             .unwrap()

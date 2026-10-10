@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "AudioLens 全体仕様"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -85,6 +85,14 @@ Visualization Builder
 Visualization Dataset
 ```
 
+上記は論理的な処理順序を表す。Candidate Detection は
+`ExpensiveAnalysisStage` の先頭で候補生成 → `events/candidates` 保存 →
+トリガ評価の順に実行する。独立した StageKind や候補のみの再実行は
+要求しない。高コスト解析が抑制されても候補テーブルを保存し、元の
+cheap/reference 特徴と観測へのリンクを保持する。
+この仕様改訂は #33 の coordinator 承認による
+([判断と証拠](../tasks/spec-residual-decisions.md))。
+
 解析ステージ:
 
 - Stage 1 — Cheap features: 解析可能な全キャプチャ / リファレンス信号に
@@ -147,7 +155,10 @@ Visualization Dataset
 - 保存形式の原則:
   - 表形式 / 時系列特徴: Parquet または同等のカラムナ形式
   - 大規模 N 次元テンソル: チャンク化された Zarr 相当形式
-  - 音声の中間物 / 残差: WAV / FLAC
+  - 音声の中間物 / 残差: WAV / FLAC。現行保存は WAV のみ。
+    FLAC 保存は #33 の承認済み defer であり実装済みとは扱わない。
+    減算後残差は Float64 WAV で解析値と来歴を保持する。
+    圧縮保存の再検討条件と制約は [判断記録](../tasks/spec-residual-decisions.md) を参照。
   - メタデータ / スキーマ / 来歴: JSON
   - 複素 STFT と代替解析を導出できる十分な基礎量を保持する
   - アルゴリズムバージョン、パラメータ、サンプルレート、

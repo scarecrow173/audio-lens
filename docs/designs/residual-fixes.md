@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "残存課題の責務境界と検証設計"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -61,7 +61,7 @@ Issue ごとの修正境界と検証設計。#33 の方式判断を実装修正�
 | #30 | fixture builder とテスト所有者 | 実コンテナ契約に沿った padding/index/stride、強い assertion、失敗時 cleanup、合成来歴の説明を管理する |
 | #31 | config 入力と avsync | マーカーの有限時刻と明示クロックを入力境界で検証し、検出イベントと同じ時刻表現へ一箇所で変換して既存照合へ合流する |
 | #32 | residual_search と audio store、alignment PCM 読込境界 | 減算済みチャネルを既存 residual ロールで保存し、残差を独立した signal version として child alignment の使用 PCM に明示参照する。search JSON と親 source/alignment の lineage を同時に登録する |
-| #33 | stage orchestration と dataset schema | 独立候補段/現状の仕様化、FLAC/保存形式の仕様改訂、第一級 sample_rate/既存参照方式を比較して承認に回す |
+| #33 | stage orchestration と dataset schema | 承認済み: 候補検出を論理段として fused 実行を仕様化、FLAC 保存を defer、Resolution.sample_rate を u32 で第一級化 |
 
 ## Data and Control Flow
 
@@ -94,10 +94,21 @@ fail-closed 再取得契約を残差探索にも適用する設計である。
 
 ## Deferred Design Concerns
 
-#33 の三つの方式、marker の入力位置とクロック契約は承認時に明文化する。draft を実装承認と解釈しない。
+#33 の三つの方式は末尾の承認済み採用設計を参照する。marker の入力位置とクロック契約は承認時に明文化する。draft を実装承認と解釈しない。
 
 ## Verification Notes
 
 - [ ] spec の AC-28〜AC-33 が plan/task/test-spec へ対応する。
 - [ ] derives-from が 1 spec + 1 ADR のみを指す。
 - [ ] Graph は関係欠落なしで承認待ちを返す。
+
+## #33 の採用設計 (2026-10-11)
+
+候補生成 → events 保存 → トリガ評価を `ExpensiveAnalysisStage` 内で維持し、
+候補のみの独立再実行は要求しない。FLAC は承認済み defer とし、既存
+Float64 WAV の残差と lineage を維持する。`Resolution` は window/hop と
+必須の `sample_rate: u32` を一箇所に定義し、RecordBuilder と直接生成箇所は
+計算に使用する decoded/normalized PCM レートを渡す。expensive 共通 Emit は
+analyze_region のレートを保持して有効・無効の両経路へ伝播する。
+互換層や manifest レートへの暗黙 fallback は設けず成果物を再生成する。
+[承認・理由・証拠](../tasks/spec-residual-decisions.md) を参照。
