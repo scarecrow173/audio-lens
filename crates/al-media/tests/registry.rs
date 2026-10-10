@@ -3,6 +3,68 @@ use al_media::decoder::{MediaDecoder, NativeDecoder, UnavailableKind};
 use al_testkit::media::{AviSpec, AviStreamSpec, MoviPacket, write_avi};
 
 #[test]
+fn unaligned_audio_packets_keep_fractional_ticks_across_packets() {
+    let mut spec = AviSpec::cfr(2, 2, 30, vec![], vec![], 1, 48000);
+    spec.streams[1].scale = 3;
+    spec.streams[1].sample_size = 2;
+    spec.packets = (0..100).map(|_| MoviPacket::audio(1, vec![0])).collect();
+    let bytes = write_avi(&spec);
+    let direct = al_media::decode_avi(&bytes, &Default::default()).unwrap();
+    let probe = NativeDecoder.probe(&bytes).unwrap();
+    let expected: Vec<i64> = (0..100).map(|i| i * 3 / 2).collect();
+    assert_eq!(direct.timing[1].stream_timestamps, expected);
+    assert_eq!(probe.timing[1].stream_timestamps, expected);
+}
+
+#[test]
+fn avi_clock_range_is_a_structural_boundary_in_direct_and_probe() {
+    let mut spec = AviSpec::cfr(2, 2, 30, vec![vec![0; 16]], vec![0; 2], 1, 48000);
+    spec.streams[0].start = u32::MAX;
+    spec.streams[0].scale = 1;
+    let bytes = write_avi(&spec);
+    let direct = al_media::decode_avi(&bytes, &Default::default()).unwrap();
+    assert_eq!(direct.timing[0].start_tick, i64::from(u32::MAX));
+    assert!(NativeDecoder.probe(&bytes).is_ok());
+    for start in [u32::MAX, 1 << 31] {
+        spec.streams[0].start = start;
+        spec.streams[0].scale = u32::MAX;
+        let bytes = write_avi(&spec);
+        assert!(matches!(
+            al_media::decode_avi(&bytes, &Default::default()),
+            Err(al_media::MediaError::Malformed { .. })
+        ));
+        assert!(matches!(
+            NativeDecoder.probe(&bytes),
+            Err(al_media::MediaError::Malformed { .. })
+        ));
+    }
+}
+
+#[test]
+fn nested_rec_list_is_explicitly_unsupported_in_direct_and_probe() {
+    let spec = AviSpec::cfr(2, 2, 30, vec![vec![0; 16]], vec![0; 2], 1, 48000);
+    let bytes = write_avi(&spec);
+    let at = bytes.windows(4).position(|w| w == b"movi").unwrap();
+    let size = u32::from_le_bytes(bytes[at - 4..at].try_into().unwrap()) as usize;
+    let mut rec = Vec::new();
+    al_testkit::media::push_list(&mut rec, b"rec ", &bytes[at + 4..at - 4 + size]);
+    let mut nested = bytes[..at - 8].to_vec();
+    al_testkit::media::push_list(&mut nested, b"movi", &rec);
+    nested.extend_from_slice(&bytes[at - 4 + size..]);
+    let riff_size = (nested.len() - 8) as u32;
+    nested[4..8].copy_from_slice(&riff_size.to_le_bytes());
+    for error in [
+        al_media::decode_avi(&nested, &Default::default()).unwrap_err(),
+        NativeDecoder.probe(&nested).unwrap_err(),
+    ] {
+        let al_media::MediaError::InputUnavailable { reason } = error else {
+            panic!("explicit unsupported format")
+        };
+        assert!(reason.contains("OpenDML") && reason.contains("rec"));
+    }
+}
+
+#[test]
 fn native_registry_preserves_pcm_and_records_selection() {
     let bytes = al_testkit::media::wav_s16_bytes(2, 48000, &[123, -456, 32767, -32768]);
     let registry = DecoderRegistry::native();
@@ -95,6 +157,17 @@ fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
             .find(|s| s.kind == "audio")
             .unwrap();
         assert_eq!(failure.unavailable.as_ref().unwrap().kind, kind);
+        let observations: Vec<_> = result
+            .integrity
+            .iter()
+            .filter(|o| o.detail["media_kind"] == "audio")
+            .collect();
+        assert_eq!(observations.len(), 1);
+        assert_eq!(observations[0].kind, "decode_unavailable");
+        assert_eq!(
+            observations[0].detail["kind"],
+            serde_json::to_value(kind).unwrap()
+        );
         assert!(!result.provenance.fallback);
     }
 }
@@ -199,6 +272,23 @@ fn first_avi_audio_stream_is_the_only_decoded_stream() {
         .unwrap();
     assert_eq!(result.audio.unwrap().samples, vec![123.0]);
     assert_eq!(result.av_timing.len(), 2);
+    let secondary = result.streams.iter().find(|s| s.stream == 1).unwrap();
+    assert_eq!(secondary.codec.as_deref(), Some("pcm_s16le"));
+    assert_eq!(secondary.channels, Some(1));
+    assert_eq!(secondary.sample_rate, Some(48000));
+    assert_eq!(secondary.packet_lengths, vec![2]);
+    let observation = result
+        .integrity
+        .iter()
+        .find(|o| o.detail["track_index"] == 1)
+        .unwrap();
+    assert_eq!(observation.kind, "decode_unavailable");
+    assert!(
+        observation.detail["reason"]
+            .as_str()
+            .unwrap()
+            .contains("first auds")
+    );
 }
 
 #[test]

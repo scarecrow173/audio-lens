@@ -252,12 +252,21 @@ fn video_info(head: &StreamHead, movi_frames: u64) -> Result<VideoInfo, MediaErr
 
 /// Advance one stream's clock past a `movi` packet, in `strh`-rate
 /// ticks. A `dwSampleSize` stream (PCM audio) covers `len/sample_size`
-/// samples of `dwScale` ticks each; every other packet is one frame.
-fn tick_advance(head: &StreamHead, body_len: usize) -> Result<i64, MediaError> {
+/// samples of `dwScale` ticks each; every other packet consumes one slot.
+/// 非フレーム vids (`pc` 等)も slot を消費する。frame index は db/dc のみを
+/// 数えるため index×scale と時刻を同一視せず、persisted ticks を使用する。
+fn tick_advance(
+    head: &StreamHead,
+    body_len: usize,
+    remainder: &mut u128,
+) -> Result<i64, MediaError> {
     let t = if head.sample_size > 0 {
-        (body_len as u64 * u64::from(head.scale)) / u64::from(head.sample_size)
+        // 分子の余りを stream ごとに保持し、パケット境界で時計を丸めない。
+        let numerator = body_len as u128 * u128::from(head.scale) + *remainder;
+        *remainder = numerator % u128::from(head.sample_size);
+        numerator / u128::from(head.sample_size)
     } else {
-        u64::from(head.scale)
+        u128::from(head.scale)
     };
     i64::try_from(t).map_err(|_| MediaError::malformed("stream clock advance overflows i64"))
 }
@@ -274,6 +283,7 @@ fn packet_ticks(
     packets: &[MoviPacket<'_>],
 ) -> Result<Vec<Option<i64>>, MediaError> {
     let mut next = Vec::with_capacity(streams.len());
+    let mut remainders = vec![0; streams.len()];
     for s in streams {
         next.push(
             i64::from(s.start)
@@ -287,7 +297,11 @@ fn packet_ticks(
             Some(head) if matches!(&head.fcc_type, b"vids" | b"auds") => {
                 let t = next[p.stream_no];
                 next[p.stream_no] = t
-                    .checked_add(tick_advance(head, p.body.len())?)
+                    .checked_add(tick_advance(
+                        head,
+                        p.body.len(),
+                        &mut remainders[p.stream_no],
+                    )?)
                     .ok_or_else(|| MediaError::malformed("stream clock overflows i64"))?;
                 Ok(Some(t))
             }
@@ -422,6 +436,18 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                     movi_found = true;
                     for inner in chunks(&body[4..], "movi list") {
                         let (cid, cbody) = inner?;
+                        if &cid == b"LIST" {
+                            if cbody.len() < 4 {
+                                return Err(MediaError::malformed(
+                                    "movi LIST shorter than list type",
+                                ));
+                            }
+                            if &cbody[..4] == b"rec " {
+                                return Err(MediaError::input_unavailable(
+                                    "OpenDML/nested rec LIST is not supported",
+                                ));
+                            }
+                        }
                         // Chunk ids are `NNdb`/`NNdc` (video) / `NNwb` (audio).
                         if !cid[0].is_ascii_digit() || !cid[1].is_ascii_digit() {
                             continue;

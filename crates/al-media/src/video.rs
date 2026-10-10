@@ -297,10 +297,11 @@ pub(crate) fn unavailable_extraction(
 }
 
 /// Codec に依存せず top-down luma と元 clock から特徴を逐次算出する。
+/// 比較を終えた前々フレームの buffer を decoder に返し、二枚を交互に使う。
 pub fn extract_decoded_features(
     info: VideoFrameInfo,
     frame_count: usize,
-    frames: impl Iterator<Item = Result<DecodedVideoFrame, MediaError>>,
+    mut decode_frame: impl FnMut(usize, Vec<f64>) -> Result<DecodedVideoFrame, MediaError>,
     cfg: &VideoFeatureConfig,
 ) -> VideoExtraction {
     let VideoFrameInfo {
@@ -314,6 +315,7 @@ pub fn extract_decoded_features(
     } = info;
     let pixels = width as usize * height as usize;
     let mut prev: Option<Vec<f64>> = None;
+    let mut scratch = Vec::new();
     let mut frame_timestamps = Vec::with_capacity(frame_count);
     let mut luminance = Vec::with_capacity(frame_count);
     let mut diff = Vec::with_capacity(frame_count);
@@ -322,8 +324,8 @@ pub fn extract_decoded_features(
     let mut thumb_times = Vec::new();
     let mut thumb_frames = Vec::new();
     let (mut tw, mut th) = (0u32, 0u32);
-    for (i, decoded) in frames.enumerate() {
-        let frame = match decoded {
+    for i in 0..frame_count {
+        let frame = match decode_frame(i, scratch) {
             Ok(frame) => frame,
             Err(error) => return unavailable_extraction(stream, &codec, error),
         };
@@ -348,7 +350,7 @@ pub fn extract_decoded_features(
             // The first frame has no predecessor.
             None => 0.0,
         });
-        prev = Some(frame.luma);
+        scratch = prev.replace(frame.luma).unwrap_or_default();
     }
     let events = detect_events(&luminance, &diff, &frame_timestamps, cfg);
     let thumbs = (!thumb_frames.is_empty()).then_some(VideoThumbs {
@@ -382,6 +384,49 @@ pub fn extract_decoded_features(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn luma_planes_are_recycled_after_previous_frame_comparison() {
+        let info = VideoFrameInfo {
+            stream: 0,
+            codec: "rawvideo".into(),
+            width: 2,
+            height: 2,
+            bits_per_pixel: 24,
+            timebase_hz: 30,
+            start_tick: 0,
+        };
+        let mut pointers = Vec::new();
+        let mut capacities = Vec::new();
+        let extraction = extract_decoded_features(
+            info,
+            8,
+            |i, mut luma: Vec<f64>| {
+                capacities.push(luma.capacity());
+                luma.resize(4, 0.0);
+                luma.fill(i as f64);
+                pointers.push(luma.as_ptr());
+                Ok(DecodedVideoFrame {
+                    time_ticks: i as i64,
+                    luma,
+                    preview: None,
+                })
+            },
+            &VideoFeatureConfig::default(),
+        );
+        let VideoFeatureArtifact::Decoded(features) = extraction.features else {
+            panic!("decoded")
+        };
+        assert_eq!(
+            features.luminance,
+            (0..8).map(|i| i as f64).collect::<Vec<_>>()
+        );
+        assert_eq!(features.diff, vec![0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+        assert!(capacities[2..].iter().all(|c| *c >= 4));
+        for i in 2..8 {
+            assert_eq!(pointers[i], pointers[i - 2]);
+        }
+    }
 
     /// BITMAPINFOHEADER body for a BI_RGB DIB (`height` signed so
     /// top-down fixtures are expressible).
