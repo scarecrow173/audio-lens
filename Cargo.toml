@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "crates/al-core",
+    "crates/al-math",
     "crates/al-job",
     "crates/al-cli",
     "crates/al-media",
@@ -19,6 +20,7 @@ license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 al-core = { path = "crates/al-core" }
+al-math = { path = "crates/al-math" }
 al-job = { path = "crates/al-job" }
 al-media = { path = "crates/al-media" }
 al-dataset = { path = "crates/al-dataset" }
