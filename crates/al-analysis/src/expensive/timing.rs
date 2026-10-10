@@ -25,7 +25,13 @@ pub(crate) fn emit_invalid(e: &Emit<'_>, records: &mut Vec<FeatureRecord>, reaso
         ("exp.stuck_max_ms", "ms"),
         ("exp.local_time_map", "tensor_ref"),
     ] {
-        records.push(e.push(
+        let push = if id == "exp.local_time_map" {
+            Emit::push_pair
+        } else {
+            Emit::push
+        };
+        records.push(push(
+            e,
             id,
             f64::NAN,
             unit,
@@ -90,12 +96,15 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 }
             }
         }
-        let (src_val, src_reason) = if evaluated {
+        let (src_val, src_reason) = if evaluated && best_rate > 0.0 {
             (Validity::Valid, None)
         } else {
             (
                 Validity::InsufficientSupport,
-                Some("no source-rate candidate has enough bins".into()),
+                Some(
+                    "no source-rate candidate has positive fold correlation with enough bins"
+                        .into(),
+                ),
             )
         };
         out.records.push(e.push_spec(
@@ -103,18 +112,26 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             if evaluated { best_score } else { f64::NAN },
             "corr",
             Confidence::Medium,
-            src_val,
-            src_reason.clone(),
+            if evaluated {
+                Validity::Valid
+            } else {
+                Validity::InsufficientSupport
+            },
+            if evaluated {
+                None
+            } else {
+                Some("no source-rate candidate has enough bins".into())
+            },
             frames as u64,
         ));
         out.records.push(e.push_spec(
             "exp.src_candidate_rate",
-            if evaluated { best_rate } else { f64::NAN },
+            if best_rate > 0.0 { best_rate } else { f64::NAN },
             "hz",
             Confidence::Low,
             src_val,
             src_reason,
-            frames as u64,
+            if best_rate > 0.0 { frames as u64 } else { 0 },
         ));
     }
 
@@ -139,6 +156,13 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 None,
                 (n / block) as u64,
             ));
+        } else {
+            super::emit_unsupported(
+                e,
+                &mut out.records,
+                &[("exp.repeat_block_score", "corr")],
+                "region shorter than four repeat-analysis blocks",
+            );
         }
         // Gaps: 5 ms windows below -80 dBFS.
         let win = ((0.005 * rate as f64) as usize).max(1);
@@ -206,6 +230,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             ("exp.splice_count", count as f64, "count"),
             ("exp.splice_first_s", first_s, "seconds"),
         ] {
+            let supported = supported && (id != "exp.splice_first_s" || count > 0);
             out.records.push(e.push(
                 id,
                 if supported { value } else { f64::NAN },
@@ -219,7 +244,14 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 if supported {
                     None
                 } else {
-                    Some("region too short for splice analysis".into())
+                    Some(
+                        if n < 2 * win {
+                            "region too short for splice analysis"
+                        } else {
+                            "no splice detected"
+                        }
+                        .into(),
+                    )
                 },
                 count,
             ));
@@ -298,7 +330,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 let conf = pair.map_or(Confidence::Medium, |p| {
                     propagate_confidence(p.confidence, Confidence::Medium)
                 });
-                let mut r = e.push(
+                let mut r = e.push_pair(
                     "exp.local_time_map",
                     f64::NAN,
                     "tensor_ref",
@@ -380,7 +412,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         );
                     } else {
                         let nrow = rows.len();
-                        let mut rec = e.push(
+                        let mut rec = e.push_pair(
                             "exp.local_time_map",
                             nrow as f64,
                             "tensor_ref",
@@ -390,6 +422,9 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                             nrow as u64,
                         );
                         rec.alignment_id = Some(pair.alignment_id.clone());
+                        rec.params["pair"] = serde_json::json!(pair.pair);
+                        rec.params["source_channel"] = serde_json::json!(0);
+                        rec.params["capture_channel"] = serde_json::json!(0);
                         rec.value = Value::Tensor {
                             array: path.clone(),
                             region: vec![[0, nrow as u64], [0, 3]],

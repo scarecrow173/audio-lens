@@ -28,7 +28,7 @@ const IDS: [(&str, &str); 2] = [
 /// scalars with the mapped validity).
 pub(crate) fn emit_invalid(e: &Emit<'_>, records: &mut Vec<FeatureRecord>, reason: &str) {
     for (id, unit) in IDS {
-        records.push(e.push(
+        records.push(e.push_pair(
             id,
             f64::NAN,
             unit,
@@ -54,7 +54,7 @@ fn push_pair(
     reason: Option<String>,
     support: u64,
 ) -> FeatureRecord {
-    let mut r = e.push(
+    let mut r = e.push_pair(
         id,
         value,
         unit,
@@ -83,7 +83,7 @@ fn emit_unavailable(
     reason: &str,
 ) {
     for (id, unit) in IDS {
-        let mut r = e.push(
+        let mut r = e.push_pair(
             id,
             f64::NAN,
             unit,
@@ -175,7 +175,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     let mut re: Vec<f64> = h.iter().map(|v| v.0).collect();
     let mut im: Vec<f64> = h.iter().map(|v| v.1).collect();
     al_locate::dsp::fft(&mut re, &mut im, true);
-    let mag2: Vec<f64> = re.iter().zip(&im).map(|(r, i)| r * r + i * i).collect();
+    let mut mag2: Vec<f64> = re.iter().zip(&im).map(|(r, i)| r * r + i * i).collect();
     let (peak, _) = mag2
         .iter()
         .enumerate()
@@ -184,10 +184,14 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
 
     // Early energy: main-peak neighborhood (0.25 ms pre-peak guard
     // through 2.5 ms). Late energy: the remaining tail from 5 ms.
-    let early_lo = peak.saturating_sub((0.00025 * rate as f64) as usize);
-    let early_hi = (peak + (0.0025 * rate as f64) as usize).min(mag2.len());
-    let late_lo = (peak + (0.005 * rate as f64) as usize).min(mag2.len());
-    let e_early: f64 = mag2[early_lo..early_hi].iter().sum();
+    // IFFT は循環表現なので、pre-peak guard の始点へ一度だけ並べ直す。
+    // 末尾に wrap した pre-ringing を late tail / decay に混入させない。
+    let pre = ((0.00025 * rate as f64) as usize).min(mag2.len() - 1);
+    let origin = (peak + mag2.len() - pre) % mag2.len();
+    mag2.rotate_left(origin);
+    let early_hi = (pre + (0.0025 * rate as f64) as usize).min(mag2.len());
+    let late_lo = (pre + (0.005 * rate as f64) as usize).min(mag2.len());
+    let e_early: f64 = mag2[..early_hi].iter().sum();
     let e_late: f64 = mag2[late_lo..].iter().sum();
     let early_late = e_early / e_late.max(1e-30);
     let mut rec = push_pair(
@@ -209,6 +213,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     // linear fit over the −5..−35 dB range (a 30 dB evaluation
     // range). A tail too short to span that range cannot carry a
     // slope — record InsufficientSupport rather than a fake number.
+    let mag2 = &mag2[pre..];
     let total_e: f64 = mag2.iter().sum();
     if total_e <= 0.0 {
         emit_unavailable(
