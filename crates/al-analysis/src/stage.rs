@@ -45,7 +45,21 @@ impl Stage for CheapAnalysisStage {
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
         let err = |e: io::Error| StageError::new(StageKind::CheapAnalysis, e.to_string());
         let cfg = CheapConfig::from_job(ctx.config);
-        let av_cfg = AvSyncConfig::from_job(ctx.config);
+        let av_cfg = AvSyncConfig::from_job(ctx.config)
+            .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
+        for marker in &av_cfg.markers {
+            if !ctx
+                .manifest
+                .inputs
+                .iter()
+                .any(|input| input.input_id == marker.input_id)
+            {
+                return Err(StageError::new(
+                    StageKind::CheapAnalysis,
+                    "marker references unknown input_id",
+                ));
+            }
+        }
         let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let mut records = Vec::new();
@@ -68,6 +82,9 @@ impl Stage for CheapAnalysisStage {
                 lineage.push(artifact_id.clone());
             }
             let video_features = video.map(|(f, _)| f);
+            av_cfg
+                .validate_video(&input.input_id.to_string(), video_features.as_ref())
+                .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
             let audio_start_s = if decoded.is_some()
                 && matches!(
                     video_features,

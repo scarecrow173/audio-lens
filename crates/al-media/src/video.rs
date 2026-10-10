@@ -148,10 +148,12 @@ pub struct RoiLuminance {
     pub luminance: Vec<f64>,
 }
 
-/// Coarse video event kinds the ingest stage can emit.
+/// 汎用映像イベント種別(ingest の検出イベントとユーザー供給マーカー)。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum VideoEventKind {
+    /// ユーザー供給の汎用 visual marker(analysis で追加)。
+    UserMarker,
     /// Frame-to-frame diff over `scene_change_threshold`.
     SceneChange,
     /// Mean-luminance step over `luminance_step_threshold`.
