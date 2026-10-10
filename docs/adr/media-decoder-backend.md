@@ -116,6 +116,14 @@ Chosen option: "D: native 優先 registry と段階的移行", because 現行能
   metadata、timing、integrity observations、backend provenance を一つにまとめる。
   timing-only 成功は PCM decode 成功と区別する。backend は成果物を登録しない。
 
+2026-10-10 フェーズ1実装時の coordinator 指示による訂正: 現行 `mp4.rs` は
+`sowt` / `twos` / `in24` / `in32` / `fl32` / `fl64` / `raw ` / `lpcm` /
+`ipcm` / `fpcm` の対応 layout から PCM sample を抽出していた。
+本 ADR はその既存能力と first PCM-decodable track の選択規則を維持し、
+AAC/H.264 等の新規 codec decode を追加しない。従前の「PCM を含め decode しない」
+記述は現行能力についての事実誤認であり、既存 ingest 維持の判断に沿って訂正する。
+`mp4-demux-decode.md` を supersede する追加 codec の決定ではない。
+
 既存 parser が probe/decode を一体で返している場合、構造を解析した内部状態を
 adapter 内で再利用してよい。probe のために PCM を先行生成したり parser を
 別実装へ置換したりせず、既存検証ロジックを責務の所有者として再利用する。
@@ -126,7 +134,7 @@ adapter 内で再利用してよい。probe のために PCM を先行生成し�
 | --- | --- | --- | --- |
 | WAV RIFF/WAVE | format tag 1: unsigned 8 / signed 16・24・32 bit PCM、tag 3: IEEE float 32・64 bit | 対象外、要求時 unavailable | 現行 WAV metadata と sample clock |
 | legacy AVI RIFF/AVI | 最初の auds、現行 WAVEFORMATEX parser が扱う上記 PCM/float | 最初の vids、BI_RGB DIB 24/32 bpp、top-down/bottom-up | 全 stream の現行 clock・packet 観測 |
-| MP4/ISO-BMFF、先頭 ftyp | 全 codec unavailable。AAC/PCM を含め decode しない | 全 codec unavailable。H.264 を含め decode しない | 現行 mp4.rs の track/sample-table/PTS/DTS 観測のみ |
+| MP4/ISO-BMFF、先頭 ftyp | 既存 PCM sample 抽出を維持。それ以外の codec(AAC 等)は unavailable | 全 codec unavailable。H.264 を含め decode しない | 現行 mp4.rs の track/sample-table/PTS/DTS 観測のみ |
 
 FLAC/MP3/AAC、圧縮 AVI、H.264/HEVC、未対応 RIFF variant や MP4 構造を
 新たに decode/demux 対応にしない。現行 parser が拒否する構造を推測して補完しない。
