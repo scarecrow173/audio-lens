@@ -101,6 +101,16 @@ pub struct Delta {
     pub ratio: Option<f64>,
 }
 
+/// Job スコープのキャプチャ間比較。単一 input や source/capture ペアに
+/// 帰属させず、比較方向と共通ソースを明示する。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CaptureComparison {
+    pub reference_capture_id: String,
+    pub target_capture_id: String,
+    pub common_source_ids: Vec<String>,
+    pub records: Vec<FeatureRecord>,
+}
+
 /// One derived measurement, covering the spec's result shape.
 ///
 /// Every field maps 1:1 to the analysis-dataset spec so a consumer can
@@ -193,6 +203,21 @@ mod tests {
         let json = serde_json::to_string(&record).unwrap();
         let back: FeatureRecord = serde_json::from_str(&json).unwrap();
         assert_eq!(back, record);
+        let mut unsupported = record;
+        unsupported.input_id = "job".into();
+        unsupported.validity = Validity::Unsupported;
+        let comparison = CaptureComparison {
+            reference_capture_id: "CAP-ref".into(),
+            target_capture_id: "CAP-bug".into(),
+            common_source_ids: Vec::new(),
+            records: vec![unsupported],
+        };
+        let json = serde_json::to_string(&comparison).unwrap();
+        assert!(json.contains("\"unsupported\""));
+        assert_eq!(
+            serde_json::from_str::<CaptureComparison>(&json).unwrap(),
+            comparison
+        );
     }
 
     #[test]
