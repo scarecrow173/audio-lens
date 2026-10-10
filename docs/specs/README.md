@@ -16,6 +16,7 @@ Directory: `docs/specs`
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
+| SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
 | SPEC-034yYlsZHRt4b5fTzZS7Qr | マルチメソッドソース定位 | proposed | [source-localization.md](./source-localization.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |

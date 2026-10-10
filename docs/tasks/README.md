@@ -11,6 +11,7 @@ Directory: `docs/tasks`
 | TASK-035fPlMnOkJiHgFeDcBaZ | al-math: least_squares を Householder QR 化 | todo | [al-math-qr.md](./al-math-qr.md) |
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | todo | [al-math-skeleton.md](./al-math-skeleton.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
+| TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
 | TASK-034z9nDhaSqoH2kao6D3Xz | analysis ステージ CLI 配線 + depends_on | done | [analysis-cli-wiring.md](./analysis-cli-wiring.md) |
 | TASK-034z9novQ1qbeZc0x58nsX | analysis 基盤: DatasetWriter open_or_create + FeatureRecord 拡張 | done | [analysis-dataset-foundation.md](./analysis-dataset-foundation.md) |
@@ -19,12 +20,14 @@ Directory: `docs/tasks`
 | TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | done | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
-| TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | todo | [band-lag-gain.md](./band-lag-gain.md) |
-| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | todo | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | done | [avsync-analysis.md](./avsync-analysis.md) |
+| TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | blocked | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
+| TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | todo | [band-lag-gain.md](./band-lag-gain.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
+| TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | blocked | [container-review-edge-cases.md](./container-review-edge-cases.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
+| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | todo | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |
 | TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | done | [dataset-reader.md](./dataset-reader.md) |
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
@@ -38,7 +41,9 @@ Directory: `docs/tasks`
 | TASK-034AaFTNVqwkFuTpDA07oM | exp-timing: click/splice + stuck buffer 深掘り | done | [exp-timing-splice.md](./exp-timing-splice.md) |
 | TASK-034AaFURCQqe9DBwLB4N0J | expensive 追加ファミリの既知ケース検証 | done | [expensive-families-tests.md](./expensive-families-tests.md) |
 | TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | done | [expensive-module-split.md](./expensive-module-split.md) |
+| TASK-034dLdqYk3HXx4PdtOgnVz | al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW) | blocked | [expensive-review-consistency.md](./expensive-review-consistency.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
+| TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | blocked | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
@@ -52,6 +57,7 @@ Directory: `docs/tasks`
 | TASK-034z8kAawdMoi8AxPYZjrB | locate-methods 4手法 + 候補/証拠型 | done | [locate-methods.md](./locate-methods.md) |
 | TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | done | [locate-mixer.md](./locate-mixer.md) |
 | TASK-035hJkLmNpQrStUvWxYz | locate: サンプルレート正規化(リジェクト→リサンプル統一) | todo | [locate-resample-normalize.md](./locate-resample-normalize.md) |
+| TASK-034dLdqYvyaMjl7hTgg6IT | al-locate: 2ソース残差探索の残差PCMを保存する | blocked | [locate-residual-pcm.md](./locate-residual-pcm.md) |
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | done | [locate-residual.md](./locate-residual.md) |
 | TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | done | [locate-result-schema.md](./locate-result-schema.md) |
 | TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | done | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
@@ -67,6 +73,7 @@ Directory: `docs/tasks`
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
+| TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | blocked | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
