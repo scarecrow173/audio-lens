@@ -65,6 +65,7 @@ version = "0.1.0"
 dependencies = [
  "al-core",
  "al-job",
+ "al-math",
  "al-media",
  "al-testkit",
  "serde",
