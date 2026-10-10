@@ -136,8 +136,8 @@ fn scalar_value(r: &serde_json::Value) -> f64 {
 #[test]
 fn accepted_alignment_produces_features_residuals_and_dataset() {
     // Capture = embedded 0.5× source at 5000 + low background noise.
-    let source = noise(4_096, 7);
-    let mut capture = noise(20_000, 11);
+    let source = noise(16_384, 7);
+    let mut capture = noise(30_000, 11);
     for v in &mut capture {
         *v *= 0.05;
     }
@@ -206,8 +206,57 @@ fn accepted_alignment_produces_features_residuals_and_dataset() {
         .filter(|a| a.path.starts_with(&pair_prefix))
         .collect();
     assert!(!tensors.is_empty(), "no intermediate tensors persisted");
+    let band_tensor = tensors
+        .iter()
+        .find(|a| a.path.ends_with("channel_0/band_gain"))
+        .expect("persisted band gain tensor");
+    assert_eq!(band_tensor.provenance.params["max_lag_samples"], 1920);
+    assert_eq!(
+        band_tensor.provenance.params["coherence_estimator"],
+        "welch_magnitude_squared"
+    );
+    let name = band_tensor.path.strip_prefix("intermediate/").unwrap();
+    let tensor = reader.open_tensor("intermediate", name).unwrap();
+    assert!(tensor.meta().shape[0] > 0 && tensor.meta().shape[1] > 0);
+    let shape = tensor.meta().shape.clone();
+    let (values, _) = reader
+        .read_tensor("intermediate", name, &[[0, shape[0]], [0, shape[1]]])
+        .unwrap();
+    assert!(
+        values
+            .iter()
+            .any(|v| v.is_finite() && (*v - 0.5).abs() < 0.1)
+    );
+    let m2 = body["records"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| {
+            r["feature_id"] == "ref.band_gain_m2"
+                && r["params"]["polarity"] == "normal"
+                && r["validity"] == "valid"
+        })
+        .expect("supported M2 observation");
+    assert_eq!(m2["algorithm_id"], "reference.band_lag_ls.v1");
+    assert_eq!(m2["params"]["max_lag_samples"], 1920);
+    assert!(
+        body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|r| r["feature_id"] == "ref.band_gain_psd_ratio")
+    );
     for a in tensors {
-        assert_eq!(a.provenance.algorithm_id, "reference.v1", "{}", a.path);
+        assert_eq!(
+            a.provenance.algorithm_id,
+            if a.path.contains("/channel_") {
+                "reference.band_lag_ls.v1"
+            } else {
+                "reference.v1"
+            },
+            "{}",
+            a.path
+        );
         assert_eq!(
             a.provenance.alignment_id.as_deref(),
             Some(aln),

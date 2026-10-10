@@ -173,6 +173,11 @@ fn scalar(r: &serde_json::Value) -> f64 {
     r["value"]["scalar"].as_f64().expect("scalar value")
 }
 
+// 帯域推定の空の極性群だけは unavailable (JSON null) を保持する。
+fn band_scalar(r: &serde_json::Value) -> f64 {
+    r["value"]["scalar"].as_f64().unwrap_or(f64::NAN)
+}
+
 /// ベッドノイズ上に `content` を `embed_at` へ埋め込んだ capture。
 fn capture_with(content: &[f64], embed_at: usize, bed_seed: u64) -> Vec<f64> {
     let mut cap = signal::noise(embed_at + content.len() + 2_048, bed_seed, 0.02);
@@ -215,7 +220,7 @@ fn case_scalar_gain() {
 // ==== 帯域別 EQ ====
 #[test]
 fn case_band_eq() {
-    let source = signal::noise(8_192, 13, 1.0);
+    let source = signal::noise(16_384, 13, 1.0);
     // 4 kHz ピーキング +9 dB
     let eq = Biquad::peaking(RATE, 4_000.0, 9.0, 1.4);
     let cap_body = eq.apply(&source);
@@ -223,7 +228,11 @@ fn case_band_eq() {
     let mut fx = mono_fixture("band-eq", source, capture, serde_json::json!({}));
     let (body, _) = run(&mut fx);
 
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。支持された群の振幅を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["value"]["scalar"].as_f64().is_some())
+        .collect();
     assert!(!bands.is_empty());
     // 4 kHz を含む band: ゲインが持ち上がる
     let boost = bands
@@ -233,7 +242,7 @@ fn case_band_eq() {
                 && r["freq_range"]["end"].as_f64().unwrap_or(0.0) >= 4_000.0
         })
         .expect("band containing 4 kHz");
-    expect_between("boosted band gain", 1.3, 6.0, scalar(boost));
+    expect_between("boosted band gain", 1.3, 6.0, scalar(boost).abs());
     // 遠い帯域(200 Hz 前後)はほぼ 1.0
     let flat = bands
         .iter()
@@ -245,7 +254,7 @@ fn case_band_eq() {
     expect_close(
         "flat band gain",
         1.0,
-        scalar(flat),
+        scalar(flat).abs(),
         Tolerance::abs_rel(0.15, 0.2),
     );
     fs::remove_dir_all(&fx.dir).ok();
@@ -254,7 +263,7 @@ fn case_band_eq() {
 // ==== 位相 / all-pass ====
 #[test]
 fn case_phase_allpass() {
-    let source = signal::noise(8_192, 19, 1.0);
+    let source = signal::noise(16_384, 19, 1.0);
     // 1次 all-pass 2段: 位相だけが回る。エネルギーと帯域ゲインは不変。
     let ap = Biquad::allpass(0.6);
     let cap_body = ap.apply(&ap.apply(&source));
@@ -270,10 +279,14 @@ fn case_phase_allpass() {
         Tolerance::abs_rel(0.1, 0.15),
     );
     // 帯域ゲイン中央値もほぼ 1.0
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。通常極性の代表値を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["params"]["polarity"] == "normal")
+        .collect();
     let mut gs: Vec<f64> = bands
         .iter()
-        .map(|r| scalar(r))
+        .map(|r| band_scalar(r))
         .filter(|g| g.is_finite())
         .collect();
     gs.sort_by(|a, b| a.total_cmp(b));
@@ -505,7 +518,7 @@ fn case_clipping() {
 // ==== 既知遅延のコムフィルタ ====
 #[test]
 fn case_comb_filter() {
-    let source = signal::noise(8_192, 107, 1.0);
+    let source = signal::noise(16_384, 107, 1.0);
     let cap_body = signal::comb(&source, 64, 0.6);
     let capture = capture_with(&cap_body, 4_000, 109);
     let mut fx = mono_fixture("comb", source, capture, serde_json::json!({}));
@@ -518,10 +531,14 @@ fn case_comb_filter() {
         Tolerance::abs(8.0),
     );
     // コムリップルで帯域ゲインにばらつきが出る
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。通常極性の代表値を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["params"]["polarity"] == "normal")
+        .collect();
     let gs: Vec<f64> = bands
         .iter()
-        .map(|r| scalar(r))
+        .map(|r| band_scalar(r))
         .filter(|g| g.is_finite())
         .collect();
     let (lo, hi) = (
@@ -761,7 +778,7 @@ fn pinned_noncoherent_psd_lift_not_valid_eq() {
             format!(
                 "band {:?} gain {} reported {:?}",
                 r["freq_range"],
-                scalar(r),
+                band_scalar(r),
                 r["validity"]
             ),
         );

@@ -263,7 +263,17 @@ impl Stage for ReferenceAnalysisStage {
                 parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
             };
             for tensor in &out.tensors {
-                write_tensor(&mut writer, tensor, tensor_prov.clone(), chunk_bytes).map_err(err)?;
+                let mut provenance = tensor_prov.clone();
+                if tensor
+                    .path
+                    .starts_with(&format!("intermediate/{pair}/channel_"))
+                {
+                    provenance.algorithm_id = "reference.band_lag_ls.v1".into();
+                    provenance.params = crate::band_gain::parameters(&cfg, aligned.rate);
+                    provenance.params["capture_input_id"] =
+                        serde_json::json!(result.capture_input_id);
+                }
+                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
             }
             for audio in &out.residual_audio {
                 writer
