@@ -79,7 +79,7 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 - [ ] AC-30: #30: 奇数 LIST、stream 99/100、index フラグ、DIB stride と rcFrame が生成するメディアの契約と一致する。周期 fixture は全拒否で成功しない。失敗時も一時ディレクトリが回収され、合成 source hash の意味と defer 項目の受け皿が明記される。
 - [ ] AC-31: #31: ユーザー供給 visual marker が avsync のペア出力に反映される。未指定時の検出イベント経路と出力は変化しない。有限時刻・クロック・入力来歴を検証し、ゲーム固有 detector を core に追加しない。
 - [ ] AC-32: #32: two-source 探索の残差 PCM を保存して再読出し・再聴取できる。search JSON から音声 artifact と親 source/alignment、混合行列の来歴を辿れ、保存前後のサンプル・エネルギーが一致する。
-- [ ] AC-33: #33: 候補検出の独立実行、FLAC 保存、Resolution.sample_rate の各項目に、既存 spec の該当文言、実装との差、選択肢、承認結果、実装または仕様改訂先を記録する。判断前に現状を適合済みとせず、選択した契約の回帰テストを承認後に追加する。
+- [x] AC-33: #33: 候補検出の独立実行、FLAC 保存、Resolution.sample_rate の各項目に、既存 spec の該当文言、実装との差、選択肢、承認結果、実装または仕様改訂先を記録する。判断前に現状を適合済みとせず、選択した契約の回帰テストを承認後に追加する。
 
 ## Existing Spec Alignment
 
@@ -102,3 +102,10 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 に記録した。dwStart は音声 PCM 開始を共通原点として実相対 offset を保持する。
 OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応とする。
 利用不能とデータ不正の区分は共通 UnavailableKind に従う。
+
+## AC-33 の実施判断 (2026-10-11)
+
+三方式は coordinator の事前承認を得て、候補検出の論理段/fused 実行の
+仕様改訂、FLAC 保存の承認済み defer、Resolution.sample_rate の第一級 u32
+実装に対応させた。FLAC を実装済み適合とは扱わない。
+[task の項目別判断と証拠](../tasks/spec-residual-decisions.md) を正本として参照する。

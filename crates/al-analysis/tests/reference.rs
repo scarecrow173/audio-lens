@@ -392,6 +392,21 @@ fn normalized_alignment_survives_process_boundary() {
             assert!(record.inputs.contains(&pcm.0.record.artifact_id));
             assert!(record.inputs.contains(&pcm.1.record.artifact_id));
         }
+        let reference_body = feature_records(&fx);
+        let resolutions: Vec<_> = reference_body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
         let gain = scalar(&feature_records(&fx), "ref.gain_ls");
         assert_eq!(gain["validity"], "valid", "{gain}");
         assert!((scalar_value(&gain) - 0.5).abs() < 0.02);
@@ -410,6 +425,20 @@ fn normalized_alignment_survives_process_boundary() {
         assert!(cap_record.inputs.contains(&pcm.1.record.artifact_id));
         let body: serde_json::Value =
             serde_json::from_slice(&fs::read(fx.dir.join(&cap_record.path)).unwrap()).unwrap();
+        let resolutions: Vec<_> = body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
         let record = body["records"]
             .as_array()
             .unwrap()
@@ -500,4 +529,120 @@ fn normalized_alignment_survives_process_boundary() {
         String::from_utf8_lossy(&output.stderr)
     );
     fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn cross_capture_path_gain_is_job_scoped_and_preserves_pair_features() {
+    let source = noise(16384, 123);
+    let mut bug = vec![0.0; 30000];
+    let mut reference = vec![0.0; 30000];
+    for (i, v) in source.iter().enumerate() {
+        bug[5000 + i] = v * 0.8;
+        reference[5000 + i] = v * 0.4;
+    }
+    let mut fx = fixture(&source, &bug);
+    let mut ref_input = input(InputRole::CaptureReference, fx.dir.join("reference.bin"));
+    ref_input.source_sha256 = Some("dd".repeat(32));
+    let ref_id = ref_input.input_id.clone();
+    let mut inputs = fx.manifest.inputs.clone();
+    inputs.push(ref_input);
+    let old_decoded: Vec<_> = fx
+        .manifest
+        .artifacts
+        .iter()
+        .filter(|a| a.role == "decoded_pcm")
+        .cloned()
+        .collect();
+    fx.manifest = Manifest::new(JobId::new(), inputs, serde_json::json!({}), &[]);
+    for mut a in old_decoded {
+        let id = if a.path.to_string_lossy().contains("src") {
+            &fx.manifest.inputs[0].input_id
+        } else {
+            &fx.manifest.inputs[1].input_id
+        };
+        a.inputs = vec![fx.manifest.input_artifact(id).unwrap()];
+        fx.manifest.register_artifact(a);
+    }
+    write_pcm(&fx.dir, "inputs/reference.f64le", &reference);
+    fx.manifest.register_artifact(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "decoded_pcm".into(),
+        path: "inputs/reference.f64le".into(),
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![fx.manifest.input_artifact(&ref_id).unwrap()],
+        params: serde_json::json!({"sample_rate":48000,"channels":1}),
+    });
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({"analysis":{"reference":{"stft_window":512,"stft_hop":256}}});
+    for r in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    for r in al_analysis::stage::CheapAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    for r in al_analysis::stage::ReferenceAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    let before = fs::read(fx.dir.join(format!(
+        "analysis/features/reference/{}__{}.json",
+        fx.source_input_id, fx.capture_input_id
+    )))
+    .unwrap();
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap();
+    let rec = recs
+        .iter()
+        .find(|r| r.role == "cross_capture_features")
+        .unwrap();
+    let comparison: al_dataset::types::CaptureComparison =
+        serde_json::from_slice(&fs::read(fx.dir.join(&rec.path)).unwrap()).unwrap();
+    assert_eq!(comparison.reference_capture_id, ref_id.as_str());
+    assert_eq!(comparison.target_capture_id, fx.capture_input_id);
+    assert_eq!(comparison.common_source_ids, [fx.source_input_id.clone()]);
+    assert_eq!(comparison.records[0].validity, al_core::Validity::Valid);
+    assert_eq!(comparison.records[0].input_id, "job");
+    let reader = al_dataset::DatasetReader::open(&fx.dir.join("analysis")).unwrap();
+    let name = format!(
+        "cross_capture/{}__{}/path_gain",
+        ref_id, fx.capture_input_id
+    );
+    let (data, _) = reader
+        .read_tensor("intermediate", &name, &[[0, 3], [1, 4]])
+        .unwrap();
+    assert!(data[..3].iter().all(|r| (r - 2.0).abs() < 0.02), "{data:?}");
+    assert_eq!(&data[6..], &[1.0; 3]);
+    assert_eq!(
+        before,
+        fs::read(fx.dir.join(format!(
+            "analysis/features/reference/{}__{}.json",
+            fx.source_input_id, fx.capture_input_id
+        )))
+        .unwrap()
+    );
+    // locate がない場合もキャプチャ組を消さず、観測不能を保存する。
+    fx.manifest.artifacts.retain(|a| a.role != "locate_result");
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap();
+    let rec = recs
+        .iter()
+        .find(|r| r.role == "cross_capture_features")
+        .unwrap();
+    let comparison: al_dataset::types::CaptureComparison =
+        serde_json::from_slice(&fs::read(fx.dir.join(&rec.path)).unwrap()).unwrap();
+    assert_eq!(
+        comparison.records[0].validity,
+        al_core::Validity::Unsupported
+    );
+    fs::remove_dir_all(fx.dir).unwrap();
 }

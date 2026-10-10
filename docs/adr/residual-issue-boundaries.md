@@ -99,3 +99,14 @@ packet-slot 文書化、dwStart 実相対 offset の保持、rec LIST 未対応�
 i64 overflow の構造不正境界を承認した。
 [実施 task](../tasks/container-review-edge-cases.md) に全項目の証拠を記録する。
 本確認は #28 の実施判断であり、#33 等の未承認方式を採択しない。
+
+## #33 の方式承認 (2026-10-11)
+
+coordinator は task の事前質問に対し、候補検出の fused 実行を論理段として
+仕様化、FLAC 保存の defer、`Resolution.sample_rate: u32` の第一級化を承認した。
+候補のみ再実行を提供する独立 StageKind は採らず、順序・候補保存・非破壊を
+維持する。FLAC の未実装を適合済みとせず、#32 の Float64 WAV と来歴を維持する。
+分解能は解析対象 PCM のレートを保存し、旧成果物は再生成する。
+独立実装修正は分解能のみのため task 分割不要も承認された。
+この承認は #33 の方式判断に限り、本 ADR 全体の status は変更しない。
+[選択肢・理由・再検討条件・証拠](../tasks/spec-residual-decisions.md) を参照。

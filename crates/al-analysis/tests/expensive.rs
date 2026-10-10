@@ -149,6 +149,16 @@ fn clipping_candidate_triggers_expensive_without_overwriting_cheap() {
     // Candidate event persisted under the events role.
     let kinds = event_kinds(&fx);
     assert!(kinds.iter().any(|k| k == "clipping"), "events: {kinds:?}");
+    assert_eq!(recs.first().unwrap().role, "candidate_events");
+    let reader = al_dataset::reader::DatasetReader::open(&fx.dir.join("analysis")).unwrap();
+    let candidate = reader.artifacts("events").into_iter().next().unwrap();
+    assert!(
+        candidate
+            .provenance
+            .parents
+            .iter()
+            .any(|p| p.contains("features/cheap/"))
+    );
     // Expensive region was produced and records its trigger.
     assert!(
         recs.iter().any(|r| r.role == "expensive_features"),
@@ -190,6 +200,7 @@ fn suppressed_triggers_write_events_but_no_expensive() {
     // The events table exists (role produced) even with no hits;
     // expensive_features are suppressed.
     let _ = event_kinds(&fx);
+    assert_eq!(recs.first().unwrap().role, "candidate_events");
     assert!(
         !recs.iter().any(|r| r.role == "expensive_features"),
         "unexpected expensive artifacts: {recs:?}"

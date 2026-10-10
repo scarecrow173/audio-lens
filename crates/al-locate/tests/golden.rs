@@ -4,6 +4,10 @@
 //! 実 `LocateStage` を走らせて persisted `result.json` /
 //! `time_map.json` / `residual_*.json` を許容誤差付きで検証する。
 //!
+//! ingest を省略し decoded_pcm を直接登録する合成 fixture。
+//! srcN.bin / capN.bin は実在する入力を指さず、source_sha256 は未設定。
+//! 原ファイルの hash/来歴検証は ingest 結合テストが担当する。
+//!
 //! ケース一覧(spec `validation-strategy.md` の locate 行列):
 //! - exact / gain / EQ-mismatch insert … case_*_insert
 //! - silence boundary … case_silence_boundary
@@ -35,11 +39,12 @@ use al_locate::stage::LocateStage;
 use al_testkit::expect::{Tolerance, expect_close, expect_close_u64, expect_true};
 use al_testkit::media::pcm_f64le;
 use al_testkit::signal::{self, Biquad};
+use al_testkit::temp::TempDir;
 
 const RATE: u32 = 48_000;
 
 struct JobFixture {
-    dir: PathBuf,
+    dir: TempDir,
     manifest: Manifest,
     config: serde_json::Value,
     source_ids: Vec<String>,
@@ -60,8 +65,7 @@ fn fixture(
     captures: &[(&[Vec<f64>], u32)],
     config: serde_json::Value,
 ) -> JobFixture {
-    let dir = std::env::temp_dir().join(format!("al-locate-golden-{tag}-{}", JobId::new()));
-    fs::create_dir_all(&dir).unwrap();
+    let dir = TempDir::new(&format!("al-locate-golden-{tag}"));
 
     let mut inputs = Vec::new();
     for i in 0..sources.len() {
@@ -133,7 +137,7 @@ fn mono_fixture(
 }
 
 fn run_locate(fx: &JobFixture) -> Vec<ArtifactRecord> {
-    let registry = ArtifactRegistry::new(&fx.dir);
+    let registry = ArtifactRegistry::new(fx.dir.as_ref());
     let ctx = StageContext {
         manifest: &fx.manifest,
         registry: &registry,
@@ -145,7 +149,7 @@ fn run_locate(fx: &JobFixture) -> Vec<ArtifactRecord> {
 fn read_json(fx: &JobFixture, dir_parts: &[&str], name: &str) -> serde_json::Value {
     let path = dir_parts
         .iter()
-        .fold(fx.dir.clone(), |p, d| p.join(d))
+        .fold(fx.dir.to_path_buf(), |p, d| p.join(d))
         .join(name);
     serde_json::from_str(
         &fs::read_to_string(&path)
@@ -220,7 +224,6 @@ fn case_exact_insert() {
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 9_600, 64);
     assert!(body["result"]["agreeing_methods"].as_u64().unwrap() >= 3);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ゲイン変更された挿入 ====
@@ -237,7 +240,6 @@ fn case_gain_insert() {
         .as_f64()
         .expect("mixer matrix");
     expect_close("mixer gain", 0.4, m, Tolerance::abs(0.1));
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== EQ フィルタ済み挿入 ====
@@ -252,7 +254,6 @@ fn case_eq_filtered_insert() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 8_000, 64);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 無音境界 ====
@@ -269,7 +270,6 @@ fn case_silence_boundary() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 25_000, 64);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 強周期信号(偽ピークを持つ素材)====
@@ -289,7 +289,6 @@ fn case_periodic_source_locates_at_phase_consistent_position() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, embed_at as u64, 64);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ループ素材 ====
@@ -324,7 +323,6 @@ fn case_loop_material() {
     // loop_occurrences に全パスが残る
     let tm = time_map_json(&fx, 0, 0);
     assert_eq!(tm["loop_occurrences"].as_array().unwrap().len(), 3);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 複数の正当な出現 ====
@@ -357,7 +355,6 @@ fn case_repeated_source() {
     for (got, expected) in all.iter().zip([5_000u64, 18_000, 33_000]) {
         expect_close_u64("occurrence position", expected, *got, 64);
     }
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 一定オフセットの長尺ソース ====
@@ -389,7 +386,6 @@ fn case_long_source_constant_offset() {
         let c = a["capture"].as_u64().unwrap();
         expect_close_u64("anchor offset", s + embed_at as u64, c, 96);
     }
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 線形ドリフトの長尺ソース ====
@@ -432,7 +428,6 @@ fn case_long_source_linear_drift() {
         drifts[0],
         Tolerance::abs_rel(0.002, 0.005),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== スキップ + 再開 ====
@@ -462,7 +457,6 @@ fn case_skip_and_resume() {
         kinds.contains(&"skip"),
         "expected skip segment in {kinds:?} ({tm})"
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== マルチチャンネルダウンミックス ====
@@ -489,7 +483,6 @@ fn case_multichannel_downmix() {
     let m10 = matrix[1][0].as_f64().unwrap();
     expect_close("mixer L", 0.6, m00, Tolerance::abs(0.15));
     expect_close("mixer R", -0.4, m10, Tolerance::abs(0.15));
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 支配的 BGM に覆われた静かな素材 ====
@@ -503,7 +496,6 @@ fn case_bgm_masks_quiet_source() {
     let body = result_json(&fx, 0, 0);
     // 直接検索では受理されない(埋め込みは相関的に埋もれる)
     assert_not_accepted(&body);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== BGM 減算後の残差探索 ====
@@ -561,7 +553,6 @@ fn case_bgm_residual_search() {
         residual["energy"]["after"].as_f64().unwrap()
             < residual["energy"]["before"].as_f64().unwrap()
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 無音での偽相関ピーク受理 ====
@@ -600,15 +591,14 @@ fn pinned_silence_no_false_peak() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_not_accepted(&body);
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 強周期信号での偽相関ピーク受理 ====
 #[test]
 fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
     // キャプチャ全体が周期 1024 の繰り返し: 全ての位相整合位置が
-    // 等価なピークになる。受理されるなら位相整合位置に限る
-    // (位相ずれ偽ピークの受理は回帰とみなす)。
+    // 等価なピークになる。現行 consensus は曖昧性として拒否する。
+    // 非周期対照の受理も固定し、全拒否への回帰では成功させない。
     let period = 1_024usize;
     let mut source = Vec::with_capacity(2_048);
     let unit = signal::noise(period, 139, 1.0);
@@ -623,15 +613,45 @@ fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     let result = &body["result"];
-    if result["accepted"] == true {
-        let pos = position(&body);
-        expect_true(
-            "periodic accept is phase-consistent",
-            pos.is_multiple_of(period as u64),
-            format!("accepted at non-period-aligned position {pos}"),
+    assert_not_accepted(&body);
+    assert_eq!(result["validity"], "ambiguous_alignment");
+    assert!(
+        result["reject_reason"]
+            .as_str()
+            .unwrap()
+            .contains("method(s) agree")
+    );
+    let full_ncc = result["evidence"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["method"] == "full_ncc")
+        .unwrap();
+    let candidates = full_ncc["candidates"].as_array().unwrap();
+    assert!(
+        candidates.len() >= 2,
+        "periodic peaks must remain observable"
+    );
+    for candidate in candidates {
+        assert!(
+            candidate["position"]
+                .as_u64()
+                .unwrap()
+                .is_multiple_of(period as u64)
         );
     }
-    fs::remove_dir_all(&fx.dir).ok();
+
+    let control = signal::noise(4_096, 149, 1.0);
+    let mut control_capture = vec![0.0; 16_000];
+    signal::embed(&mut control_capture, &control, 6_000, 1.0);
+    let control_fx = mono_fixture(
+        "pin-periodic-control",
+        &control,
+        &control_capture,
+        serde_json::json!({}),
+    );
+    run_locate(&control_fx);
+    assert_accepted_at(&result_json(&control_fx, 0, 0), 6_000, 64);
 }
 
 // ==== ピン留め: 低コヒーレンス時の optimal-lag 過大推定 ====
@@ -669,5 +689,4 @@ fn pinned_low_coherence_no_inflated_lag() {
             );
         }
     }
-    fs::remove_dir_all(&fx.dir).ok();
 }

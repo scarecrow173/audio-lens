@@ -4,7 +4,7 @@ use al_testkit::media::{AviSpec, AviStreamSpec, MoviPacket, write_avi};
 
 #[test]
 fn unaligned_audio_packets_keep_fractional_ticks_across_packets() {
-    let mut spec = AviSpec::cfr(2, 2, 30, vec![], vec![], 1, 48000);
+    let mut spec = AviSpec::cfr(4, 2, 30, vec![], vec![], 1, 48000);
     spec.streams[1].scale = 3;
     spec.streams[1].sample_size = 2;
     spec.packets = (0..100).map(|_| MoviPacket::audio(1, vec![0])).collect();
@@ -18,7 +18,7 @@ fn unaligned_audio_packets_keep_fractional_ticks_across_packets() {
 
 #[test]
 fn avi_clock_range_is_a_structural_boundary_in_direct_and_probe() {
-    let mut spec = AviSpec::cfr(2, 2, 30, vec![vec![0; 16]], vec![0; 2], 1, 48000);
+    let mut spec = AviSpec::cfr(4, 2, 30, vec![vec![0; 24]], vec![0; 2], 1, 48000);
     spec.streams[0].start = u32::MAX;
     spec.streams[0].scale = 1;
     let bytes = write_avi(&spec);
@@ -42,7 +42,7 @@ fn avi_clock_range_is_a_structural_boundary_in_direct_and_probe() {
 
 #[test]
 fn nested_rec_list_is_explicitly_unsupported_in_direct_and_probe() {
-    let spec = AviSpec::cfr(2, 2, 30, vec![vec![0; 16]], vec![0; 2], 1, 48000);
+    let spec = AviSpec::cfr(4, 2, 30, vec![vec![0; 24]], vec![0; 2], 1, 48000);
     let bytes = write_avi(&spec);
     let at = bytes.windows(4).position(|w| w == b"movi").unwrap();
     let size = u32::from_le_bytes(bytes[at - 4..at].try_into().unwrap()) as usize;
@@ -80,7 +80,7 @@ fn native_registry_preserves_pcm_and_records_selection() {
 #[test]
 fn probe_is_pinned_and_does_not_decode_bad_payloads() {
     let spec = AviSpec::cfr(
-        2,
+        4,
         2,
         30,
         vec![vec![0; 1]],
@@ -117,6 +117,7 @@ fn probe_is_pinned_and_does_not_decode_bad_payloads() {
 
 #[test]
 fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
+    // 共有 writer の未パディング BGR24 契約に沿った幅・frame 長。
     for (format, kind) in [
         (vec![0; 2], UnavailableKind::Malformed),
         (
@@ -129,10 +130,10 @@ fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
         ),
     ] {
         let mut spec = AviSpec::cfr(
-            2,
+            4,
             2,
             30,
-            vec![vec![255; 16]],
+            vec![vec![255; 4 * 2 * 3]],
             al_testkit::media::pcm_s16le(&[10.0]),
             1,
             48000,
@@ -175,7 +176,7 @@ fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
 #[test]
 fn timing_only_skips_pcm_and_pixel_decode_and_arbitrary_selection_is_rejected() {
     let spec = AviSpec::cfr(
-        2,
+        4,
         2,
         30,
         vec![vec![0; 1]],

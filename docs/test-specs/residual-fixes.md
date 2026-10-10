@@ -67,6 +67,13 @@ relations:
 
 ## Guarantees
 
+#30 の具体的 assertion は `al-testkit` の奇数 LIST/stream 99・100/
+HASINDEX/DIB 整列幅/strf 由来 rcFrame/音声ゼロ矩形と、成功・assertion
+unwind のディレクトリ回収を検証する。locate golden は周期の
+ambiguous_alignment と複数位相整合ピークを保持し、同じテストの非周期
+対照を受理必須にするため、全拒否実装では成功しない。合成入力 hash と
+四つの defer の意味・理由・再検討条件・実装の受け皿は文書監査で照合する。
+
 task の原文 inventory 全項目をケースに対応付ける。上表は代表例であり全項目の代替ではない。#33 の具体的 assertion は選択を承認した後に確定し、仕様改訂を選ぶ場合も対応文書監査を行う。
 
 ## Non-goals
@@ -86,3 +93,22 @@ task の原文 inventory 全項目をケースに対応付ける。上表は代�
 原点、luma buffer の容量・ポインタ再利用、dataset 一パス一 identity、
 不正 codec と declared-only viz、capture/input 不在の skipped を検証する。
 OpenDML decoder 拡張は実施せず、rec LIST の明示的 unsupported を検証する。
+
+## AC-33 の承認後の具体的検証 (2026-10-11)
+
+- 候補段: `clipping_candidate_triggers_expensive_without_overwriting_cheap` で
+  candidate_events が高コスト特徴より先に返され、events の provenance が
+  cheap 観測を参照し、元 cheap JSON が不変であることを検証する。
+  `suppressed_triggers_write_events_but_no_expensive` で候補テーブルを保存し、
+  高コスト特徴を生成しないことを検証する。独立 StageKind は要求しない。
+- FLAC: 承認済み defer のため圧縮テストは追加しない。
+  `residual_child_reopens_the_exact_subtracted_signal_and_lineage` で #32 の
+  Float64 WAV の完全一致・再取得・来歴・不整合時のエラーを再確認する。
+- 分解能: `windowed_records_persist_the_decoded_sample_rate` で 32/44.1 kHz の
+  cheap 分解能を検証する。`normalized_alignment_survives_process_boundary` で
+  44.1 kHz 原入力を 48 kHz へ正規化した reference/expensive 成果物のレートを
+  検証する。`windowed_expensive_records_keep_the_analysis_rate_even_when_invalid`
+  で 8/32 kHz の有効・無効分解能を検証する。`feature_record_round_trips` で
+  レートの JSON round trip と欠落時の拒否を固定する。
+
+[選択肢・承認結果・実行結果](../tasks/spec-residual-decisions.md) を参照。

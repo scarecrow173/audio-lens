@@ -92,7 +92,7 @@ impl IngestStage {
         }
 
         let request = DecodeRequest {
-            video_config: *video_cfg,
+            video_config: video_cfg.clone(),
             ..Default::default()
         };
         let media = DecoderRegistry::native()
@@ -370,7 +370,8 @@ impl Stage for IngestStage {
     }
 
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
-        let video_cfg = VideoFeatureConfig::from_job(ctx.config);
+        let video_cfg = VideoFeatureConfig::from_job(ctx.config)
+            .map_err(|e| StageError::new(StageKind::Ingest, e))?;
         let mut records = Vec::new();
         for input in &ctx.manifest.inputs {
             records.extend(self.ingest_input(input, &video_cfg, ctx)?);

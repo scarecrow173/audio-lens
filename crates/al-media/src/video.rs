@@ -44,7 +44,7 @@ pub struct VideoFrame<'a> {
 
 /// Event detection tunables; every used value is persisted in the
 /// artifact (`config.ingest.video.*` overrides).
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct VideoFeatureConfig {
     /// Mean absolute luma difference (0..255) between consecutive
     /// frames that marks a `scene_change` candidate.
@@ -57,6 +57,8 @@ pub struct VideoFeatureConfig {
     /// Consecutive frames over `motion_threshold` that open a
     /// `motion_onset` event.
     pub motion_min_run: usize,
+    /// 名前付き矩形。名前は marker と紐付ける安定キー。
+    pub rois: Vec<VideoRoi>,
 }
 
 impl Default for VideoFeatureConfig {
@@ -66,13 +68,14 @@ impl Default for VideoFeatureConfig {
             luminance_step_threshold: 32.0,
             motion_threshold: 4.0,
             motion_min_run: 2,
+            rois: Vec::new(),
         }
     }
 }
 
 impl VideoFeatureConfig {
     /// Overlay `config.ingest.video` onto the defaults.
-    pub fn from_job(config: &serde_json::Value) -> Self {
+    pub fn from_job(config: &serde_json::Value) -> Result<Self, String> {
         let c = &config["ingest"]["video"];
         let mut cfg = Self::default();
         if let Some(v) = c["scene_change_threshold"].as_f64() {
@@ -87,8 +90,62 @@ impl VideoFeatureConfig {
         if let Some(v) = c["motion_min_run"].as_u64() {
             cfg.motion_min_run = (v as usize).max(1);
         }
-        cfg
+        if let Some(rois) = c.get("rois") {
+            cfg.rois = serde_json::from_value(rois.clone())
+                .map_err(|e| format!("invalid ingest.video.rois: {e}"))?;
+        }
+        cfg.validate_rois(None)?;
+        Ok(cfg)
     }
+
+    fn validate_rois(&self, dimensions: Option<(u32, u32)>) -> Result<(), String> {
+        let mut names = std::collections::HashSet::new();
+        for roi in &self.rois {
+            let r = &roi.rect;
+            if roi.name.trim().is_empty() || !names.insert(&roi.name) {
+                return Err("ROI names must be nonempty and unique".into());
+            }
+            let right = r.x.checked_add(r.width);
+            let bottom = r.y.checked_add(r.height);
+            if r.width == 0
+                || r.height == 0
+                || right.is_none()
+                || bottom.is_none()
+                || dimensions.is_some_and(|(w, h)| right.unwrap() > w || bottom.unwrap() > h)
+            {
+                return Err(format!(
+                    "invalid or out-of-frame ROI rectangle: {}",
+                    roi.name
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+
+/// 左上原点のピクセル矩形。[x, x+width) × [y, y+height)。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VideoRoiRect {
+    pub x: u32,
+    pub y: u32,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// marker との対応付けに使用できる ROI 名とその観測範囲。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VideoRoi {
+    pub name: String,
+    pub rect: VideoRoiRect,
+}
+
+/// フレーム時刻列と同じ index の ROI 平均輝度系列。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RoiLuminance {
+    pub roi: VideoRoi,
+    pub luminance: Vec<f64>,
 }
 
 /// Coarse video event kinds the ingest stage can emit.
@@ -105,8 +162,10 @@ pub enum VideoEventKind {
 }
 
 /// One detected video event on the `vids` stream clock.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct VideoEvent {
+    /// None は全フレーム、Some は名前付き ROI のイベント。
+    pub roi_name: Option<String>,
     /// Event classification.
     pub kind: VideoEventKind,
     /// Frame index into `luminance`/`diff`/`frame_timestamps`.
@@ -139,6 +198,8 @@ pub struct VideoFeatures {
     pub frame_timestamps: Vec<i64>,
     /// Mean luma per frame (0..255).
     pub luminance: Vec<f64>,
+    /// ROI 別の輝度。空なら従来の全フレーム観測だけ。
+    pub roi_luminance: Vec<RoiLuminance>,
     /// Mean absolute luma difference to the previous frame
     /// (`diff[0] == 0.0`; aligned with `luminance`).
     pub diff: Vec<f64>,
@@ -215,6 +276,7 @@ fn detect_events(
     let mut events = Vec::new();
     let push = |events: &mut Vec<VideoEvent>, kind: VideoEventKind, frame: usize| {
         events.push(VideoEvent {
+            roi_name: None,
             kind,
             frame: frame as u32,
             time_ticks: frame_timestamps[frame],
@@ -313,6 +375,17 @@ pub fn extract_decoded_features(
         timebase_hz,
         start_tick,
     } = info;
+    if let Err(reason) = cfg.validate_rois(Some((width, height))) {
+        return unavailable_extraction(stream, &codec, MediaError::input_unavailable(reason));
+    }
+    let mut roi_luminance: Vec<RoiLuminance> = cfg
+        .rois
+        .iter()
+        .map(|roi| RoiLuminance {
+            roi: roi.clone(),
+            luminance: Vec::with_capacity(frame_count),
+        })
+        .collect();
     let pixels = width as usize * height as usize;
     let mut prev: Option<Vec<f64>> = None;
     let mut scratch = Vec::new();
@@ -335,6 +408,19 @@ pub fn extract_decoded_features(
             thumb_times.push(frame.time_ticks);
             thumb_frames.push(al_core::b64::encode(&rgb));
         }
+        for series in &mut roi_luminance {
+            let r = &series.roi.rect;
+            let mut sum = 0.0;
+            for y in r.y..r.y + r.height {
+                let start = y as usize * width as usize + r.x as usize;
+                sum += frame.luma[start..start + r.width as usize]
+                    .iter()
+                    .sum::<f64>();
+            }
+            series
+                .luminance
+                .push(sum / (u64::from(r.width) * u64::from(r.height)) as f64);
+        }
         frame_timestamps.push(frame.time_ticks);
         luminance.push(frame.luma.iter().sum::<f64>() / pixels as f64);
         diff.push(match &prev {
@@ -352,7 +438,21 @@ pub fn extract_decoded_features(
         });
         scratch = prev.replace(frame.luma).unwrap_or_default();
     }
-    let events = detect_events(&luminance, &diff, &frame_timestamps, cfg);
+    let mut events = detect_events(&luminance, &diff, &frame_timestamps, cfg);
+    for series in &roi_luminance {
+        for (i, pair) in series.luminance.windows(2).enumerate() {
+            let i = i + 1;
+            if (pair[1] - pair[0]).abs() >= cfg.luminance_step_threshold {
+                events.push(VideoEvent {
+                    kind: VideoEventKind::LuminanceStep,
+                    frame: i as u32,
+                    time_ticks: frame_timestamps[i],
+                    roi_name: Some(series.roi.name.clone()),
+                });
+            }
+        }
+    }
+    events.sort_by_key(|e| e.time_ticks);
     let thumbs = (!thumb_frames.is_empty()).then_some(VideoThumbs {
         width: tw,
         height: th,
@@ -374,7 +474,8 @@ pub fn extract_decoded_features(
             luminance,
             diff,
             events,
-            params: *cfg,
+            params: cfg.clone(),
+            roi_luminance,
         }),
         thumbs,
         unavailable: None,
@@ -425,6 +526,122 @@ mod tests {
         assert!(capacities[2..].iter().all(|c| *c >= 4));
         for i in 2..8 {
             assert_eq!(pointers[i], pointers[i - 2]);
+        }
+    }
+
+    #[test]
+    fn roi_tracks_local_step_on_stream_clock() {
+        let cfg = VideoFeatureConfig::from_job(&serde_json::json!({
+            "ingest": {"video": {"rois": [
+                {"name": "字幕", "rect": {"x": 0, "y": 0, "width": 1, "height": 1}},
+                {"name": "背景", "rect": {"x": 1, "y": 1, "width": 1, "height": 1}}
+            ]}}
+        }))
+        .unwrap();
+        let frames = [vec![0.0; 4], vec![100.0, 0.0, 0.0, 0.0]];
+        let out = extract_decoded_features(
+            VideoFrameInfo {
+                stream: 0,
+                codec: "rawvideo".into(),
+                width: 2,
+                height: 2,
+                bits_per_pixel: 24,
+                timebase_hz: 10,
+                start_tick: 7,
+            },
+            2,
+            |i, _scratch| {
+                Ok(DecodedVideoFrame {
+                    time_ticks: 7 + i as i64 * 3,
+                    luma: frames[i].clone(),
+                    preview: None,
+                })
+            },
+            &cfg,
+        );
+        let body = serde_json::to_value(&out.features).unwrap();
+        assert_eq!(body["roi_luminance"][0]["roi"]["name"], "字幕");
+        assert_eq!(
+            body["roi_luminance"][0]["luminance"],
+            serde_json::json!([0.0, 100.0])
+        );
+        assert_eq!(
+            body["roi_luminance"][1]["luminance"],
+            serde_json::json!([0.0, 0.0])
+        );
+        assert_eq!(body["luminance"], serde_json::json!([0.0, 25.0]));
+        assert_eq!(body["events"].as_array().unwrap().len(), 1);
+        assert_eq!(body["events"][0]["roi_name"], "字幕");
+        assert_eq!(body["events"][0]["time_ticks"], 10);
+    }
+
+    #[test]
+    fn invalid_roi_config_is_explicit() {
+        let roi =
+            serde_json::json!({"name": "字幕", "rect": {"x": 0, "y": 0, "width": 1, "height": 1}});
+        for rois in [
+            serde_json::json!(null),
+            serde_json::json!({}),
+            serde_json::json!([roi.clone(), roi.clone()]),
+            serde_json::json!([{ "name": " ", "rect": roi["rect"] }]),
+            serde_json::json!([{ "name": "字幕", "rect": {"x": 0, "y": 0, "width": 0, "height": 1} }]),
+            serde_json::json!([{ "name": "字幕", "rect": {"x": u32::MAX, "y": 0, "width": 1, "height": 1} }]),
+            serde_json::json!([{ "name": "字幕", "rect": {"x": -1, "y": 0, "width": 1, "height": 1} }]),
+        ] {
+            assert!(
+                VideoFeatureConfig::from_job(
+                    &serde_json::json!({"ingest": {"video": {"rois": rois}}})
+                )
+                .is_err()
+            );
+        }
+        let cfg = VideoFeatureConfig {
+            rois: vec![VideoRoi {
+                name: "外側".into(),
+                rect: VideoRoiRect {
+                    x: 2,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                },
+            }],
+            ..Default::default()
+        };
+        let out = extract_features(
+            0,
+            &bih(2, 2, 24, 0),
+            10,
+            0,
+            &[frame(0, &dib_body(2, 2, &[0, 0], false))],
+            &cfg,
+        );
+        assert!(
+            matches!(out.features, VideoFeatureArtifact::Unavailable { ref reason, .. } if reason.contains("外側"))
+        );
+    }
+
+    #[test]
+    fn roi_coordinates_follow_display_rows_with_padding() {
+        let cfg = VideoFeatureConfig {
+            rois: vec![VideoRoi {
+                name: "上段".into(),
+                rect: VideoRoiRect {
+                    x: 1,
+                    y: 0,
+                    width: 1,
+                    height: 1,
+                },
+            }],
+            ..Default::default()
+        };
+        for top_down in [true, false] {
+            let strf = bih(2, if top_down { -2 } else { 2 }, 24, 0);
+            let body = dib_body(2, 2, &[70, 210], top_down);
+            let out = extract_features(0, &strf, 10, 0, &[frame(0, &body)], &cfg);
+            let VideoFeatureArtifact::Decoded(f) = out.features else {
+                panic!("decode")
+            };
+            assert!((f.roi_luminance[0].luminance[0] - 70.0).abs() < 1e-9);
         }
     }
 

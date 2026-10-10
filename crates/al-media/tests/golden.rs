@@ -36,6 +36,7 @@ use al_media::{
 use al_testkit::expect::{Tolerance, expect_close, expect_true};
 use al_testkit::media::{AviSpec, AviStreamSpec, MoviPacket, pcm_s16le, write_avi};
 use al_testkit::mp4::{Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4};
+use al_testkit::temp::TempDir;
 
 /// 4x4 / 24bpp DIB フレームのバイト数(row は DWORD aligned)。
 const W: u32 = 4;
@@ -673,17 +674,12 @@ fn case_compressed_only_mp4_ingest() {
             .any(|o| o["kind"] == "decode_unavailable" && o["detail"]["codec"] == "mp4a"),
         "integrity: {integrity:?}"
     );
-
-    std::fs::remove_dir_all(&dir).ok();
-    std::fs::remove_dir_all(&job_dir).ok();
 }
 
 // ---- ingest ステージ経由のケース用ヘルパ ----
 
-fn temp_dir(tag: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!("al-media-golden-{tag}-{}", al_core::JobId::new()));
-    std::fs::create_dir_all(&dir).unwrap();
-    dir
+fn temp_dir(tag: &str) -> TempDir {
+    TempDir::new(&format!("al-media-golden-{tag}"))
 }
 
 fn write_fixture(dir: &Path, name: &str, bytes: &[u8]) -> PathBuf {
