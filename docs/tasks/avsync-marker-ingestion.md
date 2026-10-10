@@ -1,7 +1,7 @@
 ---
 id: "TASK-034dLdqYq4GSy3E3kSqOzG"
 type: "task"
-status: "blocked"
+status: "todo"
 title: "[Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存)"
 created: "2026-10-10"
 updated: "2026-10-10"
@@ -53,7 +53,7 @@ relations:
 
 ## Dependencies
 
-spec/ADR と design/plan の承認を待つため status blocked。承認前は実行しない。
+spec/ADR はチェーンの受理可能な status を満たし、design/plan と test-spec は承認済みのため status todo。
 
 #28 の時計・dwStart 意味論を確認後にイベント差分を検証する。#39 ROI task は本 marker 入力の代替ではない。
 
