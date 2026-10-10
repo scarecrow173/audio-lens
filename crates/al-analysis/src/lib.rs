@@ -15,3 +15,5 @@ pub mod reference;
 pub mod session;
 pub mod stage;
 pub mod stft;
+
+pub mod video;

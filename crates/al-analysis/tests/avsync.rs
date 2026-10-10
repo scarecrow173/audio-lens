@@ -48,13 +48,34 @@ fn scalar(rec: &serde_json::Value) -> f64 {
 
 #[test]
 fn ingest_then_cheap_recovers_planted_av_offset() {
+    run_offset_fixture(false, true);
+}
+
+#[test]
+fn roi_series_tensor_and_event_reach_avsync() {
+    run_offset_fixture(true, true);
+}
+
+#[test]
+fn roi_tensor_survives_missing_audio() {
+    run_offset_fixture(true, false);
+}
+
+fn run_offset_fixture(roi: bool, has_audio: bool) {
     // 4 s of 10 fps video: dark frames 0-14, bright 15-39 → a scene
     // change (and luminance step) at frame 15 → 1.5 s on the vids
     // clock. dwStart = 5 ticks declares a container-level offset that
     // must cancel out. Audio: tone onset at 1.3 s → delta +0.2 s.
     let fps = 10u32;
     let dark = vec![0u8; 64 * 48 * 3];
-    let bright = vec![200u8; 64 * 48 * 3];
+    let mut bright = vec![200u8; 64 * 48 * 3];
+    if roi {
+        bright.fill(0);
+        // DIB は bottom-up。表示上左下の 8 × 2 ピクセルだけ変化。
+        for y in 0..2 {
+            bright[y * 64 * 3..y * 64 * 3 + 8 * 3].fill(200);
+        }
+    }
     let frames: Vec<Vec<u8>> = (0..40)
         .map(|f| if f < 15 { dark.clone() } else { bright.clone() })
         .collect();
@@ -64,7 +85,9 @@ fn ingest_then_cheap_recovers_planted_av_offset() {
         .into_iter()
         .map(|f| MoviPacket::video_frame(0, f))
         .collect();
-    packets.push(MoviPacket::audio(1, audio));
+    if has_audio {
+        packets.push(MoviPacket::audio(1, audio));
+    }
     let avi_bytes = write_avi(&AviSpec {
         width: 64,
         height: 48,
@@ -85,7 +108,13 @@ fn ingest_then_cheap_recovers_planted_av_offset() {
     let runner = StageRunner::new(&job_dir);
     let def = JobDefinition::create(
         vec![input(InputRole::CaptureBug, &avi)],
-        serde_json::json!({}),
+        if roi {
+            serde_json::json!({"ingest": {"video": {"rois": [
+                {"name": "字幕/表示", "rect": {"x": 0, "y": 46, "width": 8, "height": 2}}
+            ]}}})
+        } else {
+            serde_json::json!({})
+        },
         vec![StageKind::Ingest, StageKind::CheapAnalysis],
     )
     .unwrap();
@@ -113,7 +142,14 @@ fn ingest_then_cheap_recovers_planted_av_offset() {
     let scene = f
         .events
         .iter()
-        .find(|e| e.kind == al_media::VideoEventKind::SceneChange)
+        .find(|e| {
+            e.kind
+                == if roi {
+                    al_media::VideoEventKind::LuminanceStep
+                } else {
+                    al_media::VideoEventKind::SceneChange
+                }
+        })
         .expect("scene change detected");
     assert_eq!(scene.time_ticks, 5 + 15); // raw stream clock keeps dwStart
 
@@ -130,6 +166,56 @@ fn ingest_then_cheap_recovers_planted_av_offset() {
             .expect("cheap records parse");
     let records = body["records"].as_array().expect("records array");
 
+    if roi {
+        let record = find(records, "video.roi_luminance");
+        assert_eq!(record["params"]["roi"]["name"], "字幕/表示");
+        assert_eq!(record["support_count"], 40);
+        let array = record["value"]["tensor"]["array"].as_str().unwrap();
+        let reader = al_dataset::reader::DatasetReader::open(
+            &runner.job_dir(&manifest.job_id).join("analysis"),
+        )
+        .unwrap();
+        let name = array.strip_prefix("features/cheap/").unwrap();
+        let (data, _) = reader
+            .read_tensor("features/cheap", name, &[[0, 1], [0, 40]])
+            .unwrap();
+        assert!(data[..15].iter().all(|v| v.abs() < 1e-9));
+        assert!(data[15..].iter().all(|v| (v - 200.0).abs() < 1e-9));
+        let times = find(records, "video.frame_times");
+        let time_array = times["value"]["tensor"]["array"].as_str().unwrap();
+        let (times, _) = reader
+            .read_tensor(
+                "features/cheap",
+                time_array.strip_prefix("features/cheap/").unwrap(),
+                &[[0, 1], [0, 40]],
+            )
+            .unwrap();
+        assert_eq!(times[15], 1.5);
+        if has_audio {
+            assert_eq!(
+                find(records, "avsync.delta")["params"]["roi_name"],
+                "字幕/表示"
+            );
+        }
+        assert!(f.luminance[15] < 32.0);
+    } else {
+        assert!(f.roi_luminance.is_empty());
+        assert!(
+            !records
+                .iter()
+                .any(|r| r["feature_id"] == "video.roi_luminance")
+        );
+    }
+
+    if !has_audio {
+        assert_eq!(
+            find(records, "avsync.pair_count")["validity"],
+            "decode_input_unavailable"
+        );
+        fs::remove_dir_all(&dir).ok();
+        fs::remove_dir_all(&job_dir).ok();
+        return;
+    }
     // The tone edge produces one or two onsets (10 ms hop
     // quantization across the rising edge); every one must land on
     // the planted A/V offset.
