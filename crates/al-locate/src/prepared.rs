@@ -23,6 +23,33 @@ pub(crate) fn bands_for_rate(rate: u32) -> Vec<(f64, f64)> {
         .collect()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn custom_band_cache_preserves_identity_and_separates_filter_settings() {
+        let samples: Vec<_> = (0..512).map(|i| (i as f64 * 0.2).sin()).collect();
+        let mut cache = InputCache::default();
+        let bands = [(100.0, 500.0), (500.0, 1000.0)];
+        let a = cache
+            .prepare_with_bands("input", 0, 8000, "v1", &samples, &bands)
+            .unwrap();
+        let b = cache
+            .prepare_with_bands("input", 0, 8000, "v1", &samples, &bands)
+            .unwrap();
+        assert!(Arc::ptr_eq(&a, &b));
+        let other = cache
+            .prepare_with_bands("input", 0, 8000, "v1", &samples, &[(100.0, 1000.0)])
+            .unwrap();
+        assert!(!Arc::ptr_eq(&a, &other));
+        let filtered = crate::dsp::bandpass_many(&samples, 8000, &bands);
+        for ((_, actual), expected) in a.bands().iter().zip(filtered) {
+            assert_eq!(actual.as_ref(), expected);
+        }
+    }
+}
+
 /// F5: 同じ全区間、次の 2 冪へ末尾ゼロ埋め、半開帯域、元長へ切り戻す。
 /// 端点の周期拡張や窓を追加しない。規則の変更時は別設定となる。
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -92,6 +119,23 @@ impl InputCache {
             return Err("sample rates must be nonzero");
         }
         let bands = bands_for_rate(rate);
+        self.prepare_with_bands(id, channel, rate, version, samples, &bands)
+    }
+
+    /// 指定帯域を同じ入力単位キャッシュで準備する。窓ごとの再フィルタを避ける。
+    #[allow(clippy::too_many_arguments)]
+    pub fn prepare_with_bands(
+        &mut self,
+        id: &str,
+        channel: usize,
+        rate: u32,
+        version: &str,
+        samples: &[f64],
+        bands: &[(f64, f64)],
+    ) -> Result<Arc<PreparedChannel>, &'static str> {
+        if rate == 0 {
+            return Err("sample rates must be nonzero");
+        }
         let key = InputKey {
             id: id.into(),
             channel,
@@ -110,7 +154,7 @@ impl InputCache {
         if let Some(prepared) = self.channels.get(&key) {
             return Ok(Arc::clone(prepared));
         }
-        let filtered = crate::dsp::bandpass_many(samples, rate, &bands);
+        let filtered = crate::dsp::bandpass_many(samples, rate, bands);
         let coarse_rate = rate / 4;
         let (coarse, radius) = if coarse_rate > 0 && samples.len() >= 4 {
             let plan = ResamplePlan::new(rate, coarse_rate)?;
@@ -123,7 +167,8 @@ impl InputCache {
         };
         let prepared = Arc::new(PreparedChannel {
             bands: bands
-                .into_iter()
+                .iter()
+                .copied()
                 .zip(filtered.into_iter().map(Arc::from))
                 .collect(),
             coarse,
