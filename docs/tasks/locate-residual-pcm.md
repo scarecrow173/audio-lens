@@ -1,7 +1,7 @@
 ---
 id: "TASK-034dLdqYvyaMjl7hTgg6IT"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-locate: 2ソース残差探索の残差PCMを保存する"
 created: "2026-10-10"
 updated: "2026-10-10"
@@ -41,7 +41,7 @@ relations:
 ## Classification
 
 - `new-feature`
-- draft plan のレビュー用候補。依頼により先に文書化するが、通常の承認済み計画由来の実装 task ではない。
+- 承認済み design/plan/test-spec と LEFT-R1 の使用 PCM 契約に基づく実装。
 
 ## Upstream Documents
 
@@ -58,8 +58,11 @@ spec/ADR はチェーンの受理可能な status を満たし、design/plan と
 
 - `crates/al-locate/src/stage.rs`
 - `crates/al-locate/src/residual.rs`
-- `crates/al-dataset/src/audio.rs`
+- `crates/al-locate/src/decode.rs`
+- `crates/al-locate/Cargo.toml`, `Cargo.lock`
+- `crates/al-dataset/src/audio.rs` の既存 API を再利用(変更なし)
 - `crates/al-locate/tests/locate.rs`
+- `docs/tasks/README.md`
 
 ## Issue Inventory (2026-10-10)
 
@@ -111,15 +114,34 @@ reference 解析側では staged residual R0–R3 の音声が `residual` ロー
 
 ## Done When
 
-- [ ] two-source 探索の残差 PCM を保存して再読出し・再聴取できる。search JSON から音声 artifact と親 source/alignment、混合行列の来歴を辿れ、保存前後のサンプル・エネルギーが一致する。
-- [ ] 残差 child alignment の `capture_pcm` が探索に実際に使用した減算後残差の signal version を明示参照する。dataset 再 open 後も `read_alignment_pcm` 等が探索時と同一信号を返し、参照欠落・不整合では fail-closed でエラーになる。
-- [ ] 原文全項目に修正・文書化・承認済み defer と検証証拠の対応がある。
-- [ ] 関連 spec/ADR/design/test-spec が実施内容と一致する。
+- [x] two-source 探索の残差 PCM を保存して再読出し・再聴取できる。search JSON から音声 artifact と親 source/alignment、混合行列の来歴を辿れ、保存前後のサンプル・エネルギーが一致する。
+- [x] 残差 child alignment の `capture_pcm` が探索に実際に使用した減算後残差の signal version を明示参照する。dataset 再 open 後も `read_alignment_pcm` 等が探索時と同一信号を返し、参照欠落・不整合では fail-closed でエラーになる。
+- [x] 原文全項目に修正・文書化・承認済み defer と検証証拠の対応がある。
+- [x] 関連 spec/ADR/design/test-spec が実施内容と一致する。
 
 ## Verification
 
-- [ ] `mise exec -- cargo test -p al-locate -p al-dataset` が exit 0。原文項目に対応した回帰テストを含む。
-- [ ] `mise run fmt` と `mise run lint` が exit 0。
-- [ ] 文書と Issue 項目の対応を review する。
+- [x] `mise exec -- cargo test -p al-locate -p al-dataset` が exit 0。原文項目に対応した回帰テストを含む。
+- [x] `mise run fmt` と `mise run lint` が exit 0。
+- [x] 文書と Issue 項目の対応を review する。
 
-現時点では文書整備のみであり、上記実装検証は未実行。
+## 実施結果と証拠 (2026-10-10)
+
+| 原文項目 / 契約 | 実施結果 | 検証証拠 |
+| --- | --- | --- |
+| 減算後 channel samples の保持・再聴取 | `al-dataset::write_wav` を再利用し、親ごとに `locate/residual/<parent_source>_<artifact_id>.wav` を Float64 / residual ロールで保存。全 child で共有する | `residual_child_reopens_the_exact_subtracted_signal_and_lineage` の二音源・2チャネル fixture で保存前後のサンプルと RMS が完全一致 |
+| search JSON と親 source/alignment・混合行列の来歴 | JSON の `residual_pcm` と artifact inputs、WAV params の親 alignment artifact・source/capture PCM・符号付き行列・エネルギーを登録 | 同テストで JSON から WAV と親 locate_result を辿り、行列を照合 |
+| LEFT-R1: child 使用 PCM の明示参照 | child の `capture_pcm` を残差 artifact に結び付け、`residual_parent_alignment` で親を明示。`read_alignment_pcm` の共有境界で WAV と来歴を検証し、保存済み信号を復元 | manifest をディスクへ保存・再読出し後、探索に渡した減算信号と完全一致し、元キャプチャと異なることを assertion |
+| fail-closed | 参照欠落、元キャプチャへの差し替え、role/形式・rate/channels/frames・行列・親 alignment・inputs の不整合、WAV 破損/欠落をエラーとする | 同テストの参照欠落/差し替え、metadata 変異、inputs 欠落、WAV 破損/欠落ケース |
+
+回帰テストは修正前に child の使用 PCM が `normalized_pcm` であるため失敗し、修正後に成功した。
+対象テストは合計 93 件成功、`mise run fmt` と workspace 全 targets の
+`mise run lint`(`cargo clippy --workspace --all-targets -- -D warnings`)も成功。
+内部依存 `al-dataset` と `Cargo.lock` 更新は coordinator の明示承認を得た。
+spec AC-32、design の独立 signal version / lineage / fail-closed 契約、test-spec AC-32 と対応し、上流の status は変更していない。
+
+## Non-blocking
+
+- 簡易 PSD/帯域 observation は任意項目であり、保存・再聴取・使用 PCM 再取得の AC-32 に必要ないため追加しない。再検討条件は残差のスペクトル比較が必要になったとき。
+- WAV は既存 RIFF writer のサイズ制約に従う。上限を超える保存はエラーとし、別形式や大容量コンテナの導入は本 task の範囲外。
+- JSON の浮動小数メタデータは parse 時の丸めを許容して照合し、PCM 自体の保存・再取得は Float64 の完全一致で検証した。
