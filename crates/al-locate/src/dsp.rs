@@ -6,6 +6,7 @@
 //! are scale-invariant; callers that compare absolute quantities must
 //! normalize themselves first.
 
+#[cfg(test)]
 use std::f64::consts::PI;
 
 /// Split interleaved samples into per-channel contiguous vectors.
@@ -82,42 +83,17 @@ pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
 
 /// In-place radix-2 FFT. `re`/`im` lengths must be equal powers of two.
 pub fn fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
-    let n = re.len();
-    assert_eq!(n, im.len());
-    assert!(n.is_power_of_two());
-    // Bit-reversal permutation.
-    for i in 1..n {
-        let j = i.reverse_bits() >> (usize::BITS - n.trailing_zeros());
-        if i < j {
-            re.swap(i, j);
-            im.swap(i, j);
-        }
-    }
-    let sign = if inverse { 1.0 } else { -1.0 };
-    let mut len = 2;
-    while len <= n {
-        let ang = sign * 2.0 * PI / len as f64;
-        let (wr, wi) = (ang.cos(), ang.sin());
-        for i in (0..n).step_by(len) {
-            let (mut cr, mut ci) = (1.0, 0.0);
-            for j in i..i + len / 2 {
-                let k = j + len / 2;
-                let (tr, ti) = (re[k] * cr - im[k] * ci, re[k] * ci + im[k] * cr);
-                re[k] = re[j] - tr;
-                im[k] = im[j] - ti;
-                re[j] += tr;
-                im[j] += ti;
-                let ncr = cr * wr - ci * wi;
-                ci = cr * wi + ci * wr;
-                cr = ncr;
-            }
-        }
-        len *= 2;
-    }
-    if inverse {
-        for v in re.iter_mut().chain(im.iter_mut()) {
-            *v /= n as f64;
-        }
+    assert_eq!(re.len(), im.len());
+    let plan = al_math::fft::Fft::new(re.len());
+    let mut values: Vec<_> = re
+        .iter()
+        .zip(im.iter())
+        .map(|(&re, &im)| al_math::c64::new(re, im))
+        .collect();
+    plan.transform(&mut values, inverse);
+    for ((re, im), value) in re.iter_mut().zip(im.iter_mut()).zip(values) {
+        *re = value.re;
+        *im = value.im;
     }
 }
 
