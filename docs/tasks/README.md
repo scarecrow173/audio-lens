@@ -27,7 +27,7 @@ Directory: `docs/tasks`
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | todo | [container-review-edge-cases.md](./container-review-edge-cases.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
-| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | todo | [cross-capture-calibration.md](./cross-capture-calibration.md) |
+| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | done | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |
 | TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | done | [dataset-reader.md](./dataset-reader.md) |
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
