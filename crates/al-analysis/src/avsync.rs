@@ -46,8 +46,10 @@ impl AvSyncConfig {
 }
 
 /// One video event rebased onto the `vids` stream clock, in seconds.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VideoEventS {
+    /// 名前付き ROI の安定キー。
+    pub roi_name: Option<String>,
     /// Event classification (kept verbatim from ingest).
     pub kind: VideoEventKind,
     /// Frame index in the decoded series.
@@ -64,6 +66,7 @@ pub fn rebase_events(video: &VideoFeatures) -> Vec<VideoEventS> {
         .events
         .iter()
         .map(|e| VideoEventS {
+            roi_name: e.roi_name.clone(),
             kind: e.kind,
             frame: e.frame,
             time_s: (e.time_ticks - video.start_tick) as f64 / video.timebase_hz as f64,
@@ -72,8 +75,10 @@ pub fn rebase_events(video: &VideoFeatures) -> Vec<VideoEventS> {
 }
 
 /// One accepted onset↔event pair.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AvSyncPair {
+    /// 照合した映像イベントの ROI 名。
+    pub roi_name: Option<String>,
     /// Onset position, seconds from PCM start.
     pub audio_time_s: f64,
     /// Event position, seconds on the rebased `vids` clock.
@@ -136,6 +141,7 @@ pub fn match_events(onsets: &[f64], events: &[VideoEventS], window_s: f64) -> Ve
         used_event[ei] = true;
         let delta = events[ei].time_s - onsets[ai];
         pairs.push(AvSyncPair {
+            roi_name: events[ei].roi_name.clone(),
             audio_time_s: onsets[ai],
             video_time_s: events[ei].time_s,
             delta_s: delta,
@@ -255,6 +261,7 @@ pub fn sync_records(
             "pair": i,
             "event_kind": p.event_kind,
             "event_frame": p.event_frame,
+            "roi_name": p.roi_name,
         });
         for (id, value) in [
             ("avsync.audio_time", p.audio_time_s),
@@ -372,11 +379,13 @@ mod tests {
             start_tick,
             frame_timestamps: (0..8).map(|i| start_tick + i).collect(),
             luminance: vec![0.0; 8],
+            roi_luminance: Vec::new(),
             diff: vec![0.0; 8],
             events: events
                 .iter()
                 .enumerate()
                 .map(|(i, &(tick, kind))| VideoEvent {
+                    roi_name: None,
                     kind,
                     frame: i as u32,
                     time_ticks: tick,
