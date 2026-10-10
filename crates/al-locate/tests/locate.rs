@@ -193,7 +193,7 @@ fn embedded_source_is_located_with_time_map_and_residual() {
     // the child locate result with subtraction provenance.
     let residual_rec = records
         .iter()
-        .find(|r| r.role == "residual")
+        .find(|r| r.role == "residual" && r.path.extension().is_some_and(|e| e == "json"))
         .expect("residual artifact");
     let res: serde_json::Value =
         serde_json::from_str(&fs::read_to_string(fx.dir.join(&residual_rec.path)).unwrap())
@@ -202,6 +202,194 @@ fn embedded_source_is_located_with_time_map_and_residual() {
     assert!(res["energy"]["before"].is_f64());
 
     fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn residual_child_reopens_the_exact_subtracted_signal_and_lineage() {
+    use al_locate::{decode::read_alignment_pcm, residual::prepare_residual, result::LocateResult};
+    let source = noise(2048, 71);
+    let quiet = noise(1024, 72);
+    let mut capture = vec![0.0; 8192];
+    capture[1024..3072].copy_from_slice(&source);
+    for (out, v) in capture[4096..].iter_mut().zip(&quiet) {
+        *out += 0.04 * v;
+    }
+    let mut fx = fixture(&source, &capture, (48000, 48000));
+    let mut right = vec![0.0; capture.len()];
+    for (out, v) in right[1024..].iter_mut().zip(&source) {
+        *out = -0.5 * v;
+    }
+    for (out, v) in right[4096..].iter_mut().zip(&quiet) {
+        *out += 0.06 * v;
+    }
+    let interleaved: Vec<f64> = capture
+        .iter()
+        .zip(&right)
+        .flat_map(|(&l, &r)| [l, r])
+        .collect();
+    write_pcm(&fx.dir, "inputs/cap.f64le", &interleaved);
+    fx.manifest
+        .artifacts
+        .iter_mut()
+        .find(|r| r.path == Path::new("inputs/cap.f64le"))
+        .unwrap()
+        .params["channels"] = serde_json::json!(2);
+    let child = input(InputRole::SourceAsset, fx.dir.join("quiet.bin"));
+    let child_id = child.input_id.to_string();
+    // Manifest::new registers the declared input artifacts as well.
+    let mut extra = Manifest::new(JobId::new(), vec![child], serde_json::json!({}), &[]);
+    let declared = extra.input_artifact(&extra.inputs[0].input_id).unwrap();
+    fx.manifest.inputs.append(&mut extra.inputs);
+    fx.manifest.artifacts.append(&mut extra.artifacts);
+    write_pcm(&fx.dir, "inputs/quiet.f64le", &quiet);
+    fx.manifest.register_artifact(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "decoded_pcm".into(),
+        path: "inputs/quiet.f64le".into(),
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![declared],
+        params: serde_json::json!({"sample_rate": 48000, "channels": 1}),
+    });
+    let (records, body) = run_and_read(&fx);
+    let parent: LocateResult = serde_json::from_value(body["result"].clone()).unwrap();
+    assert!(parent.accepted);
+    let search_record = records
+        .iter()
+        .find(|r| {
+            r.role == "residual"
+                && r.path.extension().is_some_and(|e| e == "json")
+                && r.params["parent_source"] == fx.source_input_id
+                && r.params["child_source"] == child_id
+        })
+        .unwrap();
+    let search: serde_json::Value =
+        serde_json::from_slice(&fs::read(fx.dir.join(&search_record.path)).unwrap()).unwrap();
+    let child: LocateResult = serde_json::from_value(search["child"].clone()).unwrap();
+    assert!(child.accepted);
+    let residual_id = child.capture_pcm.as_ref().unwrap().artifact_id.clone();
+    let residual = records
+        .iter()
+        .find(|r| r.artifact_id == residual_id)
+        .unwrap();
+    assert_eq!(residual.role, "residual");
+    assert_eq!(residual.path.extension().unwrap(), "wav");
+    assert_eq!(search["residual_pcm"]["artifact_id"], residual_id.as_str());
+    assert!(search_record.inputs.contains(&residual_id));
+    let parent_record = records
+        .iter()
+        .find(|r| {
+            r.role == "locate_result" && r.params["alignment_id"] == parent.alignment_id.as_str()
+        })
+        .unwrap();
+    assert!(residual.inputs.contains(&parent_record.artifact_id));
+    assert_eq!(
+        residual.params["parent_alignment"],
+        search["parent_alignment"]
+    );
+    let matrix: Vec<Vec<f64>> =
+        serde_json::from_value(search["channel_transform"].clone()).unwrap();
+    let saved_matrix: Vec<Vec<f64>> =
+        serde_json::from_value(residual.params["channel_transform"].clone()).unwrap();
+    for (saved, json) in saved_matrix.iter().flatten().zip(matrix.iter().flatten()) {
+        assert!((saved - json).abs() < 1e-15);
+    }
+    let mut aligned = vec![0.0; capture.len()];
+    let start = parent.capture_range.start as usize;
+    let span = (parent.capture_range.end - parent.capture_range.start) as usize;
+    aligned[start..start + span].copy_from_slice(&source[..span]);
+    let expected = prepare_residual(&[aligned], &[capture.clone(), right], 1e-3).unwrap();
+    assert_ne!(expected.channels[0], capture);
+    for record in records {
+        fx.manifest.register_artifact(record);
+    }
+    // Only serialized manifest + on-disk artifacts survive the process boundary.
+    let path = fx.dir.join("reopened.json");
+    fs::write(&path, serde_json::to_vec(&fx.manifest).unwrap()).unwrap();
+    let mut reopened: Manifest = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let ctx = StageContext {
+        manifest: &reopened,
+        registry: &registry,
+        config: &config,
+    };
+    let (_, loaded) = read_alignment_pcm(&child, &ctx).unwrap().unwrap();
+    assert_eq!(loaded.decoded.channel_samples, expected.channels);
+    let rms = (loaded
+        .decoded
+        .channel_samples
+        .iter()
+        .flatten()
+        .map(|v| v * v)
+        .sum::<f64>()
+        / (capture.len() * 2) as f64)
+        .sqrt();
+    assert_eq!(rms, expected.energy.after);
+    assert!((search["energy"]["after"].as_f64().unwrap() - expected.energy.after).abs() < 1e-15);
+    let mut missing = child.clone();
+    missing.capture_pcm = None;
+    assert!(read_alignment_pcm(&missing, &ctx).is_err());
+    let mut wrong = child.clone();
+    wrong.capture_pcm.as_mut().unwrap().channels += 1;
+    assert!(read_alignment_pcm(&wrong, &ctx).is_err());
+    let mut wrong = child.clone();
+    wrong.capture_pcm = parent.capture_pcm.clone();
+    assert!(read_alignment_pcm(&wrong, &ctx).is_err());
+    let idx = reopened
+        .artifacts
+        .iter()
+        .position(|r| r.artifact_id == residual_id)
+        .unwrap();
+    let original = reopened.artifacts[idx].clone();
+    for (pointer, value) in [
+        ("/pcm/frames", serde_json::json!(1)),
+        ("/pcm/sample_rate", serde_json::json!(24000)),
+        ("/pcm/channels", serde_json::json!(1)),
+        ("/encoding", serde_json::json!("wav-f32le")),
+        (
+            "/parent_alignment",
+            serde_json::json!(al_core::AlignmentId::new()),
+        ),
+        (
+            "/channel_transform",
+            serde_json::json!([[1.0, 0.0], [0.0, 1.0]]),
+        ),
+    ] {
+        reopened.artifacts[idx] = original.clone();
+        *reopened.artifacts[idx].params.pointer_mut(pointer).unwrap() = value;
+        let ctx = StageContext {
+            manifest: &reopened,
+            registry: &registry,
+            config: &config,
+        };
+        assert!(read_alignment_pcm(&child, &ctx).is_err(), "{pointer}");
+    }
+    reopened.artifacts[idx] = original.clone();
+    reopened.artifacts[idx].inputs.clear();
+    let ctx = StageContext {
+        manifest: &reopened,
+        registry: &registry,
+        config: &config,
+    };
+    assert!(read_alignment_pcm(&child, &ctx).is_err());
+    reopened.artifacts[idx] = original.clone();
+    let ctx = StageContext {
+        manifest: &reopened,
+        registry: &registry,
+        config: &config,
+    };
+    fs::write(fx.dir.join(&original.path), [0; 8]).unwrap();
+    assert!(read_alignment_pcm(&child, &ctx).is_err());
+    fs::remove_file(fx.dir.join(&original.path)).unwrap();
+    assert!(read_alignment_pcm(&child, &ctx).is_err());
+    reopened.artifacts.remove(idx);
+    let ctx = StageContext {
+        manifest: &reopened,
+        registry: &registry,
+        config: &config,
+    };
+    assert!(read_alignment_pcm(&child, &ctx).is_err());
+    fs::remove_dir_all(&fx.dir).unwrap();
 }
 
 #[test]

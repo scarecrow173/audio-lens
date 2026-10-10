@@ -24,7 +24,7 @@ use crate::methods::{CoarseSearch, FullNcc, default_methods, peaks_from_correlat
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
 use crate::prepared::{InputCache, PreparedChannel};
-use crate::residual::{assemble_residual_search, prepare_residual};
+use crate::residual::{assemble_residual_search, persist_residual, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
 use crate::tracking::{Anchor, build_time_map, identify_loop_occurrences};
 
@@ -948,6 +948,17 @@ impl Stage for LocateStage {
                 else {
                     continue;
                 };
+                let prepared_parent = prepared_sources[parent_idx].as_ref().unwrap();
+                let residual_pcm = persist_residual(
+                    &prepared,
+                    prepared_parent,
+                    &prepared_capture,
+                    parent_result,
+                    parent_artifact,
+                    ctx,
+                )
+                .map_err(err)?;
+                records.push(residual_pcm.record.clone());
                 let children: Vec<&DecodedInput> = decoded_sources
                     .iter()
                     .flatten()
@@ -1043,8 +1054,10 @@ impl Stage for LocateStage {
                         .find(|p| p.decoded.input_id == child.input_id)
                         .unwrap();
                     prepared_child
-                        .attach(&prepared_capture, &mut child_result)
+                        .attach(&residual_pcm, &mut child_result)
                         .map_err(err)?;
+                    child_result.params["residual_parent_alignment"] =
+                        serde_json::to_value(&parent_result.alignment_id).map_err(err)?;
                     let search = assemble_residual_search(
                         &parent.input_id,
                         parent_result.alignment_id.clone(),
@@ -1059,6 +1072,7 @@ impl Stage for LocateStage {
                     lineage.extend(capture.artifact_ids.iter().cloned());
                     lineage.extend(child.artifact_ids.iter().cloned());
                     lineage.push(parent_artifact.clone());
+                    lineage.push(residual_pcm.record.artifact_id.clone());
                     records.push(self.persist_json(
                         &dir,
                         &name,
@@ -1071,6 +1085,8 @@ impl Stage for LocateStage {
                             "child_source": search.child.source_input_id,
                             "child_accepted": search.child.accepted,
                             "confidence": search.confidence,
+                            "residual_pcm": search.residual_pcm,
+                            "channel_transform": search.channel_transform,
                         }),
                         ctx,
                     )?);
