@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "分析データセットスキーマ"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -58,7 +58,12 @@ Analysis Dataset を定義する。
 - 時間範囲
 - 周波数範囲(該当する場合)
 - チャンネル / チャンネルペア
-- 分解能 / window / hop
+- 分解能 / window / hop / sample_rate (Hz)。`Resolution.sample_rate` は
+  必須の `u32` で、window/hop を計算した PCM のレートを表す。
+  正規化後の解析では原入力レートではなく正規化レートを保存する。
+  窓を持たない segment 要約等は resolution 自体を省略できる。
+  周波数軸と窓の時間換算はこのレートを使用し、原入力レート等の来歴は
+  manifest/params に保持する。旧成果物は再生成し、欠落値の fallback は設けない。
 - 絶対的な対象値
 - リファレンス値(該当する場合)
 - 差分および / または比率(意味がある場合)
@@ -93,7 +98,12 @@ validity セマンティクス(最低限の区別):
 - Parquet: フレーム / セグメント特徴、locate マッチ、イベント
 - Zarr 等のチャンクテンソル形式: STFT、PSD/CSD/コヒーレンス /
   伝達関数テンソル
-- WAV / FLAC: デコード済み / アライン済み / 残差音声
+- WAV / FLAC: デコード済み / アライン済み / 残差音声。
+  現行 audio store は WAV を実装し、FLAC 保存は #33 の承認済み defer。
+  Float64 WAV の残差は再取得時に解析サンプルを保持し、音声 artifact と
+  親 source/alignment・混合行列の provenance を辿れる。
+  RIFF サイズ上限を超える保存はエラーとする。FLAC や大容量コンテナの
+  新依存・方式選定は別途承認する ([判断記録](../tasks/spec-residual-decisions.md))。
 
 推奨レイアウト:
 

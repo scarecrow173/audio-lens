@@ -63,6 +63,8 @@ impl<'de> Deserialize<'de> for Value {
 /// Analysis resolution parameters.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Resolution {
+    /// 解析対象 PCM のサンプリングレート (Hz)。
+    pub sample_rate: u32,
     /// Analysis window length (samples or Hz bins, per `unit`).
     pub window: u64,
     /// Hop between successive windows.
@@ -179,6 +181,7 @@ mod tests {
             freq_range: None,
             channels: Some(ChannelSelector::Channel(0)),
             resolution: Some(Resolution {
+                sample_rate: 48000,
                 window: 2048,
                 hop: 512,
             }),
@@ -201,6 +204,8 @@ mod tests {
             lineage: vec!["ART-a".into()],
         };
         let json = serde_json::to_string(&record).unwrap();
+        let body: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(body["resolution"]["sample_rate"], 48000);
         let back: FeatureRecord = serde_json::from_str(&json).unwrap();
         assert_eq!(back, record);
         let mut unsupported = record;
@@ -218,6 +223,13 @@ mod tests {
             serde_json::from_str::<CaptureComparison>(&json).unwrap(),
             comparison
         );
+        // 旧形式の暗黙 fallback は設けず、成果物の再生成を要求する。
+        let mut missing_rate = body;
+        missing_rate["resolution"]
+            .as_object_mut()
+            .unwrap()
+            .remove("sample_rate");
+        assert!(serde_json::from_value::<FeatureRecord>(missing_rate).is_err());
     }
 
     #[test]

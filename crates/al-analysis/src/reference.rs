@@ -280,7 +280,7 @@ pub fn analyze_pair(
         }
     }
     let lag_rb =
-        rb(ResolutionClass::Broad100ms).resolution(cfg.lag_window as u64, cfg.lag_hop as u64);
+        rb(ResolutionClass::Broad100ms).resolution(cfg.lag_window as u64, cfg.lag_hop as u64, rate);
     if let Some(s) = robust_summary(&lags) {
         let lag_conf = propagate_confidence(
             up_conf,
@@ -955,7 +955,7 @@ pub fn analyze_pair(
     if !os.is_empty() && !oc.is_empty() {
         let offset = oc[0] as f64 - os[0] as f64;
         let mut r = rb(ResolutionClass::Mid20ms)
-            .resolution(lw as u64, lw as u64)
+            .resolution(lw as u64, lw as u64, rate)
             .scalar(
                 "ref.transient_onset_offset_ms",
                 offset * lw as f64 / rate as f64 * 1000.0,
