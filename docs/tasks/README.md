@@ -43,7 +43,7 @@ Directory: `docs/tasks`
 | TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | done | [expensive-module-split.md](./expensive-module-split.md) |
 | TASK-034dLdqYk3HXx4PdtOgnVz | al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW) | done | [expensive-review-consistency.md](./expensive-review-consistency.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
-| TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | todo | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
+| TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | done | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |

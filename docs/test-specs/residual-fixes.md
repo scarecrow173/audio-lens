@@ -4,7 +4,7 @@ type: "test-spec"
 status: "approved"
 title: "残存課題の契約回帰検証"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -66,6 +66,13 @@ relations:
 | #33 | 三項目の採択記録と既知 fixture | 採択した契約を個別の assertion で固定、未決定を適合済みとしない |
 
 ## Guarantees
+
+#30 の具体的 assertion は `al-testkit` の奇数 LIST/stream 99・100/
+HASINDEX/DIB 整列幅/strf 由来 rcFrame/音声ゼロ矩形と、成功・assertion
+unwind のディレクトリ回収を検証する。locate golden は周期の
+ambiguous_alignment と複数位相整合ピークを保持し、同じテストの非周期
+対照を受理必須にするため、全拒否実装では成功しない。合成入力 hash と
+四つの defer の意味・理由・再検討条件・実装の受け皿は文書監査で照合する。
 
 task の原文 inventory 全項目をケースに対応付ける。上表は代表例であり全項目の代替ではない。#33 の具体的 assertion は選択を承認した後に確定し、仕様改訂を選ぶ場合も対応文書監査を行う。
 
