@@ -18,7 +18,7 @@ fn native_registry_preserves_pcm_and_records_selection() {
 #[test]
 fn probe_is_pinned_and_does_not_decode_bad_payloads() {
     let spec = AviSpec::cfr(
-        2,
+        4,
         2,
         30,
         vec![vec![0; 1]],
@@ -55,6 +55,7 @@ fn probe_is_pinned_and_does_not_decode_bad_payloads() {
 
 #[test]
 fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
+    // 共有 writer の未パディング BGR24 契約に沿った幅・frame 長。
     for (format, kind) in [
         (vec![0; 2], UnavailableKind::Malformed),
         (
@@ -67,10 +68,10 @@ fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
         ),
     ] {
         let mut spec = AviSpec::cfr(
-            2,
+            4,
             2,
             30,
-            vec![vec![255; 16]],
+            vec![vec![255; 4 * 2 * 3]],
             al_testkit::media::pcm_s16le(&[10.0]),
             1,
             48000,
@@ -102,7 +103,7 @@ fn avi_audio_errors_are_typed_and_independent_clocks_survive() {
 #[test]
 fn timing_only_skips_pcm_and_pixel_decode_and_arbitrary_selection_is_rejected() {
     let spec = AviSpec::cfr(
-        2,
+        4,
         2,
         30,
         vec![vec![0; 1]],
