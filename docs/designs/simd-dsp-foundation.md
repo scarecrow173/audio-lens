@@ -114,7 +114,8 @@ lag は 0..=min(max_lag, signal_len-template_len) を返す。
 ### Bandpass とキャッシュ
 
 現行のゼロ位相 spectral mask を採用し、IIR への変更は行わない。
-これはフィルタ応答と端点挙動を保持するためである。入力の forward
+フィルタ応答と端点挙動の保持を要件とするが、全入力キャッシュでの
+同等性は P2 / F5 の未決事項として後述する。入力の forward
 FFT を 1 回行い、各帯域 `[lo_hz, hi_hz)` の mask と IFFT に分岐する。
 帯域境界、Nyquist による上限切り詰め、元長への切り戻しを保持する。
 素材に存在しない帯域は現行 BandNcc 同様にスキップする。
@@ -147,16 +148,72 @@ A の条件数へ暗黙に変えず、求解はこの診断行列から独立さ
 
 1. decode 後、素材をキャプチャレートへ正規化する。一致時は無変換。
    `al-math` のアンチエイリアス付き polyphase リサンプルを用い、
-   元/変換後レート、方式、係数・パラメータ、遅延補償を provenance に残す。
+   下記の正規化 PCM 成果物として保存する。元/変換後レート、方式、
+   係数・パラメータ、遅延補償を成果物の `params` に残す。
 2. 正規化済みのチャンネルと素材区間を入力準備層で作る。元ソース区間は
-   秒による対応から元レートの座標へ戻し、キャプチャ座標と混同しない。
-   analysis の後段比較にも同じ正規化データと時刻対応を渡す。
+   下記の座標対応から元レートの座標へ戻し、キャプチャ座標と混同しない。
+   alignment は使用した PCM の artifact id と区間を保存し、analysis は
+   その参照から同じ正規化データと時刻対応を再取得する。
 3. 長尺探索ではアンチエイリアス付き間引き信号で粗候補を列挙し、
-   全レートで近傍を再探索する。粗探索の offset/score を最終証拠にしない。
+   全レートで近傍を再探索する。粗探索は候補提案に限定し、粗探索の
+   offset/score や近傍だけの統計を最終証拠にしない。
    間引き率、探索範囲、近傍幅を記録し、周期信号の複数候補を保持する。
-   情報不足・曖昧な粗候補では全レート探索を行い、偽受理を防ぐ。
+   最終証拠は、間引き前の全レートと、その手法・素材窓に対して元々
+   指定された全探索域で計算する。背景中央値は全 lag の絶対値、
+   競合ピークと順位は全域の局所最大、半値幅は全域内で左右の半値到達点
+   または探索域端までを対象とし、`methods.rs::peaks_from_correlation`
+   の背景下限・端点・同値順位・候補数の規則を保持する。
+   近傍外の候補欠落、中央値の変化、半値幅の切り詰めがないことを保証
+   できない場合は、全レート・全探索域の相関曲線を計算する全探索へ
+   fallback する。現設計には近傍のみでこの保証を行う手段がないため、
+   最終証拠生成は全探索を必須とする。情報不足・曖昧な粗候補も同じ
+   fallback を適用し、`consensus.rs::evaluate` の背景比による受理契約を保つ。
 4. NCC、BandNcc、GCC-PHAT、spectral envelope の各証拠を保持し、
    現行の独立手法合議へ渡す。mixer QR と残差探索にも同じ算術を適用する。
+
+### 正規化 PCM の永続化と再取得
+
+以下は後続実装で追加する契約であり、現行 `decode.rs::decode_input` は
+元の `decoded_pcm` と `ingest_metadata` を復元する入口として残す。
+
+- locate 入力準備層は、新設 role `normalized_pcm` の `ArtifactRecord` を
+  `StageContext` の manifest に登録する。保存先は job 相対の
+  `locate/normalized/<artifact_id>.f64le` とし、`write_durable` で保存する。
+  形式はフレーム順・チャンネル順のインターリーブ済み little-endian f64。
+  `decode_input` のスケール正規化後の値を保存し、再読込で再度 scale を
+  適用しない。リサンプルによる振幅の overshoot はクリップしない。
+  `params` に `input_id`、`sample_rate`、`channels`、フレーム数、
+  保存形式と振幅スケールを記録し、チャンネル順序を元 PCM と揃える。
+- 再利用の識別キーは、元 `decoded_pcm` と `ingest_metadata` の artifact id、
+  目標 sample-rate、変換 algorithm id/version、変換設定の組とする。
+  変換設定は元レート、整数レート比、polyphase の係数またはその完全な
+  再生成パラメータ、アンチエイリアス設定、端点拡張、出力長の丸め規則、
+  遅延と補償量を含む。設定の正本は成果物の `params` とし、キーはその
+  正本から構成する。input id だけでレートや設定の異なる成果物を共用しない。
+- `ArtifactRecord.inputs` は元 `DecodedInput.artifact_ids` を保持し、
+  `produced_by` は `StageKind::Locate` とする。レート一致でも identity
+  変換として同じ保存形式・参照契約を用い、元成果物への lineage を残す。
+- 座標対応の正本も `params` に保存する。元レートを Rs、正規化レートを
+  Rn、補償後に残る時刻原点差を t0 秒とし、正規化フレーム n の元座標を
+  `Rs * (n / Rn + t0)` と定義する。t0 は有理数で保存し、通常は遅延補償
+  により 0 とする。区間は `[start, end)`、元区間への変換は開始を floor、
+  終了を ceil とし、元フレーム数内に制限する。元/正規化フレーム数と
+  レートを保存し、丸めで失われる情報を秒だけの記録に依存させない。
+- `crates/al-locate/src/result.rs` の `LocateResult` に、使用 PCM を指す
+  source/capture の artifact id と正規化 source 区間を後続実装で追加する。
+  `source_range` は元素材座標、`capture_range` はキャプチャ座標とし、
+  正規化 source 区間は参照先 PCM の座標とする。capture も identity
+  正規化 PCM を明示参照する。`locate_result` の `ArtifactRecord.inputs`
+  に両 PCM を含め、`alignment_id` から使用データと変換を追跡できるようにする。
+- 共有の成果物読込境界を `crates/al-locate/src/decode.rs` に追加し、
+  artifact id で manifest を解決して `checked_job_path` 経由で復元する。
+  role、レート、チャンネル数、バイト長とフレーム数、区間の整合を検証する。
+  `crates/al-analysis/src/stage.rs` の reference と expensive の alignment
+  比較はこの入口と正規化区間を使う。元 source を input id で引く現在の
+  `decode_input` / decoded map の経路は alignment 比較では置き換える。
+  cheap 等の元入力観測は現行経路を使う。参照欠落・不整合はステージ
+  エラーとし、元 PCM への暗黙の fallback や別設定での再リサンプルはしない。
+  後段成果物の lineage に alignment と両 PCM の artifact id を含める。
 
 ## Non-Functional Constraints
 
@@ -181,6 +238,14 @@ A の条件数へ暗黙に変えず、求解はこの診断行列から独立さ
 
 ## Deferred Design Concerns
 
+P2 / F5 は未決事項として残す。BandNcc の全入力キャッシュは、窓単位の
+フィルタと比べて FFT 長と周波数 grid、および端点応答を変え得る。
+後続のキャッシュ実装前に、対象区間、ゼロ埋めを含む FFT 長、帯域境界の
+bin 選択、端点拡張・切り戻し規則を固定し、これらをキャッシュキーに
+含める設計を確定する。golden に対する波形・定位証拠の許容差も未決であり、
+閾値近傍を含む検証で不一致の場合は従来の区間単位フィルタへ戻す。
+許容差と同等性が確定するまで全入力キャッシュの応答保持は保証しない。
+
 新たな deferred artifact は設けない。混合基数 FFT、AVX-512、
 ベクトル超越関数は今回の scope 外とし、必要性を実測できた時点で
 別の設計入力として扱う。
@@ -196,6 +261,12 @@ A の条件数へ暗黙に変えず、求解はこの診断行列から独立さ
   mixer/残差 golden を検証する。
 - [ ] 44.1k/48k の定位、元区間との時刻対応、provenance を確認し、
   レート一致の golden は従来どおりであることを確認する。
+- [ ] F4: locate と別プロセスの reference/expensive が alignment の PCM
+  参照から同じサンプルを復元し、元区間・正規化区間・lineage が一致する。
+  identity、丸め境界、複数目標レート、参照欠落・不整合も検証する。
+- [ ] F3: 全探索参照と背景中央値・競合ピーク・半値幅・候補順位・合議を
+  比較する。近傍外の強いピーク、広い半値幅、周期信号、閾値近傍を含め、
+  契約保証がない近傍探索が全レート・全探索域へ fallback することを確認する。
 - [ ] long_source、skip_and_resume、loop 系および analysis/golden を実行し、
   証拠・候補位置・合議の一致と許容誤差を確認する。
 - [ ] `mise exec -- cargo test -p al-math -p al-locate -p al-analysis` と
