@@ -206,168 +206,6 @@ pub fn bandpass(samples: &[f64], sample_rate: u32, lo_hz: f64, hi_hz: f64) -> Ve
     re[..samples.len()].to_vec()
 }
 
-/// Ordinary least squares with ridge regularization, solved via
-/// Gaussian elimination on the normal equations.
-///
-/// `rows` are observation rows (`cols` wide), `rhs` the right-hand
-/// side. Returns `(coefficients, residual_rms)`. `lambda` is the
-/// ridge coefficient; pass 0 for unregularized solve.
-#[allow(clippy::needless_range_loop)]
-pub fn least_squares(rows: &[Vec<f64>], rhs: &[f64], lambda: f64) -> Option<(Vec<f64>, f64)> {
-    let cols = rows.first()?.len();
-    if cols == 0 || rows.len() < cols || rhs.len() != rows.len() {
-        return None;
-    }
-    // Normal equations: (AᵀA + λI) x = Aᵀb.
-    let mut ata = vec![vec![0.0; cols]; cols];
-    let mut atb = vec![0.0; cols];
-    for (row, &y) in rows.iter().zip(rhs) {
-        if row.len() != cols {
-            return None;
-        }
-        for i in 0..cols {
-            atb[i] += row[i] * y;
-            for j in 0..cols {
-                ata[i][j] += row[i] * row[j];
-            }
-        }
-    }
-    for i in 0..cols {
-        ata[i][i] += lambda;
-    }
-    let x = solve(&ata, &atb)?;
-    let mut rss = 0.0;
-    for (row, &y) in rows.iter().zip(rhs) {
-        let pred: f64 = row.iter().zip(&x).map(|(a, c)| a * c).sum();
-        rss += (pred - y).powi(2);
-    }
-    Some((x, (rss / rows.len() as f64).sqrt()))
-}
-
-/// Solve `a x = b` by Gaussian elimination with partial pivoting.
-/// Returns `None` when the system is singular.
-#[allow(clippy::needless_range_loop)]
-pub fn solve(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
-    let n = a.len();
-    if n == 0 || b.len() != n || a.iter().any(|r| r.len() != n) {
-        return None;
-    }
-    let mut m: Vec<Vec<f64>> = a
-        .iter()
-        .zip(b)
-        .map(|(row, &bi)| row.iter().copied().chain([bi]).collect())
-        .collect();
-    for col in 0..n {
-        let pivot = (col..n).max_by(|&i, &j| m[i][col].abs().total_cmp(&m[j][col].abs()))?;
-        if m[pivot][col].abs() < 1e-12 {
-            return None;
-        }
-        m.swap(col, pivot);
-        let inv = 1.0 / m[col][col];
-        for row in col + 1..n {
-            let f = m[row][col] * inv;
-            for c in col..=n {
-                m[row][c] -= f * m[col][c];
-            }
-        }
-    }
-    let mut x = vec![0.0; n];
-    for row in (0..n).rev() {
-        let s: f64 = (row + 1..n).map(|c| m[row][c] * x[c]).sum();
-        x[row] = (m[row][n] - s) / m[row][row];
-    }
-    Some(x)
-}
-
-/// Spectral condition-number estimate of a square matrix via the
-/// ratio of largest to smallest singular value approximated by
-/// power iteration on `AᵀA` and `(AᵀA)⁻¹`. Returns `f64::INFINITY`
-/// for singular input.
-#[allow(clippy::needless_range_loop)]
-pub fn condition_number(a: &[Vec<f64>]) -> f64 {
-    let n = a.len();
-    if n == 0 || a.iter().any(|r| r.len() != n) {
-        return f64::INFINITY;
-    }
-    let ata: Vec<Vec<f64>> = (0..n)
-        .map(|i| {
-            (0..n)
-                .map(|j| (0..n).map(|k| a[k][i] * a[k][j]).sum())
-                .collect()
-        })
-        .collect();
-    let power = |m: &[Vec<f64>]| -> f64 {
-        let mut v = vec![1.0 / (n as f64).sqrt(); n];
-        let mut lambda = 0.0;
-        for _ in 0..64 {
-            let mut w = vec![0.0; n];
-            for (i, row) in m.iter().enumerate() {
-                w[i] = row.iter().zip(&v).map(|(a, b)| a * b).sum();
-            }
-            let norm = w.iter().map(|x| x * x).sum::<f64>().sqrt();
-            if norm == 0.0 {
-                return 0.0;
-            }
-            for x in &mut w {
-                *x /= norm;
-            }
-            lambda = norm;
-            v = w;
-        }
-        lambda
-    };
-    let max_sv2 = power(&ata);
-    if max_sv2 <= 0.0 {
-        return f64::INFINITY;
-    }
-    let Some(inv) = invert(&ata) else {
-        return f64::INFINITY;
-    };
-    let min_sv2_inv = power(&inv);
-    if min_sv2_inv <= 0.0 {
-        return f64::INFINITY;
-    }
-    (max_sv2 * min_sv2_inv).sqrt()
-}
-
-/// Invert a square matrix via Gauss-Jordan; `None` when singular.
-#[allow(clippy::needless_range_loop)]
-pub fn invert(a: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
-    let n = a.len();
-    if n == 0 || a.iter().any(|r| r.len() != n) {
-        return None;
-    }
-    let mut m: Vec<Vec<f64>> = (0..n)
-        .map(|i| {
-            a[i].iter()
-                .copied()
-                .chain((0..n).map(|j| (i == j) as u8 as f64))
-                .collect()
-        })
-        .collect();
-    for col in 0..n {
-        let pivot = (col..n).max_by(|&i, &j| m[i][col].abs().total_cmp(&m[j][col].abs()))?;
-        if m[pivot][col].abs() < 1e-12 {
-            return None;
-        }
-        m.swap(col, pivot);
-        let inv = 1.0 / m[col][col];
-        for c in 0..2 * n {
-            m[col][c] *= inv;
-        }
-        for row in 0..n {
-            if row == col {
-                continue;
-            }
-            let f = m[row][col];
-            for c in 0..2 * n {
-                m[row][c] -= f * m[col][c];
-            }
-        }
-    }
-    Some(m.into_iter().map(|row| row[n..].to_vec()).collect())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -439,7 +277,7 @@ mod tests {
             .map(|i| vec![i as f64 * 0.1, (i as f64 * 0.37).sin()])
             .collect();
         let rhs: Vec<f64> = rows.iter().map(|r| 2.0 * r[0] - r[1]).collect();
-        let (x, rms) = least_squares(&rows, &rhs, 0.0).unwrap();
+        let (x, rms) = al_math::linalg::least_squares(&rows, &rhs, 0.0).unwrap();
         assert!((x[0] - 2.0).abs() < 1e-6);
         assert!((x[1] + 1.0).abs() < 1e-6);
         assert!(rms < 1e-6);
@@ -448,10 +286,10 @@ mod tests {
     #[test]
     fn condition_number_reports_singular() {
         assert_eq!(
-            condition_number(&[vec![1.0, 2.0], vec![2.0, 4.0]]),
+            al_math::linalg::condition_number(&[vec![1.0, 2.0], vec![2.0, 4.0]]),
             f64::INFINITY
         );
-        let good = condition_number(&[vec![2.0, 0.0], vec![0.0, 1.0]]);
+        let good = al_math::linalg::condition_number(&[vec![2.0, 0.0], vec![0.0, 1.0]]);
         assert!((good - 2.0).abs() < 0.2);
     }
 }

@@ -8,7 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::dsp;
+use al_math::linalg::{LeastSquares, condition_number};
 
 /// Estimated mixing matrix plus fit diagnostics.
 ///
@@ -63,12 +63,13 @@ pub fn fit_mix(
             }
         }
     }
-    let cond = dsp::condition_number(&ata);
+    let cond = condition_number(&ata);
+    let factor = LeastSquares::new(&rows, ridge)?;
 
     let mut matrix = Vec::with_capacity(capture_channels.len());
     let mut quality_acc = 0.0;
     for cap in capture_channels {
-        let (coeffs, residual_rms) = dsp::least_squares(&rows, cap, ridge)?;
+        let (coeffs, residual_rms) = factor.solve(cap)?;
         matrix.push(coeffs);
         let cap_rms = (cap.iter().map(|v| v * v).sum::<f64>() / len as f64).sqrt();
         quality_acc += if cap_rms > 0.0 {
@@ -127,5 +128,37 @@ mod tests {
         let cap = s0.clone();
         let est = fit_mix(&[s0, dup], &[cap], 1e-6).unwrap();
         assert_eq!(est.condition_number, f64::INFINITY);
+    }
+
+    #[test]
+    fn correlated_mix_recovers_coefficients_and_preserves_raw_diagnostic() {
+        let a = noise(11, 1024);
+        let b: Vec<f64> = a
+            .iter()
+            .zip(noise(12, 1024))
+            .map(|(&x, y)| x + 1e-7 * y)
+            .collect();
+        let cap0: Vec<f64> = a.iter().zip(&b).map(|(a, b)| 2.0 * a - b).collect();
+        let cap1: Vec<f64> = a.iter().zip(&b).map(|(a, b)| -0.5 * a + 3.0 * b).collect();
+        let sources = [a, b];
+        let captures = [cap0, cap1];
+        let est = fit_mix(&sources, &captures, 0.0).unwrap();
+        for (actual, expected) in est.matrix.iter().flatten().zip([2.0, -1.0, -0.5, 3.0]) {
+            assert!((actual - expected).abs() < 1e-7);
+        }
+        assert!(est.fit_quality < 1e-14);
+        // 診断は従来と同じ ridge 前の正規行列を使用し、ridge に依存しない。
+        let regularized = fit_mix(&sources, &captures, 1e-3).unwrap();
+        assert_eq!(est.condition_number, regularized.condition_number);
+        let mut ata = vec![vec![0.0; 2]; 2];
+        for (&a, &b) in sources[0].iter().zip(&sources[1]) {
+            let row = [a, b];
+            for (i, &ri) in row.iter().enumerate() {
+                for (j, &rj) in row.iter().enumerate() {
+                    ata[i][j] += ri * rj;
+                }
+            }
+        }
+        assert_eq!(est.condition_number, condition_number(&ata));
     }
 }
