@@ -1,10 +1,10 @@
 ---
 id: "TASK-034dLdqYq4GSy3E3kSqOzG"
 type: "task"
-status: "todo"
+status: "done"
 title: "[Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存)"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -42,7 +42,7 @@ relations:
 ## Classification
 
 - `new-feature`
-- draft plan のレビュー用候補。依頼により先に文書化するが、通常の承認済み計画由来の実装 task ではない。
+- 実装依頼と coordinator による入力位置・時計契約・CLI 補完の承認に基づき実装済み。
 
 ## Upstream Documents
 
@@ -82,8 +82,8 @@ issue #11 の A/V 同期要求は検出イベント(SceneChange / LuminanceStep 
 
 ### Acceptance
 
-- [ ] ユーザー指定マーカーが `avsync.*` のペア出力に反映される
-- [ ] マーカー未指定でも既存経路が変わらない
+- [x] ユーザー指定マーカーが `avsync.*` のペア出力に反映される
+- [x] マーカー未指定でも既存経路が変わらない
 
 ## Steps
 
@@ -97,14 +97,40 @@ issue #11 の A/V 同期要求は検出イベント(SceneChange / LuminanceStep 
 
 ## Done When
 
-- [ ] ユーザー供給 visual marker が avsync のペア出力に反映される。未指定時の検出イベント経路と出力は変化しない。有限時刻・クロック・入力来歴を検証し、ゲーム固有 detector を core に追加しない。
-- [ ] 原文全項目に修正・文書化・承認済み defer と検証証拠の対応がある。
-- [ ] 関連 spec/ADR/design/test-spec が実施内容と一致する。
+- [x] ユーザー供給 visual marker が avsync のペア出力に反映される。未指定時の検出イベント経路と出力は変化しない。有限時刻・クロック・入力来歴を検証し、ゲーム固有 detector を core に追加しない。
+- [x] 原文全項目に修正・文書化・承認済み defer と検証証拠の対応がある。
+- [x] 関連 spec/ADR/design/test-spec が実施内容と一致する。
 
 ## Verification
 
-- [ ] `mise exec -- cargo test -p al-analysis --test avsync` が exit 0。原文項目に対応した回帰テストを含む。
-- [ ] `mise run fmt` と `mise run lint` が exit 0。
-- [ ] 文書と Issue 項目の対応を review する。
+- [x] `mise exec -- cargo test -p al-analysis --test avsync` が exit 0。原文項目に対応した回帰テストを含む。
+- [x] `mise run fmt` と `mise run lint` が exit 0。
+- [x] 文書と Issue 項目の対応を review する。
 
-現時点では文書整備のみであり、上記実装検証は未実行。
+2026-10-11 に実装検証を実行し、すべて exit 0 を確認した。
+
+## 実施結果と証拠 (2026-10-11)
+
+| 原文項目 | 結果 | 実装・検証根拠 |
+| --- | --- | --- |
+| job config または入力 role で受け取る | 修正 | analysis.avsync.markers を採用、AvSyncConfig::from_job と CheapAnalysisStage。CLI は承認済み --input-ids で安定 ID を与える |
+| VideoEventS に変換して合流、時計明示 | 修正 | clock=video_stream 必須、dwStart を含む秒から audio_start_s を引き match_events へ追加。四組の stream 原点 fixture と同時照合単体テスト |
+| 汎用スキーマ | 修正 | input_id/clock/time_s/frame と user_marker 種別のみ。ゲーム固有 detector は追加しない |
+| 未指定時の既存経路・出力保持 | 修正・検証 | 既存 AVI/ROI/WAV の回帰テストと、未指定/空配列の全レコード一致単体テスト |
+| 有限時刻・時計・入力来歴 | 修正・検証 | config 境界の型/有限値検証、未知入力と decoded frame 時計の検証。params.marker に config_path/input_id/clock/time_s、event_frame と既存 artifact lineage を保存 |
+| spec/ADR/design/test-spec との整合 | 文書化 | residual-compliance AC-31 を充足、residual-fixes design/test-spec に承認済み契約とテストを追記。ゲーム固有 detector を core に置かない既存 ADR の境界を維持 |
+
+追加 defer はない。config 入力を選んだため新規 marker role/外部ファイルは追加しない。
+承認済み schema と詳細は [採用設計](../designs/residual-fixes.md#31-の採用設計-2026-10-11) を参照する。
+
+### 検証実績
+
+- mise exec -- cargo test -p al-analysis --test avsync: 7 passed。
+- mise exec -- cargo test -p al-analysis avsync: avsync 単体 8 passed、名前一致の ROI 統合 1 passed。
+- mise exec -- cargo test -p al-cli --test cli: 14 passed(CLI マーカー経路・ID 検証を含む)。
+- mise run fmt: workspace cargo fmt --all -- --check、exit 0。
+- mise run lint: workspace/all-targets clippy -D warnings、exit 0。
+- git diff --check: exit 0。
+- 赤テスト: user_marker pair 欠落と CLI 指定 input_id の未反映を実装前に確認した。
+
+workspace 全体の test suite は実行していない。fmt/clippy は workspace 全体を検証した。

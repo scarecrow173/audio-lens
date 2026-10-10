@@ -125,7 +125,7 @@ fail-closed 再取得契約を残差探索にも適用する設計である。
 
 ## Deferred Design Concerns
 
-#33 の三つの方式は末尾の承認済み採用設計を参照する。marker の入力位置とクロック契約は承認時に明文化する。draft を実装承認と解釈しない。
+#33 の三つの方式は末尾の承認済み採用設計を参照する。marker の入力位置とクロック契約は末尾の承認済み採用設計を参照する。draft を実装承認と解釈しない。
 
 ## Verification Notes
 
@@ -143,3 +143,32 @@ Float64 WAV の残差と lineage を維持する。`Resolution` は window/hop �
 analyze_region のレートを保持して有効・無効の両経路へ伝播する。
 互換層や manifest レートへの暗黙 fallback は設けず成果物を再生成する。
 [承認・理由・証拠](../tasks/spec-residual-decisions.md) を参照。
+
+
+## #31 の採用設計 (2026-10-11)
+
+coordinator 承認により、入力位置を job config の `analysis.avsync.markers`
+に決定する。各要素は `{input_id, clock, time_s, frame}` で、`input_id` は
+job 内の対象入力の安定 ID、`clock` は必須の `"video_stream"`、`time_s` は
+dwStart を含む映像 stream の絶対秒、`frame` はゼロ始まりの decoded frame
+index とする。時刻は `frame_timestamps[frame] / timebase_hz` と絶対誤差
+1e-9 秒以内で一致しなければならない。wall-clock の暗黙変換は行わない。
+
+CLI `al run` は任意の `--input-ids <IN-...>[,<IN-...>...]` で `--input` の順に
+ID を指定できる。個数、既存 InputId 形式、重複を検証し、未指定では従来どおり
+自動生成する。指定 ID と marker の input_id を一致させた config を渡す。
+
+CheapAnalysis の入力境界で未知入力、非有限時刻、不明時計、未知フィールド、
+decoded video の欠落、ゼロ timebase、frame 範囲外、frame/時刻不一致を
+stage error として拒否する。正常なマーカーは `VideoEventS` の汎用
+`user_marker` に変換し、`time_s - audio_start_s` により音声 PCM 原点へ
+rebase して検出イベントと合流する。ゲーム固有 detector は追加しない。
+最近傍・一対一・同距離で検出イベント優先という既存の照合規則を維持するため、
+指定した全マーカーが必ずペアになるわけではない。
+
+マーカーペアの params.marker に config_path、input_id、clock、元の time_s を
+保存する。frame は既存の event_frame、音声原点は audio_start_s に保存する。
+input artifact、video_features、metadata の lineage は既存経路を継承する。
+未指定または空配列では既存の全 avsync レコードを維持し、検出イベントの
+params に marker キーを追加しない。新規入力 role と外部 marker ファイルは
+採用しない(config 入力で要件を満たす)。
