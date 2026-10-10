@@ -85,6 +85,52 @@ fn open_writer(fx: &Fixture, config: &serde_json::Value) -> DatasetWriter {
     .expect("dataset writer")
 }
 
+#[test]
+fn timeline_absence_is_recorded_without_inputs_or_capture() {
+    for no_capture in [false, true] {
+        let mut fx = fixture();
+        if no_capture {
+            fx.manifest.inputs.clear();
+        }
+        let config = serde_json::json!({});
+        open_writer(&fx, &config).finish().unwrap();
+        let registry = ArtifactRegistry::new(&fx.dir);
+        al_viz::stage::VisualizationStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .unwrap();
+        let skipped: serde_json::Value = serde_json::from_slice(
+            &fs::read(analysis_root(&fx).join("visualization/skipped.json")).unwrap(),
+        )
+        .unwrap();
+        assert!(
+            skipped["skipped_products"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|s| s["product"] == "timeline")
+        );
+        fs::remove_dir_all(&fx.dir).unwrap();
+    }
+}
+
+#[test]
+fn declared_json_alone_does_not_validate_materialized_inputs() {
+    let fx = fixture();
+    let config = serde_json::json!({});
+    let mut writer = open_writer(&fx, &config);
+    writer
+        .write_json("inputs", "declared", &serde_json::json!({}), prov("job"))
+        .unwrap();
+    writer.finish().unwrap();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    assert!(
+        al_viz::stage::VisualizationStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .is_err()
+    );
+    fs::remove_dir_all(&fx.dir).unwrap();
+}
+
 /// A dataset with inputs audio, cheap features, and an intermediate
 /// magnitude tensor — the roles every core product reads.
 fn seed_dataset(fx: &Fixture, config: &serde_json::Value) {
