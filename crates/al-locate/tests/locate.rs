@@ -106,6 +106,48 @@ fn run_and_read(fx: &Fixture) -> (Vec<ArtifactRecord>, serde_json::Value) {
 }
 
 #[test]
+fn long_source_persists_coarse_proposals_and_global_evidence() {
+    let source = noise(10_241, 901);
+    let mut capture = noise(18_003, 902);
+    for (out, value) in capture[3001..].iter_mut().zip(&source) {
+        *out += value * 3.0;
+    }
+    let fx = fixture(&source, &capture, (512, 512));
+    let (records, result) = run_and_read(&fx);
+    assert_eq!(result["result"]["accepted"], true);
+    let record = records
+        .iter()
+        .find(|r| r.role == "locate_evidence")
+        .unwrap();
+    let body: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fx.dir.join(&record.path)).unwrap()).unwrap();
+    let full = body["evidence"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["method"] == "full_ncc")
+        .unwrap();
+    assert_eq!(full["coarse_search"]["coarse_rate"], 128);
+    assert_eq!(
+        full["coarse_search"]["search_range"],
+        serde_json::json!([0, 7762])
+    );
+    assert_eq!(full["coarse_search"]["full_search_required"], true);
+    assert!(
+        full["coarse_search"]["refined_positions"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!(3001))
+    );
+    use al_locate::LocateMethod;
+    assert_eq!(
+        full["candidates"],
+        serde_json::to_value(al_locate::FullNcc.locate(&source, &capture, 512).candidates).unwrap()
+    );
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
 fn embedded_source_is_located_with_time_map_and_residual() {
     let source = noise(2_000, 7);
     let mut capture = noise(20_000, 11);

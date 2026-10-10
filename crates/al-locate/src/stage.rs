@@ -20,9 +20,10 @@ use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
 use crate::decode::{DecodedInput, decode_input};
 use crate::dsp::ncc;
-use crate::methods::{default_methods, peaks_from_correlation};
+use crate::methods::{CoarseSearch, FullNcc, default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
+use crate::prepared::{InputCache, PreparedChannel};
 use crate::residual::{assemble_residual_search, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
 use crate::tracking::{Anchor, build_time_map, identify_loop_occurrences};
@@ -120,6 +121,27 @@ fn err(e: impl std::fmt::Display) -> StageError {
     StageError::new(StageKind::Locate, e.to_string())
 }
 
+fn prepare_channels(
+    cache: &mut InputCache,
+    input: &DecodedInput,
+    version: &str,
+) -> Result<Vec<std::sync::Arc<PreparedChannel>>, &'static str> {
+    input
+        .channel_samples
+        .iter()
+        .enumerate()
+        .map(|(channel, samples)| {
+            cache.prepare(
+                &input.input_id,
+                channel,
+                input.sample_rate,
+                version,
+                samples,
+            )
+        })
+        .collect()
+}
+
 impl LocateStage {
     /// Explicit non-accepted result for a pair that cannot be
     /// evaluated (missing/empty decode).
@@ -163,6 +185,8 @@ impl LocateStage {
         source_channels: &[Vec<f64>],
         capture_channels: &[Vec<f64>],
         sample_rate: u32,
+        prepared_source: &[std::sync::Arc<PreparedChannel>],
+        prepared_capture: &[std::sync::Arc<PreparedChannel>],
     ) -> Vec<PairEvidence> {
         // Tasks are (method, source_channel, capture_channel) tuples,
         // method-major so the result order matches the sequential
@@ -172,19 +196,27 @@ impl LocateStage {
         let n_methods = default_methods().len();
         let mut tasks = Vec::with_capacity(n_methods * n_src * n_cap);
         for m in 0..n_methods {
-            for src_ch in source_channels {
-                for cap_ch in capture_channels {
-                    tasks.push((m, src_ch.as_slice(), cap_ch.as_slice(), sample_rate));
+            for (src_ch, prepared_template) in source_channels.iter().zip(prepared_source) {
+                for (cap_ch, prepared_signal) in capture_channels.iter().zip(prepared_capture) {
+                    tasks.push(MethodTask {
+                        method: m,
+                        template: src_ch,
+                        signal: cap_ch,
+                        rate: sample_rate,
+                        prepared_template,
+                        prepared_signal,
+                    });
                 }
             }
         }
         run_method_tasks(&tasks)
             .into_iter()
             .enumerate()
-            .map(|(idx, evidence)| PairEvidence {
+            .map(|(idx, output)| PairEvidence {
                 source_channel: (idx / n_cap) % n_src,
                 capture_channel: idx % n_cap,
-                evidence,
+                evidence: output.evidence,
+                coarse_search: output.coarse_search,
             })
             .collect()
     }
@@ -328,6 +360,23 @@ struct PairEvidence {
     capture_channel: usize,
     #[serde(flatten)]
     evidence: MethodEvidence,
+    /// チャンネルペア共通の候補提案を FullNcc 行に一度だけ記録する。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    coarse_search: Option<CoarseSearch>,
+}
+
+struct MethodTask<'a> {
+    method: usize,
+    template: &'a [f64],
+    signal: &'a [f64],
+    rate: u32,
+    prepared_template: &'a PreparedChannel,
+    prepared_signal: &'a PreparedChannel,
+}
+
+struct MethodOutput {
+    evidence: MethodEvidence,
+    coarse_search: Option<CoarseSearch>,
 }
 
 /// Run `n_tasks` independent units of work over a worker pool,
@@ -364,11 +413,35 @@ fn run_pool<T: Send>(n_tasks: usize, work: &(dyn Fn(usize) -> T + Sync)) -> Vec<
 /// order. Locate methods are pure but not `Send`, so each worker
 /// builds its own method set and only evidence crosses the thread
 /// boundary.
-fn run_method_tasks(tasks: &[(usize, &[f64], &[f64], u32)]) -> Vec<MethodEvidence> {
+fn run_method_tasks(tasks: &[MethodTask<'_>]) -> Vec<MethodOutput> {
     run_pool(tasks.len(), &|idx| {
         let methods = default_methods();
-        let (m, template, signal, rate) = tasks[idx];
-        methods[m].locate(template, signal, rate)
+        let task = &tasks[idx];
+        if methods[task.method].id() == "full_ncc" {
+            let (evidence, coarse_search) = FullNcc.locate_coarse_to_fine(
+                task.template,
+                task.signal,
+                task.rate,
+                task.prepared_template,
+                task.prepared_signal,
+            );
+            return MethodOutput {
+                evidence,
+                coarse_search,
+            };
+        }
+        // F3: 候補提案の成否に関係なく、証拠は全レート・元の全探索域から生成。
+        let evidence = methods[task.method].locate_prepared(
+            task.template,
+            task.signal,
+            task.rate,
+            task.prepared_template,
+            task.prepared_signal,
+        );
+        MethodOutput {
+            evidence,
+            coarse_search: None,
+        }
     })
 }
 
@@ -434,6 +507,7 @@ impl Stage for LocateStage {
         }
 
         let mut records = Vec::new();
+        let mut dsp_inputs = InputCache::default();
         for (cap_index, cap_input) in captures.iter().enumerate() {
             // A capture with missing or empty decoded PCM marks every
             // source pair; it never aborts the stage.
@@ -495,6 +569,8 @@ impl Stage for LocateStage {
             )
             .map_err(err)?;
             let capture = &prepared_capture.decoded;
+            let capture_dsp =
+                prepare_channels(&mut dsp_inputs, capture, "original").map_err(err)?;
             let prepared_sources = decoded_sources
                 .iter()
                 .map(|s| {
@@ -572,11 +648,15 @@ impl Stage for LocateStage {
                     continue;
                 }
                 let source = decoded_sources[src_index].as_ref().unwrap();
+                let source_dsp =
+                    prepare_channels(&mut dsp_inputs, source, "original").map_err(err)?;
 
                 let pairs = self.locate_channels(
                     &source.channel_samples,
                     &capture.channel_samples,
                     source.sample_rate,
+                    &source_dsp,
+                    &capture_dsp,
                 );
                 let evidence = merged_votes(&pairs);
                 let source_len = source.channel_samples[0].len() as u64;
@@ -876,17 +956,46 @@ impl Stage for LocateStage {
                     .collect();
                 let n_methods = default_methods().len();
                 let n_cap = prepared.channels.len();
+                // 親ごとに版を分離し、この残差の全 child が完了した時点で解放する。
+                let version = format!("residual:{}", parent_result.alignment_id);
+                let mut residual_cache = InputCache::default();
+                let residual_dsp = prepared
+                    .channels
+                    .iter()
+                    .enumerate()
+                    .map(|(channel, samples)| {
+                        residual_cache.prepare(
+                            &capture.input_id,
+                            channel,
+                            capture.sample_rate,
+                            &version,
+                            samples,
+                        )
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(err)?;
+                let child_dsp = children
+                    .iter()
+                    .map(|child| prepare_channels(&mut dsp_inputs, child, "original"))
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(err)?;
                 let mut tasks = Vec::new();
-                for child in &children {
+                for (child, prepared_child) in children.iter().zip(&child_dsp) {
                     for m in 0..n_methods {
-                        for src_ch in &child.channel_samples {
-                            for cap_ch in &prepared.channels {
-                                tasks.push((
-                                    m,
-                                    src_ch.as_slice(),
-                                    cap_ch.as_slice(),
-                                    child.sample_rate,
-                                ));
+                        for (src_ch, prepared_template) in
+                            child.channel_samples.iter().zip(prepared_child)
+                        {
+                            for (cap_ch, prepared_signal) in
+                                prepared.channels.iter().zip(&residual_dsp)
+                            {
+                                tasks.push(MethodTask {
+                                    method: m,
+                                    template: src_ch,
+                                    signal: cap_ch,
+                                    rate: child.sample_rate,
+                                    prepared_template,
+                                    prepared_signal,
+                                });
                             }
                         }
                     }
@@ -895,10 +1004,14 @@ impl Stage for LocateStage {
                 for child in children {
                     let n_src = child.channel_samples.len();
                     let pairs: Vec<PairEvidence> = (0..n_methods * n_src * n_cap)
-                        .map(|idx| PairEvidence {
-                            source_channel: (idx / n_cap) % n_src,
-                            capture_channel: idx % n_cap,
-                            evidence: evidences.next().unwrap(),
+                        .map(|idx| {
+                            let output = evidences.next().unwrap();
+                            PairEvidence {
+                                source_channel: (idx / n_cap) % n_src,
+                                capture_channel: idx % n_cap,
+                                evidence: output.evidence,
+                                coarse_search: output.coarse_search,
+                            }
                         })
                         .collect();
                     let child_len = child.channel_samples[0].len() as u64;
@@ -912,6 +1025,18 @@ impl Stage for LocateStage {
                         "locate-consensus",
                         "1",
                     );
+                    child_result.params["coarse_search"] = serde_json::to_value(
+                        pairs
+                            .iter()
+                            .filter_map(|pair| {
+                                pair.coarse_search.as_ref().map(|search| {
+                                    serde_json::json!({"source_channel": pair.source_channel,
+                                "capture_channel": pair.capture_channel, "search": search})
+                                })
+                            })
+                            .collect::<Vec<_>>(),
+                    )
+                    .map_err(err)?;
                     let prepared_child = prepared_sources
                         .iter()
                         .flatten()
@@ -951,6 +1076,7 @@ impl Stage for LocateStage {
                     )?);
                 }
             }
+            dsp_inputs.release(&capture.input_id, "original");
         }
         Ok(records)
     }
