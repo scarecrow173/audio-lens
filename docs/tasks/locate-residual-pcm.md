@@ -86,6 +86,11 @@ reference 解析側では staged residual R0–R3 の音声が `residual` ロー
 - residual_search 後の残差 channel samples を `residual` ロールの
   WAV/audio artifact として保存(親ソース ID 連動の命名)
 - search JSON から残差 audio artifact への参照を lineage/params に追加
+- 残差 child alignment は探索に実際に使用した減算後残差 PCM を
+  独立した signal version として保存し、`capture_pcm` で明示参照する。
+  `read_alignment_pcm` 等の再取得経路が探索時と同一信号を返すようにし、
+  減算前の元キャプチャ normalized_pcm を使用 PCM として参照しない。
+  参照欠落・不整合はエラーとし、元 PCM への暗黙 fallback を禁止する
 - 必要なら残差の簡易スペクトル特性(PSD/帯域)を observation として併記
 
 ### 参照
@@ -107,6 +112,7 @@ reference 解析側では staged residual R0–R3 の音声が `residual` ロー
 ## Done When
 
 - [ ] two-source 探索の残差 PCM を保存して再読出し・再聴取できる。search JSON から音声 artifact と親 source/alignment、混合行列の来歴を辿れ、保存前後のサンプル・エネルギーが一致する。
+- [ ] 残差 child alignment の `capture_pcm` が探索に実際に使用した減算後残差の signal version を明示参照する。dataset 再 open 後も `read_alignment_pcm` 等が探索時と同一信号を返し、参照欠落・不整合では fail-closed でエラーになる。
 - [ ] 原文全項目に修正・文書化・承認済み defer と検証証拠の対応がある。
 - [ ] 関連 spec/ADR/design/test-spec が実施内容と一致する。
 
