@@ -64,7 +64,7 @@ Directory: `docs/tasks`
 | TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | done | [locate-stage-cli.md](./locate-stage-cli.md) |
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
 | TASK-036aQwErTyUiOpAsDfGhJk | MediaDecoder トレイト + レジストリ設計の ADR(#36 フェーズ0) | done | [media-decoder-adr.md](./media-decoder-adr.md) |
-| TASK-036bZxCvBnMqWeRtYuIo | 既存 WAV/AVI/MP4 を MediaDecoder native バックエンドへ移行(#36 フェーズ1) | todo | [media-decoder-native.md](./media-decoder-native.md) |
+| TASK-036bZxCvBnMqWeRtYuIo | 既存 WAV/AVI/MP4 を MediaDecoder native バックエンドへ移行(#36 フェーズ1) | done | [media-decoder-native.md](./media-decoder-native.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |
 | TASK-034yZBGR8sboPsFlB6FpMr | 最小 CLI(run / resume / inspect)の実装 | done | [minimal-cli.md](./minimal-cli.md) |
 | TASK-034AaFVy7YRTQZiKi04T2q | mp4: box パーサ + trak メタデータ | done | [mp4-box-parser.md](./mp4-box-parser.md) |
