@@ -27,7 +27,7 @@ Directory: `docs/tasks`
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
-| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | todo | [cross-capture-calibration.md](./cross-capture-calibration.md) |
+| TASK-036eLkJhGfDsAqWeRtYu | analysis: キャプチャ間経路校正(#41) | done | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |
 | TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | done | [dataset-reader.md](./dataset-reader.md) |
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
@@ -43,7 +43,7 @@ Directory: `docs/tasks`
 | TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | done | [expensive-module-split.md](./expensive-module-split.md) |
 | TASK-034dLdqYk3HXx4PdtOgnVz | al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW) | done | [expensive-review-consistency.md](./expensive-review-consistency.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
-| TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | todo | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
+| TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | done | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
@@ -73,14 +73,14 @@ Directory: `docs/tasks`
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
-| TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | todo | [spec-residual-decisions.md](./spec-residual-decisions.md) |
+| TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
 | TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | done | [video-frame-decode.md](./video-frame-decode.md) |
-| TASK-036cAsDfGhJkLzQwErTy | video: ROI 輝度追跡(#39) | todo | [video-roi-luma.md](./video-roi-luma.md) |
+| TASK-036cAsDfGhJkLzQwErTy | video: ROI 輝度追跡(#39) | done | [video-roi-luma.md](./video-roi-luma.md) |
 | TASK-034z9oB8rhYcBdeSRvtsKy | al-viz: dataset 範囲/チャンク読み出し基盤 | done | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | TASK-034z9oHPHHVPCNKwoMJp5c | イベントマーカ + 決定的サマリ + skipped.json | done | [viz-events-summary.md](./viz-events-summary.md) |
 | TASK-034z9oJ2ngcyfGSgbNPcrX | viz/export 結合 + ゴールデンテスト | done | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |

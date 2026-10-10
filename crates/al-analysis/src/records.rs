@@ -126,9 +126,13 @@ impl RecordBuilder {
         self
     }
 
-    /// Set the actual window/hop.
-    pub fn resolution(mut self, window: u64, hop: u64) -> Self {
-        self.resolution = Some(Resolution { window, hop });
+    /// 解析対象 PCM のレートと window/hop を設定する。
+    pub fn resolution(mut self, window: u64, hop: u64, sample_rate: u32) -> Self {
+        self.resolution = Some(Resolution {
+            window,
+            hop,
+            sample_rate,
+        });
         self
     }
 
@@ -237,7 +241,7 @@ mod tests {
     #[test]
     fn record_builder_stamps_resolution() {
         let b = RecordBuilder::new("IN-1", "rms.v1", ResolutionClass::Mid20ms)
-            .resolution(960, 480)
+            .resolution(960, 480, 48000)
             .lineage(["ART-1".to_string()]);
         let r = b.scalar(
             "rms",
@@ -251,6 +255,7 @@ mod tests {
         );
         assert_eq!(r.resolution_class, ResolutionClass::Mid20ms);
         assert_eq!(r.resolution.unwrap().window, 960);
+        assert_eq!(r.resolution.unwrap().sample_rate, 48000);
         assert_eq!(r.lineage, vec!["ART-1"]);
     }
 }

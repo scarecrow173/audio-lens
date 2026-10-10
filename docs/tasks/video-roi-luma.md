@@ -1,10 +1,10 @@
 ---
 id: "TASK-036cAsDfGhJkLzQwErTy"
 type: "task"
-status: "todo"
+status: "done"
 title: "video: ROI 輝度追跡(#39)"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-11"
 owners: []
 relations:
   source: []
@@ -73,10 +73,24 @@ relations:
 
 ## Done When
 
-- [ ] ROI 指定で輝度時系列が出力される
-- [ ] ROI 輝度ステップが avsync イベントとして照合される
-- [ ] ROI 未指定時の既存挙動が変わらない
+- [x] ROI 指定で輝度時系列が出力される
+- [x] ROI 輝度ステップが avsync イベントとして照合される
+- [x] ROI 未指定時の既存挙動が変わらない
 
 ## Verification
 
-- [ ] `cargo test -p al-analysis -p al-media`
+- [x] `cargo test -p al-analysis -p al-media`
+
+## 実装・検証結果
+
+- `VideoFeatureConfig.rois` と名前付き矩形を追加。ROI 系列は ingest
+  artifact と `video.roi_luminance` FeatureRecord/tensor に保存する。
+- ROI 輝度ステップを既存 stream-clock の映像イベントへ追加し、
+  avsync の照合ペアまで ROI 名を保持する。marker 形式の実装は後続。
+- 全フレーム観測を維持し、ROI 未指定時は ROI tensor を追加しない。
+- 局所変化、複数 ROI、非等間隔 timestamp、DIB 行順序・パディング、
+  不正設定・範囲外、音声欠落、ROI 未指定を検証した。
+- `mise exec -- cargo test -p al-analysis -p al-media` を実行。
+- `mise exec -- cargo fmt --all -- --check` を実行。
+- `mise exec -- cargo clippy --workspace --all-targets -- -D warnings` を実行。
+- `git diff --check` を実行。

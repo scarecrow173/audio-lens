@@ -85,6 +85,8 @@ pub enum Validity {
     DecodeInputUnavailable,
     /// The measurement does not apply to this artifact.
     NotApplicable,
+    /// 必要な比較基準がなく、この観測を構成できない。
+    Unsupported,
     /// The computation itself failed.
     ComputationFailed,
 }

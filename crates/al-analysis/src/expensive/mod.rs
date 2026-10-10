@@ -277,6 +277,7 @@ pub(crate) fn corr0(x: &[f64], y: &[f64]) -> f64 {
 /// each record to the mapped validity with an explanation.
 pub(crate) struct Emit<'a> {
     input_id: &'a str,
+    sample_rate: u32,
     region: &'a TriggeredRegion,
     cfg: &'a ExpensiveConfig,
     range: Range,
@@ -286,9 +287,15 @@ pub(crate) struct Emit<'a> {
 }
 
 impl<'a> Emit<'a> {
-    fn new(input_id: &'a str, region: &'a TriggeredRegion, cfg: &'a ExpensiveConfig) -> Self {
+    fn new(
+        input_id: &'a str,
+        region: &'a TriggeredRegion,
+        cfg: &'a ExpensiveConfig,
+        sample_rate: u32,
+    ) -> Self {
         Self {
             input_id,
+            sample_rate,
             region,
             cfg,
             range: Range {
@@ -368,6 +375,7 @@ impl<'a> Emit<'a> {
     ) -> FeatureRecord {
         let mut r = self.push(id, value, unit, conf, val, reason, support);
         r.resolution = Some(Resolution {
+            sample_rate: self.sample_rate,
             window: self.cfg.stft_window as u64,
             hop: self.cfg.stft_hop as u64,
         });
@@ -571,7 +579,7 @@ pub fn analyze_region(
     cfg: &ExpensiveConfig,
 ) -> ExpensiveResult {
     let mut out = ExpensiveResult::default();
-    let e = Emit::new(input_id, region, cfg);
+    let e = Emit::new(input_id, region, cfg, rate);
     // Plan contract: when no `Valid` trigger selected the region the
     // upstream evidence is untrusted, so no estimation runs — every
     // feature is persisted as an invalid observation (NaN scalar,
