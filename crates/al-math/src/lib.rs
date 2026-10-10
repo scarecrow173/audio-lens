@@ -6,7 +6,9 @@
 
 use std::sync::LazyLock;
 
+pub mod correlation;
 pub mod fft;
+pub mod filter;
 pub mod linalg;
 pub mod resample;
 

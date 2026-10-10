@@ -76,9 +76,20 @@ thin split wrapper(161.8 ms)比で判定する。rfft はその 32.8% で受入�
 
 ### 相関/bandpass(TASK-035e)
 
-- [ ] NCC・GCC-PHAT が scalar 結果と一致
+- [x] NCC・GCC-PHAT が scalar 結果と一致
 - [ ] bandpass が現行比 10× 以上高速(sosfiltfilt 46ms 参照)
-- [ ] `bandpass_isolates_band` 等の既存契約を維持
+- [x] `bandpass_isolates_band` 等の既存契約を維持
+
+2026-10-10: [相関 task の検証記録](../tasks/al-math-correlation.md)を参照。
+scalar/dispatch、直接窓内積、旧複素スペクトル、帯域境界・端点と極性反転の
+signed score を検証し、既存 golden 16 件を再生成なしで維持した。
+同一プロセスの 2.4M 単帯域は 184.0 ms、移行直前 complex wrapper
+323.8 ms 比 1.76×、元の radix-2 541.8 ms 比 2.94×。
+5 帯域共有は 497.6 ms、移行直前の独立 5 帯域 1633.2 ms 比 3.28×。
+10× / 46ms は未達であり、性能チェックは unchecked のまま保持する。
+coordinator 承認によりこの未達は **non-blocking の残課題**とし、応答保持を
+優先して TASK-035e を done とする。帯域数分の IFFT と後続 TASK-035g の
+入力準備層での再利用を含む改善余地を記録し、性能達成とは判定しない。
 
 ### QR(TASK-035f)
 
