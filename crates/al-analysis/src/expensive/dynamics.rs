@@ -28,7 +28,13 @@ pub(crate) fn emit_invalid(e: &Emit<'_>, records: &mut Vec<FeatureRecord>, reaso
         ("exp.level_transfer_slope", "db_per_db"),
         ("exp.level_transfer_corr", "corr"),
     ] {
-        records.push(e.push(
+        let push = if id.starts_with("exp.level_transfer_") {
+            Emit::push_pair
+        } else {
+            Emit::push
+        };
+        records.push(push(
+            e,
             id,
             f64::NAN,
             unit,
@@ -284,7 +290,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 ("exp.level_transfer_slope", "db_per_db"),
                 ("exp.level_transfer_corr", "corr"),
             ] {
-                let mut r = e.push(
+                let mut r = e.push_pair(
                     id,
                     f64::NAN,
                     unit,
@@ -388,7 +394,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             ("exp.level_transfer_slope", slope, "db_per_db"),
             ("exp.level_transfer_corr", corr, "corr"),
         ] {
-            let mut r = e.push(
+            let mut r = e.push_pair(
                 id,
                 value,
                 unit,
@@ -403,6 +409,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 "triggers": e.region().triggers,
                 "pair": pair.pair,
                 "src_level_spread_db": spread,
+                "source_channel": 0,
+                "capture_channel": 0,
             });
             out.records.push(r);
         }

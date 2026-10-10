@@ -209,6 +209,18 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 },
                 frames as u64,
             ));
+        } else {
+            super::emit_unsupported_spec(
+                e,
+                &mut out.records,
+                &[
+                    ("exp.echo_delay_s", "seconds"),
+                    ("exp.cepstrum_prominence", "ratio"),
+                    ("exp.echo2_delay_s", "seconds"),
+                    ("exp.echo2_level_ratio", "ratio"),
+                ],
+                "no supported quefrency interval",
+            );
         }
     }
 
@@ -337,13 +349,20 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 None,
                 frames as u64,
             ));
+        } else {
+            super::emit_unsupported_spec(
+                e,
+                &mut out.records,
+                &[("exp.spectral_hole_ratio", "ratio")],
+                "spectrum has no supported energy",
+            );
         }
-        // Block-boundary periodicity: energy-derivative energy when
-        // folded onto common codec frame sizes.
+        // ブロック境界の生エネルギーと内部の生エネルギーの比を、
+        // 一般的な codec frame size ごとに評価する。
         let block_e: Vec<f64> = (0..n / 64)
             .map(|i| seg[i * 64..(i + 1) * 64].iter().map(|v| v * v).sum::<f64>())
             .collect();
-        let mut best = (0.0f64, 0u64);
+        let mut best: Option<(f64, u64)> = None;
         for size in [576usize, 1024, 1152] {
             let stride = size / 64;
             if stride == 0 || block_e.len() < 4 * stride {
@@ -363,27 +382,51 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             let nb = (block_e.len() / stride).max(1) as f64;
             let ni = (block_e.len() - block_e.len() / stride).max(1) as f64;
             let ratio = (bsum / nb) / (isum / ni).max(1e-18);
-            if ratio > best.0 {
-                best = (ratio, size as u64);
+            if total_power > 0.0 && best.is_none_or(|b| ratio > b.0) {
+                best = Some((ratio, size as u64));
             }
         }
         out.records.push(e.push(
             "exp.codec_block_score",
-            best.0,
+            best.map_or(f64::NAN, |b| b.0),
             "ratio",
             Confidence::Low,
-            Validity::Valid,
-            None,
-            block_e.len() as u64,
+            if best.is_some() {
+                Validity::Valid
+            } else {
+                Validity::InsufficientSupport
+            },
+            if best.is_some() {
+                None
+            } else {
+                Some("no supported codec block candidate".into())
+            },
+            if best.is_some() {
+                block_e.len() as u64
+            } else {
+                0
+            },
         ));
         out.records.push(e.push(
             "exp.codec_block_size",
-            best.1 as f64,
+            best.map_or(f64::NAN, |b| b.1 as f64),
             "samples",
             Confidence::Low,
-            Validity::Valid,
-            None,
-            block_e.len() as u64,
+            if best.is_some() {
+                Validity::Valid
+            } else {
+                Validity::InsufficientSupport
+            },
+            if best.is_some() {
+                None
+            } else {
+                Some("no supported codec block candidate".into())
+            },
+            if best.is_some() {
+                block_e.len() as u64
+            } else {
+                0
+            },
         ));
     }
 }
