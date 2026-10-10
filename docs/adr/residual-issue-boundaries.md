@@ -4,7 +4,7 @@ type: "adr"
 status: "proposed"
 title: "残存課題を責務境界で修正し仕様判断を分離する"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -89,3 +89,14 @@ Artifact Graph が一意の spec/ADR/design/plan を選び、全 Issue の task 
 ## More Information
 
 対象は #28 #29 #30 #31 #32 #33。方式を選定する段階で本提案を再検討する。既存 SIMD/decoder 拡張の作業を混ぜない。
+
+## #33 の方式承認 (2026-10-11)
+
+coordinator は task の事前質問に対し、候補検出の fused 実行を論理段として
+仕様化、FLAC 保存の defer、`Resolution.sample_rate: u32` の第一級化を承認した。
+候補のみ再実行を提供する独立 StageKind は採らず、順序・候補保存・非破壊を
+維持する。FLAC の未実装を適合済みとせず、#32 の Float64 WAV と来歴を維持する。
+分解能は解析対象 PCM のレートを保存し、旧成果物は再生成する。
+独立実装修正は分解能のみのため task 分割不要も承認された。
+この承認は #33 の方式判断に限り、本 ADR 全体の status は変更しない。
+[選択肢・理由・再検討条件・証拠](../tasks/spec-residual-decisions.md) を参照。

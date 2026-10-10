@@ -3,6 +3,44 @@ use crate::events::CandidateEvent;
 use al_dataset::types::Value;
 
 #[test]
+fn windowed_expensive_records_keep_the_analysis_rate_even_when_invalid() {
+    let samples = noise(2048, 33);
+    for rate in [8000, 32000] {
+        for valid in [true, false] {
+            let region = TriggeredRegion {
+                start_s: 0.0,
+                end_s: samples.len() as f64 / rate as f64,
+                triggers: vec!["manual".into()],
+                validity: if valid {
+                    Validity::Valid
+                } else {
+                    Validity::LowCoherence
+                },
+                confidence: Confidence::High,
+                has_valid_trigger: valid,
+            };
+            let out = analyze_region(
+                "in",
+                "r",
+                &[&samples],
+                rate,
+                &region,
+                None,
+                None,
+                &ExpensiveConfig {
+                    stft_window: 64,
+                    stft_hop: 32,
+                    ..Default::default()
+                },
+            );
+            let resolutions: Vec<_> = out.records.iter().filter_map(|r| r.resolution).collect();
+            assert!(!resolutions.is_empty());
+            assert!(resolutions.iter().all(|r| r.sample_rate == rate));
+        }
+    }
+}
+
+#[test]
 fn ac29_short_secondary_channel_is_unsupported_without_panicking() {
     let primary = noise(4096, 29);
     let secondary = noise(512, 30);
@@ -269,7 +307,7 @@ fn ac29_mix_keeps_channel_identity_after_short_channel_is_excluded() {
         pair: Some(&pair),
     };
     let mut out = ExpensiveResult::default();
-    channel::run(&ctx, &Emit::new("in", &region, &cfg), &mut out);
+    channel::run(&ctx, &Emit::new("in", &region, &cfg, ctx.rate), &mut out);
     let coeffs: Vec<_> = out
         .records
         .iter()
