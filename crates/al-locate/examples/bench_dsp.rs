@@ -3,6 +3,39 @@
 
 use std::time::Instant;
 
+// 移行前の演算を同じプロセス・CPU・入力で比較するための参照。
+// 製品の DSP 入口には使用しない。
+fn legacy_fft(re: &mut [f64], im: &mut [f64]) {
+    let n = re.len();
+    for i in 1..n {
+        let j = i.reverse_bits() >> (usize::BITS - n.trailing_zeros());
+        if i < j {
+            re.swap(i, j);
+            im.swap(i, j);
+        }
+    }
+    let mut len = 2;
+    while len <= n {
+        let ang = -2.0 * std::f64::consts::PI / len as f64;
+        let (wr, wi) = (ang.cos(), ang.sin());
+        for i in (0..n).step_by(len) {
+            let (mut cr, mut ci) = (1.0, 0.0);
+            for j in i..i + len / 2 {
+                let k = j + len / 2;
+                let (tr, ti) = (re[k] * cr - im[k] * ci, re[k] * ci + im[k] * cr);
+                re[k] = re[j] - tr;
+                im[k] = im[j] - ti;
+                re[j] += tr;
+                im[j] += ti;
+                let ncr = cr * wr - ci * wi;
+                ci = cr * wi + ci * wr;
+                cr = ncr;
+            }
+        }
+        len *= 2;
+    }
+}
+
 fn main() {
     let n_sig = 2_400_000usize;
     let n_tpl = 8192usize;
@@ -22,9 +55,20 @@ fn main() {
         for _ in 0..reps {
             f();
         }
-        println!("{:40} {:9.1} ms", name, t0.elapsed().as_secs_f64() * 1000.0 / reps as f64);
+        println!(
+            "{:40} {:9.1} ms",
+            name,
+            t0.elapsed().as_secs_f64() * 1000.0 / reps as f64
+        );
     };
 
+    bench("legacy fft 4M (same process)", 3, &mut || {
+        let mut re = sig.clone();
+        re.resize(1 << 22, 0.0);
+        let mut im = vec![0.0; 1 << 22];
+        legacy_fft(&mut re, &mut im);
+        std::hint::black_box(&re);
+    });
     bench("fft 4M (next_pow2)", 3, &mut || {
         let mut re = sig.clone();
         re.resize(1 << 22, 0.0);
@@ -32,6 +76,27 @@ fn main() {
         al_locate::dsp::fft(&mut re, &mut im, false);
         std::hint::black_box(&re);
     });
+
+    // 同じ実数入力を、処理コンテキストの係数/scratch 再利用で測る。
+    let n = 1 << 22;
+    let mut real = sig.clone();
+    real.resize(n, 0.0);
+    let plan = al_math::fft::Fft::new(n);
+    let mut complex = vec![al_math::c64::new(0.0, 0.0); n];
+    bench("complex fft 4M (reused plan)", 7, &mut || {
+        for (z, &r) in complex.iter_mut().zip(&real) {
+            *z = al_math::c64::new(r, 0.0);
+        }
+        plan.transform(&mut complex, false);
+        std::hint::black_box(&complex);
+    });
+    let mut real_plan = al_math::fft::RealFft::new(n);
+    let mut spectrum = vec![al_math::c64::new(0.0, 0.0); n / 2 + 1];
+    bench("rfft 4M (reused plan/scratch)", 7, &mut || {
+        real_plan.forward(&real, &mut spectrum);
+        std::hint::black_box(&spectrum);
+    });
+    drop((plan, complex, real_plan, real, spectrum));
 
     bench("NCC 2.4M x 8k (fft corr)", 3, &mut || {
         // Same FFT-correlation the locate methods use: gcc_phat's

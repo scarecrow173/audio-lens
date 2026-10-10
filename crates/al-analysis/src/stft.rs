@@ -219,6 +219,9 @@ mod tests {
         let mag = m.magnitude();
         let (bin, _) = mag[0]
             .iter()
+            // 実数信号は負周波数にも同じピークを持つ。
+            // 微小な丸め差で共役側を選ばないよう非負周波数を調べる。
+            .take(m.fft_size / 2 + 1)
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
             .unwrap();
