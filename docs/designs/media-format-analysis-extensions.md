@@ -133,18 +133,28 @@ capture とも処理する。帯域境界生成と filter 適用は reference �
 帯域用の窓 0.1 秒・hop 0.05 秒・最大 lag ±0.04 秒を job config に持ち、
 実 rate から sample 数に変換して保存する。48kHz の探索幅は ±1920 samples。
 
-各窓で有効な overlap に対する正規化相関を最大化する lag を探索し、同点は
+各窓で有効な overlap に対する正規化相関の絶対値 `|correlation|` を最大化する
+lag を探索し、同点は
 |lag| が小さいもの、次に符号の固定順で決める。lag の正方向は capture が遅れる
 方向に統一し、補償した source x と capture y で `g = Σ(x*y)/Σ(x*x)` を求める。
 filter 過渡と境界不足を除外し、無音・分母不足・探索端の peak・低相関は理由付きで
-記録する。極性を失わないよう signed gain と相関を保持し、dB は |g| > 0 の場合だけ
-導出する。極性反転の候補は別途記録し、高信頼の通常ゲインへ混ぜない。
+記録する。低相関判定にも `|correlation|` を使う。選択に使う絶対値とは別に、
+選択 lag の signed correlation と signed LS gain を保持し、dB は |g| > 0 の場合だけ
+導出する。`y=-x` の真の lag は相関 -1 でも選択対象となる。
+これは `crates/al-locate/src/methods.rs::peaks_from_correlation` と
+`crates/al-locate/src/consensus.rs` の絶対値選択・符号保持と整合する。
 
-帯域ごとに数値計算可能な窓を相関降順で並べ、同点を時間順で固定して上位
-ceil(N/2) の gain の中央値を代表値とする。選択数、全窓数、相関、coherence、
-MAD、lag、validity を残す。上位半分でも低相関なら高信頼へ昇格させず、
+帯域ごとに数値計算可能な窓を signed correlation と LS gain がともに正の通常極性群、
+ともに負の反転極性群へ分ける。ゼロまたは符号不整合の窓は理由付きで保持し、
+代表値から除外する。各群を `|correlation|` 降順で並べ、同点を時間順で固定して
+群内の上位 ceil(N/2) の signed gain の中央値を、それぞれ独立した代表値とする。
+N は各群の窓数であり、反転極性の値を通常極性の代表値に混ぜない。
+空の群は unavailable とし、他方の群の値で補完しない。
+各群の極性、選択数、群内窓数、全窓数、signed correlation とその絶対値、coherence、
+MAD、lag、validity を残す。上位半分でも `|correlation|` が低ければ高信頼へ昇格させず、
 低相関の値には下限的解釈というメタデータを付ける。
-400Hz 相対ゲインも同じ推定器の支持された 400Hz 帯域から計算する。
+400Hz 相対ゲインも同じ推定器の同じ極性群で支持された 400Hz 帯域から計算する。
+対応する 400Hz 群が未支持なら相対ゲインは unavailable とする。
 
 `ref.band_gain_m2` をこの LS 推定の正本とし、旧 PSD 比は別の明示的な
 `ref.band_gain_psd_ratio` 二次観測として保持する。algorithm/provenance に
@@ -182,6 +192,11 @@ dataset 表現の追加は実装時にこの責務の一箇所で定義し、既
 
 ## Data and Control Flow
 
+実装順序の前提ゲートとして、backend 選定 ADR(TASK-036a)を accepted にしてから
+#36 フェーズ1の既存 WAV/AVI/MP4 の native 移行へ進む。codec backend の依存導入時
+だけのゲートにはしない。MP4 demux-only 決定の維持または supersede/amend の要否も
+その ADR で確定し、本書の draft 記述だけで現行決定を変更しない。
+
 1. ingest: pinned hash 検証 → registry/native probe/decode → 共通 PCM・frame・
    timing 結果 → 全画面/ROI 特徴 → provenance/manifest 登録。
 2. locate: 既存 PCM とクロックによる alignment を受理し、reference へ渡す。
@@ -212,7 +227,13 @@ dataset 表現の追加は実装時にこの責務の一箇所で定義し、既
 ## Deferred Design Concerns
 
 - backend 選定 ADR の accepted 化と MP4 ADR の supersede/amend | 現行決定を維持 |
-  TASK-036a のレビュー時 | 承認なしの codec 対応拡大。
+  TASK-036a のレビュー時、native 移行開始前の必須ゲート | 承認なしの移行・codec 対応拡大。
+- #41 比較コンテキストの永続化スキーマ | 現行 `al-dataset` の `FeatureRecord` は
+  単一の `input_id` / `alignment_id` と `lineage`、manifest の `DatasetArtifact` は
+  `role` / `path` / `provenance` を持ち、比較専用契約は未定 |
+  #41 実装開始前に比較コンテキストの role/path、安定識別子、FeatureRecord/tensor
+  からの参照 field、再読込スキーマと参照検証を一箇所で確定 |
+  再読込時に baseline/target と source/alignment 集合を復元できないリスク。
 - symphonia/ffmpeg backend と codec coverage | plan のフェーズ1外 |
   依存承認と後続計画の成立時 | 主要キャプチャの PCM は引き続き unavailable。
 - ROI/経路差の viz view | 解析データの契約を先に固定 |
@@ -223,13 +244,15 @@ dataset 表現の追加は実装時にこの責務の一箇所で定義し、既
 以下は実装時の検証項目であり、本書作成によるテスト成功を意味しない。
 正本は `docs/test-specs/media-format-analysis-extensions.md` の TASK-036a〜e。
 
-- [ ] accepted backend ADR と MP4 ADR の関係を確認し、依存導入前にレビューする。
+- [ ] accepted backend ADR(TASK-036a)と MP4 ADR の関係を確認し、native 移行前にレビューする。
 - [ ] native registry 経由で既存 WAV/AVI/MP4 ingest/golden を通し、部分 unavailable、
   timing、PCM/channel、hash と backend provenance を確認する。
 - [ ] ROI の既知輝度、複数矩形、top/bottom-up、範囲外設定、VFR/欠落、未指定時の
   既存結果、既知 onset 差の avsync を確認する。
 - [ ] 帯域別既知 gain/lag、rate 差、無相関高域雑音、無音、極性、上位半分中央値、
   400Hz 比、FFT oracle 一致と低 support validity を確認する。
+- [ ] 同じ既知 lag の `y=x` / `y=-x` が絶対値相関で選ばれ、signed correlation/gain を
+  保持すること、極性混在窓の群別上位半分集約と低相関判定が絶対値を使うことを確認する。
 - [ ] 同一 source の既知 -5dB 経路差、複数 source の外れ値、位相折返し、分母ゼロ、
   grid 不整合、共通 source なしの unsupported、既存ペア観測保持を確認する。
 
