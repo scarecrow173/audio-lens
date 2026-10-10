@@ -49,10 +49,11 @@ impl WithSimd for Correlation<'_> {
             return Vec::new();
         }
         let max_lag = max_lag.min(signal.len() - len);
-        let mut squares = vec![0.0; signal.len()];
-        square(simd, signal, &mut squares);
         // 同じ標本順で加算し、レーン数に依存する reduction 順序を避ける。
-        let template_energy: f64 = {
+        // PHAT は窓エネルギーを使わず、非ゼロ cross-spectrum のみで正規化する。
+        let template_energy: f64 = if phat {
+            1.0
+        } else {
             let mut values = vec![0.0; len];
             square(simd, template, &mut values);
             values.iter().sum()
@@ -74,6 +75,8 @@ impl WithSimd for Correlation<'_> {
         plan.inverse_with_simd(simd, &a, &mut real);
         real.truncate(max_lag + 1);
         if !phat {
+            let mut squares = vec![0.0; signal.len()];
+            square(simd, signal, &mut squares);
             let mut cumulative = vec![0.0; signal.len() + 1];
             for (i, &value) in squares.iter().enumerate() {
                 cumulative[i + 1] = cumulative[i] + value;

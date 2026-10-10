@@ -48,6 +48,13 @@ fn gcc_phat_retains_polarity_and_lag_direction() {
 }
 
 #[test]
+fn gcc_phat_does_not_apply_ncc_energy_gate() {
+    // PHAT の非ゼロ cross-spectrum を、素材の二乗 underflow で棄却しない。
+    assert_eq!(correlation::gcc_phat(&[1e-200], &[1e200], 0), vec![1.0]);
+    assert_eq!(correlation::gcc_phat(&[-1e-200], &[1e200], 0), vec![-1.0]);
+}
+
+#[test]
 fn shared_bandpass_preserves_mask_boundaries_and_endpoints() {
     let n = 256;
     let input: Vec<_> = (0..n)
