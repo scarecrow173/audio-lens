@@ -57,7 +57,7 @@ Directory: `docs/tasks`
 | TASK-034z8kAawdMoi8AxPYZjrB | locate-methods 4手法 + 候補/証拠型 | done | [locate-methods.md](./locate-methods.md) |
 | TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | done | [locate-mixer.md](./locate-mixer.md) |
 | TASK-035hJkLmNpQrStUvWxYz | locate: サンプルレート正規化(リジェクト→リサンプル統一) | done | [locate-resample-normalize.md](./locate-resample-normalize.md) |
-| TASK-034dLdqYvyaMjl7hTgg6IT | al-locate: 2ソース残差探索の残差PCMを保存する | todo | [locate-residual-pcm.md](./locate-residual-pcm.md) |
+| TASK-034dLdqYvyaMjl7hTgg6IT | al-locate: 2ソース残差探索の残差PCMを保存する | done | [locate-residual-pcm.md](./locate-residual-pcm.md) |
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | done | [locate-residual.md](./locate-residual.md) |
 | TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | done | [locate-result-schema.md](./locate-result-schema.md) |
 | TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | done | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
