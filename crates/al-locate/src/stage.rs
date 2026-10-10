@@ -4,8 +4,8 @@
 //! piecewise time map, runs the two-stage residual search, and
 //! persists every result — accepted and rejected alike.
 //!
-//! Sample-rate-mismatched pairs are never resampled: they get an
-//! explicit marked result instead. A pair whose decoded PCM is
+//! 素材はキャプチャのレートに正規化し、比較した PCM を永続化する。
+//! A pair whose decoded PCM is
 //! missing or empty is marked per-pair — one bad input never aborts
 //! the stage's other pairs.
 
@@ -22,6 +22,7 @@ use crate::decode::{DecodedInput, decode_input};
 use crate::dsp::ncc;
 use crate::methods::{default_methods, peaks_from_correlation};
 use crate::mixer::fit_mix;
+use crate::normalize::prepare_input;
 use crate::residual::{assemble_residual_search, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
 use crate::tracking::{Anchor, build_time_map, identify_loop_occurrences};
@@ -121,7 +122,7 @@ fn err(e: impl std::fmt::Display) -> StageError {
 
 impl LocateStage {
     /// Explicit non-accepted result for a pair that cannot be
-    /// evaluated (missing/empty decode, sample-rate mismatch).
+    /// evaluated (missing/empty decode).
     fn marked_result(
         &self,
         source_input_id: &str,
@@ -135,6 +136,9 @@ impl LocateStage {
             capture_input_id: capture_input_id.into(),
             source_range: SampleRange { start: 0, end: 0 },
             capture_range: SampleRange { start: 0, end: 0 },
+            normalized_source_range: SampleRange { start: 0, end: 0 },
+            source_pcm: None,
+            capture_pcm: None,
             evidence: vec![],
             agreeing_methods: 0,
             position_spread: 0,
@@ -482,7 +486,28 @@ impl Stage for LocateStage {
                 }
                 continue;
             }
-            let capture = decoded_captures[cap_index].as_ref().unwrap();
+            let capture_original = decoded_captures[cap_index].as_ref().unwrap();
+            let prepared_capture = prepare_input(
+                capture_original,
+                capture_original.sample_rate,
+                &mut records,
+                ctx,
+            )
+            .map_err(err)?;
+            let capture = &prepared_capture.decoded;
+            let prepared_sources = decoded_sources
+                .iter()
+                .map(|s| {
+                    s.as_ref()
+                        .map(|s| prepare_input(s, capture.sample_rate, &mut records, ctx))
+                        .transpose()
+                })
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(err)?;
+            let decoded_sources: Vec<Option<&DecodedInput>> = prepared_sources
+                .iter()
+                .map(|s| s.as_ref().map(|p| &p.decoded))
+                .collect();
             let capture_len = capture.channel_samples[0].len() as u64;
             let tolerance = self.config.consensus.position_tolerance;
             // Per-source results kept alive for the residual pass;
@@ -502,8 +527,7 @@ impl Stage for LocateStage {
                 lineage.extend(capture.artifact_ids.iter().cloned());
 
                 // Missing or empty decode → per-pair explicit mark;
-                // sample-rate mismatch is never resampled — also a
-                // mark. One bad pair never aborts the others.
+                // One bad pair never aborts the others.
                 let mark = match &decoded_sources[src_index] {
                     None => Some((
                         Validity::DecodeInputUnavailable,
@@ -520,14 +544,6 @@ impl Stage for LocateStage {
                             serde_json::json!({"empty_input": true}),
                         ))
                     }
-                    Some(s) if s.sample_rate != capture.sample_rate => Some((
-                        Validity::OutOfSupportedFrequencyRange,
-                        format!(
-                            "sample rate mismatch: source {} Hz vs capture {} Hz",
-                            s.sample_rate, capture.sample_rate
-                        ),
-                        serde_json::json!({"sample_rate_mismatch": true}),
-                    )),
                     Some(_) => None,
                 };
                 if let Some((validity, reason, derived)) = mark {
@@ -564,7 +580,7 @@ impl Stage for LocateStage {
                 );
                 let evidence = merged_votes(&pairs);
                 let source_len = source.channel_samples[0].len() as u64;
-                let result = evaluate(
+                let mut result = evaluate(
                     &evidence,
                     &source.input_id,
                     &capture.input_id,
@@ -574,6 +590,12 @@ impl Stage for LocateStage {
                     "locate-consensus",
                     "1",
                 );
+
+                prepared_sources[src_index]
+                    .as_ref()
+                    .unwrap()
+                    .attach(&prepared_capture, &mut result)
+                    .map_err(err)?;
 
                 // Every channel pair's evidence is its own artifact so
                 // per-channel detail survives the vote merge.
@@ -641,7 +663,7 @@ impl Stage for LocateStage {
                 // Derived data for the primary result: mixer fit on the
                 // matched window; loop occurrences and the piecewise
                 // time map are their own artifacts below.
-                let mut derived = serde_json::json!({"occurrences": occurrences});
+                let mut derived = serde_json::json!({"occurrences": occurrences, "resampled": prepared_sources[src_index].as_ref().unwrap().params.original_sample_rate != capture.sample_rate});
                 let mut time_map_body = None;
                 if result.accepted {
                     let primary = result.capture_range.start;
@@ -768,6 +790,9 @@ impl Stage for LocateStage {
                         "anchors": anchors,
                         "loop_occurrences": loops,
                         "anchor_reference": primary,
+                        "source_coordinate_space": "normalized_pcm",
+                        "source_pcm": result.source_pcm,
+                        "capture_pcm": result.capture_pcm,
                     }));
                 }
 
@@ -846,6 +871,7 @@ impl Stage for LocateStage {
                 let children: Vec<&DecodedInput> = decoded_sources
                     .iter()
                     .flatten()
+                    .copied()
                     .filter(|c| c.sample_rate == capture.sample_rate)
                     .collect();
                 let n_methods = default_methods().len();
@@ -876,7 +902,7 @@ impl Stage for LocateStage {
                         })
                         .collect();
                     let child_len = child.channel_samples[0].len() as u64;
-                    let child_result = evaluate(
+                    let mut child_result = evaluate(
                         &merged_votes(&pairs),
                         &child.input_id,
                         &capture.input_id,
@@ -886,6 +912,14 @@ impl Stage for LocateStage {
                         "locate-consensus",
                         "1",
                     );
+                    let prepared_child = prepared_sources
+                        .iter()
+                        .flatten()
+                        .find(|p| p.decoded.input_id == child.input_id)
+                        .unwrap();
+                    prepared_child
+                        .attach(&prepared_capture, &mut child_result)
+                        .map_err(err)?;
                     let search = assemble_residual_search(
                         &parent.input_id,
                         parent_result.alignment_id.clone(),

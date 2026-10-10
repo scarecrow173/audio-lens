@@ -245,7 +245,6 @@ fn manual_ranges_analyze_without_any_candidate() {
 struct PairFixture {
     dir: PathBuf,
     manifest: Manifest,
-    source_input_id: String,
     capture_input_id: String,
 }
 
@@ -257,7 +256,6 @@ fn pair_fixture(source: &[f64], capture: &[f64]) -> PairFixture {
     let mut cap_input = input(InputRole::CaptureBug, dir.join("cap.bin"));
     src_input.source_sha256 = Some("aa".repeat(32));
     cap_input.source_sha256 = Some("bb".repeat(32));
-    let source_input_id = src_input.input_id.to_string();
     let capture_input_id = cap_input.input_id.to_string();
     let input_ids = [src_input.input_id.clone(), cap_input.input_id.clone()];
     let manifest = Manifest::new(
@@ -290,7 +288,6 @@ fn pair_fixture(source: &[f64], capture: &[f64]) -> PairFixture {
     PairFixture {
         dir,
         manifest,
-        source_input_id,
         capture_input_id,
     }
 }
@@ -310,7 +307,7 @@ fn pctx<'a>(
 #[test]
 fn pair_evidence_populates_pair_dependent_families() {
     // capture = 0.5× source, aligned at sample 0 (identity
-    // alignment written by hand). The locate artifact is present
+    // alignment from the real locate stage). The locate artifact is present
     // but no reference stage ran, so `transfer_h` is absent: IR
     // stays `pair evidence unavailable` while the level-transfer,
     // mixing-matrix and time-map families measure.
@@ -324,50 +321,30 @@ fn pair_evidence_populates_pair_dependent_families() {
     let mut fx = pair_fixture(&source, &capture);
     let registry = ArtifactRegistry::new(&fx.dir);
     let config = serde_json::json!({
+        "locate": {"consensus": {"min_peak_to_background": 0.5}},
         "analysis": {
             "events": {"noise_floor_dbfs": 1e9, "zero_run_samples": 1e9, "stuck_run_samples": 1e9},
             "expensive": {"always_run": true}
         }
     });
 
-    let rel = PathBuf::from("locate")
-        .join(&fx.source_input_id)
-        .join(&fx.capture_input_id)
-        .join("result.json");
-    fs::create_dir_all(fx.dir.join(rel.parent().unwrap())).unwrap();
-    fs::write(
-        fx.dir.join(&rel),
-        serde_json::to_string(&serde_json::json!({
-            "result": {
-                "alignment_id": "aln-ok",
-                "source_input_id": fx.source_input_id,
-                "capture_input_id": fx.capture_input_id,
-                "source_range": {"start": 0, "end": n},
-                "capture_range": {"start": 0, "end": n},
-                "evidence": [],
-                "agreeing_methods": 1,
-                "position_spread": 0,
-                "confidence": "high",
-                "validity": "valid",
-                "reject_reason": null,
-                "accepted": true,
-                "algorithm_id": "locate.v1",
-                "algorithm_version": "1",
-                "params": {},
-            }
-        }))
-        .unwrap(),
-    )
-    .unwrap();
-    fx.manifest.register_artifact(ArtifactRecord {
-        artifact_id: al_core::ArtifactId::new(),
-        role: "locate_result".into(),
-        path: rel,
-        produced_by: Some(StageKind::Locate),
-        inputs: vec![],
-        params: serde_json::json!({}),
-    });
+    for rec in al_locate::stage::LocateStage::new()
+        .run(&pctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(rec);
+    }
 
+    let alignment_id = fx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|r| r.role == "locate_result")
+        .unwrap()
+        .params["alignment_id"]
+        .as_str()
+        .unwrap()
+        .to_string();
     for rec in al_analysis::stage::CheapAnalysisStage::new()
         .run(&pctx(&fx, &registry, &config))
         .expect("cheap stage")
@@ -410,7 +387,7 @@ fn pair_evidence_populates_pair_dependent_families() {
         );
         assert_eq!(
             r["alignment_id"].as_str(),
-            Some("aln-ok"),
+            Some(alignment_id.as_str()),
             "{id} must reference the locate alignment"
         );
     }

@@ -8,6 +8,7 @@ pub mod decode;
 pub mod dsp;
 pub mod methods;
 pub mod mixer;
+pub mod normalize;
 pub mod residual;
 pub mod result;
 pub mod stage;

@@ -8,6 +8,7 @@ use std::sync::LazyLock;
 
 pub mod fft;
 pub mod linalg;
+pub mod resample;
 
 pub use pulp::{Simd, WithSimd, c64};
 
