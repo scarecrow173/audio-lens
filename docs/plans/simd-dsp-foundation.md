@@ -28,6 +28,7 @@ relations:
     - "docs/adr/simd-arithmetic-pulp.md"
     - "docs/adr/implementation-stack.md"
     - "docs/specs/source-localization.md"
+    - "docs/designs/simd-dsp-foundation.md"
   derived-by: []
   verifies: []
   verified-by:
