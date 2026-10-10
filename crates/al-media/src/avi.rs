@@ -114,6 +114,10 @@ pub struct AviMedia {
     pub audio: Option<DecodedAudio>,
     /// Why `audio` is absent (`decode/input unavailable` detail).
     pub audio_unavailable: Option<String>,
+    /// 局所失敗の型付き区分（文字列化より前に決定）。
+    pub audio_failure: Option<crate::decoder::Unavailable>,
+    /// 映像側の局所失敗区分。
+    pub video_failure: Option<crate::decoder::Unavailable>,
     /// First `vids` stream's declared metadata, if present.
     pub video: Option<VideoInfo>,
     /// Coarse features of the first `vids` stream — decoded series or
@@ -128,23 +132,25 @@ pub struct AviMedia {
     pub timing: Vec<StreamTiming>,
 }
 
-struct StreamHead {
-    fcc_type: [u8; 4],
-    scale: u32,
-    rate: u32,
-    start: u32,
-    length: u32,
-    sample_size: u32,
-    format: Vec<u8>,
+#[derive(Debug)]
+pub(crate) struct StreamHead {
+    pub(crate) fcc_type: [u8; 4],
+    pub(crate) scale: u32,
+    pub(crate) rate: u32,
+    pub(crate) start: u32,
+    pub(crate) length: u32,
+    pub(crate) sample_size: u32,
+    pub(crate) format: Vec<u8>,
 }
 
 /// One packet inside the `movi` list, tagged with its stream.
-struct MoviPacket<'a> {
+#[derive(Debug)]
+pub(crate) struct MoviPacket<'a> {
     /// `hdrl` stream index (the `NN` prefix of the chunk id).
-    stream_no: usize,
+    pub(crate) stream_no: usize,
     /// Chunk kind (the `id[2..4]` suffix: `wb`, `db`, `dc`, ...).
     kind: [u8; 2],
-    body: &'a [u8],
+    pub(crate) body: &'a [u8],
 }
 
 /// Iterate `(id, body)` chunk pairs inside a RIFF chunk region.
@@ -329,6 +335,13 @@ fn stream_timings(
         .collect()
 }
 
+pub(crate) struct AviLayout<'a> {
+    pub(crate) streams: Vec<StreamHead>,
+    pub(crate) packets: Vec<MoviPacket<'a>>,
+    ticks: Vec<Option<i64>>,
+    pub(crate) timing: Vec<StreamTiming>,
+}
+
 /// Demux an AVI file: decode the first PCM audio stream when possible,
 /// record the first video stream's declared metadata plus per-stream
 /// packet timing, and extract coarse features from uncompressed `vids`
@@ -341,6 +354,10 @@ fn stream_timings(
 /// in `audio_unavailable`. Errors mean the container itself is
 /// unusable: bad RIFF/chunk structure or a missing `movi` list.
 pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedia, MediaError> {
+    decode_layout(avi_layout(data)?, video_cfg, true, true)
+}
+
+pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
     if data.len() < 12 || &data[0..4] != b"RIFF" || &data[8..12] != b"AVI " {
         return Err(MediaError::input_unavailable("not a RIFF/AVI file"));
     }
@@ -428,34 +445,68 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
     let ticks = packet_ticks(&streams, &movi_packets)?;
     let timing = stream_timings(&streams, &movi_packets, &ticks);
 
+    Ok(AviLayout {
+        streams,
+        packets: movi_packets,
+        ticks,
+        timing,
+    })
+}
+
+pub(crate) fn decode_layout(
+    layout: AviLayout<'_>,
+    video_cfg: &VideoFeatureConfig,
+    audio_requested: bool,
+    video_requested: bool,
+) -> Result<AviMedia, MediaError> {
+    let AviLayout {
+        streams,
+        packets: movi_packets,
+        ticks,
+        timing,
+    } = layout;
     // Only the first `auds` stream is decoded; its `NNwb` packets are
     // concatenated in mux order so interleaved packets of other streams
     // never leak into the PCM. Any decode-level failure — no audio
     // stream, an unsupported codec, corrupt stream headers — is
     // recorded as `audio_unavailable` instead of aborting the demux:
     // metadata, timing, and video observations stay valid on their own.
-    let (audio, audio_unavailable) = match streams.iter().position(|s| &s.fcc_type == b"auds") {
-        Some(audio_idx) => {
-            let mut audio_pcm: Vec<u8> = Vec::new();
-            for p in &movi_packets {
-                if p.stream_no == audio_idx && &p.kind == b"wb" {
-                    audio_pcm.extend_from_slice(p.body);
+    let (audio, audio_unavailable, audio_failure) = if !audio_requested {
+        (None, None, None)
+    } else {
+        match streams.iter().position(|s| &s.fcc_type == b"auds") {
+            Some(audio_idx) => {
+                let mut audio_pcm: Vec<u8> = Vec::new();
+                for p in &movi_packets {
+                    if p.stream_no == audio_idx && &p.kind == b"wb" {
+                        audio_pcm.extend_from_slice(p.body);
+                    }
+                }
+                // An auds stream with no wb payloads is undecodable input,
+                // not a zero-length decode.
+                match if audio_pcm.is_empty() {
+                    Err(MediaError::input_unavailable(
+                        "audio stream carries no wb packets",
+                    ))
+                } else {
+                    decode_waveformatex(&streams[audio_idx].format, &audio_pcm)
+                } {
+                    Ok(a) => (Some(a), None, None),
+                    Err(e) => (
+                        None,
+                        Some(format!("AVI audio stream: {e}")),
+                        Some(crate::decoder::Unavailable::from_error(&e)),
+                    ),
                 }
             }
-            // An auds stream with no wb payloads is undecodable input,
-            // not a zero-length decode.
-            match if audio_pcm.is_empty() {
-                Err(MediaError::input_unavailable(
-                    "audio stream carries no wb packets",
-                ))
-            } else {
-                decode_waveformatex(&streams[audio_idx].format, &audio_pcm)
-            } {
-                Ok(a) => (Some(a), None),
-                Err(e) => (None, Some(format!("AVI audio stream: {e}"))),
-            }
+            None => (
+                None,
+                Some("AVI has no audio stream".into()),
+                Some(crate::decoder::Unavailable::capability(
+                    "AVI has no audio stream",
+                )),
+            ),
         }
-        None => (None, Some("AVI has no audio stream".into())),
     };
 
     let vidx = streams.iter().position(|s| &s.fcc_type == b"vids");
@@ -473,7 +524,7 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
     // Frame-carrying chunks (`db`/`dc`) are the only ones handed to the
     // decoder; non-frame chunks (`pc` palette changes etc.) keep their
     // timeline slot in `ticks` but never shift the frame index.
-    let video_extraction = vidx.map(|vidx| {
+    let video_extraction = vidx.filter(|_| video_requested).map(|vidx| {
         let head = &streams[vidx];
         let frames: Vec<VideoFrame<'_>> = movi_packets
             .iter()
@@ -493,14 +544,16 @@ pub fn decode_avi(data: &[u8], video_cfg: &VideoFeatureConfig) -> Result<AviMedi
             video_cfg,
         )
     });
-    let (video_features, video_thumbs) = match video_extraction {
-        Some(e) => (Some(e.features), e.thumbs),
-        None => (None, None),
+    let (video_features, video_thumbs, video_failure) = match video_extraction {
+        Some(e) => (Some(e.features), e.thumbs, e.unavailable),
+        None => (None, None, None),
     };
 
     Ok(AviMedia {
         audio,
         audio_unavailable,
+        audio_failure,
+        video_failure,
         video,
         video_features,
         video_thumbs,
