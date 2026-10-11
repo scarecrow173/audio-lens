@@ -31,7 +31,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/observability-foundation-logging-and-profiling.md"
-  derived-by: []
+  derived-by:
+    - "../designs/observability-foundation.md"
   verifies: []
   verified-by: []
   references: []
