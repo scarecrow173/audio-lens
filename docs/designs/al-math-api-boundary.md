@@ -224,7 +224,18 @@ FFT 境界は split re/im」と決定された。本設計はその具体化で�
 - 直接 plan 利用の FFT マイクロベンチに残る ~10% 回帰の追跡 —
   SoA 固有のメモリ uops 増が構造的要因であり、将来 AoS
   ハイブリッド等で回収する余地を残す(既知トレードオフとして
-  Non-Functional Constraints に記録済み)
+  Non-Functional Constraints に記録済み)。
+  回収策の具体形(解説資料化作業で確認): ws 経路(n ≥ 16384)は
+  `stage_out`(入力 → workspace コピー)と
+  `gather_permute`(workspace → 出力書き戻し)が既に全要素コピー
+  を行うため、workspace の中身を split から AoS(交互配置)に
+  変えてもコピー回数は増えない。つまり「内部 stage カーネルを
+  AoS 版にするだけ」で 12 → 6 ストリームに戻せ、公開境界は
+  split のまま維持できる。さらに `gather_permute` の逆順読みが
+  「re/im ペアを1キャッシュラインで読む」形になり効率化する。
+  コストは内部 stage の split/AoS 2実装と twiddle の2形式化、
+  および検証対象の増加。n < 16384 の in-place 経路は split の
+  ままでよい(小さな変換はコピー経路を新設する意味がない)
 - `spectral_envelope` の `fft_size: 0` が
   `samples.len().next_power_of_two()` で黙って置き換わる —
   `fft_size.max(...)` の既存動作であり、本変更のスコープ外
