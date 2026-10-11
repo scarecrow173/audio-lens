@@ -32,20 +32,11 @@ pub fn deinterleave(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
 pub use al_math::correlation::{gcc_phat, ncc};
 pub use al_math::filter::{bandpass, bandpass_many, spectral_envelope};
 
-/// In-place radix-2 FFT. `re`/`im` lengths must be equal powers of two.
+/// In-place FFT (fused radix-4 stages, large transforms run on a skewed
+/// workspace). `re`/`im` lengths must be equal powers of two.
 pub fn fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
-    assert_eq!(re.len(), im.len());
     let plan = al_math::fft::Fft::new(re.len());
-    let mut values: Vec<_> = re
-        .iter()
-        .zip(im.iter())
-        .map(|(&re, &im)| al_math::c64::new(re, im))
-        .collect();
-    plan.transform(&mut values, inverse);
-    for ((re, im), value) in re.iter_mut().zip(im.iter_mut()).zip(values) {
-        *re = value.re;
-        *im = value.im;
-    }
+    plan.transform(re, im, inverse);
 }
 
 #[cfg(test)]

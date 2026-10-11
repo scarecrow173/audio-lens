@@ -1,21 +1,6 @@
 //! 同一プロセス・入力で移行前の spectral mask と新しい実数 FFT 経路を測る。
-use al_math::{c64, correlation, fft::Fft, filter};
+use al_math::{correlation, filter};
 use std::{hint::black_box, time::Instant};
-
-// 移行直前の al-locate::dsp の split-complex FFT wrapper。
-fn previous_fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
-    let plan = Fft::new(re.len());
-    let mut values: Vec<_> = re
-        .iter()
-        .zip(im.iter())
-        .map(|(&r, &i)| c64::new(r, i))
-        .collect();
-    plan.transform(&mut values, inverse);
-    for ((r, i), value) in re.iter_mut().zip(im.iter_mut()).zip(values) {
-        *r = value.re;
-        *i = value.im;
-    }
-}
 
 // SIMD 基盤導入前の radix-2 FFT。応答確認と比較測定専用。
 fn original_fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
@@ -55,13 +40,12 @@ fn original_fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
     }
 }
 
-fn legacy_bandpass(input: &[f64], lo: f64, hi: f64, original: bool) -> Vec<f64> {
+fn legacy_bandpass(input: &[f64], lo: f64, hi: f64) -> Vec<f64> {
     let n = input.len().next_power_of_two();
     let mut re = vec![0.0; n];
     let mut im = vec![0.0; n];
     re[..input.len()].copy_from_slice(input);
-    let fft = if original { original_fft } else { previous_fft };
-    fft(&mut re, &mut im, false);
+    original_fft(&mut re, &mut im, false);
     let bin_hz = 48000.0 / n as f64;
     for k in 0..n {
         let frequency = bin_hz * k.min(n - k) as f64;
@@ -70,7 +54,7 @@ fn legacy_bandpass(input: &[f64], lo: f64, hi: f64, original: bool) -> Vec<f64> 
             im[k] = 0.0;
         }
     }
-    fft(&mut re, &mut im, true);
+    original_fft(&mut re, &mut im, true);
     re.truncate(input.len());
     re
 }
@@ -94,7 +78,7 @@ fn main() {
             (state >> 32) as f64 / u32::MAX as f64 - 0.5
         })
         .collect();
-    let reference = legacy_bandpass(&input, 200.0, 800.0, true);
+    let reference = legacy_bandpass(&input, 200.0, 800.0);
     let actual = filter::bandpass(&input, 48000, 200.0, 800.0);
     let error = actual
         .iter()
@@ -105,10 +89,7 @@ fn main() {
     println!("max absolute response error: {error:.3e}");
     drop((reference, actual));
     let original = bench("original radix-2 bandpass 2.4M", || {
-        legacy_bandpass(&input, 200.0, 800.0, true)
-    });
-    let previous = bench("previous dispatched complex bandpass 2.4M", || {
-        legacy_bandpass(&input, 200.0, 800.0, false)
+        legacy_bandpass(&input, 200.0, 800.0)
     });
     let current = bench("real spectral-mask bandpass 2.4M", || {
         filter::bandpass(&input, 48000, 200.0, 800.0)
@@ -120,20 +101,19 @@ fn main() {
         (4000.0, 16000.0),
         (16000.0, 24000.0),
     ];
-    let previous_many = bench("previous five independent bands 2.4M", || {
+    let independent = bench("real spectral-mask five independent bands 2.4M", || {
         bands
             .iter()
-            .map(|&(lo, hi)| legacy_bandpass(&input, lo, hi, false))
+            .map(|&(lo, hi)| filter::bandpass(&input, 48000, lo, hi))
             .collect::<Vec<_>>()
     });
     let many = bench("shared forward FFT five bands 2.4M", || {
         filter::bandpass_many(&input, 48000, &bands)
     });
     println!(
-        "speedup original/current: {:.2}x, previous/current: {:.2}x, five bands: {:.2}x",
+        "speedup original/current: {:.2}x, five bands: {:.2}x",
         original / current,
-        previous / current,
-        previous_many / many
+        independent / many
     );
     bench("NCC 2.4M x 8k", || {
         correlation::ncc(&input[8192..16384], &input, usize::MAX)
