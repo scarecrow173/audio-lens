@@ -6,6 +6,7 @@ Directory: `docs/discovery`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| DISC-034DX9JFBV7X3bMuehK48V | al-math 公開APIのバックエンド非依存化とFFT複素数表現 | resolved | [al-math-api-fft.md](./al-math-api-fft.md) |
 | DISC-034AajDdIqPQODwBlBJPPC | コンテナカバレッジのギャップ(MP4/ISO-BMFF) | resolved | [container-coverage-gaps.md](./container-coverage-gaps.md) |
 | DISC-034AajCHW8VrVBAMwzlOzL | 高コスト解析の未実装ファミリ | resolved | [expensive-family-gaps.md](./expensive-family-gaps.md) |
 | DISC-034yYFlTHXyXnjrEm19mGq | AudioLens 要件取りまとめ | resolved | [initial-requirements-consolidation.md](./initial-requirements-consolidation.md) |

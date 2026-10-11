@@ -6,10 +6,15 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034DYiGC8yp76ElLB8R0J5 | al-locate: dsp::fft と bench_dsp の split API 追従 | todo | [al-locate-split-re-im-fft.md](./al-locate-split-re-im-fft.md) |
+| TASK-034DYiRwEeud1alnVmGMJj | al-math API 境界: 全体検証と旧コミット bench 比較 | todo | [al-math-api-boundary-verification.md](./al-math-api-boundary-verification.md) |
+| TASK-034DYiMM43O9mMDdme6ijq | al-math: 公開面の pub(crate) 化と intra-doc link 修正 | todo | [al-math-api-pub-crate.md](./al-math-api-pub-crate.md) |
 | TASK-035eXcVbNmAsDfGhJkLzQ | al-math: 相関/NCC/bandpass カーネル | done | [al-math-correlation.md](./al-math-correlation.md) |
 | TASK-035dQwErTyUiOpAsDfGhJk | al-math: FFT カーネル(複素/実数) | done | [al-math-fft.md](./al-math-fft.md) |
 | TASK-035fPlMnOkJiHgFeDcBaZ | al-math: least_squares を Householder QR 化 | done | [al-math-qr.md](./al-math-qr.md) |
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | done | [al-math-skeleton.md](./al-math-skeleton.md) |
+| TASK-034DYiz9Z4rXXkKoNvy4vI | al-math: fft/correlation/filter の split re/im 内部化 | todo | [al-math-split-re-im-internals.md](./al-math-split-re-im-internals.md) |
+| TASK-034DYiFVJy5OyohvPiyzkf | al-math: tests の split re/im 追従と独立参照の保持 | todo | [al-math-split-re-im-tests.md](./al-math-split-re-im-tests.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
 | TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
@@ -23,6 +28,7 @@ Directory: `docs/tasks`
 | TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | done | [avsync-analysis.md](./avsync-analysis.md) |
 | TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | done | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
 | TASK-036dBnMqWeRtYuIoPlKj | reference: 帯域別ラグ補償ゲイン推定(#38) | done | [band-lag-gain.md](./band-lag-gain.md) |
+| TASK-034DYiHj7TcoYoEFn29rMP | bench_correlation: split API 追従と previous_fft 腕の削除 | todo | [bench-correlation-split-re-im.md](./bench-correlation-split-re-im.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
