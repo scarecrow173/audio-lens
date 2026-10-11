@@ -1,10 +1,10 @@
 ---
-id: "TASK-035hJkLmNpQrStUvWxYz"
+id: "TASK-035h6IfQGjVLTZjgH6kiRT"
 type: "task"
 status: "done"
 title: "locate: サンプルレート正規化(リジェクト→リサンプル統一)"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

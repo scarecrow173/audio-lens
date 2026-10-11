@@ -1,10 +1,10 @@
 ---
-id: "TASK-035eXcVbNmAsDfGhJkLzQ"
+id: "TASK-035e5Sz9kMdPRs2o1Cd4W0"
 type: "task"
 status: "done"
 title: "al-math: 相関/NCC/bandpass カーネル"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

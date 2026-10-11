@@ -4,7 +4,7 @@ type: "task"
 status: "done"
 title: "MediaDecoder トレイト + レジストリ設計の ADR(#36 フェーズ0)"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source:
@@ -12,7 +12,8 @@ relations:
     - "../specs/media-ingest.md"
   changes:
     added:
-      - "../adr/media-decoder-backend.md"
+      - type: "adr"
+        path: "../adr/media-decoder-backend.md"
     modified: []
     deleted: []
     renamed: []

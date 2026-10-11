@@ -1,10 +1,10 @@
 ---
-id: "ADR-035pQkRfVwXyZaBcDeFgHjK"
+id: "ADR-035pmRjqxvweesfcw4L90A"
 type: "adr"
 status: "accepted"
 title: "独自 SIMD 算術クレートの基盤に pulp を採用する"
 created: "2026-10-09"
-updated: "2026-10-09"
+updated: "2026-10-12"
 owners: ["scarecrow173"]
 relations:
   source: []

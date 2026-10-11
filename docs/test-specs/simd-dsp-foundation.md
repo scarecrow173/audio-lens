@@ -1,10 +1,10 @@
 ---
-id: "TSPEC-035iTyUiOpAsDfGhJkLzX"
+id: "TSPEC-035iqm9CyhHVBcqennRTlq"
 type: "test-spec"
 status: "proposed"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
@@ -27,8 +27,8 @@ relations:
   derives-from: []
   derived-by: []
   verifies:
-    - "docs/plans/simd-dsp-foundation.md"
     - "docs/adr/simd-arithmetic-pulp.md"
+    - "docs/designs/simd-dsp-foundation.md"
     - "docs/specs/source-localization.md"
   verified-by: []
   references: []
@@ -44,8 +44,8 @@ metadata:
 
 ## Verifies
 
-- `docs/plans/simd-dsp-foundation.md`
 - `docs/adr/simd-arithmetic-pulp.md`
+- `docs/designs/simd-dsp-foundation.md`
 - `docs/specs/source-localization.md`
 
 ## Coverage
