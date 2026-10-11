@@ -31,7 +31,8 @@ relations:
   verifies: []
   verified-by: []
   references: []
-  defers: []
+  defers:
+    - "../discovery/al-math-simd-reduction.md"
   deferred-by: []
 ---
 
