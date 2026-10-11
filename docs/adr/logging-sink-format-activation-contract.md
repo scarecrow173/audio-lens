@@ -18,7 +18,8 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../plans/observability-foundation.md"
   depends-on: []
   blocks: []
   supersedes: []
@@ -33,6 +34,8 @@ relations:
     - "../discovery/observability-foundation-logging-and-profiling.md"
   derived-by:
     - "../designs/observability-foundation.md"
+    - "../tasks/observability-crate.md"
+    - "../tasks/observability-cli-wiring.md"
   verifies: []
   verified-by: []
   references: []

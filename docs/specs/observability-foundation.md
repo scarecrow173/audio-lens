@@ -16,7 +16,9 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../designs/observability-foundation.md"
+    - "../plans/observability-foundation.md"
   depends-on: []
   blocks: []
   supersedes: []
@@ -31,8 +33,10 @@ relations:
     - "../discovery/observability-foundation-logging-and-profiling.md"
   derived-by:
     - "../designs/observability-foundation.md"
+    - "../tasks/observability-criterion-samply.md"
   verifies: []
-  verified-by: []
+  verified-by:
+    - "../test-specs/observability-foundation.md"
   references: []
   defers: []
   deferred-by: []
