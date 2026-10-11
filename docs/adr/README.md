@@ -18,3 +18,4 @@ Directory: `docs/adr`
 | ADR-034yYy6pBGTFj1fMRdqJdg | locate 受理に複数手法の合議を要求する | proposed | [multi-method-locate-consensus.md](./multi-method-locate-consensus.md) |
 | ADR-034DlyK8LKvSfTztL5Bfu5 | 残存課題を責務境界で修正し仕様判断を分離する | proposed | [residual-issue-boundaries.md](./residual-issue-boundaries.md) |
 | ADR-035pmRjqxvweesfcw4L90A | 独自 SIMD 算術クレートの基盤に pulp を採用する | accepted | [simd-arithmetic-pulp.md](./simd-arithmetic-pulp.md) |
+| ADR-z2U7XfOoFCqimI9EpcPc8B | spectral_envelope の fft_size を入口 assert で非ゼロ 2 冪必須とし底上げ規則を維持する | accepted | [spectral-envelope-fft-size-assert.md](./spectral-envelope-fft-size-assert.md) |

@@ -21,6 +21,7 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
+| TSPEC-brMJfBQXA6vJ3f4Vm4UKjR | spectral_envelope の fft_size 契約検証 | proposed | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
 | TSPEC-034z99BMV8hBTVwYrwacBo | 可視化・エクスポート検証 | proposed | [visualization-export.md](./visualization-export.md) |

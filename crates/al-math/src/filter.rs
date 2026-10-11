@@ -80,7 +80,8 @@ fn lower_bin(length: usize, predicate: impl Fn(usize) -> bool) -> usize {
 }
 
 /// 非負周波数の区間平均振幅を log に変換する。exp/log は scalar。
-/// fft_size は 2 のべき乗。bins=0 は空結果を返す。
+/// fft_size は 2 のべき乗(0 は不可)。fft_size が信号長より小さい
+/// 場合は信号長まで拡大する。bins=0 は空結果を返す。
 pub fn spectral_envelope(samples: &[f64], fft_size: usize, bins: usize) -> Vec<f64> {
     dispatch(Envelope {
         samples,
@@ -99,6 +100,11 @@ impl WithSimd for Envelope<'_> {
     type Output = Vec<f64>;
     #[inline(always)]
     fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
+        assert!(
+            self.fft_size.is_power_of_two(),
+            "fft_size must be a non-zero power of two, got {}",
+            self.fft_size
+        );
         if self.bins == 0 {
             return Vec::new();
         }
@@ -169,5 +175,19 @@ mod tests {
                 assert!((a - b).abs() < 1e-10);
             }
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "fft_size must be a non-zero power of two")]
+    fn envelope_panics_on_zero_fft_size() {
+        let input = [0.0; 64];
+        spectral_envelope(&input, 0, 8);
+    }
+
+    #[test]
+    #[should_panic(expected = "fft_size must be a non-zero power of two")]
+    fn envelope_panics_on_non_power_of_two_fft_size() {
+        let input = [0.0; 64];
+        spectral_envelope(&input, 1000, 8);
     }
 }
