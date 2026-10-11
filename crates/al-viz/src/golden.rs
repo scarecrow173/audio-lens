@@ -10,6 +10,8 @@ use std::path::Path;
 /// path. `only` limits the snapshot to a subset of relative path
 /// prefixes (empty = everything).
 pub fn snapshot(root: &Path, only: &[String]) -> io::Result<serde_json::Value> {
+    let span = tracing::info_span!("viz::golden", len = only.len());
+    let _enter = span.enter();
     let mut entries: Vec<(String, String)> = Vec::new();
     collect(root, root, only, &mut entries)?;
     entries.sort();

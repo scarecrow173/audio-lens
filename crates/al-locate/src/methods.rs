@@ -305,6 +305,13 @@ impl FullNcc {
         prepared_template: &PreparedChannel,
         prepared_signal: &PreparedChannel,
     ) -> (MethodEvidence, Option<CoarseSearch>) {
+        let span = tracing::info_span!(
+            "locate::full_ncc",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return (e, None);
         }
@@ -325,6 +332,13 @@ impl LocateMethod for FullNcc {
         "1"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+        let span = tracing::info_span!(
+            "locate::full_ncc",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
@@ -374,6 +388,13 @@ impl LocateMethod for BandNcc {
         "1"
     }
     fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence {
+        let span = tracing::info_span!(
+            "locate::band_ncc",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
@@ -405,6 +426,13 @@ impl LocateMethod for BandNcc {
         prepared_template: &PreparedChannel,
         prepared_signal: &PreparedChannel,
     ) -> MethodEvidence {
+        let span = tracing::info_span!(
+            "locate::band_ncc",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
@@ -433,6 +461,13 @@ impl LocateMethod for GccPhat {
         "1"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+        let span = tracing::info_span!(
+            "locate::gcc_phat",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
@@ -478,6 +513,13 @@ impl LocateMethod for SpectralEnvelope {
         "1"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+        let span = tracing::info_span!(
+            "locate::spectral_envelope",
+            method = self.id(),
+            len_a = template.len(),
+            len_b = signal.len()
+        );
+        let _enter = span.enter();
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }

@@ -9,6 +9,7 @@ al-core.workspace = true
 al-job.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+tracing.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true

@@ -31,6 +31,8 @@ pub fn summary_body(
     produced_products: &[String],
     skipped: &[Skipped],
 ) -> io::Result<serde_json::Value> {
+    let span = tracing::info_span!("viz::summary", len = produced_products.len());
+    let _enter = span.enter();
     let inputs: Vec<serde_json::Value> = reader
         .artifacts("inputs")
         .into_iter()

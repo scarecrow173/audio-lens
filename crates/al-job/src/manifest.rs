@@ -37,6 +37,11 @@ pub struct StageRecord {
     pub artifacts: Vec<ArtifactId>,
     /// Error message when the stage failed.
     pub error: Option<String>,
+    /// Wall-clock duration of the stage's latest execution in
+    /// milliseconds. `None` when the stage has never run — including
+    /// records in manifests written before this field existed.
+    #[serde(default)]
+    pub duration_ms: Option<u64>,
 }
 
 /// Canonical manifest for one job: inputs, configuration, stage records,
@@ -101,6 +106,7 @@ impl Manifest {
                     status: StageStatus::Pending,
                     artifacts: Vec::new(),
                     error: None,
+                    duration_ms: None,
                 })
                 .collect(),
             artifacts,
@@ -251,6 +257,32 @@ mod tests {
         let lineage = manifest.lineage_of(&locate.artifact_id);
         assert_eq!(lineage.len(), 2);
         assert_eq!(lineage[0], locate.artifact_id);
+    }
+
+    #[test]
+    fn manifest_without_duration_ms_loads_as_none() {
+        // Manifests written before `duration_ms` existed have no such
+        // key; they must still load, with the field defaulting to None.
+        let manifest = sample_manifest();
+        let mut json = serde_json::to_value(&manifest).unwrap();
+        for stage in json["stages"].as_array_mut().unwrap() {
+            stage.as_object_mut().unwrap().remove("duration_ms");
+        }
+        let dir = std::env::temp_dir().join(format!("al-test-{}", JobId::new()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join(Manifest::FILE_NAME),
+            serde_json::to_string_pretty(&json).unwrap(),
+        )
+        .unwrap();
+        let loaded = Manifest::load(&dir).unwrap();
+        assert!(
+            loaded
+                .stages
+                .iter()
+                .all(|record| record.duration_ms.is_none())
+        );
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

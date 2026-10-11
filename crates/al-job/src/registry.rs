@@ -79,6 +79,7 @@ mod tests {
                 status: StageStatus::Pending,
                 artifacts: vec![],
                 error: None,
+                duration_ms: None,
             }],
             artifacts: vec![],
         };

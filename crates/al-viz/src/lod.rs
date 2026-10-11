@@ -87,7 +87,14 @@ pub struct Pyramid {
 
 /// Build the pyramid for `inputs/<input_id>` via chunked range reads.
 pub fn build(reader: &DatasetReader, input_id: &str) -> io::Result<Pyramid> {
+    let span = tracing::info_span!(
+        "viz::lod",
+        input_id = %input_id,
+        len = tracing::field::Empty
+    );
+    let _enter = span.enter();
     let frames = reader.audio_frames("inputs", input_id)?;
+    span.record("len", frames);
     if frames == 0 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,

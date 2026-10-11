@@ -52,7 +52,14 @@ pub fn build(
     capture: &str,
     config: &serde_json::Value,
 ) -> io::Result<Timeline> {
+    let span = tracing::info_span!(
+        "viz::timeline",
+        input_id = %capture,
+        len = tracing::field::Empty
+    );
+    let _enter = span.enter();
     let capture_samples = reader.audio_frames("inputs", capture)?;
+    span.record("len", capture_samples);
     // A one-frame read returns the format metadata without touching
     // the bulk of the file.
     let head = reader.read_audio_range("inputs", capture, 0, 1)?;

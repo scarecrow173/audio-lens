@@ -161,6 +161,71 @@ fn failed_stage_preserves_completed_artifacts_and_resume_completes() {
 }
 
 #[test]
+fn duration_ms_is_recorded_and_resume_overwrites_only_rerun_stages() {
+    let dir = temp_dir("duration");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    // A failed stage is timed and recorded just like a completed one;
+    // pending stages stay `None`.
+    trio.b_fail.set(true);
+    assert!(runner.run(&def, &mut trio.stages).is_err());
+    let job_dir = runner.job_dir(&def.job_id);
+    let mut manifest = Manifest::load(&job_dir).unwrap();
+    assert!(
+        manifest
+            .stage(StageKind::Ingest)
+            .unwrap()
+            .duration_ms
+            .is_some()
+    );
+    assert!(
+        manifest
+            .stage(StageKind::Locate)
+            .unwrap()
+            .duration_ms
+            .is_some()
+    );
+    assert_eq!(
+        manifest
+            .stage(StageKind::CheapAnalysis)
+            .unwrap()
+            .duration_ms,
+        None
+    );
+
+    // Sentinel a completed record: resume re-runs only the failed and
+    // pending stages, so the sentinel must survive on Ingest while
+    // Locate receives a fresh measurement.
+    const SENTINEL: u64 = u64::MAX;
+    manifest.stage_mut(StageKind::Ingest).unwrap().duration_ms = Some(SENTINEL);
+    manifest.save(&job_dir).unwrap();
+
+    trio.b_fail.set(false);
+    let manifest = runner.resume(&def, &mut trio.stages).unwrap();
+    assert_eq!(
+        manifest.stage(StageKind::Ingest).unwrap().duration_ms,
+        Some(SENTINEL),
+        "completed stage must keep its recorded duration"
+    );
+    let locate = manifest.stage(StageKind::Locate).unwrap().duration_ms;
+    assert!(
+        locate.is_some() && locate != Some(SENTINEL),
+        "re-run stage must carry a fresh measurement: {locate:?}"
+    );
+    assert!(
+        manifest
+            .stage(StageKind::CheapAnalysis)
+            .unwrap()
+            .duration_ms
+            .is_some()
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn resume_after_full_success_is_a_noop() {
     let dir = temp_dir("noop");
     let runner = StageRunner::new(&dir);

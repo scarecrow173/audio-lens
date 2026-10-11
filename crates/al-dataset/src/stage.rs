@@ -434,7 +434,14 @@ impl Stage for DatasetStage {
         let mut all_lineage = declared_lineage.clone();
         let mut produced = Vec::new();
         for input in &ctx.manifest.inputs {
-            let (lineage, records) = self.materialize_pcm(input, ctx, &mut writer)?;
+            let span = tracing::info_span!(
+                "dataset::write",
+                input_id = %input.input_id,
+                len = tracing::field::Empty
+            );
+            let (lineage, records) =
+                span.in_scope(|| self.materialize_pcm(input, ctx, &mut writer))?;
+            span.record("len", records.len());
             all_lineage.extend(lineage);
             produced.extend(records);
         }
