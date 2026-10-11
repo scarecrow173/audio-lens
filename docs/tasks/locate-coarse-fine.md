@@ -1,10 +1,10 @@
 ---
-id: "TASK-035gHnMnKlJhGfDsAqWe"
+id: "TASK-035gGKtgDKLiTaF31a5GUM"
 type: "task"
 status: "done"
 title: "locate: 帯域キャッシュ + coarse-to-fine 間引き探索"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

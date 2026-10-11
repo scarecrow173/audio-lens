@@ -1,10 +1,10 @@
 ---
-id: "TASK-036bZxCvBnMqWeRtYuIo"
+id: "TASK-036bWOCJcMZThXnoW2Bs93"
 type: "task"
 status: "done"
 title: "既存 WAV/AVI/MP4 を MediaDecoder native バックエンドへ移行(#36 フェーズ1)"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
@@ -16,9 +16,11 @@ relations:
     moved: []
     generated: []
   implements:
+    - "docs/adr/media-decoder-backend.md"
     - "docs/plans/media-format-analysis-extensions.md"
   implemented-by: []
   depends-on:
+    - "docs/adr/media-decoder-backend.md"
     - "docs/tasks/media-decoder-adr.md"
   blocks: []
   supersedes: []
@@ -117,8 +119,8 @@ ADR で決定した `MediaDecoder` トレイトに既存実装を移し、
 
 - 補助 `audit_docs.js --type task --dir docs/tasks --json` は既存文書に 9 件の
   指摘を返した（8 件の ID 形式、`media-decoder-adr.md` の changes.added 型）。
-  本 task の ID `TASK-036bZxCvBnMqWeRtYuIo` も変更前からの ID 形式指摘対象であり、
-  関係参照を壊さないため今回は ID を変更しない。runtime 完了を妨げない文書整備課題。
+  本 task の ID を含むこれらの文書整備課題は、後続の監査修復で正規形式へ
+  更新済み(`TASK-036bWOCJcMZThXnoW2Bs93`)。
 
 ## Verification Results
 
