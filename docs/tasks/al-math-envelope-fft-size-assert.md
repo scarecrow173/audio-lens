@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/spectral-envelope-fft-size.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/spectral-envelope-fft-size-entry-assert.md"
   depends-on:
     - "docs/plans/spectral-envelope-fft-size.md"
   blocks: []
