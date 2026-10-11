@@ -132,10 +132,9 @@ pub struct TriggeredRegion {
     /// Trigger reasons (`candidate:<id>`, `high_residual`,
     /// `low_similarity`, `abnormal_timing`, `manual`, `always_run`).
     pub triggers: Vec<String>,
-    /// Weakest validity among the upstream evidence that selected
-    /// this region. `manual` / `always_run` are independent triggers
-    /// and carry `Valid`; a candidate-selected region keeps the
-    /// event's validity so outputs never out-trust their trigger.
+    /// 選択した upstream evidence の最初の非 Valid 分類を保持する。
+    /// 分類間に深刻度順はない。manual / always_run は独立した Valid
+    /// trigger だが、混在する非 Valid evidence を Valid に昇格させない。
     pub validity: Validity,
     /// Weakest confidence among the selecting evidence (`High` for
     /// `manual` / `always_run`).
@@ -165,10 +164,9 @@ fn event_triggers(e: &CandidateEvent) -> Vec<String> {
     }
 }
 
-/// Weakest of two upstream validity states: `Valid` loses to any
-/// non-`Valid` state — a merged region must not claim more trust
-/// than the least trustworthy evidence that selected it.
-fn weakest_validity(a: Validity, b: Validity) -> Validity {
+/// Validity は失敗理由の分類であり、非 Valid 同士に深刻度順はない。
+/// 最初の非 Valid を保持し、Valid に昇格させない。
+fn first_non_valid(a: Validity, b: Validity) -> Validity {
     if a == Validity::Valid { b } else { a }
 }
 
@@ -231,7 +229,7 @@ pub fn plan_regions(
             && r.start_s <= last.end_s
         {
             last.end_s = last.end_s.max(r.end_s);
-            last.validity = weakest_validity(last.validity, r.validity);
+            last.validity = first_non_valid(last.validity, r.validity);
             last.confidence = last.confidence.min(r.confidence);
             last.has_valid_trigger |= r.has_valid_trigger;
             for t in r.triggers {
@@ -279,6 +277,7 @@ pub(crate) fn corr0(x: &[f64], y: &[f64]) -> f64 {
 /// each record to the mapped validity with an explanation.
 pub(crate) struct Emit<'a> {
     input_id: &'a str,
+    sample_rate: u32,
     region: &'a TriggeredRegion,
     cfg: &'a ExpensiveConfig,
     range: Range,
@@ -288,9 +287,15 @@ pub(crate) struct Emit<'a> {
 }
 
 impl<'a> Emit<'a> {
-    fn new(input_id: &'a str, region: &'a TriggeredRegion, cfg: &'a ExpensiveConfig) -> Self {
+    fn new(
+        input_id: &'a str,
+        region: &'a TriggeredRegion,
+        cfg: &'a ExpensiveConfig,
+        sample_rate: u32,
+    ) -> Self {
         Self {
             input_id,
+            sample_rate,
             region,
             cfg,
             range: Range {
@@ -370,10 +375,48 @@ impl<'a> Emit<'a> {
     ) -> FeatureRecord {
         let mut r = self.push(id, value, unit, conf, val, reason, support);
         r.resolution = Some(Resolution {
+            sample_rate: self.sample_rate,
             window: self.cfg.stft_window as u64,
             hop: self.cfg.stft_hop as u64,
         });
         r
+    }
+
+    /// ペア全体の summary。単一 capture channel の測定とは区別する。
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn push_pair(
+        &self,
+        id: &str,
+        value: f64,
+        unit: &str,
+        conf: Confidence,
+        val: Validity,
+        reason: Option<String>,
+        support: u64,
+    ) -> FeatureRecord {
+        let mut r = self.push(id, value, unit, conf, val, reason, support);
+        r.channels = None;
+        r
+    }
+}
+
+/// スペクトル特徴の未支持レコードにも fine STFT の分解能を保持する。
+pub(crate) fn emit_unsupported_spec(
+    e: &Emit<'_>,
+    records: &mut Vec<FeatureRecord>,
+    ids: &[(&str, &str)],
+    reason: &str,
+) {
+    for &(id, unit) in ids {
+        records.push(e.push_spec(
+            id,
+            f64::NAN,
+            unit,
+            Confidence::High,
+            Validity::InsufficientSupport,
+            Some(reason.into()),
+            0,
+        ));
     }
 }
 
@@ -536,7 +579,7 @@ pub fn analyze_region(
     cfg: &ExpensiveConfig,
 ) -> ExpensiveResult {
     let mut out = ExpensiveResult::default();
-    let e = Emit::new(input_id, region, cfg);
+    let e = Emit::new(input_id, region, cfg, rate);
     // Plan contract: when no `Valid` trigger selected the region the
     // upstream evidence is untrusted, so no estimation runs — every
     // feature is persisted as an invalid observation (NaN scalar,
@@ -620,7 +663,10 @@ pub fn analyze_region(
     let total_power: f64 = mean_power.iter().sum();
     let one_sided_power: f64 = mean_power[..half].iter().sum();
 
-    let segs: Vec<&[f64]> = chans.iter().map(|c| &c[s0..s1.min(c.len())]).collect();
+    let segs: Vec<&[f64]> = chans
+        .iter()
+        .map(|c| &c[s0.min(c.len())..s1.min(c.len())])
+        .collect();
     let ctx = RegionCtx {
         region_name,
         rate,

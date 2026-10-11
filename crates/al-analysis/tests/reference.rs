@@ -136,8 +136,8 @@ fn scalar_value(r: &serde_json::Value) -> f64 {
 #[test]
 fn accepted_alignment_produces_features_residuals_and_dataset() {
     // Capture = embedded 0.5× source at 5000 + low background noise.
-    let source = noise(4_096, 7);
-    let mut capture = noise(20_000, 11);
+    let source = noise(16_384, 7);
+    let mut capture = noise(30_000, 11);
     for v in &mut capture {
         *v *= 0.05;
     }
@@ -206,8 +206,57 @@ fn accepted_alignment_produces_features_residuals_and_dataset() {
         .filter(|a| a.path.starts_with(&pair_prefix))
         .collect();
     assert!(!tensors.is_empty(), "no intermediate tensors persisted");
+    let band_tensor = tensors
+        .iter()
+        .find(|a| a.path.ends_with("channel_0/band_gain"))
+        .expect("persisted band gain tensor");
+    assert_eq!(band_tensor.provenance.params["max_lag_samples"], 1920);
+    assert_eq!(
+        band_tensor.provenance.params["coherence_estimator"],
+        "welch_magnitude_squared"
+    );
+    let name = band_tensor.path.strip_prefix("intermediate/").unwrap();
+    let tensor = reader.open_tensor("intermediate", name).unwrap();
+    assert!(tensor.meta().shape[0] > 0 && tensor.meta().shape[1] > 0);
+    let shape = tensor.meta().shape.clone();
+    let (values, _) = reader
+        .read_tensor("intermediate", name, &[[0, shape[0]], [0, shape[1]]])
+        .unwrap();
+    assert!(
+        values
+            .iter()
+            .any(|v| v.is_finite() && (*v - 0.5).abs() < 0.1)
+    );
+    let m2 = body["records"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| {
+            r["feature_id"] == "ref.band_gain_m2"
+                && r["params"]["polarity"] == "normal"
+                && r["validity"] == "valid"
+        })
+        .expect("supported M2 observation");
+    assert_eq!(m2["algorithm_id"], "reference.band_lag_ls.v1");
+    assert_eq!(m2["params"]["max_lag_samples"], 1920);
+    assert!(
+        body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|r| r["feature_id"] == "ref.band_gain_psd_ratio")
+    );
     for a in tensors {
-        assert_eq!(a.provenance.algorithm_id, "reference.v1", "{}", a.path);
+        assert_eq!(
+            a.provenance.algorithm_id,
+            if a.path.contains("/channel_") {
+                "reference.band_lag_ls.v1"
+            } else {
+                "reference.v1"
+            },
+            "{}",
+            a.path
+        );
         assert_eq!(
             a.provenance.alignment_id.as_deref(),
             Some(aln),
@@ -253,45 +302,23 @@ fn rejected_alignment_persists_invalid_rows_and_completes() {
     let registry = ArtifactRegistry::new(&fx.dir);
     let config = serde_json::json!({});
 
-    // Hand-written rejected locate result at the canonical path.
-    let rel = PathBuf::from("locate")
-        .join(&fx.source_input_id)
-        .join(&fx.capture_input_id)
-        .join("result.json");
-    fs::create_dir_all(fx.dir.join(rel.parent().unwrap())).unwrap();
-    fs::write(
-        fx.dir.join(&rel),
-        serde_json::to_string(&serde_json::json!({
-            "result": {
-                "alignment_id": "aln-rejected",
-                "source_input_id": fx.source_input_id,
-                "capture_input_id": fx.capture_input_id,
-                "source_range": {"start": 0, "end": 0},
-                "capture_range": {"start": 0, "end": 0},
-                "evidence": [],
-                "agreeing_methods": 0,
-                "position_spread": 0,
-                "confidence": "low",
-                "validity": "ambiguous_alignment",
-                "reject_reason": "no consensus",
-                "accepted": false,
-                "algorithm_id": "locate.v1",
-                "algorithm_version": "1",
-                "params": {},
-            }
-        }))
-        .unwrap(),
-    )
-    .unwrap();
-    fx.manifest.register_artifact(ArtifactRecord {
-        artifact_id: al_core::ArtifactId::new(),
-        role: "locate_result".into(),
-        path: rel,
-        produced_by: Some(StageKind::Locate),
-        inputs: vec![],
-        params: serde_json::json!({}),
-    });
+    for rec in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(rec);
+    }
 
+    let alignment_id = fx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "locate_result")
+        .unwrap()
+        .params["alignment_id"]
+        .as_str()
+        .unwrap()
+        .to_string();
     al_analysis::stage::ReferenceAnalysisStage::new()
         .run(&ctx(&fx, &registry, &config))
         .expect("stage must complete on rejected alignment");
@@ -303,11 +330,319 @@ fn rejected_alignment_persists_invalid_rows_and_completes() {
         assert_ne!(r["validity"], "valid", "record {}", r["feature_id"]);
         assert_eq!(
             r["alignment_id"].as_str(),
-            Some("aln-rejected"),
+            Some(alignment_id.as_str()),
             "record {} must reference the issued alignment",
             r["feature_id"]
         );
     }
 
     fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn normalized_alignment_survives_process_boundary() {
+    use al_locate::decode::read_alignment_pcm;
+    use al_locate::result::LocateResult;
+    const CHILD_ENV: &str = "AL_TEST_NORMALIZED_JOB";
+    if let Some(path) = std::env::var_os(CHILD_ENV) {
+        let dir = PathBuf::from(path);
+        let manifest: Manifest =
+            serde_json::from_slice(&fs::read(dir.join("snapshot.json")).unwrap()).unwrap();
+        let source_input_id = manifest.inputs[0].input_id.to_string();
+        let capture_input_id = manifest.inputs[1].input_id.to_string();
+        let fx = Fixture {
+            dir,
+            manifest,
+            source_input_id,
+            capture_input_id,
+        };
+        let registry = ArtifactRegistry::new(&fx.dir);
+        let config =
+            serde_json::json!({"analysis":{"expensive":{"always_run":true,"stft_window":512}}});
+        let artifact = fx
+            .manifest
+            .artifacts
+            .iter()
+            .find(|a| a.role == "locate_result")
+            .unwrap();
+        let body: serde_json::Value =
+            serde_json::from_slice(&fs::read(fx.dir.join(&artifact.path)).unwrap()).unwrap();
+        let result: LocateResult = serde_json::from_value(body["result"].clone()).unwrap();
+        let pcm = read_alignment_pcm(&result, &ctx(&fx, &registry, &config))
+            .unwrap()
+            .unwrap();
+        assert_eq!(pcm.0.params.original_sample_rate, 44100);
+        assert_eq!(pcm.0.params.sample_rate, 48000);
+        assert_eq!(result.source_range.end, 4410);
+        assert_eq!(result.normalized_source_range.end, 4800);
+        assert!(pcm.0.decoded.channel_samples[0].iter().any(|s| *s != 0.0));
+        let expected: Vec<f64> = fs::read(fx.dir.join("expected.f64le"))
+            .unwrap()
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b))
+            .collect();
+        assert_eq!(pcm.0.decoded.channel_samples[0], expected);
+        let records = al_analysis::stage::ReferenceAnalysisStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .unwrap();
+        for record in &records {
+            assert!(record.inputs.contains(&artifact.artifact_id));
+            assert!(record.inputs.contains(&pcm.0.record.artifact_id));
+            assert!(record.inputs.contains(&pcm.1.record.artifact_id));
+        }
+        let reference_body = feature_records(&fx);
+        let resolutions: Vec<_> = reference_body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
+        let gain = scalar(&feature_records(&fx), "ref.gain_ls");
+        assert_eq!(gain["validity"], "valid", "{gain}");
+        assert!((scalar_value(&gain) - 0.5).abs() < 0.02);
+        let records = al_analysis::stage::ExpensiveAnalysisStage::new()
+            .run(&ctx(&fx, &registry, &config))
+            .unwrap();
+        let cap_record = records
+            .iter()
+            .find(|r| {
+                r.role == "expensive_features"
+                    && r.path.to_string_lossy().contains(&fx.capture_input_id)
+            })
+            .unwrap();
+        assert!(cap_record.inputs.contains(&artifact.artifact_id));
+        assert!(cap_record.inputs.contains(&pcm.0.record.artifact_id));
+        assert!(cap_record.inputs.contains(&pcm.1.record.artifact_id));
+        let body: serde_json::Value =
+            serde_json::from_slice(&fs::read(fx.dir.join(&cap_record.path)).unwrap()).unwrap();
+        let resolutions: Vec<_> = body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|r| !r["resolution"].is_null())
+            .collect();
+        assert!(!resolutions.is_empty());
+        for record in resolutions {
+            assert_eq!(
+                record["resolution"]["sample_rate"], 48000,
+                "{}",
+                record["feature_id"]
+            );
+        }
+        let record = body["records"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["feature_id"] == "exp.mix_fit_quality")
+            .unwrap();
+        assert_eq!(record["validity"], "valid", "{record}");
+        let mut inconsistent = result.clone();
+        inconsistent.source_range.end -= 1;
+        assert!(read_alignment_pcm(&inconsistent, &ctx(&fx, &registry, &config)).is_err());
+        inconsistent = result.clone();
+        inconsistent.normalized_source_range.end += 1;
+        assert!(read_alignment_pcm(&inconsistent, &ctx(&fx, &registry, &config)).is_err());
+        fs::remove_file(fx.dir.join(&pcm.0.record.path)).unwrap();
+        assert!(
+            al_analysis::stage::ReferenceAnalysisStage::new()
+                .run(&ctx(&fx, &registry, &config))
+                .is_err()
+        );
+        assert!(
+            al_analysis::stage::ExpensiveAnalysisStage::new()
+                .run(&ctx(&fx, &registry, &config))
+                .is_err()
+        );
+        return;
+    }
+    let source = noise(4410, 314);
+    let mut fx = fixture(&source, &[0.0; 9000]);
+    fx.manifest
+        .artifacts
+        .iter_mut()
+        .find(|a| a.role == "decoded_pcm")
+        .unwrap()
+        .params["sample_rate"] = serde_json::json!(44100);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let input =
+        al_locate::decode::decode_input(&fx.manifest.inputs[0], &ctx(&fx, &registry, &config))
+            .unwrap()
+            .unwrap();
+    let mut prepared = Vec::new();
+    let source_pcm = al_locate::normalize::prepare_input(
+        &input,
+        48000,
+        &mut prepared,
+        &ctx(&fx, &registry, &config),
+    )
+    .unwrap();
+    let mut capture = vec![0.0; 9000];
+    for (i, sample) in source_pcm.decoded.channel_samples[0].iter().enumerate() {
+        capture[1000 + i] = 0.5 * sample;
+    }
+    write_pcm(&fx.dir, "inputs/cap.f64le", &capture);
+    write_pcm(
+        &fx.dir,
+        "expected.f64le",
+        &source_pcm.decoded.channel_samples[0],
+    );
+    for r in prepared {
+        fx.manifest.register_artifact(r);
+    }
+    for r in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    // 元デコード値を変えても、後段比較は永続化した PCM を使う。
+    write_pcm(&fx.dir, "inputs/src.f64le", &[0.0; 4410]);
+    fs::write(
+        fx.dir.join("snapshot.json"),
+        serde_json::to_vec(&fx.manifest).unwrap(),
+    )
+    .unwrap();
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "normalized_alignment_survives_process_boundary",
+            "--nocapture",
+        ])
+        .env(CHILD_ENV, &fx.dir)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "child stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn cross_capture_path_gain_is_job_scoped_and_preserves_pair_features() {
+    let source = noise(16384, 123);
+    let mut bug = vec![0.0; 30000];
+    let mut reference = vec![0.0; 30000];
+    for (i, v) in source.iter().enumerate() {
+        bug[5000 + i] = v * 0.8;
+        reference[5000 + i] = v * 0.4;
+    }
+    let mut fx = fixture(&source, &bug);
+    let mut ref_input = input(InputRole::CaptureReference, fx.dir.join("reference.bin"));
+    ref_input.source_sha256 = Some("dd".repeat(32));
+    let ref_id = ref_input.input_id.clone();
+    let mut inputs = fx.manifest.inputs.clone();
+    inputs.push(ref_input);
+    let old_decoded: Vec<_> = fx
+        .manifest
+        .artifacts
+        .iter()
+        .filter(|a| a.role == "decoded_pcm")
+        .cloned()
+        .collect();
+    fx.manifest = Manifest::new(JobId::new(), inputs, serde_json::json!({}), &[]);
+    for mut a in old_decoded {
+        let id = if a.path.to_string_lossy().contains("src") {
+            &fx.manifest.inputs[0].input_id
+        } else {
+            &fx.manifest.inputs[1].input_id
+        };
+        a.inputs = vec![fx.manifest.input_artifact(id).unwrap()];
+        fx.manifest.register_artifact(a);
+    }
+    write_pcm(&fx.dir, "inputs/reference.f64le", &reference);
+    fx.manifest.register_artifact(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "decoded_pcm".into(),
+        path: "inputs/reference.f64le".into(),
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![fx.manifest.input_artifact(&ref_id).unwrap()],
+        params: serde_json::json!({"sample_rate":48000,"channels":1}),
+    });
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({"analysis":{"reference":{"stft_window":512,"stft_hop":256}}});
+    for r in LocateStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    for r in al_analysis::stage::CheapAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    for r in al_analysis::stage::ReferenceAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap()
+    {
+        fx.manifest.register_artifact(r);
+    }
+    let before = fs::read(fx.dir.join(format!(
+        "analysis/features/reference/{}__{}.json",
+        fx.source_input_id, fx.capture_input_id
+    )))
+    .unwrap();
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap();
+    let rec = recs
+        .iter()
+        .find(|r| r.role == "cross_capture_features")
+        .unwrap();
+    let comparison: al_dataset::types::CaptureComparison =
+        serde_json::from_slice(&fs::read(fx.dir.join(&rec.path)).unwrap()).unwrap();
+    assert_eq!(comparison.reference_capture_id, ref_id.as_str());
+    assert_eq!(comparison.target_capture_id, fx.capture_input_id);
+    assert_eq!(comparison.common_source_ids, [fx.source_input_id.clone()]);
+    assert_eq!(comparison.records[0].validity, al_core::Validity::Valid);
+    assert_eq!(comparison.records[0].input_id, "job");
+    let reader = al_dataset::DatasetReader::open(&fx.dir.join("analysis")).unwrap();
+    let name = format!(
+        "cross_capture/{}__{}/path_gain",
+        ref_id, fx.capture_input_id
+    );
+    let (data, _) = reader
+        .read_tensor("intermediate", &name, &[[0, 3], [1, 4]])
+        .unwrap();
+    assert!(data[..3].iter().all(|r| (r - 2.0).abs() < 0.02), "{data:?}");
+    assert_eq!(&data[6..], &[1.0; 3]);
+    assert_eq!(
+        before,
+        fs::read(fx.dir.join(format!(
+            "analysis/features/reference/{}__{}.json",
+            fx.source_input_id, fx.capture_input_id
+        )))
+        .unwrap()
+    );
+    // locate がない場合もキャプチャ組を消さず、観測不能を保存する。
+    fx.manifest.artifacts.retain(|a| a.role != "locate_result");
+    let recs = al_analysis::stage::ExpensiveAnalysisStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .unwrap();
+    let rec = recs
+        .iter()
+        .find(|r| r.role == "cross_capture_features")
+        .unwrap();
+    let comparison: al_dataset::types::CaptureComparison =
+        serde_json::from_slice(&fs::read(fx.dir.join(&rec.path)).unwrap()).unwrap();
+    assert_eq!(
+        comparison.records[0].validity,
+        al_core::Validity::Unsupported
+    );
+    fs::remove_dir_all(fx.dir).unwrap();
 }

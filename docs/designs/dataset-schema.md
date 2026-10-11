@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "分析データセット設計"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-11"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -112,3 +112,36 @@ spec `../specs/analysis-dataset.md` と ADR
 - [ ] manifest から各成果物の生成経緯を再構成できる
 - [ ] テンソルを全体読み込みなしに部分範囲で読める
 - [ ] スキーマ / アルゴリズムバージョンが別々に管理される
+
+## キャプチャ間経路差の job スコープ
+
+- `features/cross_capture/<reference_capture_id>__<target_capture_id>.json`
+  に `CaptureComparison` を保存する。単一 input や source/capture ペアの
+  観測ではないため job 軸を採用し、record と provenance の `input_id` は
+  `job`、`alignment_id` は null とする。既存 `features/reference` /
+  `features/expensive` のペア観測は変更しない。
+- JSON は `reference_capture_id`、`target_capture_id`、
+  `common_source_ids`、共通の `FeatureRecord` 配列 `records` を持つ。
+  `capture_reference` を基準側に優先し、同一 role の場合は input id 順で
+  全キャプチャの非順序組を1回ずつ出力する。比率の向きは常に target / reference。
+- `cross_capture.path_gain` は両キャプチャに accepted かつ valid な locate が
+  ある同一 source id の `transfer_h` の振幅比を使用する。位相は locate の
+  時刻原点に依存するため集約せず、振幅の経路差に限定する。
+- 大きな周波数列は `intermediate/cross_capture/<組>/path_gain` の
+  チャンクテンソル `[3, fft_size/2+1]` に置き、record の tensor 参照から読む。
+  行は `magnitude_ratio`、`gain_difference_db`、`source_support`。
+  bin k の周波数は `k * sample_rate / fft_size` (DC/Nyquist を含む)。
+- 各 bin の有限かつ正の振幅比をソース間で等重みの中央値に集約する。
+  偶数個は中央2値の平均、dB 差は `20 * log10(median_ratio)`。
+  ゼロ振幅・非有限値・両経路のいずれかの magnitude-squared coherence が
+  0.5 未満の bin は除外する。欠損セルは NaN、support は 0 とし、
+  record の `support_count` は支持された bin 数を示す。
+- rate/FFT size が同じ grid だけを比較し、異なる grid は補間しない。
+  H と coherence は locate の alignment に対応する成果物を参照する。
+  共通ソースなしは `unsupported`、共通ソースがあっても H/coherence が欠落、
+  grid 不一致、支持 bin なしは `insufficient_support` として保存する。
+  比較未実施・計測不能を経路差ゼロと同一視しない。
+- algorithm は `cross_capture.path_gain.v1`。median、行定義、rate、FFT size、
+  使用可能ソース数を params に、locate artifact id と H/coherence の
+  dataset-relative path を lineage / provenance.parents に記録する。
+  confidence は寄与した locate の最弱値と Medium の最小値に制限する。

@@ -6,6 +6,8 @@
 //! `al_locate::dsp`, decoded input comes from `al_locate::decode`.
 
 pub mod avsync;
+mod band_gain;
+mod calibration;
 pub mod cheap;
 pub mod events;
 pub mod expensive;
@@ -14,3 +16,5 @@ pub mod reference;
 pub mod session;
 pub mod stage;
 pub mod stft;
+
+pub mod video;

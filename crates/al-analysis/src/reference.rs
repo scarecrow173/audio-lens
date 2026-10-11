@@ -30,6 +30,12 @@ pub struct ReferenceConfig {
     pub lag_hop: usize,
     /// Maximum per-window lag search (samples).
     pub lag_max: usize,
+    /// 帯域推定窓 (秒)。実レートから標本数へ変換する。
+    pub band_window_s: f64,
+    /// 帯域推定 hop (秒)。
+    pub band_hop_s: f64,
+    /// 帯域ラグの最大絶対値 (秒)。
+    pub band_max_lag_s: f64,
     /// Gain trajectory window (samples).
     pub gain_window: usize,
     /// Mixer ridge parameter.
@@ -44,6 +50,9 @@ impl Default for ReferenceConfig {
             lag_window: 8192,
             lag_hop: 4096,
             lag_max: 512,
+            band_window_s: 0.1,
+            band_hop_s: 0.05,
+            band_max_lag_s: 0.04,
             gain_window: 4096,
             ridge: 1e-6,
         }
@@ -55,6 +64,18 @@ impl ReferenceConfig {
     pub fn from_job(config: &serde_json::Value) -> Self {
         let c = &config["analysis"]["reference"];
         let mut cfg = Self::default();
+        for (key, dest) in [
+            ("band_window_s", &mut cfg.band_window_s),
+            ("band_hop_s", &mut cfg.band_hop_s),
+            ("band_max_lag_s", &mut cfg.band_max_lag_s),
+        ] {
+            if let Some(v) = c[key]
+                .as_f64()
+                .filter(|v| v.is_finite() && *v > 0.0 && *v <= 1.0)
+            {
+                *dest = v;
+            }
+        }
         if let Some(v) = c["stft_window"].as_u64() {
             cfg.stft_window = v as usize;
         }
@@ -158,7 +179,7 @@ fn local_lag(x: &[f64], y: &[f64], max_lag: usize) -> (isize, f64, f64) {
     (best.0, best.1, width)
 }
 
-fn matrix_to_tensor(path: String, m: &[Vec<f64>]) -> NamedTensor {
+pub(crate) fn matrix_to_tensor(path: String, m: &[Vec<f64>]) -> NamedTensor {
     let rows = m.len() as u64;
     let cols = m.first().map_or(0, |r| r.len()) as u64;
     let mut data = Vec::with_capacity(m.iter().map(Vec::len).sum());
@@ -259,7 +280,7 @@ pub fn analyze_pair(
         }
     }
     let lag_rb =
-        rb(ResolutionClass::Broad100ms).resolution(cfg.lag_window as u64, cfg.lag_hop as u64);
+        rb(ResolutionClass::Broad100ms).resolution(cfg.lag_window as u64, cfg.lag_hop as u64, rate);
     if let Some(s) = robust_summary(&lags) {
         let lag_conf = propagate_confidence(
             up_conf,
@@ -387,25 +408,6 @@ pub fn analyze_pair(
     );
     g.alignment_id = Some(alignment_id.to_string());
     out.records.push(g);
-    // 400 Hz gain: bandpass both around 400 Hz then LS.
-    if n >= 1024 {
-        let (lo, hi) = (350.0, 450.0);
-        let xs = bandpass(src_mono, rate, lo, hi);
-        let ys = bandpass(cap_mono, rate, lo, hi);
-        let mut g4 = g_rb.scalar(
-            "ref.gain_400hz",
-            ls_gain(&xs, &ys),
-            "ratio",
-            None,
-            up_conf,
-            up_val,
-            None,
-            n as u64,
-        );
-        g4.alignment_id = Some(alignment_id.to_string());
-        g4.params = serde_json::json!({"band": [lo, hi]});
-        out.records.push(g4);
-    }
     // Segment RMS ratio + g(t) trajectory + src-level→gain relation.
     let ratio = rms(cap_mono) / rms(src_mono).max(1e-12);
     let mut rr = g_rb.scalar(
@@ -622,38 +624,20 @@ pub fn analyze_pair(
         })
         .collect();
     out.tensors.push(matrix_to_tensor(
-        format!("intermediate/{pair}/band_gain_m2"),
+        format!("intermediate/{pair}/band_gain_psd_ratio"),
         &[
             bands.iter().map(|b| (b.0 + b.1) / 2.0).collect::<Vec<_>>(),
             band_gains.clone(),
             band_coh.clone(),
         ],
     ));
-    let g400 = {
-        let b = (400.0 / bin_hz) as usize;
-        let lo = b.saturating_sub(2);
-        let hi = (b + 3).min(half);
-        let s: f64 = mean_psd_s[lo..hi].iter().sum();
-        let c: f64 = mean_psd_c[lo..hi].iter().sum();
-        if s > 0.0 { (c / s).sqrt() } else { f64::NAN }
-    };
-    let m2_valid = band_gains.iter().filter(|v| v.is_finite()).count() >= 4;
     for (i, ((&g, &coh), &(lo, hi))) in band_gains.iter().zip(&band_coh).zip(&bands).enumerate() {
         let mut r = rb(ResolutionClass::Segment).scalar(
-            "ref.band_gain_m2",
+            "ref.band_gain_psd_ratio",
             g,
             "ratio",
             None,
-            propagate_confidence(
-                up_conf,
-                if coh > 0.5 {
-                    Confidence::High
-                } else if coh > 0.2 {
-                    Confidence::Medium
-                } else {
-                    Confidence::Low
-                },
-            ),
+            propagate_confidence(up_conf, Confidence::Low),
             if !g.is_finite() {
                 Validity::SilenceInsufficientEnergy
             } else if coh < 0.2 {
@@ -661,30 +645,15 @@ pub fn analyze_pair(
             } else {
                 up_val
             },
-            None,
+            (coh < 0.2).then(|| "secondary PSD evidence: low coherence".into()),
             frames as u64,
         );
         r.alignment_id = Some(alignment_id.to_string());
         r.freq_range = Some(al_dataset::types::Range { start: lo, end: hi });
-        r.reference = Some(g400);
-        r.delta = Some(al_dataset::types::Delta {
-            difference: if g.is_finite() && g400.is_finite() {
-                Some(g - g400)
-            } else {
-                None
-            },
-            ratio: if g.is_finite() && g400.is_finite() && g400 != 0.0 {
-                Some(g / g400)
-            } else {
-                None
-            },
-        });
-        r.params = serde_json::json!({"band_index": i, "band_coherence": coh});
+        r.params = serde_json::json!({"band_index":i,"band_coherence":coh,"estimator":"sqrt_psd_ratio","secondary_evidence":true});
         out.records.push(r);
     }
-    if !m2_valid {
-        // Coverage flag already handled row-by-row; nothing more.
-    }
+    crate::band_gain::analyze(pair, alignment_id, src, cfg, &mut out);
     // PSD ratio tensor (secondary evidence).
     let psd_ratio: Vec<f64> = mean_psd_s
         .iter()
@@ -986,7 +955,7 @@ pub fn analyze_pair(
     if !os.is_empty() && !oc.is_empty() {
         let offset = oc[0] as f64 - os[0] as f64;
         let mut r = rb(ResolutionClass::Mid20ms)
-            .resolution(lw as u64, lw as u64)
+            .resolution(lw as u64, lw as u64, rate)
             .scalar(
                 "ref.transient_onset_offset_ms",
                 offset * lw as f64 / rate as f64 * 1000.0,

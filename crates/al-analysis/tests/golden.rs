@@ -6,6 +6,11 @@
 //! `features/reference/<src>__<cap>.json` の feature record を
 //! 許容誤差付きで検証する。
 //!
+//! ingest を省略し decoded_pcm を直接登録する合成 fixture。
+//! src.bin / cap.bin は実在する入力を指さず、source_sha256 の aa/bb は
+//! 入力識別用のダミー値で、PCM や原ファイルの SHA-256 ではない。
+//! 来歴の実ファイル検証は ingest 結合テストが担当する。
+//!
 //! ケース一覧(spec `validation-strategy.md` の reference 行列):
 //! - scalar gain / band EQ / phase(all-pass) / fixed delay / jitter /
 //!   SRC time-scale / polarity / channel matrix mix / low-coherence
@@ -29,11 +34,12 @@ use al_locate::stage::LocateStage;
 use al_testkit::expect::{Tolerance, expect_between, expect_close, expect_true};
 use al_testkit::media::pcm_f64le;
 use al_testkit::signal::{self, Biquad};
+use al_testkit::temp::TempDir;
 
 const RATE: u32 = 48_000;
 
 struct Fixture {
-    dir: PathBuf,
+    dir: TempDir,
     manifest: Manifest,
     config: serde_json::Value,
     source_id: String,
@@ -54,8 +60,7 @@ fn fixture(
     capture_channels: &[Vec<f64>],
     config: serde_json::Value,
 ) -> Fixture {
-    let dir = std::env::temp_dir().join(format!("al-ref-golden-{tag}-{}", JobId::new()));
-    fs::create_dir_all(&dir).unwrap();
+    let dir = TempDir::new(&format!("al-ref-golden-{tag}"));
 
     let mut src_input = input(InputRole::SourceAsset, dir.join("src.bin"));
     let mut cap_input = input(InputRole::CaptureBug, dir.join("cap.bin"));
@@ -114,7 +119,7 @@ fn ctx<'a>(fx: &'a Fixture, registry: &'a ArtifactRegistry) -> StageContext<'a> 
 /// locate → (register) → reference analysis → persisted feature
 /// records + locate result body を返す。
 fn run(fx: &mut Fixture) -> (serde_json::Value, serde_json::Value) {
-    let registry = ArtifactRegistry::new(&fx.dir);
+    let registry = ArtifactRegistry::new(fx.dir.as_ref());
     for rec in LocateStage::new().run(&ctx(fx, &registry)).expect("locate") {
         fx.manifest.register_artifact(rec);
     }
@@ -173,6 +178,11 @@ fn scalar(r: &serde_json::Value) -> f64 {
     r["value"]["scalar"].as_f64().expect("scalar value")
 }
 
+// 帯域推定の空の極性群だけは unavailable (JSON null) を保持する。
+fn band_scalar(r: &serde_json::Value) -> f64 {
+    r["value"]["scalar"].as_f64().unwrap_or(f64::NAN)
+}
+
 /// ベッドノイズ上に `content` を `embed_at` へ埋め込んだ capture。
 fn capture_with(content: &[f64], embed_at: usize, bed_seed: u64) -> Vec<f64> {
     let mut cap = signal::noise(embed_at + content.len() + 2_048, bed_seed, 0.02);
@@ -209,13 +219,12 @@ fn case_scalar_gain() {
         scalar(record(&body, "ref.rms_ratio")),
         Tolerance::abs_rel(0.03, 0.1),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 帯域別 EQ ====
 #[test]
 fn case_band_eq() {
-    let source = signal::noise(8_192, 13, 1.0);
+    let source = signal::noise(16_384, 13, 1.0);
     // 4 kHz ピーキング +9 dB
     let eq = Biquad::peaking(RATE, 4_000.0, 9.0, 1.4);
     let cap_body = eq.apply(&source);
@@ -223,7 +232,11 @@ fn case_band_eq() {
     let mut fx = mono_fixture("band-eq", source, capture, serde_json::json!({}));
     let (body, _) = run(&mut fx);
 
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。支持された群の振幅を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["value"]["scalar"].as_f64().is_some())
+        .collect();
     assert!(!bands.is_empty());
     // 4 kHz を含む band: ゲインが持ち上がる
     let boost = bands
@@ -233,7 +246,7 @@ fn case_band_eq() {
                 && r["freq_range"]["end"].as_f64().unwrap_or(0.0) >= 4_000.0
         })
         .expect("band containing 4 kHz");
-    expect_between("boosted band gain", 1.3, 6.0, scalar(boost));
+    expect_between("boosted band gain", 1.3, 6.0, scalar(boost).abs());
     // 遠い帯域(200 Hz 前後)はほぼ 1.0
     let flat = bands
         .iter()
@@ -245,16 +258,15 @@ fn case_band_eq() {
     expect_close(
         "flat band gain",
         1.0,
-        scalar(flat),
+        scalar(flat).abs(),
         Tolerance::abs_rel(0.15, 0.2),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 位相 / all-pass ====
 #[test]
 fn case_phase_allpass() {
-    let source = signal::noise(8_192, 19, 1.0);
+    let source = signal::noise(16_384, 19, 1.0);
     // 1次 all-pass 2段: 位相だけが回る。エネルギーと帯域ゲインは不変。
     let ap = Biquad::allpass(0.6);
     let cap_body = ap.apply(&ap.apply(&source));
@@ -270,10 +282,14 @@ fn case_phase_allpass() {
         Tolerance::abs_rel(0.1, 0.15),
     );
     // 帯域ゲイン中央値もほぼ 1.0
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。通常極性の代表値を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["params"]["polarity"] == "normal")
+        .collect();
     let mut gs: Vec<f64> = bands
         .iter()
-        .map(|r| scalar(r))
+        .map(|r| band_scalar(r))
         .filter(|g| g.is_finite())
         .collect();
     gs.sort_by(|a, b| a.total_cmp(b));
@@ -284,7 +300,6 @@ fn case_phase_allpass() {
         median,
         Tolerance::abs_rel(0.2, 0.25),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 固定遅延 ====
@@ -319,7 +334,6 @@ fn case_fixed_delay() {
             scalar(record(&body, "ref.similarity_fullband"))
         ),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ジッタ遅延 ====
@@ -352,7 +366,6 @@ fn case_jitter_delay() {
             scalar(record(&body, "ref.lag_p95"))
         ),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== サンプルレート不一致 / 時間伸縮ドリフト ====
@@ -383,7 +396,6 @@ fn case_src_time_scale() {
         spread > 8.0,
         format!("lag spread {spread}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 極性反転 ====
@@ -406,7 +418,6 @@ fn case_polarity_inversion() {
         scalar(record(&body, "ref.gain_ls")),
         Tolerance::abs_rel(0.1, 0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== チャンネル入れ替え / 行列ミックス ====
@@ -453,7 +464,6 @@ fn case_channel_swap_matrix() {
         m[1][1].as_f64().unwrap(),
         Tolerance::abs(0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 低コヒーレンス加算ノイズ ====
@@ -481,7 +491,6 @@ fn case_added_noise() {
         scalar(record(&body, "ref.gain_ls")),
         Tolerance::abs_rel(0.1, 0.15),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== クリッピング / リミッタ ====
@@ -499,13 +508,12 @@ fn case_clipping() {
         0.98,
         scalar(record(&body, "ref.similarity_fullband")),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 既知遅延のコムフィルタ ====
 #[test]
 fn case_comb_filter() {
-    let source = signal::noise(8_192, 107, 1.0);
+    let source = signal::noise(16_384, 107, 1.0);
     let cap_body = signal::comb(&source, 64, 0.6);
     let capture = capture_with(&cap_body, 4_000, 109);
     let mut fx = mono_fixture("comb", source, capture, serde_json::json!({}));
@@ -518,10 +526,14 @@ fn case_comb_filter() {
         Tolerance::abs(8.0),
     );
     // コムリップルで帯域ゲインにばらつきが出る
-    let bands = records_with(&body, "ref.band_gain_m2");
+    // LS の空の極性群は unavailable。通常極性の代表値を比較する。
+    let bands: Vec<_> = records_with(&body, "ref.band_gain_m2")
+        .into_iter()
+        .filter(|r| r["params"]["polarity"] == "normal")
+        .collect();
     let gs: Vec<f64> = bands
         .iter()
-        .map(|r| scalar(r))
+        .map(|r| band_scalar(r))
         .filter(|g| g.is_finite())
         .collect();
     let (lo, hi) = (
@@ -533,7 +545,6 @@ fn case_comb_filter() {
         hi / lo.max(1e-9) > 1.15,
         format!("band gains {lo}..{hi}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 既知遅延のエコー ====
@@ -557,7 +568,6 @@ fn case_echo() {
         0.97,
         scalar(record(&body, "ref.similarity_fullband")),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== 意図的な SRC エイリアス / イメージ ====
@@ -611,7 +621,6 @@ fn case_src_alias_image() {
         })
         .expect("band containing 1 kHz");
     assert_eq!(mid["validity"], "valid", "1k band: {mid}");
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ドロップしたブロック(バッファアンダーラン = 無音化)====
@@ -636,7 +645,6 @@ fn case_dropped_block_silence() {
         scalar(record(&body, "ref.lag_step_candidates")),
         Tolerance::abs(0.5),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ドロップしたブロック(内容が本当に欠落 = lag ステップ)====
@@ -661,7 +669,6 @@ fn case_dropped_block_step() {
         p95 - p05 > 128.0,
         format!("lag p05={p05} p95={p95}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== バッファ反復 ====
@@ -685,7 +692,6 @@ fn case_repeated_buffer() {
         p95 - p05 > 128.0,
         format!("lag p05={p05} p95={p95}"),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== スタックサンプル ====
@@ -709,7 +715,6 @@ fn case_stuck_samples() {
         scalar(record(&body, "ref.lag_step_candidates")),
         Tolerance::abs(0.5),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 非コヒーレント PSD 比の高域リフト ====
@@ -761,12 +766,11 @@ fn pinned_noncoherent_psd_lift_not_valid_eq() {
             format!(
                 "band {:?} gain {} reported {:?}",
                 r["freq_range"],
-                scalar(r),
+                band_scalar(r),
                 r["validity"]
             ),
         );
     }
-    fs::remove_dir_all(&fx.dir).ok();
 }
 
 // ==== ピン留め: 低コヒーレンス時の optimal-lag 水増し ====
@@ -791,5 +795,4 @@ fn pinned_low_coherence_no_inflated_lag() {
         lag["validity"] != "valid",
         format!("lag_median validity {}", lag["validity"]),
     );
-    fs::remove_dir_all(&fx.dir).ok();
 }

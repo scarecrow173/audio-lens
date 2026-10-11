@@ -100,6 +100,13 @@ fn ingest_wav_produces_pcm_and_metadata_artifacts() {
     assert_eq!(meta["audio"]["sample_rate"], 48000);
     assert_eq!(meta["audio"]["channels"], 2);
     assert_eq!(meta["audio"]["source_hash"].as_str().unwrap().len(), 64);
+    assert_eq!(meta["decoder"]["backend"], "native");
+    assert_eq!(meta["decoder"]["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(meta["decoder"]["source_hash"], meta["audio"]["source_hash"]);
+    assert_eq!(meta["decoder"]["fallback"], false);
+    assert_eq!(meta["decoder"]["attempts"][0]["executed"], true);
+    assert_eq!(pcm.params["decoder"], meta["decoder"]);
+    assert_eq!(meta_record.params["decoder"], meta["decoder"]);
     // Dictionary provenance (version + content hash) is recorded.
     assert_eq!(meta["dictionary"]["sha256"].as_str().unwrap().len(), 64);
     // The dictionary annotates, never alters raw measurements.
@@ -464,15 +471,14 @@ fn avi_with_undecodable_audio_still_ingests_observations() {
         serde_json::from_str(&std::fs::read_to_string(meta_path).unwrap()).unwrap();
     assert_eq!(meta["container"], "avi");
     assert!(meta["audio"].is_null());
+    assert_eq!(meta["source_hash"], al_core::sha256_hex(&avi_bytes));
     // Timing observations persist even without decodable audio.
     assert_eq!(meta["av_timing"].as_array().unwrap().len(), 2);
     // The absence is recorded explicitly.
     let integrity = meta["integrity"].as_array().expect("integrity array");
-    assert!(
-        integrity
-            .iter()
-            .any(|o| o["kind"] == "audio_decode_unavailable")
-    );
+    assert!(integrity.iter().any(|o| o["kind"] == "decode_unavailable"
+        && o["detail"]["kind"] == "capability"
+        && o["detail"]["media_kind"] == "audio"));
 
     std::fs::remove_dir_all(&dir).ok();
     std::fs::remove_dir_all(&job_dir).ok();

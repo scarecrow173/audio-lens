@@ -236,6 +236,12 @@ pub struct Mp4Facts {
 pub struct Mp4Media {
     /// Persisted container facts (`mp4` section of `metadata.json`).
     pub facts: Mp4Facts,
+    /// Probe で取得した既存 PCM 抽出能力（track order index）。
+    pub pcm_tracks: Vec<u32>,
+    /// 実際に PCM を抽出できた track。
+    pub audio_stream: Option<u32>,
+    /// 元 sample table の packet 長。
+    pub packet_lengths: Vec<Vec<u32>>,
     /// PCM extracted from the first PCM-decodable `soun` sample entry,
     /// `None` when every audio track is compressed or there is no
     /// audio track at all. `None` is not an error — it is the partial
@@ -528,6 +534,9 @@ struct ChunkMap {
 
 /// Expand `stsc` into a per-chunk (samples_per_chunk, sd_index) vector.
 fn chunk_samples(stsc: &[(u32, u32, u32)], chunks: usize) -> Result<Vec<(u32, u32)>, MediaError> {
+    if chunks == 0 && stsc.is_empty() {
+        return Ok(Vec::new());
+    }
     if stsc.is_empty() {
         return Err(MediaError::malformed("stsc has no entries"));
     }
@@ -539,7 +548,7 @@ fn chunk_samples(stsc: &[(u32, u32, u32)], chunks: usize) -> Result<Vec<(u32, u3
     let mut out = Vec::with_capacity(chunks);
     for (i, &(first, spc, sd)) in stsc.iter().enumerate() {
         let next_first = stsc.get(i + 1).map(|e| e.0).unwrap_or(chunks as u32 + 1);
-        if first == 0 || next_first <= first {
+        if first == 0 || first as usize > chunks || next_first <= first || spc == 0 || sd == 0 {
             return Err(MediaError::malformed(
                 "stsc first_chunk values are not ascending",
             ));
@@ -582,6 +591,20 @@ fn build_chunk_map(table: &SampleTable) -> Result<ChunkMap, MediaError> {
         ));
     }
     Ok(ChunkMap { samples })
+}
+
+fn audio_unavailable(
+    kind: crate::decoder::UnavailableKind,
+    detail: serde_json::Value,
+) -> IntegrityObservation {
+    let failure = crate::decoder::Unavailable {
+        kind,
+        reason: detail["reason"]
+            .as_str()
+            .expect("parser supplies reason")
+            .into(),
+    };
+    IntegrityObservation::decode_unavailable("audio", &failure, detail)
 }
 
 /// Parse a sound sample entry body (fields after the 8-byte
@@ -716,6 +739,21 @@ fn pcm_layout(entry: &SoundEntry) -> Option<PcmLayout> {
     }
 }
 
+fn pcm_sample_width(layout: &PcmLayout) -> Result<usize, MediaError> {
+    match (layout.float, layout.bits) {
+        (true, 32) => Ok(4),
+        (true, 64) => Ok(8),
+        (false, 8) => Ok(1),
+        (false, 16) => Ok(2),
+        (false, 24) => Ok(3),
+        (false, 32) => Ok(4),
+        (float, bits) => Err(MediaError::input_unavailable(format!(
+            "unsupported PCM width {}-bit float={float}",
+            bits
+        ))),
+    }
+}
+
 /// Decode raw PCM bytes to integer-scale `f64` under `layout`, keeping
 /// the WAV pre-normalization contract: unsigned input is offset to a
 /// signed integer scale (u8 → −128..127 like WAV `PcmU8`; wider
@@ -725,24 +763,15 @@ fn decode_pcm_bytes(
     layout: &PcmLayout,
     data: &[u8],
 ) -> Result<(Vec<f64>, SampleFormat), MediaError> {
-    let width = match (layout.float, layout.bits) {
-        (true, 32) => 4,
-        (true, 64) => 8,
-        (false, 8) => 1,
-        (false, 16) => 2,
-        (false, 24) => 3,
-        (false, 32) => 4,
-        (float, bits) => {
-            return Err(MediaError::input_unavailable(format!(
-                "unsupported PCM width {}-bit float={float}",
-                bits
-            )));
-        }
-    };
+    let width = pcm_sample_width(layout)?;
     if !data.len().is_multiple_of(width) {
-        return Err(MediaError::input_unavailable(
-            "PCM sample data ends mid-sample",
-        ));
+        return Err(MediaError::malformed("PCM sample data ends mid-sample"));
+    }
+    if !data
+        .len()
+        .is_multiple_of(width * usize::from(layout.channels))
+    {
+        return Err(MediaError::malformed("PCM sample data ends mid-frame"));
     }
     let signed_int = |raw: u64, bits: u16| -> f64 {
         let shift = 64 - bits;
@@ -815,7 +844,6 @@ fn pcm_codec_name(layout: &PcmLayout, format: SampleFormat) -> String {
 /// order, concatenated — the PCM sample stream.
 fn extract_sample_bytes(data: &[u8], map: &ChunkMap, sd_index: u32) -> Result<Vec<u8>, MediaError> {
     let mut out = Vec::new();
-    let mut total: u64 = 0;
     for &(offset, size, sd) in &map.samples {
         if sd != sd_index {
             continue;
@@ -823,21 +851,9 @@ fn extract_sample_bytes(data: &[u8], map: &ChunkMap, sd_index: u32) -> Result<Ve
         let end = offset
             .checked_add(u64::from(size))
             .ok_or_else(|| MediaError::malformed("sample offset overflows"))?;
-        // Real PCM samples are disjoint ranges of the same file, so a
-        // declared total above the file length can only come from
-        // overlapping/corrupt tables — reject before the output
-        // buffer grows without bound.
-        total = total
-            .checked_add(u64::from(size))
-            .ok_or_else(|| MediaError::malformed("sample byte total overflows"))?;
-        if total > data.len() as u64 {
-            return Err(MediaError::malformed(
-                "declared sample bytes exceed file length",
-            ));
-        }
         let body = data
             .get(offset as usize..end as usize)
-            .ok_or_else(|| MediaError::input_unavailable("sample extends past end of file"))?;
+            .ok_or_else(|| MediaError::malformed("sample extends past end of file"))?;
         out.extend_from_slice(body);
     }
     Ok(out)
@@ -973,6 +989,32 @@ fn parse_stbl(
                 return Err(MediaError::malformed("stss index outside sample range"));
             }
         }
+        // サンプル参照は codec 能力と無関係なコンテナ構造の責務。
+        // probe/direct decode とも同じ境界で拒否する。
+        let map = build_chunk_map(&table)?;
+        let mut total = 0u64;
+        for &(offset, size, sd) in &map.samples {
+            // codec 能力に依らず、破損テーブルによる過大な出力を拒否する。
+            total = total
+                .checked_add(u64::from(size))
+                .ok_or_else(|| MediaError::malformed("sample byte total overflows"))?;
+            if total > data.len() as u64 {
+                return Err(MediaError::malformed(
+                    "declared sample bytes exceed file length",
+                ));
+            }
+            if sd as usize > trak.entry_formats.len() {
+                return Err(MediaError::malformed(
+                    "stsc sample description index outside stsd",
+                ));
+            }
+            if offset
+                .checked_add(u64::from(size))
+                .is_none_or(|end| end > data.len() as u64)
+            {
+                return Err(MediaError::malformed("sample extends past end of file"));
+            }
+        }
         trak.track.sample_count = table.sizes.len() as u64;
         trak.table = table;
         trak.has_table = true;
@@ -1100,6 +1142,14 @@ fn parse_trak(
 /// integrity observation. Structural corruption stays `Malformed`;
 /// fragmented MP4 is `InputUnavailable` (explicitly unsupported).
 pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
+    parse_mp4(data, true)
+}
+
+pub(crate) fn probe_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
+    parse_mp4(data, false)
+}
+
+fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
     if data.len() < 8 || &data[4..8] != b"ftyp" {
         return Err(MediaError::input_unavailable(
             "not an ISO-BMFF file (no leading ftyp box)",
@@ -1207,10 +1257,22 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
     // PCM extraction: the first PCM-decodable soun sample entry wins
     // (matching AVI's first-auds rule). Undecodable soun entries are
     // integrity observations, never stage failures.
+    let pcm_tracks = traks
+        .iter()
+        .enumerate()
+        .filter(|(_, t)| {
+            t.sound.iter().find_map(pcm_layout).is_some_and(|layout| {
+                layout.channels > 0 && layout.sample_rate > 0 && pcm_sample_width(&layout).is_ok()
+            })
+        })
+        .map(|(i, _)| i as u32)
+        .collect();
+    let packet_lengths = traks.iter().map(|t| t.table.sizes.clone()).collect();
+    let mut audio_stream = None;
     let mut audio = None;
     let mut integrity = Vec::new();
     for (ti, trak) in traks.iter().enumerate() {
-        if &trak.handler != b"soun" {
+        if &trak.handler != b"soun" || !extract_pcm {
             continue;
         }
         if audio.is_some() {
@@ -1218,14 +1280,11 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
             // fact they were not decoded is still an observation so
             // every undecoded entry leaves a record.
             if !trak.sound.is_empty() {
-                integrity.push(IntegrityObservation {
-                    kind: "decode/input unavailable".into(),
-                    detail: serde_json::json!({
+                integrity.push(audio_unavailable(crate::decoder::UnavailableKind::Capability, serde_json::json!({
                         "track_index": ti as u32,
                         "handler": "soun",
                         "reason": "secondary soun track; first PCM-decodable track already selected",
-                    }),
-                });
+                    })));
             }
             continue;
         }
@@ -1240,52 +1299,53 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
                 .first()
                 .map(fourcc_text)
                 .unwrap_or_default();
-            integrity.push(IntegrityObservation {
-                kind: "decode/input unavailable".into(),
-                detail: serde_json::json!({
+            integrity.push(audio_unavailable(
+                crate::decoder::UnavailableKind::Capability,
+                serde_json::json!({
                     "track_index": ti as u32,
                     "handler": "soun",
                     "codec": codec,
                     "reason": "compressed or unsupported audio codec is not decoded",
                 }),
-            });
+            ));
             continue;
         };
         if !trak.has_table {
             // PCM entry but nothing to extract — an observation, not
             // corruption (an empty track is legal).
-            integrity.push(IntegrityObservation {
-                kind: "decode/input unavailable".into(),
-                detail: serde_json::json!({
+            integrity.push(audio_unavailable(
+                crate::decoder::UnavailableKind::Capability,
+                serde_json::json!({
                     "track_index": ti as u32,
                     "handler": "soun",
                     "codec": fourcc_text(&entry.format),
                     "reason": "PCM sample entry has no sample table",
                 }),
-            });
+            ));
             continue;
         }
         if layout.channels == 0 || layout.sample_rate == 0 {
-            integrity.push(IntegrityObservation {
-                kind: "decode/input unavailable".into(),
-                detail: serde_json::json!({
+            integrity.push(audio_unavailable(
+                crate::decoder::UnavailableKind::Malformed,
+                serde_json::json!({
                     "track_index": ti as u32,
                     "handler": "soun",
                     "codec": fourcc_text(&entry.format),
                     "reason": "PCM entry declares zero channels or sample rate",
                 }),
-            });
+            ));
             continue;
         }
         // A decodable layout can still fail at the data layer
         // (unsupported width, mid-sample truncation): that is a
         // decode/input observation, while structural table corruption
         // stays Malformed — the same boundary as compressed tracks.
-        let extracted = build_chunk_map(&trak.table)
-            .and_then(|map| extract_sample_bytes(data, &map, sd_index))
-            .and_then(|bytes| decode_pcm_bytes(&layout, &bytes));
+        let map = build_chunk_map(&trak.table)?;
+        let bytes = extract_sample_bytes(data, &map, sd_index)?;
+        let extracted = decode_pcm_bytes(&layout, &bytes);
         match extracted {
             Ok((samples, sample_format)) => {
+                audio_stream = Some(ti as u32);
                 audio = Some(DecodedAudio {
                     samples,
                     channels: layout.channels,
@@ -1295,23 +1355,25 @@ pub fn decode_mp4(data: &[u8]) -> Result<Mp4Media, MediaError> {
                     codec: pcm_codec_name(&layout, sample_format),
                 });
             }
-            Err(MediaError::InputUnavailable { reason }) => {
-                integrity.push(IntegrityObservation {
-                    kind: "decode/input unavailable".into(),
-                    detail: serde_json::json!({
+            Err(error) => {
+                integrity.push(IntegrityObservation::decode_unavailable(
+                    "audio",
+                    &crate::decoder::Unavailable::from_error(&error),
+                    serde_json::json!({
                         "track_index": ti as u32,
                         "handler": "soun",
                         "codec": fourcc_text(&entry.format),
-                        "reason": reason,
                     }),
-                });
+                ));
             }
-            Err(e) => return Err(e),
         }
     }
 
     let tracks: Vec<Mp4Track> = traks.into_iter().map(|t| t.track).collect();
     Ok(Mp4Media {
+        pcm_tracks,
+        audio_stream,
+        packet_lengths,
         facts: Mp4Facts {
             brands,
             movie_timescale: movie.map(|m| m.0),

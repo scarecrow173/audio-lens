@@ -38,7 +38,7 @@ pub(crate) fn emit_invalid(
         ("exp.mix_polarity", "sign"),
         ("exp.mix_condition", "ratio"),
     ] {
-        records.push(e.push(
+        records.push(e.push_pair(
             id,
             f64::NAN,
             unit,
@@ -75,10 +75,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     let mean_power = &ctx.mean_power;
 
     // ==== Advanced channel analysis (>= 2ch) ====
-    if ctx.chans.len() >= 2
-        && let Some(oseg) = ctx.segs.get(1).copied()
-        && !oseg.is_empty()
-    {
+    if ctx.chans.len() >= 2 {
+        let oseg = ctx.segs[1];
         let n_ch = seg.len().min(oseg.len());
         if n_ch >= ctx.stft.window as usize {
             let bands = third_octave_bands(100.0, rate as f64 / 2.0 * 0.9);
@@ -293,7 +291,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 let mut r = if spec {
                     e.push_spec(id, f64::NAN, unit, conf, val, Some(reason.to_string()), 0)
                 } else {
-                    e.push(id, f64::NAN, unit, conf, val, Some(reason.to_string()), 0)
+                    e.push_pair(id, f64::NAN, unit, conf, val, Some(reason.to_string()), 0)
                 };
                 if let Some(p) = pair {
                     r.alignment_id = Some(p.alignment_id.clone());
@@ -332,11 +330,29 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             return;
         }
         let (o0, o1, src_segs) = aligned.unwrap();
-        let cap_segs: Vec<&[f64]> = ctx
+        let cap_segs: Vec<(usize, &[f64])> = ctx
             .chans
             .iter()
-            .filter(|c| c.len() >= o1)
-            .map(|c| &c[o0..o1])
+            .enumerate()
+            .filter_map(|(channel, c)| {
+                if c.len() >= o1 {
+                    Some((channel, &c[o0..o1]))
+                } else {
+                    let mut r = e.push_spec(
+                        "exp.mix_band_coeff",
+                        f64::NAN,
+                        "ratio",
+                        propagate_confidence(pair.confidence, Confidence::Medium),
+                        Validity::InsufficientSupport,
+                        Some("capture channel does not cover aligned region".into()),
+                        0,
+                    );
+                    r.channels = Some(ChannelSelector::Channel(channel as u16));
+                    r.alignment_id = Some(pair.alignment_id.clone());
+                    out.records.push(r);
+                    None
+                }
+            })
             .collect();
         let n_src = src_segs.len();
         let n_cap = cap_segs.len();
@@ -352,7 +368,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             return;
         }
         let mss: Vec<_> = src_segs.iter().map(|s| stft(s, w, h, rate)).collect();
-        let mcs: Vec<_> = cap_segs.iter().map(|s| stft(s, w, h, rate)).collect();
+        let mcs: Vec<_> = cap_segs.iter().map(|(_, s)| stft(s, w, h, rate)).collect();
         let fr = mss
             .iter()
             .chain(&mcs)
@@ -445,13 +461,21 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     dmag,
                     "ratio",
                     propagate_confidence(pair.confidence, Confidence::Medium),
-                    up_val,
-                    None,
+                    if cond > 1e3 {
+                        Validity::LowCoherence
+                    } else {
+                        up_val
+                    },
+                    if cond > 1e3 {
+                        Some(format!("mix estimate ill-conditioned ({cond:.3e})"))
+                    } else {
+                        None
+                    },
                     ((b1 - b0) * fr) as u64,
                 );
                 r.alignment_id = Some(pair.alignment_id.clone());
                 r.freq_range = Some(Range { start: lo, end: hi });
-                r.channels = Some(ChannelSelector::Channel(c as u16));
+                r.channels = Some(ChannelSelector::Channel(cap_segs[c].0 as u16));
                 r.params = serde_json::json!({
                     "region_s": [e.region().start_s, e.region().end_s],
                     "triggers": e.region().triggers,
@@ -474,7 +498,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                        val: Validity,
                        reason: Option<String>,
                        support: u64| {
-            let mut r = e.push(
+            let mut r = e.push_pair(
                 id,
                 value,
                 unit,
@@ -484,6 +508,9 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 support,
             );
             r.alignment_id = Some(pair.alignment_id.clone());
+            r.params["pair"] = serde_json::json!(pair.pair);
+            r.params["capture_channels"] =
+                serde_json::json!(cap_segs.iter().map(|(c, _)| c).collect::<Vec<_>>());
             records.push(r);
         };
         let ill = max_cond > 1e3;

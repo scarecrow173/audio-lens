@@ -1,11 +1,9 @@
 //! A/V event synchronization: match cheap audio onsets against the
 //! ingest-side `video_features` event list and measure the offset.
 //!
-//! Both sides are rebased onto their own stream clock before
-//! comparison: video events are converted from `vids` stream-clock
-//! ticks minus `start_tick`, audio onsets are already seconds from PCM
-//! start (the `auds` stream's own origin). Container-level `dwStart`
-//! offsets therefore cancel and cannot leak into `avsync.delta`.
+//! 音声 PCM の開始を共通原点とする。映像 tick は自身の timebase で秒に
+//! 変換してから音声 stream の start_tick/timebase を引く。音声 onset は
+//! PCM 開始からの秒のままなので、auds/vids の実相対 offset を保持する。
 //!
 //! Matching is deterministic nearest-neighbor: every onset↔event
 //! candidate inside `match_window_s` is considered, pairs are greedily
@@ -13,70 +11,143 @@
 //! once. Missing evidence surfaces as invalid records — never as
 //! silence or stage failure.
 
-use al_core::{Confidence, Validity};
+use al_core::{Confidence, InputId, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
 use al_media::video::{VideoEventKind, VideoFeatureArtifact, VideoFeatures};
 
 use crate::records::{RecordBuilder, robust_summary};
 
 /// `avsync` tunables (`config.analysis.avsync.*` overrides).
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AvSyncConfig {
     /// Maximum |video_time − audio_time| for a matched pair, seconds.
     pub match_window_s: f64,
+    /// ユーザー供給の映像 stream-clock マーカー。
+    pub markers: Vec<VisualMarker>,
 }
 
 impl Default for AvSyncConfig {
     fn default() -> Self {
         Self {
             match_window_s: 0.5,
+            markers: Vec::new(),
         }
     }
 }
 
 impl AvSyncConfig {
     /// Overlay `config.analysis.avsync` onto the defaults.
-    pub fn from_job(config: &serde_json::Value) -> Self {
+    pub fn from_job(config: &serde_json::Value) -> Result<Self, String> {
         let mut cfg = Self::default();
         if let Some(v) = config["analysis"]["avsync"]["match_window_s"].as_f64() {
             cfg.match_window_s = v;
         }
-        cfg
+        if let Some(markers) = config["analysis"]["avsync"].get("markers") {
+            cfg.markers = serde_json::from_value(markers.clone())
+                .map_err(|e| format!("analysis.avsync.markers: {e}"))?;
+        }
+        for marker in &cfg.markers {
+            if !marker.time_s.is_finite() || InputId::parse(marker.input_id.as_str()).is_err() {
+                return Err("marker requires finite time_s and valid input_id".into());
+            }
+        }
+        Ok(cfg)
+    }
+
+    /// 入力来歴と実際の decoded frame 時計を照合する入力境界。
+    pub fn validate_video(
+        &self,
+        input_id: &str,
+        video: Option<&VideoFeatureArtifact>,
+    ) -> Result<(), String> {
+        for marker in self
+            .markers
+            .iter()
+            .filter(|m| m.input_id.as_str() == input_id)
+        {
+            let Some(VideoFeatureArtifact::Decoded(video)) = video else {
+                return Err(format!("marker input {input_id} has no decoded video"));
+            };
+            if video.timebase_hz == 0 {
+                return Err("marker video clock has zero timebase".into());
+            }
+            let tick = video
+                .frame_timestamps
+                .get(marker.frame as usize)
+                .ok_or_else(|| "marker frame outside decoded video".to_string())?;
+            let frame_time = *tick as f64 / video.timebase_hz as f64;
+            if (frame_time - marker.time_s).abs() > 1e-9 {
+                return Err("marker time_s does not match decoded frame stream clock".into());
+            }
+        }
+        Ok(())
     }
 }
 
-/// One video event rebased onto the `vids` stream clock, in seconds.
-#[derive(Debug, Clone, Copy, PartialEq)]
+/// 汎用 visual marker。時計は映像 stream の絶対秒(dwStart を含む)。
+#[derive(Debug, Clone, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct VisualMarker {
+    pub input_id: InputId,
+    pub clock: MarkerClock,
+    pub time_s: f64,
+    pub frame: u32,
+}
+
+/// wall-clock 等の暗黙変換を許さない明示時計。
+#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MarkerClock {
+    VideoStream,
+}
+
+/// 共通の音声 PCM 原点へ変換した映像イベント。
+#[derive(Debug, Clone, PartialEq)]
 pub struct VideoEventS {
+    /// 名前付き ROI の安定キー。
+    pub roi_name: Option<String>,
     /// Event classification (kept verbatim from ingest).
     pub kind: VideoEventKind,
     /// Frame index in the decoded series.
     pub frame: u32,
-    /// Seconds since the stream's declared origin (`start_tick`).
+    /// Seconds since the audio PCM origin.
     pub time_s: f64,
+    /// config 供給時のみ、その入力来歴。
+    pub marker: Option<serde_json::Value>,
 }
 
-/// Rebase `events` from stream-clock ticks to seconds since
-/// `start_tick`. The stream's own clock is the only fact used — no
-/// nominal FPS reconstruction.
-pub fn rebase_events(video: &VideoFeatures) -> Vec<VideoEventS> {
+/// 映像 stream の tick を音声 PCM 原点からの秒へ変換する。
+/// nominal FPS を使用せず、両 stream の宣言時計の相対 offset を保つ。
+pub fn rebase_events(video: &VideoFeatures, audio_start_s: f64) -> Vec<VideoEventS> {
     video
         .events
         .iter()
         .map(|e| VideoEventS {
+            marker: None,
+            roi_name: e.roi_name.clone(),
             kind: e.kind,
             frame: e.frame,
-            time_s: (e.time_ticks - video.start_tick) as f64 / video.timebase_hz as f64,
+            time_s: audio_origin_time(
+                e.time_ticks as f64 / video.timebase_hz as f64,
+                audio_start_s,
+            ),
         })
         .collect()
 }
 
+/// 検出・供給イベントに共通の stream 秒 → 音声 PCM 原点の変換。
+fn audio_origin_time(stream_time_s: f64, audio_start_s: f64) -> f64 {
+    stream_time_s - audio_start_s
+}
+
 /// One accepted onset↔event pair.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AvSyncPair {
+    /// 照合した映像イベントの ROI 名。
+    pub roi_name: Option<String>,
     /// Onset position, seconds from PCM start.
     pub audio_time_s: f64,
-    /// Event position, seconds on the rebased `vids` clock.
+    /// Event position, seconds since the audio PCM origin.
     pub video_time_s: f64,
     /// `video_time_s − audio_time_s` — the A/V offset estimate.
     pub delta_s: f64,
@@ -86,6 +157,8 @@ pub struct AvSyncPair {
     pub event_frame: u32,
     /// Confidence derived from |delta| as a fraction of the window.
     pub confidence: Confidence,
+    /// 供給マーカーの入力来歴。
+    pub marker: Option<serde_json::Value>,
 }
 
 /// Confidence decays with the fraction of the match window the delta
@@ -106,7 +179,7 @@ fn pair_confidence(abs_delta: f64, window_s: f64) -> Confidence {
 }
 
 /// Greedily match `onsets` (seconds from PCM start) to `events`
-/// (rebased `vids` seconds) one-to-one within `window_s`. Pairs are
+/// (audio-PCM-origin seconds) one-to-one within `window_s`. Pairs are
 /// returned in audio-time order.
 pub fn match_events(onsets: &[f64], events: &[VideoEventS], window_s: f64) -> Vec<AvSyncPair> {
     // Every candidate inside the window, nearest first — greedy
@@ -136,6 +209,8 @@ pub fn match_events(onsets: &[f64], events: &[VideoEventS], window_s: f64) -> Ve
         used_event[ei] = true;
         let delta = events[ei].time_s - onsets[ai];
         pairs.push(AvSyncPair {
+            marker: events[ei].marker.clone(),
+            roi_name: events[ei].roi_name.clone(),
             audio_time_s: onsets[ai],
             video_time_s: events[ei].time_s,
             delta_s: delta,
@@ -181,6 +256,7 @@ pub fn sync_records(
     input_id: &str,
     onset_times: Option<&[f64]>,
     video: Option<&VideoFeatureArtifact>,
+    audio_start_s: f64,
     cfg: &AvSyncConfig,
     lineage: Vec<String>,
 ) -> Vec<FeatureRecord> {
@@ -202,6 +278,14 @@ pub fn sync_records(
                 Validity::DecodeInputUnavailable,
                 format!("video features unavailable: {reason}"),
             )),
+            Some(VideoFeatureArtifact::Decoded(v))
+                if v.timebase_hz == 0 || !audio_start_s.is_finite() =>
+            {
+                Some((
+                    Validity::ComputationFailed,
+                    "A/V stream clock origin unavailable or invalid".into(),
+                ))
+            }
             Some(VideoFeatureArtifact::Decoded(_)) => None,
         }
     };
@@ -244,18 +328,40 @@ pub fn sync_records(
         Some(VideoFeatureArtifact::Decoded(v)) => v,
         _ => unreachable!("blocked cases returned above"),
     };
-    let events = rebase_events(video);
+    let mut events = rebase_events(video, audio_start_s);
+    events.extend(
+        cfg.markers
+            .iter()
+            .enumerate()
+            .filter(|(_, m)| m.input_id.as_str() == input_id)
+            .map(|(i, m)| VideoEventS {
+                roi_name: None,
+                kind: VideoEventKind::UserMarker,
+                frame: m.frame,
+                time_s: audio_origin_time(m.time_s, audio_start_s),
+                marker: Some(serde_json::json!({
+                    "config_path": format!("analysis.avsync.markers[{i}]"),
+                    "input_id": m.input_id, "clock": m.clock, "time_s": m.time_s,
+                })),
+            }),
+    );
     let pairs = match_events(onsets, &events, cfg.match_window_s);
 
     // Per-pair evidence: each accepted pair contributes audio_time,
     // video_time, and delta records tagged with the pair index and the
     // video event's classification.
     for (i, p) in pairs.iter().enumerate() {
-        let params = serde_json::json!({
+        let mut params = serde_json::json!({
             "pair": i,
             "event_kind": p.event_kind,
             "event_frame": p.event_frame,
+            "clock_origin": "audio_pcm_start",
+            "audio_start_s": audio_start_s,
+            "roi_name": p.roi_name,
         });
+        if let Some(marker) = &p.marker {
+            params["marker"] = marker.clone();
+        }
         for (id, value) in [
             ("avsync.audio_time", p.audio_time_s),
             ("avsync.video_time", p.video_time_s),
@@ -372,11 +478,13 @@ mod tests {
             start_tick,
             frame_timestamps: (0..8).map(|i| start_tick + i).collect(),
             luminance: vec![0.0; 8],
+            roi_luminance: Vec::new(),
             diff: vec![0.0; 8],
             events: events
                 .iter()
                 .enumerate()
                 .map(|(i, &(tick, kind))| VideoEvent {
+                    roi_name: None,
                     kind,
                     frame: i as u32,
                     time_ticks: tick,
@@ -417,6 +525,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -449,15 +558,15 @@ mod tests {
     }
 
     #[test]
-    fn dwstart_offset_never_contaminates_delta() {
-        // Same fixture but the video stream declares dwStart = 100
-        // ticks: rebasing must cancel it exactly.
+    fn equal_stream_origins_cancel_without_discarding_relative_offset() {
+        // 両 stream の共通シフト 10 s のみが相殺される。
         let v = features(&[(105, VideoEventKind::SceneChange)], 100);
         let onsets = [0.6];
         let records = sync_records(
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            10.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -485,6 +594,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -504,6 +614,7 @@ mod tests {
             "IN-1",
             Some(&onsets),
             Some(&VideoFeatureArtifact::Decoded(v)),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -518,7 +629,14 @@ mod tests {
     #[test]
     fn missing_or_undecodable_video_is_explicit() {
         // No vids stream at all → NotApplicable.
-        let records = sync_records("IN-1", Some(&[0.5]), None, &AvSyncConfig::default(), vec![]);
+        let records = sync_records(
+            "IN-1",
+            Some(&[0.5]),
+            None,
+            0.0,
+            &AvSyncConfig::default(),
+            vec![],
+        );
         assert_eq!(
             find(&records, "avsync.median_delta").validity,
             Validity::NotApplicable
@@ -532,6 +650,7 @@ mod tests {
                 codec: "MJPG".into(),
                 reason: "compressed video codec MJPG is not decodable".into(),
             }),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
@@ -543,12 +662,106 @@ mod tests {
             "IN-1",
             None,
             Some(&VideoFeatureArtifact::Decoded(features(&[], 0))),
+            0.0,
             &AvSyncConfig::default(),
             vec![],
         );
         assert_eq!(
             find(&records, "avsync.median_delta").validity,
             Validity::DecodeInputUnavailable
+        );
+    }
+
+    #[test]
+    fn unavailable_clock_origin_does_not_produce_valid_sync() {
+        for (origin, hz) in [(f64::NAN, 10), (0.0, 0)] {
+            let v = features_at(&[(5, VideoEventKind::SceneChange)], 0, hz);
+            let records = sync_records(
+                "IN-1",
+                Some(&[0.5]),
+                Some(&VideoFeatureArtifact::Decoded(v)),
+                origin,
+                &AvSyncConfig::default(),
+                vec![],
+            );
+            assert_eq!(
+                find(&records, "avsync.median_delta").validity,
+                Validity::ComputationFailed
+            );
+            assert!(!records.iter().any(|r| r.feature_id == "avsync.delta"));
+        }
+    }
+
+    #[test]
+    fn omitted_and_empty_markers_preserve_all_records() {
+        let video = VideoFeatureArtifact::Decoded(features(&[(5, VideoEventKind::SceneChange)], 0));
+        let baseline = sync_records(
+            "IN-1",
+            Some(&[0.6]),
+            Some(&video),
+            0.0,
+            &AvSyncConfig::default(),
+            vec!["source".into()],
+        );
+        for config in [
+            serde_json::json!({}),
+            serde_json::json!({"analysis":{"avsync":{"markers":[]}}}),
+        ] {
+            let records = sync_records(
+                "IN-1",
+                Some(&[0.6]),
+                Some(&video),
+                0.0,
+                &AvSyncConfig::from_job(&config).unwrap(),
+                vec!["source".into()],
+            );
+            assert_eq!(
+                serde_json::to_value(records).unwrap(),
+                serde_json::to_value(&baseline).unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn markers_and_detected_events_share_the_same_matcher() {
+        let id = InputId::new();
+        let video = VideoFeatureArtifact::Decoded(features(&[(5, VideoEventKind::SceneChange)], 0));
+        let cfg = AvSyncConfig::from_job(&serde_json::json!({"analysis":{"avsync":{"markers":[{
+            "input_id":id, "clock":"video_stream", "time_s":0.3,"frame":3
+        }]}}}))
+        .unwrap();
+        cfg.validate_video(id.as_str(), Some(&video)).unwrap();
+        let records = sync_records(
+            id.as_str(),
+            Some(&[0.3, 0.5]),
+            Some(&video),
+            0.0,
+            &cfg,
+            vec![],
+        );
+        let pairs: Vec<_> = records
+            .iter()
+            .filter(|r| r.feature_id == "avsync.delta")
+            .collect();
+        assert_eq!(pairs.len(), 2);
+        assert_eq!(pairs[0].params["event_kind"], "user_marker");
+        assert_eq!(pairs[1].params["event_kind"], "scene_change");
+        assert!(pairs[1].params.get("marker").is_none());
+        for origin in [f64::NAN, f64::INFINITY] {
+            let invalid = sync_records(
+                id.as_str(),
+                Some(&[0.3]),
+                Some(&video),
+                origin,
+                &cfg,
+                vec![],
+            );
+            assert!(!invalid.iter().any(|r| r.feature_id == "avsync.delta"));
+        }
+        let invalid_clock = VideoFeatureArtifact::Decoded(features_at(&[], 0, 0));
+        assert!(
+            cfg.validate_video(id.as_str(), Some(&invalid_clock))
+                .is_err()
         );
     }
 }

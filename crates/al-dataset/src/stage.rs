@@ -40,19 +40,13 @@ impl DatasetStage {
 /// on the codec family (`pcm_s16{le,be}`, `pcm_s8`, …), not on the
 /// wire endianness.
 fn encoding_for(codec: &str) -> Option<WavEncoding> {
-    let c = codec.strip_prefix("pcm_").unwrap_or(codec);
-    if c == "u8" || c == "s8" || c.starts_with("s16") {
-        Some(WavEncoding::PcmS16)
-    } else if c.starts_with("s24") {
-        Some(WavEncoding::PcmS24)
-    } else if c.starts_with("s32") {
-        Some(WavEncoding::PcmS32)
-    } else if c.starts_with("f32") {
-        Some(WavEncoding::Float32)
-    } else if c.starts_with("f64") {
-        Some(WavEncoding::Float64)
-    } else {
-        None
+    match codec {
+        "pcm_u8" | "pcm_s8" | "pcm_s16le" | "pcm_s16be" => Some(WavEncoding::PcmS16),
+        "pcm_s24le" | "pcm_s24be" => Some(WavEncoding::PcmS24),
+        "pcm_s32le" | "pcm_s32be" => Some(WavEncoding::PcmS32),
+        "pcm_f32le" | "pcm_f32be" => Some(WavEncoding::Float32),
+        "pcm_f64le" | "pcm_f64be" => Some(WavEncoding::Float64),
+        _ => None,
     }
 }
 
@@ -156,18 +150,6 @@ impl DatasetStage {
                     "sample_rate": sample_rate,
                 }),
             });
-        } else {
-            produced.push(ArtifactRecord {
-                artifact_id: ctx.registry.issue(),
-                role: "dataset_input_unavailable".into(),
-                path: PathBuf::from("analysis/inputs").join(format!("{input_id}.metadata.json")),
-                produced_by: Some(StageKind::Dataset),
-                inputs: vec![declared, meta.artifact_id.clone()],
-                params: serde_json::json!({
-                    "input_id": input_id,
-                    "reason": "ingest produced no decoded_pcm",
-                }),
-            });
         }
 
         let meta_path = checked_job_path(job_dir, &meta.path).map_err(err)?;
@@ -191,11 +173,12 @@ impl DatasetStage {
             .map_err(err)?;
         produced.push(ArtifactRecord {
             artifact_id: ctx.registry.issue(),
-            role: "dataset_input_metadata".into(),
+            // 一つの metadata パスに一つの artifact identity を割り当てる。
+            role: if decoded.is_some() { "dataset_input_metadata" } else { "dataset_input_unavailable" }.into(),
             path: PathBuf::from("analysis/inputs").join(format!("{input_id}.metadata.json")),
             produced_by: Some(StageKind::Dataset),
-            inputs: vec![meta.artifact_id.clone()],
-            params: serde_json::json!({ "input_id": input_id }),
+            inputs: vec![declared, meta.artifact_id.clone()],
+            params: serde_json::json!({ "input_id": input_id, "audio_available": decoded.is_some() }),
         });
         Ok((lineage, produced))
     }
@@ -503,5 +486,32 @@ impl Stage for DatasetStage {
         ];
         records.extend(produced);
         Ok(records)
+    }
+}
+
+#[cfg(test)]
+mod codec_tests {
+    use super::*;
+    #[test]
+    fn decoded_codec_names_are_exact() {
+        for codec in ["s16", "pcm_s16", "pcm_s16evil", "pcm_f32be_extra", "s24le"] {
+            assert!(encoding_for(codec).is_none(), "{codec}");
+        }
+        for codec in [
+            "pcm_u8",
+            "pcm_s8",
+            "pcm_s16le",
+            "pcm_s16be",
+            "pcm_s24le",
+            "pcm_s24be",
+            "pcm_s32le",
+            "pcm_s32be",
+            "pcm_f32le",
+            "pcm_f32be",
+            "pcm_f64le",
+            "pcm_f64be",
+        ] {
+            assert!(encoding_for(codec).is_some(), "{codec}");
+        }
     }
 }

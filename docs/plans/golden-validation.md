@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034AaBtyLhpTxk9Vb4eftR"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "ゴールデン fixture マトリクスの実装"
 created: "2026-10-04"
 updated: "2026-10-04"

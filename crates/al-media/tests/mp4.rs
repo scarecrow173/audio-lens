@@ -90,6 +90,126 @@ fn base_spec(tracks: Vec<Mp4TrackSpec>) -> Mp4Spec {
 }
 
 #[test]
+fn nondecoded_tracks_validate_chunk_mapping_in_direct_and_registry_probe() {
+    use al_media::decoder::{MediaDecoder, NativeDecoder};
+    for codec in [*b"avc1", *b"jpeg"] {
+        for stsc in [
+            vec![(2, 2, 1)],
+            vec![(1, 1, 1)],
+            vec![(1, 2, 0)],
+            vec![(1, 2, 2)],
+            vec![(1, 0, 1)],
+        ] {
+            let mut track = vide_track(1, codec, 1000, 2, 40);
+            track.table.stsc = stsc;
+            let bytes = write_mp4(&base_spec(vec![track]));
+            assert!(matches!(
+                decode_mp4(&bytes),
+                Err(MediaError::Malformed { .. })
+            ));
+            assert!(matches!(
+                NativeDecoder.probe(&bytes),
+                Err(MediaError::Malformed { .. })
+            ));
+        }
+    }
+}
+
+#[test]
+fn empty_complete_sample_table_remains_valid() {
+    use al_media::decoder::{MediaDecoder, NativeDecoder};
+    let mut track = vide_track(1, *b"avc1", 1000, 0, 40);
+    track.table.stts.clear();
+    track.table.stsc.clear();
+    track.table.chunks.clear();
+    let bytes = write_mp4(&base_spec(vec![track]));
+    assert!(decode_mp4(&bytes).is_ok());
+    assert!(NativeDecoder.probe(&bytes).is_ok());
+}
+
+#[test]
+fn excessive_mapped_bytes_are_structural_for_all_codecs() {
+    use al_media::decoder::{MediaDecoder, NativeDecoder};
+    for codec in [*b"sowt", *b"mp4a"] {
+        let mut track = soun_pcm_track(1, codec, 1, 48000, &[0; 4]);
+        track.table = Mp4TableSpec {
+            stts: vec![(2, 1)],
+            ctts: None,
+            stss: None,
+            stsc: vec![(1, 1, 1)],
+            chunks: vec![vec![0; 2000]; 2],
+            sample_sizes: vec![4000; 2],
+        };
+        let mut bytes = write_mp4(&base_spec(vec![track]));
+        let at = bytes.windows(4).position(|w| w == b"stco").unwrap();
+        let first = bytes[at + 12..at + 16].to_vec();
+        bytes[at + 16..at + 20].copy_from_slice(&first);
+        assert!(matches!(
+            decode_mp4(&bytes),
+            Err(MediaError::Malformed { .. })
+        ));
+        assert!(matches!(
+            NativeDecoder.probe(&bytes),
+            Err(MediaError::Malformed { .. })
+        ));
+    }
+}
+
+#[test]
+fn zero_rate_pcm_failure_is_malformed_in_direct_and_registry_results() {
+    use al_media::decoder::{DecodeRequest, DecoderRegistry, UnavailableKind};
+    let mut track = soun_pcm_track(1, *b"sowt", 1, 0, &[1; 8]);
+    track.timescale = 48000;
+    let bytes = write_mp4(&base_spec(vec![track]));
+    let direct = decode_mp4(&bytes).unwrap();
+    assert_eq!(direct.integrity[0].detail["kind"], "malformed");
+    let result = DecoderRegistry::native()
+        .decode(&bytes, &DecodeRequest::default())
+        .unwrap();
+    let audio = result
+        .provenance
+        .streams
+        .iter()
+        .find(|s| s.kind == "audio")
+        .unwrap();
+    assert_eq!(
+        audio.unavailable.as_ref().unwrap().kind,
+        UnavailableKind::Malformed
+    );
+    assert_eq!(
+        result
+            .integrity
+            .iter()
+            .filter(|o| o.detail["media_kind"] == "audio")
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn incomplete_pcm_frame_is_local_malformed_in_direct_and_registry() {
+    use al_media::decoder::{DecodeRequest, DecoderRegistry, UnavailableKind};
+    let mut track = soun_pcm_track(1, *b"sowt", 2, 48000, &[0; 4]);
+    track.table = Mp4TableSpec::uniform(vec![0; 2], 1, 2, 1);
+    let bytes = write_mp4(&base_spec(vec![track]));
+    let direct = decode_mp4(&bytes).unwrap();
+    assert!(direct.audio.is_none());
+    let result = DecoderRegistry::native()
+        .decode(&bytes, &DecodeRequest::default())
+        .unwrap();
+    let audio = result
+        .provenance
+        .streams
+        .iter()
+        .find(|s| s.kind == "audio")
+        .unwrap();
+    assert_eq!(
+        audio.unavailable.as_ref().unwrap().kind,
+        UnavailableKind::Malformed
+    );
+}
+
+#[test]
 fn detects_mp4_and_decodes_track_metadata() {
     let s16: Vec<u8> = (0..48i16).flat_map(|v| v.to_le_bytes()).collect();
     let spec = base_spec(vec![
@@ -297,7 +417,8 @@ fn mid_sample_pcm_data_is_integrity_observation_not_failure() {
     let m = decode_mp4(&write_mp4(&base_spec(vec![t]))).unwrap();
     assert!(m.audio.is_none());
     assert!(m.integrity.iter().any(|o| {
-        o.kind == "decode/input unavailable"
+        o.kind == "decode_unavailable"
+            && o.detail["kind"] == "malformed"
             && o.detail["reason"]
                 .as_str()
                 .is_some_and(|r| r.contains("mid-sample"))
@@ -305,29 +426,22 @@ fn mid_sample_pcm_data_is_integrity_observation_not_failure() {
 }
 
 #[test]
-fn sample_past_eof_is_integrity_observation_not_failure() {
-    // A corrupt stco offset pointing beyond EOF: declared layout is
-    // structurally consistent, the mdat data is just absent — again a
-    // data-layer observation, while metadata/timing still record.
-    let t = soun_pcm_track(1, *b"sowt", 1, 48000, &[1u8; 8]);
-    let mut bytes = write_mp4(&base_spec(vec![t]));
-    let mut patched = false;
-    for i in 0..bytes.len().saturating_sub(16) + 1 {
-        if &bytes[i..i + 4] == b"stco" {
-            bytes[i + 12..i + 16].copy_from_slice(&u32::MAX.to_be_bytes());
-            patched = true;
-            break;
-        }
+fn sample_past_eof_is_structural_failure_for_all_codecs() {
+    use al_media::decoder::{MediaDecoder, NativeDecoder};
+    for codec in [*b"sowt", *b"mp4a"] {
+        let t = soun_pcm_track(1, codec, 1, 48000, &[1u8; 8]);
+        let mut bytes = write_mp4(&base_spec(vec![t]));
+        let at = bytes.windows(4).position(|w| w == b"stco").unwrap();
+        bytes[at + 12..at + 16].copy_from_slice(&u32::MAX.to_be_bytes());
+        assert!(matches!(
+            decode_mp4(&bytes),
+            Err(MediaError::Malformed { .. })
+        ));
+        assert!(matches!(
+            NativeDecoder.probe(&bytes),
+            Err(MediaError::Malformed { .. })
+        ));
     }
-    assert!(patched, "stco not found in fixture");
-    let m = decode_mp4(&bytes).unwrap();
-    assert!(m.audio.is_none());
-    assert!(m.integrity.iter().any(|o| {
-        o.kind == "decode/input unavailable"
-            && o.detail["reason"]
-                .as_str()
-                .is_some_and(|r| r.contains("past end"))
-    }));
 }
 
 #[test]
@@ -339,7 +453,7 @@ fn compressed_soun_is_an_integrity_observation_not_a_failure() {
 
     assert!(m.audio.is_none());
     assert_eq!(m.integrity.len(), 1);
-    assert_eq!(m.integrity[0].kind, "decode/input unavailable");
+    assert_eq!(m.integrity[0].kind, "decode_unavailable");
     assert_eq!(m.integrity[0].detail["codec"], "mp4a");
     // Timing for both tracks is still observed.
     assert_eq!(
@@ -381,7 +495,7 @@ fn unsupported_pcm_width_is_integrity_observation_not_failure() {
     assert!(m.audio.is_none());
     assert!(
         m.integrity.iter().any(|o| {
-            o.kind == "decode/input unavailable"
+            o.kind == "decode_unavailable"
                 && o.detail["reason"]
                     .as_str()
                     .is_some_and(|r| r.contains("unsupported PCM width"))
@@ -597,8 +711,14 @@ fn compressed_only_mp4_completes_with_metadata_and_no_pcm() {
     assert!(meta["audio"].is_null());
     assert_eq!(meta["mp4"]["tracks"].as_array().unwrap().len(), 2);
     let integrity = meta["integrity"].as_array().expect("integrity array");
-    assert_eq!(integrity.len(), 1);
-    assert_eq!(integrity[0]["kind"], "decode/input unavailable");
+    assert_eq!(integrity.len(), 2);
+    assert_eq!(integrity[0]["kind"], "decode_unavailable");
+    assert_eq!(meta["source_hash"], al_core::sha256_hex(&bytes));
+    assert!(
+        integrity
+            .iter()
+            .all(|o| o["kind"] == "decode_unavailable" && o["detail"]["kind"] == "capability")
+    );
     assert_eq!(integrity[0]["detail"]["codec"], "mp4a");
     // Timing artifacts persist independently of PCM.
     assert!(!meta["av_timing"].as_array().unwrap().is_empty());

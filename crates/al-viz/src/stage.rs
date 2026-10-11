@@ -157,17 +157,27 @@ impl Stage for VisualizationStage {
         let json = |a: &al_dataset::manifest::DatasetArtifact| {
             a.store == al_dataset::manifest::StoreKind::Json
         };
-        let audio_or_json = |a: &al_dataset::manifest::DatasetArtifact| {
-            a.store == al_dataset::manifest::StoreKind::Audio
-                || a.store == al_dataset::manifest::StoreKind::Json
-        };
         let table = |a: &al_dataset::manifest::DatasetArtifact| {
             a.store == al_dataset::manifest::StoreKind::Table
         };
         // Partial-ingest contract: an input whose PCM was undecodable
         // contributes only its metadata JSON, so `inputs` may hold
         // Json stores with zero Audio stores.
-        expect("inputs", audio_or_json).map_err(err)?;
+        if reader.role_produced("inputs") {
+            for input in &ctx.manifest.inputs {
+                let audio = format!("inputs/{}.wav", input.input_id);
+                let metadata = format!("inputs/{}.metadata.json", input.input_id);
+                if !reader.artifacts("inputs").into_iter().any(|a| {
+                    (a.store == al_dataset::manifest::StoreKind::Audio && a.path == audio)
+                        || (a.store == al_dataset::manifest::StoreKind::Json && a.path == metadata)
+                }) {
+                    return Err(err(invalid(format!(
+                        "materialized inputs lack audio or metadata for {}",
+                        input.input_id
+                    ))));
+                }
+            }
+        }
         expect("intermediate", tensor).map_err(err)?;
         expect("features/cheap", json).map_err(err)?;
         expect("residual", tensor).map_err(err)?;
@@ -217,6 +227,16 @@ impl Stage for VisualizationStage {
                     "capture input has no materialized audio",
                 );
             }
+        } else {
+            skip(
+                "timeline",
+                "inputs",
+                if capture.is_none() {
+                    "no capture input"
+                } else {
+                    "role not produced"
+                },
+            );
         }
 
         // Waveform LOD per materialized input (audio stores only —

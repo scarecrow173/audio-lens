@@ -4,7 +4,7 @@ type: "design"
 status: "draft"
 title: "AudioLens 設計概要"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-10"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -23,6 +23,7 @@ relations:
     - "dataset-schema.md"
     - "analysis-stages.md"
     - "visualization-export.md"
+    - "simd-dsp-foundation.md"
   derives-from:
     - "../specs/audiolens-overview.md"
     - "../discovery/initial-requirements-consolidation.md"
@@ -46,9 +47,12 @@ relations:
 | [job-orchestration.md](./job-orchestration.md) | 不変ジョブ・ステージ実行・部分再開 | ジョブモデル spec、不変ジョブ ADR |
 | [ingest-av.md](./ingest-av.md) | デコード・タイミング完全性・AV 同期 | ingest spec、AV タイミング spec |
 | [localization.md](./localization.md) | 多手法定位・ループ・残差探索 | 定位 spec、トラッキング spec、合議 ADR |
+| [simd-dsp-foundation.md](./simd-dsp-foundation.md) | SIMD 算術基盤・DSP 移行・定位入力準備 | 定位 spec、pulp ADR |
 | [dataset-schema.md](./dataset-schema.md) | manifest・表・テンソル・音声の構造 | データセット spec、ストレージ ADR |
 | [analysis-stages.md](./analysis-stages.md) | cheap / reference / expensive・イベント | 解析系 spec、観測主義 ADR |
 | [visualization-export.md](./visualization-export.md) | 可視化派生データ・サマリ・パッケージ | 可視化・エクスポート・検証 spec、派生 ADR |
+
+| [residual-fixes.md](./residual-fixes.md) | #28〜#33 の残存契約修正・仕様判断(draft) | 残件 spec、責務境界 ADR |
 
 ## 層構造と依存
 
