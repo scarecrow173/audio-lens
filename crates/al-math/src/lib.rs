@@ -1,7 +1,7 @@
 //! AudioLens の算術型と実行時 SIMD dispatch 基盤。
 //!
-//! カーネルは [`Simd`] に対して単一ソースで実装し、演算の公開入口で
-//! [`dispatch`] を一度呼ぶ。通常の利用側には f64 slice を公開し、
+//! カーネルは `Simd` に対して単一ソースで実装し、演算の公開入口で
+//! `dispatch` を一度呼ぶ。通常の利用側には f64 slice を公開し、
 //! ISA 検出やレーン幅の扱いはこのクレート内に留める。
 
 use std::sync::LazyLock;
@@ -12,21 +12,19 @@ pub mod filter;
 pub mod linalg;
 pub mod resample;
 
-pub use pulp::{Simd, WithSimd, c64};
+pub(crate) use pulp::{Simd, WithSimd};
 
 /// カーネルが利用する、実行時に選択された f64 ベクトル型。
-pub type F64s<S> = <S as Simd>::f64s;
-/// カーネルが利用する、実行時に選択された複素 f64 ベクトル型。
-pub type C64s<S> = <S as Simd>::c64s;
+pub(crate) type F64s<S> = <S as Simd>::f64s;
 
 // CPU 検出はプロセス内で一度だけ行い、並列の演算入口でも共有する。
 static ARCH: LazyLock<pulp::Arch> = LazyLock::new(pulp::Arch::new);
 
 /// 共有の CPU 検出結果を使ってカーネルを実行する。
 ///
-/// 利用可能な ISA がない環境では同じ [`WithSimd`] 実装が scalar で動く。
+/// 利用可能な ISA がない環境では同じ `WithSimd` 実装が scalar で動く。
 /// 内側のループから繰り返し呼ばず、演算入口で呼び出す。
-pub fn dispatch<K: WithSimd>(kernel: K) -> K::Output {
+pub(crate) fn dispatch<K: WithSimd>(kernel: K) -> K::Output {
     ARCH.dispatch(kernel)
 }
 
