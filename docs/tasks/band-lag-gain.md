@@ -1,10 +1,10 @@
 ---
-id: "TASK-036dBnMqWeRtYuIoPlKj"
+id: "TASK-036dv4ZVW9bSvsugi4x7VA"
 type: "task"
 status: "done"
 title: "reference: 帯域別ラグ補償ゲイン推定(#38)"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

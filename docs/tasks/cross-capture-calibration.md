@@ -1,10 +1,10 @@
 ---
-id: "TASK-036eLkJhGfDsAqWeRtYu"
+id: "TASK-036edNsnBEJeHcDgX1EWwK"
 type: "task"
 status: "done"
 title: "analysis: キャプチャ間経路校正(#41)"
 created: "2026-10-09"
-updated: "2026-10-11"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

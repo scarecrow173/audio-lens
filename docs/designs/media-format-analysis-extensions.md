@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "メディア形式拡大・正規化アーキテクチャと解析精度拡張"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
@@ -29,7 +29,8 @@ relations:
     - "docs/adr/mp4-demux-decode.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/media-format-analysis-extensions.md"
   references: []
   defers: []
   deferred-by: []

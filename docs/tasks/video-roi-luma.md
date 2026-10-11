@@ -1,10 +1,10 @@
 ---
-id: "TASK-036cAsDfGhJkLzQwErTy"
+id: "TASK-036c2x6kzHHw88LSp3Y7oX"
 type: "task"
 status: "done"
 title: "video: ROI 輝度追跡(#39)"
 created: "2026-10-09"
-updated: "2026-10-11"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
