@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EevjbT8l6ojq2mAPkn0"
 type: "task"
-status: "todo"
+status: "done"
 title: "stage 計時の manifest 永続化と runner 計装"
 created: "2026-10-11"
 updated: "2026-10-11"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/observability-foundation.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/observability-stage-timing.md"
   depends-on: []
   blocks: []
   supersedes: []

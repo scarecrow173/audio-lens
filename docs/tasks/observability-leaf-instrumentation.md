@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EevjKiDgtt3CwF4qTtW"
 type: "task"
-status: "todo"
+status: "done"
 title: "leaf crate への span 計装"
 created: "2026-10-11"
 updated: "2026-10-11"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/observability-foundation.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/observability-leaf-instrumentation.md"
   depends-on:
     - "docs/tasks/observability-crate.md"
   blocks: []

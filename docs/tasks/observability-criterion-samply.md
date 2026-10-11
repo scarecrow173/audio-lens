@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EevkeIeBV0D2XgS6uTw"
 type: "task"
-status: "todo"
+status: "done"
 title: "criterion smoke bench と samply 手順書"
 created: "2026-10-11"
 updated: "2026-10-11"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/observability-foundation.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/observability-criterion-samply.md"
   depends-on: []
   blocks: []
   supersedes: []

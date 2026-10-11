@@ -210,8 +210,14 @@ EnvFilter 粒度・既定 OFF の各決定を方向づけた。
   `AL_LOG=al_locate=debug` は crate 単位の絞込みになる。span 名
   単位で絞るのではなく、event の field(`stage` 等)を見て判別
   する使い方とする
+- fmt layer は span lifecycle event(`FmtSpan::CLOSE`)を出力する。
+  内部に event を持たない leaf span でも close event として sink
+  に残り、「計装対象 crate の内部 span が観測できる」要件を
+  成立させるために必要
 - field 語彙: `job_id`・`stage`・`duration_ms`・`len`・
-  `sha256`・`input_id`・`method` を共通利用する。run 単位の
+  `len_a`・`len_b`・`sha256`・`input_id`・`method` を共通利用
+  する。`len_a`/`len_b` は locate の template/signal 入力長の
+  ように `len` を用途別に分ける派生語彙とする。run 単位の
   span/event には `job_id` を必須 field とする —
   `<base_dir>/logs/` の集約 file で event→job 帰属を取るために
   必要
