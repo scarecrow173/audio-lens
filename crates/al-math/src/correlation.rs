@@ -1,6 +1,6 @@
 //! 符号付きの窓 NCC と GCC-PHAT。候補の順位付け・validity は利用側が所有する。
 
-use crate::{Simd, WithSimd, c64, dispatch, fft::RealFft};
+use crate::{Simd, WithSimd, dispatch, fft::RealFft};
 
 /// `signal[lag..lag + template.len()]` との NCC を返す。
 /// 空素材・短い signal は空、ゼロエネルギー窓は 0。極性反転の符号を保持する。
@@ -64,15 +64,18 @@ impl WithSimd for Correlation<'_> {
         let n = (signal.len() + len - 1).next_power_of_two();
         let mut plan = RealFft::new(n);
         let mut real = vec![0.0; n];
-        let mut a = vec![c64::new(0.0, 0.0); n / 2 + 1];
-        let mut b = a.clone();
+        let bins = n / 2 + 1;
+        let mut a_re = vec![0.0; bins];
+        let mut a_im = vec![0.0; bins];
+        let mut b_re = vec![0.0; bins];
+        let mut b_im = vec![0.0; bins];
         real[..len].copy_from_slice(template);
-        plan.forward_with_simd(simd, &real, &mut a);
+        plan.forward_with_simd(simd, &real, &mut a_re, &mut a_im);
         real.fill(0.0);
         real[..signal.len()].copy_from_slice(signal);
-        plan.forward_with_simd(simd, &real, &mut b);
-        cross_spectrum(simd, &mut a, &b, phat);
-        plan.inverse_with_simd(simd, &a, &mut real);
+        plan.forward_with_simd(simd, &real, &mut b_re, &mut b_im);
+        cross_spectrum(simd, &mut a_re, &mut a_im, &b_re, &b_im, phat);
+        plan.inverse_with_simd(simd, &a_re, &a_im, &mut real);
         real.truncate(max_lag + 1);
         if !phat {
             let mut squares = vec![0.0; signal.len()];
@@ -81,10 +84,10 @@ impl WithSimd for Correlation<'_> {
             for (i, &value) in squares.iter().enumerate() {
                 cumulative[i + 1] = cumulative[i] + value;
             }
-            let mut norms: Vec<_> = (0..=max_lag)
+            let norms: Vec<_> = (0..=max_lag)
                 .map(|lag| (cumulative[lag + len] - cumulative[lag]).max(0.0))
                 .collect();
-            normalize(simd, &mut real, &mut norms, template_energy.sqrt());
+            normalize(simd, &mut real, &norms, template_energy.sqrt());
         }
         real
     }
@@ -102,36 +105,52 @@ fn square<S: Simd>(simd: S, input: &[f64], output: &mut [f64]) {
     }
 }
 
+// conj(a)·b = (ar·br + ai·bi, ar·bi − ai·br) の実部演算で書き換える。
 #[inline(always)]
-fn cross_spectrum<S: Simd>(simd: S, a: &mut [c64], b: &[c64], phat: bool) {
-    let (av, at) = S::as_mut_simd_c64s(a);
-    let (bv, bt) = S::as_simd_c64s(b);
-    for (a, &b) in av.iter_mut().zip(bv) {
-        *a = simd.mul_c64s(simd.conj_c64s(*a), b);
+fn cross_spectrum<S: Simd>(
+    simd: S,
+    a_re: &mut [f64],
+    a_im: &mut [f64],
+    b_re: &[f64],
+    b_im: &[f64],
+    phat: bool,
+) {
+    let (arv, art) = S::as_mut_simd_f64s(a_re);
+    let (aiv, ait) = S::as_mut_simd_f64s(a_im);
+    let (brv, brt) = S::as_simd_f64s(b_re);
+    let (biv, bit) = S::as_simd_f64s(b_im);
+    for (((ar, ai), &br), &bi) in arv.iter_mut().zip(aiv).zip(brv).zip(biv) {
+        // mul_c64s(conj(a), b) と同じ FMA 融合形。
+        let re = simd.mul_add_f64s(*ar, br, simd.mul_f64s(*ai, bi));
+        let im = simd.mul_add_f64s(*ar, bi, simd.mul_f64s(simd.neg_f64s(*ai), br));
+        *ar = re;
+        *ai = im;
     }
-    for (a, &b) in at.iter_mut().zip(bt) {
-        *a = a.conj() * b;
+    for (((ar, ai), &br), &bi) in art.iter_mut().zip(ait).zip(brt).zip(bit) {
+        let re = *ar * br + *ai * bi;
+        let im = *ar * bi - *ai * br;
+        *ar = re;
+        *ai = im;
     }
     if phat {
-        // abs2 は実部・虚部の両レーンに同じ値を格納する。
-        let mut magnitude = vec![c64::new(0.0, 0.0); a.len()];
-        let (av, at) = S::as_simd_c64s(a);
-        let (mv, mt) = S::as_mut_simd_c64s(&mut magnitude);
-        for (&a, m) in av.iter().zip(mv) {
-            *m = simd.abs2_c64s(a);
+        // bin ごとのエネルギーで re/im 両成分を同一規則で白色化する。
+        let mut energy = vec![0.0; a_re.len()];
+        let (arv, art) = S::as_simd_f64s(a_re);
+        let (aiv, ait) = S::as_simd_f64s(a_im);
+        let (ev, et) = S::as_mut_simd_f64s(&mut energy);
+        for ((&ar, &ai), e) in arv.iter().zip(aiv).zip(ev) {
+            *e = simd.add_f64s(simd.mul_f64s(ar, ar), simd.mul_f64s(ai, ai));
         }
-        for (&a, m) in at.iter().zip(mt) {
-            let e = a.norm_sqr();
-            *m = c64::new(e, e);
+        for ((&ar, &ai), e) in art.iter().zip(ait).zip(et) {
+            *e = ar * ar + ai * ai;
         }
-        let values = pulp::bytemuck::cast_slice_mut(a);
-        let norms = pulp::bytemuck::cast_slice_mut(&mut magnitude);
-        normalize(simd, values, norms, 1.0);
+        normalize(simd, a_re, &energy, 1.0);
+        normalize(simd, a_im, &energy, 1.0);
     }
 }
 
 #[inline(always)]
-fn normalize<S: Simd>(simd: S, values: &mut [f64], energy: &mut [f64], template_norm: f64) {
+fn normalize<S: Simd>(simd: S, values: &mut [f64], energy: &[f64], template_norm: f64) {
     let zero = simd.splat_f64s(0.0);
     let one = simd.splat_f64s(1.0);
     let tn = simd.splat_f64s(template_norm);

@@ -6,6 +6,7 @@ Directory: `docs/adr`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| ADR-034DXb88VbwPFg3jZqRxkv | al-math 公開 API からバックエンド型を排除し FFT 境界を split re/im 表現にする | accepted | [al-math-api-fft-split-re-im.md](./al-math-api-fft-split-re-im.md) |
 | ADR-034yYy5Xx8zznKyVgAgdtP | Analysis Dataset の保存形式を分割する | proposed | [analysis-dataset-storage.md](./analysis-dataset-storage.md) |
 | ADR-034AapHIAOqZfyrLPIa14w | 映像フレームデコードは非圧縮 AVI に限定する | accepted | [avi.md](./avi.md) |
 | ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | proposed | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |

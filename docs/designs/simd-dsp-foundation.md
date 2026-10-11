@@ -82,6 +82,12 @@ reference、expensive 処理も `al_locate::dsp` に依存している。
 内側のループで繰り返し dispatch しない。f64xN/c64xN に相当する
 pulp の型・関連型の公開はこのクレートに集約し、通常の呼び出し元は
 f64 slice とクレート所有の結果表現を使う。ISA 固定幅を API に埋め込まない。
+(追認: 本設計の approved 後に採択された ADR
+[al-math-api-fft-split-re-im](../adr/al-math-api-fft-split-re-im.md)
+により、「このクレートへの公開集約」はさらに「バックエンド型を
+公開しない」へ引き締められた。将来のバックエンド移行を `al-math`
+内部の変更に閉じ込めるための字義ドリフトであり、上記の記述は
+当初方針の記録として残す)
 端数レーンも同じ演算規則で処理する。exp/log は当面スカラ演算とする。
 
 `fft.rs` / `correlation.rs` / `filter.rs` / `linalg.rs` に算術責務を置く。

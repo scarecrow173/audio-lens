@@ -1,7 +1,7 @@
 //! 実数 FFT の spectral mask フィルタとスペクトル包絡。
 //! 信号区間とゼロ埋め長を保持し、全入力キャッシュの意味は導入しない。
 
-use crate::{Simd, WithSimd, c64, dispatch, fft::RealFft};
+use crate::{Simd, WithSimd, dispatch, fft::RealFft};
 
 /// ゼロ位相の `[lo_hz, hi_hz)` spectral mask。Nyquist bin も同じ規則で判定する。
 pub fn bandpass(samples: &[f64], sample_rate: u32, lo_hz: f64, hi_hz: f64) -> Vec<f64> {
@@ -37,22 +37,28 @@ impl WithSimd for Bandpass<'_> {
         let mut plan = RealFft::new(n);
         let mut real = vec![0.0; n];
         real[..self.samples.len()].copy_from_slice(self.samples);
-        let mut spectrum = vec![c64::new(0.0, 0.0); n / 2 + 1];
-        plan.forward_with_simd(simd, &real, &mut spectrum);
-        let mut masked = spectrum.clone();
+        let mut spectrum_re = vec![0.0; n / 2 + 1];
+        let mut spectrum_im = vec![0.0; n / 2 + 1];
+        plan.forward_with_simd(simd, &real, &mut spectrum_re, &mut spectrum_im);
+        let mut masked_re = spectrum_re.clone();
+        let mut masked_im = spectrum_im.clone();
         let bin_hz = f64::from(self.sample_rate) / n as f64;
         // FFT は closure 外で実行し、選択した ISA コンテキストへインラインする。
         let mut output = Vec::with_capacity(self.bands.len());
         for &(lo, hi) in self.bands {
             // 連続した passband だけコピーし、範囲外はゼロにする。
             // 比較を周波数値で行い、旧実装の境界丸め規則を保つ。
-            let lo_bin = lower_bin(spectrum.len(), |k| bin_hz * (k as f64) < lo);
-            let hi_bin = lower_bin(spectrum.len(), |k| hi.is_nan() || bin_hz * (k as f64) < hi);
-            masked.fill(c64::new(0.0, 0.0));
+            let lo_bin = lower_bin(spectrum_re.len(), |k| bin_hz * (k as f64) < lo);
+            let hi_bin = lower_bin(spectrum_re.len(), |k| {
+                hi.is_nan() || bin_hz * (k as f64) < hi
+            });
+            masked_re.fill(0.0);
+            masked_im.fill(0.0);
             if lo_bin < hi_bin {
-                masked[lo_bin..hi_bin].copy_from_slice(&spectrum[lo_bin..hi_bin]);
+                masked_re[lo_bin..hi_bin].copy_from_slice(&spectrum_re[lo_bin..hi_bin]);
+                masked_im[lo_bin..hi_bin].copy_from_slice(&spectrum_im[lo_bin..hi_bin]);
             }
-            plan.inverse_with_simd(simd, &masked, &mut real);
+            plan.inverse_with_simd(simd, &masked_re, &masked_im, &mut real);
             output.push(real[..self.samples.len()].to_vec());
         }
         output
@@ -100,20 +106,21 @@ impl WithSimd for Envelope<'_> {
         let mut plan = RealFft::new(n);
         let mut real = vec![0.0; n];
         real[..self.samples.len()].copy_from_slice(self.samples);
-        let mut spectrum = vec![c64::new(0.0, 0.0); n / 2 + 1];
-        plan.forward_with_simd(simd, &real, &mut spectrum);
-        let mut magnitudes = vec![c64::new(0.0, 0.0); spectrum.len()];
-        let (sv, st) = S::as_simd_c64s(&spectrum);
-        let (mv, mt) = S::as_mut_simd_c64s(&mut magnitudes);
-        for (&s, m) in sv.iter().zip(mv) {
-            *m = simd.abs2_c64s(s);
+        let mut spectrum_re = vec![0.0; n / 2 + 1];
+        let mut spectrum_im = vec![0.0; n / 2 + 1];
+        plan.forward_with_simd(simd, &real, &mut spectrum_re, &mut spectrum_im);
+        // bin ごとの |z|² を実部演算で求める。
+        let mut magnitudes = vec![0.0; spectrum_re.len()];
+        let (srv, srt) = S::as_simd_f64s(&spectrum_re);
+        let (siv, sit) = S::as_simd_f64s(&spectrum_im);
+        let (mv, mt) = S::as_mut_simd_f64s(&mut magnitudes);
+        for ((&re, &im), m) in srv.iter().zip(siv).zip(mv) {
+            *m = simd.add_f64s(simd.mul_f64s(re, re), simd.mul_f64s(im, im));
         }
-        for (&s, m) in st.iter().zip(mt) {
-            let e = s.norm_sqr();
-            *m = c64::new(e, e);
+        for ((&re, &im), m) in srt.iter().zip(sit).zip(mt) {
+            *m = re * re + im * im;
         }
-        let squared: &mut [f64] = pulp::bytemuck::cast_slice_mut(&mut magnitudes);
-        let (vectors, tail) = S::as_mut_simd_f64s(squared);
+        let (vectors, tail) = S::as_mut_simd_f64s(&mut magnitudes);
         for v in vectors {
             *v = simd.sqrt_f64s(*v);
         }
@@ -125,7 +132,7 @@ impl WithSimd for Envelope<'_> {
             .map(|b| {
                 let lo = b * half / self.bins;
                 let hi = ((b + 1) * half / self.bins).max(lo + 1).min(half);
-                let sum: f64 = magnitudes[lo..hi].iter().map(|v| v.re).sum();
+                let sum: f64 = magnitudes[lo..hi].iter().sum();
                 (sum / (hi - lo) as f64 + 1e-12).ln()
             })
             .collect()
