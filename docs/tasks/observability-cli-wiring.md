@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EeviFOOrOAjrYXMGXHO"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-cli の logging 配線"
 created: "2026-10-11"
 updated: "2026-10-11"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/observability-foundation.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/observability-cli-wiring.md"
   depends-on:
     - "docs/tasks/observability-crate.md"
   blocks: []

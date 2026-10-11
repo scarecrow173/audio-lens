@@ -402,7 +402,8 @@ EnvFilter の target は span 名ではなく module path(`al_locate`
 等)であり、`AL_LOG=al_locate=debug` は crate 単位の絞込みになる。
 field 語彙は `job_id`・`stage`・`duration_ms`・`len`・`sha256`・
 `input_id`・`method` を共通利用し、run 単位の span/event には
-`job_id` を必須 field とする。
+`job_id` を必須 field とする。2系統の入力長を取る箇所では
+`len_a`・`len_b` の派生語彙を使う(locate の template/signal 長)。
 
 | crate | 配置箇所 | span 名 | 主な field |
 | --- | --- | --- | --- |

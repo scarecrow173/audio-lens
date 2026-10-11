@@ -110,8 +110,10 @@ foundation。
   stage 内部は `<crate>::<unit>`(例 `locate::ncc`)とする。
   EnvFilter の target は span 名ではなく module path である
 - Rule: field には `job_id`・`stage`・`duration_ms`・`len`・
-  `sha256`・`input_id`・`method` の語彙のメタデータのみを
-  載せ、raw PCM・波形データ・巨大バッファは記録しない。
+  `len_a`・`len_b`・`sha256`・`input_id`・`method` の語彙の
+  メタデータのみを載せ、raw PCM・波形データ・巨大バッファは
+  記録しない。`len_a`/`len_b` は locate の template/signal
+  入力長のように `len` を用途別に分ける派生語彙とする。
   run 単位の span/event には `job_id` を必須とする
 - Rule: 計装対象 crate(al-cli・al-job・al-locate・
   al-analysis・al-media・al-viz・al-dataset)それぞれで内部
@@ -173,10 +175,14 @@ foundation。
   `<base_dir>/logs/` に file が作られない
 - Example(fail-fast): `al run --log`(末尾・値なし)は
   `error: --log requires a value` + exit 2。
-  `AL_LOG="bogus!!!"`、`--log-format stdout=text`、
-  `--log-format file=bogus`、`--log-format stderrtext`、
-  `--log ""` も同様に `error:` 行 + exit 2 で失敗し panic
-  しない。`al --log x run` は unknown subcommand
+  `AL_LOG="=info"`(target が空の壊れた directive)、
+  `AL_LOG="info=bogus"`(未知 level)、`--log-format
+  stdout=text`、`--log-format file=bogus`、`--log-format
+  stderrtext`、`--log ""` も同様に `error:` 行 + exit 2 で
+  失敗し panic しない。EnvFilter の parse は lenient で、
+  `bogus!!!` のような文字列は valid target directive として
+  受理されるため parse 失敗例には使えない。`al --log x run`
+  は unknown subcommand
 - Example(優先順位): `AL_LOG=warn` + `--log info` では info が
   効き、`AL_LOG_FORMAT=file=text` + `--log-format file=json`
   では file=json が効く(per-concern 全体置換)

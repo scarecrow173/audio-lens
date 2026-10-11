@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EevbtmmkzTShLCB0Mw0"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-observability crate の新設"
 created: "2026-10-11"
 updated: "2026-10-11"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/observability-foundation.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/observability-crate.md"
   depends-on: []
   blocks:
     - "docs/tasks/observability-cli-wiring.md"
