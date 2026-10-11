@@ -10,6 +10,7 @@ Directory: `docs/tasks`
 | TASK-034DYiRwEeud1alnVmGMJj | al-math API 境界: 全体検証と旧コミット bench 比較 | done | [al-math-api-boundary-verification.md](./al-math-api-boundary-verification.md) |
 | TASK-034DYiMM43O9mMDdme6ijq | al-math: 公開面の pub(crate) 化と intra-doc link 修正 | done | [al-math-api-pub-crate.md](./al-math-api-pub-crate.md) |
 | TASK-035e5Sz9kMdPRs2o1Cd4W0 | al-math: 相関/NCC/bandpass カーネル | done | [al-math-correlation.md](./al-math-correlation.md) |
+| TASK-DcAsg3VFFjE7QXhkMFM6Hl | al-math: spectral_envelope の fft_size 入口 assert と doc/テスト追加 | done | [al-math-envelope-fft-size-assert.md](./al-math-envelope-fft-size-assert.md) |
 | TASK-035dQwErTyUiOpAsDfGhJk | al-math: FFT カーネル(複素/実数) | done | [al-math-fft.md](./al-math-fft.md) |
 | TASK-035futl9MJWE3vMQ4d6QKJ | al-math: least_squares を Householder QR 化 | done | [al-math-qr.md](./al-math-qr.md) |
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | done | [al-math-skeleton.md](./al-math-skeleton.md) |
