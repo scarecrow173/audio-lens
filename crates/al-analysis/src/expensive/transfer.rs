@@ -1,7 +1,6 @@
 //! Spectral transfer families: precision cutoff (plus the optional
 //! dictionary-matched cutoff delta), narrowband peaks/notches, and
-//! the THD proxy. Estimation code is unchanged from the pre-split
-//! `expensive.rs`; the module boundary only owns the feature ids.
+//! the THD proxy. The module owns estimation and unsupported observations.
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
@@ -145,6 +144,21 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             None,
             frames as u64,
         ));
+    } else {
+        let mut ids = vec![
+            ("exp.cutoff_hz", "hz"),
+            ("exp.narrowband_peak_count", "count"),
+            ("exp.narrowband_notch_count", "count"),
+        ];
+        if ctx.dictionary.is_some() {
+            ids.push(("exp.dictionary_cutoff_delta_khz", "khz"));
+        }
+        super::emit_unsupported_spec(
+            e,
+            &mut out.records,
+            &ids,
+            "spectrum has no supported energy",
+        );
     }
 
     // ==== THD proxy ====
@@ -175,5 +189,12 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             None,
             frames as u64,
         ));
+    } else {
+        super::emit_unsupported_spec(
+            e,
+            &mut out.records,
+            &[("exp.thd_ratio", "ratio")],
+            "spectrum has no supported energy",
+        );
     }
 }

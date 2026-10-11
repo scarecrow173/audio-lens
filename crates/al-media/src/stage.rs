@@ -10,36 +10,10 @@ use al_job::stage::{Stage, StageContext, StageError};
 
 use al_core::sha256_hex;
 
-use crate::avi::{StreamTiming, VideoInfo, decode_avi};
+use crate::decoder::{DecodeRequest, DecoderRegistry, IngestResult};
 use crate::dictionary::Dictionary;
-use crate::format::{MediaFormat, detect_format};
 use crate::metadata::{AudioMetadata, IntegrityObservation};
-use crate::mp4::{Mp4Facts, decode_mp4};
-use crate::video::{VideoFeatureArtifact, VideoFeatureConfig, VideoFeatureReport, VideoThumbs};
-use crate::wav::{DecodedAudio, decode_wav};
-
-/// Optional mux-level observations a container may carry alongside the
-/// decoded PCM: declared video/track facts, per-stream sample timing,
-/// MP4 container facts, coarse video features, and integrity
-/// observations (codecs we cannot decode — recorded, never stage
-/// failures).
-#[derive(Default)]
-struct MuxObservations {
-    video: Option<VideoInfo>,
-    av_timing: Vec<StreamTiming>,
-    video_features: Option<VideoFeatureArtifact>,
-    /// Downscaled preview thumbnails of the decoded `vids` stream —
-    /// `Some` only when `video_features` is `Decoded`.
-    video_thumbs: Option<VideoThumbs>,
-    /// `decode/input unavailable` detail for the audio stream — the
-    /// partial-ingest contract records this instead of failing.
-    audio_unavailable: Option<String>,
-    mp4: Option<Mp4Facts>,
-    integrity: Vec<IntegrityObservation>,
-    /// Codec used for dictionary annotation when no PCM was decoded
-    /// (e.g. a compressed-only MP4's declared codec fourcc).
-    fallback_codec: Option<String>,
-}
+use crate::video::{VideoFeatureArtifact, VideoFeatureConfig, VideoFeatureReport};
 
 /// Ingest stage: decodes declared inputs into pre-normalization PCM plus
 /// metadata/annotation artifacts registered in the manifest.
@@ -117,89 +91,16 @@ impl IngestStage {
             ));
         }
 
-        let format = detect_format(&bytes).ok_or_else(|| {
-            StageError::new(
-                StageKind::Ingest,
-                format!(
-                    "decode/input unavailable: unknown format for {}",
-                    path.display()
-                ),
-            )
-        })?;
-
-        match format {
-            MediaFormat::Wav => {
-                // WAV is a single-stream audio format: a decode failure
-                // means the input carries nothing else to observe, so
-                // the strict failure contract is kept.
-                let audio = decode_wav(&bytes).map_err(|e| {
-                    StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
-                })?;
-                self.ingest_decoded(
-                    input,
-                    Some(audio),
-                    "wav",
-                    MuxObservations::default(),
-                    source_hash,
-                    ctx,
-                )
-            }
-            MediaFormat::Avi => {
-                let media = decode_avi(&bytes, video_cfg).map_err(|e| {
-                    StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
-                })?;
-                self.ingest_decoded(
-                    input,
-                    media.audio,
-                    "avi",
-                    MuxObservations {
-                        video: media.video,
-                        av_timing: media.timing,
-                        video_features: media.video_features,
-                        video_thumbs: media.video_thumbs,
-                        audio_unavailable: media.audio_unavailable,
-                        ..Default::default()
-                    },
-                    source_hash,
-                    ctx,
-                )
-            }
-            MediaFormat::Mp4 => {
-                let media = decode_mp4(&bytes).map_err(|e| {
-                    StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
-                })?;
-                // Dictionary annotation keys off the declared codec even
-                // when nothing decoded: prefer the decoded codec, then
-                // the first soun track, then any track codec.
-                let fallback_codec = media
-                    .audio
-                    .as_ref()
-                    .map(|a| a.codec.clone())
-                    .or_else(|| {
-                        media
-                            .facts
-                            .tracks
-                            .iter()
-                            .find(|t| t.handler == "soun")
-                            .and_then(|t| t.codec.clone())
-                    })
-                    .or_else(|| media.facts.tracks.iter().find_map(|t| t.codec.clone()));
-                self.ingest_decoded(
-                    input,
-                    media.audio,
-                    "mp4",
-                    MuxObservations {
-                        av_timing: media.timing,
-                        mp4: Some(media.facts),
-                        integrity: media.integrity,
-                        fallback_codec,
-                        ..Default::default()
-                    },
-                    source_hash,
-                    ctx,
-                )
-            }
-        }
+        let request = DecodeRequest {
+            video_config: video_cfg.clone(),
+            ..Default::default()
+        };
+        let media = DecoderRegistry::native()
+            .decode(&bytes, &request)
+            .map_err(|e| {
+                StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
+            })?;
+        self.ingest_decoded(input, media, source_hash, ctx)
     }
 
     /// Register artifacts for one input: `metadata.json` always (with
@@ -212,12 +113,19 @@ impl IngestStage {
     fn ingest_decoded(
         &self,
         input: &al_job::job::JobInput,
-        audio: Option<DecodedAudio>,
-        container: &str,
-        mux: MuxObservations,
+        mut mux: IngestResult,
         source_hash: String,
         ctx: &StageContext<'_>,
     ) -> Result<Vec<ArtifactRecord>, StageError> {
+        // 部分 ingest のポリシーは backend ID ではなくコンテナ観測で決定。
+        if mux.container == "wav" && mux.audio.is_none() {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                "WAV audio decode unavailable",
+            ));
+        }
+        let audio = mux.audio.take();
+        let container = mux.container;
         let codec_for_annotation = audio
             .as_ref()
             .map(|a| a.codec.as_str())
@@ -251,28 +159,7 @@ impl IngestStage {
 
         // Missing observations are recorded once, structurally —
         // downstream stages read facts, not implied absence.
-        let mut integrity: Vec<IntegrityObservation> = mux.integrity.clone();
-        if let Some(reason) = &mux.audio_unavailable {
-            integrity.push(IntegrityObservation {
-                kind: "audio_decode_unavailable".into(),
-                detail: serde_json::json!({ "reason": reason }),
-            });
-        }
-        if let Some(VideoFeatureArtifact::Unavailable {
-            stream,
-            codec,
-            reason,
-        }) = &mux.video_features
-        {
-            integrity.push(IntegrityObservation {
-                kind: "video_decode_unavailable".into(),
-                detail: serde_json::json!({
-                    "stream": stream,
-                    "codec": codec,
-                    "reason": reason,
-                }),
-            });
-        }
+        let integrity: Vec<IntegrityObservation> = mux.integrity.clone();
 
         let job_dir = ctx.registry.job_dir();
         let input_dir = job_dir.join("inputs").join(input.input_id.as_str());
@@ -327,7 +214,9 @@ impl IngestStage {
             "input_id": input.input_id,
             "role": input.role,
             "source_path": input.path,
+            "source_hash": source_hash,
             "container": container,
+            "streams": mux.streams,
             "audio": audio_metadata,
             "video": mux.video,
             "av_timing": mux.av_timing,
@@ -336,6 +225,7 @@ impl IngestStage {
             "integrity": integrity,
             "dictionary": dictionary_info,
             "annotations": annotations,
+            "decoder": mux.provenance,
         });
         let meta_text = serde_json::to_string_pretty(&meta_json).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot serialize metadata: {e}"))
@@ -432,6 +322,19 @@ impl IngestStage {
                     .map(|d| d.sha256.clone()),
             }),
         });
+        for record in &mut records {
+            if let Some(params) = record.params.as_object_mut() {
+                params.insert(
+                    "decoder".into(),
+                    serde_json::to_value(&mux.provenance).map_err(|e| {
+                        StageError::new(
+                            StageKind::Ingest,
+                            format!("cannot serialize decoder provenance: {e}"),
+                        )
+                    })?,
+                );
+            }
+        }
         Ok(records)
     }
 }
@@ -467,7 +370,8 @@ impl Stage for IngestStage {
     }
 
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
-        let video_cfg = VideoFeatureConfig::from_job(ctx.config);
+        let video_cfg = VideoFeatureConfig::from_job(ctx.config)
+            .map_err(|e| StageError::new(StageKind::Ingest, e))?;
         let mut records = Vec::new();
         for input in &ctx.manifest.inputs {
             records.extend(self.ingest_input(input, &video_cfg, ctx)?);

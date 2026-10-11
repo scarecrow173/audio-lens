@@ -4,11 +4,12 @@
 use std::fmt;
 use std::io;
 
+pub(crate) const DECODE_UNAVAILABLE_KIND: &str = "decode_unavailable";
+
 /// Error produced by the ingest layer.
 ///
-/// `decode/input unavailable` means the input cannot be decoded at all —
-/// unknown format, missing codec support, or malformed container. It is
-/// always explicit, never a soft fallback.
+/// 未対応入力は `InputUnavailable`、構造不正は `Malformed` として区別する。
+/// 部分 ingest の局所失敗も同じ区分を `UnavailableKind` に保存する。
 #[derive(Debug)]
 pub enum MediaError {
     /// The input format is unknown or not yet supported.
@@ -116,4 +117,21 @@ pub struct IntegrityObservation {
     pub kind: String,
     /// Human- / machine-readable detail.
     pub detail: serde_json::Value,
+}
+
+impl IntegrityObservation {
+    /// decoder と direct parser が共有する利用不能観測の表現。
+    pub(crate) fn decode_unavailable(
+        media_kind: &str,
+        failure: &crate::decoder::Unavailable,
+        mut detail: serde_json::Value,
+    ) -> Self {
+        detail["media_kind"] = media_kind.into();
+        detail["kind"] = serde_json::to_value(failure.kind).expect("enum is serializable");
+        detail["reason"] = failure.reason.clone().into();
+        Self {
+            kind: DECODE_UNAVAILABLE_KIND.into(),
+            detail,
+        }
+    }
 }

@@ -10,7 +10,7 @@ use al_dataset::writer::DatasetWriter;
 use al_job::fsutil::checked_job_path;
 use al_job::manifest::ArtifactRecord;
 use al_job::stage::{Stage, StageContext, StageError};
-use al_locate::decode::decode_input;
+use al_locate::decode::{decode_input, read_alignment_pcm};
 use al_locate::result::LocateResult;
 use al_media::wav::WavEncoding;
 
@@ -45,7 +45,21 @@ impl Stage for CheapAnalysisStage {
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
         let err = |e: io::Error| StageError::new(StageKind::CheapAnalysis, e.to_string());
         let cfg = CheapConfig::from_job(ctx.config);
-        let av_cfg = AvSyncConfig::from_job(ctx.config);
+        let av_cfg = AvSyncConfig::from_job(ctx.config)
+            .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
+        for marker in &av_cfg.markers {
+            if !ctx
+                .manifest
+                .inputs
+                .iter()
+                .any(|input| input.input_id == marker.input_id)
+            {
+                return Err(StageError::new(
+                    StageKind::CheapAnalysis,
+                    "marker references unknown input_id",
+                ));
+            }
+        }
         let chunk_bytes = tensor_chunk_bytes(ctx.config);
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let mut records = Vec::new();
@@ -68,6 +82,40 @@ impl Stage for CheapAnalysisStage {
                 lineage.push(artifact_id.clone());
             }
             let video_features = video.map(|(f, _)| f);
+            av_cfg
+                .validate_video(&input.input_id.to_string(), video_features.as_ref())
+                .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
+            let audio_start_s = if decoded.is_some()
+                && matches!(
+                    video_features,
+                    Some(al_media::VideoFeatureArtifact::Decoded(_))
+                ) {
+                let (origin, metadata_id) = load_audio_origin(input, ctx)?;
+                lineage.push(metadata_id);
+                origin
+            } else {
+                0.0
+            };
+            let video_out = crate::video::roi_records(
+                &input.input_id.to_string(),
+                video_features.as_ref(),
+                lineage.clone(),
+            );
+            for tensor in &video_out.tensors {
+                let mut provenance = prov(input, ctx);
+                provenance.algorithm_id = "video.roi_luminance.v1".into();
+                provenance.parents = lineage.clone();
+                provenance.params = video_features
+                    .as_ref()
+                    .and_then(|v| match v {
+                        al_media::video::VideoFeatureArtifact::Decoded(v) => {
+                            serde_json::to_value(&v.params).ok()
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_else(|| serde_json::json!({}));
+                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
+            }
             let Some(dec) = decoded else {
                 // Never ingested: record the failure as an invalid
                 // observation, not a stage error.
@@ -95,10 +143,12 @@ impl Stage for CheapAnalysisStage {
                     lineage: Vec::new(),
                 };
                 let mut all = vec![rec];
+                all.extend(video_out.records);
                 all.extend(avsync::sync_records(
                     &input.input_id.to_string(),
                     None,
                     video_features.as_ref(),
+                    audio_start_s,
                     &av_cfg,
                     lineage,
                 ));
@@ -115,9 +165,10 @@ impl Stage for CheapAnalysisStage {
             };
 
             let mut out = cheap::analyze_input(&dec, &cfg);
+            out.records.extend(video_out.records);
             // A/V sync: the persisted onset_times tensor is the audio
             // event series; video events come from ingest. Both are
-            // rebased to their own stream clock inside `sync_records`.
+            // converted to a shared audio PCM origin inside `sync_records`.
             let onset_times: Vec<f64> = out
                 .tensors
                 .iter()
@@ -128,6 +179,7 @@ impl Stage for CheapAnalysisStage {
                 &dec.input_id,
                 Some(&onset_times),
                 video_features.as_ref(),
+                audio_start_s,
                 &av_cfg,
                 lineage,
             ));
@@ -198,59 +250,54 @@ impl Stage for ReferenceAnalysisStage {
             let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
             let feature_path = format!("features/reference/{pair}");
 
-            let (src_in, cap_in) = match (
-                ctx.manifest
-                    .inputs
-                    .iter()
-                    .find(|i| i.input_id.to_string() == result.source_input_id),
-                ctx.manifest
-                    .inputs
-                    .iter()
-                    .find(|i| i.input_id.to_string() == result.capture_input_id),
-            ) {
-                (Some(s), Some(c)) => (s, c),
-                _ => continue,
-            };
-            let src_dec = decode_input(src_in, ctx)
+            let pcm = read_alignment_pcm(&result, ctx)
                 .map_err(|e| StageError::new(StageKind::ReferenceAnalysis, e.to_string()))?;
-            let cap_dec = decode_input(cap_in, ctx)
-                .map_err(|e| StageError::new(StageKind::ReferenceAnalysis, e.to_string()))?;
-            let (Some(src_dec), Some(cap_dec)) = (src_dec, cap_dec) else {
-                continue;
-            };
-
+            let mut lineage = vec![artifact.artifact_id.clone()];
+            if let Some((src, cap)) = &pcm {
+                lineage.push(src.record.artifact_id.clone());
+                lineage.push(cap.record.artifact_id.clone());
+            }
             let upstream = if result.accepted {
                 Validity::Valid
             } else {
                 Validity::AmbiguousAlignment
             };
             let aligned = if result.accepted {
-                let s_start = result.source_range.start as usize;
+                let (src, cap) = pcm.as_ref().ok_or_else(|| {
+                    StageError::new(
+                        StageKind::ReferenceAnalysis,
+                        "accepted alignment has no PCM",
+                    )
+                })?;
+                let s_start = result.normalized_source_range.start as usize;
                 let c_start = result.capture_range.start as usize;
-                let len = (result.source_range.end - result.source_range.start)
+                let len = (result.normalized_source_range.end
+                    - result.normalized_source_range.start)
                     .min(result.capture_range.end - result.capture_range.start)
                     as usize;
-                let src: Vec<&[f64]> = src_dec
-                    .channel_samples
-                    .iter()
-                    .map(|c| &c[s_start..(s_start + len).min(c.len())])
-                    .collect();
-                let cap: Vec<&[f64]> = cap_dec
-                    .channel_samples
-                    .iter()
-                    .map(|c| &c[c_start..(c_start + len).min(c.len())])
-                    .collect();
                 Aligned {
-                    src,
-                    cap,
-                    rate: cap_dec.sample_rate,
+                    src: src
+                        .decoded
+                        .channel_samples
+                        .iter()
+                        .map(|c| &c[s_start..s_start + len])
+                        .collect(),
+                    cap: cap
+                        .decoded
+                        .channel_samples
+                        .iter()
+                        .map(|c| &c[c_start..c_start + len])
+                        .collect(),
+                    rate: cap.decoded.sample_rate,
                     upstream_confidence: result.confidence,
                 }
             } else {
                 Aligned {
                     src: Vec::new(),
                     cap: Vec::new(),
-                    rate: cap_dec.sample_rate,
+                    rate: pcm
+                        .as_ref()
+                        .map_or(48000, |(_, cap)| cap.decoded.sample_rate),
                     upstream_confidence: result.confidence,
                 }
             };
@@ -265,16 +312,20 @@ impl Stage for ReferenceAnalysisStage {
                     "capture_input_id": result.capture_input_id,
                 }),
                 alignment_id: Some(result.alignment_id.to_string()),
-                parents: cap_dec
-                    .artifact_ids
-                    .iter()
-                    .chain(src_dec.artifact_ids.iter())
-                    .map(|a| a.as_str().to_string())
-                    .chain(std::iter::once(artifact.artifact_id.as_str().to_string()))
-                    .collect(),
+                parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
             };
             for tensor in &out.tensors {
-                write_tensor(&mut writer, tensor, tensor_prov.clone(), chunk_bytes).map_err(err)?;
+                let mut provenance = tensor_prov.clone();
+                if tensor
+                    .path
+                    .starts_with(&format!("intermediate/{pair}/channel_"))
+                {
+                    provenance.algorithm_id = "reference.band_lag_ls.v1".into();
+                    provenance.params = crate::band_gain::parameters(&cfg, aligned.rate);
+                    provenance.params["capture_input_id"] =
+                        serde_json::json!(result.capture_input_id);
+                }
+                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
             }
             for audio in &out.residual_audio {
                 writer
@@ -293,12 +344,7 @@ impl Stage for ReferenceAnalysisStage {
                                 "capture_input_id": result.capture_input_id,
                             }),
                             alignment_id: Some(result.alignment_id.to_string()),
-                            parents: cap_dec
-                                .artifact_ids
-                                .iter()
-                                .chain(src_dec.artifact_ids.iter())
-                                .map(|a| a.as_str().to_string())
-                                .collect(),
+                            parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                         },
                     )
                     .map_err(err)?;
@@ -314,7 +360,7 @@ impl Stage for ReferenceAnalysisStage {
                         algorithm_version: "1".into(),
                         params: serde_json::json!({}),
                         alignment_id: Some(result.alignment_id.to_string()),
-                        parents: vec![artifact.artifact_id.as_str().to_string()],
+                        parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                     },
                 )
                 .map_err(err)?;
@@ -323,7 +369,7 @@ impl Stage for ReferenceAnalysisStage {
                 role: "reference_features".into(),
                 path: PathBuf::from(format!("analysis/{feature_path}.json")),
                 produced_by: Some(StageKind::ReferenceAnalysis),
-                inputs: vec![artifact.artifact_id.clone()],
+                inputs: lineage,
                 params: serde_json::json!({}),
             });
         }
@@ -461,8 +507,7 @@ impl Stage for ExpensiveAnalysisStage {
         // simply get no pair evidence and the families emit
         // `pair evidence unavailable` invalid records instead.
         let job_dir = ctx.registry.job_dir();
-        let mut pairs: std::collections::HashMap<String, expensive::PairEvidence> =
-            std::collections::HashMap::new();
+        let mut loaded_alignments = Vec::new();
         for artifact in ctx
             .manifest
             .artifacts
@@ -470,33 +515,163 @@ impl Stage for ExpensiveAnalysisStage {
             .filter(|a| a.role == "locate_result")
         {
             let result = read_locate_result(StageKind::ExpensiveAnalysis, job_dir, artifact)?;
+            let pcm = read_alignment_pcm(&result, ctx)
+                .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))?;
+            loaded_alignments.push((artifact, result, pcm));
+        }
+        let mut pairs: std::collections::HashMap<String, expensive::PairEvidence> =
+            std::collections::HashMap::new();
+        let mut pair_captures = std::collections::HashMap::new();
+        let mut pair_lineage = std::collections::HashMap::new();
+        let mut calibration_evidence = Vec::new();
+        for (artifact, result, pcm) in &loaded_alignments {
+            if !result.accepted || result.validity != Validity::Valid {
+                continue;
+            }
+            let Some((_, capture)) = pcm else { continue };
+            let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
+            let path = format!("intermediate/{pair}/transfer_h");
+            // H/coherence はこの locate の alignment から生成されたものだけを採用する。
+            let current_alignment = [&path, &format!("intermediate/{pair}/coherence")]
+                .iter()
+                .all(|path| {
+                    reader.artifacts("intermediate").into_iter().any(|a| {
+                        a.path == **path
+                            && a.provenance.alignment_id.as_deref()
+                                == Some(result.alignment_id.as_str())
+                    })
+                });
+            let mut h = if current_alignment {
+                read_transfer_h(&reader, &pair).map_err(err)?
+            } else {
+                None
+            };
+            if let Some(values) = &mut h {
+                let coherence = read_complex_tensor(&reader, &pair, "coherence").map_err(err)?;
+                if let Some(coherence) = coherence.filter(|c| c.len() == values.len()) {
+                    for (value, (msc, _)) in values.iter_mut().zip(coherence) {
+                        if !msc.is_finite() || msc < crate::calibration::MIN_COHERENCE {
+                            *value = (f64::NAN, f64::NAN);
+                        }
+                    }
+                } else {
+                    h = None;
+                }
+            }
+            let mut lineage = vec![artifact.artifact_id.as_str().to_string()];
+            if h.is_some() {
+                lineage.extend([path, format!("intermediate/{pair}/coherence")]);
+            }
+            calibration_evidence.push(crate::calibration::TransferEvidence {
+                source: result.source_input_id.clone(),
+                capture: result.capture_input_id.clone(),
+                rate: capture.decoded.sample_rate,
+                h,
+                confidence: result.confidence,
+                lineage,
+            });
+        }
+        // キャプチャ間比較は job 全体の成果物。既存のペア選択・観測は変更しない。
+        let mut captures: Vec<_> = ctx
+            .manifest
+            .inputs
+            .iter()
+            .filter(|i| {
+                matches!(
+                    i.role,
+                    al_core::InputRole::CaptureBug | al_core::InputRole::CaptureReference
+                )
+            })
+            .collect();
+        captures.sort_by_key(|i| {
+            (
+                i.role != al_core::InputRole::CaptureReference,
+                i.input_id.as_str(),
+            )
+        });
+        for (i, reference) in captures.iter().enumerate() {
+            for target in &captures[i + 1..] {
+                let (comparison, tensor) = crate::calibration::compare(
+                    reference.input_id.as_str(),
+                    target.input_id.as_str(),
+                    &calibration_evidence,
+                );
+                let name = format!("{}__{}", reference.input_id, target.input_id);
+                let provenance = al_dataset::provenance::Provenance {
+                    input_id: "job".into(),
+                    algorithm_id: "cross_capture.path_gain.v1".into(),
+                    algorithm_version: "1".into(),
+                    params: comparison.records[0].params.clone(),
+                    alignment_id: None,
+                    parents: comparison.records[0].lineage.clone(),
+                };
+                if let Some(tensor) = tensor {
+                    write_tensor(&mut writer, &tensor, provenance.clone(), chunk_bytes)
+                        .map_err(err)?;
+                }
+                writer
+                    .write_json(
+                        "features/cross_capture",
+                        &name,
+                        &serde_json::to_value(&comparison)
+                            .map_err(io::Error::other)
+                            .map_err(err)?,
+                        provenance,
+                    )
+                    .map_err(err)?;
+                records.push(ArtifactRecord {
+                    artifact_id: ctx.registry.issue(),
+                    role: "cross_capture_features".into(),
+                    path: PathBuf::from(format!("analysis/features/cross_capture/{name}.json")),
+                    produced_by: Some(StageKind::ExpensiveAnalysis),
+                    inputs: loaded_alignments
+                        .iter()
+                        .filter(|(_, r, _)| {
+                            r.capture_input_id == reference.input_id.as_str()
+                                || r.capture_input_id == target.input_id.as_str()
+                        })
+                        .map(|(a, _, _)| a.artifact_id.clone())
+                        .collect(),
+                    params: serde_json::json!({"reference_capture_id": reference.input_id, "target_capture_id": target.input_id}),
+                });
+            }
+        }
+        for (artifact, result, pcm) in &loaded_alignments {
             if pairs.contains_key(&result.capture_input_id) {
                 continue; // first locate result per capture wins
             }
             let pair_name = format!("{}__{}", result.source_input_id, result.capture_input_id);
             let (aligned_src, len): (Vec<&[f64]>, usize) = if result.accepted {
-                match decoded.get(&result.source_input_id) {
-                    Some(src_dec) => {
-                        let s_start = result.source_range.start as usize;
-                        let want = (result.source_range.end - result.source_range.start)
-                            .min(result.capture_range.end - result.capture_range.start)
-                            as usize;
-                        let segs: Vec<&[f64]> = src_dec
-                            .channel_samples
-                            .iter()
-                            .map(|c| &c[s_start.min(c.len())..(s_start + want).min(c.len())])
-                            .collect();
-                        // `len` is the true common aligned span —
-                        // `aligned_slice` slices by it, so it must
-                        // never exceed the shortest channel view.
-                        let len = segs.iter().map(|c| c.len()).min().unwrap_or(0);
-                        (segs, len)
-                    }
-                    None => (Vec::new(), 0),
-                }
+                let (source, capture) = pcm.as_ref().ok_or_else(|| {
+                    StageError::new(
+                        StageKind::ExpensiveAnalysis,
+                        "accepted alignment has no PCM",
+                    )
+                })?;
+                let s_start = result.normalized_source_range.start as usize;
+                let len = (result.normalized_source_range.end
+                    - result.normalized_source_range.start)
+                    .min(result.capture_range.end - result.capture_range.start)
+                    as usize;
+                pair_captures.insert(result.capture_input_id.clone(), &capture.decoded);
+                (
+                    source
+                        .decoded
+                        .channel_samples
+                        .iter()
+                        .map(|c| &c[s_start..s_start + len])
+                        .collect(),
+                    len,
+                )
             } else {
                 (Vec::new(), 0)
             };
+            let mut lineage = vec![artifact.artifact_id.clone()];
+            if let Some((source, capture)) = pcm {
+                lineage.push(source.record.artifact_id.clone());
+                lineage.push(capture.record.artifact_id.clone());
+            }
+            pair_lineage.insert(result.capture_input_id.clone(), lineage);
             let transfer_h = read_transfer_h(&reader, &pair_name).map_err(err)?;
             pairs.insert(
                 result.capture_input_id.clone(),
@@ -544,7 +719,16 @@ impl Stage for ExpensiveAnalysisStage {
                 .cloned()
                 .collect();
             let regions = expensive::plan_regions(duration_s, &own_events, &e_cfg);
-            let chans: Vec<&[f64]> = dec.channel_samples.iter().map(|c| c.as_slice()).collect();
+            let comparison = pair_captures.get(&input_id).copied().unwrap_or(dec);
+            let mut lineage = dec.artifact_ids.clone();
+            if let Some(ids) = pair_lineage.get(&input_id) {
+                lineage.extend(ids.iter().cloned());
+            }
+            let chans: Vec<&[f64]> = comparison
+                .channel_samples
+                .iter()
+                .map(|c| c.as_slice())
+                .collect();
             for (i, region) in regions.iter().enumerate() {
                 let name = format!("{input_id}__r{i:03}");
                 let out = expensive::analyze_region(
@@ -565,11 +749,7 @@ impl Stage for ExpensiveAnalysisStage {
                         "triggers": region.triggers,
                     }),
                     alignment_id: None,
-                    parents: dec
-                        .artifact_ids
-                        .iter()
-                        .map(|a| a.as_str().to_string())
-                        .collect(),
+                    parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                 };
                 for tensor in &out.tensors {
                     write_tensor(&mut writer, tensor, prov.clone(), chunk_bytes).map_err(err)?;
@@ -591,7 +771,7 @@ impl Stage for ExpensiveAnalysisStage {
                     role: "expensive_features".into(),
                     path: PathBuf::from(format!("analysis/features/expensive/{name}.json")),
                     produced_by: Some(StageKind::ExpensiveAnalysis),
-                    inputs: dec.artifact_ids.clone(),
+                    inputs: lineage.clone(),
                     params: serde_json::json!({"triggers": region.triggers}),
                 });
             }
@@ -622,12 +802,24 @@ fn read_locate_result(
             format!("locate result {} unreadable: {e}", artifact.path.display()),
         )
     })?;
-    serde_json::from_value(body["result"].clone()).map_err(|e| {
+    let result: LocateResult = serde_json::from_value(body["result"].clone()).map_err(|e| {
         StageError::new(
             kind,
             format!("locate result {} malformed: {e}", artifact.path.display()),
         )
-    })
+    })?;
+    for pcm in [&result.source_pcm, &result.capture_pcm]
+        .into_iter()
+        .flatten()
+    {
+        if !artifact.inputs.contains(&pcm.artifact_id) {
+            return Err(StageError::new(
+                kind,
+                "locate_result lineage missing normalized PCM",
+            ));
+        }
+    }
+    Ok(result)
 }
 
 /// Read `intermediate/{pair}/transfer_h` — `[re, im] × bins`, the
@@ -639,7 +831,15 @@ fn read_transfer_h(
     reader: &al_dataset::reader::DatasetReader,
     pair: &str,
 ) -> io::Result<Option<Vec<(f64, f64)>>> {
-    let name = format!("{pair}/transfer_h");
+    read_complex_tensor(reader, pair, "transfer_h")
+}
+
+fn read_complex_tensor(
+    reader: &al_dataset::reader::DatasetReader,
+    pair: &str,
+    kind: &str,
+) -> io::Result<Option<Vec<(f64, f64)>>> {
+    let name = format!("{pair}/{kind}");
     let path = format!("intermediate/{name}");
     if !reader
         .artifacts("intermediate")
@@ -653,7 +853,7 @@ fn read_transfer_h(
     if shape.len() != 2 || shape[0] != 2 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("transfer_h tensor {path} has unexpected shape {shape:?}"),
+            format!("{kind} tensor {path} has unexpected shape {shape:?}"),
         ));
     }
     let bins = shape[1] as usize;
@@ -782,6 +982,48 @@ fn load_video_features(
         report.features,
         artifact.artifact_id.as_str().to_string(),
     )))
+}
+
+/// 選択された音声 stream の時計を ingest の正本から読む。
+/// secondary audio の原点を first audio と取り違えない。
+fn load_audio_origin(
+    input: &al_job::job::JobInput,
+    ctx: &StageContext<'_>,
+) -> Result<(f64, String), StageError> {
+    let fail = |msg: String| StageError::new(StageKind::CheapAnalysis, msg);
+    let declared = ctx
+        .manifest
+        .input_artifact(&input.input_id)
+        .ok_or_else(|| fail("missing declared input".into()))?;
+    let artifact = ctx
+        .manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "ingest_metadata" && a.inputs.contains(&declared))
+        .ok_or_else(|| fail("missing ingest metadata for audio clock".into()))?;
+    let path = checked_job_path(ctx.registry.job_dir(), &artifact.path)
+        .map_err(|e| fail(e.to_string()))?;
+    let metadata: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(path).map_err(|e| fail(e.to_string()))?)
+            .map_err(|e| fail(e.to_string()))?;
+    let streams: Vec<al_media::decoder::StreamResult> =
+        serde_json::from_value(metadata["decoder"]["streams"].clone())
+            .map_err(|e| fail(e.to_string()))?;
+    let timings: Vec<al_media::StreamTiming> =
+        serde_json::from_value(metadata["av_timing"].clone()).map_err(|e| fail(e.to_string()))?;
+    let selected = streams
+        .iter()
+        .find(|s| s.kind == "audio" && s.decoded)
+        .and_then(|s| s.stream);
+    let origin = timings
+        .iter()
+        .find(|t| {
+            Some(t.stream) == selected && t.observation.clock == al_media::timing::ClockKind::Audio
+        })
+        .filter(|t| t.observation.timebase_hz > 0)
+        .map(|t| t.start_tick as f64 / t.observation.timebase_hz as f64)
+        .unwrap_or(f64::NAN);
+    Ok((origin, artifact.artifact_id.to_string()))
 }
 
 fn prov(

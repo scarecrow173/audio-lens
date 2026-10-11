@@ -48,13 +48,14 @@ impl DecodedAudio {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct FmtChunk {
     format_tag: u16,
-    channels: u16,
-    sample_rate: u32,
+    pub(crate) channels: u16,
+    pub(crate) sample_rate: u32,
     byte_rate: u32,
     block_align: u16,
-    bits_per_sample: u16,
+    pub(crate) bits_per_sample: u16,
 }
 
 pub(crate) fn read_u16(data: &[u8], at: usize) -> Result<u16, MediaError> {
@@ -83,10 +84,7 @@ pub(crate) fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
     })
 }
 
-pub(crate) fn decode_samples(
-    fmt: &FmtChunk,
-    data: &[u8],
-) -> Result<(SampleFormat, String, Vec<f64>), MediaError> {
+pub(crate) fn sample_layout(fmt: &FmtChunk) -> Result<(SampleFormat, String, usize), MediaError> {
     let (sample_format, codec, bytes_per_sample): (SampleFormat, &str, usize) =
         match (fmt.format_tag, fmt.bits_per_sample) {
             (1, 8) => (SampleFormat::PcmU8, "pcm_u8", 1),
@@ -126,6 +124,14 @@ pub(crate) fn decode_samples(
         )));
     }
 
+    Ok((sample_format, codec.to_owned(), bytes_per_sample))
+}
+
+pub(crate) fn decode_samples(
+    fmt: &FmtChunk,
+    data: &[u8],
+) -> Result<(SampleFormat, String, Vec<f64>), MediaError> {
+    let (sample_format, codec, bytes_per_sample) = sample_layout(fmt)?;
     let frame_bytes = usize::from(fmt.block_align);
     if !data.len().is_multiple_of(frame_bytes) {
         return Err(MediaError::malformed("data chunk ends mid-frame"));
@@ -163,15 +169,16 @@ pub(crate) fn decode_samples(
 /// Located WAV structure: parsed `fmt ` plus the `data` chunk's byte
 /// range, so sample decoding can target a sub-range without holding
 /// the whole file.
-struct WavLayout {
-    fmt: FmtChunk,
+#[derive(Debug)]
+pub(crate) struct WavLayout {
+    pub(crate) fmt: FmtChunk,
     data_offset: u64,
     data_len: u64,
 }
 
 /// Walk RIFF chunk headers from a seekable source. Only the `fmt `
 /// body is read; `data` and unknown chunks are skipped by offset.
-fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaError> {
+pub(crate) fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaError> {
     let file_len = r
         .seek(SeekFrom::End(0))
         .map_err(|e| MediaError::malformed(format!("cannot seek WAV source: {e}")))?;
@@ -256,7 +263,7 @@ fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaError> {
         return Err(MediaError::malformed("fmt declares zero sample rate"));
     }
     let (data_offset, data_len) = pcm.ok_or_else(|| MediaError::malformed("missing data chunk"))?;
-    if !data_len.is_multiple_of(u64::from(fmt.block_align)) {
+    if fmt.block_align == 0 || !data_len.is_multiple_of(u64::from(fmt.block_align)) {
         return Err(MediaError::malformed("data chunk ends mid-frame"));
     }
     Ok(WavLayout {

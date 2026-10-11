@@ -9,10 +9,94 @@
 
 use serde::{Deserialize, Serialize};
 
-use al_core::AlignmentId;
+use al_core::{AlignmentId, ArtifactId};
 
 use crate::mixer::{MixerEstimate, fit_mix};
-use crate::result::LocateResult;
+use crate::normalize::{NormalizedParams, PreparedInput, bad};
+use crate::result::{LocateResult, PcmReference};
+
+/// 残差 signal version の配置と減算来歴。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub(crate) struct ResidualPcmParams {
+    pub pcm: NormalizedParams,
+    pub encoding: String,
+    pub parent_source: String,
+    pub parent_alignment: AlignmentId,
+    pub parent_artifact: ArtifactId,
+    pub source_pcm: PcmReference,
+    pub original_capture_pcm: PcmReference,
+    pub channel_transform: Vec<Vec<f64>>,
+    pub energy: ResidualEnergy,
+}
+
+/// 探索と同じ f64 サンプルを WAV に保存する。親の全 child で共有する。
+pub(crate) fn persist_residual(
+    prepared: &PreparedResidual,
+    source: &PreparedInput,
+    capture: &PreparedInput,
+    parent: &LocateResult,
+    parent_artifact: &ArtifactId,
+    ctx: &al_job::stage::StageContext<'_>,
+) -> std::io::Result<PreparedInput> {
+    let frames = capture.params.frames as usize;
+    if prepared.channels.len() != capture.params.channels as usize
+        || prepared
+            .channels
+            .iter()
+            .any(|c| c.len() != frames || c.iter().any(|s| !s.is_finite()))
+    {
+        return Err(bad("residual channel layout inconsistent"));
+    }
+    let artifact_id = ctx.registry.issue();
+    let path = std::path::PathBuf::from(format!(
+        "locate/residual/{}_{artifact_id}.wav",
+        source.decoded.input_id
+    ));
+    let samples: Vec<f64> = (0..frames)
+        .flat_map(|f| prepared.channels.iter().map(move |c| c[f]))
+        .collect();
+    al_dataset::write_wav(
+        &al_job::fsutil::checked_job_path(ctx.registry.job_dir(), &path)?,
+        al_media::wav::WavEncoding::Float64,
+        capture.params.channels,
+        capture.params.sample_rate,
+        &samples,
+    )?;
+    let params = ResidualPcmParams {
+        pcm: capture.params.clone(),
+        encoding: "wav-f64le".into(),
+        parent_source: source.decoded.input_id.clone(),
+        parent_alignment: parent.alignment_id.clone(),
+        parent_artifact: parent_artifact.clone(),
+        source_pcm: source.reference(),
+        original_capture_pcm: capture.reference(),
+        channel_transform: prepared.estimate.matrix.clone(),
+        energy: prepared.energy.clone(),
+    };
+    let record = al_job::manifest::ArtifactRecord {
+        artifact_id: artifact_id.clone(),
+        role: "residual".into(),
+        path,
+        produced_by: Some(al_core::StageKind::Locate),
+        inputs: vec![
+            source.record.artifact_id.clone(),
+            capture.record.artifact_id.clone(),
+            parent_artifact.clone(),
+        ],
+        params: serde_json::to_value(params).map_err(bad)?,
+    };
+    Ok(PreparedInput {
+        decoded: crate::decode::DecodedInput {
+            input_id: capture.decoded.input_id.clone(),
+            sample_rate: capture.params.sample_rate,
+            channels: capture.params.channels,
+            channel_samples: prepared.channels.clone(),
+            artifact_ids: vec![artifact_id],
+        },
+        record,
+        params: capture.params.clone(),
+    })
+}
 
 /// Energy figures bracketing the subtraction.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -26,6 +110,8 @@ pub struct ResidualEnergy {
 /// Result of a two-stage residual search for one source pair.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ResidualSearch {
+    /// 探索に使った残差の明示参照。
+    pub residual_pcm: Option<PcmReference>,
     /// Parent source identity (manifest input id).
     pub parent_source: String,
     /// Alignment id of the parent acceptance that was subtracted.
@@ -139,6 +225,7 @@ pub fn assemble_residual_search(
         .sqrt();
     let child_accepted = f64::from(child.accepted as u8);
     ResidualSearch {
+        residual_pcm: child.capture_pcm.clone(),
         parent_source: parent_source.to_string(),
         parent_alignment,
         estimated_gain: gain,
@@ -193,6 +280,9 @@ mod tests {
             capture_input_id: "cap".into(),
             source_range: SampleRange { start: 0, end: 1 },
             capture_range: SampleRange { start: 0, end: 1 },
+            normalized_source_range: SampleRange { start: 0, end: 0 },
+            source_pcm: None,
+            capture_pcm: None,
             evidence: vec![MethodEvidence {
                 method: "stub".into(),
                 method_version: "0".into(),

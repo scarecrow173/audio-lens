@@ -9,6 +9,7 @@ use al_core::Validity;
 
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::dsp;
+use crate::prepared::{PreparedChannel, bands_for_rate};
 
 /// Minimum template energy to attempt correlation; below this the
 /// method reports `SilenceInsufficientEnergy`.
@@ -18,6 +19,104 @@ const MIN_PEAK_TO_BACKGROUND: f64 = 2.0;
 /// Maximum candidates reported per method.
 const MAX_CANDIDATES: usize = 8;
 
+/// 粗候補と原レート近傍精密化の実行記録。合議用の証拠ではない。
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct CoarseSearch {
+    /// 元レートと粗探索レート。比は必ずしも整数にならない。
+    pub original_rate: u32,
+    pub coarse_rate: u32,
+    /// 元レートでの閉区間 lag 範囲。
+    pub search_range: [u64; 2],
+    /// 原レートでの左右の近傍幅。
+    pub neighborhood_radius: usize,
+    /// 原レート座標へ丸めた粗候補。周期信号の複数候補を保持する。
+    pub coarse_positions: Vec<u64>,
+    /// 原レートの近傍で精密化した候補。順位・統計を最終証拠に流用しない。
+    pub refined_positions: Vec<u64>,
+    /// F3 の全探索域証拠契約により常に true。
+    pub full_search_required: bool,
+    pub fallback_reason: &'static str,
+}
+
+/// 長尺素材 (2 秒以上) の候補提案。NCC の粗候補を原レートで再探索する。
+/// 近傍だけでは全域の背景・競合・幅を保証できず、全手法は別途全探索する。
+pub fn propose_coarse_to_fine(
+    template: &[f64],
+    signal: &[f64],
+    rate: u32,
+    prepared_template: &PreparedChannel,
+    prepared_signal: &PreparedChannel,
+) -> Option<CoarseSearch> {
+    let mut search = propose_coarse(template, signal, rate, prepared_template, prepared_signal)?;
+    let corr = dsp::ncc(template, signal, signal.len() - template.len());
+    refine_coarse(&mut search, &corr);
+    Some(search)
+}
+
+fn propose_coarse(
+    template: &[f64],
+    signal: &[f64],
+    rate: u32,
+    prepared_template: &PreparedChannel,
+    prepared_signal: &PreparedChannel,
+) -> Option<CoarseSearch> {
+    if template.is_empty() || template.len() < rate as usize * 2 || signal.len() < template.len() {
+        return None;
+    }
+    let t = prepared_template.coarse_samples()?;
+    let s = prepared_signal.coarse_samples()?;
+    let coarse_rate = prepared_template.coarse_rate;
+    if s.len() < t.len() {
+        return None;
+    }
+    let max_lag = signal.len() - template.len();
+    let radius = prepared_signal.radius;
+    let coarse = peaks_from_correlation(&dsp::ncc(t, s, s.len() - t.len()), MAX_CANDIDATES);
+    let positions: Vec<_> = coarse
+        .iter()
+        .map(|c| {
+            ((c.position as u128 * rate as u128 + coarse_rate as u128 / 2) / coarse_rate as u128)
+                .min(max_lag as u128) as u64
+        })
+        .collect();
+    let reason = if positions.is_empty() {
+        "no-coarse-candidates"
+    } else if positions
+        .iter()
+        .any(|&p| p <= radius as u64 || max_lag as u64 - p <= radius as u64)
+    {
+        "boundary-candidate"
+    } else {
+        "global-evidence-required"
+    };
+    Some(CoarseSearch {
+        original_rate: rate,
+        coarse_rate,
+        search_range: [0, max_lag as u64],
+        neighborhood_radius: radius,
+        coarse_positions: positions,
+        refined_positions: Vec::new(),
+        full_search_required: true,
+        fallback_reason: reason,
+    })
+}
+
+fn refine_coarse(search: &mut CoarseSearch, corr: &[f64]) {
+    // 全域証拠に必要な原レート NCC を近傍精密化にも共用し、長尺 FFT の重複を避ける。
+    for &position in &search.coarse_positions {
+        let lo = (position as usize).saturating_sub(search.neighborhood_radius);
+        let hi = (position as usize + search.neighborhood_radius).min(corr.len() - 1);
+        if let Some(candidate) = peaks_from_correlation(&corr[lo..=hi], 1).first() {
+            search
+                .refined_positions
+                .push(lo as u64 + candidate.position);
+        }
+    }
+    if !search.coarse_positions.is_empty() && search.refined_positions.is_empty() {
+        search.fallback_reason = "no-refined-candidates";
+    }
+}
+
 /// One independent locate method.
 pub trait LocateMethod {
     /// Stable method id.
@@ -26,6 +125,18 @@ pub trait LocateMethod {
     fn version(&self) -> &'static str;
     /// Produce evidence for `template` inside `signal`.
     fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence;
+
+    /// 入力準備層が共有するフィルタを利用する。証拠の探索域は変更しない。
+    fn locate_prepared(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        sample_rate: u32,
+        _prepared_template: &PreparedChannel,
+        _prepared_signal: &PreparedChannel,
+    ) -> MethodEvidence {
+        self.locate(template, signal, sample_rate)
+    }
 }
 
 fn energy(x: &[f64]) -> f64 {
@@ -184,6 +295,28 @@ fn evidence_from_corr(method: &'static str, version: &'static str, corr: &[f64])
 /// Full-band normalized cross-correlation.
 pub struct FullNcc;
 
+impl FullNcc {
+    /// 粗候補を提案し、必須の全探索曲線を精密化と最終証拠で一度だけ共用する。
+    pub fn locate_coarse_to_fine(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        rate: u32,
+        prepared_template: &PreparedChannel,
+        prepared_signal: &PreparedChannel,
+    ) -> (MethodEvidence, Option<CoarseSearch>) {
+        if let Err(e) = preflight(self.id(), self.version(), template, signal) {
+            return (e, None);
+        }
+        let mut search = propose_coarse(template, signal, rate, prepared_template, prepared_signal);
+        let corr = dsp::ncc(template, signal, signal.len() - template.len());
+        if let Some(search) = &mut search {
+            refine_coarse(search, &corr);
+        }
+        (evidence_from_corr(self.id(), self.version(), &corr), search)
+    }
+}
+
 impl LocateMethod for FullNcc {
     fn id(&self) -> &'static str {
         "full_ncc"
@@ -205,41 +338,18 @@ impl LocateMethod for FullNcc {
 pub struct BandNcc;
 
 impl BandNcc {
-    /// Octave band edges (Hz) applied before summing NCC curves.
-    const BANDS: &'static [(f64, f64)] = &[
-        (20.0, 250.0),
-        (250.0, 1000.0),
-        (1000.0, 4000.0),
-        (4000.0, 16000.0),
-        (16000.0, 96000.0),
-    ];
-}
-
-impl LocateMethod for BandNcc {
-    fn id(&self) -> &'static str {
-        "band_ncc"
-    }
-    fn version(&self) -> &'static str {
-        "1"
-    }
-    fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence {
-        if let Err(e) = preflight(self.id(), self.version(), template, signal) {
-            return e;
-        }
-        let nyquist = f64::from(sample_rate) / 2.0;
-        let mut acc = vec![0.0; signal.len() - template.len() + 1];
-        let mut bands_used = 0usize;
-        for &(lo, hi) in Self::BANDS {
-            if lo >= nyquist {
+    fn evidence_from_bands<'a>(
+        &self,
+        curve_len: usize,
+        bands: impl Iterator<Item = (&'a [f64], &'a [f64])>,
+    ) -> MethodEvidence {
+        let mut acc = vec![0.0; curve_len];
+        let mut bands_used = 0;
+        for (t, s) in bands {
+            if energy(t) < MIN_ENERGY {
                 continue;
             }
-            let t = dsp::bandpass(template, sample_rate, lo, hi.min(nyquist));
-            if energy(&t) < MIN_ENERGY {
-                continue; // band absent in the template — skip, not reject
-            }
-            let s = dsp::bandpass(signal, sample_rate, lo, hi.min(nyquist));
-            let corr = dsp::ncc(&t, &s, s.len().saturating_sub(t.len()));
-            for (a, c) in acc.iter_mut().zip(&corr) {
+            for (a, c) in acc.iter_mut().zip(dsp::ncc(t, s, s.len() - t.len())) {
                 *a += c;
             }
             bands_used += 1;
@@ -253,6 +363,62 @@ impl LocateMethod for BandNcc {
             );
         }
         evidence_from_corr(self.id(), self.version(), &acc)
+    }
+}
+
+impl LocateMethod for BandNcc {
+    fn id(&self) -> &'static str {
+        "band_ncc"
+    }
+    fn version(&self) -> &'static str {
+        "1"
+    }
+    fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence {
+        if let Err(e) = preflight(self.id(), self.version(), template, signal) {
+            return e;
+        }
+        let bands = bands_for_rate(sample_rate);
+        let templates = dsp::bandpass_many(template, sample_rate, &bands);
+        // 素材に存在する帯域だけキャプチャを処理する。区間と FFT grid は従来と同じ。
+        let active: Vec<_> = bands
+            .iter()
+            .copied()
+            .zip(templates)
+            .filter(|(_, t)| energy(t) >= MIN_ENERGY)
+            .collect();
+        let active_bands: Vec<_> = active.iter().map(|(band, _)| *band).collect();
+        let signals = dsp::bandpass_many(signal, sample_rate, &active_bands);
+        self.evidence_from_bands(
+            signal.len() - template.len() + 1,
+            active
+                .iter()
+                .zip(&signals)
+                .map(|((_, t), s)| (t.as_slice(), s.as_slice())),
+        )
+    }
+
+    fn locate_prepared(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        _sample_rate: u32,
+        prepared_template: &PreparedChannel,
+        prepared_signal: &PreparedChannel,
+    ) -> MethodEvidence {
+        if let Err(e) = preflight(self.id(), self.version(), template, signal) {
+            return e;
+        }
+        self.evidence_from_bands(
+            signal.len() - template.len() + 1,
+            prepared_template
+                .bands()
+                .iter()
+                .zip(prepared_signal.bands())
+                .map(|((band, t), (signal_band, s))| {
+                    assert_eq!(band, signal_band);
+                    (t.as_ref(), s.as_ref())
+                }),
+        )
     }
 }
 
@@ -372,6 +538,20 @@ mod tests {
         let ev = FullNcc.locate(&template, &signal, 48000);
         assert_eq!(ev.validity, Validity::Valid);
         assert_eq!(ev.candidates[0].position, 1500);
+    }
+
+    #[test]
+    fn correlation_methods_rank_inverted_source_by_magnitude_and_keep_signed_score() {
+        let signal = noise_signal(7, 4097);
+        let template: Vec<_> = signal[1500..2001].iter().map(|v| -v).collect();
+        let methods: Vec<Box<dyn LocateMethod>> =
+            vec![Box::new(FullNcc), Box::new(BandNcc), Box::new(GccPhat)];
+        for method in methods {
+            let evidence = method.locate(&template, &signal, 48000);
+            assert_eq!(evidence.validity, Validity::Valid, "{}", method.id());
+            assert_eq!(evidence.candidates[0].position, 1500, "{}", method.id());
+            assert!(evidence.candidates[0].score < 0.0, "{}", method.id());
+        }
     }
 
     #[test]

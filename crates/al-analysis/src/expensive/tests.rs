@@ -2,6 +2,394 @@ use super::*;
 use crate::events::CandidateEvent;
 use al_dataset::types::Value;
 
+#[test]
+fn windowed_expensive_records_keep_the_analysis_rate_even_when_invalid() {
+    let samples = noise(2048, 33);
+    for rate in [8000, 32000] {
+        for valid in [true, false] {
+            let region = TriggeredRegion {
+                start_s: 0.0,
+                end_s: samples.len() as f64 / rate as f64,
+                triggers: vec!["manual".into()],
+                validity: if valid {
+                    Validity::Valid
+                } else {
+                    Validity::LowCoherence
+                },
+                confidence: Confidence::High,
+                has_valid_trigger: valid,
+            };
+            let out = analyze_region(
+                "in",
+                "r",
+                &[&samples],
+                rate,
+                &region,
+                None,
+                None,
+                &ExpensiveConfig {
+                    stft_window: 64,
+                    stft_hop: 32,
+                    ..Default::default()
+                },
+            );
+            let resolutions: Vec<_> = out.records.iter().filter_map(|r| r.resolution).collect();
+            assert!(!resolutions.is_empty());
+            assert!(resolutions.iter().all(|r| r.sample_rate == rate));
+        }
+    }
+}
+
+#[test]
+fn ac29_short_secondary_channel_is_unsupported_without_panicking() {
+    let primary = noise(4096, 29);
+    let secondary = noise(512, 30);
+    let region = TriggeredRegion {
+        start_s: 1.0,
+        end_s: 2.0,
+        triggers: vec!["manual".into()],
+        validity: Validity::Valid,
+        confidence: Confidence::High,
+        has_valid_trigger: true,
+    };
+    let cfg = ExpensiveConfig {
+        stft_window: 64,
+        stft_hop: 32,
+        ..Default::default()
+    };
+    let out = analyze_region(
+        "in",
+        "r",
+        &[&primary, &secondary],
+        1024,
+        &region,
+        None,
+        None,
+        &cfg,
+    );
+    let coherence = record(&out, "exp.freq_lr_coherence");
+    assert_eq!(coherence.validity, Validity::InsufficientSupport);
+    assert_eq!(coherence.channels, Some(ChannelSelector::ChannelPair(0, 1)));
+    assert!(val(coherence).is_nan());
+}
+
+fn ac29_run(
+    sig: &[&[f64]],
+    rate: u32,
+    window: usize,
+    pair: Option<&PairEvidence<'_>>,
+) -> ExpensiveResult {
+    let region = TriggeredRegion {
+        start_s: 0.0,
+        end_s: sig[0].len() as f64 / rate as f64,
+        triggers: vec!["manual".into()],
+        validity: Validity::Valid,
+        confidence: Confidence::High,
+        has_valid_trigger: true,
+    };
+    analyze_region(
+        "in",
+        "r",
+        sig,
+        rate,
+        &region,
+        None,
+        pair,
+        &ExpensiveConfig {
+            stft_window: window,
+            stft_hop: window / 2,
+            ..Default::default()
+        },
+    )
+}
+
+#[test]
+fn ac29_no_splice_has_valid_zero_count_but_no_first_time() {
+    let sig = vec![0.01; 4096];
+    let out = ac29_run(&[&sig], 48000, 256, None);
+    assert_eq!(val(record(&out, "exp.splice_count")), 0.0);
+    assert_eq!(record(&out, "exp.splice_count").validity, Validity::Valid);
+    assert_eq!(
+        record(&out, "exp.splice_first_s").validity,
+        Validity::InsufficientSupport
+    );
+    assert!(val(record(&out, "exp.splice_first_s")).is_nan());
+}
+
+#[test]
+fn ac29_no_codec_candidate_is_not_valid_zero() {
+    let sig = noise(1024, 29);
+    let out = ac29_run(&[&sig], 48000, 256, None);
+    for id in ["exp.codec_block_size", "exp.codec_block_score"] {
+        let r = record(&out, id);
+        assert_eq!(r.validity, Validity::InsufficientSupport, "{id}");
+        assert!(val(r).is_nan());
+        assert_eq!(r.support_count, 0);
+    }
+}
+
+#[test]
+fn ac29_zero_fold_scores_have_no_source_rate_candidate() {
+    let sig = vec![0.0; 8192];
+    let out = ac29_run(&[&sig], 48000, 1024, None);
+    let r = record(&out, "exp.src_candidate_rate");
+    assert_eq!(r.validity, Validity::InsufficientSupport);
+    assert!(val(r).is_nan());
+}
+
+#[test]
+fn ac29_unsupported_gates_emit_records() {
+    let sig = vec![0.0; 1024];
+    let out = ac29_run(&[&sig], 48000, 256, None);
+    let ids = [
+        "exp.cutoff_hz",
+        "exp.narrowband_peak_count",
+        "exp.narrowband_notch_count",
+        "exp.thd_ratio",
+        "exp.spectral_hole_ratio",
+        "exp.repeat_block_score",
+    ];
+    let missing: Vec<_> = ids
+        .iter()
+        .filter(|id| !out.records.iter().any(|r| &r.feature_id == *id))
+        .collect();
+    assert!(missing.is_empty(), "missing: {missing:?}");
+    for id in [
+        "exp.cutoff_hz",
+        "exp.narrowband_peak_count",
+        "exp.narrowband_notch_count",
+        "exp.thd_ratio",
+        "exp.spectral_hole_ratio",
+        "exp.repeat_block_score",
+    ] {
+        let r = record(&out, id);
+        assert_eq!(r.validity, Validity::InsufficientSupport, "{id}");
+        assert!(val(r).is_nan(), "{id}");
+        assert!(r.invalid_reason.is_some());
+    }
+}
+
+#[test]
+fn ac29_empty_quefrency_interval_emits_invalid_echo_records() {
+    let sig = vec![0.0; 1024];
+    let out = ac29_run(&[&sig], 1_000_000, 64, None);
+    let ids = [
+        "exp.echo_delay_s",
+        "exp.cepstrum_prominence",
+        "exp.echo2_delay_s",
+        "exp.echo2_level_ratio",
+    ];
+    let missing: Vec<_> = ids
+        .iter()
+        .filter(|id| !out.records.iter().any(|r| &r.feature_id == *id))
+        .collect();
+    assert!(missing.is_empty(), "missing: {missing:?}");
+    for id in [
+        "exp.echo_delay_s",
+        "exp.cepstrum_prominence",
+        "exp.echo2_delay_s",
+        "exp.echo2_level_ratio",
+    ] {
+        assert_eq!(
+            record(&out, id).validity,
+            Validity::InsufficientSupport,
+            "{id}"
+        );
+    }
+}
+
+#[test]
+fn ac29_ill_conditioned_coefficients_are_demoted() {
+    let src = noise(8192, 1);
+    let other: Vec<f64> = src
+        .iter()
+        .zip(noise(8192, 2))
+        .map(|(&a, b)| a + 0.001 * b)
+        .collect();
+    let source_channels: [&[f64]; 2] = [&src, &other];
+    let pair = aligned_pair(&source_channels, src.len());
+    let out = ac29_run(&[&src], 48000, 1024, Some(&pair));
+    let coeffs: Vec<_> = out
+        .records
+        .iter()
+        .filter(|r| {
+            r.feature_id == "exp.mix_band_coeff"
+                && r.params["condition"].as_f64().is_some_and(|c| c > 1e3)
+        })
+        .collect();
+    assert!(!coeffs.is_empty());
+    for r in coeffs {
+        assert_eq!(r.validity, Validity::LowCoherence);
+        assert!(r.invalid_reason.is_some());
+    }
+}
+
+#[test]
+fn ac29_pair_summaries_do_not_claim_capture_channel_zero() {
+    let sig = noise(8192, 29);
+    let out = ac29_run(&[&sig], 48000, 256, None);
+    for id in [
+        "exp.level_transfer_slope",
+        "exp.level_transfer_corr",
+        "exp.mix_fit_quality",
+        "exp.mix_polarity",
+        "exp.mix_condition",
+        "exp.ir_early_late_ratio",
+        "exp.ir_decay_db_per_s",
+        "exp.local_time_map",
+    ] {
+        assert_eq!(record(&out, id).channels, None, "{id}");
+    }
+}
+
+#[test]
+fn ac29_ir_windows_are_invariant_to_circular_peak_position() {
+    let sig = noise(8192, 29);
+    let measure = |shift: usize| {
+        let n = 1024;
+        let mut re = vec![0.0; n];
+        re[shift] = 1.0;
+        re[(shift + n - 1) % n] = 0.5;
+        re[(shift + 300) % n] = 0.1;
+        let mut im = vec![0.0; n];
+        al_locate::dsp::fft(&mut re, &mut im, false);
+        let mut pair = aligned_pair(&[], 0);
+        pair.transfer_h = Some(re.into_iter().zip(im).collect());
+        let out = ac29_run(&[&sig], 48000, 256, Some(&pair));
+        val(record(&out, "exp.ir_early_late_ratio"))
+    };
+    let zero = measure(0);
+    assert!((zero - 125.0).abs() < 1e-6, "{zero}");
+    assert!((measure(900) - zero).abs() < 1e-6);
+}
+
+#[test]
+fn ac29_mix_keeps_channel_identity_after_short_channel_is_excluded() {
+    // channel family 境界を直接検証する。通常の orchestrator は ch0 timeline
+    // で早期 return するため、この別ケースを family の入力で固定する。
+    let short = noise(512, 29);
+    let long = noise(4096, 30);
+    let source = &long[1024..2048];
+    let source_channels = [source];
+    let mut pair = aligned_pair(&source_channels, 1024);
+    pair.cap_start = 1024;
+    let cfg = ExpensiveConfig {
+        stft_window: 64,
+        stft_hop: 32,
+        ..Default::default()
+    };
+    let region = TriggeredRegion {
+        start_s: 1.0,
+        end_s: 2.0,
+        triggers: vec!["manual".into()],
+        validity: Validity::Valid,
+        confidence: Confidence::High,
+        has_valid_trigger: true,
+    };
+    let m = stft(source, 64, 32, 1024);
+    let power = m.power();
+    let mean_power: Vec<f64> = (0..m.fft_size)
+        .map(|k| power.iter().map(|f| f[k]).sum::<f64>() / m.frames() as f64)
+        .collect();
+    let ctx = RegionCtx {
+        region_name: "r",
+        rate: 1024,
+        s0: 1024,
+        s1: 2048,
+        chans: &[&short, &long],
+        segs: vec![&[], source],
+        bin_hz: 1024.0 / m.fft_size as f64,
+        total_power: mean_power.iter().sum(),
+        one_sided_power: mean_power[..m.fft_size / 2].iter().sum(),
+        mean_power,
+        stft: m,
+        dictionary: None,
+        pair: Some(&pair),
+    };
+    let mut out = ExpensiveResult::default();
+    channel::run(&ctx, &Emit::new("in", &region, &cfg, ctx.rate), &mut out);
+    let coeffs: Vec<_> = out
+        .records
+        .iter()
+        .filter(|r| r.feature_id == "exp.mix_band_coeff" && r.validity == Validity::Valid)
+        .collect();
+    assert!(!coeffs.is_empty());
+    assert!(
+        coeffs
+            .iter()
+            .all(|r| r.channels == Some(ChannelSelector::Channel(1)))
+    );
+    assert!(
+        out.records
+            .iter()
+            .any(|r| r.feature_id == "exp.mix_band_coeff"
+                && r.channels == Some(ChannelSelector::Channel(0))
+                && r.validity == Validity::InsufficientSupport)
+    );
+}
+
+#[test]
+fn ac29_validity_categories_keep_first_non_valid_without_severity_order() {
+    assert_eq!(
+        first_non_valid(Validity::Valid, Validity::LowCoherence),
+        Validity::LowCoherence
+    );
+    assert_eq!(
+        first_non_valid(Validity::LowCoherence, Validity::DecodeInputUnavailable),
+        Validity::LowCoherence
+    );
+    assert_eq!(
+        first_non_valid(Validity::DecodeInputUnavailable, Validity::LowCoherence),
+        Validity::DecodeInputUnavailable
+    );
+}
+
+#[test]
+fn ac29_codec_periodicity_measures_raw_boundary_energy() {
+    let sig: Vec<f64> = (0..576 * 8)
+        .map(|i| if (i / 64) % 9 == 0 { 0.1 } else { 0.01 })
+        .collect();
+    let out = ac29_run(&[&sig], 48000, 256, None);
+    assert_eq!(val(record(&out, "exp.codec_block_size")), 576.0);
+    assert!((val(record(&out, "exp.codec_block_score")) - 100.0).abs() < 1e-8);
+}
+
+#[test]
+fn ac29_measured_pair_summaries_keep_pair_scope_and_alignment() {
+    let sig: Vec<f64> = noise(16384, 29)
+        .into_iter()
+        .enumerate()
+        .map(|(i, v)| v * (0.01 + i as f64 / 16384.0))
+        .collect();
+    let source_channels: [&[f64]; 1] = [&sig];
+    let mut pair = aligned_pair(&source_channels, sig.len());
+    pair.transfer_h = Some(vec![(1.0, 0.0); 1024]);
+    let out = ac29_run(&[&sig], 48000, 256, Some(&pair));
+    for id in [
+        "exp.level_transfer_slope",
+        "exp.level_transfer_corr",
+        "exp.mix_fit_quality",
+        "exp.mix_polarity",
+        "exp.mix_condition",
+        "exp.ir_early_late_ratio",
+        "exp.local_time_map",
+    ] {
+        let r = record(&out, id);
+        assert_eq!(r.channels, None, "{id}");
+        assert_eq!(r.validity, Validity::Valid, "{id}");
+        assert_eq!(r.alignment_id.as_deref(), Some("aln-test"), "{id}");
+    }
+    // mono-to-mono の実測は pair summary のパラメータに明示する。
+    assert_eq!(
+        record(&out, "exp.local_time_map").params["capture_channel"],
+        0
+    );
+    assert_eq!(
+        record(&out, "exp.level_transfer_slope").params["source_channel"],
+        0
+    );
+}
+
 fn ev(kind: EventKind, start: f64, end: Option<f64>) -> CandidateEvent {
     ev_with(kind, start, end, Validity::Valid, Confidence::High)
 }

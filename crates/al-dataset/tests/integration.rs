@@ -22,6 +22,69 @@ fn tmp(tag: &str) -> PathBuf {
     dir
 }
 
+#[test]
+fn partial_input_metadata_has_one_manifest_owner() {
+    let dir = tmp("partial-owner");
+    use al_job::manifest::{ArtifactRecord, Manifest};
+    use al_job::registry::ArtifactRegistry;
+    use al_job::stage::{Stage, StageContext};
+    let mut cap = input(InputRole::CaptureBug, dir.join("cap.avi"));
+    cap.source_sha256 = Some("aa".repeat(32));
+    let mut manifest = Manifest::new(
+        JobId::new(),
+        vec![cap],
+        serde_json::json!({}),
+        &[StageKind::Ingest, StageKind::Dataset],
+    );
+    let id = manifest.inputs[0].input_id.clone();
+    let declared = manifest.input_artifact(&id).unwrap();
+    let meta_rel = PathBuf::from("inputs")
+        .join(id.as_str())
+        .join("metadata.json");
+    fs::create_dir_all(dir.join(&meta_rel).parent().unwrap()).unwrap();
+    fs::write(
+        dir.join(&meta_rel),
+        serde_json::to_vec(&serde_json::json!({"audio": null, "source_hash": "aa".repeat(32)}))
+            .unwrap(),
+    )
+    .unwrap();
+    manifest.artifacts.push(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "ingest_metadata".into(),
+        path: meta_rel,
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![declared],
+        params: serde_json::json!({}),
+    });
+    let registry = ArtifactRegistry::new(&dir);
+    let config = serde_json::json!({});
+    let produced = DatasetStage::new()
+        .run(&StageContext {
+            manifest: &manifest,
+            registry: &registry,
+            config: &config,
+        })
+        .unwrap();
+    manifest.artifacts.extend(produced);
+    let missing = manifest
+        .artifacts
+        .iter()
+        .find(|a| a.role == "dataset_input_unavailable")
+        .unwrap();
+    assert_eq!(
+        manifest
+            .artifacts
+            .iter()
+            .filter(|a| a.path == missing.path)
+            .count(),
+        1
+    );
+    let meta: serde_json::Value =
+        serde_json::from_slice(&fs::read(dir.join(&missing.path)).unwrap()).unwrap();
+    assert!(meta["source_hash"].is_string());
+    fs::remove_dir_all(&dir).unwrap();
+}
+
 fn prov() -> Provenance {
     Provenance {
         input_id: "IN-1".into(),
