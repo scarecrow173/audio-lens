@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "SIMD 算術クレート基盤と DSP カーネル高速化"
 created: "2026-10-10"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
@@ -29,7 +29,8 @@ relations:
     - "docs/adr/simd-arithmetic-pulp.md"
   derived-by: []
   verifies: []
-  verified-by: []
+  verified-by:
+    - "docs/test-specs/simd-dsp-foundation.md"
   references: []
   defers: []
   deferred-by: []

@@ -1,10 +1,10 @@
 ---
-id: "TASK-035fPlMnOkJiHgFeDcBaZ"
+id: "TASK-035futl9MJWE3vMQ4d6QKJ"
 type: "task"
 status: "done"
 title: "al-math: least_squares を Householder QR 化"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []

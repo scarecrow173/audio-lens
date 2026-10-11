@@ -1,10 +1,10 @@
 ---
-id: "TSPEC-035jZxCvBnMqWeRtYuIo"
+id: "TSPEC-035jRegcnGwUqH1RD6oUtJ"
 type: "test-spec"
 status: "proposed"
 title: "メディア形式拡大・正規化アーキテクチャと解析精度拡張"
 created: "2026-10-09"
-updated: "2026-10-10"
+updated: "2026-10-12"
 owners: []
 relations:
   source: []
@@ -27,7 +27,8 @@ relations:
   derives-from: []
   derived-by: []
   verifies:
-    - "docs/plans/media-format-analysis-extensions.md"
+    - "docs/adr/media-decoder-backend.md"
+    - "docs/designs/media-format-analysis-extensions.md"
     - "docs/specs/media-ingest.md"
     - "docs/specs/reference-analysis.md"
   verified-by: []
@@ -44,7 +45,8 @@ metadata:
 
 ## Verifies
 
-- `docs/plans/media-format-analysis-extensions.md`
+- `docs/adr/media-decoder-backend.md`
+- `docs/designs/media-format-analysis-extensions.md`
 - `docs/specs/media-ingest.md`
 - `docs/specs/reference-analysis.md`
 
