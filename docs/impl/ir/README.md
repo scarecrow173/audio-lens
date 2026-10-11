@@ -45,6 +45,7 @@ Directory: `docs/impl/ir`
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
 | resume-reproduction-tests | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | stage-runner | [stage-runner.md](./stage-runner.md) |
+| al-math-envelope-fft-size-assert | [spectral-envelope-fft-size-entry-assert.md](./spectral-envelope-fft-size-entry-assert.md) |
 | timing-observation | [timing-observation.md](./timing-observation.md) |
 | viz-dataset-reads | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | viz-events-summary | [viz-events-summary.md](./viz-events-summary.md) |
