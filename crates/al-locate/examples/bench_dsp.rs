@@ -82,21 +82,22 @@ fn main() {
     let mut real = sig.clone();
     real.resize(n, 0.0);
     let plan = al_math::fft::Fft::new(n);
-    let mut complex = vec![al_math::c64::new(0.0, 0.0); n];
+    let mut cre = vec![0.0; n];
+    let mut cim = vec![0.0; n];
     bench("complex fft 4M (reused plan)", 7, &mut || {
-        for (z, &r) in complex.iter_mut().zip(&real) {
-            *z = al_math::c64::new(r, 0.0);
-        }
-        plan.transform(&mut complex, false);
-        std::hint::black_box(&complex);
+        cre.copy_from_slice(&real);
+        cim.iter_mut().for_each(|v| *v = 0.0);
+        plan.transform(&mut cre, &mut cim, false);
+        std::hint::black_box(&cre);
     });
     let mut real_plan = al_math::fft::RealFft::new(n);
-    let mut spectrum = vec![al_math::c64::new(0.0, 0.0); n / 2 + 1];
+    let mut spec_re = vec![0.0; n / 2 + 1];
+    let mut spec_im = vec![0.0; n / 2 + 1];
     bench("rfft 4M (reused plan/scratch)", 7, &mut || {
-        real_plan.forward(&real, &mut spectrum);
-        std::hint::black_box(&spectrum);
+        real_plan.forward(&real, &mut spec_re, &mut spec_im);
+        std::hint::black_box(&spec_re);
     });
-    drop((plan, complex, real_plan, real, spectrum));
+    drop((plan, cre, cim, real_plan, real, spec_re, spec_im));
 
     bench("NCC 2.4M x 8k (fft corr)", 3, &mut || {
         // Same FFT-correlation the locate methods use: gcc_phat's

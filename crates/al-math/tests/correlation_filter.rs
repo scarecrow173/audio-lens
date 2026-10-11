@@ -91,13 +91,14 @@ fn shared_bandpass_preserves_mask_boundaries_and_endpoints() {
     assert_eq!(filter::bandpass(&[2.0], 256, 0.0, 1.0), vec![2.0]);
 }
 
-fn complex_spectrum(input: &[f64], n: usize) -> Vec<al_math::c64> {
-    let mut spectrum = vec![al_math::c64::new(0.0, 0.0); n];
-    for (z, &value) in spectrum.iter_mut().zip(input) {
-        z.re = value;
+fn complex_spectrum(input: &[f64], n: usize) -> (Vec<f64>, Vec<f64>) {
+    let mut re = vec![0.0; n];
+    let mut im = vec![0.0; n];
+    for (z, &value) in re.iter_mut().zip(input) {
+        *z = value;
     }
-    al_math::fft::Fft::new(n).transform(&mut spectrum, false);
-    spectrum
+    al_math::fft::Fft::new(n).transform(&mut re, &mut im, false);
+    (re, im)
 }
 
 #[test]
@@ -106,46 +107,50 @@ fn real_kernels_preserve_previous_complex_spectrum_contract() {
         let input = noise(len);
         let n = len.next_power_of_two();
         for (lo, hi) in [(0.0, 128.0), (10.0, 60.0), (128.0, 129.0), (70.0, 60.0)] {
-            let mut spectrum = complex_spectrum(&input, n);
-            for (k, value) in spectrum.iter_mut().enumerate() {
+            let (mut spectrum_re, mut spectrum_im) = complex_spectrum(&input, n);
+            for k in 0..n {
                 let f = 256.0 / n as f64 * k.min(n - k) as f64;
                 if f < lo || f >= hi {
-                    *value = al_math::c64::new(0.0, 0.0);
+                    spectrum_re[k] = 0.0;
+                    spectrum_im[k] = 0.0;
                 }
             }
-            al_math::fft::Fft::new(n).transform(&mut spectrum, true);
+            al_math::fft::Fft::new(n).transform(&mut spectrum_re, &mut spectrum_im, true);
             let actual = filter::bandpass(&input, 256, lo, hi);
-            for (a, b) in actual.iter().zip(spectrum) {
-                assert!((a - b.re).abs() < 1e-10);
+            for (a, b) in actual.iter().zip(&spectrum_re) {
+                assert!((a - b).abs() < 1e-10);
             }
         }
         let template = &input[..len.min(7)];
         let n = (input.len() + template.len() - 1).next_power_of_two();
-        let mut a = complex_spectrum(template, n);
-        let b = complex_spectrum(&input, n);
-        for (a, b) in a.iter_mut().zip(b) {
-            let cross = a.conj() * b;
-            let mag = cross.norm_sqr().sqrt();
-            *a = if mag > 0.0 {
-                cross / mag
+        let (mut a_re, mut a_im) = complex_spectrum(template, n);
+        let (b_re, b_im) = complex_spectrum(&input, n);
+        for k in 0..n {
+            // cross = conj(a) * b = (ar·br + ai·bi, ar·bi − ai·br)
+            let cross_re = a_re[k] * b_re[k] + a_im[k] * b_im[k];
+            let cross_im = a_re[k] * b_im[k] - a_im[k] * b_re[k];
+            let mag = (cross_re * cross_re + cross_im * cross_im).sqrt();
+            if mag > 0.0 {
+                a_re[k] = cross_re / mag;
+                a_im[k] = cross_im / mag;
             } else {
-                al_math::c64::new(0.0, 0.0)
-            };
+                a_re[k] = 0.0;
+                a_im[k] = 0.0;
+            }
         }
-        al_math::fft::Fft::new(n).transform(&mut a, true);
+        al_math::fft::Fft::new(n).transform(&mut a_re, &mut a_im, true);
         let actual = correlation::gcc_phat(template, &input, usize::MAX);
-        for (a, b) in actual.iter().zip(a) {
-            assert!((a - b.re).abs() < 1e-10);
+        for (a, b) in actual.iter().zip(&a_re) {
+            assert!((a - b).abs() < 1e-10);
         }
 
-        let spectrum = complex_spectrum(&input, 256);
+        let (spectrum_re, spectrum_im) = complex_spectrum(&input, 256);
         let actual = filter::spectral_envelope(&input, 256, 17);
         for (bin, &a) in actual.iter().enumerate() {
             let lo = bin * 128 / 17;
             let hi = ((bin + 1) * 128 / 17).max(lo + 1).min(128);
-            let mean = spectrum[lo..hi]
-                .iter()
-                .map(|v| v.norm_sqr().sqrt())
+            let mean = (lo..hi)
+                .map(|k| (spectrum_re[k] * spectrum_re[k] + spectrum_im[k] * spectrum_im[k]).sqrt())
                 .sum::<f64>()
                 / (hi - lo) as f64;
             assert!((a - (mean + 1e-12).ln()).abs() < 1e-10);
