@@ -32,7 +32,14 @@ relations:
     - "../adr/observability-dedicated-crate.md"
     - "../adr/logging-sink-format-activation-contract.md"
     - "../adr/stage-timing-manifest-persistence.md"
-  derived-by: []
+  derived-by:
+    - "../plans/observability-foundation.md"
+    - "../test-specs/observability-foundation.md"
+    - "../tasks/observability-crate.md"
+    - "../tasks/observability-cli-wiring.md"
+    - "../tasks/observability-stage-timing.md"
+    - "../tasks/observability-leaf-instrumentation.md"
+    - "../tasks/observability-criterion-samply.md"
   verifies: []
   verified-by: []
   references: []

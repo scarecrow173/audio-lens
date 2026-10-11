@@ -79,6 +79,11 @@ Directory: `docs/tasks`
 | TASK-034AaFXpJRZWcxVPOfKCdh | mp4: ingest stage 配線 + 成果物記録 | done | [mp4-ingest-stage.md](./mp4-ingest-stage.md) |
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
+| TASK-034EeviFOOrOAjrYXMGXHO | al-cli の logging 配線 | todo | [observability-cli-wiring.md](./observability-cli-wiring.md) |
+| TASK-034EevbtmmkzTShLCB0Mw0 | al-observability crate の新設 | todo | [observability-crate.md](./observability-crate.md) |
+| TASK-034EevkeIeBV0D2XgS6uTw | criterion smoke bench と samply 手順書 | todo | [observability-criterion-samply.md](./observability-criterion-samply.md) |
+| TASK-034EevjKiDgtt3CwF4qTtW | leaf crate への span 計装 | todo | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
+| TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | todo | [observability-stage-timing.md](./observability-stage-timing.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
