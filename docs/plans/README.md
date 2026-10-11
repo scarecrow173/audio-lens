@@ -18,5 +18,6 @@ Directory: `docs/plans`
 | PLAN-034AaBsJ00thIonv8bp54N | MP4 demux とタイミング観測の実装 | completed | [mp4-ingest.md](./mp4-ingest.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
+| PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | PLAN-034AaBrlpxZEKpyEGpUmmk | 映像フレーム特徴と A/V 同期の実装 | completed | [video-av-features.md](./video-av-features.md) |
 | PLAN-034z8FkQ8VWjuojrvS0HhT | visualization-export | completed | [visualization-export.md](./visualization-export.md) |
