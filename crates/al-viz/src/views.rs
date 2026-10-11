@@ -44,6 +44,8 @@ fn cell_f64(c: &Cell) -> Option<f64> {
 /// a `transfer_detail` tensor (rows: |H|, unwrapped phase, group
 /// delay over the lower half of the spectrum).
 pub fn transfer_views(reader: &DatasetReader, sample_rate: f64) -> io::Result<Vec<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "transfer_views");
+    let _enter = span.enter();
     let mut out = Vec::new();
     for a in reader.artifacts("intermediate") {
         if a.store != al_dataset::manifest::StoreKind::Tensor
@@ -111,6 +113,8 @@ pub fn transfer_views(reader: &DatasetReader, sample_rate: f64) -> io::Result<Ve
 /// Locate/time-map views: reshape each `locate` role JSON into a
 /// display document (segments, occurrences, ranges, evidence list).
 pub fn locate_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "locate_views");
+    let _enter = span.enter();
     let mut out = Vec::new();
     for a in reader.artifacts("locate") {
         if a.store != al_dataset::manifest::StoreKind::Json {
@@ -152,6 +156,8 @@ pub fn locate_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
 /// Stereo/channel views: per-input JSON collecting the `stereo.*`
 /// scalar series and references to the channel-pair coherence tiles.
 pub fn stereo_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "stereo_views");
+    let _enter = span.enter();
     let mut out = Vec::new();
     for a in reader.artifacts("features/cheap") {
         if a.store != al_dataset::manifest::StoreKind::Json {
@@ -221,6 +227,8 @@ pub fn stereo_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
 /// explicit `unavailable` record. The viewer renders the persisted
 /// payload verbatim; no re-decode, no new analysis.
 pub fn video_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "video_views");
+    let _enter = span.enter();
     let mut out = Vec::new();
     for a in reader.artifacts("inputs") {
         if a.store != al_dataset::manifest::StoreKind::Json {
@@ -256,6 +264,8 @@ pub fn video_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
 /// Residual views: per residual stage name, index its artifacts
 /// (waveform, PSD/band tensors) and the stored energies.
 pub fn residual_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "residual_views");
+    let _enter = span.enter();
     let mut out = Vec::new();
     let mut stages: Vec<String> = reader
         .artifacts("residual")
@@ -290,6 +300,8 @@ pub fn residual_views(reader: &DatasetReader) -> io::Result<Vec<JsonProduct>> {
 /// Event markers: flatten the `events` table into a timeline-aligned
 /// marker list keyed by the stable event id.
 pub fn events_view(reader: &DatasetReader) -> io::Result<Option<JsonProduct>> {
+    let span = tracing::info_span!("viz::views", method = "events_view");
+    let _enter = span.enter();
     let table = match reader.open_table("events", "candidates") {
         Ok(t) => t,
         Err(_) => return Ok(None),

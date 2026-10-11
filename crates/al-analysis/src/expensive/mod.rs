@@ -578,6 +578,12 @@ pub fn analyze_region(
     pair: Option<&PairEvidence<'_>>,
     cfg: &ExpensiveConfig,
 ) -> ExpensiveResult {
+    let span = tracing::info_span!(
+        "analysis::region",
+        input_id = %input_id,
+        len = ((region.end_s - region.start_s).max(0.0) * rate as f64) as usize
+    );
+    let _enter = span.enter();
     let mut out = ExpensiveResult::default();
     let e = Emit::new(input_id, region, cfg, rate);
     // Plan contract: when no `Valid` trigger selected the region the
@@ -683,13 +689,22 @@ pub fn analyze_region(
         pair,
     };
 
-    transfer::run(&ctx, &e, &mut out);
-    codec::run(&ctx, &e, &mut out);
-    dynamics::run(&ctx, &e, &mut out);
-    noise::run(&ctx, &e, &mut out);
-    channel::run(&ctx, &e, &mut out);
-    ir::run(&ctx, &e, &mut out);
-    timing::run(&ctx, &e, &mut out);
+    // Each family gets its own `analysis::<family>` span; span names
+    // must be literals, so the calls are wrapped one by one.
+    tracing::info_span!("analysis::transfer", input_id = %input_id, method = "transfer", len = n)
+        .in_scope(|| transfer::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::codec", input_id = %input_id, method = "codec", len = n)
+        .in_scope(|| codec::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::dynamics", input_id = %input_id, method = "dynamics", len = n)
+        .in_scope(|| dynamics::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::noise", input_id = %input_id, method = "noise", len = n)
+        .in_scope(|| noise::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::channel", input_id = %input_id, method = "channel", len = n)
+        .in_scope(|| channel::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::ir", input_id = %input_id, method = "ir", len = n)
+        .in_scope(|| ir::run(&ctx, &e, &mut out));
+    tracing::info_span!("analysis::timing", input_id = %input_id, method = "timing", len = n)
+        .in_scope(|| timing::run(&ctx, &e, &mut out));
 
     out
 }
