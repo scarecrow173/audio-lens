@@ -31,11 +31,13 @@ relations:
     generated: []
   implements: []
   implemented-by: []
-  depends-on: []
+  depends-on:
+    - "./observability-foundation-logging-and-profiling.md"
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "./observability-foundation-logging-and-profiling.md"
   refines: []
   refined-by: []
   derives-from:
