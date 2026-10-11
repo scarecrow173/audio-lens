@@ -35,7 +35,11 @@ relations:
   refines: []
   refined-by: []
   derives-from: []
-  derived-by: []
+  derived-by:
+    - "../specs/observability-foundation.md"
+    - "../adr/observability-dedicated-crate.md"
+    - "../adr/logging-sink-format-activation-contract.md"
+    - "../adr/stage-timing-manifest-persistence.md"
   verifies: []
   verified-by: []
   references: []
@@ -190,14 +194,17 @@ activation の各決定を方向づけた。
 
 - confirmed: 専用 `al-observability` crate を新設し sink init/format/
   routing/activation 解釈を所有。他 crate は `tracing` に直接依存して
-  emit のみ。依存方向は一方向(全 crate → al-observability →
-  tracing-subscriber)。init は al-cli が呼ぶ
+  emit のみ(leaf crate は `al-observability` に依存しない)。依存
+  方向は `al-cli → al-observability → tracing-subscriber` と
+  `leaf → tracing` の2系統。init は al-cli が呼ぶ
 - confirmed: sink は stderr + file(`<base_dir>/logs/`)の dual routing。
   format は各 sink が独立に text/JSON 切替可能で同時併用も可
   (file 既定 JSON-lines、stderr 既定 text)
-- confirmed: 計装範囲は全 crate 網羅 — cli dispatch、runner、stage
+- confirmed: 計装範囲は網羅的 — cli dispatch、runner、stage
   境界、stage 内部(locate method、analysis family、media ingest、
-  viz)。span 命名・field 規約は spec で統一
+  viz、dataset)。対象外: al-core(純粋型)、al-math(ホットカーネル、
+  性能計測は criterion の責務)、al-testkit(テストヘルパ)。
+  span 命名・field 規約は spec で統一
 - confirmed: 既定 OFF、`AL_LOG`(EnvFilter directive)+ `--log` flag
   (flag 優先)で有効化。format 指定も env var + flag
   (`AL_LOG_FORMAT` / `--log-format` 系)
