@@ -36,8 +36,8 @@ pub struct MixerEstimate {
 /// channel must share the same length. Returns `None` when there is
 /// not enough data to solve (fewer observations than sources).
 pub fn fit_mix(
-    source_channels: &[Vec<f64>],
-    capture_channels: &[Vec<f64>],
+    source_channels: &[&[f64]],
+    capture_channels: &[&[f64]],
     ridge: f64,
 ) -> Option<MixerEstimate> {
     let n_src = source_channels.len();
@@ -51,22 +51,17 @@ pub fn fit_mix(
     {
         return None;
     }
-    // Observations: each sample index is a row of source values.
-    let rows: Vec<Vec<f64>> = (0..len)
-        .map(|t| (0..n_src).map(|s| source_channels[s][t]).collect())
-        .collect();
 
-    // Condition number of the raw normal matrix (before ridge).
+    // Condition number of the raw normal matrix (before ridge),
+    // accumulated on the contiguous column buffers.
     let mut ata = vec![vec![0.0; n_src]; n_src];
-    for row in &rows {
-        for (i, &ri) in row.iter().enumerate() {
-            for (j, &rj) in row.iter().enumerate() {
-                ata[i][j] += ri * rj;
-            }
+    for (i, ci) in source_channels.iter().enumerate() {
+        for (j, cj) in source_channels.iter().enumerate() {
+            ata[i][j] = dsp::dot(ci, cj);
         }
     }
     let cond = condition_number(&ata);
-    let factor = LeastSquares::new(&rows, ridge)?;
+    let factor = LeastSquares::from_columns(source_channels, ridge)?;
 
     let mut matrix = Vec::with_capacity(capture_channels.len());
     let mut quality_acc = 0.0;
@@ -115,7 +110,12 @@ mod tests {
             .map(|(&a, &b)| 0.8 * a - 0.5 * b)
             .collect();
         let cap1: Vec<f64> = s1.iter().map(|&b| 0.3 * b).collect();
-        let est = fit_mix(&[s0, s1], &[cap0, cap1], 1e-3).unwrap();
+        let est = fit_mix(
+            &[s0.as_slice(), s1.as_slice()],
+            &[cap0.as_slice(), cap1.as_slice()],
+            1e-3,
+        )
+        .unwrap();
         assert!((est.matrix[0][0] - 0.8).abs() < 0.05);
         assert!((est.matrix[0][1] + 0.5).abs() < 0.05); // negative = inverted
         assert!(est.matrix[1][0].abs() < 0.05);
@@ -128,7 +128,7 @@ mod tests {
         let s0 = noise(3, 2048);
         let dup = s0.clone(); // two identical source channels → singular
         let cap = s0.clone();
-        let est = fit_mix(&[s0, dup], &[cap], 1e-6).unwrap();
+        let est = fit_mix(&[s0.as_slice(), dup.as_slice()], &[cap.as_slice()], 1e-6).unwrap();
         assert_eq!(est.condition_number, f64::INFINITY);
     }
 
@@ -278,7 +278,9 @@ mod tests {
                         .collect()
                 })
                 .collect();
-            let est = fit_mix(&sources, &captures, lambda).unwrap();
+            let src_refs: Vec<&[f64]> = sources.iter().map(Vec::as_slice).collect();
+            let cap_refs: Vec<&[f64]> = captures.iter().map(Vec::as_slice).collect();
+            let est = fit_mix(&src_refs, &cap_refs, lambda).unwrap();
             let rows = oracle_rows(&sources, obs);
             let mut quality = 0.0;
             for (c, cap) in captures.iter().enumerate() {
@@ -318,7 +320,7 @@ mod tests {
         // bound is "huge or infinite" (well-conditioned fixtures
         // above sit at ~1-10).
         let s0 = noise(200, 2048);
-        let est = fit_mix(&[s0.clone(), s0.clone()], std::slice::from_ref(&s0), 1e-6).unwrap();
+        let est = fit_mix(&[s0.as_slice(), s0.as_slice()], &[s0.as_slice()], 1e-6).unwrap();
         assert!(
             est.condition_number.is_infinite() || est.condition_number >= 1e6,
             "ill-conditioned mix must surface a huge condition number, got {}",
@@ -338,21 +340,22 @@ mod tests {
         let cap1: Vec<f64> = a.iter().zip(&b).map(|(a, b)| -0.5 * a + 3.0 * b).collect();
         let sources = [a, b];
         let captures = [cap0, cap1];
-        let est = fit_mix(&sources, &captures, 0.0).unwrap();
+        let src_refs: Vec<&[f64]> = sources.iter().map(Vec::as_slice).collect();
+        let cap_refs: Vec<&[f64]> = captures.iter().map(Vec::as_slice).collect();
+        let est = fit_mix(&src_refs, &cap_refs, 0.0).unwrap();
         for (actual, expected) in est.matrix.iter().flatten().zip([2.0, -1.0, -0.5, 3.0]) {
             assert!((actual - expected).abs() < 1e-7);
         }
         assert!(est.fit_quality < 1e-14);
         // 診断は従来と同じ ridge 前の正規行列を使用し、ridge に依存しない。
-        let regularized = fit_mix(&sources, &captures, 1e-3).unwrap();
+        let regularized = fit_mix(&src_refs, &cap_refs, 1e-3).unwrap();
         assert_eq!(est.condition_number, regularized.condition_number);
+        // 参照側の AᵀA も fit_mix と同じ列 `dsp::dot` 累算で組み立てる
+        // (行累算とは ulps がずれ得るため assert_eq は同じ累算順が前提)。
         let mut ata = vec![vec![0.0; 2]; 2];
-        for (&a, &b) in sources[0].iter().zip(&sources[1]) {
-            let row = [a, b];
-            for (i, &ri) in row.iter().enumerate() {
-                for (j, &rj) in row.iter().enumerate() {
-                    ata[i][j] += ri * rj;
-                }
+        for (i, ci) in sources.iter().enumerate() {
+            for (j, cj) in sources.iter().enumerate() {
+                ata[i][j] = dsp::dot(ci, cj);
             }
         }
         assert_eq!(est.condition_number, condition_number(&ata));

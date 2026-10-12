@@ -750,14 +750,14 @@ impl Stage for LocateStage {
                     let start = primary as usize;
                     let len = source_len as usize;
                     if start + len <= capture.channel_samples[0].len() {
-                        let cap_window: Vec<Vec<f64>> = capture
+                        let cap_window: Vec<&[f64]> = capture
                             .channel_samples
                             .iter()
-                            .map(|c| c[start..start + len].to_vec())
+                            .map(|c| &c[start..start + len])
                             .collect();
-                        if let Some(mix) =
-                            fit_mix(&source.channel_samples, &cap_window, self.config.ridge)
-                        {
+                        let src_cols: Vec<&[f64]> =
+                            source.channel_samples.iter().map(Vec::as_slice).collect();
+                        if let Some(mix) = fit_mix(&src_cols, &cap_window, self.config.ridge) {
                             derived["mixer"] = serde_json::to_value(&mix).unwrap_or_default();
                         }
                     }
