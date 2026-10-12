@@ -28,7 +28,9 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../designs/mechanical-caller-cleanup.md"
+    - "../plans/mechanical-caller-cleanup.md"
   depends-on:
     - "../discovery/mechanical-caller-cleanup.md"
     - "./al-math-vec-primitives.md"
@@ -45,9 +47,14 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/mechanical-caller-cleanup.md"
-  derived-by: []
+  derived-by:
+    - "../designs/mechanical-caller-cleanup.md"
+    - "../plans/mechanical-caller-cleanup.md"
+    - "../tasks/mech-cleanup-bench-baseline-characterization.md"
+    - "../tasks/mech-cleanup-measurement-ir-closeout.md"
   verifies: []
-  verified-by: []
+  verified-by:
+    - "../test-specs/mechanical-caller-cleanup.md"
   references: []
   defers: []
   deferred-by: []

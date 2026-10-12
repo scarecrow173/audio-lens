@@ -29,7 +29,8 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "docs/plans/mechanical-caller-cleanup.md"
   refines: []
   refined-by: []
   derives-from:

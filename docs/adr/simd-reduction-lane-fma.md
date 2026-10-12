@@ -39,6 +39,8 @@ relations:
     - "../tasks/caller-opt-bench-baseline-characterization.md"
     - "../tasks/caller-opt-least-squares-column-api.md"
     - "../tasks/caller-opt-dsp-conv-overlap-save.md"
+    - "../tasks/mech-cleanup-bench-baseline-characterization.md"
+    - "../tasks/mech-cleanup-a16-row-major-fast-paths.md"
   verifies: []
   verified-by: []
   references: []
