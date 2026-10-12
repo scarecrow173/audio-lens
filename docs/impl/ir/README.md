@@ -17,6 +17,7 @@ Directory: `docs/impl/ir`
 | analysis-expensive-stage | [analysis-expensive-stage.md](./analysis-expensive-stage.md) |
 | analysis-integration-tests | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | analysis-reference-stage | [analysis-reference-stage.md](./analysis-reference-stage.md) |
+| al-math-vec-primitives | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | al-media-skeleton | [al-media-skeleton.md](./al-media-skeleton.md) |
 | artifact-dictionary | [artifact-dictionary.md](./artifact-dictionary.md) |
 | avi-container-ingest-and-video-fixtures | [avi-container-ingest-and-video-fixtures.md](./avi-container-ingest-and-video-fixtures.md) |

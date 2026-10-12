@@ -18,7 +18,7 @@ Directory: `docs/tasks`
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | done | [al-math-skeleton.md](./al-math-skeleton.md) |
 | TASK-034DYiz9Z4rXXkKoNvy4vI | al-math: fft/correlation/filter の split re/im 内部化 | done | [al-math-split-re-im-internals.md](./al-math-split-re-im-internals.md) |
 | TASK-034DYiFVJy5OyohvPiyzkf | al-math: tests の split re/im 追従と独立参照の保持 | done | [al-math-split-re-im-tests.md](./al-math-split-re-im-tests.md) |
-| TASK-034EpP87rKX85uUeXWXtA5 | al-math: vec プリミティブモジュール(カーネル + dispatch + linalg 共有) | todo | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
+| TASK-034EpP87rKX85uUeXWXtA5 | al-math: vec プリミティブモジュール(カーネル + dispatch + linalg 共有) | done | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
 | TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |

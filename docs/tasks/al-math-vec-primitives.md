@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EpP87rKX85uUeXWXtA5"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-math: vec プリミティブモジュール(カーネル + dispatch + linalg 共有)"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/al-math-vec-primitives.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/al-math-vec-primitives.md"
   depends-on:
     - "docs/plans/al-math-vec-primitives.md"
   blocks:
