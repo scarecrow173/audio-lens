@@ -8,7 +8,7 @@ Directory: `docs/tasks`
 | --- | --- | --- | --- |
 | TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | todo | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |
 | TASK-034DYiGC8yp76ElLB8R0J5 | al-locate: dsp::fft と bench_dsp の split API 追従 | done | [al-locate-split-re-im-fft.md](./al-locate-split-re-im-fft.md) |
-| TASK-034EpPesSpbjbAQBsmjvJx | al-locate: dsp re-export と vec プリミティブ移行 | todo | [al-locate-vec-migration.md](./al-locate-vec-migration.md) |
+| TASK-034EpPesSpbjbAQBsmjvJx | al-locate: dsp re-export と vec プリミティブ移行 | done | [al-locate-vec-migration.md](./al-locate-vec-migration.md) |
 | TASK-034DYiRwEeud1alnVmGMJj | al-math API 境界: 全体検証と旧コミット bench 比較 | done | [al-math-api-boundary-verification.md](./al-math-api-boundary-verification.md) |
 | TASK-034DYiMM43O9mMDdme6ijq | al-math: 公開面の pub(crate) 化と intra-doc link 修正 | done | [al-math-api-pub-crate.md](./al-math-api-pub-crate.md) |
 | TASK-035e5Sz9kMdPRs2o1Cd4W0 | al-math: 相関/NCC/bandpass カーネル | done | [al-math-correlation.md](./al-math-correlation.md) |

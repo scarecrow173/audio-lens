@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EpPesSpbjbAQBsmjvJx"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-locate: dsp re-export と vec プリミティブ移行"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/al-math-vec-primitives.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/al-locate-dsp-re-export-vec-migration.md"
   depends-on:
     - "docs/plans/al-math-vec-primitives.md"
     - "docs/tasks/al-math-vec-primitives.md"
@@ -65,10 +66,11 @@ per-source `sub_scaled` 化・列 gather dot の解消)は本タスクの
     `dsp::scale(x, r.recip(), &mut out)`。`v / rms` から
     `v * r.recip()` への ulp 級差は再合成許容ポリシーで許容
     (Implementation Record に記録)
-  - `:541-544` envelope NCC のインライン corr 合成 →
-    `dsp::corr0(&t_env, &s_env)`。ガード等価(非負和に対し
-    `tn*sn > 0` ≡ `ex > 0 && ey > 0`)と
-    `sqrt(a)*sqrt(b)` vs `sqrt(a*b)` の ulp 級差を確認
+  - `:539-547` envelope NCC は**未移行 — 残存許容へ逸脱**。
+    `corr0` 置換は周期入力で全 lag 厳密 1.0 となり argmax
+    タイブレークが lag 0 に倒れ、golden
+    `pinned_periodic_everywhere_not_accepted_at_wrong_phase`
+    の曖昧ケース非受理契約を破る(IMPL-034EqrFgTWTPu16W3CuG6r)
 - `crates/al-locate/src/mixer.rs`: `:74` のインライン `rms` →
   `dsp::rms(cap)`
 - `crates/al-locate/src/residual.rs`: `:133` の `&[Vec<f64>]`
