@@ -36,6 +36,9 @@ relations:
     - "../designs/al-math-vec-primitives.md"
     - "../tasks/al-math-vec-primitives.md"
     - "../tasks/vec-primitives-verification-bench.md"
+    - "../tasks/caller-opt-bench-baseline-characterization.md"
+    - "../tasks/caller-opt-least-squares-column-api.md"
+    - "../tasks/caller-opt-dsp-conv-overlap-save.md"
   verifies: []
   verified-by: []
   references: []
