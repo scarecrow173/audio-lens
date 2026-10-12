@@ -43,6 +43,11 @@ Directory: `docs/impl/ir`
 | locate-stage-cli | [locate-stage-cli.md](./locate-stage-cli.md) |
 | locate-tracking | [locate-tracking.md](./locate-tracking.md) |
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
+| observability-cli-wiring | [observability-cli-wiring.md](./observability-cli-wiring.md) |
+| observability-crate | [observability-crate.md](./observability-crate.md) |
+| observability-criterion-samply | [observability-criterion-samply.md](./observability-criterion-samply.md) |
+| observability-leaf-instrumentation | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
+| observability-stage-timing | [observability-stage-timing.md](./observability-stage-timing.md) |
 | resume-reproduction-tests | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | stage-runner | [stage-runner.md](./stage-runner.md) |
 | al-math-envelope-fft-size-assert | [spectral-envelope-fft-size-entry-assert.md](./spectral-envelope-fft-size-entry-assert.md) |

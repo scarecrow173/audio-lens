@@ -134,6 +134,8 @@ pub fn build(
     manifest: &Manifest,
     cfg: &ExportConfig,
 ) -> io::Result<(PathBuf, Vec<String>)> {
+    let span = tracing::info_span!("viz::package", len = tracing::field::Empty);
+    let _enter = span.enter();
     validate_package_name(&cfg.name)?;
     let analysis = job_dir.join("analysis");
     if !analysis.join("manifest.json").exists() {
@@ -271,6 +273,7 @@ pub fn build(
             }
         }
     }
+    span.record("len", files.len());
     Ok((dest, files))
 }
 

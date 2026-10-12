@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use al_core::{InputId, InputRole, JobId, StageKind};
@@ -33,6 +33,19 @@ CONFIG:
                  content is snapshotted into the job at run time, so resume
                  does not depend on the file and the job stays reproducible.
                  Defaults to the dictionary bundled with the binary.
+
+LOGGING:
+  --log <directive>        Enable logging with a tracing EnvFilter
+                           directive (e.g. \"info\", \"al_locate=debug,info\").
+                           Overrides the AL_LOG environment variable.
+  --log-format <sink>=<format>[,<sink>=<format>...]
+                           Per-sink output format. Sinks: stderr, file.
+                           Formats: text, json. Defaults: stderr=text,
+                           file=json. Overrides the AL_LOG_FORMAT
+                           environment variable.
+  run/resume log to stderr and <base-dir>/logs/al.YYYY-MM-DD.log;
+  inspect logs to stderr only. Logging is off unless --log or AL_LOG
+  is given.
 
 NOTE:
   All stages are implemented: ingest (WAV/PCM, AVI/PCM+uncompressed
@@ -177,10 +190,60 @@ fn flag_present(args: &[String], name: &str) -> bool {
     args.iter().any(|arg| arg == name)
 }
 
+/// Interpret `--log`/`--log-format` and AL_LOG/AL_LOG_FORMAT and
+/// initialize logging. `file_sink` controls whether a file sink under
+/// `<base_dir>/logs` is built (`run`/`resume`: true, `inspect`: false —
+/// stderr only). Returns `Ok(None)` when logging is not activated; the
+/// caller holds the returned guard for the rest of the `cmd_*` scope so
+/// the non-blocking file writer flushes on drop.
+fn init_logging(
+    args: &[String],
+    base_dir: &Path,
+    file_sink: bool,
+) -> Result<Option<al_observability::LogGuard>, String> {
+    if flag_present(args, "--log") && parse_flag(args, "--log").is_none() {
+        return Err("--log requires a value".to_owned());
+    }
+    if flag_present(args, "--log-format") && parse_flag(args, "--log-format").is_none() {
+        return Err("--log-format requires a value".to_owned());
+    }
+    let activation = al_observability::resolve_activation(
+        std::env::var("AL_LOG").ok().as_deref(),
+        parse_flag(args, "--log"),
+        std::env::var("AL_LOG_FORMAT").ok().as_deref(),
+        parse_flag(args, "--log-format"),
+    )
+    .map_err(|e| e.to_string())?;
+    match activation {
+        al_observability::Activation::Disabled => Ok(None),
+        al_observability::Activation::Enabled(mut config) => {
+            if file_sink {
+                config.file_dir = Some(base_dir.join("logs"));
+            }
+            al_observability::init(config)
+                .map(Some)
+                .map_err(|e| e.to_string())
+        }
+    }
+}
+
 fn cmd_run(args: &[String]) -> ExitCode {
     let Some(base_dir) = parse_flag(args, "--base-dir").map(PathBuf::from) else {
         return fail("--base-dir is required");
     };
+    let _log_guard = match init_logging(args, &base_dir, true) {
+        Ok(guard) => guard,
+        Err(e) => return fail(e),
+    };
+    // The dispatch span is created after `init_logging`: a span built
+    // before the subscriber is installed stays inert and `record` is a
+    // no-op on it.
+    let span = tracing::info_span!(
+        "cli::run",
+        job_id = tracing::field::Empty,
+        len = tracing::field::Empty
+    );
+    let _entered = span.enter();
     let Some(raw_inputs) = parse_flag(args, "--input") else {
         return fail("--input is required");
     };
@@ -215,6 +278,7 @@ fn cmd_run(args: &[String]) -> ExitCode {
             input.input_id = id;
         }
     }
+    span.record("len", inputs.len() as u64);
     let stage_names: Vec<&str> = parse_flag(args, "--stages")
         .map(|s| s.split(',').collect())
         .unwrap_or_else(|| {
@@ -260,6 +324,7 @@ fn cmd_run(args: &[String]) -> ExitCode {
         Ok(def) => def,
         Err(e) => return fail(format!("cannot create job: {e}")),
     };
+    span.record("job_id", def.job_id.as_str());
     let mut stages: Vec<Box<dyn Stage>> = Vec::new();
     for kind in &stage_kinds {
         match make_stage(*kind, &config) {
@@ -296,6 +361,12 @@ fn cmd_resume(args: &[String]) -> ExitCode {
     let Some(base_dir) = parse_flag(args, "--base-dir").map(PathBuf::from) else {
         return fail("--base-dir is required");
     };
+    let _log_guard = match init_logging(args, &base_dir, true) {
+        Ok(guard) => guard,
+        Err(e) => return fail(e),
+    };
+    let span = tracing::info_span!("cli::resume", job_id = tracing::field::Empty);
+    let _entered = span.enter();
     let Some(job_id) = parse_flag(args, "--job-id") else {
         return fail("--job-id is required");
     };
@@ -303,6 +374,7 @@ fn cmd_resume(args: &[String]) -> ExitCode {
         Ok(v) => v,
         Err(e) => return fail(e),
     };
+    span.record("job_id", def.job_id.as_str());
     let mut stages: Vec<Box<dyn Stage>> = Vec::new();
     for kind in &def.stages {
         match make_stage(*kind, &def.config) {
@@ -327,6 +399,13 @@ fn cmd_inspect(args: &[String]) -> ExitCode {
     let Some(base_dir) = parse_flag(args, "--base-dir").map(PathBuf::from) else {
         return fail("--base-dir is required");
     };
+    // `inspect` is read-only: stderr sink only, no file sink is built.
+    let _log_guard = match init_logging(args, &base_dir, false) {
+        Ok(guard) => guard,
+        Err(e) => return fail(e),
+    };
+    let span = tracing::info_span!("cli::inspect", job_id = tracing::field::Empty);
+    let _entered = span.enter();
     let Some(job_id) = parse_flag(args, "--job-id") else {
         return fail("--job-id is required");
     };
@@ -334,6 +413,7 @@ fn cmd_inspect(args: &[String]) -> ExitCode {
         Ok(v) => v,
         Err(e) => return fail(e),
     };
+    span.record("job_id", job_id);
     match Manifest::load(&job_dir)
         .and_then(|m| serde_json::to_string_pretty(&m).map_err(std::io::Error::other))
     {

@@ -72,6 +72,8 @@ fn read_downsampled(
 /// `dest/analysis` so the report reflects exactly what ships and input
 /// names are already shrunk to file names.
 pub fn generate(dest: &Path) -> io::Result<()> {
+    let span = tracing::info_span!("viz::report");
+    let _enter = span.enter();
     let reader = DatasetReader::open(&dest.join("analysis"))?;
     let manifest = reader.manifest();
 

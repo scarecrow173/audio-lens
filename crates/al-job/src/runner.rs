@@ -233,6 +233,7 @@ impl StageRunner {
                     status: StageStatus::Pending,
                     artifacts: Vec::new(),
                     error: None,
+                    duration_ms: None,
                 });
             match record.status {
                 StageStatus::Completed | StageStatus::Skipped => continue,
@@ -254,20 +255,54 @@ impl StageRunner {
                 registry: &registry,
                 config: &def.config,
             };
+            // Stage boundary span + timing wrap `stage.run`. The enter
+            // guard is held across the match so completion events nest
+            // under the span. The stage name is the serde snake_case
+            // kind (same convention as al-cli's StubStage).
+            let stage_name = serde_json::to_value(*stage_kind)
+                .ok()
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_else(|| format!("{stage_kind:?}"));
+            let span = tracing::info_span!(
+                "stage",
+                stage = %stage_name,
+                job_id = %manifest.job_id
+            );
+            let _enter = span.enter();
+            let started = std::time::Instant::now();
             match stage.run(&ctx) {
                 Ok(artifacts) => {
+                    let duration_ms = started.elapsed().as_millis() as u64;
+                    tracing::info!(
+                        stage = %stage_name,
+                        job_id = %manifest.job_id,
+                        duration_ms,
+                        "stage completed"
+                    );
                     for artifact in artifacts {
                         manifest.register_artifact(artifact);
                     }
                     if let Some(record) = manifest.stage_mut(*stage_kind) {
                         record.status = StageStatus::Completed;
                         record.error = None;
+                        record.duration_ms = Some(duration_ms);
                     }
                 }
                 Err(err) => {
+                    // An `Err` return is still timed and recorded; only a
+                    // panic unwinds out of the instrumentation's scope.
+                    let duration_ms = started.elapsed().as_millis() as u64;
+                    tracing::error!(
+                        stage = %stage_name,
+                        job_id = %manifest.job_id,
+                        duration_ms,
+                        error = %err.message,
+                        "stage failed"
+                    );
                     if let Some(record) = manifest.stage_mut(*stage_kind) {
                         record.status = StageStatus::Failed;
                         record.error = Some(err.message.clone());
+                        record.duration_ms = Some(duration_ms);
                     }
                     manifest.save(job_dir).map_err(|e| {
                         StageError::new(*stage_kind, format!("cannot save manifest: {e}"))

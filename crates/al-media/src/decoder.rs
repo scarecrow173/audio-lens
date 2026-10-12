@@ -183,10 +183,17 @@ impl DecoderRegistry {
         source: &[u8],
         request: &DecodeRequest,
     ) -> Result<IngestResult, MediaError> {
+        let span = tracing::info_span!(
+            "media::decode",
+            method = tracing::field::Empty,
+            len = source.len()
+        );
+        let _enter = span.enter();
         // フェーズ1は native のみ。部分観測の合成・外部 fallback 許可は後続決定。
         let backend = self
             .resolve(source)
             .ok_or_else(|| MediaError::input_unavailable("unknown format"))?;
+        span.record("method", backend.id());
         let probe = backend.probe(source)?;
         let mut result = backend.decode(source, &probe, request)?;
         result.provenance.backend = backend.id().into();
@@ -231,6 +238,8 @@ impl MediaDecoder for NativeDecoder {
     }
 
     fn probe(&self, source: &[u8]) -> Result<MediaProbe, MediaError> {
+        let span = tracing::info_span!("media::probe", method = self.id(), len = source.len());
+        let _enter = span.enter();
         let format = self
             .detect(source)
             .ok_or_else(|| MediaError::input_unavailable("unknown format"))?;

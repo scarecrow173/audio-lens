@@ -6,3 +6,13 @@ license.workspace = true
 
 [dependencies]
 pulp = { version = "=0.22.3", default-features = false, features = ["std", "x86-v3"] }
+
+# criterion 0.8.2 (crates.io published 2026-02-04, ≥7 days at add
+# time). Smoke-bench only; production vec-primitive benches are
+# deferred to the al-math-simd-reduction chain.
+[dev-dependencies]
+criterion = "=0.8.2"
+
+[[bench]]
+name = "dsp_smoke"
+harness = false
