@@ -10,7 +10,7 @@ Directory: `docs/plans`
 | PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | PLAN-034z7Go0WvShlVKkU7NCCH | Analysis Dataset ストアの実装 | completed | [analysis-dataset.md](./analysis-dataset.md) |
 | PLAN-034z8FkpJb4ejhkehZ3pgc | analysis-stages | completed | [analysis-stages.md](./analysis-stages.md) |
-| PLAN-034EJg701ux76Ga7UWPP0j | caller 側最適化チェーン: 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
+| PLAN-034EJg701ux76Ga7UWPP0j | caller 側最適化チェーン: 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | completed | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | PLAN-034AaBrYBgbeSTDlZzbaGl | Expensive 追加解析ファミリの実装 | completed | [expensive-families.md](./expensive-families.md) |
 | PLAN-034AaBtyLhpTxk9Vb4eftR | ゴールデン fixture マトリクスの実装 | completed | [golden-validation.md](./golden-validation.md) |
 | PLAN-034z0yzgmf43IGEQwzG9gE | インジェストとAVタイミングの実装 | completed | [implement-ingest-av.md](./implement-ingest-av.md) |

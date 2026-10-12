@@ -26,6 +26,7 @@ Directory: `docs/impl/ir`
 | caller-opt-bench-baseline-characterization | [caller-side-optimizations-bench-baseline-and-characterization.md](./caller-side-optimizations-bench-baseline-and-characterization.md) |
 | caller-opt-dsp-conv-overlap-save | [caller-side-optimizations-dsp-conv-overlap-save-and-fir-model-migration.md](./caller-side-optimizations-dsp-conv-overlap-save-and-fir-model-migration.md) |
 | caller-opt-least-squares-column-api | [caller-side-optimizations-least-squares-column-api.md](./caller-side-optimizations-least-squares-column-api.md) |
+| caller-opt-measurement-ir-closeout | [caller-side-optimizations-post-measurement-closeout.md](./caller-side-optimizations-post-measurement-closeout.md) |
 | caller-opt-stft-fft-plan-hoist | [caller-side-optimizations-stft-fft-plan-hoist.md](./caller-side-optimizations-stft-fft-plan-hoist.md) |
 | chunked-tensor-store | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | columnar-table-store | [columnar-table-store.md](./columnar-table-store.md) |
