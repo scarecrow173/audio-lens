@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "caller 側最適化チェーン: FIR 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4)"
 created: "2026-10-12"
-updated: "2026-10-12"
+updated: "2026-10-13"
 owners: []
 relations:
   source:
@@ -43,7 +43,9 @@ relations:
   refines: []
   refined-by: []
   derives-from: []
-  derived-by: []
+  derived-by:
+    - "../specs/caller-side-optimizations.md"
+    - "../adr/caller-side-optimizations-structure.md"
   verifies: []
   verified-by: []
   references: []
@@ -94,7 +96,9 @@ al-locate の呼出し側コード)の既知ホットスポット調査結果 A1
   `m[i.min(m.len())]` は `i >= m.len()` のとき `m.len()` で index し
   境界外 panic の可能性がある(residual が model より長い場合)。
   到達可能性を評価し、境界で修正する小さな correctness タスクとして
-  チェーンに含める
+  チェーンに含める → spec/ADR で確定: `m.get(i).copied().unwrap_or(0.0)`
+  の zero-fill へ置換。Aligned shared-length 契約
+  (al-analysis `stage.rs:283-295`)の下で本番到達不能の構造的防御
 
 ### A3 — STFT の per-frame plan 再構築
 
@@ -157,7 +161,7 @@ al-locate の呼出し側コード)の既知ホットスポット調査結果 A1
   `al-locate/tests/golden.rs` 等が存在し、最適化後も pass 必須
 - 前提: kernels untouched — al-math のカーネル実装は変更しない。
   チェーンの変更面は al-analysis / al-locate の caller と
-  linalg の API 追加
+  linalg の API 変更(列指向エントリへの置換)
 - 前提: pre-release 方針により互換層・移行期間は設けない。
   API 変更は置換でよい
 - 前提(ユーザー指定の process ポリシー、制約として課す):
@@ -234,16 +238,21 @@ al-locate の呼出し側コード)の既知ホットスポット調査結果 A1
   持ち回る内部経路を別途導入する(A3)
 - confirmed(API 方向): A4 は列優先エントリ
   `LeastSquares::from_columns(&[&[f64]], λ)` で行マテリアライズを
-  除去する方向。`reference.rs:731-732` の `.to_vec()` コピーが
-  新 API で不要になるかを併せて評価する
+  除去する方向。`reference.rs:731-732` の `.to_vec()` コピーは
+  ADR で除去確定(`src.src`/`src.cap` の `Vec<&[f64]>` を直接
+  渡す)。既存 rows API は置換(pre-release 方針)
 - confirmed(correctness): `reference.rs:1045` の
   `m[i.min(m.len())]` 境界外 index を小さな correctness タスクとして
   チェーンに含め、到達可能性評価と境界での修正を行う
+  → spec/ADR で zero-fill(`m.get(i).copied().unwrap_or(0.0)`)に確定。
+  characterization コミットに同梱して A1 適用より先に land させる
 - hypothesis: A1 の FFT 化で reference stage 最大の単一計算が
   O(n log n) に縮み、stage `duration_ms` の大きな改善として
   観測できる(実測で確認)
-- hypothesis: A3 の plan+scratch 巻き上げで STFT コストの ~30-50%
-  が消え、~10 本/pair の STFT 全体に効く(実測で確認)
+- hypothesis: A3 の plan 巻き上げで STFT コストの ~30-50%
+  が消え、~10 本/pair の STFT 全体に効く(実測で確認。
+  フレームバッファは `re.push(fre)` で出力行に move されるため
+  巻き上げ対象は plan のみ — spec で確定)
 - hypothesis: A4 の列優先化で ~8.6M 規模の一時 alloc と strided
   gather が消え、fit_mix 経路が定数時間に近い overhead になる
   (実測で確認)
@@ -252,16 +261,23 @@ al-locate の呼出し側コード)の既知ホットスポット調査結果 A1
 
 - A1: overlap-save と全長 spectral path(bandpass_many 型)の選定、
   conv_len 4096 キャップの扱い、境界条件設計 → design で確定
-- A3: plan キャリアの具体的形(dsp ファサードに何を露出するか、
-  scratch buffer の所有)→ design で確定
+- A3: plan キャリアの具体的形(dsp ファサードに何を露出するか)→
+  design で確定。scratch buffer の所有は spec で確定済み:
+  フレームバッファは `re.push(fre)` で出力 `StftMatrix` 行に
+  move される(`stft.rs:113-121`)ため巻き上げ対象は plan のみ
 - A4: `from_columns` の契約(等長・finite 検査の置き場、ridge
-  augmentation の列への表現、既存 rows API の存否)→ spec/ADR で確定
-- `reference.rs:1045` OOB の実際の到達可能性(residual が model より
-  長くなる経路が現実に存在するか)→ 実装時に評価
-- al-analysis への criterion dev-dep 追加の要否 → bench 設計時に
-  判断(依存追加は確認対象)
-- characterization テストの捕捉粒度(stage 出力の record 比較か、
-  関数出力の直接比較か)→ spec/plan で確定
+  augmentation の列への表現)→ spec/ADR で確定。既存 rows API の
+  存否も ADR で置換に確定
+- `reference.rs:1045` OOB の実際の到達可能性 → spec/ADR で確定:
+  Aligned shared-length 契約(al-analysis `stage.rs:283-295`)の
+  下で models/residuals は長さ n を共有し本番到達不能。
+  zero-fill の構造的防御として修正
+- al-analysis への criterion dev-dep 追加の要否 → spec で確定:
+  追加する(`=0.8.2` + `[[bench]] harness = false` stanza、
+  al-math `Cargo.toml:16-22` と同 pattern)
+- characterization テストの捕捉粒度 → spec/ADR で確定: 関数
+  レベル。畳み込みと `fir_model` を名前付き関数へ切り出して
+  test/bench から到達可能にする
 
 ## Promotion Candidates
 
