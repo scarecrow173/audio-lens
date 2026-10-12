@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EJgOK1cNKnai60q1zOd"
 type: "task"
-status: "todo"
+status: "done"
 title: "caller 側最適化 A1: dsp::conv overlap-save 化と fir_model 置換"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/caller-side-optimizations.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/caller-side-optimizations-dsp-conv-overlap-save-and-fir-model-migration.md"
   depends-on:
     - "docs/plans/caller-side-optimizations.md"
     - "docs/tasks/caller-opt-least-squares-column-api.md"

@@ -20,7 +20,7 @@ pub use candidate::{LocateCandidate, MethodEvidence};
 pub use consensus::{ConsensusConfig, evaluate};
 pub use decode::{DecodedInput, decode_input, format_scale};
 pub use dsp::{
-    Fft, axpy, bandpass, corr0, deinterleave, dot, fft, gcc_phat, mag_sq, ncc, rms, scale,
+    Fft, axpy, bandpass, conv, corr0, deinterleave, dot, fft, gcc_phat, mag_sq, ncc, rms, scale,
     spectral_envelope, sub_scaled, sum_sq,
 };
 pub use methods::{BandNcc, FullNcc, GccPhat, LocateMethod, SpectralEnvelope, default_methods};

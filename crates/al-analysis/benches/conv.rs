@@ -1,23 +1,26 @@
 //! Criterion bench for the `fir_model` convolution path
-//! (TASK-034EJgkPQJmqrMLNdP7lVh, design T-baseline).
+//! (TASK-034EJgkPQJmqrMLNdP7lVh, design T-baseline;
+//! TASK-034EJgOK1cNKnai60q1zOd added the `dsp::conv` arm).
 //!
-//! T0 contains only the `conv_direct` baseline arm — `dsp::conv`
-//! does not exist until the A1 optimization commit, which adds its
-//! arm on the same fixtures for a direct A/B. `conv_direct` is the
-//! verbatim reference implementation kept in `reference.rs` tests
-//! and `dsp.rs` tests (no shared helper, per ADR).
+//! `conv_direct` is the verbatim reference implementation kept in
+//! `reference.rs` tests and `dsp.rs` tests (no shared helper, per
+//! ADR). `dsp::conv` (overlap-save via `RealFft`) runs on the same
+//! fixtures for a direct A/B against the `pre` baseline.
 //!
-//! Direct convolution is O(n·m), so sizes are bounded to
-//! n <= 262_144 with `sample_size(10)` and a short
+//! Direct convolution is O(n·m), so `conv_direct` sizes are bounded
+//! to n <= 262_144 with `sample_size(10)` and a short
 //! `measurement_time` (n = 262_144, m = 4_096 is ~1G MACs/iter).
-//! The FFT-path-only 1M scaling point arrives with the `dsp::conv`
-//! arm, not here.
+//! The `dsp::conv` arm additionally covers n = 1_048_576 to observe
+//! FFT-path scaling where the direct path is too slow to bench.
 
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
 use std::time::Duration;
 
 const SIGNAL_SIZES: [usize; 2] = [65_536, 262_144];
+/// `dsp::conv` adds the 1M scaling point the direct path cannot
+/// afford.
+const FFT_SIGNAL_SIZES: [usize; 3] = [65_536, 262_144, 1_048_576];
 const KERNEL_SIZES: [usize; 2] = [256, 4_096];
 
 /// Direct linear convolution returning the first `x.len()` outputs.
@@ -61,6 +64,16 @@ fn bench_conv(c: &mut Criterion) {
                 &(n, m),
                 |b, _| {
                     b.iter(|| conv_direct(black_box(&signal), black_box(&kernel)));
+                },
+            );
+        }
+        for n in FFT_SIGNAL_SIZES {
+            let signal = noise(n, 0x5eed);
+            group.bench_with_input(
+                BenchmarkId::new("dsp_conv", format!("n{n}_m{m}")),
+                &(n, m),
+                |b, _| {
+                    b.iter(|| al_locate::dsp::conv(black_box(&signal), black_box(&kernel)));
                 },
             );
         }
