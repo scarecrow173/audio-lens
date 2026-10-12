@@ -33,6 +33,11 @@ Directory: `docs/tasks`
 | TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | done | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
 | TASK-036dv4ZVW9bSvsugi4x7VA | reference: 帯域別ラグ補償ゲイン推定(#38) | done | [band-lag-gain.md](./band-lag-gain.md) |
 | TASK-034DYiHj7TcoYoEFn29rMP | bench_correlation: split API 追従と previous_fft 腕の削除 | done | [bench-correlation-split-re-im.md](./bench-correlation-split-re-im.md) |
+| TASK-034EJgkPQJmqrMLNdP7lVh | caller 側最適化: bench 基盤導入・baseline 計測・characterization テスト先行 | done | [caller-opt-bench-baseline-characterization.md](./caller-opt-bench-baseline-characterization.md) |
+| TASK-034EJgOK1cNKnai60q1zOd | caller 側最適化 A1: dsp::conv overlap-save 化と fir_model 置換 | done | [caller-opt-dsp-conv-overlap-save.md](./caller-opt-dsp-conv-overlap-save.md) |
+| TASK-034EJgyjQ0EutoP1M6RqoQ | caller 側最適化 A4: LeastSquares 列指向 API 置換と caller 移行 | done | [caller-opt-least-squares-column-api.md](./caller-opt-least-squares-column-api.md) |
+| TASK-034EJgPpxRSjjhOJVeBUup | caller 側最適化: 事後計測・Implementation Record 記録・最終検証 | done | [caller-opt-measurement-ir-closeout.md](./caller-opt-measurement-ir-closeout.md) |
+| TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |

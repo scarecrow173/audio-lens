@@ -38,6 +38,7 @@ relations:
   superseded-by: []
   related:
     - "./observability-foundation-logging-and-profiling.md"
+    - "./caller-side-optimizations.md"
   refines: []
   refined-by: []
   derives-from:
