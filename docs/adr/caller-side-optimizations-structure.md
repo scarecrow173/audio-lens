@@ -33,7 +33,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/caller-side-optimizations.md"
-  derived-by: []
+  derived-by:
+    - "../designs/caller-side-optimizations.md"
   verifies: []
   verified-by: []
   references: []
