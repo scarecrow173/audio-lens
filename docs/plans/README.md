@@ -16,6 +16,7 @@ Directory: `docs/plans`
 | PLAN-034z7HA18FxYMCQPBZ6Gg2 | ソース定位・トラッキングの実装 | completed | [locate-and-tracking.md](./locate-and-tracking.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | PLAN-034AaBsJ00thIonv8bp54N | MP4 demux とタイミング観測の実装 | completed | [mp4-ingest.md](./mp4-ingest.md) |
+| PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |

@@ -11,6 +11,7 @@ members = [
     "crates/al-analysis",
     "crates/al-viz",
     "crates/al-testkit",
+    "crates/al-observability",
 ]
 
 [workspace.package]
@@ -28,5 +29,20 @@ al-locate = { path = "crates/al-locate" }
 al-analysis = { path = "crates/al-analysis" }
 al-viz = { path = "crates/al-viz" }
 al-testkit = { path = "crates/al-testkit" }
+al-observability = { path = "crates/al-observability" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = [
+    "fmt",
+    "env-filter",
+    "json",
+    "ansi",
+] }
+tracing-appender = "0.2.5"
+
+# Keep full debug info in release builds so external CPU samplers
+# (samply — see docs/guides/profiling-samply.md) resolve symbols.
+# Cost is artifact size only; codegen and optimization are unchanged.
+[profile.release]
+debug = true

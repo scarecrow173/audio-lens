@@ -19,6 +19,7 @@ Directory: `docs/test-specs`
 | TSPEC-034z8k5JiNwiAsnNVpk7vn | locate-tracking-residual | proposed | [locate-tracking-residual.md](./locate-tracking-residual.md) |
 | TSPEC-035jRegcnGwUqH1RD6oUtJ | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | proposed | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
+| TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-brMJfBQXA6vJ3f4Vm4UKjR | spectral_envelope の fft_size 契約検証 | proposed | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |

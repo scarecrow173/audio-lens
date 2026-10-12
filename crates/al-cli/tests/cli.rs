@@ -11,6 +11,18 @@ fn temp_dir(tag: &str) -> PathBuf {
     dir
 }
 
+/// `al` バイナリへの `Command` を組み立てる。`AL_LOG`/`AL_LOG_FORMAT`
+/// は親環境から scrub する(edition 2024 では `std::env::set_var` が
+/// unsafe のため、親ではなく子プロセス側の環境を除去する)。全 spawn
+/// サイトでこれを使い、logging env の有無で結果が変わらないことを
+/// 保証する。
+fn al_command() -> Command {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_al"));
+    command.env_remove("AL_LOG");
+    command.env_remove("AL_LOG_FORMAT");
+    command
+}
+
 fn wav_bytes() -> Vec<u8> {
     let frames: Vec<i16> = (0..960).map(|i| i % 200 - 100).collect();
     let data_len = frames.len() as u32 * 2;
@@ -36,7 +48,6 @@ fn wav_bytes() -> Vec<u8> {
 
 #[test]
 fn resume_uses_snapshotted_dictionary_after_source_deleted() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("dict");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_bytes()).unwrap();
@@ -54,7 +65,7 @@ fn resume_uses_snapshotted_dictionary_after_source_deleted() {
     .unwrap();
     let jobs = dir.join("jobs");
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -91,7 +102,7 @@ fn resume_uses_snapshotted_dictionary_after_source_deleted() {
 
     // Deleting the dictionary file must not break resume.
     std::fs::remove_file(&dict).unwrap();
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "resume",
             "--base-dir",
@@ -112,7 +123,6 @@ fn resume_uses_snapshotted_dictionary_after_source_deleted() {
 
 #[test]
 fn default_run_snapshots_bundled_dictionary_into_config() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("embedded");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_bytes()).unwrap();
@@ -120,7 +130,7 @@ fn default_run_snapshots_bundled_dictionary_into_config() {
 
     // No --config: the bundled dictionary is still snapshotted into the
     // job config so resume stays pinned to those exact bytes.
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -202,7 +212,6 @@ fn input_id_of(artifacts: &[serde_json::Value], name: &str) -> String {
 /// Run `ingest,locate` over the given `role:path` inputs and return
 /// the job directory. `config` is an optional job config JSON file.
 fn run_ingest_locate(
-    al: &str,
     jobs: &std::path::Path,
     inputs: &str,
     config: Option<&std::path::Path>,
@@ -220,7 +229,7 @@ fn run_ingest_locate(
         args.push("--config".to_string());
         args.push(config.to_str().unwrap().to_string());
     }
-    let out = Command::new(al).args(&args).output().unwrap();
+    let out = al_command().args(&args).output().unwrap();
     assert!(
         out.status.success(),
         "run failed: {}",
@@ -332,7 +341,6 @@ fn assert_segments_ordered(segments: &[serde_json::Value]) {
 
 #[test]
 fn locate_finds_source_embedded_in_capture() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate");
     let jobs = dir.join("jobs");
 
@@ -348,7 +356,7 @@ fn locate_finds_source_embedded_in_capture() {
     std::fs::write(&src_wav, wav_from_samples(&source)).unwrap();
     std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -400,7 +408,6 @@ fn locate_finds_source_embedded_in_capture() {
 
 #[test]
 fn locate_emits_time_map_and_residual_artifacts() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate-tracking");
     let jobs = dir.join("jobs");
 
@@ -428,7 +435,7 @@ fn locate_emits_time_map_and_residual_artifacts() {
     std::fs::write(&quiet_wav, wav_from_samples(&quiet)).unwrap();
     std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -555,13 +562,12 @@ fn locate_emits_time_map_and_residual_artifacts() {
 
 #[test]
 fn capture_only_runs_through_cheap_analysis_and_dataset() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("cheap");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
     let jobs = dir.join("jobs");
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -604,13 +610,12 @@ fn capture_only_runs_through_cheap_analysis_and_dataset() {
 
 #[test]
 fn full_pipeline_reaches_visualization_and_export() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("viz");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
     let jobs = dir.join("jobs");
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -658,13 +663,13 @@ fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
     // completes the full default stage plan — the dataset keeps the
     // metadata store, visualization records the skipped timeline, and
     // the export package is still produced.
-    let al = env!("CARGO_BIN_EXE_al");
+
     let dir = temp_dir("mp4-e2e");
     let mp4 = dir.join("cap.mp4");
     std::fs::write(&mp4, compressed_mp4_bytes()).unwrap();
     let jobs = dir.join("jobs");
 
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -739,14 +744,13 @@ fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
 
 #[test]
 fn stage_plan_missing_dependency_is_rejected() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("dep");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_bytes()).unwrap();
     let jobs = dir.join("jobs");
 
     // cheap_analysis requires ingest earlier in the plan.
-    let out = Command::new(al)
+    let out = al_command()
         .args([
             "run",
             "--base-dir",
@@ -768,7 +772,6 @@ fn stage_plan_missing_dependency_is_rejected() {
 
 #[test]
 fn locate_tracks_long_source_with_windowed_anchors() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate-long");
     let jobs = dir.join("jobs");
 
@@ -786,7 +789,6 @@ fn locate_tracks_long_source_with_windowed_anchors() {
     std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
 
     let job_dir = run_ingest_locate(
-        al,
         &jobs,
         &format!(
             "capture_bug:{},source_asset:{}",
@@ -818,7 +820,6 @@ fn locate_tracks_long_source_with_windowed_anchors() {
 
 #[test]
 fn locate_tracks_linear_drift_as_drift_segment() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate-drift");
     let jobs = dir.join("jobs");
 
@@ -849,7 +850,6 @@ fn locate_tracks_linear_drift_as_drift_segment() {
     .unwrap();
 
     let job_dir = run_ingest_locate(
-        al,
         &jobs,
         &format!(
             "capture_bug:{},source_asset:{}",
@@ -879,7 +879,6 @@ fn locate_tracks_linear_drift_as_drift_segment() {
 
 #[test]
 fn locate_tracks_skip_and_resume_piecewise() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("locate-skip");
     let jobs = dir.join("jobs");
 
@@ -905,7 +904,6 @@ fn locate_tracks_skip_and_resume_piecewise() {
     std::fs::write(&cap_wav, wav_from_samples(&capture)).unwrap();
 
     let job_dir = run_ingest_locate(
-        al,
         &jobs,
         &format!(
             "capture_bug:{},source_asset:{}",
@@ -935,7 +933,6 @@ fn locate_tracks_skip_and_resume_piecewise() {
 
 #[test]
 fn missing_or_invalid_config_is_an_explicit_error() {
-    let al = env!("CARGO_BIN_EXE_al");
     let dir = temp_dir("cfg");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_bytes()).unwrap();
@@ -945,7 +942,7 @@ fn missing_or_invalid_config_is_an_explicit_error() {
         if config == "broken.json" {
             std::fs::write(dir.join(config), "{ not json").unwrap();
         }
-        let out = Command::new(al)
+        let out = al_command()
             .args([
                 "run",
                 "--base-dir",
@@ -982,7 +979,7 @@ fn explicit_input_ids_are_pinned_and_invalid_assignments_fail() {
         format!("{},{}", ids[0], ids[0]),
         "invalid,invalid".into(),
     ] {
-        let output = Command::new(env!("CARGO_BIN_EXE_al"))
+        let output = al_command()
             .args([
                 "run",
                 "--base-dir",
@@ -1062,7 +1059,7 @@ fn cli_config_marker_produces_avsync_pair() {
     )
     .unwrap();
     let jobs = dir.join("jobs");
-    let output = Command::new(env!("CARGO_BIN_EXE_al"))
+    let output = al_command()
         .args([
             "run",
             "--base-dir",

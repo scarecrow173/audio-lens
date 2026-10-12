@@ -164,7 +164,12 @@ impl Stage for CheapAnalysisStage {
                 continue;
             };
 
-            let mut out = cheap::analyze_input(&dec, &cfg);
+            let span = tracing::info_span!(
+                "analysis::cheap",
+                input_id = %dec.input_id,
+                len = dec.channel_samples.first().map_or(0, |c| c.len())
+            );
+            let mut out = span.in_scope(|| cheap::analyze_input(&dec, &cfg));
             out.records.extend(video_out.records);
             // A/V sync: the persisted onset_times tensor is the audio
             // event series; video events come from ingest. Both are
@@ -302,8 +307,14 @@ impl Stage for ReferenceAnalysisStage {
                 }
             };
 
-            let out =
-                reference::analyze_pair(&pair, &result.alignment_id, &aligned, upstream, &cfg);
+            let span = tracing::info_span!(
+                "analysis::reference",
+                input_id = %result.source_input_id,
+                len = aligned.src.first().map_or(0, |c| c.len())
+            );
+            let out = span.in_scope(|| {
+                reference::analyze_pair(&pair, &result.alignment_id, &aligned, upstream, &cfg)
+            });
             let tensor_prov = al_dataset::provenance::Provenance {
                 input_id: result.source_input_id.clone(),
                 algorithm_id: "reference.v1".into(),

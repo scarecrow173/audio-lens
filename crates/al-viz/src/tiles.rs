@@ -108,6 +108,8 @@ fn intermediate_named(reader: &DatasetReader, leaf: &str) -> Vec<String> {
 /// Callers decide skip/error policy per family via
 /// `reader.role_produced`.
 pub fn build(reader: &DatasetReader) -> io::Result<Vec<StreamedTensor>> {
+    let span = tracing::info_span!("viz::tiles", method = "spectrogram");
+    let _enter = span.enter();
     let mut out = Vec::new();
 
     // Spectrogram tiles: dB magnitude per input channel.
@@ -189,6 +191,8 @@ pub fn build(reader: &DatasetReader) -> io::Result<Vec<StreamedTensor>> {
 /// companion spectrogram's whole frame count — trailing frames after
 /// the last invalid range stay `1`.
 pub fn validity_masks(reader: &DatasetReader, hop_s: f64) -> io::Result<Vec<TensorProduct>> {
+    let span = tracing::info_span!("viz::tiles", method = "validity_masks");
+    let _enter = span.enter();
     let mut out = Vec::new();
     for a in reader.artifacts("features/cheap") {
         if a.store != StoreKind::Json {

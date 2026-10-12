@@ -58,6 +58,13 @@ impl IngestStage {
         video_cfg: &VideoFeatureConfig,
         ctx: &StageContext<'_>,
     ) -> Result<Vec<ArtifactRecord>, StageError> {
+        let span = tracing::info_span!(
+            "media::ingest",
+            input_id = %input.input_id,
+            len = tracing::field::Empty,
+            sha256 = tracing::field::Empty
+        );
+        let _enter = span.enter();
         let path = &input.path;
         let bytes = fs::read(path).map_err(|e| {
             StageError::new(
@@ -68,7 +75,9 @@ impl IngestStage {
                 ),
             )
         })?;
+        span.record("len", bytes.len());
         let source_hash = sha256_hex(&bytes);
+        span.record("sha256", source_hash.as_str());
 
         // The job pins input content at creation; a resume must not
         // silently ingest a replaced file under the same job id. An
