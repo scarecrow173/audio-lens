@@ -80,8 +80,8 @@ Directory: `docs/tasks`
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
 | TASK-034EO4rKpEFHb4NpDpz5py | 機械的 caller クリーンアップ A15: interleave/deinterleave のブロック書き込み化 | todo | [mech-cleanup-a15-interleave-block-writes.md](./mech-cleanup-a15-interleave-block-writes.md) |
 | TASK-034EO4yi7Vv8c3JuAdt1Z0 | 機械的 caller クリーンアップ A16: 行優先累積・dom mag_sq scratch・video 融合・tensor fast path | todo | [mech-cleanup-a16-row-major-fast-paths.md](./mech-cleanup-a16-row-major-fast-paths.md) |
-| TASK-034EO4gPvPkx3voaC6KOlY | 機械的 caller クリーンアップ A6: band_correlation の bandpass_many バッチ化 | todo | [mech-cleanup-a6-bandpass-batching.md](./mech-cleanup-a6-bandpass-batching.md) |
-| TASK-034EO4hAcMtLkbpxQc8eOZ | 機械的 caller クリーンアップ A7/A8: csd 呼出しの inline conj(x)·y 化 | todo | [mech-cleanup-a7-a8-csd-inlining.md](./mech-cleanup-a7-a8-csd-inlining.md) |
+| TASK-034EO4gPvPkx3voaC6KOlY | 機械的 caller クリーンアップ A6: band_correlation の bandpass_many バッチ化 | done | [mech-cleanup-a6-bandpass-batching.md](./mech-cleanup-a6-bandpass-batching.md) |
+| TASK-034EO4hAcMtLkbpxQc8eOZ | 機械的 caller クリーンアップ A7/A8: csd 呼出しの inline conj(x)·y 化 | done | [mech-cleanup-a7-a8-csd-inlining.md](./mech-cleanup-a7-a8-csd-inlining.md) |
 | TASK-034EO4qUmlyu3qleVAOHoo | 機械的 caller クリーンアップ A9/A12: cheap 側 power 一括化・mean_row 融合・HashSet 事前計数 | todo | [mech-cleanup-a9-a12-cheap-pass-consolidation.md](./mech-cleanup-a9-a12-cheap-pass-consolidation.md) |
 | TASK-034EO484s25JM8bsb6zUCh | 機械的 caller クリーンアップ: characterization テスト・bench 腕・baseline 採取 | done | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
 | TASK-034EO4z7oZadAFuMojWjLO | 機械的 caller クリーンアップ: 事後計測・Implementation Record 記録・最終検証 | todo | [mech-cleanup-measurement-ir-closeout.md](./mech-cleanup-measurement-ir-closeout.md) |

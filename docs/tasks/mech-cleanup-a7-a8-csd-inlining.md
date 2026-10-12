@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4hAcMtLkbpxQc8eOZ"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ A7/A8: csd 呼出しの inline conj(x)·y 化"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-a7-a8-csd-inlining.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-a6-bandpass-batching.md"

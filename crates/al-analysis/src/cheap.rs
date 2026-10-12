@@ -12,9 +12,7 @@ use al_locate::decode::DecodedInput;
 use al_locate::dsp::{corr0, ncc, rms, sum_sq};
 
 use crate::records::{RecordBuilder, robust_summary};
-use crate::stft::{
-    StftMatrix, band_power, complex_coherence, csd, envelope, stft, third_octave_bands,
-};
+use crate::stft::{StftMatrix, band_power, complex_coherence, envelope, stft, third_octave_bands};
 
 /// Cheap-stage tunables (`config.analysis.cheap.*` overrides).
 #[derive(Debug, Clone)]
@@ -1110,10 +1108,11 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 let mut paa = vec![0.0f64; ma.fft_size];
                 let mut pbb = vec![0.0f64; ma.fft_size];
                 for f in 0..frames {
-                    let pxy = csd(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f]);
-                    for (k, &(pr, pi)) in pxy.iter().enumerate() {
-                        csd_re[k] += pr;
-                        csd_im[k] += pi;
+                    for k in 0..ma.fft_size {
+                        let (xr, xi) = (ma.re[f][k], ma.im[f][k]);
+                        let (yr, yi) = (mb.re[f][k], mb.im[f][k]);
+                        csd_re[k] += xr * yr + xi * yi;
+                        csd_im[k] += xr * yi - xi * yr;
                         paa[k] += ma.re[f][k] * ma.re[f][k] + ma.im[f][k] * ma.im[f][k];
                         pbb[k] += mb.re[f][k] * mb.re[f][k] + mb.im[f][k] * mb.im[f][k];
                     }
