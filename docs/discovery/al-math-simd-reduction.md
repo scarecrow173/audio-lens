@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "al-math ベクトル演算プリミティブ集約と SIMD reduction 順序"
 created: "2026-10-11"
-updated: "2026-10-11"
+updated: "2026-10-12"
 owners: []
 relations:
   source:
@@ -43,7 +43,10 @@ relations:
   derives-from:
     - "../specs/al-math-api-boundary.md"
     - "../designs/al-math-api-boundary.md"
-  derived-by: []
+  derived-by:
+    - "../specs/al-math-vec-primitives.md"
+    - "../adr/al-math-vec-primitives-slice-boundary.md"
+    - "../adr/simd-reduction-lane-fma.md"
   verifies: []
   verified-by: []
   references: []
@@ -74,7 +77,8 @@ Conclusions)。本集約の spec/ADR 作成・実装はその基盤チェーン
 
 - 確認済み(棚卸し): 同一式の f64 リダクションが複数 crate に分散
   - `corr0`(Σxy/√(Σx²Σy²)、ゼロエネルギー→0.0、中心化なし):
-    `expensive/mod.rs:264`(pub(crate)、timing.rs で ~4 箇所使用)、
+    `expensive/mod.rs:264`(pub(crate)、timing.rs で3箇所
+    (:92,:148,:397)使用)、
     `reference.rs:134`(~8 箇所使用)、`cheap.rs` ×3(インライン、
     `stereo.pair_correlation`・`stereo.ipd_samples` の lag 走査・
     `trans.self_similarity`)
@@ -85,24 +89,26 @@ Conclusions)。本集約の spec/ADR 作成・実装はその基盤チェーン
     signal/template に毎回、最大級のホット)、`mixer.rs:74`、
     `band_gain.rs:94,101`、cheap 内複数
   - `dot`(Σa·b): `linalg.rs` に内部 SIMD 版が既存(lane acc +
-    scalar tail)、`methods.rs:499`、`residual.rs:166`、
+    scalar tail)、`methods.rs:541`、`residual.rs:166`、
     `band_gain.rs:96`、cheap/reference 内にインライン
-  - `scale`: `methods.rs:470` `normalize_gain`
+  - `scale`: `methods.rs:500` `normalize_gain`
   - `axpy` 系: `residual.rs:163-169` の `*v -= Σ_s m·src` は
     転置アクセス形。per-source 化すれば連続 `axpy`/`sub_scaled`
     として書ける(ループ構造変更を伴う)
   - `mag_sq`(re²+im²→out): `stft.rs:82`、`expensive/ir.rs:178`、
     `dynamics.rs:194` — split re/im 境界の副産物として新候補
 - 確認済み(依存): `al-analysis` は `al-math` に直接依存せず、
-  DSP は `al_locate::dsp` ファサード経由(`ncc`/`fft`/`bandpass`/
-  `spectral_envelope` を re-export)。al-analysis への al-math
+  DSP は `al_locate::dsp` ファサード経由(`ncc`/`bandpass`/
+  `spectral_envelope` は `pub use` の re-export、`fft` は
+  dsp.rs:31-38 の手書き wrapper fn)。al-analysis への al-math
   依存追加は規約上「依存の追加・変更」で確認対象
 - 確認済み(数値): 逐次和と SIMD lane アキュムレート+FMA は加算順が
   異なり ~ulp(10⁻¹⁶)級の差が出得る。scalar(pulp::Scalar、
   1レーン)経路は逐次和と同順序で現行値とビット一致する
 - 確認済み(影響): golden テストは位置比較(±64 samples)であり
   float 厳密比較ではない。Validity ゲート閾値(corr 0.3、
-  MIN_ENERGY 1e-4 等)は差分より6〜12桁大きい
+  `MIN_ENERGY = 1e-9`・methods.rs:16 等)は差分より6〜12桁
+  大きい
 - 確認済み(計測): criterion 未導入。ベンチは examples/ の
   `Instant` 手動計測(bench_dsp/bench_ncc/bench_correlation/
   bench_locate_prepared)のみ。ログ基盤(tracing/log 等)も未導入
@@ -216,5 +222,9 @@ Lean 列の通り):
 - 棚卸し対象コードは `relations.source` に記載
 - `target/explain-reduction-order.html`(reduction 順序の解説資料。
   ユーザー確認用の一時資料でコミット対象外)
-- 後続チェーン: Logging/Profile 基盤(先行)、本集約の spec/ADR/
-  design/plan/task(後続)
+- 後続チェーン: Logging/Profile 基盤(先行、マージ済み)、本集約の
+  spec/ADR/design/plan/task(後続)。spec/ADR は
+  `docs/specs/al-math-vec-primitives.md`・
+  `docs/adr/al-math-vec-primitives-slice-boundary.md`・
+  `docs/adr/simd-reduction-lane-fma.md` として作成済み
+  (derived-by で連結)

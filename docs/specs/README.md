@@ -7,6 +7,7 @@ Directory: `docs/specs`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | SPEC-034DXcFaOvk0LFMoPMjkaS | al-math 公開 API のバックエンド中立化と split re/im FFT 境界 | approved | [al-math-api-boundary.md](./al-math-api-boundary.md) |
+| SPEC-034EoHgAtLogjk6xxhiJWm | al-math vec プリミティブ集約と dsp ファサード経由の公開 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | SPEC-034yYltIfR72sgyFIMvsdh | 分析データセットスキーマ | proposed | [analysis-dataset.md](./analysis-dataset.md) |
 | SPEC-034yYlGGF9K5h2tGmQTOvS | 解析結果エクスポート | proposed | [analysis-export.md](./analysis-export.md) |
 | SPEC-034yYlrZw66KVKNEHErIn4 | 分析ジョブモデルとオーケストレーション | proposed | [analysis-job-model.md](./analysis-job-model.md) |
