@@ -30,6 +30,7 @@ pub fn deinterleave(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
 }
 
 pub use al_math::correlation::{gcc_phat, ncc};
+pub use al_math::fft::Fft;
 pub use al_math::filter::{bandpass, bandpass_many, spectral_envelope};
 pub use al_math::vec::{axpy, corr0, dot, mag_sq, rms, scale, sub_scaled, sum_sq};
 

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EJgxFS2IJznrYHnuNJy"
 type: "task"
-status: "todo"
+status: "done"
 title: "caller 側最適化 A3: stft の Fft plan 巻き上げ"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/caller-side-optimizations.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/caller-side-optimizations-stft-fft-plan-hoist.md"
   depends-on:
     - "docs/plans/caller-side-optimizations.md"
     - "docs/tasks/caller-opt-bench-baseline-characterization.md"

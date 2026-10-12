@@ -1,11 +1,12 @@
 //! Complex STFT and derived spectral intermediates.
 //!
-//! The FFT kernel is `al_locate::dsp::fft` (radix-2), so every frame
-//! is zero-padded up to the next power of two when the analysis
+//! The FFT kernel is `al_locate::dsp::Fft` (radix-2); one plan is
+//! built per call and reused across all frames. Every frame is
+//! zero-padded up to the next power of two when the analysis
 //! window is not already one. All products are deterministic and
 //! persistable as `intermediate`-role tensors.
 
-use al_locate::dsp::{fft, mag_sq, scale};
+use al_locate::dsp::{Fft, mag_sq, scale};
 
 /// One frame×bin complex matrix produced by [`stft`].
 #[derive(Debug, Clone)]
@@ -109,13 +110,14 @@ pub fn stft(samples: &[f64], window: usize, hop: usize, sample_rate: u32) -> Stf
     let mut re = Vec::new();
     let mut im = Vec::new();
     if samples.len() >= window && window > 0 && hop > 0 {
+        let plan = Fft::new(fft_size);
         for start in (0..=samples.len() - window).step_by(hop) {
             let mut fre = vec![0.0; fft_size];
             let mut fim = vec![0.0; fft_size];
             for (i, &v) in samples[start..start + window].iter().enumerate() {
                 fre[i] = v * win[i];
             }
-            fft(&mut fre, &mut fim, false);
+            plan.transform(&mut fre, &mut fim, false);
             re.push(fre);
             im.push(fim);
         }
@@ -210,6 +212,9 @@ pub fn envelope(magnitude_row: &[f64], bins: usize) -> Vec<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // The bit-exact oracle below intentionally transforms each frame
+    // through the single-shot `dsp::fft` path (pre-hoist behavior).
+    use al_locate::dsp::fft;
 
     #[test]
     fn stft_places_sine_in_the_right_bin() {
