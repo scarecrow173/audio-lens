@@ -118,8 +118,7 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
   コード基準の目安):
   - `crates/al-locate/src/methods.rs`: `energy`(:142)、
     preflight の全長 signal/template `energy` 呼出し
-    (:175,:183)、`normalize_gain`(:500、`rms`→`scale` 合成)、
-    envelope NCC のインライン corr 合成(:541-544)
+    (:175,:183)、`normalize_gain`(:500、`rms`→`scale` 合成)
   - `crates/al-locate/src/mixer.rs`: インライン `rms`(:74)
   - `crates/al-locate/src/residual.rs`: `&[Vec<f64>]` マルチch
     `rms`(:133、per-channel `sum_sq` の合成で再表現 —
@@ -174,8 +173,9 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
 
 ### 残存許容(residual allowance)
 
-`&[f64]` スライス API では供給できない、または同一式でない
-複合式として、重複解消の対象外とし残存を明示的に許容する箇所。
+`&[f64]` スライス API では供給できない、同一式でない複合式、
+または置換が文書化済み契約を破壊すると実装時に判明した箇所
+として、重複解消の対象外とし残存を明示的に許容する箇所。
 以下は AC の「独立実装が残存しない」判定から除く:
 
 - `expensive/ir.rs` のタプルスライス上の合成(:155-161)—
@@ -183,6 +183,10 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
   であり、re/im 分離前のため `&[f64]` API に乗らない
 - `residual.rs` の列 gather dot(:166)— 上記条件付き再構成を
   採用した場合のみ解消される
+- `methods.rs` envelope NCC のインライン corr 合成(:539-547)—
+  周期入力で `corr0` が全 lag 厳密 1.0 → argmax タイブレークが
+  lag 0 に倒れ合議誤受理。曖昧ケース非受理契約を優先して順次式
+  を維持(IMPL-034EqrFgTWTPu16W3CuG6r に記録)
 - `al-viz` `lod.rs` の incremental `sum_sq` — Out of Scope
   (streaming 契約が異なる)
 - `Vec<Vec<f64>>` / `Vec<(f64,f64)>` 上の合成で、呼出し側が

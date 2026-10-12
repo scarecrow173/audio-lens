@@ -111,6 +111,10 @@ panic 契約・ゼロ入力規則・等価性 predicate)が ADR と乖離した
     変化するため、インラインのまま残す
   - `reference.rs:872-881` M/S エネルギー — `Σ((a±b)/2)²` は
     materialization を要する複合式 — 対象外
+  - `methods.rs:539-547` envelope NCC — 周期入力で `corr0` が
+    全 lag 厳密 1.0 → argmax タイブレークが lag 0 に倒れ合議
+    誤受理。曖昧ケース非受理契約を優先して順次式を維持
+    (IMPL-034EqrFgTWTPu16W3CuG6r に記録)
 
 ## Components and Boundaries
 
@@ -238,7 +242,7 @@ spec In Scope の列挙全件をカバーする。行番号は現行コード基
 | --- | --- | --- |
 | `methods.rs:142` | `fn energy` 自前 `Σv²` | 削除し `dsp::sum_sq` に置換(呼出し :175,:183,:363,:408 と :501。:363 は `evidence_from_bands`、:408 は `BandNcc::locate` の MIN_ENERGY フィルタ) |
 | `methods.rs:500-506` `normalize_gain` | `energy/len` の sqrt → 要素除算 | `dsp::rms(x)` + `dsp::scale(x, r.recip(), &mut out)`。`v / rms` が `v * r.recip()` になるため ulp 級の差異(除算→逆数乗算)を生む — 再構成の許容誤差ポリシーで許容済み。Implementation Record に記録する |
-| `methods.rs:541-544` envelope NCC | インライン dot/√(tn·sn) | `dsp::corr0(&t_env, &s_env)`(`tn*sn>0` と `ex>0&&ey>0` は非負和で同値 — NaN を含めガード同値性は保持)。`dot/(tn*sn)` と `sxy/(ex*ey).sqrt()` は `sqrt(a)*sqrt(b)` vs `sqrt(a*b)` で ulp 級に差異し得る |
+| `methods.rs:539-547` envelope NCC | インライン dot/√(tn·sn) | **未移行 — 残存許容へ逸脱**。`dsp::corr0(&t_env, &s_env)` への置換を予定したが、周期入力で `corr0` が全 lag 厳密 1.0 → argmax タイブレークが lag 0 に倒れ合議誤受理となるため見送り、順次式を維持(Out of Scope の残存許容追加分と IMPL-034EqrFgTWTPu16W3CuG6r を参照) |
 | `mixer.rs:74` | インライン `rms` | `dsp::rms(cap)` |
 | `residual.rs:133` | `&[Vec<f64>]` マルチch `rms` | per-channel `dsp::sum_sq` の合成に再表現(下記参照) |
 | `residual.rs:163-169` | 転置アクセス減算ループ | **条件付き** per-source `sub_scaled` 再構成(計測プロトコル節) |

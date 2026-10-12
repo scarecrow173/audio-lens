@@ -113,7 +113,7 @@ approved design `docs/designs/al-math-vec-primitives.md`
 | `crates/al-math/src/linalg.rs` | 内部 `dot` を `vec::dot_kernel` に統一、`reflect` を `dot_kernel`+`sub_scaled_kernel` 消費へ | T1 |
 | `crates/al-locate/src/dsp.rs` | `pub use al_math::vec::{axpy, corr0, dot, mag_sq, rms, scale, sub_scaled, sum_sq};` 追加 | T2 |
 | `crates/al-locate/src/lib.rs` | root mirror(`pub use dsp::{...}` :22)に vec シンボル追加 | T2 |
-| `crates/al-locate/src/methods.rs` | `energy`(:142)削除 + 呼出し(:175,:183,:363,:408,:501)を `dsp::sum_sq` へ、`normalize_gain`(:500-506)を `rms`+`scale`、envelope NCC(:541-544)を `corr0` へ | T2 |
+| `crates/al-locate/src/methods.rs` | `energy`(:142)削除 + 呼出し(:175,:183,:363,:408,:501)を `dsp::sum_sq` へ、`normalize_gain`(:500-506)を `rms`+`scale`。envelope NCC(:539-547)は **未移行 — 残存許容へ逸脱**(risk 8・IMPL-034EqrFgTWTPu16W3CuG6r 参照) | T2 |
 | `crates/al-locate/src/mixer.rs` | インライン `rms`(:74)を `dsp::rms` へ | T2 |
 | `crates/al-locate/src/residual.rs` | マルチch `rms`(:133)を per-channel `sum_sq` 再合成へ | T2 |
 | `crates/al-analysis/src/cheap.rs` | `rms`×4・mean-square・`sum_sq`×2・inline corr0×3(pair_correlation は sx/sy 保持の `corr0`+個別 `sum_sq`) | T3 |
@@ -157,6 +157,7 @@ dev-dep として導入済み)。
 | 5 | `mul_add_f64s` の誤用で Scalar 経路も融合しビット一致契約が破れる | low | med | カーネルは `mul_add_e_f64s` のみ。scalar ビット一致テスト(T1)で即座に検出される |
 | 6 | dispatch 経路の最終ビットが ISA 依存で永続化値(ResidualEnergy 等)が ~ulp 揺れ | — | low | ADR で受容済み(Validity 閾値との桁差 6〜12 桁を確認済み)。golden は位置比較で float 厳密比較なし |
 | 7 | 小スライス呼出しの per-call dispatch オーバーヘッド回帰 | low | low | ポリシー上許容(Deferred Design Concerns)。bench サイズ 32 で観測し、問題なら別施策 |
+| 8 | 合議の argmax が FP ノイズの票分散に暗黙依存する構造問題: envelope NCC に `corr0`(および `dot`/`sum_sq` 再合成形)を適用すると、周期入力で全 lag 厳密 1.0 となり stable-sort argmax が lag 0 に倒れ gcc_phat と 2 手法合意 → golden `pinned_periodic_everywhere_not_accepted_at_wrong_phase` を破壊(T2 で確定)。method 内曖昧性(全 lag で peak_ratio≈1.0)は現合議機構では検出されない | —(T2 で確定) | med | 当サイトは逐次式を維持し残存許容へ逸脱(IMPL-034EqrFgTWTPu16W3CuG6r に実験経緯を記録)。将来このサイトを `corr0` へ移行するには決定的タイブレーク、または method 内曖昧性検出(peak_ratio≈1.0 の全 lag 同点検出)が前提となる — 発見された構造課題として別 issue に切り出し、本チェーンの scope 外とする |
 
 planning 時の厳密比較棚卸し(al-locate/al-analysis/tests を
 `assert_eq!` で sweep): 経路間比較に該当する確定的な候補は

@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 
 use al_math::linalg::{LeastSquares, condition_number};
 
+use crate::dsp;
+
 /// Estimated mixing matrix plus fit diagnostics.
 ///
 /// `matrix[capture_ch][source_ch]` — `capture_ch ≈ Σ_s matrix[c][s] *
@@ -71,7 +73,7 @@ pub fn fit_mix(
     for cap in capture_channels {
         let (coeffs, residual_rms) = factor.solve(cap)?;
         matrix.push(coeffs);
-        let cap_rms = (cap.iter().map(|v| v * v).sum::<f64>() / len as f64).sqrt();
+        let cap_rms = dsp::rms(cap);
         quality_acc += if cap_rms > 0.0 {
             residual_rms / cap_rms
         } else {
