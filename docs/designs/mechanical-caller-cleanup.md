@@ -34,7 +34,16 @@ relations:
   derives-from:
     - "../specs/mechanical-caller-cleanup.md"
     - "../discovery/mechanical-caller-cleanup.md"
-  derived-by: []
+  derived-by:
+    - "../plans/mechanical-caller-cleanup.md"
+    - "../test-specs/mechanical-caller-cleanup.md"
+    - "../tasks/mech-cleanup-bench-baseline-characterization.md"
+    - "../tasks/mech-cleanup-a6-bandpass-batching.md"
+    - "../tasks/mech-cleanup-a7-a8-csd-inlining.md"
+    - "../tasks/mech-cleanup-a9-a12-cheap-pass-consolidation.md"
+    - "../tasks/mech-cleanup-a15-interleave-block-writes.md"
+    - "../tasks/mech-cleanup-a16-row-major-fast-paths.md"
+    - "../tasks/mech-cleanup-measurement-ir-closeout.md"
   verifies: []
   verified-by: []
   references: []
