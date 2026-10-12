@@ -11,6 +11,7 @@ pub mod fft;
 pub mod filter;
 pub mod linalg;
 pub mod resample;
+pub mod vec;
 
 pub(crate) use pulp::{Simd, WithSimd};
 
