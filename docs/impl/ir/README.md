@@ -50,6 +50,7 @@ Directory: `docs/impl/ir`
 | locate-skeleton-dsp | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
 | locate-stage-cli | [locate-stage-cli.md](./locate-stage-cli.md) |
 | locate-tracking | [locate-tracking.md](./locate-tracking.md) |
+| mech-cleanup-bench-baseline-characterization | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
 | observability-cli-wiring | [observability-cli-wiring.md](./observability-cli-wiring.md) |
 | observability-crate | [observability-crate.md](./observability-crate.md) |

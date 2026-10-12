@@ -148,4 +148,72 @@ fn main() {
         let p = al_locate::dsp::gcc_phat(&tpl, &sig, n_sig - n_tpl);
         std::hint::black_box(&p);
     });
+
+    // ==== mechanical-caller-cleanup A15 (TASK-034EO484s25JM8bsb6zUCh) ====
+    // deinterleave/interleave の Instant 計時区間 — 既存測定経路に
+    // 載っていなかったため追加(plan T1)。A15-opt の対称腕:
+    // `dsp.rs` の現行 element-loop と channel-block strided gather
+    // (`chunks_exact`)、normalize/reference の frame-major push
+    // loop と `n*c` 事前確保 indexed write / staged-row
+    // `extend_from_slice`。byte/element 完全一致は
+    // `src/dsp.rs`/`tests/locate.rs` の characterization で gate。
+    let channels = 2usize;
+    let frames = 1_000_000usize;
+    let interleaved: Vec<f64> = (0..frames * channels).map(|_| rand()).collect();
+    let chans: Vec<Vec<f64>> = (0..channels)
+        .map(|c| (0..frames).map(|i| interleaved[i * channels + c]).collect())
+        .collect();
+
+    bench("deinterleave 2ch x 1M (current)", 5, &mut || {
+        let d = al_locate::dsp::deinterleave(&interleaved, channels as u16);
+        std::hint::black_box(&d);
+    });
+    bench(
+        "deinterleave 2ch x 1M (channel-block gather)",
+        5,
+        &mut || {
+            // A15 候補形状: チャンネル毎に chunks_exact ストライド gather。
+            let fr = interleaved.len() / channels;
+            let mut out: Vec<Vec<f64>> = (0..channels).map(|_| Vec::with_capacity(fr)).collect();
+            for (c, o) in out.iter_mut().enumerate() {
+                for frame in interleaved.chunks_exact(channels) {
+                    o.push(frame[c]);
+                }
+            }
+            std::hint::black_box(&out);
+        },
+    );
+
+    bench("interleave 2ch x 1M (frame-major loop)", 5, &mut || {
+        // normalize.rs:168-171 / reference.rs:1163-1170 の現行形状。
+        let mut v = Vec::with_capacity(frames * channels);
+        for i in 0..frames {
+            for ch in &chans {
+                v.push(ch[i]);
+            }
+        }
+        std::hint::black_box(&v);
+    });
+    bench("interleave 2ch x 1M (indexed write)", 5, &mut || {
+        // A15 候補形状: `n*c` 事前確保 + indexed write。
+        let mut v = vec![0.0; frames * channels];
+        for (c, ch) in chans.iter().enumerate() {
+            for (i, &x) in ch.iter().enumerate() {
+                v[i * channels + c] = x;
+            }
+        }
+        std::hint::black_box(&v);
+    });
+    bench("interleave 2ch x 1M (staged-row extend)", 5, &mut || {
+        // A15 候補形状: frame row buffer → extend_from_slice。
+        let mut row = vec![0.0; channels];
+        let mut v = Vec::with_capacity(frames * channels);
+        for i in 0..frames {
+            for (c, ch) in chans.iter().enumerate() {
+                row[c] = ch[i];
+            }
+            v.extend_from_slice(&row);
+        }
+        std::hint::black_box(&v);
+    });
 }

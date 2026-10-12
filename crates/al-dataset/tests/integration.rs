@@ -740,3 +740,73 @@ fn corrupt_manifest_with_completed_analysis_refuses() {
 
     fs::remove_dir_all(&job_dir).ok();
 }
+
+// ==== mechanical-caller-cleanup characterization (A16d) ====
+// TASK-034EO484s25JM8bsb6zUCh (plan T1). Instant-based micro-timing
+// section for `TensorReader::read_range` — no new dev dependency.
+// Timings are PRINTED (visible with `--nocapture`) and captured for
+// the bench-baseline notes; assertions pin only the exact
+// `(values, region_shape)` contract. Timing never gates the test.
+#[test]
+fn a16d_read_range_micro_timing_baseline() {
+    use al_dataset::tensor::{TensorReader, TensorWriter};
+    use std::time::Instant;
+
+    let dir = tmp("a16d-timing");
+    let root = dir.join("arr");
+    // 2048x256 array in 64x64 chunks: 32x4 = 128 chunk files, large
+    // enough that the per-element inside-test dominates the read.
+    let shape = [2048u64, 256];
+    let chunk = [64u64, 64];
+    let mut w = TensorWriter::create(&root, &shape, &chunk).unwrap();
+    for c0 in 0..shape[0] / chunk[0] {
+        for c1 in 0..shape[1] / chunk[1] {
+            let mut data = Vec::with_capacity((chunk[0] * chunk[1]) as usize);
+            for r in 0..chunk[0] {
+                for c in 0..chunk[1] {
+                    let g = (c0 * chunk[0] + r) * shape[1] + (c1 * chunk[1] + c);
+                    data.push(g as f64);
+                }
+            }
+            w.write_chunk(&[c0, c1], &data).unwrap();
+        }
+    }
+    w.finish().unwrap();
+    let r = TensorReader::open(&root).unwrap();
+    let check = |region: &[[u64; 2]], what: &str| {
+        let (vals, rshape) = r.read_range(region).unwrap();
+        let expected_shape: Vec<u64> = region.iter().map(|r| r[1] - r[0]).collect();
+        assert_eq!(rshape, expected_shape, "{what} region_shape");
+        // Exact values: cell (g0, g1) holds its row-major index.
+        let mut expect = Vec::with_capacity(vals.len());
+        for g0 in region[0][0]..region[0][1] {
+            for g1 in region[1][0]..region[1][1] {
+                expect.push((g0 * shape[1] + g1) as f64);
+            }
+        }
+        for (i, (&a, &e)) in vals.iter().zip(&expect).enumerate() {
+            assert_eq!(a.to_bits(), e.to_bits(), "{what}[{i}]");
+        }
+        vals.len()
+    };
+
+    // Contiguous innermost-dim span (the A16d fast-path target):
+    // 1900 full-width rows = 486_400 contiguous values.
+    let t = Instant::now();
+    let n_full = check(&[[100, 2_000], [0, 256]], "contiguous_rows");
+    let contiguous = t.elapsed();
+    // Partial inner-dim region (element-wise path): same row band,
+    // 96-wide inner slice.
+    let t = Instant::now();
+    let n_partial = check(&[[100, 2_000], [64, 160]], "partial_inner");
+    let partial = t.elapsed();
+    // Single-chunk-aligned inner range (small-region control).
+    let t = Instant::now();
+    let n_small = check(&[[0, 64], [0, 64]], "one_chunk");
+    let small = t.elapsed();
+    eprintln!(
+        "[a16d read_range baseline] contiguous_rows={contiguous:?} ({n_full} vals) \
+         partial_inner={partial:?} ({n_partial} vals) one_chunk={small:?} ({n_small} vals)"
+    );
+    fs::remove_dir_all(&dir).ok();
+}
