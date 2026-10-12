@@ -10,12 +10,14 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
-use al_locate::dsp::{bandpass, conv, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
+use al_locate::dsp::{
+    bandpass_many, conv, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq,
+};
 use al_locate::mixer::fit_mix;
 
 use crate::cheap::NamedTensor;
 use crate::records::{RecordBuilder, propagate_confidence, propagate_validity, robust_summary};
-use crate::stft::{StftMatrix, band_power, complex_coherence, csd, stft, third_octave_bands};
+use crate::stft::{StftMatrix, band_power, complex_coherence, stft, third_octave_bands};
 
 /// Reference-stage tunables (`config.analysis.reference.*`).
 #[derive(Debug, Clone)]
@@ -180,11 +182,12 @@ fn fir_ir(from_stft: &StftMatrix, to: &[f64], window: usize, hop: usize, rate: u
     let mut cxx = vec![0.0; bins];
     let mut cxy = vec![(0.0, 0.0); bins];
     for f in 0..fr {
-        let c = csd(&from_stft.re[f], &from_stft.im[f], &mt.re[f], &mt.im[f]);
         for k in 0..bins {
             cxx[k] += from_stft.re[f][k].powi(2) + from_stft.im[f][k].powi(2);
-            cxy[k].0 += c[k].0;
-            cxy[k].1 += c[k].1;
+            let (xr, xi) = (from_stft.re[f][k], from_stft.im[f][k]);
+            let (yr, yi) = (mt.re[f][k], mt.im[f][k]);
+            cxy[k].0 += xr * yr + xi * yi;
+            cxy[k].1 += xr * yi - xi * yr;
         }
     }
     let mut hre: Vec<f64> = (0..bins)
@@ -536,12 +539,13 @@ pub fn analyze_pair(
     let mut pyy = vec![0.0; bins];
     let mut pxy = vec![(0.0, 0.0); bins];
     for f in 0..frames {
-        let c = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
         for k in 0..bins {
             pxx[k] += ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
             pyy[k] += mc.re[f][k] * mc.re[f][k] + mc.im[f][k] * mc.im[f][k];
-            pxy[k].0 += c[k].0;
-            pxy[k].1 += c[k].1;
+            let (xr, xi) = (ms.re[f][k], ms.im[f][k]);
+            let (yr, yi) = (mc.re[f][k], mc.im[f][k]);
+            pxy[k].0 += xr * yr + xi * yi;
+            pxy[k].1 += xr * yi - xi * yr;
         }
     }
     for k in 0..bins {
@@ -584,13 +588,11 @@ pub fn analyze_pair(
                 .map(|k| {
                     let xs = ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
                     if xs > 0.0 {
-                        let c = csd(
-                            &ms.re[f][k..k + 1],
-                            &ms.im[f][k..k + 1],
-                            &mc.re[f][k..k + 1],
-                            &mc.im[f][k..k + 1],
-                        );
-                        ((c[0].0 * c[0].0 + c[0].1 * c[0].1).sqrt()) / xs
+                        let (xr, xi) = (ms.re[f][k], ms.im[f][k]);
+                        let (yr, yi) = (mc.re[f][k], mc.im[f][k]);
+                        let cr = xr * yr + xi * yi;
+                        let ci = xr * yi - xi * yr;
+                        ((cr * cr + ci * ci).sqrt()) / xs
                     } else {
                         0.0
                     }
@@ -739,12 +741,10 @@ pub fn analyze_pair(
     out.records.push(sim);
     // Band correlation: bandpass each third-octave band, corr per
     // band (first 8 bands to bound cost).
-    let mut band_corrs = Vec::new();
-    for &(lo, hi) in bands.iter().take(8) {
-        let xs = bandpass(src_mono, rate, lo, hi);
-        let ys = bandpass(cap_mono, rate, lo, hi);
-        band_corrs.push(corr0(&xs, &ys));
-    }
+    let capped = &bands[..bands.len().min(8)];
+    let xs = bandpass_many(src_mono, rate, capped);
+    let ys = bandpass_many(cap_mono, rate, capped);
+    let band_corrs: Vec<f64> = xs.iter().zip(&ys).map(|(x, y)| corr0(x, y)).collect();
     out.tensors.push(matrix_to_tensor(
         format!("intermediate/{pair}/band_correlation"),
         std::slice::from_ref(&band_corrs),
@@ -869,12 +869,13 @@ pub fn analyze_pair(
             let mut pb = vec![0.0; bins];
             let mut pab = vec![(0.0, 0.0); bins];
             for f in 0..fr {
-                let c = csd(&m0.re[f], &m0.im[f], &m1.re[f], &m1.im[f]);
                 for k in 0..bins {
                     pa[k] += m0.re[f][k].powi(2) + m0.im[f][k].powi(2);
                     pb[k] += m1.re[f][k].powi(2) + m1.im[f][k].powi(2);
-                    pab[k].0 += c[k].0;
-                    pab[k].1 += c[k].1;
+                    let (xr, xi) = (m0.re[f][k], m0.im[f][k]);
+                    let (yr, yi) = (m1.re[f][k], m1.im[f][k]);
+                    pab[k].0 += xr * yr + xi * yi;
+                    pab[k].1 += xr * yi - xi * yr;
                 }
             }
             let coh = complex_coherence(&pa, &pb, &pab);

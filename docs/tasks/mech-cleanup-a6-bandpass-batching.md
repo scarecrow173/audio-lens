@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4gPvPkx3voaC6KOlY"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ A6: band_correlation の bandpass_many バッチ化"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-a6-bandpass-batching.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-bench-baseline-characterization.md"

@@ -6,7 +6,7 @@ use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, FeatureRecord, Range};
 
 use crate::records::{propagate_confidence, propagate_validity};
-use crate::stft::{csd, stft, third_octave_bands};
+use crate::stft::{stft, third_octave_bands};
 
 use super::{Emit, ExpensiveResult, RegionCtx};
 
@@ -107,12 +107,13 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                     .flat_map(|(a, b)| a..b.min(half))
                     .collect();
                 for f in 0..fr {
-                    let c = csd(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f]);
                     for &k in &band_bins {
                         let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
                         let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
-                        sxy[k].0 += c[k].0;
-                        sxy[k].1 += c[k].1;
+                        let (xr, xi) = (mb.re[f][k], mb.im[f][k]);
+                        let (yr, yi) = (ob.re[f][k], ob.im[f][k]);
+                        sxy[k].0 += xr * yr + xi * yi;
+                        sxy[k].1 += xr * yi - xi * yr;
                         sxx[k] += aa;
                         syy[k] += bb;
                     }
