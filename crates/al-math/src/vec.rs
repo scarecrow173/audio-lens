@@ -320,6 +320,37 @@ mod tests {
         (x, y)
     }
 
+    // dispatch↔Scalar 等価性用の決定的入力。負値と 1e-2〜1e2 の
+    // 混合桁を含め、lane アキュムレートと逐次和の丸め順差を露出
+    // させる(ADR simd-reduction-lane-fma のサイズ行列に対応)。
+    fn mixed_inputs(n: usize) -> (Vec<f64>, Vec<f64>) {
+        let pattern = |i: usize, phase: f64| {
+            let mag = 10f64.powi(((i * 7) % 5) as i32 - 2);
+            ((i as f64 * 0.71 + phase).sin() - 0.3) * mag
+        };
+        let x: Vec<f64> = (0..n).map(|i| pattern(i, 0.0)).collect();
+        let y: Vec<f64> = (0..n).map(|i| pattern(i, 1.37)).collect();
+        (x, y)
+    }
+
+    // 等価性 predicate: |a - b| <= 1e-12 * max(1.0, |a|, |b|)。
+    // 経路間比較に assert_eq! は使わない(同 ADR)。
+    fn assert_equiv(a: f64, b: f64, context: &str) {
+        let tol = 1e-12 * 1.0f64.max(a.abs()).max(b.abs());
+        assert!(
+            (a - b).abs() <= tol,
+            "{context}: {a} vs {b} (diff {} > tol {tol})",
+            (a - b).abs()
+        );
+    }
+
+    fn assert_equiv_slice(a: &[f64], b: &[f64], context: &str) {
+        assert_eq!(a.len(), b.len(), "{context}: length mismatch");
+        for (i, (&a, &b)) in a.iter().zip(b).enumerate() {
+            assert_equiv(a, b, &format!("{context}[{i}]"));
+        }
+    }
+
     #[test]
     fn corr0_returns_ratio_only_when_both_energies_are_positive() {
         let (x, y) = inputs(33);
@@ -456,6 +487,86 @@ mod tests {
             });
             let expected: Vec<f64> = x.iter().zip(&y).map(|(&r, &i)| r * r + i * i).collect();
             assert_eq!(out, expected, "mag_sq n={n}");
+        }
+    }
+
+    // サイズ行列: 0..=33(空・1要素・lane 端数の全経過)・1k・64k・
+    // ~1M(1_048_576)。本ビルドの pulp features は ["std","x86-v3"]
+    // のため、検証される dispatch 経路は x86-v3 と Scalar のみ。
+    const EQUIV_SIZES: [usize; 3] = [1_024, 65_536, 1_048_576];
+
+    #[test]
+    fn dispatch_matches_scalar_for_scalar_outputs() {
+        for n in (0..=33).chain(EQUIV_SIZES) {
+            let (x, y) = mixed_inputs(n);
+            assert_equiv(
+                dot(&x, &y),
+                pulp::Scalar.vectorize(Dot { a: &x, b: &y }),
+                &format!("dot n={n}"),
+            );
+            assert_equiv(
+                sum_sq(&x),
+                pulp::Scalar.vectorize(SumSq(&x)),
+                &format!("sum_sq n={n}"),
+            );
+            assert_equiv(
+                corr0(&x, &y),
+                pulp::Scalar.vectorize(Corr0 { x: &x, y: &y }),
+                &format!("corr0 n={n}"),
+            );
+            assert_equiv(
+                rms(&x),
+                pulp::Scalar.vectorize(Rms(&x)),
+                &format!("rms n={n}"),
+            );
+        }
+    }
+
+    #[test]
+    fn dispatch_matches_scalar_for_vector_outputs() {
+        for n in (0..=33).chain(EQUIV_SIZES) {
+            let (x, y) = mixed_inputs(n);
+            let a = -2.5;
+
+            let mut dispatched = vec![0.0; n];
+            scale(&x, a, &mut dispatched);
+            let mut scalar = vec![0.0; n];
+            pulp::Scalar.vectorize(Scale {
+                x: &x,
+                a,
+                out: &mut scalar,
+            });
+            assert_equiv_slice(&dispatched, &scalar, &format!("scale n={n}"));
+
+            let mut dispatched = y.clone();
+            axpy(&mut dispatched, a, &x);
+            let mut scalar = y.clone();
+            pulp::Scalar.vectorize(Axpy {
+                y: &mut scalar,
+                a,
+                x: &x,
+            });
+            assert_equiv_slice(&dispatched, &scalar, &format!("axpy n={n}"));
+
+            let mut dispatched = y.clone();
+            sub_scaled(&mut dispatched, a, &x);
+            let mut scalar = y.clone();
+            pulp::Scalar.vectorize(SubScaled {
+                y: &mut scalar,
+                a,
+                x: &x,
+            });
+            assert_equiv_slice(&dispatched, &scalar, &format!("sub_scaled n={n}"));
+
+            let mut dispatched = vec![0.0; n];
+            mag_sq(&x, &y, &mut dispatched);
+            let mut scalar = vec![0.0; n];
+            pulp::Scalar.vectorize(MagSq {
+                re: &x,
+                im: &y,
+                out: &mut scalar,
+            });
+            assert_equiv_slice(&dispatched, &scalar, &format!("mag_sq n={n}"));
         }
     }
 }

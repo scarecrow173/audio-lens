@@ -92,7 +92,7 @@ Directory: `docs/tasks`
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
-| TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | todo | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |
+| TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | done | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
 | TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | done | [video-frame-decode.md](./video-frame-decode.md) |
