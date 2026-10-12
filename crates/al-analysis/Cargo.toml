@@ -27,3 +27,19 @@ harness = false
 [[bench]]
 name = "conv"
 harness = false
+
+[[bench]]
+name = "band_correlation"
+harness = false
+
+[[bench]]
+name = "csd_accum"
+harness = false
+
+[[bench]]
+name = "quant_step"
+harness = false
+
+[[bench]]
+name = "spectral_pass"
+harness = false

@@ -716,3 +716,73 @@ fn normalized_pcm_applies_integer_scale_once() {
     assert_eq!(loaded.decoded.channel_samples[0], [0.5, -1.0]);
     fs::remove_dir_all(&fx.dir).ok();
 }
+
+// ==== mechanical-caller-cleanup characterization (A15) ====
+// TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT byte-level
+// contract of the normalized `.f64le` image `prepare_input` writes:
+// frame-major, channel-inner little-endian f64 — byte equality, not
+// round-trip tolerance (test-spec Rules C/D).
+#[test]
+fn a15_normalized_pcm_f64le_bytes_are_exact() {
+    use al_locate::decode::decode_input;
+    use al_locate::normalize::prepare_input;
+
+    // Stereo decoded fixture: the f64le source is interleaved, so
+    // `decode_input` must split it into two channel vectors.
+    let left = noise(64, 0x1e);
+    let right = noise(64, 0x1f);
+    let interleaved: Vec<f64> = (0..64).flat_map(|i| [left[i], right[i]]).collect();
+    let mut fx = fixture(&interleaved, &[0.0; 8], (48_000, 48_000));
+    let original = fx
+        .manifest
+        .artifacts
+        .iter_mut()
+        .find(|a| a.role == "decoded_pcm")
+        .unwrap();
+    original.params["channels"] = serde_json::json!(2);
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    let ctx = StageContext {
+        manifest: &fx.manifest,
+        registry: &registry,
+        config: &config,
+    };
+    let source = decode_input(&fx.manifest.inputs[0], &ctx).unwrap().unwrap();
+    assert_eq!(source.channel_samples.len(), 2);
+    // Identity rate → the resample path returns the channels
+    // unchanged, so the byte image is fully reconstructible.
+    let mut records = Vec::new();
+    let prepared = prepare_input(&source, 48_000, &mut records, &ctx).unwrap();
+    let expected: Vec<u8> = (0..prepared.params.frames as usize)
+        .flat_map(|f| {
+            prepared
+                .decoded
+                .channel_samples
+                .iter()
+                .map(move |c| c[f].to_le_bytes())
+        })
+        .flatten()
+        .collect();
+    let actual = fs::read(fx.dir.join(&prepared.record.path)).unwrap();
+    assert_eq!(actual, expected, "normalized .f64le byte image");
+    // The parsed stream deinterleaves back to the written channels
+    // bit-for-bit.
+    let parsed: Vec<f64> = actual
+        .as_chunks::<8>()
+        .0
+        .iter()
+        .map(|b| f64::from_le_bytes(*b))
+        .collect();
+    let chans = al_locate::dsp::deinterleave(&parsed, 2);
+    for (c, (a, e)) in chans
+        .iter()
+        .zip(&prepared.decoded.channel_samples)
+        .enumerate()
+    {
+        assert_eq!(a.len(), e.len(), "ch{c} len");
+        for (i, (&x, &y)) in a.iter().zip(e).enumerate() {
+            assert_eq!(x.to_bits(), y.to_bits(), "ch{c}[{i}]");
+        }
+    }
+    fs::remove_dir_all(&fx.dir).ok();
+}

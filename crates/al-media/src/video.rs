@@ -874,4 +874,156 @@ mod tests {
         let back: VideoFeatureReport = serde_json::from_value(json).unwrap();
         assert_eq!(back, report);
     }
+
+    // ==== mechanical-caller-cleanup characterization (A16c) ====
+    // TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT
+    // per-frame `luminance`/`diff` series of
+    // `extract_decoded_features` — mean-of-all-elements luminance,
+    // `diff[0] == 0.0`, mean |a-b| over the `zip` of current and
+    // previous planes divided by `pixels` — bit-exact via
+    // `f64::to_bits` against an oracle re-implementing the current
+    // formulas (test-spec Rules C/D/E). No tolerance predicate.
+
+    fn video_info(width: u32, height: u32) -> VideoFrameInfo {
+        VideoFrameInfo {
+            stream: 0,
+            codec: "rawvideo".into(),
+            width,
+            height,
+            bits_per_pixel: 24,
+            timebase_hz: 30,
+            start_tick: 0,
+        }
+    }
+
+    fn decoded_frames(out: &VideoExtraction) -> &VideoFeatures {
+        let VideoFeatureArtifact::Decoded(f) = &out.features else {
+            panic!("expected decoded features, got {:?}", out.features)
+        };
+        f
+    }
+
+    /// Oracle for the current per-frame accumulation: luminance is
+    /// `sum(luma) / pixels`; `diff[0] == 0.0`; `diff[i]` is the
+    /// mean |a-b| over `luma.zip(prev)` (which silently truncates
+    /// when lengths differ) divided by `pixels`.
+    fn luma_diff_oracle(frames: &[Vec<f64>], pixels: usize) -> (Vec<f64>, Vec<f64>) {
+        let mut luminance = Vec::with_capacity(frames.len());
+        let mut diff = Vec::with_capacity(frames.len());
+        for (i, luma) in frames.iter().enumerate() {
+            luminance.push(luma.iter().sum::<f64>() / pixels as f64);
+            diff.push(if i == 0 {
+                0.0
+            } else {
+                luma.iter()
+                    .zip(frames[i - 1].iter())
+                    .map(|(&a, &b)| (a - b).abs())
+                    .sum::<f64>()
+                    / pixels as f64
+            });
+        }
+        (luminance, diff)
+    }
+
+    fn assert_bits(actual: &[f64], expected: &[f64], what: &str) {
+        assert_eq!(
+            actual.len(),
+            expected.len(),
+            "{what} length {} vs {}",
+            actual.len(),
+            expected.len()
+        );
+        for (i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+            assert_eq!(a.to_bits(), e.to_bits(), "{what}[{i}]");
+        }
+    }
+
+    #[test]
+    fn a16c_luma_diff_series_is_bit_exact() {
+        // Deterministic varying-content frames (4x3).
+        let pixels = 12usize;
+        let frames: Vec<Vec<f64>> = (0..6)
+            .map(|i| {
+                (0..pixels)
+                    .map(|p| ((i * 7 + p * 3) % 13) as f64 * 8.0 - 48.0)
+                    .collect()
+            })
+            .collect();
+        let (el, ed) = luma_diff_oracle(&frames, pixels);
+        let out = extract_decoded_features(
+            video_info(4, 3),
+            frames.len(),
+            |i, _scratch| {
+                Ok(DecodedVideoFrame {
+                    time_ticks: i as i64,
+                    luma: frames[i].clone(),
+                    preview: None,
+                })
+            },
+            &VideoFeatureConfig::default(),
+        );
+        let f = decoded_frames(&out);
+        assert_bits(&f.luminance, &el, "luminance");
+        assert_bits(&f.diff, &ed, "diff");
+        assert_eq!(f.diff[0].to_bits(), 0.0f64.to_bits(), "diff[0]");
+        assert_eq!(f.frame_timestamps, (0..6).collect::<Vec<i64>>());
+    }
+
+    #[test]
+    fn a16c_length_mismatch_truncates_via_zip() {
+        // The decoder may hand back a plane whose length differs
+        // from `pixels`: current code does NOT validate it — the
+        // `zip` truncates the diff while luminance still divides by
+        // `pixels`. Pin that exact behavior.
+        let frames: Vec<Vec<f64>> = vec![vec![10.0; 4], vec![20.0; 2], vec![30.0; 4]];
+        let pixels = 4usize;
+        let (el, ed) = luma_diff_oracle(&frames, pixels);
+        let out = extract_decoded_features(
+            video_info(2, 2),
+            frames.len(),
+            |i, _scratch| {
+                Ok(DecodedVideoFrame {
+                    time_ticks: i as i64,
+                    luma: frames[i].clone(),
+                    preview: None,
+                })
+            },
+            &VideoFeatureConfig::default(),
+        );
+        let f = decoded_frames(&out);
+        assert_bits(&f.luminance, &el, "luminance");
+        assert_bits(&f.diff, &ed, "diff");
+        // diff[1] only spans min(2,4)=2 terms.
+        assert_eq!(
+            f.diff[1].to_bits(),
+            (2.0f64 * 10.0 / pixels as f64).to_bits()
+        );
+    }
+
+    #[test]
+    fn a16c_zero_pixel_degenerate_series_is_pinned() {
+        // `width * height == 0` → luminance is `0.0 / 0.0` = NaN on
+        // every frame; `diff[0] == 0.0`, later diffs are NaN as
+        // well (`sum / 0`). Exact bit pattern of quiet NaN.
+        let frames: Vec<Vec<f64>> = vec![Vec::new(); 3];
+        let (el, ed) = luma_diff_oracle(&frames, 0);
+        let out = extract_decoded_features(
+            video_info(0, 0),
+            frames.len(),
+            |i, _scratch| {
+                Ok(DecodedVideoFrame {
+                    time_ticks: i as i64,
+                    luma: Vec::new(),
+                    preview: None,
+                })
+            },
+            &VideoFeatureConfig::default(),
+        );
+        let f = decoded_frames(&out);
+        assert_bits(&f.luminance, &el, "luminance");
+        assert_bits(&f.diff, &ed, "diff");
+        assert!(f.luminance.iter().all(|v| v.is_nan()));
+        assert_eq!(f.diff[0].to_bits(), 0.0f64.to_bits());
+        assert!(f.diff[1..].iter().all(|v| v.is_nan()));
+    }
 }

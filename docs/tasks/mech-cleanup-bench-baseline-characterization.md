@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO484s25JM8bsb6zUCh"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ: characterization テスト・bench 腕・baseline 採取"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-bench-baseline-characterization.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
   blocks:

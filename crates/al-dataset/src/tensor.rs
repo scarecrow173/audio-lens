@@ -410,4 +410,141 @@ mod tests {
         assert!(r.read_range(&[[0, 4]]).is_err());
         fs::remove_dir_all(&dir).ok();
     }
+
+    // ==== mechanical-caller-cleanup characterization (A16d) ====
+    // TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT
+    // `read_range` contract — the per-element inside-test that the
+    // contiguous-row fast path must reproduce exactly — for a
+    // fully-covered innermost dimension and for partial inner-dim
+    // edges. `(values, region_shape)` equality is element/bit
+    // exact (test-spec Rules C/D).
+
+    /// Writes a fully committed 2-D array whose cell at global
+    /// `(g0, g1)` is a deterministic non-linear function — no two
+    /// cells share a value, so order is pinned too.
+    fn write_grid(tag: &str, shape: [u64; 2], chunk: [u64; 2]) -> (PathBuf, Vec<f64>) {
+        let dir = std::env::temp_dir().join(format!("tns-a16d-{tag}-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let root = dir.join("arr");
+        let n = (shape[0] * shape[1]) as usize;
+        let full: Vec<f64> = (0..n)
+            .map(|i| {
+                // Reversible deterministic bit pattern per index.
+                let x = (i as u64).wrapping_mul(0x9E3779B97F4A7C15) ^ 0xA5A5A5A5A5A5A5A5;
+                f64::from_bits((x & !(0x7FFu64 << 52)) | (0x3FFu64 << 52))
+            })
+            .collect();
+        let mut w = TensorWriter::create(&root, &shape, &chunk).unwrap();
+        let nc0 = shape[0].div_ceil(chunk[0]);
+        let nc1 = shape[1].div_ceil(chunk[1]);
+        for c0 in 0..nc0 {
+            for c1 in 0..nc1 {
+                let extent = [
+                    chunk[0].min(shape[0] - c0 * chunk[0]),
+                    chunk[1].min(shape[1] - c1 * chunk[1]),
+                ];
+                let mut data = Vec::new();
+                for r in 0..extent[0] {
+                    for c in 0..extent[1] {
+                        let g = ((c0 * chunk[0] + r) * shape[1] + (c1 * chunk[1] + c)) as usize;
+                        data.push(full[g]);
+                    }
+                }
+                w.write_chunk(&[c0, c1], &data).unwrap();
+            }
+        }
+        w.finish().unwrap();
+        (root, full)
+    }
+
+    /// Row-major oracle: enumerate the region volume last-dim-
+    /// fastest and gather `full[global_linear]` for each point.
+    /// Mirrors the documented output contract, not the code path.
+    fn region_oracle(full: &[f64], shape: &[u64], region: &[[u64; 2]]) -> Vec<f64> {
+        let ndim = shape.len();
+        let shape_strides: Vec<u64> = {
+            let mut s = vec![1u64; ndim];
+            for d in (0..ndim - 1).rev() {
+                s[d] = s[d + 1] * shape[d + 1];
+            }
+            s
+        };
+        let region_shape: Vec<u64> = region.iter().map(|r| r[1] - r[0]).collect();
+        let count: u64 = region_shape.iter().product();
+        let mut out = Vec::with_capacity(count as usize);
+        for lin in 0..count {
+            let mut rem = lin;
+            let mut g = 0u64;
+            for d in (0..ndim).rev() {
+                let local = rem % region_shape[d];
+                rem /= region_shape[d];
+                g += (region[d][0] + local) * shape_strides[d];
+            }
+            out.push(full[g as usize]);
+        }
+        out
+    }
+
+    fn assert_region(
+        reader: &TensorReader,
+        full: &[f64],
+        shape: &[u64],
+        region: &[[u64; 2]],
+        what: &str,
+    ) {
+        let (vals, rshape) = reader.read_range(region).unwrap();
+        let expected_shape: Vec<u64> = region.iter().map(|r| r[1] - r[0]).collect();
+        assert_eq!(rshape, expected_shape, "{what} region_shape");
+        let expected = region_oracle(full, shape, region);
+        assert_eq!(vals.len(), expected.len(), "{what} len");
+        for (i, (&a, &e)) in vals.iter().zip(&expected).enumerate() {
+            assert_eq!(a.to_bits(), e.to_bits(), "{what}[{i}]");
+        }
+    }
+
+    /// Full innermost dimension: every row of the region is one
+    /// contiguous span — the case the A16d fast path targets.
+    #[test]
+    fn a16d_read_range_full_inner_dim_is_bit_exact() {
+        // 6x5 array, 4x3 chunks → 2x2 grid with edge chunks.
+        let shape = [6u64, 5];
+        let (root, full) = write_grid("full-inner", shape, [4, 3]);
+        let r = TensorReader::open(&root).unwrap();
+        for region in [
+            // Whole array.
+            [[0, 6], [0, 5]],
+            // Full-width row band crossing the chunk boundary.
+            [[2, 5], [0, 5]],
+            // Single full-width row.
+            [[3, 4], [0, 5]],
+        ] {
+            assert_region(&r, &full, &shape, &region, "full_inner");
+        }
+        fs::remove_dir_all(root.parent().unwrap()).ok();
+    }
+
+    /// Partial innermost-dimension edges: the region starts and/or
+    /// ends mid-chunk in the last dim, so the inside-test rejects
+    /// part of each touched chunk.
+    #[test]
+    fn a16d_read_range_partial_inner_dim_edge_is_bit_exact() {
+        let shape = [6u64, 5];
+        let (root, full) = write_grid("partial-inner", shape, [4, 3]);
+        let r = TensorReader::open(&root).unwrap();
+        for region in [
+            // Suffix of chunk0 inner extent + prefix of chunk1.
+            [[0, 6], [2, 4]],
+            // Single column at a chunk inner edge.
+            [[0, 6], [3, 4]],
+            // Mid range spanning the boundary both dims.
+            [[3, 6], [1, 4]],
+            // One cell at the array's inner edge.
+            [[5, 6], [4, 5]],
+            // Prefix of the inner dim (left partial edge only).
+            [[1, 3], [0, 2]],
+        ] {
+            assert_region(&r, &full, &shape, &region, "partial_inner");
+        }
+        fs::remove_dir_all(root.parent().unwrap()).ok();
+    }
 }

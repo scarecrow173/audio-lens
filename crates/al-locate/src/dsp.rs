@@ -198,6 +198,81 @@ mod tests {
         assert_eq!(out, vec![vec![1.0, 2.0, 3.0], vec![10.0, 20.0, 30.0]]);
     }
 
+    // ==== mechanical-caller-cleanup characterization (A15) ====
+    // TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT
+    // element/byte-level contract of `deinterleave` — frame-major
+    // element order, `channels` result entries, dropped trailing
+    // partial frame, `channels == 0` → empty — bit-exact via
+    // `f64::to_bits` (test-spec Rules C/D).
+
+    /// Reference shape: `out[c][i] = interleaved[i*ch + c]` for
+    /// whole frames only.
+    fn deinterleave_oracle(interleaved: &[f64], channels: usize) -> Vec<Vec<f64>> {
+        if channels == 0 {
+            return Vec::new();
+        }
+        let frames = interleaved.len() / channels;
+        (0..channels)
+            .map(|c| (0..frames).map(|i| interleaved[i * channels + c]).collect())
+            .collect()
+    }
+
+    fn assert_deinterleave(interleaved: &[f64], channels: u16, what: &str) {
+        let out = deinterleave(interleaved, channels);
+        let expected = deinterleave_oracle(interleaved, usize::from(channels));
+        assert_eq!(out.len(), expected.len(), "{what} channel count");
+        for (c, (a, e)) in out.iter().zip(&expected).enumerate() {
+            assert_eq!(a.len(), e.len(), "{what} ch{c} len");
+            for (i, (&x, &y)) in a.iter().zip(e).enumerate() {
+                assert_eq!(x.to_bits(), y.to_bits(), "{what} ch{c}[{i}]");
+            }
+        }
+    }
+
+    #[test]
+    fn a15_deinterleave_element_order_and_edges() {
+        // 1/2/6-channel frame-major order over noise (exact f64
+        // element equality, not just round-trip shape).
+        for channels in [1u16, 2, 6] {
+            let frames = 97usize;
+            let buf = noise(frames * channels as usize, 0xd515 + channels as u64);
+            assert_deinterleave(&buf, channels, "noise");
+        }
+        // Trailing partial frame is dropped from every channel.
+        let mut buf = noise(2 * 40, 0x7a11);
+        buf.extend_from_slice(&noise(3, 0x7a12)); // 3 < channels
+        assert_deinterleave(&buf, 4, "trailing_partial");
+        // `channels == 0` → empty vector (not a panic).
+        assert!(deinterleave(&noise(8, 1), 0).is_empty());
+        // Empty input → one empty vector per channel.
+        let out = deinterleave(&[], 3);
+        assert_eq!(out, vec![Vec::<f64>::new(); 3]);
+    }
+
+    #[test]
+    fn a15_deinterleave_byte_layout_roundtrip() {
+        // Byte-exact framing: an interleaved little-endian f64
+        // stream (the `.f64le` layout normalize.rs writes) splits
+        // back into the same per-channel sequences bit-for-bit.
+        let chans: Vec<Vec<f64>> = vec![noise(33, 0xb1), noise(33, 0xb2)];
+        let interleaved: Vec<f64> = (0..33)
+            .flat_map(|i| chans.iter().map(move |c| c[i]))
+            .collect();
+        let bytes: Vec<u8> = interleaved.iter().flat_map(|v| v.to_le_bytes()).collect();
+        let parsed: Vec<f64> = bytes
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b))
+            .collect();
+        let out = deinterleave(&parsed, 2);
+        for (c, (a, e)) in out.iter().zip(&chans).enumerate() {
+            for (i, (&x, &y)) in a.iter().zip(e).enumerate() {
+                assert_eq!(x.to_bits(), y.to_bits(), "byte_layout ch{c}[{i}]");
+            }
+        }
+    }
+
     #[test]
     fn ncc_finds_known_offset() {
         let signal: Vec<f64> = (0..64).map(|i| (i as f64 * 0.7).sin()).collect();
