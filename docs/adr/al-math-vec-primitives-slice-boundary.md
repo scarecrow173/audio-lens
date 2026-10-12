@@ -35,6 +35,9 @@ relations:
     - "../discovery/al-math-simd-reduction.md"
   derived-by:
     - "../designs/al-math-vec-primitives.md"
+    - "../tasks/al-math-vec-primitives.md"
+    - "../tasks/al-locate-vec-migration.md"
+    - "../tasks/al-analysis-vec-migration.md"
   verifies: []
   verified-by: []
   references: []

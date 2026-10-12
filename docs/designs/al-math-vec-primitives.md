@@ -32,7 +32,13 @@ relations:
     - "../specs/al-math-vec-primitives.md"
     - "../adr/al-math-vec-primitives-slice-boundary.md"
     - "../adr/simd-reduction-lane-fma.md"
-  derived-by: []
+  derived-by:
+    - "../plans/al-math-vec-primitives.md"
+    - "../test-specs/al-math-vec-primitives.md"
+    - "../tasks/al-math-vec-primitives.md"
+    - "../tasks/al-locate-vec-migration.md"
+    - "../tasks/al-analysis-vec-migration.md"
+    - "../tasks/vec-primitives-verification-bench.md"
   verifies: []
   verified-by: []
   references: []
