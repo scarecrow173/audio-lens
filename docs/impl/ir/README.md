@@ -24,6 +24,7 @@ Directory: `docs/impl/ir`
 | artifact-dictionary | [artifact-dictionary.md](./artifact-dictionary.md) |
 | avi-container-ingest-and-video-fixtures | [avi-container-ingest-and-video-fixtures.md](./avi-container-ingest-and-video-fixtures.md) |
 | caller-opt-bench-baseline-characterization | [caller-side-optimizations-bench-baseline-and-characterization.md](./caller-side-optimizations-bench-baseline-and-characterization.md) |
+| caller-opt-stft-fft-plan-hoist | [caller-side-optimizations-stft-fft-plan-hoist.md](./caller-side-optimizations-stft-fft-plan-hoist.md) |
 | chunked-tensor-store | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | columnar-table-store | [columnar-table-store.md](./columnar-table-store.md) |
 | core-domain-types | [core-domain-types.md](./core-domain-types.md) |

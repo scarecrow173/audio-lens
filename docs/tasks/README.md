@@ -37,7 +37,7 @@ Directory: `docs/tasks`
 | TASK-034EJgOK1cNKnai60q1zOd | caller 側最適化 A1: dsp::conv overlap-save 化と fir_model 置換 | todo | [caller-opt-dsp-conv-overlap-save.md](./caller-opt-dsp-conv-overlap-save.md) |
 | TASK-034EJgyjQ0EutoP1M6RqoQ | caller 側最適化 A4: LeastSquares 列指向 API 置換と caller 移行 | todo | [caller-opt-least-squares-column-api.md](./caller-opt-least-squares-column-api.md) |
 | TASK-034EJgPpxRSjjhOJVeBUup | caller 側最適化: 事後計測・Implementation Record 記録・最終検証 | todo | [caller-opt-measurement-ir-closeout.md](./caller-opt-measurement-ir-closeout.md) |
-| TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | todo | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
+| TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
