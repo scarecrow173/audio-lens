@@ -16,3 +16,14 @@ tracing.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true
+# criterion 0.8.2 — same pin as al-math (bench baseline for the
+# caller-side optimization chain, docs/designs/caller-side-optimizations.md).
+criterion = "=0.8.2"
+
+[[bench]]
+name = "stft"
+harness = false
+
+[[bench]]
+name = "conv"
+harness = false

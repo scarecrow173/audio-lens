@@ -132,6 +132,200 @@ mod tests {
         assert_eq!(est.condition_number, f64::INFINITY);
     }
 
+    // ==== A4 characterization (caller-side optimizations,
+    // docs/test-specs/caller-side-optimizations.md Rule D) ====
+    //
+    // `fit_mix` output (`matrix` / `fit_quality`) must match a
+    // self-contained row-based normal-equations oracle (same shape
+    // as `al_math::linalg`'s `mod legacy`) within the recomposition
+    // tolerance `|a-b| <= 1e-12*max(1,|a|,|b|)`
+    // (ADR-034EoHxzsvsHp9BOdCK2Cn). `condition_number` is out of
+    // predicate scope: only INFINITY-consistency and order-of-
+    // magnitude agreement (sanity bound) are checked. Stays green
+    // after the A4 column-oriented `fit_mix` migration.
+
+    /// Element-wise recomposition tolerance.
+    fn assert_close(a: f64, b: f64) {
+        let tol = 1e-12 * 1.0_f64.max(a.abs()).max(b.abs());
+        assert!((a - b).abs() <= tol, "{a} vs {b} (tol {tol})");
+    }
+
+    /// Observation rows of source values: `rows[t][j] = sources[j][t]`.
+    fn oracle_rows(sources: &[Vec<f64>], obs: usize) -> Vec<Vec<f64>> {
+        (0..obs)
+            .map(|t| sources.iter().map(|s| s[t]).collect())
+            .collect()
+    }
+
+    /// Solve `a x = b` by Gaussian elimination with partial
+    /// pivoting; `None` when singular (same shape as
+    /// `linalg.rs` `mod legacy::solve`).
+    #[allow(clippy::needless_range_loop)]
+    fn oracle_gauss(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
+        let n = a.len();
+        if n == 0 || b.len() != n || a.iter().any(|r| r.len() != n) {
+            return None;
+        }
+        let mut m: Vec<Vec<f64>> = a
+            .iter()
+            .zip(b)
+            .map(|(row, &bi)| row.iter().copied().chain([bi]).collect())
+            .collect();
+        for col in 0..n {
+            let pivot = (col..n).max_by(|&i, &j| m[i][col].abs().total_cmp(&m[j][col].abs()))?;
+            if m[pivot][col].abs() < 1e-12 {
+                return None;
+            }
+            m.swap(col, pivot);
+            let inv = 1.0 / m[col][col];
+            for row in col + 1..n {
+                let f = m[row][col] * inv;
+                for c in col..=n {
+                    m[row][c] -= f * m[col][c];
+                }
+            }
+        }
+        let mut x = vec![0.0; n];
+        for row in (0..n).rev() {
+            let s: f64 = (row + 1..n).map(|c| m[row][c] * x[c]).sum();
+            x[row] = (m[row][n] - s) / m[row][row];
+        }
+        Some(x)
+    }
+
+    /// Row-based normal-equations least squares: returns
+    /// `(coefficients, residual_rms)` — the oracle counterpart of
+    /// one `LeastSquares::solve` call.
+    #[allow(clippy::needless_range_loop)]
+    fn oracle_solve(rows: &[Vec<f64>], rhs: &[f64], lambda: f64) -> Option<(Vec<f64>, f64)> {
+        let cols = rows.first()?.len();
+        if cols == 0 || rows.len() < cols || rhs.len() != rows.len() {
+            return None;
+        }
+        let mut ata = vec![vec![0.0; cols]; cols];
+        let mut atb = vec![0.0; cols];
+        for (row, &y) in rows.iter().zip(rhs) {
+            if row.len() != cols {
+                return None;
+            }
+            for i in 0..cols {
+                atb[i] += row[i] * y;
+                for j in 0..cols {
+                    ata[i][j] += row[i] * row[j];
+                }
+            }
+        }
+        for i in 0..cols {
+            ata[i][i] += lambda;
+        }
+        let x = oracle_gauss(&ata, &atb)?;
+        let mut rss = 0.0;
+        for (row, &y) in rows.iter().zip(rhs) {
+            let pred: f64 = row.iter().zip(&x).map(|(a, c)| a * c).sum();
+            rss += (pred - y).powi(2);
+        }
+        Some((x, (rss / rows.len() as f64).sqrt()))
+    }
+
+    /// Plain RMS used by the oracle's fit-quality computation.
+    fn oracle_rms(x: &[f64]) -> f64 {
+        (x.iter().map(|v| v * v).sum::<f64>() / x.len() as f64).sqrt()
+    }
+
+    /// Raw (pre-ridge) normal matrix over observation rows — the
+    /// matrix `fit_mix` reports the condition number of.
+    #[allow(clippy::needless_range_loop)]
+    fn oracle_ata(sources: &[Vec<f64>], obs: usize) -> Vec<Vec<f64>> {
+        let cols = sources.len();
+        let mut ata = vec![vec![0.0; cols]; cols];
+        for t in 0..obs {
+            for i in 0..cols {
+                for j in 0..cols {
+                    ata[i][j] += sources[i][t] * sources[j][t];
+                }
+            }
+        }
+        ata
+    }
+
+    #[test]
+    fn fit_mix_matches_normal_equations_oracle() {
+        // (n_src, n_cap, obs, lambda): well-conditioned deterministic
+        // fixtures, plus a singular duplicated-source case for the
+        // INFINITY-consistency check on `condition_number`.
+        let mut s_idx = 0u64;
+        for (n_src, n_cap, obs, lambda) in [
+            (1usize, 1usize, 4096usize, 0.0f64),
+            (2, 2, 4096, 1e-6),
+            (2, 1, 2048, 1e-3),
+            (3, 2, 8192, 0.0),
+        ] {
+            let sources: Vec<Vec<f64>> = (0..n_src)
+                .map(|_| {
+                    s_idx += 1;
+                    noise(100 + s_idx, obs)
+                })
+                .collect();
+            // cap_c = Σ_s w[c][s]·src_s with deterministic weights.
+            let captures: Vec<Vec<f64>> = (0..n_cap)
+                .map(|c| {
+                    (0..obs)
+                        .map(|t| {
+                            (0..n_src)
+                                .map(|s| (0.4 + 0.3 * (c + s) as f64) * sources[s][t])
+                                .sum()
+                        })
+                        .collect()
+                })
+                .collect();
+            let est = fit_mix(&sources, &captures, lambda).unwrap();
+            let rows = oracle_rows(&sources, obs);
+            let mut quality = 0.0;
+            for (c, cap) in captures.iter().enumerate() {
+                let (x, rms) = oracle_solve(&rows, cap, lambda).unwrap();
+                for (&a, &b) in est.matrix[c].iter().zip(&x) {
+                    assert_close(a, b);
+                }
+                let cap_rms = oracle_rms(cap);
+                quality += if cap_rms > 0.0 { rms / cap_rms } else { 0.0 };
+            }
+            assert_close(est.fit_quality, quality / n_cap as f64);
+            // condition_number sanity only: INFINITY-consistency and
+            // order-of-magnitude agreement with the in-test raw
+            // normal matrix.
+            let expected = condition_number(&oracle_ata(&sources, obs));
+            assert_eq!(
+                est.condition_number.is_infinite(),
+                expected.is_infinite(),
+                "condition_number INFINITY mismatch (est={}, expected={})",
+                est.condition_number,
+                expected
+            );
+            if expected.is_finite() && expected > 0.0 && est.condition_number > 0.0 {
+                assert!(
+                    (est.condition_number.log10() - expected.log10()).abs() <= 0.5,
+                    "condition_number magnitude {} vs {}",
+                    est.condition_number,
+                    expected
+                );
+            }
+        }
+
+        // Ill-conditioned fixture: duplicated source → singular
+        // normal matrix. `condition_number` reports INFINITY only
+        // when the Gauss-Jordan pivot residual lands below its
+        // absolute threshold — an ulp-luck edge — so the sanity
+        // bound is "huge or infinite" (well-conditioned fixtures
+        // above sit at ~1-10).
+        let s0 = noise(200, 2048);
+        let est = fit_mix(&[s0.clone(), s0.clone()], std::slice::from_ref(&s0), 1e-6).unwrap();
+        assert!(
+            est.condition_number.is_infinite() || est.condition_number >= 1e6,
+            "ill-conditioned mix must surface a huge condition number, got {}",
+            est.condition_number
+        );
+    }
+
     #[test]
     fn correlated_mix_recovers_coefficients_and_preserves_raw_diagnostic() {
         let a = noise(11, 1024);

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EJgkPQJmqrMLNdP7lVh"
 type: "task"
-status: "todo"
+status: "done"
 title: "caller 側最適化: bench 基盤導入・baseline 計測・characterization テスト先行"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/caller-side-optimizations.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/caller-side-optimizations-bench-baseline-and-characterization.md"
   depends-on:
     - "docs/plans/caller-side-optimizations.md"
   blocks:
