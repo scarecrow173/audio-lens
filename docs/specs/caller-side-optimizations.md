@@ -16,7 +16,8 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../designs/caller-side-optimizations.md"
   depends-on:
     - "./al-math-vec-primitives.md"
     - "../adr/al-math-vec-primitives-slice-boundary.md"
@@ -32,7 +33,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/caller-side-optimizations.md"
-  derived-by: []
+  derived-by:
+    - "../designs/caller-side-optimizations.md"
   verifies: []
   verified-by: []
   references: []
