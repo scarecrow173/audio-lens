@@ -16,7 +16,8 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../designs/al-math-vec-primitives.md"
   depends-on:
     - "./observability-foundation.md"
     - "../adr/simd-arithmetic-pulp.md"
@@ -32,7 +33,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/al-math-simd-reduction.md"
-  derived-by: []
+  derived-by:
+    - "../designs/al-math-vec-primitives.md"
   verifies: []
   verified-by: []
   references: []
@@ -120,7 +122,7 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
     `rms`(:133、per-channel `sum_sq` の合成で再表現 —
     プリミティブ自体は `&[f64]` 単一ch のみ)
   - `crates/al-analysis/src/cheap.rs`: インライン `rms`
-    (:180,:254,:358,:390 — `rms(&mom)` 相当、:414)、
+    (:180,:254,:358,:414)、
     mean-square(:385)、`sum_sq`(:912,:921)、インライン
     corr0 ×3(`stereo.pair_correlation` :1017-1023、
     `stereo.ipd_samples` lag 走査 :1067-1071、
@@ -187,10 +189,13 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
   (:550,:621)と off-diagonal `sum_sq`(:908)
 - 同一式でない複合式(置換対象外): `cheap.rs` の mid/side
   電力(:1096-1101)、magnitude 総和(:1148)、スペクトル傾斜の
-  4アキュムレータ回帰 fold(:811)、`dynamics.rs` の符号別
+  4アキュムレータ回帰 fold(:811)、`sqrt(mean(mom))`(:390 —
+  `mom` はフレーム毎 mean-square で `rms` 式でない、
+  mean プリミティブが不在)、`dynamics.rs` の符号別
   エネルギー split(:57-61)・要素毎 magnitude(:199)・
   回帰アキュムレータ(:373-389)、`reference.rs` の単要素/
-  バンド合成(:535,:839)
+  バンド合成(:535,:839)と M/S エネルギー(:872-881 —
+  `Σ((a±b)/2)²`、materialization を要する複合式)
 
 ### Out of Scope
 
@@ -217,10 +222,10 @@ foundation(criterion 0.8.2 dev-dep + `dsp_smoke` bench、stage
   `mag_sq(re: &[f64], im: &[f64], out: &mut [f64])`。
   `scale`/`axpy`/`sub_scaled` の `a` は f64 スカラー乗数であり、
   ベクトルではない
-- 2入力プリミティブ(`dot`/`corr0`/`axpy`/`sub_scaled`)は
-  入出力スライスの長さ不整合を等長 assert で panic とし、
-  `mag_sq` は `re`/`im`/`out` の **3スライス全て** が等長で
-  なければ panic とする。「fail, never guess」の方針と
+- 2入力プリミティブ(`dot`/`corr0`/`axpy`/`sub_scaled`/
+  `scale`)は入出力スライスの長さ不整合を等長 assert で
+  panic とし、`mag_sq` は `re`/`im`/`out` の **3スライス
+  全て** が等長でなければ panic とする。「fail, never guess」の方針と
   `fft_size` assert の前例に揃える。現行 corr0 の
   min-len(zip)黙認は継承しない
 - `corr0` は `Σx² > 0 かつ Σy² > 0` でなければ 0.0 を返す

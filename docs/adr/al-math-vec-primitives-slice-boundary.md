@@ -33,7 +33,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/al-math-simd-reduction.md"
-  derived-by: []
+  derived-by:
+    - "../designs/al-math-vec-primitives.md"
   verifies: []
   verified-by: []
   references: []
@@ -127,9 +128,9 @@ re-export、2入力は等長 assert で panic", because 既存 dsp
   正規経路は `dsp::` のまま、root mirror は公開面の一貫性の
   ための re-export のみとする
 * **長さ不整合**: 2入力プリミティブ(`dot`/`corr0`/`axpy`/
-  `sub_scaled`)は入出力スライスの等長を assert で強制し、
-  `mag_sq` は `re`/`im`/`out` の **3スライス全て** が等長で
-  なければ panic。現行 corr0 の min-len(`zip`)黙認は継承しない
+  `sub_scaled`/`scale`)は入出力スライスの等長を assert で
+  強制し、`mag_sq` は `re`/`im`/`out` の **3スライス全て** が
+  等長でなければ panic。現行 corr0 の min-len(`zip`)黙認は継承しない
 * **値の契約**: `corr0` は `Σx² > 0 かつ Σy² > 0` でなければ
   0.0 を返す(NaN・縮退エネルギーも 0.0 に写像する現行契約を
   維持)し中心化しない。`rms` は空入力で 0.0 を返す

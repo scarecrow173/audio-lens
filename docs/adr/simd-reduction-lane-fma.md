@@ -32,7 +32,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/al-math-simd-reduction.md"
-  derived-by: []
+  derived-by:
+    - "../designs/al-math-vec-primitives.md"
   verifies: []
   verified-by: []
   references: []
