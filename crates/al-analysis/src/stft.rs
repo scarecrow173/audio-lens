@@ -5,7 +5,7 @@
 //! window is not already one. All products are deterministic and
 //! persistable as `intermediate`-role tensors.
 
-use al_locate::dsp::fft;
+use al_locate::dsp::{fft, mag_sq, scale};
 
 /// One frame×bin complex matrix produced by [`stft`].
 #[derive(Debug, Clone)]
@@ -52,10 +52,13 @@ impl StftMatrix {
             .iter()
             .zip(&self.im)
             .map(|(re, im)| {
-                re.iter()
-                    .zip(im)
-                    .map(|(&r, &i)| (r * r + i * i) / norm)
-                    .collect()
+                // Two passes (mag_sq then scale): the primitives do
+                // not allow logical in-place aliasing.
+                let mut power = vec![0.0; re.len()];
+                mag_sq(re, im, &mut power);
+                let mut out = vec![0.0; re.len()];
+                scale(&power, 1.0 / norm, &mut out);
+                out
             })
             .collect()
     }
@@ -66,10 +69,9 @@ impl StftMatrix {
             .iter()
             .zip(&self.im)
             .map(|(re, im)| {
-                re.iter()
-                    .zip(im)
-                    .map(|(&r, &i)| (r * r + i * i).sqrt())
-                    .collect()
+                let mut m2 = vec![0.0; re.len()];
+                mag_sq(re, im, &mut m2);
+                m2.iter().map(|&v| v.sqrt()).collect()
             })
             .collect()
     }
@@ -79,7 +81,11 @@ impl StftMatrix {
         self.re
             .iter()
             .zip(&self.im)
-            .map(|(re, im)| re.iter().zip(im).map(|(&r, &i)| r * r + i * i).collect())
+            .map(|(re, im)| {
+                let mut out = vec![0.0; re.len()];
+                mag_sq(re, im, &mut out);
+                out
+            })
             .collect()
     }
 }

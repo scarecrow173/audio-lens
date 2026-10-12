@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EpPeS7I91EbO1Kzjqwr"
 type: "task"
-status: "todo"
+status: "done"
 title: "al-analysis: dsp ファサード経由の vec プリミティブ移行"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/al-math-vec-primitives.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/al-analysis-dsp-facade-vec-migration.md"
   depends-on:
     - "docs/plans/al-math-vec-primitives.md"
     - "docs/tasks/al-locate-vec-migration.md"
