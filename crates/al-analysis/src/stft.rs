@@ -268,6 +268,111 @@ mod tests {
         assert!(bands.last().unwrap().1 > 16_000.0);
     }
 
+    // ==== A3 characterization (caller-side optimizations,
+    // docs/test-specs/caller-side-optimizations.md Rule B) ====
+    //
+    // `stft` output must be bit-exact (`f64::to_bits`) against the
+    // reference that windows each frame and transforms it via the
+    // single-shot `dsp::fft` path — the pre-plan-hoist behavior.
+    // The test stays green after the A3 `Fft` plan hoist.
+
+    /// Deterministic fixture: sine mix + LCG noise.
+    fn fixture_samples(n: usize, rate: u32) -> Vec<f64> {
+        let mut s = 0x9e3779b9u64;
+        (0..n)
+            .map(|i| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                let noise = ((s >> 33) as f64 / (1u64 << 31) as f64) * 2.0 - 1.0;
+                let t = i as f64 / rate as f64;
+                (2.0 * std::f64::consts::PI * 1000.0 * t).sin()
+                    + 0.3 * (2.0 * std::f64::consts::PI * 3000.0 * t).sin()
+                    + 0.1 * noise
+            })
+            .collect()
+    }
+
+    /// Reference: each frame independently windowed + single-shot
+    /// `dsp::fft`, returning `(re, im)` per frame.
+    fn reference_frames(samples: &[f64], window: usize, hop: usize) -> Vec<(Vec<f64>, Vec<f64>)> {
+        let fft_size = window.next_power_of_two();
+        let win = hann(window);
+        let mut out = Vec::new();
+        if samples.len() >= window && window > 0 && hop > 0 {
+            for start in (0..=samples.len() - window).step_by(hop) {
+                let mut re = vec![0.0; fft_size];
+                let mut im = vec![0.0; fft_size];
+                for (i, &v) in samples[start..start + window].iter().enumerate() {
+                    re[i] = v * win[i];
+                }
+                fft(&mut re, &mut im, false);
+                out.push((re, im));
+            }
+        }
+        out
+    }
+
+    fn assert_bit_exact(m: &StftMatrix, samples: &[f64], window: usize, hop: usize) {
+        let reference = reference_frames(samples, window, hop);
+        assert_eq!(m.frames(), reference.len(), "frame count");
+        assert_eq!(m.fft_size, window.next_power_of_two(), "fft_size");
+        assert_eq!(m.window, window as u64, "window");
+        assert_eq!(m.hop, hop as u64, "hop");
+        for (f, (re, im)) in reference.iter().enumerate() {
+            for k in 0..m.fft_size {
+                assert_eq!(m.re[f][k].to_bits(), re[k].to_bits(), "re[{f}][{k}]");
+                assert_eq!(m.im[f][k].to_bits(), im[k].to_bits(), "im[{f}][{k}]");
+            }
+        }
+    }
+
+    #[test]
+    fn stft_is_bit_exact_multiple_frames() {
+        let rate = 48_000;
+        let samples = fixture_samples(8192, rate);
+        let m = stft(&samples, 1024, 512, rate);
+        assert!(m.frames() > 1);
+        assert_bit_exact(&m, &samples, 1024, 512);
+    }
+
+    #[test]
+    fn stft_is_bit_exact_zero_frames() {
+        let rate = 48_000;
+        let samples = fixture_samples(500, rate);
+        let m = stft(&samples, 1024, 512, rate);
+        assert_eq!(m.frames(), 0);
+        assert_bit_exact(&m, &samples, 1024, 512);
+    }
+
+    #[test]
+    fn stft_is_bit_exact_single_frame() {
+        let rate = 48_000;
+        // window <= n < window + hop → exactly one frame.
+        let samples = fixture_samples(1500, rate);
+        let m = stft(&samples, 1024, 512, rate);
+        assert_eq!(m.frames(), 1);
+        assert_bit_exact(&m, &samples, 1024, 512);
+    }
+
+    #[test]
+    fn stft_is_bit_exact_non_power_of_two_window() {
+        let rate = 48_000;
+        let samples = fixture_samples(2000, rate);
+        let m = stft(&samples, 1500, 500, rate);
+        assert_eq!(m.fft_size, 2048);
+        assert_bit_exact(&m, &samples, 1500, 500);
+    }
+
+    #[test]
+    fn stft_is_bit_exact_all_zero() {
+        let rate = 48_000;
+        let samples = vec![0.0; 4096];
+        let m = stft(&samples, 1024, 512, rate);
+        assert!(m.frames() > 0);
+        assert_bit_exact(&m, &samples, 1024, 512);
+    }
+
     #[test]
     fn coherence_is_one_for_identical_signals() {
         let rate = 48000;

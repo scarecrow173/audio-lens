@@ -21,6 +21,7 @@ dependencies = [
  "al-locate",
  "al-media",
  "al-testkit",
+ "criterion",
  "serde",
  "serde_json",
  "tracing",
