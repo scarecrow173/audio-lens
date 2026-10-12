@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4rKpEFHb4NpDpz5py"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ A15: interleave/deinterleave のブロック書き込み化"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-a15-interleave-block-writes.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-a9-a12-cheap-pass-consolidation.md"

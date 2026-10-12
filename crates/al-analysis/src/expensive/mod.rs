@@ -646,9 +646,18 @@ pub fn analyze_region(
         return out;
     }
     let power = m.power();
-    let mean_power: Vec<f64> = (0..bins)
-        .map(|k| power.iter().map(|f| f[k]).sum::<f64>() / frames as f64)
-        .collect();
+    // Row-ascending scalar accumulation: same 0.0-start, same
+    // per-bin addition order (row 0..frames), same `/ frames`
+    // divisor as the column scan — bit-identical.
+    let mut mean_power = vec![0.0; bins];
+    for row in &power {
+        for (k, v) in mean_power.iter_mut().enumerate() {
+            *v += row[k];
+        }
+    }
+    for v in &mut mean_power {
+        *v /= frames as f64;
+    }
     let bin_hz = rate as f64 / bins as f64;
     let total_power: f64 = mean_power.iter().sum();
     let one_sided_power: f64 = mean_power[..half].iter().sum();

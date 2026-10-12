@@ -19,14 +19,17 @@ pub fn deinterleave(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
     if channels == 0 {
         return Vec::new();
     }
-    let frames = interleaved.len() / channels;
-    let mut out = vec![Vec::with_capacity(frames); channels];
-    for frame in interleaved.chunks_exact(channels) {
-        for (ch, &v) in frame.iter().enumerate() {
-            out[ch].push(v);
-        }
-    }
-    out
+    // Channel-block strided gather: each channel row is written
+    // contiguously. `chunks_exact` drops a trailing partial frame,
+    // same as the element-loop form.
+    (0..channels)
+        .map(|ch| {
+            interleaved
+                .chunks_exact(channels)
+                .map(|frame| frame[ch])
+                .collect()
+        })
+        .collect()
 }
 
 pub use al_math::correlation::{gcc_phat, ncc};

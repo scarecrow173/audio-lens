@@ -11,7 +11,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
 use al_locate::dsp::{
-    bandpass_many, conv, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq,
+    bandpass_many, conv, corr0, dot, fft, gcc_phat, mag_sq, rms, spectral_envelope, sum_sq,
 };
 use al_locate::mixer::fit_mix;
 
@@ -652,14 +652,33 @@ pub fn analyze_pair(
 
     // ==== Band family: 1/3-octave M2 gain + 400Hz ratio + PSD ratio ====
     let bands = third_octave_bands(40.0, (rate as f64 / 2.0).min(16000.0));
-    let psd_s = ms.psd();
-    let psd_c = mc.psd();
-    let mean_psd_s: Vec<f64> = (0..bins)
-        .map(|k| psd_s.iter().take(frames).map(|r| r[k]).sum::<f64>() / frames as f64)
-        .collect();
-    let mean_psd_c: Vec<f64> = (0..bins)
-        .map(|k| psd_c.iter().take(frames).map(|r| r[k]).sum::<f64>() / frames as f64)
-        .collect();
+    // `psd()` is `power()` followed by `scale(…, 1.0 / norm, …)`;
+    // `row[k] * inv` is the same per-element multiply, so the psd
+    // matrices are never materialized. Row-ascending scalar
+    // accumulation keeps the column scan's addition order (and the
+    // defensive `.take(frames)` bound) bit-identical.
+    let norm = (0.375 * ms.window as f64) * ms.sample_rate as f64;
+    let inv = 1.0 / norm;
+    let pow_s = ms.power();
+    let pow_c = mc.power();
+    let mut mean_psd_s = vec![0.0; bins];
+    for row in pow_s.iter().take(frames) {
+        for (k, v) in mean_psd_s.iter_mut().enumerate() {
+            *v += row[k] * inv;
+        }
+    }
+    for v in &mut mean_psd_s {
+        *v /= frames as f64;
+    }
+    let mut mean_psd_c = vec![0.0; bins];
+    for row in pow_c.iter().take(frames) {
+        for (k, v) in mean_psd_c.iter_mut().enumerate() {
+            *v += row[k] * inv;
+        }
+    }
+    for v in &mut mean_psd_c {
+        *v /= frames as f64;
+    }
     let band_e_s = band_power(&mean_psd_s, rate, bins, &bands);
     let band_e_c = band_power(&mean_psd_c, rate, bins, &bands);
     let band_gains: Vec<f64> = band_e_s
@@ -1070,11 +1089,18 @@ pub fn analyze_pair(
     }
     // Harmonic frequency ratio: ratio of dominant peak frequencies.
     let dom = |m: &crate::stft::StftMatrix| -> f64 {
-        let mag = m.magnitude();
-        let mut mean = vec![0.0; m.fft_size / 2];
-        for row in &mag {
+        // One reused `mag_sq` scratch instead of a materialized
+        // `magnitude()` matrix. `mag_sq` must be the kernel call —
+        // a handwritten `r*r + i*i` cannot reproduce its
+        // lane/tail-dependent rounding (FMA on simd lanes,
+        // non-fused on scalar tail).
+        let half = m.fft_size / 2;
+        let mut mean = vec![0.0; half];
+        let mut scratch = vec![0.0; m.fft_size];
+        for f in 0..m.frames() {
+            mag_sq(&m.re[f], &m.im[f], &mut scratch);
             for (k, v) in mean.iter_mut().enumerate() {
-                *v += row[k];
+                *v += scratch[k].sqrt();
             }
         }
         mean.iter()
@@ -1163,10 +1189,12 @@ pub fn analyze_pair(
     let mut residual_levels = Vec::new();
     for (idx, (name, residual)) in residuals.iter().enumerate() {
         let interleaved: Vec<f64> = {
-            let mut v = Vec::with_capacity(n * residual.len());
+            // Preallocated frame-major indexed write (no transpose).
+            let c = residual.len();
+            let mut v = vec![0.0; n * c];
             for i in 0..n {
-                for ch in residual {
-                    v.push(ch[i]);
+                for (ch_idx, ch) in residual.iter().enumerate() {
+                    v[i * c + ch_idx] = ch[i];
                 }
             }
             v
