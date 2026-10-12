@@ -266,13 +266,29 @@ impl TensorReader {
             let chunk_data = self.read_chunk_file(&coords)?;
             let extent = chunk_extent(meta, &coords);
             let ext_strides = strides(&extent);
-            // Intersect the chunk volume with the requested region.
+            // Intersect the chunk volume with the requested region,
+            // walking the innermost dim as whole "rows": when the
+            // outer coords are inside the region and the row's
+            // innermost extent is fully contained in the region's
+            // innermost bound, the row is one contiguous span in
+            // both layouts (innermost stride == 1) and copies as a
+            // block. Partial containment falls back to the
+            // per-element gather.
+            let last = ndim - 1;
+            let extent_last = extent[last];
+            let g_lo = coords[last] * meta.chunk_shape[last];
+            let g_hi = g_lo + extent_last;
+            let row_fully_contained = g_lo >= region[last][0] && g_hi <= region[last][1];
             let mut local = vec![0u64; ndim];
             loop {
+                // Row head: `local[last]` stays 0 while the outer
+                // dims walk. `inside`/`src`/`dst` for the outer dims
+                // are hoisted — the per-element check adds the
+                // innermost dim on top.
                 let mut inside = true;
                 let mut dst = 0u64;
                 let mut src = 0u64;
-                for d in 0..ndim {
+                for d in 0..last {
                     let global = coords[d] * meta.chunk_shape[d] + local[d];
                     if global < region[d][0] || global >= region[d][1] {
                         inside = false;
@@ -282,9 +298,24 @@ impl TensorReader {
                     dst += (global - region[d][0]) * region_strides[d];
                 }
                 if inside {
-                    out[dst as usize] = chunk_data[src as usize];
+                    if row_fully_contained {
+                        let src = src as usize;
+                        let dst = (dst + (g_lo - region[last][0])) as usize;
+                        let len = extent_last as usize;
+                        out[dst..dst + len].copy_from_slice(&chunk_data[src..src + len]);
+                    } else {
+                        for l in 0..extent_last {
+                            let global = g_lo + l;
+                            if global >= region[last][0] && global < region[last][1] {
+                                // Innermost stride is 1 in both
+                                // layouts.
+                                out[(dst + (global - region[last][0])) as usize] =
+                                    chunk_data[(src + l) as usize];
+                            }
+                        }
+                    }
                 }
-                if !increment(&mut local, &extent) {
+                if !increment(&mut local[..last], &extent[..last]) {
                     break;
                 }
             }

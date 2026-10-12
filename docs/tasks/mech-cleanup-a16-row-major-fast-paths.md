@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4yi7Vv8c3JuAdt1Z0"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ A16: 行優先累積・dom mag_sq scratch・video 融合・tensor fast path"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-a16-row-major-fast-paths.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-a15-interleave-block-writes.md"

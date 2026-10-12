@@ -424,19 +424,31 @@ pub fn extract_decoded_features(
                 .push(sum / (u64::from(r.width) * u64::from(r.height)) as f64);
         }
         frame_timestamps.push(frame.time_ticks);
-        luminance.push(frame.luma.iter().sum::<f64>() / pixels as f64);
-        diff.push(match &prev {
-            Some(p) => {
-                frame
-                    .luma
-                    .iter()
-                    .zip(p.iter())
-                    .map(|(&a, &b)| (a - b).abs())
-                    .sum::<f64>()
-                    / pixels as f64
+        // One fused pass over `luma`: luminance and prev-diff in
+        // separate accumulators, same ascending element order as
+        // the split sums. `p.get(i)` keeps `zip`'s
+        // silently-truncate semantics — indexing `p[i]` would turn
+        // a length mismatch into a panic.
+        let mut luma_sum = 0.0;
+        let mut diff_sum = 0.0;
+        if let Some(p) = &prev {
+            for (i, &a) in frame.luma.iter().enumerate() {
+                luma_sum += a;
+                if let Some(&b) = p.get(i) {
+                    diff_sum += (a - b).abs();
+                }
             }
+        } else {
+            for &a in &frame.luma {
+                luma_sum += a;
+            }
+        }
+        luminance.push(luma_sum / pixels as f64);
+        diff.push(if prev.is_some() {
+            diff_sum / pixels as f64
+        } else {
             // The first frame has no predecessor.
-            None => 0.0,
+            0.0
         });
         scratch = prev.replace(frame.luma).unwrap_or_default();
     }
