@@ -10,6 +10,7 @@ Directory: `docs/adr`
 | ADR-034EoHr8hchpVwmk758yL4 | al-math vec プリミティブ層のスライス公開境界と dsp ファサード消費経路 | accepted | [al-math-vec-primitives-slice-boundary.md](./al-math-vec-primitives-slice-boundary.md) |
 | ADR-034yYy5Xx8zznKyVgAgdtP | Analysis Dataset の保存形式を分割する | proposed | [analysis-dataset-storage.md](./analysis-dataset-storage.md) |
 | ADR-034AapHIAOqZfyrLPIa14w | 映像フレームデコードは非圧縮 AVI に限定する | accepted | [avi.md](./avi.md) |
+| ADR-034EHHl9H4TTHHr0OQEa39 | caller 側最適化の構造決定: LeastSquares 列指向 API・FIR 畳み込みの FFT 化・STFT plan 所有境界 | accepted | [caller-side-optimizations-structure.md](./caller-side-optimizations-structure.md) |
 | ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | proposed | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |
 | ADR-034yYyq7wrVYD7X3NvjeX0 | 不変ジョブと再開可能なステージ実行を採用する | proposed | [immutable-resumable-job.md](./immutable-resumable-job.md) |
 | ADR-034yZb7m1ru4R4k7m8jLme | 実装言語に Rust を採用しコア処理を自前モジュールで実装する | accepted | [implementation-stack.md](./implementation-stack.md) |
