@@ -360,7 +360,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         // ブロック境界の生エネルギーと内部の生エネルギーの比を、
         // 一般的な codec frame size ごとに評価する。
         let block_e: Vec<f64> = (0..n / 64)
-            .map(|i| seg[i * 64..(i + 1) * 64].iter().map(|v| v * v).sum::<f64>())
+            .map(|i| al_locate::dsp::sum_sq(&seg[i * 64..(i + 1) * 64]))
             .collect();
         let mut best: Option<(f64, u64)> = None;
         for size in [576usize, 1024, 1152] {
