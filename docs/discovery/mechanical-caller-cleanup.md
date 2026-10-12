@@ -41,7 +41,8 @@ relations:
   refined-by: []
   derives-from:
     - "./caller-side-optimizations.md"
-  derived-by: []
+  derived-by:
+    - "../specs/mechanical-caller-cleanup.md"
   verifies: []
   verified-by: []
   references: []
