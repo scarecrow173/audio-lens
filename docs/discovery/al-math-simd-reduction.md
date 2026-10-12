@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "al-math ベクトル演算プリミティブ集約と SIMD reduction 順序"
 created: "2026-10-11"
-updated: "2026-10-12"
+updated: "2026-10-13"
 owners: []
 relations:
   source:
@@ -39,6 +39,7 @@ relations:
   related:
     - "./observability-foundation-logging-and-profiling.md"
     - "./caller-side-optimizations.md"
+    - "./mechanical-caller-cleanup.md"
   refines: []
   refined-by: []
   derives-from:

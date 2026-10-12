@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "observability foundation: tracing 基盤と stage 計時"
 created: "2026-10-11"
-updated: "2026-10-11"
+updated: "2026-10-13"
 owners: []
 relations:
   source:
@@ -33,6 +33,7 @@ relations:
   related:
     - "./al-math-simd-reduction.md"
     - "./caller-side-optimizations.md"
+    - "./mechanical-caller-cleanup.md"
   refines: []
   refined-by: []
   derives-from: []
