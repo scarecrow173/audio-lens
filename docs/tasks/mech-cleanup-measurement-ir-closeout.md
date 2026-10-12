@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4z7oZadAFuMojWjLO"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ: 事後計測・Implementation Record 記録・最終検証"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-measurement-ir-closeout.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-a16-row-major-fast-paths.md"

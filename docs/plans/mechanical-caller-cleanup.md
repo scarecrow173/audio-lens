@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034EO41zt4R9uACMi7eaFH"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16)"
 created: "2026-10-12"
 updated: "2026-10-12"

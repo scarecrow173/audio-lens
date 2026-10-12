@@ -84,7 +84,7 @@ Directory: `docs/tasks`
 | TASK-034EO4hAcMtLkbpxQc8eOZ | 機械的 caller クリーンアップ A7/A8: csd 呼出しの inline conj(x)·y 化 | done | [mech-cleanup-a7-a8-csd-inlining.md](./mech-cleanup-a7-a8-csd-inlining.md) |
 | TASK-034EO4qUmlyu3qleVAOHoo | 機械的 caller クリーンアップ A9/A12: cheap 側 power 一括化・mean_row 融合・HashSet 事前計数 | done | [mech-cleanup-a9-a12-cheap-pass-consolidation.md](./mech-cleanup-a9-a12-cheap-pass-consolidation.md) |
 | TASK-034EO484s25JM8bsb6zUCh | 機械的 caller クリーンアップ: characterization テスト・bench 腕・baseline 採取 | done | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
-| TASK-034EO4z7oZadAFuMojWjLO | 機械的 caller クリーンアップ: 事後計測・Implementation Record 記録・最終検証 | todo | [mech-cleanup-measurement-ir-closeout.md](./mech-cleanup-measurement-ir-closeout.md) |
+| TASK-034EO4z7oZadAFuMojWjLO | 機械的 caller クリーンアップ: 事後計測・Implementation Record 記録・最終検証 | done | [mech-cleanup-measurement-ir-closeout.md](./mech-cleanup-measurement-ir-closeout.md) |
 | TASK-036aQwErTyUiOpAsDfGhJk | MediaDecoder トレイト + レジストリ設計の ADR(#36 フェーズ0) | done | [media-decoder-adr.md](./media-decoder-adr.md) |
 | TASK-036bWOCJcMZThXnoW2Bs93 | 既存 WAV/AVI/MP4 を MediaDecoder native バックエンドへ移行(#36 フェーズ1) | done | [media-decoder-native.md](./media-decoder-native.md) |
 | TASK-034z0J5bNO5HoVp8PkGjrg | al-media 骨格とフォーマット検出・明示的失敗 | done | [media-skeleton.md](./media-skeleton.md) |
