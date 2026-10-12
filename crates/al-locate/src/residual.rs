@@ -160,10 +160,14 @@ pub fn subtract_fit(
         .collect();
     let est = fit_mix(&src, capture_channels, ridge)?;
     let mut residual = capture_channels.to_vec();
+    // Per-source `sub_scaled` passes keep every access a contiguous
+    // stream (the transposed `s[t]` gather was scalar-only and could not
+    // vectorize). Accumulation order differs from the gather form, which
+    // is within the ADR's recomposition tolerance; measured non-regressing
+    // (IMPL-034EqSNHDxZ4VHxY5oaaaX).
     for (cap, row) in residual.iter_mut().zip(&est.matrix) {
-        for (t, v) in cap.iter_mut().enumerate() {
-            let pred: f64 = src.iter().zip(row).map(|(s, &m)| s[t] * m).sum();
-            *v -= pred;
+        for (s, &m) in src.iter().zip(row) {
+            dsp::sub_scaled(cap, m, s);
         }
     }
     Some((residual, est))

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EpPfi3haBLwJwM4xl66"
 type: "task"
-status: "todo"
+status: "done"
 title: "vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/al-math-vec-primitives.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/vec-primitives-verification-and-bench.md"
   depends-on:
     - "docs/plans/al-math-vec-primitives.md"
     - "docs/tasks/al-analysis-vec-migration.md"
