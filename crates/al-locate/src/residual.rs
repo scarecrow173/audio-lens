@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use al_core::{AlignmentId, ArtifactId};
 
+use crate::dsp;
 use crate::mixer::{MixerEstimate, fit_mix};
 use crate::normalize::{NormalizedParams, PreparedInput, bad};
 use crate::result::{LocateResult, PcmReference};
@@ -133,9 +134,7 @@ pub struct ResidualSearch {
 fn rms(channels: &[Vec<f64>]) -> f64 {
     let (sum, n) = channels
         .iter()
-        .flat_map(|c| c.iter())
-        .map(|v| v * v)
-        .fold((0.0, 0usize), |(s, n), v| (s + v, n + 1));
+        .fold((0.0, 0usize), |(s, n), c| (s + dsp::sum_sq(c), n + c.len()));
     if n == 0 { 0.0 } else { (sum / n as f64).sqrt() }
 }
 
@@ -161,10 +160,14 @@ pub fn subtract_fit(
         .collect();
     let est = fit_mix(&src, capture_channels, ridge)?;
     let mut residual = capture_channels.to_vec();
+    // Per-source `sub_scaled` passes keep every access a contiguous
+    // stream (the transposed `s[t]` gather was scalar-only and could not
+    // vectorize). Accumulation order differs from the gather form, which
+    // is within the ADR's recomposition tolerance; measured non-regressing
+    // (IMPL-034EqSNHDxZ4VHxY5oaaaX).
     for (cap, row) in residual.iter_mut().zip(&est.matrix) {
-        for (t, v) in cap.iter_mut().enumerate() {
-            let pred: f64 = src.iter().zip(row).map(|(s, &m)| s[t] * m).sum();
-            *v -= pred;
+        for (s, &m) in src.iter().zip(row) {
+            dsp::sub_scaled(cap, m, s);
         }
     }
     Some((residual, est))

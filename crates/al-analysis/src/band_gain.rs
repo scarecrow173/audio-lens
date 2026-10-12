@@ -1,7 +1,10 @@
 //! 帯域ラグ補償 LS。算術は al-math の既存 re-export、入力準備は prepared 層。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
-use al_locate::{dsp::ncc, prepared::InputCache};
+use al_locate::{
+    dsp::{dot, ncc, sum_sq},
+    prepared::InputCache,
+};
 
 const MIN_CORRELATION: f64 = 0.5;
 // コヒーレントなパワーが半分以上の帯域だけを支持する。
@@ -91,14 +94,14 @@ fn windows(
                 .unwrap();
             let lag = best as isize - max as isize;
             let b = &y[start - max + best..start - max + best + window];
-            let energy: f64 = a.iter().map(|v| v * v).sum();
+            let energy: f64 = sum_sq(a);
             let gain = if energy > 1e-20 {
-                a.iter().zip(b).map(|(a, b)| a * b).sum::<f64>() / energy
+                dot(a, b) / energy
             } else {
                 f64::NAN
             };
             let corr = curve[best].clamp(-1.0, 1.0);
-            let reason = if !gain.is_finite() || b.iter().map(|v| v * v).sum::<f64>() <= 1e-20 {
+            let reason = if !gain.is_finite() || sum_sq(b) <= 1e-20 {
                 "silence"
             } else if lag.unsigned_abs() == max {
                 "search_edge"

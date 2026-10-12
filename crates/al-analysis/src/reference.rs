@@ -10,7 +10,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
-use al_locate::dsp::{bandpass, fft, gcc_phat, spectral_envelope};
+use al_locate::dsp::{bandpass, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
 use al_locate::mixer::fit_mix;
 
 use crate::cheap::NamedTensor;
@@ -116,28 +116,12 @@ pub struct ReferenceResult {
     pub residual_audio: Vec<ResidualAudio>,
 }
 
-fn rms(x: &[f64]) -> f64 {
-    if x.is_empty() {
-        return 0.0;
-    }
-    (x.iter().map(|v| v * v).sum::<f64>() / x.len() as f64).sqrt()
-}
-
-/// Least-squares gain `g` minimizing `||y - g·x||`.
+/// Least-squares gain `g` minimizing `||y - g·x||`. The zero
+/// denominator guard is load-bearing: `dot / sum_sq` would yield
+/// NaN on a silent `x`.
 fn ls_gain(x: &[f64], y: &[f64]) -> f64 {
-    let num: f64 = x.iter().zip(y).map(|(&a, &b)| a * b).sum();
-    let den: f64 = x.iter().map(|v| v * v).sum();
-    if den > 0.0 { num / den } else { 0.0 }
-}
-
-/// Zero-lag normalized correlation.
-fn corr0(x: &[f64], y: &[f64]) -> f64 {
-    let (ex, ey): (f64, f64) = (x.iter().map(|v| v * v).sum(), y.iter().map(|v| v * v).sum());
-    if ex > 0.0 && ey > 0.0 {
-        x.iter().zip(y).map(|(&a, &b)| a * b).sum::<f64>() / (ex * ey).sqrt()
-    } else {
-        0.0
-    }
+    let den = sum_sq(x);
+    if den > 0.0 { dot(x, y) / den } else { 0.0 }
 }
 
 /// Normalized correlation of `x` and `y` at relative `lag` (y
@@ -1063,7 +1047,7 @@ pub fn analyze_pair(
             })
             .collect()
     };
-    let energy = |r: &[Vec<f64>]| -> f64 { r.iter().flat_map(|c| c.iter()).map(|v| v * v).sum() };
+    let energy = |r: &[Vec<f64>]| -> f64 { r.iter().map(|c| sum_sq(c)).sum() };
     // Welch-estimated FIR model of `from` explaining `to`.
     let fir_model = |to: &[f64]| -> Vec<f64> {
         let mt = stft(to, cfg.stft_window, cfg.stft_hop, rate);
@@ -1161,7 +1145,7 @@ pub fn analyze_pair(
             v
         };
         let rname = format!("{pair}/{name}");
-        let res_rms = (energy(residual) / (n * residual.len()).max(1) as f64).sqrt();
+        let res_rms = rms(&interleaved);
         residual_levels.push(res_rms);
         let res_corr = corr0(&residual[0], src_mono);
         out.residual_audio.push(ResidualAudio {

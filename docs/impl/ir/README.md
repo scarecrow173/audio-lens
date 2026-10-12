@@ -17,6 +17,9 @@ Directory: `docs/impl/ir`
 | analysis-expensive-stage | [analysis-expensive-stage.md](./analysis-expensive-stage.md) |
 | analysis-integration-tests | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | analysis-reference-stage | [analysis-reference-stage.md](./analysis-reference-stage.md) |
+| al-analysis-vec-migration | [al-analysis-dsp-facade-vec-migration.md](./al-analysis-dsp-facade-vec-migration.md) |
+| al-locate-vec-migration | [al-locate-dsp-re-export-vec-migration.md](./al-locate-dsp-re-export-vec-migration.md) |
+| al-math-vec-primitives | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | al-media-skeleton | [al-media-skeleton.md](./al-media-skeleton.md) |
 | artifact-dictionary | [artifact-dictionary.md](./artifact-dictionary.md) |
 | avi-container-ingest-and-video-fixtures | [avi-container-ingest-and-video-fixtures.md](./avi-container-ingest-and-video-fixtures.md) |
@@ -52,6 +55,7 @@ Directory: `docs/impl/ir`
 | stage-runner | [stage-runner.md](./stage-runner.md) |
 | al-math-envelope-fft-size-assert | [spectral-envelope-fft-size-entry-assert.md](./spectral-envelope-fft-size-entry-assert.md) |
 | timing-observation | [timing-observation.md](./timing-observation.md) |
+| vec-primitives-verification-bench | [vec-primitives-verification-and-bench.md](./vec-primitives-verification-and-bench.md) |
 | viz-dataset-reads | [viz-dataset-reads.md](./viz-dataset-reads.md) |
 | viz-events-summary | [viz-events-summary.md](./viz-events-summary.md) |
 | viz-export-integration-tests | [viz-export-integration-tests.md](./viz-export-integration-tests.md) |

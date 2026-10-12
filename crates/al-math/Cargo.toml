@@ -16,3 +16,7 @@ criterion = "=0.8.2"
 [[bench]]
 name = "dsp_smoke"
 harness = false
+
+[[bench]]
+name = "vec_primitives"
+harness = false

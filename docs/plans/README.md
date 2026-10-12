@@ -7,6 +7,7 @@ Directory: `docs/plans`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | PLAN-034DXViZtHIbCiHSxsn1O0 | al-math 公開 API 中立化と split re/im FFT 境界 | approved | [al-math-api-boundary.md](./al-math-api-boundary.md) |
+| PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | PLAN-034z7Go0WvShlVKkU7NCCH | Analysis Dataset ストアの実装 | completed | [analysis-dataset.md](./analysis-dataset.md) |
 | PLAN-034z8FkpJb4ejhkehZ3pgc | analysis-stages | completed | [analysis-stages.md](./analysis-stages.md) |
 | PLAN-034AaBrYBgbeSTDlZzbaGl | Expensive 追加解析ファミリの実装 | completed | [expensive-families.md](./expensive-families.md) |

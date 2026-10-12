@@ -4,11 +4,12 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Value};
+use al_locate::dsp::{corr0, rms};
 
 use crate::cheap::NamedTensor;
 use crate::records::{propagate_confidence, propagate_validity};
 
-use super::{Emit, ExpensiveResult, RegionCtx, corr0, rms};
+use super::{Emit, ExpensiveResult, RegionCtx};
 
 /// Emit this family's invalid schema for a region selected by
 /// non-`Valid` evidence (same ids `run` would produce, as NaN
