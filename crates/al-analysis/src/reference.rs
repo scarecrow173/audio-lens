@@ -10,7 +10,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
-use al_locate::dsp::{bandpass, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
+use al_locate::dsp::{bandpass, conv, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
 use al_locate::mixer::fit_mix;
 
 use crate::cheap::NamedTensor;
@@ -202,7 +202,8 @@ fn fir_ir(from_stft: &StftMatrix, to: &[f64], window: usize, hop: usize, rate: u
 /// Welch-estimated impulse response and returns a `from`-length
 /// model. `conv_len = ir.len().min(4096)` caps the kernel and the
 /// output is the first `from.len()` elements of the linear
-/// convolution — the current direct-convolution semantics.
+/// convolution via `dsp::conv` (overlap-save) — the single
+/// convolution-path switch point.
 fn fir_model(
     from: &[f64],
     to: &[f64],
@@ -211,19 +212,7 @@ fn fir_model(
     rate: u32,
 ) -> Vec<f64> {
     let ir = fir_ir(from_stft, to, cfg.stft_window, cfg.stft_hop, rate);
-    let conv_len = ir.len().min(4096);
-    let n = from.len();
-    let mut y = vec![0.0; n];
-    for (i, &x) in from.iter().enumerate() {
-        if x == 0.0 {
-            continue;
-        }
-        let maxk = conv_len.min(n - i);
-        for (k, &hv) in ir.iter().take(maxk).enumerate() {
-            y[i + k] += x * hv;
-        }
-    }
-    y
+    conv(from, &ir[..ir.len().min(4096)])
 }
 
 /// Per-channel elementwise `residual - model`. Model entries that
@@ -1446,9 +1435,9 @@ mod tests {
     /// outputs — reference implementation for A/B against the
     /// `fir_model` convolution path. Verbatim copy shared by hand
     /// with `dsp.rs` tests and `benches/conv.rs` (not a shared
-    /// public surface). The `x == 0.0` skip of the production loop
-    /// is dropped on purpose: zero terms contribute `±0.0` and are
-    /// value-equivalent.
+    /// public surface). The `x == 0.0` skip of the former
+    /// production loop is dropped on purpose: zero terms
+    /// contribute `±0.0` and are value-equivalent.
     fn conv_direct(x: &[f64], h: &[f64]) -> Vec<f64> {
         let mut y = vec![0.0; x.len()];
         for (i, &xv) in x.iter().enumerate() {
