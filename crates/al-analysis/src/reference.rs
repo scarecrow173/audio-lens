@@ -10,12 +10,12 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
-use al_locate::dsp::{bandpass, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
+use al_locate::dsp::{bandpass, conv, corr0, dot, fft, gcc_phat, rms, spectral_envelope, sum_sq};
 use al_locate::mixer::fit_mix;
 
 use crate::cheap::NamedTensor;
 use crate::records::{RecordBuilder, propagate_confidence, propagate_validity, robust_summary};
-use crate::stft::{band_power, complex_coherence, csd, stft, third_octave_bands};
+use crate::stft::{StftMatrix, band_power, complex_coherence, csd, stft, third_octave_bands};
 
 /// Reference-stage tunables (`config.analysis.reference.*`).
 #[derive(Debug, Clone)]
@@ -161,6 +161,80 @@ fn local_lag(x: &[f64], y: &[f64], max_lag: usize) -> (isize, f64, f64) {
     let half = best.1 * 0.5;
     let width = curve.iter().filter(|&&v| v >= half).count() as f64;
     (best.0, best.1, width)
+}
+
+/// Welch-estimated impulse response: the mean cross-spectral
+/// density of `from_stft`→`to` inverse-transformed to a real IR.
+/// Returns a sequence of length `from_stft.fft_size` (not yet
+/// truncated to the convolution cap). When no frame pair is
+/// available (`fr == 0`) a zero IR of the same length is returned —
+/// the caller convolves unconditionally and a zero IR yields a zero
+/// model.
+fn fir_ir(from_stft: &StftMatrix, to: &[f64], window: usize, hop: usize, rate: u32) -> Vec<f64> {
+    let mt = stft(to, window, hop, rate);
+    let fr = from_stft.frames().min(mt.frames());
+    let bins = from_stft.fft_size;
+    if fr == 0 {
+        return vec![0.0; bins];
+    }
+    let mut cxx = vec![0.0; bins];
+    let mut cxy = vec![(0.0, 0.0); bins];
+    for f in 0..fr {
+        let c = csd(&from_stft.re[f], &from_stft.im[f], &mt.re[f], &mt.im[f]);
+        for k in 0..bins {
+            cxx[k] += from_stft.re[f][k].powi(2) + from_stft.im[f][k].powi(2);
+            cxy[k].0 += c[k].0;
+            cxy[k].1 += c[k].1;
+        }
+    }
+    let mut hre: Vec<f64> = (0..bins)
+        .map(|k| if cxx[k] > 0.0 { cxy[k].0 / cxx[k] } else { 0.0 })
+        .collect();
+    let mut him: Vec<f64> = (0..bins)
+        .map(|k| if cxx[k] > 0.0 { cxy[k].1 / cxx[k] } else { 0.0 })
+        .collect();
+    // irfft (inverse FFT already normalizes by 1/N).
+    fft(&mut hre, &mut him, true);
+    hre
+}
+
+/// FIR model of `from` explaining `to`: convolves `from` with the
+/// Welch-estimated impulse response and returns a `from`-length
+/// model. `conv_len = ir.len().min(4096)` caps the kernel and the
+/// output is the first `from.len()` elements of the linear
+/// convolution via `dsp::conv` (overlap-save) — the single
+/// convolution-path switch point.
+fn fir_model(
+    from: &[f64],
+    to: &[f64],
+    from_stft: &StftMatrix,
+    cfg: &ReferenceConfig,
+    rate: u32,
+) -> Vec<f64> {
+    let ir = fir_ir(from_stft, to, cfg.stft_window, cfg.stft_hop, rate);
+    conv(from, &ir[..ir.len().min(4096)])
+}
+
+/// Per-channel elementwise `residual - model`. Model entries that
+/// are missing or shorter than the residual are zero-filled
+/// (`m.get(i).copied().unwrap_or(0.0)`): a structural guard only —
+/// production inputs share the aligned length
+/// (`stage.rs` Aligned contract) and never go ragged.
+fn subtract(residual: &[Vec<f64>], model: &[Vec<f64>]) -> Vec<Vec<f64>> {
+    residual
+        .iter()
+        .enumerate()
+        .map(|(c, ch)| {
+            ch.iter()
+                .enumerate()
+                .map(|(i, &v)| {
+                    v - model
+                        .get(c)
+                        .map_or(0.0, |m| m.get(i).copied().unwrap_or(0.0))
+                })
+                .collect()
+        })
+        .collect()
 }
 
 pub(crate) fn matrix_to_tensor(path: String, m: &[Vec<f64>]) -> NamedTensor {
@@ -728,9 +802,7 @@ pub fn analyze_pair(
     out.records.push(es);
 
     // ==== Channel family ====
-    let src_chs: Vec<Vec<f64>> = src.src.iter().map(|c| c.to_vec()).collect();
-    let cap_chs: Vec<Vec<f64>> = src.cap.iter().map(|c| c.to_vec()).collect();
-    if let Some(mix) = fit_mix(&src_chs, &cap_chs, cfg.ridge) {
+    if let Some(mix) = fit_mix(&src.src, &src.cap, cfg.ridge) {
         let mut r = rb(ResolutionClass::Segment).scalar(
             "ref.mixer_fit",
             mix.fit_quality,
@@ -879,7 +951,7 @@ pub fn analyze_pair(
         // Crosstalk / leakage: for stereo source, energy of the
         // weaker fitted cross-coefficient.
         if src.src.len() >= 2
-            && let Some(mix) = fit_mix(&src_chs, &cap_chs, cfg.ridge)
+            && let Some(mix) = fit_mix(&src.src, &src.cap, cfg.ridge)
         {
             let off_diag: f64 = mix
                 .matrix
@@ -1035,57 +1107,7 @@ pub fn analyze_pair(
     // from it. Least-squares fits (scalar gain, channel matrix) are
     // non-increasing by construction; the FIR stage is gated on
     // measured energy so R0–R3 stays monotonically non-increasing.
-    let subtract = |residual: &[Vec<f64>], model: &[Vec<f64>]| -> Vec<Vec<f64>> {
-        residual
-            .iter()
-            .enumerate()
-            .map(|(c, ch)| {
-                ch.iter()
-                    .enumerate()
-                    .map(|(i, &v)| v - model.get(c).map_or(0.0, |m| m[i.min(m.len())]))
-                    .collect()
-            })
-            .collect()
-    };
     let energy = |r: &[Vec<f64>]| -> f64 { r.iter().map(|c| sum_sq(c)).sum() };
-    // Welch-estimated FIR model of `from` explaining `to`.
-    let fir_model = |to: &[f64]| -> Vec<f64> {
-        let mt = stft(to, cfg.stft_window, cfg.stft_hop, rate);
-        let fr = ms.frames().min(mt.frames());
-        if fr == 0 {
-            return vec![0.0; n];
-        }
-        let mut cxx = vec![0.0; bins];
-        let mut cxy = vec![(0.0, 0.0); bins];
-        for f in 0..fr {
-            let c = csd(&ms.re[f], &ms.im[f], &mt.re[f], &mt.im[f]);
-            for k in 0..bins {
-                cxx[k] += ms.re[f][k].powi(2) + ms.im[f][k].powi(2);
-                cxy[k].0 += c[k].0;
-                cxy[k].1 += c[k].1;
-            }
-        }
-        let mut hre: Vec<f64> = (0..bins)
-            .map(|k| if cxx[k] > 0.0 { cxy[k].0 / cxx[k] } else { 0.0 })
-            .collect();
-        let mut him: Vec<f64> = (0..bins)
-            .map(|k| if cxx[k] > 0.0 { cxy[k].1 / cxx[k] } else { 0.0 })
-            .collect();
-        // irfft (inverse FFT already normalizes by 1/N).
-        fft(&mut hre, &mut him, true);
-        let conv_len = hre.len().min(4096);
-        let mut y = vec![0.0; n];
-        for (i, &x) in src_mono.iter().enumerate() {
-            if x == 0.0 {
-                continue;
-            }
-            let maxk = conv_len.min(n - i);
-            for (k, &hv) in hre.iter().take(maxk).enumerate() {
-                y[i + k] += x * hv;
-            }
-        }
-        y
-    };
     let residuals: Vec<(&str, Vec<Vec<f64>>)> = {
         let mut v: Vec<(&str, Vec<Vec<f64>>)> = Vec::new();
         // R0: alignment only — the capture as-is.
@@ -1102,7 +1124,8 @@ pub fn analyze_pair(
         let r1 = subtract(&r0, &m1);
         v.push(("r1", r1.clone()));
         // R2: channel matrix fit against the R1 residual.
-        if let Some(mix) = fit_mix(&src_chs, &r1, cfg.ridge) {
+        let r1_refs: Vec<&[f64]> = r1.iter().map(Vec::as_slice).collect();
+        if let Some(mix) = fit_mix(&src.src, &r1_refs, cfg.ridge) {
             let m2: Vec<Vec<f64>> = (0..r1.len())
                 .map(|c| {
                     (0..n)
@@ -1123,7 +1146,10 @@ pub fn analyze_pair(
         // R3: FIR against the R2 residual, applied only where it
         // actually reduces measured energy ("supported" transfer).
         let r2 = v.last().unwrap().1.clone();
-        let m3: Vec<Vec<f64>> = r2.iter().map(|ch| fir_model(ch)).collect();
+        let m3: Vec<Vec<f64>> = r2
+            .iter()
+            .map(|ch| fir_model(src_mono, ch, &ms, cfg, rate))
+            .collect();
         let candidate = subtract(&r2, &m3);
         let r3 = if energy(&candidate) <= energy(&r2) {
             candidate
@@ -1400,5 +1426,93 @@ mod tests {
         let out = analyze("src__cap", &pair, Validity::Valid);
         let gain = scalar(record(&out, "ref.gain_ls"));
         assert!((gain - 1.0).abs() < 1e-9);
+    }
+
+    // ==== A1 characterization (caller-side optimizations,
+    // docs/test-specs/caller-side-optimizations.md Rule C) ====
+
+    /// Direct linear convolution returning the first `x.len()`
+    /// outputs — reference implementation for A/B against the
+    /// `fir_model` convolution path. Verbatim copy shared by hand
+    /// with `dsp.rs` tests and `benches/conv.rs` (not a shared
+    /// public surface). The `x == 0.0` skip of the former
+    /// production loop is dropped on purpose: zero terms
+    /// contribute `±0.0` and are value-equivalent.
+    fn conv_direct(x: &[f64], h: &[f64]) -> Vec<f64> {
+        let mut y = vec![0.0; x.len()];
+        for (i, &xv) in x.iter().enumerate() {
+            let maxk = h.len().min(x.len() - i);
+            for (k, &hv) in h.iter().take(maxk).enumerate() {
+                y[i + k] += xv * hv;
+            }
+        }
+        y
+    }
+
+    /// Recomposition tolerance `|a-b| <= 1e-12*max(1,|a|,|b|)`
+    /// (ADR-034EoHxzsvsHp9BOdCK2Cn).
+    fn assert_close_slice(actual: &[f64], expected: &[f64]) {
+        assert_eq!(
+            actual.len(),
+            expected.len(),
+            "length {} vs {}",
+            actual.len(),
+            expected.len()
+        );
+        for (i, (&a, &b)) in actual.iter().zip(expected).enumerate() {
+            let tol = 1e-12 * 1.0_f64.max(a.abs()).max(b.abs());
+            assert!((a - b).abs() <= tol, "index {i}: {a} vs {b} (tol {tol})");
+        }
+    }
+
+    /// `fir_model` output must equal `fir_ir`'s IR truncated to
+    /// `conv_len = ir.len().min(4096)` passed through `conv_direct`.
+    /// Green both immediately after the function extraction and
+    /// after the `dsp::conv` replacement (A1).
+    #[test]
+    fn fir_model_matches_fir_ir_truncated_conv_direct() {
+        let cases: Vec<(usize, usize, Vec<f64>, Vec<f64>)> = vec![
+            // Empty input → zero-frame path, empty model.
+            (256, 128, vec![], vec![]),
+            // n < conv_len: window 300 → fft_size 512 → conv_len 512
+            // while n = 400 (frames still run).
+            (300, 100, noise(400, 7), noise(400, 8)),
+            // conv_len = 4096 boundary with real truncation:
+            // window 5000 → fft_size 8192 → IR cut to 4096.
+            (5000, 2500, noise(6000, 9), noise(6000, 10)),
+            // All-zero signals: zero energy bins → zero IR.
+            (256, 128, vec![0.0; 1024], vec![0.0; 1024]),
+            // Representative deterministic noise.
+            (256, 128, noise(2048, 11), noise(2048, 12)),
+        ];
+        for (window, hop, from, to) in cases {
+            let cfg = ReferenceConfig {
+                stft_window: window,
+                stft_hop: hop,
+                ..ReferenceConfig::default()
+            };
+            let from_stft = stft(&from, window, hop, RATE);
+            let ir = fir_ir(&from_stft, &to, window, hop, RATE);
+            let expected = conv_direct(&from, &ir[..ir.len().min(4096)]);
+            let actual = fir_model(&from, &to, &from_stft, &cfg, RATE);
+            assert_close_slice(&actual, &expected);
+        }
+    }
+
+    /// `subtract` zero-fills a short or missing model side instead
+    /// of panicking — a structural guard: production inputs share
+    /// the aligned length (`stage.rs` Aligned contract) and never
+    /// go ragged.
+    #[test]
+    fn subtract_zero_fills_short_or_missing_model() {
+        // Model shorter than residual: the tail is `residual - 0.0`.
+        let out = subtract(&[vec![1.0, 2.0, 3.0, 4.0]], &[vec![0.5, 0.25]]);
+        assert_eq!(out, vec![vec![0.5, 1.75, 3.0, 4.0]]);
+        // Missing model channel: the whole channel is zero-filled.
+        let out = subtract(&[vec![1.0], vec![2.0]], &[vec![0.5]]);
+        assert_eq!(out, vec![vec![0.5], vec![2.0]]);
+        // Equal length is exact subtraction.
+        let out = subtract(&[vec![1.0]], &[vec![0.25]]);
+        assert_eq!(out, vec![vec![0.75]]);
     }
 }

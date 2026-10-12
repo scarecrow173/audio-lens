@@ -32,6 +32,7 @@ relations:
   superseded-by: []
   related:
     - "./al-math-simd-reduction.md"
+    - "./caller-side-optimizations.md"
   refines: []
   refined-by: []
   derives-from: []

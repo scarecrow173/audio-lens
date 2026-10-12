@@ -10,6 +10,7 @@ Directory: `docs/test-specs`
 | TSPEC-034EpMxXDl69zm65O1mGBG | al-math vec プリミティブ検証仕様 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | TSPEC-034z99BlV8EIVYk7jxmzM9 | 解析ステージ検証 | proposed | [analysis-stages.md](./analysis-stages.md) |
 | TSPEC-034z0HtvsU1qWh7kPAH0ml | AV タイミング観測と辞書注釈 | proposed | [av-timing-observation.md](./av-timing-observation.md) |
+| TSPEC-034EJgd4MF3zQZ1FN9K4WV | caller 側最適化チェーン検証仕様 | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | TSPEC-034z87fIonHcU07IHGb1dE | dataset 来歴と validity セマンティクス | proposed | [dataset-provenance-validity.md](./dataset-provenance-validity.md) |
 | TSPEC-034z87feL8uCPOIagychsT | dataset store 往復と部分読み出し | proposed | [dataset-store-roundtrip.md](./dataset-store-roundtrip.md) |
 | TSPEC-034AaE4Ihkxe6GMzxNwRog | Expensive 追加ファミリの検証 | proposed | [expensive-families.md](./expensive-families.md) |
