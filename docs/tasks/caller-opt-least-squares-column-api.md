@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EJgyjQ0EutoP1M6RqoQ"
 type: "task"
-status: "todo"
+status: "done"
 title: "caller 側最適化 A4: LeastSquares 列指向 API 置換と caller 移行"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/caller-side-optimizations.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/caller-side-optimizations-least-squares-column-api.md"
   depends-on:
     - "docs/plans/caller-side-optimizations.md"
     - "docs/tasks/caller-opt-stft-fft-plan-hoist.md"

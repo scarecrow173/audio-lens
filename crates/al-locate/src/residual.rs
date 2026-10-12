@@ -150,15 +150,33 @@ pub fn subtract_fit(
     ridge: f64,
 ) -> Option<(Vec<Vec<f64>>, MixerEstimate)> {
     let len = capture_channels.first()?.len();
-    let src: Vec<Vec<f64>> = source_channels
+    // 十分な長さの列はスライス参照でコピーなし。capture より短い
+    // 列のみ zero-pad した所有バッファに逃がす(従来の
+    // clone+resize と同じ長さ合わせ意味)。
+    let padded: Vec<Vec<f64>> = source_channels
         .iter()
         .map(|c| {
-            let mut v = c.clone();
-            v.resize(len, 0.0);
+            let mut v = Vec::new();
+            if c.len() < len {
+                v = c.clone();
+                v.resize(len, 0.0);
+            }
             v
         })
         .collect();
-    let est = fit_mix(&src, capture_channels, ridge)?;
+    let src_cols: Vec<&[f64]> = source_channels
+        .iter()
+        .zip(&padded)
+        .map(|(c, p)| {
+            if c.len() < len {
+                p.as_slice()
+            } else {
+                &c[..len]
+            }
+        })
+        .collect();
+    let cap_cols: Vec<&[f64]> = capture_channels.iter().map(Vec::as_slice).collect();
+    let est = fit_mix(&src_cols, &cap_cols, ridge)?;
     let mut residual = capture_channels.to_vec();
     // Per-source `sub_scaled` passes keep every access a contiguous
     // stream (the transposed `s[t]` gather was scalar-only and could not
@@ -166,7 +184,7 @@ pub fn subtract_fit(
     // is within the ADR's recomposition tolerance; measured non-regressing
     // (IMPL-034EqSNHDxZ4VHxY5oaaaX).
     for (cap, row) in residual.iter_mut().zip(&est.matrix) {
-        for (s, &m) in src.iter().zip(row) {
+        for (s, &m) in src_cols.iter().zip(row) {
             dsp::sub_scaled(cap, m, s);
         }
     }

@@ -1,6 +1,6 @@
 //! 小列数の Householder QR。求解と正規行列による診断は独立している。
 
-use crate::vec::{dot_kernel, sub_scaled_kernel};
+use crate::vec::{dot_kernel, sub_scaled_kernel, sum_sq_kernel};
 use crate::{Simd, WithSimd, dispatch};
 
 // `v` と `target` は同じ suffix 長(m+extra-j)を持ち、等長契約は呼出し側
@@ -11,33 +11,34 @@ fn reflect<S: Simd>(simd: S, v: &[f64], target: &mut [f64]) {
     sub_scaled_kernel(simd, target, factor, v);
 }
 
-/// 元の観測と反射を所有し、複数 rhs に再利用する分解。
+/// 元の観測列と反射を所有し、複数 rhs に再利用する分解。
 pub struct LeastSquares {
-    rows: Vec<Vec<f64>>,
+    // ridge 適用前の入力列(1 コピーのみ、RSS 用)。
+    obs_columns: Vec<Vec<f64>>,
+    // ridge augmentation 付き分解後の列(R 情報)。
     columns: Vec<Vec<f64>>,
     reflectors: Vec<Vec<f64>>,
 }
 
 impl LeastSquares {
-    /// 有限の行列、非負有限の ridge、観測数 >= 列数を要求する。
-    pub fn new(rows: &[Vec<f64>], lambda: f64) -> Option<Self> {
-        let cols = rows.first()?.len();
-        if cols == 0
-            || rows.len() < cols
+    /// 有限・等長の列、非負有限の ridge、観測数(列長) >= 列数を要求する。
+    pub fn from_columns(columns: &[&[f64]], lambda: f64) -> Option<Self> {
+        let m = columns.first()?.len();
+        if m < columns.len()
             || !lambda.is_finite()
             || lambda < 0.0
-            || rows
+            || columns
                 .iter()
-                .any(|r| r.len() != cols || r.iter().any(|x| !x.is_finite()))
+                .any(|c| c.len() != m || c.iter().any(|x| !x.is_finite()))
         {
             return None;
         }
-        dispatch(Factor { rows, lambda })
+        dispatch(Factor { columns, lambda })
     }
 
     /// 元の観測のみから残差 RMS を求める（ridge 項を含めない）。
     pub fn solve(&self, rhs: &[f64]) -> Option<(Vec<f64>, f64)> {
-        if rhs.len() != self.rows.len() || rhs.iter().any(|x| !x.is_finite()) {
+        if rhs.len() != self.obs_columns[0].len() || rhs.iter().any(|x| !x.is_finite()) {
             return None;
         }
         dispatch(Apply { factor: self, rhs })
@@ -45,23 +46,28 @@ impl LeastSquares {
 }
 
 /// 単一 rhs の ridge 最小二乗求解。
-pub fn least_squares(rows: &[Vec<f64>], rhs: &[f64], lambda: f64) -> Option<(Vec<f64>, f64)> {
-    LeastSquares::new(rows, lambda)?.solve(rhs)
+pub fn least_squares(columns: &[&[f64]], rhs: &[f64], lambda: f64) -> Option<(Vec<f64>, f64)> {
+    LeastSquares::from_columns(columns, lambda)?.solve(rhs)
 }
 
 struct Factor<'a> {
-    rows: &'a [Vec<f64>],
+    columns: &'a [&'a [f64]],
     lambda: f64,
 }
 impl WithSimd for Factor<'_> {
     type Output = Option<LeastSquares>;
     fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
-        let n = self.rows[0].len();
-        let m = self.rows.len();
+        let n = self.columns.len();
+        let m = self.columns[0].len();
         let extra = if self.lambda > 0.0 { n } else { 0 };
-        let mut columns: Vec<Vec<f64>> = (0..n)
-            .map(|j| {
-                let mut c: Vec<f64> = self.rows.iter().map(|r| r[j]).collect();
+        // 分解用は入力列のコピーに √λ 対角の extra 要素を末尾へ追加した
+        // augmented 列(長さ m+extra)。augmentation は分解内部のみに存在する。
+        let mut columns: Vec<Vec<f64>> = self
+            .columns
+            .iter()
+            .enumerate()
+            .map(|(j, c)| {
+                let mut c = c.to_vec();
                 c.extend((0..extra).map(|i| if i == j { self.lambda.sqrt() } else { 0.0 }));
                 c
             })
@@ -93,7 +99,7 @@ impl WithSimd for Factor<'_> {
             reflectors.push(v);
         }
         Some(LeastSquares {
-            rows: self.rows.to_vec(),
+            obs_columns: self.columns.iter().map(|c| c.to_vec()).collect(),
             columns,
             reflectors,
         })
@@ -119,13 +125,14 @@ impl WithSimd for Apply<'_> {
             let sum: f64 = (j + 1..n).map(|k| f.columns[k][j] * x[k]).sum();
             x[j] = (y[j] - sum) / f.columns[j][j];
         }
-        let rss: f64 = f
-            .rows
-            .iter()
-            .zip(self.rhs)
-            .map(|(row, &b)| (dot_kernel(simd, row, &x) - b).powi(2))
-            .sum();
-        let rms = (rss / f.rows.len() as f64).sqrt();
+        // RSS は連続バッファ上の per-column `sub_scaled` パスで計算する
+        // (residual.rs の per-source 先例と同形)。ridge 項は含めない。
+        let mut resid = self.rhs.to_vec();
+        for (j, &xj) in x.iter().enumerate() {
+            sub_scaled_kernel(simd, &mut resid, xj, &f.obs_columns[j]);
+        }
+        let rss = sum_sq_kernel(simd, &resid);
+        let rms = (rss / self.rhs.len() as f64).sqrt();
         if x.iter().any(|v| !v.is_finite()) || !rms.is_finite() {
             return None;
         }
@@ -242,35 +249,47 @@ mod tests {
         assert!((a - b).abs() <= tolerance, "{a} != {b}");
     }
 
+    /// `&[&[f64]]` 引数用の列参照を組み立てる。
+    fn col_refs(columns: &[Vec<f64>]) -> Vec<&[f64]> {
+        columns.iter().map(Vec::as_slice).collect()
+    }
+
+    /// 列 fixture を行へ転置して `mod legacy` oracle に渡す。
+    fn rows_of(columns: &[Vec<f64>]) -> Vec<Vec<f64>> {
+        let m = columns.first().map_or(0, |c| c.len());
+        (0..m)
+            .map(|i| columns.iter().map(|c| c[i]).collect())
+            .collect()
+    }
+
     #[test]
     fn golden_matches_normal_equations_and_scalar_for_ridge_and_tails() {
         for n in 1..=8 {
             for m in [n + 1, 33, 65] {
-                let rows: Vec<Vec<f64>> = (0..m)
-                    .map(|i| {
-                        (0..n)
-                            .map(|j| ((i + 1) as f64 * (j + 1) as f64 * 0.71).sin())
+                let columns: Vec<Vec<f64>> = (0..n)
+                    .map(|j| {
+                        (0..m)
+                            .map(|i| ((i + 1) as f64 * (j + 1) as f64 * 0.71).sin())
                             .collect()
                     })
                     .collect();
-                let rhs: Vec<f64> = rows
-                    .iter()
-                    .enumerate()
-                    .map(|(i, row)| {
-                        row.iter()
-                            .enumerate()
-                            .map(|(j, v)| v * (j as f64 - 2.5))
+                let rhs: Vec<f64> = (0..m)
+                    .map(|i| {
+                        (0..n)
+                            .map(|j| columns[j][i] * (j as f64 - 2.5))
                             .sum::<f64>()
                             + (i as f64 * 0.9).cos() * 0.01
                     })
                     .collect();
+                let rows = rows_of(&columns);
+                let refs = col_refs(&columns);
                 for lambda in [0.0, 1e-3, 2.0] {
                     let expected = legacy::run(&rows, &rhs, lambda).unwrap();
-                    let factor = LeastSquares::new(&rows, lambda).unwrap();
+                    let factor = LeastSquares::from_columns(&refs, lambda).unwrap();
                     let native = factor.solve(&rhs).unwrap();
                     let scalar_factor = pulp::Scalar
                         .vectorize(Factor {
-                            rows: &rows,
+                            columns: &refs,
                             lambda,
                         })
                         .unwrap();
@@ -293,27 +312,29 @@ mod tests {
 
     #[test]
     fn highly_correlated_columns_recover_truth_independently_of_diagnostics() {
-        let rows: Vec<Vec<f64>> = (0..128)
-            .map(|i| {
-                let a = (i as f64 * 0.7).sin();
-                vec![a, a + 1e-7 * (i as f64 * 1.3).cos()]
-            })
+        let columns: Vec<Vec<f64>> = vec![
+            (0..128).map(|i| (i as f64 * 0.7).sin()).collect(),
+            (0..128)
+                .map(|i| (i as f64 * 0.7).sin() + 1e-7 * (i as f64 * 1.3).cos())
+                .collect(),
+        ];
+        let rhs: Vec<f64> = (0..128)
+            .map(|i| 2.0 * columns[0][i] - columns[1][i])
             .collect();
-        let rhs: Vec<f64> = rows.iter().map(|r| 2.0 * r[0] - r[1]).collect();
-        let (x, rms) = least_squares(&rows, &rhs, 0.0).unwrap();
+        let (x, rms) = least_squares(&col_refs(&columns), &rhs, 0.0).unwrap();
         let error = (x[0] - 2.0).abs() + (x[1] + 1.0).abs();
         assert!(error < 1e-7, "error={error}");
         assert!(rms < 1e-14);
-        if let Some((old, _)) = legacy::run(&rows, &rhs, 0.0) {
+        if let Some((old, _)) = legacy::run(&rows_of(&columns), &rhs, 0.0) {
             assert!(error < ((old[0] - 2.0).abs() + (old[1] + 1.0).abs()) * 0.01);
         }
     }
 
     #[test]
     fn rejects_invalid_and_rank_deficient_inputs_but_ridge_solves_singular() {
-        let rows = vec![vec![1.0, 1.0], vec![2.0, 2.0]];
-        assert!(LeastSquares::new(&rows, 0.0).is_none());
-        let factor = LeastSquares::new(&rows, 2.0).unwrap();
+        let columns: [&[f64]; 2] = [&[1.0, 2.0], &[1.0, 2.0]];
+        assert!(LeastSquares::from_columns(&columns, 0.0).is_none());
+        let factor = LeastSquares::from_columns(&columns, 2.0).unwrap();
         let (x, rms) = factor.solve(&[2.0, 4.0]).unwrap();
         close(x[0], 5.0 / 6.0, 1e-14);
         close(x[1], 5.0 / 6.0, 1e-14);
@@ -321,27 +342,28 @@ mod tests {
         assert!(factor.solve(&[2.0]).is_none());
         assert!(factor.solve(&[f64::NAN, 4.0]).is_none());
         for lambda in [-1.0, f64::NAN, f64::INFINITY] {
-            assert!(LeastSquares::new(&rows, lambda).is_none());
+            assert!(LeastSquares::from_columns(&columns, lambda).is_none());
         }
-        for rows in [
-            vec![],
-            vec![vec![]],
-            vec![vec![1.0, 2.0]],
-            vec![vec![1.0], vec![1.0, 2.0]],
-            vec![vec![f64::NAN]],
-            vec![vec![f64::INFINITY]],
-            vec![vec![0.0]],
+        let empty: [&[f64]; 0] = [];
+        assert!(LeastSquares::from_columns(&empty, 0.0).is_none());
+        for columns in [
+            vec![&[][..]],
+            vec![&[1.0][..], &[2.0][..]],
+            vec![&[1.0, 2.0][..], &[1.0][..]],
+            vec![&[f64::NAN][..]],
+            vec![&[f64::INFINITY][..]],
+            vec![&[0.0][..]],
         ] {
-            assert!(LeastSquares::new(&rows, 0.0).is_none());
+            assert!(LeastSquares::from_columns(&columns, 0.0).is_none());
         }
     }
 
     #[test]
     fn reuses_factorization_and_handles_small_scale() {
-        let rows = vec![vec![1e-100], vec![-2e-100], vec![3e-100]];
-        let f = LeastSquares::new(&rows, 0.0).unwrap();
+        let column = vec![1e-100, -2e-100, 3e-100];
+        let f = LeastSquares::from_columns(&[column.as_slice()], 0.0).unwrap();
         for gain in [-2.0, 0.0, 3.0] {
-            let rhs: Vec<f64> = rows.iter().map(|r| r[0] * gain).collect();
+            let rhs: Vec<f64> = column.iter().map(|v| v * gain).collect();
             let (x, rms) = f.solve(&rhs).unwrap();
             close(x[0], gain, 1e-14);
             assert!(rms < 1e-113);

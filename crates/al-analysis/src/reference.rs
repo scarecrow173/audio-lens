@@ -813,9 +813,7 @@ pub fn analyze_pair(
     out.records.push(es);
 
     // ==== Channel family ====
-    let src_chs: Vec<Vec<f64>> = src.src.iter().map(|c| c.to_vec()).collect();
-    let cap_chs: Vec<Vec<f64>> = src.cap.iter().map(|c| c.to_vec()).collect();
-    if let Some(mix) = fit_mix(&src_chs, &cap_chs, cfg.ridge) {
+    if let Some(mix) = fit_mix(&src.src, &src.cap, cfg.ridge) {
         let mut r = rb(ResolutionClass::Segment).scalar(
             "ref.mixer_fit",
             mix.fit_quality,
@@ -964,7 +962,7 @@ pub fn analyze_pair(
         // Crosstalk / leakage: for stereo source, energy of the
         // weaker fitted cross-coefficient.
         if src.src.len() >= 2
-            && let Some(mix) = fit_mix(&src_chs, &cap_chs, cfg.ridge)
+            && let Some(mix) = fit_mix(&src.src, &src.cap, cfg.ridge)
         {
             let off_diag: f64 = mix
                 .matrix
@@ -1137,7 +1135,8 @@ pub fn analyze_pair(
         let r1 = subtract(&r0, &m1);
         v.push(("r1", r1.clone()));
         // R2: channel matrix fit against the R1 residual.
-        if let Some(mix) = fit_mix(&src_chs, &r1, cfg.ridge) {
+        let r1_refs: Vec<&[f64]> = r1.iter().map(Vec::as_slice).collect();
+        if let Some(mix) = fit_mix(&src.src, &r1_refs, cfg.ridge) {
             let m2: Vec<Vec<f64>> = (0..r1.len())
                 .map(|c| {
                     (0..n)

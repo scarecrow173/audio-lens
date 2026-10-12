@@ -1,14 +1,16 @@
 //! Criterion bench for `al_math::linalg::LeastSquares`
 //! (TASK-034EJgkPQJmqrMLNdP7lVh, design T-baseline).
 //!
-//! Baseline is measured on the **rows API** (`LeastSquares::new` +
-//! `solve`) — the A4 column-oriented signature lands in a later
-//! task and this file follows it then. Factor construction and
-//! `solve` are measured separately at column counts {1, 2, 4} and
-//! observation counts {65_536, 262_144, 1_048_576}. Inputs are
-//! generated once outside `b.iter` so generation is not part of the
-//! measurement. Separate target from `vec_primitives.rs` (different
-//! concern).
+//! Baseline `lstsq-rows` was measured on the former rows API
+//! (`LeastSquares::new`); the A4 column-oriented signature landed in
+//! TASK-034EJgyjQ0EutoP1M6RqoQ and this file follows it. The
+//! benchmark IDs (`new` = factor construction, `solve`) are kept so
+//! `--baseline lstsq-rows` reports a direct delta against the rows
+//! API. Factor construction and `solve` are measured separately at
+//! column counts {1, 2, 4} and observation counts {65_536, 262_144,
+//! 1_048_576}. Inputs are generated once outside `b.iter` so
+//! generation is not part of the measurement. Separate target from
+//! `vec_primitives.rs` (different concern).
 
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
@@ -31,25 +33,26 @@ fn noise(n: usize, seed: u64) -> Vec<f64> {
         .collect()
 }
 
-/// `obs` observation rows of `cols` deterministic source values.
-fn rows(obs: usize, cols: usize) -> Vec<Vec<f64>> {
-    let columns: Vec<Vec<f64>> = (0..cols).map(|j| noise(obs, 0x5eed + j as u64)).collect();
-    (0..obs)
-        .map(|t| (0..cols).map(|j| columns[j][t]).collect())
-        .collect()
+/// `cols` deterministic source columns of `obs` observations each
+/// (same values as the rows-API baseline, transposed).
+fn columns(obs: usize, cols: usize) -> Vec<Vec<f64>> {
+    (0..cols).map(|j| noise(obs, 0x5eed + j as u64)).collect()
 }
 
 fn bench_lstsq(c: &mut Criterion) {
     let mut group = c.benchmark_group("lstsq");
     for cols in COLUMN_COUNTS {
         for obs in OBSERVATION_COUNTS {
-            let rows = rows(obs, cols);
+            let columns = columns(obs, cols);
+            let refs: Vec<&[f64]> = columns.iter().map(Vec::as_slice).collect();
             let rhs = noise(obs, 0xca9);
             let id = format!("{cols}x{obs}");
-            group.bench_with_input(BenchmarkId::new("new", &id), &rows, |b, r| {
-                b.iter(|| al_math::linalg::LeastSquares::new(black_box(r), black_box(LAMBDA)));
+            group.bench_with_input(BenchmarkId::new("new", &id), &refs, |b, r| {
+                b.iter(|| {
+                    al_math::linalg::LeastSquares::from_columns(black_box(r), black_box(LAMBDA))
+                });
             });
-            let factor = al_math::linalg::LeastSquares::new(&rows, LAMBDA).unwrap();
+            let factor = al_math::linalg::LeastSquares::from_columns(&refs, LAMBDA).unwrap();
             group.bench_with_input(BenchmarkId::new("solve", &id), &rhs, |b, rhs| {
                 b.iter(|| factor.solve(black_box(rhs)));
             });

@@ -108,11 +108,11 @@ mod tests {
     #[test]
     fn least_squares_recovers_coefficients() {
         // y = 2a - b + noise-free.
-        let rows: Vec<Vec<f64>> = (0..20)
-            .map(|i| vec![i as f64 * 0.1, (i as f64 * 0.37).sin()])
-            .collect();
-        let rhs: Vec<f64> = rows.iter().map(|r| 2.0 * r[0] - r[1]).collect();
-        let (x, rms) = al_math::linalg::least_squares(&rows, &rhs, 0.0).unwrap();
+        let c0: Vec<f64> = (0..20).map(|i| i as f64 * 0.1).collect();
+        let c1: Vec<f64> = (0..20).map(|i| (i as f64 * 0.37).sin()).collect();
+        let rhs: Vec<f64> = (0..20).map(|i| 2.0 * c0[i] - c1[i]).collect();
+        let (x, rms) =
+            al_math::linalg::least_squares(&[c0.as_slice(), c1.as_slice()], &rhs, 0.0).unwrap();
         assert!((x[0] - 2.0).abs() < 1e-6);
         assert!((x[1] + 1.0).abs() < 1e-6);
         assert!(rms < 1e-6);
