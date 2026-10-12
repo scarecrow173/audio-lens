@@ -1,7 +1,7 @@
 ---
 id: "TASK-034EO4qUmlyu3qleVAOHoo"
 type: "task"
-status: "todo"
+status: "done"
 title: "機械的 caller クリーンアップ A9/A12: cheap 側 power 一括化・mean_row 融合・HashSet 事前計数"
 created: "2026-10-12"
 updated: "2026-10-12"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/mechanical-caller-cleanup.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/mech-cleanup-a9-a12-cheap-pass-consolidation.md"
   depends-on:
     - "docs/plans/mechanical-caller-cleanup.md"
     - "docs/tasks/mech-cleanup-a7-a8-csd-inlining.md"
@@ -99,6 +100,18 @@ A9 の `reference.rs:653-654` 側は T6(A16a と同一変更
   と同値)を `:603` へ使う
 - **禁止**: 近似 distinct count(support が変わる)。
   `HashSet` は std のみ(新規依存なし)
+
+**A12 実施結果 — bench 棄却(deviation)**: T1 baseline
+(`target/bench-baseline/criterion-mech-cleanup-pre.txt`)で
+HashSet 候補は両経路で現行 sort+dedup を下回った
+(in-gate 7.29→14.17 ms、>1M 27.63→55.18 ms)。T4 の再計測
+(`target/bench-baseline/quant_step-mech-cleanup-a9a12.txt`)
+でも同傾向(6.44 vs 14.07 ms・26.74 vs 50.11 ms)を確認。
+early-exit 変種は support(正確な distinct count)契約を
+破り、近似判別子は spec の禁止事項のため、**コード不変更で
+棄却**とした。判断の詳細・数値は IR
+`docs/impl/ir/mech-cleanup-a9-a12-cheap-pass-consolidation.md`
+を参照。
 
 等価性ゲート: T1 の characterization(mag/power/psd
 tensor・`spec.slope`・`dig.quant_step_est` の両経路

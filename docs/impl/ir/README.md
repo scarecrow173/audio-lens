@@ -52,6 +52,7 @@ Directory: `docs/impl/ir`
 | locate-tracking | [locate-tracking.md](./locate-tracking.md) |
 | mech-cleanup-a6-bandpass-batching | [mech-cleanup-a6-bandpass-batching.md](./mech-cleanup-a6-bandpass-batching.md) |
 | mech-cleanup-a7-a8-csd-inlining | [mech-cleanup-a7-a8-csd-inlining.md](./mech-cleanup-a7-a8-csd-inlining.md) |
+| mech-cleanup-a9-a12-cheap-pass-consolidation | [mech-cleanup-a9-a12-cheap-pass-consolidation.md](./mech-cleanup-a9-a12-cheap-pass-consolidation.md) |
 | mech-cleanup-bench-baseline-characterization | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
 | observability-cli-wiring | [observability-cli-wiring.md](./observability-cli-wiring.md) |

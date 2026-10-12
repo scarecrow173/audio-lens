@@ -627,9 +627,33 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             format!("intermediate/{path}/stft_im"),
             &m.im,
         ));
-        let mag = m.magnitude();
+        // A9: derive every spectral tensor from one `power()` pass.
+        // `magnitude()`/`psd()` each re-run the same `mag_sq` scan,
+        // so `pow` is the only pass and mag/psd/mean_row are caller-
+        // side derivations. All of them — and every `m` field read —
+        // must complete before `m` is moved into `channel_stft`.
         let pow = m.power();
-        let psd = m.psd();
+        let norm = (0.375 * m.window as f64) * m.sample_rate as f64;
+        let inv = 1.0 / norm;
+        let half = m.fft_size / 2;
+        let mut mean_row = vec![0.0; half];
+        let mag: Vec<Vec<f64>> = pow
+            .iter()
+            .map(|row| {
+                let r: Vec<f64> = row.iter().map(|&v| v.sqrt()).collect();
+                for (k, &v) in r.iter().take(half).enumerate() {
+                    mean_row[k] += v;
+                }
+                r
+            })
+            .collect();
+        for v in &mut mean_row {
+            *v /= mag.len() as f64;
+        }
+        let psd: Vec<Vec<f64>> = pow
+            .iter()
+            .map(|row| row.iter().map(|&v| v * inv).collect())
+            .collect();
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/magnitude"),
             &mag,
@@ -663,7 +687,6 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         channel_stft.push(Some(m));
 
         // Per-frame spectral shape trajectories + summaries.
-        let half = mag[0].len() / 2;
         let bin_hz = rate as f64 / (half * 2) as f64;
         let mut centroid = Vec::with_capacity(mag.len());
         let mut flatness = Vec::with_capacity(mag.len());
@@ -788,10 +811,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         spec_rec("spec.entropy", &entropy, "norm");
         spec_rec("spec.flux", &flux, "linear");
         // Spectral slope (linear fit of log-magnitude vs log-freq,
-        // first 90% of band).
-        let mean_row: Vec<f64> = (0..half)
-            .map(|b| mag.iter().map(|r| r[b]).sum::<f64>() / mag.len() as f64)
-            .collect();
+        // first 90% of band). `mean_row` is fused into the A9
+        // row-major pass above — same additions in row-ascending
+        // order, same `/ mag.len()` divisor, bit-identical.
         let xs: Vec<f64> = (1..(half * 9 / 10).max(2))
             .map(|b| (b as f64 * bin_hz).ln())
             .collect();
