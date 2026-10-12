@@ -1,10 +1,10 @@
 ---
 id: "TASK-034EJgPpxRSjjhOJVeBUup"
 type: "task"
-status: "todo"
+status: "done"
 title: "caller 側最適化: 事後計測・Implementation Record 記録・最終検証"
 created: "2026-10-12"
-updated: "2026-10-12"
+updated: "2026-10-13"
 owners: []
 relations:
   source: []

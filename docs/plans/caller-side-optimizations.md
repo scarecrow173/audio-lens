@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034EJg701ux76Ga7UWPP0j"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "caller 側最適化チェーン: 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4)"
 created: "2026-10-12"
-updated: "2026-10-12"
+updated: "2026-10-13"
 owners: []
 relations:
   source: []
