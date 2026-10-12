@@ -18,6 +18,7 @@ relations:
   implements: []
   implemented-by:
     - "../designs/al-math-vec-primitives.md"
+    - "../plans/al-math-vec-primitives.md"
   depends-on:
     - "./observability-foundation.md"
     - "../adr/simd-arithmetic-pulp.md"
@@ -35,8 +36,10 @@ relations:
     - "../discovery/al-math-simd-reduction.md"
   derived-by:
     - "../designs/al-math-vec-primitives.md"
+    - "../tasks/vec-primitives-verification-bench.md"
   verifies: []
-  verified-by: []
+  verified-by:
+    - "../test-specs/al-math-vec-primitives.md"
   references: []
   defers: []
   deferred-by: []

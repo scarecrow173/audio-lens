@@ -6,7 +6,9 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | todo | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |
 | TASK-034DYiGC8yp76ElLB8R0J5 | al-locate: dsp::fft と bench_dsp の split API 追従 | done | [al-locate-split-re-im-fft.md](./al-locate-split-re-im-fft.md) |
+| TASK-034EpPesSpbjbAQBsmjvJx | al-locate: dsp re-export と vec プリミティブ移行 | todo | [al-locate-vec-migration.md](./al-locate-vec-migration.md) |
 | TASK-034DYiRwEeud1alnVmGMJj | al-math API 境界: 全体検証と旧コミット bench 比較 | done | [al-math-api-boundary-verification.md](./al-math-api-boundary-verification.md) |
 | TASK-034DYiMM43O9mMDdme6ijq | al-math: 公開面の pub(crate) 化と intra-doc link 修正 | done | [al-math-api-pub-crate.md](./al-math-api-pub-crate.md) |
 | TASK-035e5Sz9kMdPRs2o1Cd4W0 | al-math: 相関/NCC/bandpass カーネル | done | [al-math-correlation.md](./al-math-correlation.md) |
@@ -16,6 +18,7 @@ Directory: `docs/tasks`
 | TASK-035cMnBvCxZaSdFgHjKlQp | al-math: クレート骨格 + pulp dispatch 基盤 | done | [al-math-skeleton.md](./al-math-skeleton.md) |
 | TASK-034DYiz9Z4rXXkKoNvy4vI | al-math: fft/correlation/filter の split re/im 内部化 | done | [al-math-split-re-im-internals.md](./al-math-split-re-im-internals.md) |
 | TASK-034DYiFVJy5OyohvPiyzkf | al-math: tests の split re/im 追従と独立参照の保持 | done | [al-math-split-re-im-tests.md](./al-math-split-re-im-tests.md) |
+| TASK-034EpP87rKX85uUeXWXtA5 | al-math: vec プリミティブモジュール(カーネル + dispatch + linalg 共有) | todo | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | TASK-034AaFYEyp2hJkFmKrHAYS | al-testkit: 補助クレート + 信号/メディアビルダ | done | [al-testkit-crate.md](./al-testkit-crate.md) |
 | TASK-034z9nBEhJkL7a1GaPjUjG | 候補イベントモデル + 抽出/永続化 | done | [analysis-candidate-events.md](./analysis-candidate-events.md) |
 | TASK-034z9nv6tpsfrUU5JDU9cD | CheapAnalysisStage: 全特徴ファミリ実装 | done | [analysis-cheap-stage.md](./analysis-cheap-stage.md) |
@@ -89,6 +92,7 @@ Directory: `docs/tasks`
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
+| TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | todo | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
 | TASK-034AaFzhq1S2Z7tm0XFXSc | video: DIB/rawvideo フレームデコード + 輝度/差分/シーンチェンジ | done | [video-frame-decode.md](./video-frame-decode.md) |
