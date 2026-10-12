@@ -324,7 +324,10 @@ fn residual_child_reopens_the_exact_subtracted_signal_and_lineage() {
         .sum::<f64>()
         / (capture.len() * 2) as f64)
         .sqrt();
-    assert_eq!(rms, expected.energy.after);
+    // マルチch rms が per-channel sum_sq 再合成に移行したため、
+    // 平坦シーケンシャル和との厳密比較は許容比較へ緩和する
+    // (ulp 級の結合順差 — 許容再合成ポリシー)。
+    assert!((rms - expected.energy.after).abs() < 1e-15);
     assert!((search["energy"]["after"].as_f64().unwrap() - expected.energy.after).abs() < 1e-15);
     let mut missing = child.clone();
     missing.capture_pcm = None;

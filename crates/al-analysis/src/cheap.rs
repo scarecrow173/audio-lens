@@ -9,7 +9,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Resolution, ResolutionClass, Value};
 use al_locate::decode::DecodedInput;
-use al_locate::dsp::ncc;
+use al_locate::dsp::{corr0, ncc, rms, sum_sq};
 
 use crate::records::{RecordBuilder, robust_summary};
 use crate::stft::{
@@ -177,7 +177,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         // --- Level family ---
         let peak = samples.iter().fold(0.0f64, |m, &v| m.max(v.abs()));
         let dc = samples.iter().sum::<f64>() / samples.len() as f64;
-        let rms_all = (samples.iter().map(|v| v * v).sum::<f64>() / samples.len() as f64).sqrt();
+        let rms_all = rms(samples);
         let silent = peak <= 0.0;
         let level_validity = if silent {
             Validity::SilenceInsufficientEnergy
@@ -249,10 +249,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
 
         // Level trajectory (mid-resolution) + robust summary.
         let frames = windowed(samples, level_window, level_hop);
-        let rms_traj: Vec<f64> = frames
-            .iter()
-            .map(|f| (f.iter().map(|v| v * v).sum::<f64>() / f.len() as f64).sqrt())
-            .collect();
+        let rms_traj: Vec<f64> = frames.iter().map(|f| rms(f)).collect();
         channel_rms.push(rms_traj.clone());
         let traj_tensor = matrix_to_tensor(
             format!("features/cheap/{path}/level_trajectory"),
@@ -355,7 +352,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             let win = ((seconds * rate as f64).round() as usize).max(1);
             let tr: Vec<f64> = windowed(samples, win, win / 2)
                 .iter()
-                .map(|f| (f.iter().map(|v| v * v).sum::<f64>() / f.len() as f64).sqrt())
+                .map(|f| rms(f))
                 .collect();
             let mut r = RecordBuilder::new(&dec.input_id, "cheap.v1", class)
                 .resolution(win as u64, (win / 2) as u64, rate)
@@ -382,7 +379,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         let m_win = ((0.4 * rate as f64).round() as usize).max(1);
         let mom: Vec<f64> = windowed(samples, m_win, m_win)
             .iter()
-            .map(|f| f.iter().map(|v| v * v).sum::<f64>() / f.len() as f64)
+            .map(|f| sum_sq(f) / f.len() as f64)
             .collect();
         let integrated = if mom.is_empty() {
             f64::NEG_INFINITY
@@ -411,7 +408,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             let w = ((3.0 * rate as f64).round() as usize).max(1);
             windowed(samples, w, w / 2)
                 .iter()
-                .map(|f| db((f.iter().map(|v| v * v).sum::<f64>() / f.len() as f64).sqrt()))
+                .map(|f| db(rms(f)))
                 .collect()
         };
         let lra = robust_summary(&st).map(|s| s.p95 - s.p05);
@@ -909,7 +906,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         out.records.push(tn);
         // Hum: energy at 50/60Hz fundamentals + first 5 harmonics
         // relative to total.
-        let total_e: f64 = mean_row.iter().map(|v| v * v).sum();
+        let total_e: f64 = sum_sq(&mean_row);
         let hum_e: f64 = [50.0f64, 60.0]
             .iter()
             .flat_map(|&f| (1..=5).map(move |h| f * h as f64))
@@ -918,7 +915,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 let b = (f / bin_hz).round() as usize;
                 let lo = b.saturating_sub(1);
                 let hi = (b + 2).min(half);
-                mean_row[lo..hi].iter().map(|v| v * v).sum::<f64>()
+                sum_sq(&mean_row[lo..hi])
             })
             .sum();
         let mut hum = rb.scalar(
@@ -1013,17 +1010,12 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 continue;
             }
             let (xs, ys) = (&x[..n], &y[..n]);
-            // Zero-lag normalized correlation.
-            let (sx, sy): (f64, f64) = (
-                xs.iter().map(|v| v * v).sum(),
-                ys.iter().map(|v| v * v).sum(),
-            );
-            let sxy: f64 = xs.iter().zip(ys).map(|(&a, &b2)| a * b2).sum();
-            let corr = if sx > 0.0 && sy > 0.0 {
-                sxy / (sx * sy).sqrt()
-            } else {
-                0.0
-            };
+            // Zero-lag normalized correlation. sx/sy are also
+            // consumed by the Validity gate and `stereo.ild_db`
+            // below, so they are computed separately from `corr0`.
+            let corr = corr0(xs, ys);
+            let sx = sum_sq(xs);
+            let sy = sum_sq(ys);
             push(rb.scalar(
                 "stereo.pair_correlation",
                 corr,
@@ -1063,15 +1055,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 if xa.is_empty() {
                     continue;
                 }
-                let (ex, ey): (f64, f64) = (
-                    xa.iter().map(|v| v * v).sum(),
-                    ya.iter().map(|v| v * v).sum(),
-                );
-                let c = if ex > 0.0 && ey > 0.0 {
-                    xa.iter().zip(ya).map(|(&p, &q)| p * q).sum::<f64>() / (ex * ey).sqrt()
-                } else {
-                    0.0
-                };
+                let c = corr0(xa, ya);
                 if c > best_v {
                     best_v = c;
                     best_lag = lag;
@@ -1246,13 +1230,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 .map(|lag| {
                     let a = &rms[..rms.len() - lag];
                     let b = &rms[lag..];
-                    let (ea, eb): (f64, f64) =
-                        (a.iter().map(|v| v * v).sum(), b.iter().map(|v| v * v).sum());
-                    if ea > 0.0 && eb > 0.0 {
-                        a.iter().zip(b).map(|(&p, &q)| p * q).sum::<f64>() / (ea * eb).sqrt()
-                    } else {
-                        0.0
-                    }
+                    corr0(a, b)
                 })
                 .fold(0.0f64, f64::max);
             out.records.push(rb.scalar(

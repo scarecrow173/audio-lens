@@ -7,6 +7,7 @@ Directory: `docs/test-specs`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | TSPEC-034DYifVBA3Fc2Vs952TLz | al-math 公開 API 中立化と split re/im FFT 境界 | proposed | [al-math-api-boundary.md](./al-math-api-boundary.md) |
+| TSPEC-034EpMxXDl69zm65O1mGBG | al-math vec プリミティブ検証仕様 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | TSPEC-034z99BlV8EIVYk7jxmzM9 | 解析ステージ検証 | proposed | [analysis-stages.md](./analysis-stages.md) |
 | TSPEC-034z0HtvsU1qWh7kPAH0ml | AV タイミング観測と辞書注釈 | proposed | [av-timing-observation.md](./av-timing-observation.md) |
 | TSPEC-034z87fIonHcU07IHGb1dE | dataset 来歴と validity セマンティクス | proposed | [dataset-provenance-validity.md](./dataset-provenance-validity.md) |

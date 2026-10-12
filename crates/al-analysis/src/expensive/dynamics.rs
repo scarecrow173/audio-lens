@@ -5,10 +5,11 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
+use al_locate::dsp::rms;
 
 use crate::records::{propagate_confidence, propagate_validity, robust_summary};
 
-use super::{Emit, ExpensiveResult, RegionCtx, emit_unsupported, rms};
+use super::{Emit, ExpensiveResult, RegionCtx, emit_unsupported};
 
 /// Emit this family's invalid schema for a region selected by
 /// non-`Valid` evidence (same ids `run` would produce, as NaN

@@ -19,7 +19,10 @@ pub use al_math::linalg::{condition_number, least_squares};
 pub use candidate::{LocateCandidate, MethodEvidence};
 pub use consensus::{ConsensusConfig, evaluate};
 pub use decode::{DecodedInput, decode_input, format_scale};
-pub use dsp::{bandpass, deinterleave, fft, gcc_phat, ncc, spectral_envelope};
+pub use dsp::{
+    axpy, bandpass, corr0, deinterleave, dot, fft, gcc_phat, mag_sq, ncc, rms, scale,
+    spectral_envelope, sub_scaled, sum_sq,
+};
 pub use methods::{BandNcc, FullNcc, GccPhat, LocateMethod, SpectralEnvelope, default_methods};
 pub use mixer::{MixerEstimate, fit_mix};
 pub use residual::{

@@ -139,10 +139,6 @@ pub trait LocateMethod {
     }
 }
 
-fn energy(x: &[f64]) -> f64 {
-    x.iter().map(|v| v * v).sum()
-}
-
 fn rejected(
     method: &'static str,
     version: &'static str,
@@ -172,7 +168,7 @@ fn preflight(
             "signal shorter than template",
         ));
     }
-    if energy(template) < MIN_ENERGY {
+    if dsp::sum_sq(template) < MIN_ENERGY {
         return Err(rejected(
             method,
             version,
@@ -180,7 +176,7 @@ fn preflight(
             "template has no usable energy",
         ));
     }
-    if energy(signal) < MIN_ENERGY {
+    if dsp::sum_sq(signal) < MIN_ENERGY {
         return Err(rejected(
             method,
             version,
@@ -360,7 +356,7 @@ impl BandNcc {
         let mut acc = vec![0.0; curve_len];
         let mut bands_used = 0;
         for (t, s) in bands {
-            if energy(t) < MIN_ENERGY {
+            if dsp::sum_sq(t) < MIN_ENERGY {
                 continue;
             }
             for (a, c) in acc.iter_mut().zip(dsp::ncc(t, s, s.len() - t.len())) {
@@ -405,7 +401,7 @@ impl LocateMethod for BandNcc {
             .iter()
             .copied()
             .zip(templates)
-            .filter(|(_, t)| energy(t) >= MIN_ENERGY)
+            .filter(|(_, t)| dsp::sum_sq(t) >= MIN_ENERGY)
             .collect();
         let active_bands: Vec<_> = active.iter().map(|(band, _)| *band).collect();
         let signals = dsp::bandpass_many(signal, sample_rate, &active_bands);
@@ -498,11 +494,13 @@ impl Default for SpectralEnvelope {
 /// Normalize to unit RMS so absolute-scale comparisons are
 /// meaningful across different `sample_format` inputs.
 pub fn normalize_gain(x: &[f64]) -> Vec<f64> {
-    let rms = (energy(x) / x.len().max(1) as f64).sqrt();
-    if rms < MIN_ENERGY {
+    let r = dsp::rms(x);
+    if r < MIN_ENERGY {
         return x.to_vec();
     }
-    x.iter().map(|v| v / rms).collect()
+    let mut out = vec![0.0; x.len()];
+    dsp::scale(x, r.recip(), &mut out);
+    out
 }
 
 impl LocateMethod for SpectralEnvelope {
@@ -538,6 +536,11 @@ impl LocateMethod for SpectralEnvelope {
                 self.fft_size,
                 self.bins,
             );
+            // 残存許容(TASK-034EpPesSpbjbAQBsmjvJx): `dsp::corr0` 化すると
+            // 周期入力で各 lag が厳密に同点(≈1.0)になり、同点 argmax が
+            // 先頭 lag に移って合議の曖昧性棄却を固定する golden が破壊
+            // される(偽受理の再現)。順序が結合順に本質依存するため、
+            // 契約保持を優先して逐次式を維持する。
             let dot: f64 = t_env.iter().zip(&s_env).map(|(a, b)| a * b).sum();
             let tn: f64 = t_env.iter().map(|v| v * v).sum::<f64>().sqrt();
             let sn: f64 = s_env.iter().map(|v| v * v).sum::<f64>().sqrt();

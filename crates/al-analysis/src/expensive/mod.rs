@@ -254,22 +254,6 @@ pub struct ExpensiveResult {
     pub tensors: Vec<NamedTensor>,
 }
 
-pub(crate) fn rms(x: &[f64]) -> f64 {
-    if x.is_empty() {
-        return 0.0;
-    }
-    (x.iter().map(|v| v * v).sum::<f64>() / x.len() as f64).sqrt()
-}
-
-pub(crate) fn corr0(x: &[f64], y: &[f64]) -> f64 {
-    let (ex, ey): (f64, f64) = (x.iter().map(|v| v * v).sum(), y.iter().map(|v| v * v).sum());
-    if ex > 0.0 && ey > 0.0 {
-        x.iter().zip(y).map(|(&a, &b)| a * b).sum::<f64>() / (ex * ey).sqrt()
-    } else {
-        0.0
-    }
-}
-
 /// Record emitter bound to one triggered region. Every family pushes
 /// through this so all records share the region's push conventions:
 /// the region's time range and trigger params are stamped, confidence

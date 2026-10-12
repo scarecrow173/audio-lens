@@ -1,28 +1,14 @@
 //! 小列数の Householder QR。求解と正規行列による診断は独立している。
 
+use crate::vec::{dot_kernel, sub_scaled_kernel};
 use crate::{Simd, WithSimd, dispatch};
 
-fn dot<S: Simd>(simd: S, a: &[f64], b: &[f64]) -> f64 {
-    let (av, at) = S::as_simd_f64s(a);
-    let (bv, bt) = S::as_simd_f64s(b);
-    let mut sum = simd.splat_f64s(0.0);
-    for (&a, &b) in av.iter().zip(bv) {
-        sum = simd.add_f64s(sum, simd.mul_f64s(a, b));
-    }
-    simd.reduce_sum_f64s(sum) + at.iter().zip(bt).map(|(a, b)| a * b).sum::<f64>()
-}
-
+// `v` と `target` は同じ suffix 長(m+extra-j)を持ち、等長契約は呼出し側
+// の構造で保証される。既に `WithSimd` コンテキスト内にあるため公開
+// wrapper を経由せずカーネルを直接呼び、二重 dispatch を避ける。
 fn reflect<S: Simd>(simd: S, v: &[f64], target: &mut [f64]) {
-    let factor = 2.0 * dot(simd, v, target);
-    let (vv, vt) = S::as_simd_f64s(v);
-    let (tv, tt) = S::as_mut_simd_f64s(target);
-    let scale = simd.splat_f64s(factor);
-    for (t, &v) in tv.iter_mut().zip(vv) {
-        *t = simd.sub_f64s(*t, simd.mul_f64s(scale, v));
-    }
-    for (t, &v) in tt.iter_mut().zip(vt) {
-        *t -= factor * v;
-    }
+    let factor = 2.0 * dot_kernel(simd, v, target);
+    sub_scaled_kernel(simd, target, factor, v);
 }
 
 /// 元の観測と反射を所有し、複数 rhs に再利用する分解。
@@ -95,7 +81,7 @@ impl WithSimd for Factor<'_> {
             let sign = if columns[j][j] >= 0.0 { 1.0 } else { -1.0 };
             let mut v: Vec<f64> = columns[j][j..].iter().map(|x| x / norm).collect();
             v[0] += sign;
-            let vnorm = dot(simd, &v, &v).sqrt();
+            let vnorm = dot_kernel(simd, &v, &v).sqrt();
             for x in &mut v {
                 *x /= vnorm;
             }
@@ -137,7 +123,7 @@ impl WithSimd for Apply<'_> {
             .rows
             .iter()
             .zip(self.rhs)
-            .map(|(row, &b)| (dot(simd, row, &x) - b).powi(2))
+            .map(|(row, &b)| (dot_kernel(simd, row, &x) - b).powi(2))
             .sum();
         let rms = (rss / f.rows.len() as f64).sqrt();
         if x.iter().any(|v| !v.is_finite()) || !rms.is_finite() {
