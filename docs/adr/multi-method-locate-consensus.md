@@ -26,6 +26,7 @@ relations:
     - "../specs/locate-tracking.md"
     - "../specs/audiolens-overview.md"
     - "../specs/source-localization.md"
+    - "locate-argmax-ambiguity-representation.md"
   refines: []
   refined-by: []
   derives-from:
