@@ -27,6 +27,7 @@ relations:
     - "../specs/audiolens-overview.md"
     - "../specs/source-localization.md"
     - "locate-argmax-ambiguity-representation.md"
+    - "../designs/locate-consensus-argmax-ambiguity.md"
   refines: []
   refined-by: []
   derives-from:

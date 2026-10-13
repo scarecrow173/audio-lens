@@ -29,7 +29,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/locate-consensus-argmax-ambiguity-contract.md"
-  derived-by: []
+  derived-by:
+    - "../designs/locate-consensus-argmax-ambiguity.md"
   verifies: []
   verified-by: []
   references:
@@ -262,10 +263,11 @@ Phase 0 として、曖昧性を構造的に検出・拒否する契約を先に
    負スコアペアより優先される挙動 — は既知の挙動として変更
    しない。対象外。)
 9. **best_window_match の同点ガード**: `best_window_match`
-   (`stage.rs:228-256`)は、評価した相関曲線の同点集合(Req 1 と
-   同一基準)が ≥2 要素を持つ場合、`None` を返し(アンカーを寄与
-   しない)なければならない — 同点のウィンドウマッチは位置の証拠
-   ではなく、アンカー層にも同一契約を適用する。
+   (`stage.rs:228-256`)は、評価したペア単位の相関曲線で同点集合
+   (Req 1 と同一基準)が ≥2 要素を持つ場合、そのペアはアンカーに
+   寄与しないものとし、**全ペアがアンカーに寄与しない場合に限り
+   `None` を返さなければならない** — 同点のウィンドウマッチは
+   位置の証拠ではなく、アンカー層にも同一契約を適用する。
    `window_anchors_in` は narrow → ×8 slack → 全 `[lo,hi)` 範囲の
    3段で探索する(`stage.rs:304-313`)が、第3段は事実上無拘束の
    argmax であり同点が害を生む。ガードは評価される曲線を持つ段の

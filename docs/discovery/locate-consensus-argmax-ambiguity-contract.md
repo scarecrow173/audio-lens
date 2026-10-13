@@ -33,6 +33,7 @@ relations:
   derived-by:
     - "docs/specs/locate-consensus-ambiguity-contract.md"
     - "docs/adr/locate-argmax-ambiguity-representation.md"
+    - "docs/designs/locate-consensus-argmax-ambiguity.md"
   verifies: []
   verified-by: []
   references: []
