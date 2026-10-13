@@ -28,6 +28,7 @@ relations:
   superseded-by: []
   related:
     - "docs/discovery/locate-consensus-argmax-ambiguity-contract.md"
+    - "docs/tasks/locate-spectral-envelope-corr0.md"
   refines: []
   refined-by: []
   derives-from:

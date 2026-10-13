@@ -32,9 +32,18 @@ relations:
     - "../specs/locate-consensus-ambiguity-contract.md"
     - "../adr/locate-argmax-ambiguity-representation.md"
     - "../discovery/locate-consensus-argmax-ambiguity-contract.md"
-  derived-by: []
+  derived-by:
+    - "../plans/implement-locate-argmax-ambiguity.md"
+    - "../test-specs/locate-argmax-ambiguity.md"
+    - "../test-specs/locate-argmax-tie-eps-calibration.md"
+    - "../tasks/locate-argmax-tie-eps-characterization.md"
+    - "../tasks/locate-argmax-ambiguity-detection.md"
+    - "../tasks/locate-spectral-envelope-corr0.md"
+    - "../tasks/locate-argmax-ambiguity-closeout.md"
   verifies: []
-  verified-by: []
+  verified-by:
+    - "../test-specs/locate-argmax-ambiguity.md"
+    - "../test-specs/locate-argmax-tie-eps-calibration.md"
   references:
     - "../tasks/al-locate-vec-migration.md"
     - "../impl/ir/al-locate-dsp-re-export-vec-migration.md"
@@ -397,7 +406,7 @@ spec Req 6-7 に従い、`rel_eps`/`abs_floor` の実現可能レンジを実装
 | 計測 | 目的 |
 | --- | --- |
 | 各受理系 fixture のメソッド毎に `M − max_{i≠argmax}\|corr[i]\|`(rank-1 の大きさと、全サンプル中の第二順位大きさの差)の分布 | 判定式 `T = { i : \|corr[i]\| >= M − tie_window }` は**全サンプル**を走査するため、拘束するマージンは「rank-1 と次位の別位置ピークの分離」ではなく第二順位の大きさとの差 — argmax ピーク自身のショルダー(隣接サンプル)を含む。`min(意味ある分離)` はこのマージンの fixture 群下限として実測する |
-| ショルダーデルタ曝露の確認 | 帯域制限ソースでは argmax 直近のショルダーが極めて浅くなり得る。推定式 `1−cos(2π·fc/fs)` で、`golden.rs` `case_long_source_linear_drift`(RATE=48kHz、fc=1kHz の Biquad lowpass ノイズ、`golden.rs:393-401`)は実効帯域を考慮して ~8.6e-4 級、~35Hz 帯域制限のソースでは ~1e-6 級まで浅くなり、`rel_eps` 候補レンジ(1e-9..1e-6)に入り得る。eps の実質上限は fixture 群の最小ショルダーデルタであり、T1 で数値を確定する |
+| ショルダーデルタ曝露の確認 | 帯域制限ソースでは argmax 直近のショルダーが極めて浅くなり得る。`golden.rs` `case_long_source_linear_drift`(RATE=48kHz、fc=1kHz の Biquad lowpass ノイズ、`golden.rs:393-401`)に素朴な推定式 `1−cos(2π·fc/fs)` を適用すると ~8.6e-3 となる。NCC 対象の実効帯域が fc より狭い(低域偏重で帯域の重心が下がる)と仮定すれば ~1e-4 級、~35Hz 帯域制限のソースでは ~1e-6 級まで浅くなり得るが、これらの浅い側の推定値は未検証の実効帯域仮定に依存し、`rel_eps` 候補レンジ(1e-9..1e-6)に入り得る。推定に依らず、T1 が実際の `M − max_{i≠argmax}\|corr[i]\|` を計測して数値を確定する — eps の実質上限は fixture 群の最小ショルダーデルタである |
 | `spectral_envelope` の慢性曖昧リスク | このメソッドは 32-bin log 振幅包絡の NCC であり、ホワイトノイズ・チャープ・広帯域 SFX では殆どの lag で包絡がほぼ同一 → \|T\| が大きく `AmbiguousAlignment` となり、実世界の広い入力クラスでメソッドが暗黙に投票を止め得る。fixture 群には非 golden の受理系テストも含める — 特に `tests/locate.rs` の `different_rates_locate_without_false_drift`(広帯域チャープ、~line 488)と `repeated_source_reports_second_occurrence`(ノイズ埋込み、~line 440)。T1 が noise 系入力での慢性曖昧を示した場合、eps の再較正ではなく spec Req 7 のエスカレーション経路を取り、spec AC「受理系 fixture では全メソッドの merged 証拠が非曖昧」の再検討を含めて spec 改訂する |
 | 周期 fixture での同点構造 | 厳密同点・近同点の実形(分離ピーク vs plateau)の確認 |
 | dispatch 間偏差の上限 | **al-math の `#[cfg(test)]` 内に characterization test を追加して実測する** — `dispatch` は `pub(crate)`(`lib.rs:28`)で `Correlation`/`Envelope` カーネルは非公開だが、`pulp::Scalar` は al-math 内テストから到達可能(テスト追加はスコープ内、dispatch override seam 新設は対象外)。`ncc`/`gcc_phat`/`spectral_envelope` の scalar↔dispatch 偏差を**実運用 FFT サイズ**で測る(本番 NCC は `(signal.len()+template.len()-1).next_power_of_two()` の RealFFT で、golden 規模では ~64k-point)。既存の等価アサーションは小入力中心で実運用サイズを直接カバーしない: `correlation.rs:193` は絶対 `1e-10` だが len ≤ 127(信号 ≤ 382)、`filter.rs:165/175` は絶対 `1e-10` で len ≤ 256・fft_size 256、`vec.rs:339` は `1e-12·max(1,\|a\|,\|b\|)` 相対で最大 ~1M をカバーするが vec カーネルのみ、`fft.rs` は `1e-10·(1+norm)` で n ≤ 2^10 と workspace 経路 2^14..2^16。`Correlation`/`Envelope` カーネル全体を実運用 FFT サイズで直接アサートするテストは存在せず、偏差上限は未測定 — 「~1e-13 級」という理論推定ではなく実測を根拠とする |
@@ -477,7 +486,7 @@ spec Req 6-7 に従い、`rel_eps`/`abs_floor` の実現可能レンジを実装
 - **eps 実現可能性**: eps の上限を拘束するのは rank-1 と第二順位
   大きさの差(argmax 自身のショルダーを含む)であり、受理系
   fixture で十分なマージンが確保できるかは現時点で仮説。帯域制限
-  ソースのショルダーデルタ(~1e-3..1e-6 級)は eps 候補レンジ
+  ソースのショルダーデルタ(未検証推定で ~1e-2..1e-6 級)は eps 候補レンジ
   (1e-9..1e-6)と重なり得る(§7)。T1 が
   `max(dispatch 間偏差) << eps << min(M − 次位大きさ)` の範囲を
   示さない場合は実装せず spec 改訂へエスカレーションする
