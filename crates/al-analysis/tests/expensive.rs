@@ -548,3 +548,235 @@ fn always_run_analyzes_full_input_without_reference_stage() {
 
     fs::remove_dir_all(&fx.dir).ok();
 }
+
+// ==== mechanical-caller-cleanup characterization ====
+// TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT outputs
+// of the expensive-stage sites the mechanical caller cleanup bundle
+// touches — A7 (expensive/channel.rs per-band `csd` accumulation)
+// and A16a (expensive/mod.rs column-scan `mean_power`) — via the
+// downstream records' `f64::to_bits`. Oracles re-implement the
+// current formulas over public API (`stft` / `csd` /
+// `complex_coherence` stay public); no tolerance predicate.
+mod mechanical_cleanup {
+    use super::*;
+    use al_analysis::expensive::{
+        ExpensiveConfig, ExpensiveResult, TriggeredRegion, analyze_region,
+    };
+    use al_analysis::stft::{csd, stft, third_octave_bands};
+    use al_core::{Confidence, Validity};
+    use al_dataset::types::{FeatureRecord, Value};
+
+    fn scalar(r: &FeatureRecord) -> f64 {
+        match &r.value {
+            Value::Scalar(v) => *v,
+            other => panic!("expected scalar, got {other:?}"),
+        }
+    }
+
+    fn record<'a>(out: &'a ExpensiveResult, id: &str) -> &'a FeatureRecord {
+        out.records
+            .iter()
+            .find(|r| r.feature_id == id)
+            .unwrap_or_else(|| panic!("missing record {id}"))
+    }
+
+    const RATE: u32 = 48_000;
+    const WINDOW: usize = 1024;
+    const HOP: usize = 512;
+
+    fn run_region(chans: &[&[f64]]) -> ExpensiveResult {
+        let region = TriggeredRegion {
+            start_s: 0.0,
+            end_s: chans[0].len() as f64 / RATE as f64,
+            triggers: vec!["always_run".into()],
+            validity: Validity::Valid,
+            confidence: Confidence::High,
+            has_valid_trigger: true,
+        };
+        analyze_region(
+            "in",
+            "in__r000",
+            chans,
+            RATE,
+            &region,
+            None,
+            None,
+            &ExpensiveConfig {
+                stft_window: WINDOW,
+                stft_hop: HOP,
+                ..Default::default()
+            },
+        )
+    }
+
+    /// Column-scan `mean_power` — the current
+    /// `expensive/mod.rs` accumulation shape — plus its derived
+    /// `total_power` / `one_sided_power` sums.
+    fn mean_power_oracle(seg: &[f64]) -> (Vec<f64>, f64, f64, usize, f64) {
+        let m = stft(seg, WINDOW, HOP, RATE);
+        let bins = m.fft_size;
+        let half = bins / 2;
+        let frames = m.frames();
+        let power = m.power();
+        let mean: Vec<f64> = (0..bins)
+            .map(|k| power.iter().map(|f| f[k]).sum::<f64>() / frames as f64)
+            .collect();
+        let bin_hz = RATE as f64 / bins as f64;
+        (
+            mean.clone(),
+            mean.iter().sum(),
+            mean[..half].iter().sum(),
+            frames,
+            bin_hz,
+        )
+    }
+
+    // ---- A7: `exp.freq_lr_coherence` — the sxy accumulation over
+    //      `band_bins` (expensive/channel.rs site) ----
+
+    #[test]
+    fn a7_freq_lr_coherence_is_bit_exact() {
+        let primary = noise(16_384, 29);
+        let secondary: Vec<f64> = primary
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| {
+                if i >= 7 {
+                    0.8 * primary[i - 7]
+                } else {
+                    v * 0.2
+                }
+            })
+            .collect();
+        let chans: Vec<&[f64]> = vec![&primary, &secondary];
+        let out = run_region(&chans);
+
+        // Oracle: the channel.rs sxy path — `csd` over all bins,
+        // accumulated only inside `band_bins`.
+        let seg = &primary[..];
+        let oseg = &secondary[..];
+        let n_ch = seg.len().min(oseg.len());
+        let mb = stft(&seg[..n_ch], WINDOW, HOP, RATE);
+        let ob = stft(&oseg[..n_ch], WINDOW, HOP, RATE);
+        let bins = mb.fft_size;
+        let half = bins / 2;
+        let bin_hz = RATE as f64 / bins as f64;
+        let fr = mb.frames().min(ob.frames());
+        assert!(fr >= 2, "fixture must yield >= 2 frames");
+        let bands = third_octave_bands(100.0, RATE as f64 / 2.0 * 0.9);
+        let band_bins: Vec<usize> = bands
+            .iter()
+            .map(|&(lo, hi)| ((lo / bin_hz) as usize, (hi / bin_hz) as usize))
+            .flat_map(|(a, b)| a..b.min(half))
+            .collect();
+        let mut sxy = vec![(0.0f64, 0.0f64); half];
+        let mut sxx = vec![0.0f64; half];
+        let mut syy = vec![0.0f64; half];
+        for f in 0..fr {
+            let c = csd(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f]);
+            for &k in &band_bins {
+                let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
+                let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
+                sxy[k].0 += c[k].0;
+                sxy[k].1 += c[k].1;
+                sxx[k] += aa;
+                syy[k] += bb;
+            }
+        }
+        let mut coh_sum = 0.0;
+        let mut coh_n = 0u64;
+        for &k in &band_bins {
+            let den = sxx[k] * syy[k];
+            if den > 0.0 {
+                let num = sxy[k].0 * sxy[k].0 + sxy[k].1 * sxy[k].1;
+                coh_sum += (num / den).sqrt();
+                coh_n += 1;
+            }
+        }
+        assert!(coh_n > 0, "fixture must leave supported band bins");
+        let r = record(&out, "exp.freq_lr_coherence");
+        assert_eq!(r.validity, Validity::Valid, "{r:?}");
+        assert_eq!(
+            scalar(r).to_bits(),
+            (coh_sum / coh_n as f64).to_bits(),
+            "exp.freq_lr_coherence"
+        );
+    }
+
+    // ---- A16a: `mean_power` / `total_power` / `one_sided_power`
+    //      consumers (exp.cutoff_hz / exp.thd_ratio /
+    //      exp.spectral_hole_ratio) ----
+
+    #[test]
+    fn a16a_mean_power_consumers_are_bit_exact() {
+        // Broadband-ish input with a strong tone so all three
+        // records land on their Valid paths.
+        let n = 16_384usize;
+        let mut sig = noise(n, 0xabc);
+        for (i, v) in sig.iter_mut().enumerate() {
+            *v += 0.6 * (2.0 * std::f64::consts::PI * 3000.0 * i as f64 / RATE as f64).sin();
+        }
+        let chans: Vec<&[f64]> = vec![&sig];
+        let out = run_region(&chans);
+
+        let (mean, total_power, one_sided_power, _frames, bin_hz) = mean_power_oracle(&sig[..]);
+        let m = stft(&sig[..], WINDOW, HOP, RATE);
+        let half = m.fft_size / 2;
+        assert!(total_power > 0.0 && one_sided_power > 0.0);
+
+        // exp.cutoff_hz oracle (transfer.rs): first bin from the top
+        // whose cumulative-above energy reaches 1% of one-sided.
+        let mut above = 0.0;
+        let mut cutoff = 0usize;
+        for k in (0..half).rev() {
+            above += mean[k];
+            if above / one_sided_power >= 0.01 {
+                cutoff = k;
+                break;
+            }
+        }
+        let r = record(&out, "exp.cutoff_hz");
+        assert_eq!(
+            scalar(r).to_bits(),
+            (cutoff as f64 * bin_hz).to_bits(),
+            "exp.cutoff_hz"
+        );
+
+        // exp.thd_ratio oracle: strongest bin's harmonic share.
+        let (f0, _) = mean[4..half.min(2048)]
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .map(|(i, v)| (i + 4, *v))
+            .unwrap_or((0, 0.0));
+        let mut harm = 0.0;
+        for h in 2..=8usize {
+            let k = f0 * h;
+            if k >= half {
+                break;
+            }
+            harm += mean[k.saturating_sub(1)..=(k + 1).min(half - 1)]
+                .iter()
+                .sum::<f64>();
+        }
+        let r = record(&out, "exp.thd_ratio");
+        assert_eq!(
+            scalar(r).to_bits(),
+            (harm / total_power).to_bits(),
+            "exp.thd_ratio"
+        );
+
+        // exp.spectral_hole_ratio oracle (codec.rs): bins in the top
+        // half below 1e-4 of the one-sided max.
+        let maxp = mean[..half].iter().copied().fold(0.0, f64::max);
+        let floor = maxp * 1e-4;
+        let top = &mean[half / 2..half];
+        let holes = top.iter().filter(|&&p| p < floor).count();
+        let r = record(&out, "exp.spectral_hole_ratio");
+        assert_eq!(
+            scalar(r).to_bits(),
+            (holes as f64 / top.len().max(1) as f64).to_bits(),
+            "exp.spectral_hole_ratio"
+        );
+    }
+}

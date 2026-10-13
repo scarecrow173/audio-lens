@@ -12,9 +12,7 @@ use al_locate::decode::DecodedInput;
 use al_locate::dsp::{corr0, ncc, rms, sum_sq};
 
 use crate::records::{RecordBuilder, robust_summary};
-use crate::stft::{
-    StftMatrix, band_power, complex_coherence, csd, envelope, stft, third_octave_bands,
-};
+use crate::stft::{StftMatrix, band_power, complex_coherence, envelope, stft, third_octave_bands};
 
 /// Cheap-stage tunables (`config.analysis.cheap.*` overrides).
 #[derive(Debug, Clone)]
@@ -629,9 +627,33 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             format!("intermediate/{path}/stft_im"),
             &m.im,
         ));
-        let mag = m.magnitude();
+        // A9: derive every spectral tensor from one `power()` pass.
+        // `magnitude()`/`psd()` each re-run the same `mag_sq` scan,
+        // so `pow` is the only pass and mag/psd/mean_row are caller-
+        // side derivations. All of them — and every `m` field read —
+        // must complete before `m` is moved into `channel_stft`.
         let pow = m.power();
-        let psd = m.psd();
+        let norm = (0.375 * m.window as f64) * m.sample_rate as f64;
+        let inv = 1.0 / norm;
+        let half = m.fft_size / 2;
+        let mut mean_row = vec![0.0; half];
+        let mag: Vec<Vec<f64>> = pow
+            .iter()
+            .map(|row| {
+                let r: Vec<f64> = row.iter().map(|&v| v.sqrt()).collect();
+                for (k, &v) in r.iter().take(half).enumerate() {
+                    mean_row[k] += v;
+                }
+                r
+            })
+            .collect();
+        for v in &mut mean_row {
+            *v /= mag.len() as f64;
+        }
+        let psd: Vec<Vec<f64>> = pow
+            .iter()
+            .map(|row| row.iter().map(|&v| v * inv).collect())
+            .collect();
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/magnitude"),
             &mag,
@@ -665,7 +687,6 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         channel_stft.push(Some(m));
 
         // Per-frame spectral shape trajectories + summaries.
-        let half = mag[0].len() / 2;
         let bin_hz = rate as f64 / (half * 2) as f64;
         let mut centroid = Vec::with_capacity(mag.len());
         let mut flatness = Vec::with_capacity(mag.len());
@@ -790,10 +811,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         spec_rec("spec.entropy", &entropy, "norm");
         spec_rec("spec.flux", &flux, "linear");
         // Spectral slope (linear fit of log-magnitude vs log-freq,
-        // first 90% of band).
-        let mean_row: Vec<f64> = (0..half)
-            .map(|b| mag.iter().map(|r| r[b]).sum::<f64>() / mag.len() as f64)
-            .collect();
+        // first 90% of band). `mean_row` is fused into the A9
+        // row-major pass above — same additions in row-ascending
+        // order, same `/ mag.len()` divisor, bit-identical.
         let xs: Vec<f64> = (1..(half * 9 / 10).max(2))
             .map(|b| (b as f64 * bin_hz).ln())
             .collect();
@@ -1110,10 +1130,11 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 let mut paa = vec![0.0f64; ma.fft_size];
                 let mut pbb = vec![0.0f64; ma.fft_size];
                 for f in 0..frames {
-                    let pxy = csd(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f]);
-                    for (k, &(pr, pi)) in pxy.iter().enumerate() {
-                        csd_re[k] += pr;
-                        csd_im[k] += pi;
+                    for k in 0..ma.fft_size {
+                        let (xr, xi) = (ma.re[f][k], ma.im[f][k]);
+                        let (yr, yi) = (mb.re[f][k], mb.im[f][k]);
+                        csd_re[k] += xr * yr + xi * yi;
+                        csd_im[k] += xr * yi - xi * yr;
                         paa[k] += ma.re[f][k] * ma.re[f][k] + ma.im[f][k] * ma.im[f][k];
                         pbb[k] += mb.re[f][k] * mb.re[f][k] + mb.im[f][k] * mb.im[f][k];
                     }
@@ -1410,5 +1431,254 @@ mod tests {
         let out = analyze_input(&d, &CheapConfig::default());
         let r = rec(&out, "spec.centroid_hz");
         assert_eq!(r.validity, Validity::InsufficientSupport);
+    }
+
+    // ==== mechanical-caller-cleanup characterization ====
+    // TASK-034EO484s25JM8bsb6zUCh (plan T1). Pins the CURRENT
+    // outputs of the cheap-stage sites the mechanical caller
+    // cleanup bundle touches — A9 (magnitude/power/psd tensors +
+    // `spec.slope`), A12 (`dig.quant_step_est` in-gate and >1M
+    // distinct skip), A7 stereo (`stereo.coherence_mean`) — via
+    // `f64::to_bits` / element-exact comparison against oracles
+    // that re-implement the current formulas over public API.
+    // No tolerance predicate is applied (test-spec Rules C/D/E).
+
+    /// Deterministic zero-mean pseudo-noise (LCG, same generator
+    /// shape as the other in-tree test fixtures).
+    fn noise(n: usize, seed: u64) -> Vec<f64> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                ((s >> 33) as f64 / (1u64 << 31) as f64) * 2.0 - 1.0
+            })
+            .collect()
+    }
+
+    fn tensor<'a>(out: &'a CheapResult, path: &str) -> &'a NamedTensor {
+        out.tensors
+            .iter()
+            .find(|t| t.path == path)
+            .unwrap_or_else(|| panic!("missing tensor {path}"))
+    }
+
+    fn assert_bits(actual: &[f64], expected: &[f64], what: &str) {
+        assert_eq!(
+            actual.len(),
+            expected.len(),
+            "{what} length {} vs {}",
+            actual.len(),
+            expected.len()
+        );
+        for (i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+            assert_eq!(a.to_bits(), e.to_bits(), "{what}[{i}]");
+        }
+    }
+
+    fn flat(m: &[Vec<f64>]) -> Vec<f64> {
+        m.iter().flatten().copied().collect()
+    }
+
+    /// A9: the persisted magnitude/power/psd tensors must equal the
+    /// `StftMatrix::{magnitude,power,psd}` outputs on the same
+    /// STFT — the single `power()`-derivation change must keep
+    /// every element bit-identical.
+    #[test]
+    fn a9_mag_pow_psd_tensors_are_bit_exact() {
+        let rate = 48_000u32;
+        let samples = noise(32_768, 0x5eed);
+        let d = dec(vec![samples.clone()], rate);
+        let cfg = CheapConfig::default();
+        let out = analyze_input(&d, &cfg);
+
+        let m = stft(&samples, cfg.stft_window, cfg.stft_hop, rate);
+        assert!(m.frames() > 0);
+        let mag_t = tensor(&out, "intermediate/IN-1/ch0/magnitude");
+        let pow_t = tensor(&out, "intermediate/IN-1/ch0/power");
+        let psd_t = tensor(&out, "intermediate/IN-1/ch0/psd");
+        assert_eq!(mag_t.shape, [m.frames() as u64, m.fft_size as u64]);
+        assert_bits(&mag_t.data, &flat(&m.magnitude()), "magnitude");
+        assert_bits(&pow_t.data, &flat(&m.power()), "power");
+        assert_bits(&psd_t.data, &flat(&m.psd()), "psd");
+    }
+
+    /// A9: `spec.slope` consumes `mean_row` (per-bin row-mean of
+    /// `mag[..half]`). The row-major fused accumulation must keep
+    /// the record bit-identical to the current column-scan value.
+    #[test]
+    fn a9_spec_slope_record_is_bit_exact() {
+        let rate = 48_000u32;
+        let samples = noise(32_768, 0xbeef);
+        let d = dec(vec![samples.clone()], rate);
+        let cfg = CheapConfig::default();
+        let out = analyze_input(&d, &cfg);
+
+        // Oracle: the current mean_row + log-log linear fit shape.
+        let m = stft(&samples, cfg.stft_window, cfg.stft_hop, rate);
+        let mag = m.magnitude();
+        let half = mag[0].len() / 2;
+        let bin_hz = rate as f64 / (half * 2) as f64;
+        let mean_row: Vec<f64> = (0..half)
+            .map(|b| mag.iter().map(|r| r[b]).sum::<f64>() / mag.len() as f64)
+            .collect();
+        let xs: Vec<f64> = (1..(half * 9 / 10).max(2))
+            .map(|b| (b as f64 * bin_hz).ln())
+            .collect();
+        let ys: Vec<f64> = (1..(half * 9 / 10).max(2))
+            .map(|b| (mean_row[b] + 1e-12).ln())
+            .collect();
+        let n = xs.len() as f64;
+        let (sx, sy, sxy, sxx) = xs
+            .iter()
+            .zip(&ys)
+            .fold((0.0, 0.0, 0.0, 0.0), |(ax, ay, axy, axx), (&x, &y)| {
+                (ax + x, ay + y, axy + x * y, axx + x * x)
+            });
+        let expected = if sxx * n - sx * sx != 0.0 {
+            (sxy * n - sx * sy) / (sxx * n - sx * sx)
+        } else {
+            0.0
+        };
+        let r = rec(&out, "spec.slope");
+        assert_eq!(
+            r.target.unwrap().to_bits(),
+            expected.to_bits(),
+            "spec.slope"
+        );
+    }
+
+    /// A12 oracle: the current `uniq` sort/dedup → gate → f64
+    /// `total_cmp` sort → min positive difference shape. Returns
+    /// `(quant, support)`.
+    fn quant_oracle(samples: &[f64]) -> (f64, u64) {
+        let mut uniq: Vec<u64> = samples.iter().map(|v| v.to_bits()).collect();
+        uniq.sort_unstable();
+        uniq.dedup();
+        let quant = if uniq.len() >= 2 && uniq.len() <= 1_000_000 {
+            let mut sorted: Vec<f64> = uniq.iter().map(|b| f64::from_bits(*b)).collect();
+            sorted.sort_by(|a, b| a.total_cmp(b));
+            sorted
+                .windows(2)
+                .map(|w| w[1] - w[0])
+                .filter(|d| *d > 0.0)
+                .fold(f64::INFINITY, f64::min)
+        } else {
+            f64::NAN
+        };
+        (quant, uniq.len() as u64)
+    }
+
+    fn assert_quant_step(out: &CheapResult, samples: &[f64], what: &str) {
+        let (expected, support) = quant_oracle(samples);
+        let r = rec(out, "dig.quant_step_est");
+        assert_eq!(
+            r.target.unwrap().to_bits(),
+            expected.to_bits(),
+            "{what} quant_step value"
+        );
+        assert_eq!(r.support_count, support, "{what} support");
+        assert_eq!(
+            r.validity,
+            if expected.is_finite() {
+                Validity::Valid
+            } else {
+                Validity::NotApplicable
+            },
+            "{what} validity"
+        );
+    }
+
+    /// A12 in-gate path (2..=1M distinct): a 1/16-grid quantized
+    /// signal exercises the sort → min-positive-difference branch.
+    #[test]
+    fn a12_quant_step_in_gate_is_bit_exact() {
+        let rate = 48_000u32;
+        let samples: Vec<f64> = noise(65_536, 0x9e37)
+            .iter()
+            .map(|&v| (v * 16.0).round() / 16.0)
+            .collect();
+        let (expected, support) = quant_oracle(&samples);
+        assert!((2..=1_000_000).contains(&support), "in-gate premise");
+        assert!(expected.is_finite(), "in-gate must yield a step");
+        let out = analyze_input(&dec(vec![samples.clone()], rate), &CheapConfig::default());
+        assert_quant_step(&out, &samples, "in_gate");
+    }
+
+    /// A12 >1M distinct skip path: the gate fails and the record
+    /// reports NaN / `NotApplicable` with the distinct count as
+    /// support — same record semantics the HashSet pre-count keeps.
+    #[test]
+    fn a12_quant_step_over_1m_skip_is_bit_exact() {
+        let rate = 48_000u32;
+        let samples = noise(1_300_000, 0x51ed);
+        let (_, support) = quant_oracle(&samples);
+        assert!(
+            support > 1_000_000,
+            "fixture must exceed the gate: {support}"
+        );
+        let out = analyze_input(&dec(vec![samples.clone()], rate), &CheapConfig::default());
+        assert_quant_step(&out, &samples, "over_1m");
+    }
+
+    /// A7 stereo site: `stereo.coherence_mean` is the mean magnitude
+    /// of the complex coherence between channels' STFTs, over at
+    /// most `min(64)` frames of `csd` accumulation.
+    #[test]
+    fn a7_stereo_coherence_mean_is_bit_exact() {
+        let rate = 48_000u32;
+        let a = noise(65_536, 0xa11);
+        let b: Vec<f64> = a
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| if i >= 11 { 0.6 * a[i - 11] } else { v * 0.3 })
+            .collect();
+        let d = dec(vec![a.clone(), b.clone()], rate);
+        let cfg = CheapConfig::default();
+        let out = analyze_input(&d, &cfg);
+
+        // `csd` stays public (the production import is pruned in the
+        // A7A8 commit); keep the oracle import local to this test.
+        use crate::stft::csd;
+        // Oracle: the cheap.rs stereo-pair accumulation shape.
+        let ma = stft(&a, cfg.stft_window, cfg.stft_hop, rate);
+        let mb = stft(&b, cfg.stft_window, cfg.stft_hop, rate);
+        assert_eq!(ma.frames(), mb.frames());
+        assert_eq!(ma.fft_size, mb.fft_size);
+        let frames = ma.frames().min(64);
+        let mut csd_re = vec![0.0f64; ma.fft_size];
+        let mut csd_im = vec![0.0f64; ma.fft_size];
+        let mut paa = vec![0.0f64; ma.fft_size];
+        let mut pbb = vec![0.0f64; ma.fft_size];
+        for f in 0..frames {
+            let pxy = csd(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f]);
+            for (k, &(pr, pi)) in pxy.iter().enumerate() {
+                csd_re[k] += pr;
+                csd_im[k] += pi;
+                paa[k] += ma.re[f][k] * ma.re[f][k] + ma.im[f][k] * ma.im[f][k];
+                pbb[k] += mb.re[f][k] * mb.re[f][k] + mb.im[f][k] * mb.im[f][k];
+            }
+        }
+        let pxy_avg: Vec<(f64, f64)> = csd_re
+            .iter()
+            .zip(&csd_im)
+            .map(|(&r, &i)| (r / frames as f64, i / frames as f64))
+            .collect();
+        let paa_avg: Vec<f64> = paa.iter().map(|v| v / frames as f64).collect();
+        let pbb_avg: Vec<f64> = pbb.iter().map(|v| v / frames as f64).collect();
+        let coh = complex_coherence(&paa_avg, &pbb_avg, &pxy_avg);
+        let half = ma.fft_size / 2;
+        let expected = coh[..half]
+            .iter()
+            .map(|(r, i)| (r * r + i * i).sqrt())
+            .sum::<f64>()
+            / half as f64;
+        let r = rec(&out, "stereo.coherence_mean");
+        assert_eq!(
+            r.target.unwrap().to_bits(),
+            expected.to_bits(),
+            "stereo.coherence_mean"
+        );
     }
 }

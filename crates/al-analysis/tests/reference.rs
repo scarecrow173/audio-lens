@@ -646,3 +646,581 @@ fn cross_capture_path_gain_is_job_scoped_and_preserves_pair_features() {
     );
     fs::remove_dir_all(fx.dir).unwrap();
 }
+
+// ==== mechanical-caller-cleanup characterization ====
+// TASK-034EO484s25JM8bsb6zUCh (plan T1). These tests pin the
+// CURRENT outputs of every site the mechanical caller cleanup
+// bundle touches, before any optimization lands. All comparisons
+// are `f64::to_bits` / element-exact — no tolerance predicate is
+// applied anywhere in this bundle (test-spec Rule A). Oracles are
+// re-implemented here over the same public API (`bandpass` / `csd`
+// / `StftMatrix::{psd,magnitude}` / `fit_mix` stay public), so the
+// tests stay green on both sides of each -opt commit.
+mod mechanical_cleanup {
+    use super::*;
+    use al_analysis::reference::{Aligned, ReferenceConfig, ReferenceResult, analyze_pair};
+    use al_analysis::stft::{
+        StftMatrix, band_power, complex_coherence, csd, stft, third_octave_bands,
+    };
+    use al_core::{Confidence, Validity};
+    use al_dataset::types::Value;
+    use al_locate::dsp::{bandpass, corr0};
+
+    const ALN: &str = "ALN-0123456789abcdefghijkl";
+
+    fn scalar(r: &al_dataset::types::FeatureRecord) -> f64 {
+        match &r.value {
+            Value::Scalar(v) => *v,
+            other => panic!("expected scalar, got {other:?}"),
+        }
+    }
+
+    fn record<'a>(out: &'a ReferenceResult, id: &str) -> &'a al_dataset::types::FeatureRecord {
+        out.records
+            .iter()
+            .find(|r| r.feature_id == id)
+            .unwrap_or_else(|| panic!("missing record {id}"))
+    }
+
+    fn tensor<'a>(out: &'a ReferenceResult, path: &str) -> &'a al_analysis::cheap::NamedTensor {
+        out.tensors
+            .iter()
+            .find(|t| t.path == path)
+            .unwrap_or_else(|| panic!("missing tensor {path}"))
+    }
+
+    fn assert_bits(actual: &[f64], expected: &[f64], what: &str) {
+        assert_eq!(
+            actual.len(),
+            expected.len(),
+            "{what} length {} vs {}",
+            actual.len(),
+            expected.len()
+        );
+        for (i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+            assert_eq!(a.to_bits(), e.to_bits(), "{what}[{i}]");
+        }
+    }
+
+    /// src mono, cap stereo — the stereo capture keeps the L/R
+    /// coherence site and the multi-channel residual interleave on
+    /// the analysis path.
+    fn pair_fixture() -> (Vec<Vec<f64>>, Vec<Vec<f64>>, u32) {
+        let rate = 48_000u32;
+        let n = 1 << 15;
+        let src0 = noise(n, 0x5eed);
+        let cap0: Vec<f64> = (0..n)
+            .map(|i| if i >= 5 { 0.7 * src0[i - 5] } else { 0.0 })
+            .collect();
+        let cap1: Vec<f64> = (0..n)
+            .map(|i| if i >= 9 { 0.4 * src0[i - 9] } else { 0.0 })
+            .collect();
+        (vec![src0], vec![cap0, cap1], rate)
+    }
+
+    fn analyze(src: &[Vec<f64>], cap: &[Vec<f64>], rate: u32) -> ReferenceResult {
+        let aligned = Aligned {
+            src: src.iter().map(Vec::as_slice).collect(),
+            cap: cap.iter().map(Vec::as_slice).collect(),
+            rate,
+            upstream_confidence: Confidence::High,
+        };
+        analyze_pair(
+            "src__cap",
+            &al_core::AlignmentId::parse(ALN).unwrap(),
+            &aligned,
+            Validity::Valid,
+            &ReferenceConfig::default(),
+        )
+    }
+
+    /// Current `analyze_pair` band set (1/3-octave, capped at 8).
+    fn ref_bands(rate: u32) -> Vec<(f64, f64)> {
+        third_octave_bands(40.0, (rate as f64 / 2.0).min(16_000.0))
+    }
+
+    /// Oracle for the Welch accumulation shared by the transfer_h /
+    /// coherence / hft sites (reference.rs A7 sites + A8).
+    struct Welch {
+        h_re: Vec<f64>,
+        h_im: Vec<f64>,
+        coh: Vec<(f64, f64)>,
+        hft: Vec<Vec<f64>>,
+    }
+
+    fn welch(ms: &StftMatrix, mc: &StftMatrix) -> Welch {
+        let frames = ms.frames().min(mc.frames());
+        assert!(frames > 0, "fixture must produce STFT frames");
+        let bins = ms.fft_size;
+        let mut pxx = vec![0.0; bins];
+        let mut pyy = vec![0.0; bins];
+        let mut pxy = vec![(0.0, 0.0); bins];
+        for f in 0..frames {
+            let c = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
+            for k in 0..bins {
+                pxx[k] += ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
+                pyy[k] += mc.re[f][k] * mc.re[f][k] + mc.im[f][k] * mc.im[f][k];
+                pxy[k].0 += c[k].0;
+                pxy[k].1 += c[k].1;
+            }
+        }
+        for k in 0..bins {
+            pxx[k] /= frames as f64;
+            pyy[k] /= frames as f64;
+            pxy[k].0 /= frames as f64;
+            pxy[k].1 /= frames as f64;
+        }
+        let coh = complex_coherence(&pxx, &pyy, &pxy);
+        let mut h_re = vec![0.0; bins];
+        let mut h_im = vec![0.0; bins];
+        for k in 0..bins {
+            if pxx[k] > 0.0 {
+                h_re[k] = pxy[k].0 / pxx[k];
+                h_im[k] = pxy[k].1 / pxx[k];
+            }
+        }
+        let half = bins / 2;
+        let hft: Vec<Vec<f64>> = (0..frames)
+            .map(|f| {
+                (0..half)
+                    .map(|k| {
+                        let xs = ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
+                        if xs > 0.0 {
+                            let c = csd(
+                                &ms.re[f][k..k + 1],
+                                &ms.im[f][k..k + 1],
+                                &mc.re[f][k..k + 1],
+                                &mc.im[f][k..k + 1],
+                            );
+                            ((c[0].0 * c[0].0 + c[0].1 * c[0].1).sqrt()) / xs
+                        } else {
+                            0.0
+                        }
+                    })
+                    .collect()
+            })
+            .collect();
+        Welch {
+            h_re,
+            h_im,
+            coh,
+            hft,
+        }
+    }
+
+    // ---- A6: band_correlation tensor + `bands < 8` edge ----
+
+    fn assert_band_correlation(
+        out: &ReferenceResult,
+        src_mono: &[f64],
+        cap_mono: &[f64],
+        rate: u32,
+    ) {
+        let bands = ref_bands(rate);
+        let expected: Vec<f64> = bands
+            .iter()
+            .take(8)
+            .map(|&(lo, hi)| {
+                let xs = bandpass(src_mono, rate, lo, hi);
+                let ys = bandpass(cap_mono, rate, lo, hi);
+                corr0(&xs, &ys)
+            })
+            .collect();
+        let t = tensor(out, "intermediate/src__cap/band_correlation");
+        assert_bits(&t.data, &expected, "band_correlation");
+        // ref.band_correlation_min records the minimum of the same
+        // element list.
+        let min = record(out, "ref.band_correlation_min");
+        let expected_min = expected
+            .iter()
+            .copied()
+            .min_by(|a, b| a.total_cmp(b))
+            .unwrap();
+        assert_eq!(
+            scalar(min).to_bits(),
+            expected_min.to_bits(),
+            "ref.band_correlation_min"
+        );
+    }
+
+    #[test]
+    fn a6_band_correlation_tensor_is_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        assert_band_correlation(&out, &src[0], &cap[0], rate);
+    }
+
+    #[test]
+    fn a6_band_correlation_bands_below_eight_edge() {
+        // Low sample rate → `bands.len() < 8`: the `.min(8)` /
+        // `take(8)` bound must yield `bands.len()` elements without
+        // panic (test-spec Rule B).
+        let rate = 400u32;
+        let n = 1 << 14;
+        let src = vec![noise(n, 0xbee0)];
+        let cap = vec![
+            noise(n, 0xca90)
+                .iter()
+                .enumerate()
+                .map(|(i, &v)| if i >= 3 { 0.6 * src[0][i - 3] } else { v * 0.1 })
+                .collect(),
+        ];
+        let bands = ref_bands(rate);
+        assert!(
+            bands.len() < 8,
+            "rate {rate} must yield fewer than 8 bands, got {}",
+            bands.len()
+        );
+        let out = analyze(&src, &cap, rate);
+        let t = tensor(&out, "intermediate/src__cap/band_correlation");
+        assert_eq!(
+            t.data.len(),
+            bands.len(),
+            "capped band_correlation element count"
+        );
+        assert_band_correlation(&out, &src[0], &cap[0], rate);
+    }
+
+    // ---- A7/A8: Welch CSD consumers (transfer_h / coherence /
+    //      transfer_h_t tensors) ----
+
+    #[test]
+    fn a7_a8_welch_consumers_are_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let ms = stft(&src[0], cfg.stft_window, cfg.stft_hop, rate);
+        let mc = stft(&cap[0], cfg.stft_window, cfg.stft_hop, rate);
+        let w = welch(&ms, &mc);
+        let cols = ms.fft_size;
+
+        let th = tensor(&out, "intermediate/src__cap/transfer_h");
+        assert_eq!(th.shape, [2, cols as u64]);
+        assert_bits(&th.data[..cols], &w.h_re, "transfer_h re");
+        assert_bits(&th.data[cols..], &w.h_im, "transfer_h im");
+
+        let coh_t = tensor(&out, "intermediate/src__cap/coherence");
+        let coh_re: Vec<f64> = w.coh.iter().map(|v| v.0).collect();
+        let coh_im: Vec<f64> = w.coh.iter().map(|v| v.1).collect();
+        assert_eq!(coh_t.shape, [2, cols as u64]);
+        assert_bits(&coh_t.data[..cols], &coh_re, "coherence re");
+        assert_bits(&coh_t.data[cols..], &coh_im, "coherence im");
+
+        let hft_t = tensor(&out, "intermediate/src__cap/transfer_h_t");
+        let flat_hft: Vec<f64> = w.hft.iter().flatten().copied().collect();
+        assert_eq!(
+            hft_t.shape,
+            [w.hft.len() as u64, (cols / 2) as u64],
+            "transfer_h_t shape"
+        );
+        assert_bits(&hft_t.data, &flat_hft, "transfer_h_t");
+    }
+
+    // ---- A7: band_gain_m2 record `params.coherence` — the
+    //      band_gain.rs `coherence()` csd site ----
+
+    /// Oracle for band_gain.rs `coherence()` (A7 site): per-band
+    /// magnitude-squared coherence over `bands`.
+    fn band_gain_coherence_oracle(
+        x: &[f64],
+        y: &[f64],
+        rate: u32,
+        cfg: &ReferenceConfig,
+        bands: &[(f64, f64)],
+    ) -> Vec<f64> {
+        let a = stft(x, cfg.stft_window, cfg.stft_hop, rate);
+        let b = stft(y, cfg.stft_window, cfg.stft_hop, rate);
+        let frames = a.frames().min(b.frames());
+        let bins = a.fft_size;
+        let mut xx = vec![0.0; bins];
+        let mut yy = vec![0.0; bins];
+        let mut xy = vec![(0.0, 0.0); bins];
+        for f in 0..frames {
+            let cross = csd(&a.re[f], &a.im[f], &b.re[f], &b.im[f]);
+            for k in 0..bins {
+                xx[k] += a.re[f][k].powi(2) + a.im[f][k].powi(2);
+                yy[k] += b.re[f][k].powi(2) + b.im[f][k].powi(2);
+                xy[k].0 += cross[k].0;
+                xy[k].1 += cross[k].1;
+            }
+        }
+        let c = complex_coherence(&xx, &yy, &xy);
+        bands
+            .iter()
+            .map(|&(lo, hi)| {
+                let low = (lo * bins as f64 / rate as f64).ceil() as usize;
+                let high = ((hi * bins as f64 / rate as f64).ceil() as usize).min(bins / 2 + 1);
+                if frames < 2 || high <= low {
+                    0.0
+                } else {
+                    c[low..high]
+                        .iter()
+                        .map(|&(r, i)| r * r + i * i)
+                        .sum::<f64>()
+                        / (high - low) as f64
+                }
+            })
+            .collect()
+    }
+
+    #[test]
+    fn a7_band_gain_m2_coherence_params_are_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let bands = ref_bands(rate);
+        // Channel 0 pairs src.src[0] with src.cap[0] (band_gain.rs
+        // `src.src.iter().zip(&src.cap)`).
+        let oracle = band_gain_coherence_oracle(&src[0], &cap[0], rate, &cfg, &bands);
+        let recs: Vec<_> = out
+            .records
+            .iter()
+            .filter(|r| {
+                r.feature_id == "ref.band_gain_m2"
+                    && r.channels == Some(al_dataset::types::ChannelSelector::Channel(0))
+                    && r.params["polarity"] == "normal"
+            })
+            .collect();
+        assert_eq!(
+            recs.len(),
+            bands.len(),
+            "one normal-polarity m2 record per band"
+        );
+        for (i, r) in recs.iter().enumerate() {
+            assert_eq!(r.params["band_index"].as_u64().unwrap(), i as u64);
+            assert_eq!(
+                r.params["coherence"].as_f64().unwrap().to_bits(),
+                oracle[i].to_bits(),
+                "ref.band_gain_m2 params.coherence band {i}"
+            );
+        }
+    }
+
+    // ---- A7 stereo: `lr_band_coherence` tensor + record ----
+
+    #[test]
+    fn a7_lr_band_coherence_tensor_is_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let bands = ref_bands(rate);
+        // Oracle: the reference.rs `src.cap.len() >= 2` accumulation.
+        let m0 = stft(&cap[0], cfg.stft_window, cfg.stft_hop, rate);
+        let m1 = stft(&cap[1], cfg.stft_window, cfg.stft_hop, rate);
+        let fr = m0.frames().min(m1.frames());
+        assert!(fr > 0, "fixture must yield capture frames");
+        let bins = m0.fft_size;
+        let half = bins / 2;
+        let bin_hz = rate as f64 / bins as f64;
+        let mut pa = vec![0.0f64; bins];
+        let mut pb = vec![0.0f64; bins];
+        let mut pab = vec![(0.0f64, 0.0f64); bins];
+        for f in 0..fr {
+            let c = csd(&m0.re[f], &m0.im[f], &m1.re[f], &m1.im[f]);
+            for k in 0..bins {
+                pa[k] += m0.re[f][k].powi(2) + m0.im[f][k].powi(2);
+                pb[k] += m1.re[f][k].powi(2) + m1.im[f][k].powi(2);
+                pab[k].0 += c[k].0;
+                pab[k].1 += c[k].1;
+            }
+        }
+        let coh = complex_coherence(&pa, &pb, &pab);
+        let expected_rows: Vec<Vec<f64>> = bands
+            .iter()
+            .map(|&(lo, hi)| {
+                let b0 = (lo / bin_hz) as usize;
+                let b1 = ((hi / bin_hz).ceil() as usize).min(half);
+                if b1 <= b0 {
+                    return vec![0.0, 0.0];
+                }
+                let (mut re, mut im) = (0.0, 0.0);
+                for &(r, i) in &coh[b0..b1] {
+                    re += r;
+                    im += i;
+                }
+                let cnt = (b1 - b0) as f64;
+                vec![(re * re + im * im).sqrt() / cnt, im.atan2(re)]
+            })
+            .collect();
+        let flat: Vec<f64> = expected_rows.iter().flatten().copied().collect();
+        let t = tensor(&out, "intermediate/src__cap/lr_band_coherence");
+        assert_eq!(t.shape, [bands.len() as u64, 2]);
+        assert_bits(&t.data, &flat, "lr_band_coherence");
+        // ref.lr_lowband_coherence carries band_rows[0].
+        let r = record(&out, "ref.lr_lowband_coherence");
+        assert_eq!(
+            scalar(r).to_bits(),
+            expected_rows[0][0].to_bits(),
+            "ref.lr_lowband_coherence"
+        );
+        assert_eq!(
+            r.params["phase_rad"].as_f64().unwrap().to_bits(),
+            expected_rows[0][1].to_bits(),
+            "ref.lr_lowband_coherence phase_rad"
+        );
+    }
+
+    // ---- A16a: column-scan `mean_psd_*` → band_gain_psd_ratio
+    //      tensor + records + psd_ratio tensor ----
+
+    #[test]
+    fn a16a_band_gain_psd_ratio_is_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let bands = ref_bands(rate);
+        let ms = stft(&src[0], cfg.stft_window, cfg.stft_hop, rate);
+        let mc = stft(&cap[0], cfg.stft_window, cfg.stft_hop, rate);
+        let w = welch(&ms, &mc);
+        let frames = ms.frames().min(mc.frames());
+        let bins = ms.fft_size;
+        let half = bins / 2;
+        let bin_hz = rate as f64 / bins as f64;
+        // Oracle: the current column-scan mean over `take(frames)`.
+        let psd_s = ms.psd();
+        let psd_c = mc.psd();
+        let mean_psd_s: Vec<f64> = (0..bins)
+            .map(|k| psd_s.iter().take(frames).map(|r| r[k]).sum::<f64>() / frames as f64)
+            .collect();
+        let mean_psd_c: Vec<f64> = (0..bins)
+            .map(|k| psd_c.iter().take(frames).map(|r| r[k]).sum::<f64>() / frames as f64)
+            .collect();
+        let band_e_s = band_power(&mean_psd_s, rate, bins, &bands);
+        let band_e_c = band_power(&mean_psd_c, rate, bins, &bands);
+        let gains: Vec<f64> = band_e_s
+            .iter()
+            .zip(&band_e_c)
+            .map(|(&s, &c)| if s > 0.0 { (c / s).sqrt() } else { f64::NAN })
+            .collect();
+        let band_coh: Vec<f64> = bands
+            .iter()
+            .map(|&(lo, hi)| {
+                let b0 = (lo / bin_hz) as usize;
+                let b1 = ((hi / bin_hz).ceil() as usize).min(half);
+                if b1 <= b0 {
+                    return 0.0;
+                }
+                w.coh[b0..b1]
+                    .iter()
+                    .map(|(r, i)| (r * r + i * i).sqrt())
+                    .sum::<f64>()
+                    / (b1 - b0) as f64
+            })
+            .collect();
+        let centers: Vec<f64> = bands.iter().map(|b| (b.0 + b.1) / 2.0).collect();
+        let bg = tensor(&out, "intermediate/src__cap/band_gain_psd_ratio");
+        assert_eq!(bg.shape, [3, bands.len() as u64]);
+        let nb = bands.len();
+        assert_bits(&bg.data[..nb], &centers, "band_gain centers");
+        assert_bits(&bg.data[nb..2 * nb], &gains, "band_gain gains");
+        assert_bits(&bg.data[2 * nb..], &band_coh, "band_gain coherence");
+        // Per-band records carry the same gain value.
+        let recs: Vec<_> = out
+            .records
+            .iter()
+            .filter(|r| r.feature_id == "ref.band_gain_psd_ratio")
+            .collect();
+        assert_eq!(recs.len(), bands.len());
+        for (i, r) in recs.iter().enumerate() {
+            assert_eq!(
+                scalar(r).to_bits(),
+                gains[i].to_bits(),
+                "ref.band_gain_psd_ratio band {i}"
+            );
+            assert_eq!(
+                r.params["band_coherence"].as_f64().unwrap().to_bits(),
+                band_coh[i].to_bits(),
+                "band_coherence param band {i}"
+            );
+        }
+        // psd_ratio tensor: c/s or 0 on silence.
+        let psd_ratio: Vec<f64> = mean_psd_s
+            .iter()
+            .zip(&mean_psd_c)
+            .map(|(&s, &c)| if s > 0.0 { c / s } else { 0.0 })
+            .collect();
+        let pr = tensor(&out, "intermediate/src__cap/psd_ratio");
+        assert_bits(&pr.data, &psd_ratio, "psd_ratio");
+    }
+
+    // ---- A16b: `dom()` peak → `ref.harmonic_freq_ratio` ----
+
+    #[test]
+    fn a16b_harmonic_freq_ratio_is_bit_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let ms = stft(&src[0], cfg.stft_window, cfg.stft_hop, rate);
+        let mc = stft(&cap[0], cfg.stft_window, cfg.stft_hop, rate);
+        let bin_hz = rate as f64 / ms.fft_size as f64;
+        // Oracle: the current `dom` closure — `magnitude()` then a
+        // row-major mean, argmax skipping DC.
+        let dom = |m: &StftMatrix| -> f64 {
+            let mag = m.magnitude();
+            let mut mean = vec![0.0; m.fft_size / 2];
+            for row in &mag {
+                for (k, v) in mean.iter_mut().enumerate() {
+                    *v += row[k];
+                }
+            }
+            mean.iter()
+                .enumerate()
+                .skip(1)
+                .max_by(|a, b| a.1.total_cmp(b.1))
+                .map(|(b, _)| b as f64 * bin_hz)
+                .unwrap_or(0.0)
+        };
+        let (ds, dc) = (dom(&ms), dom(&mc));
+        assert!(ds > 0.0 && dc > 0.0, "fixture must yield peaks");
+        let r = record(&out, "ref.harmonic_freq_ratio");
+        assert_eq!(
+            scalar(r).to_bits(),
+            (dc / ds).to_bits(),
+            "ref.harmonic_freq_ratio"
+        );
+        assert_eq!(
+            r.params["src_hz"].as_f64().unwrap().to_bits(),
+            ds.to_bits(),
+            "src_hz param"
+        );
+        assert_eq!(
+            r.params["cap_hz"].as_f64().unwrap().to_bits(),
+            dc.to_bits(),
+            "cap_hz param"
+        );
+    }
+
+    // ---- A15: residual interleave (frame-major nested loop) ----
+
+    #[test]
+    fn a15_residual_interleave_is_element_exact() {
+        let (src, cap, rate) = pair_fixture();
+        let out = analyze(&src, &cap, rate);
+        let cfg = ReferenceConfig::default();
+        let n = src[0].len();
+        // The R0 residual is the capture as-is: its interleave is
+        // fully reconstructible as `v[i*ch + c] = cap[c][i]`.
+        let r0 = out
+            .residual_audio
+            .iter()
+            .find(|r| r.name == "src__cap/r0")
+            .expect("r0 residual audio");
+        assert_eq!(r0.channels as usize, cap.len());
+        assert_eq!(r0.samples.len(), n * cap.len());
+        let expected: Vec<f64> = (0..n)
+            .flat_map(|i| cap.iter().map(move |ch| ch[i]))
+            .collect();
+        assert_bits(&r0.samples, &expected, "r0 interleave");
+        // Every stage must use the same frame-major layout:
+        // deinterleaving must reproduce a channel-0 signal whose
+        // STFT equals the persisted `stft_re` companion tensor.
+        for res in &out.residual_audio {
+            let chans = al_locate::dsp::deinterleave(&res.samples, res.channels);
+            assert_eq!(chans.len(), res.channels as usize);
+            let rm = stft(&chans[0], cfg.stft_window, cfg.stft_hop, rate);
+            let flat_re: Vec<f64> = rm.re.iter().flatten().copied().collect();
+            let t = tensor(&out, &format!("residual/{}/stft_re", res.name));
+            assert_bits(&t.data, &flat_re, &format!("{} stft_re", res.name));
+        }
+    }
+}

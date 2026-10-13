@@ -13,7 +13,7 @@ const MIN_COHERENCE: f64 = 0.5;
 use crate::{
     records::{RecordBuilder, propagate_confidence, robust_summary},
     reference::{Aligned, ReferenceConfig, ReferenceResult, matrix_to_tensor},
-    stft::{complex_coherence, csd, stft, third_octave_bands},
+    stft::{complex_coherence, stft, third_octave_bands},
 };
 
 // 偶数標本では中央 2 値を平均する。既存 percentile summary の丸めとは分離する。
@@ -156,12 +156,13 @@ fn coherence(
     let mut yy = xx.clone();
     let mut xy = vec![(0.0, 0.0); bins];
     for f in 0..frames {
-        let cross = csd(&a.re[f], &a.im[f], &b.re[f], &b.im[f]);
         for k in 0..bins {
             xx[k] += a.re[f][k].powi(2) + a.im[f][k].powi(2);
             yy[k] += b.re[f][k].powi(2) + b.im[f][k].powi(2);
-            xy[k].0 += cross[k].0;
-            xy[k].1 += cross[k].1;
+            let (xr, xi) = (a.re[f][k], a.im[f][k]);
+            let (yr, yi) = (b.re[f][k], b.im[f][k]);
+            xy[k].0 += xr * yr + xi * yi;
+            xy[k].1 += xr * yi - xi * yr;
         }
     }
     let c = complex_coherence(&xx, &yy, &xy);

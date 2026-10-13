@@ -47,6 +47,7 @@ relations:
     - "../specs/caller-side-optimizations.md"
     - "../adr/caller-side-optimizations-structure.md"
     - "../designs/caller-side-optimizations.md"
+    - "./mechanical-caller-cleanup.md"
   verifies: []
   verified-by: []
   references: []

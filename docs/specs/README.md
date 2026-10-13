@@ -17,6 +17,7 @@ Directory: `docs/specs`
 | SPEC-034yYlu5QuhtAFuUQWBBvQ | 常時実行の低コスト特徴量 | proposed | [cheap-analysis-features.md](./cheap-analysis-features.md) |
 | SPEC-034yYlEMw8LnaoJcOc4v9z | 高コスト詳細解析 | proposed | [expensive-analysis.md](./expensive-analysis.md) |
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |
+| SPEC-034EMwMaXGBCfumSazX7zs | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
