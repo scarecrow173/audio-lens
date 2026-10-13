@@ -4,7 +4,7 @@ type: "impl"
 status: "draft"
 title: "locate argmax 同点検出: tie eps 特性計測(T1)"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -241,6 +241,39 @@ const TIE_ABS_FLOOR: f64 = 1e-11;
 - `mise exec -- cargo test -p al-math dispatch_deviation -- --
   nocapture`: 上記偏差表を出力し、偏差 < 1e-12(採用 eps の
   1/10 以下)をアサートして green
+
+## T3: spectral_envelope corr0 置換の差分記録
+
+`docs/tasks/locate-spectral-envelope-corr0.md`(TASK-034Fo9esKwwz1f702dj84C)
+に従い、`methods.rs` `SpectralEnvelope::locate` の逐次内積/ノルム
+(残存許容、TASK-034EpPesSpbjbAQBsmjvJx)を `dsp::corr0` へ置換し、
+残存許容コメントを除去した。数値差分は以下の通りほぼ等価:
+
+- ガード: 旧 `tn*sn > 0.0`(`tn=√Σx²`,`sn=√Σy²`)と
+  corr0 の `Σx² > 0.0 && Σy² > 0.0` は非負和・NaN 入力を含め
+  同値(0 ノルム・NaN いずれも 0.0 を返す)
+- 値: `dot/(√ex·√ey)` → `sxy/√(ex·ey)` は ulp 級のみ
+  (IR `al-locate-dsp-re-export-vec-migration.md` で確認済み)
+- 構造的変化: corr0 は fused 3-アキュムレータで決定的。
+  周期入力で包絡がビット一致する lag では厳密に 1.0 を返し、
+  全 visited lag が同点になる — `argmax_tie_count` が
+  `AmbiguousAlignment` へ構造的に検出するため拒否は維持される
+
+### T3 後の実測(特性計測テスト再実行)
+
+`argmax_tie_characterization` を corr0 経路へ追随させて再実行:
+
+- `pin-periodic` の `spectral_envelope` は |T|=219(厳密同点)
+  のまま — corr0 でも同点集合は不変。`full_ncc` |T|=28、
+  `band_ncc`/`gcc_phat` |T|=1 も不変
+- 受理系 fixture 全件・全メソッドで |T|=1・margin > 10×window
+  を維持(曖昧化する受理 fixture なし)
+- golden `pinned_periodic_everywhere_not_accepted_at_wrong_phase`:
+  `spectral_envelope` の merged 証拠が `ambiguous_alignment` +
+  候補保持("indistinguishable")で投票除外され、
+  `"only 1 method(s) agree (need 2); 2 method(s) excluded as
+  ambiguous"` で不受理 — 拒否が argmax 順序の ulp 依存ではなく
+  構造的検出によって固定されることを確認(完了証明)
 
 ## Open items / 留意事項
 

@@ -13,9 +13,8 @@
 //! - `band_ncc`: `InputCache::prepare` 経由の prepared bands
 //!   (`locate_prepared` と同一の帯域信号)+ `evidence_from_bands`
 //!   と同じ累積(テンプレート帯域エネルギー `MIN_ENERGY` フィルタ)
-//! - `spectral_envelope`: `methods.rs` `SpectralEnvelope::locate` の
-//!   現行逐次式(pre-T3、`methods.rs:539-547`)を複製 — `dsp::corr0`
-//!   置換後とは浮動小数点丸めが異なり得るため逐語で再現する
+//! - `spectral_envelope`: `methods.rs` `SpectralEnvelope::locate` と
+//!   同じ `dsp::corr0`(post-T3)+ 同一の hop 規則
 //!
 //! `cargo test -p al-locate --test argmax_tie_characterization --
 //! --nocapture` で計測表を出力する。
@@ -110,8 +109,9 @@ fn band_ncc_curve(
     (bands_used > 0).then_some(acc)
 }
 
-/// `SpectralEnvelope::locate` の現行逐次式(pre-T3)を逐語再現した
-/// hop 疎化曲線。`methods.rs:524-548` と同一の式・同一の hop 規則。
+/// `SpectralEnvelope::locate` の hop 疎化曲線を再現した計測用
+/// 曲線。`methods.rs` `SpectralEnvelope::locate` と同一の式
+/// (post-T3 `dsp::corr0`)・同一の hop 規則。
 fn spectral_envelope_curve(template: &[f64], signal: &[f64]) -> Vec<f64> {
     let method = SpectralEnvelope::default();
     let t_env = dsp::spectral_envelope(&normalize_gain(template), method.fft_size, method.bins);
@@ -126,11 +126,7 @@ fn spectral_envelope_curve(template: &[f64], signal: &[f64]) -> Vec<f64> {
             method.fft_size,
             method.bins,
         );
-        // pre-T3 逐次式(corr0 置換前の丸め挙動を保持するため複製)。
-        let dot: f64 = t_env.iter().zip(&s_env).map(|(a, b)| a * b).sum();
-        let tn: f64 = t_env.iter().map(|v| v * v).sum::<f64>().sqrt();
-        let sn: f64 = s_env.iter().map(|v| v * v).sum::<f64>().sqrt();
-        corr[lag] = if tn * sn > 0.0 { dot / (tn * sn) } else { 0.0 };
+        corr[lag] = dsp::corr0(&t_env, &s_env);
     }
     corr
 }
