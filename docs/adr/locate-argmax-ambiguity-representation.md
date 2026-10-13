@@ -31,7 +31,8 @@ relations:
   refined-by: []
   derives-from:
     - "../discovery/locate-consensus-argmax-ambiguity-contract.md"
-  derived-by: []
+  derived-by:
+    - "../designs/locate-consensus-argmax-ambiguity.md"
   verifies: []
   verified-by: []
   references:
