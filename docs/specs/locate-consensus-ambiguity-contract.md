@@ -18,7 +18,9 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by: []
+  implemented-by:
+    - "../designs/locate-consensus-argmax-ambiguity.md"
+    - "../plans/implement-locate-argmax-ambiguity.md"
   depends-on: []
   blocks: []
   supersedes: []
@@ -31,8 +33,15 @@ relations:
     - "../discovery/locate-consensus-argmax-ambiguity-contract.md"
   derived-by:
     - "../designs/locate-consensus-argmax-ambiguity.md"
+    - "../plans/implement-locate-argmax-ambiguity.md"
+    - "../tasks/locate-argmax-tie-eps-characterization.md"
+    - "../tasks/locate-argmax-ambiguity-detection.md"
+    - "../tasks/locate-spectral-envelope-corr0.md"
+    - "../tasks/locate-argmax-ambiguity-closeout.md"
   verifies: []
-  verified-by: []
+  verified-by:
+    - "../test-specs/locate-argmax-ambiguity.md"
+    - "../test-specs/locate-argmax-tie-eps-calibration.md"
   references:
     - "../tasks/al-locate-vec-migration.md"
     - "../impl/ir/al-locate-dsp-re-export-vec-migration.md"
