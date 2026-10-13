@@ -569,15 +569,7 @@ impl LocateMethod for SpectralEnvelope {
                 self.fft_size,
                 self.bins,
             );
-            // 残存許容(TASK-034EpPesSpbjbAQBsmjvJx): `dsp::corr0` 化すると
-            // 周期入力で各 lag が厳密に同点(≈1.0)になり、同点 argmax が
-            // 先頭 lag に移って合議の曖昧性棄却を固定する golden が破壊
-            // される(偽受理の再現)。順序が結合順に本質依存するため、
-            // 契約保持を優先して逐次式を維持する。
-            let dot: f64 = t_env.iter().zip(&s_env).map(|(a, b)| a * b).sum();
-            let tn: f64 = t_env.iter().map(|v| v * v).sum::<f64>().sqrt();
-            let sn: f64 = s_env.iter().map(|v| v * v).sum::<f64>().sqrt();
-            corr[lag] = if tn * sn > 0.0 { dot / (tn * sn) } else { 0.0 };
+            corr[lag] = dsp::corr0(&t_env, &s_env);
         }
         evidence_from_corr(self.id(), self.version(), &corr)
     }

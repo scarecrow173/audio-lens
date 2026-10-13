@@ -1,10 +1,10 @@
 ---
 id: "TASK-034Fo9esKwwz1f702dj84C"
 type: "task"
-status: "todo"
+status: "done"
 title: "spectral_envelope 逐次 NCC の dsp::corr0 移行(完了証明)"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -105,20 +105,39 @@ corr[lag] = if tn * sn > 0.0 { dot / (tn * sn) } else { 0.0 };
 
 ## Done When
 
-- [ ] `methods.rs` の spectral_envelope 逐次内積/ノルムが
+- [x] `methods.rs` の spectral_envelope 逐次内積/ノルムが
   `dsp::corr0` 呼出しに置換され、残存許容コメントが除去されている
-- [ ] `pinned_periodic_everywhere_not_accepted_at_wrong_phase` が
+- [x] `pinned_periodic_everywhere_not_accepted_at_wrong_phase` が
   corr0 下でも不受理を維持する(厳密同点 → `AmbiguousAlignment`
   検出 → 拒否。偽受理の再現なし)
-- [ ] golden 全件・`tests/locate.rs`・`tests/prepared.rs` が green
-- [ ] corr0 置換の差分(ゼロノルム扱い等)が IR に記録される
+- [x] golden 全件・`tests/locate.rs`・`tests/prepared.rs` が green
+- [x] corr0 置換の差分(ゼロノルム扱い等)が IR に記録される
 
 ## Verification
 
-- [ ] `mise exec -- cargo test -p al-locate` が green
-- [ ] `mise exec -- cargo test -p al-locate --test golden
+- [x] `mise exec -- cargo test -p al-locate` が green
+- [x] `mise exec -- cargo test -p al-locate --test golden
   pinned_periodic` が green(構造的拒否の確認)
-- [ ] `rg "残存許容|corr0" crates/al-locate/src/methods.rs` で残存
+- [x] `rg "残存許容|corr0" crates/al-locate/src/methods.rs` で残存
   許容コメントが除去され `dsp::corr0` 呼出しが存在すること
-- [ ] `mise exec -- cargo clippy --workspace --all-targets -- -D
+- [x] `mise exec -- cargo clippy --workspace --all-targets -- -D
   warnings`・`mise exec -- cargo fmt --all -- --check` が green
+
+## Implementation Note
+
+- `methods.rs` `SpectralEnvelope::locate` の hop ループ内4行
+  (残存許容コメント + 逐次 `dot`/`tn`/`sn` 計算)を
+  `corr[lag] = dsp::corr0(&t_env, &s_env);` 1行へ置換。
+  ガード同値性(0 ノルム・NaN → 0.0)は corr0 の契約と一致し、
+  値差は `√ex·√ey` vs `√(ex·ey)` の ulp 級のみ
+- `tests/argmax_tie_characterization.rs` の envelope 曲線生成を
+  production と同じ `dsp::corr0` へ追随(pre-T3 逐次式の複製を
+  解消)。同点構造は不変で pin 値の更新は不要:
+  `pin-periodic` の spectral_envelope |T|=219(厳密同点)、
+  full_ncc |T|=28、受理系 fixture は全件 |T|=1 を維持
+- corr0 下で `pin-periodic` の spectral_envelope merged 証拠は
+  `ambiguous_alignment` + 候補保持となり、合議は
+  `"only 1 method(s) agree (need 2); 2 method(s) excluded as
+  ambiguous"` で不受理 — 拒否が構造的検出に固定された
+- 差分記録は `docs/impl/ir/locate-argmax-tie-eps-calibration.md`
+  の「T3: spectral_envelope corr0 置換の差分記録」節へ追記
