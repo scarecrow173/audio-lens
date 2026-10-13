@@ -1,7 +1,7 @@
 ---
 id: "IMPL-034FoT1CalibrateWindowEps"
 type: "impl"
-status: "draft"
+status: "completed"
 title: "locate argmax 同点検出: tie eps 特性計測(T1)"
 created: "2026-10-13"
 updated: "2026-10-14"
