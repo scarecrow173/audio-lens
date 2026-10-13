@@ -4,7 +4,7 @@ type: "task"
 status: "done"
 title: "al-locate: dsp re-export と vec プリミティブ移行"
 created: "2026-10-12"
-updated: "2026-10-12"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -72,7 +72,12 @@ per-source `sub_scaled` 化・列 gather dot の解消)は本タスクの
     `corr0` 置換は周期入力で全 lag 厳密 1.0 となり argmax
     タイブレークが lag 0 に倒れ、golden
     `pinned_periodic_everywhere_not_accepted_at_wrong_phase`
-    の曖昧ケース非受理契約を破る(IMPL-034EqrFgTWTPu16W3CuG6r)
+    の曖昧ケース非受理契約を破る(IMPL-034EqrFgTWTPu16W3CuG6r)。
+    **解消済み(2026-10-14)**: `argmax_tie_count` による構造的
+    曖昧検出(#59・T2)の定着後、T3
+    (`docs/tasks/locate-spectral-envelope-corr0.md`)で `dsp::corr0`
+    へ置換完了。拒否は厳密同点 → `AmbiguousAlignment` → 投票除外
+    の構造的経路で維持されている
 - `crates/al-locate/src/mixer.rs`: `:74` のインライン `rms` →
   `dsp::rms(cap)`
 - `crates/al-locate/src/residual.rs`: `:133` の `&[Vec<f64>]`

@@ -312,9 +312,14 @@ AC の assertion 粒度は、特に断りのない限り結果レベル
   ≥2 件かつ全位置が周期の整数倍として観測可能である。かつ同
   fixture の判定が実行間および CPU dispatch(scalar / SIMD)間で
   決定的である
-- [ ] **証拠レベル pin**: 周期 fixture では全4メソッドの merged
-  証拠が `AmbiguousAlignment` とマークされ、かつ `candidates` が
-  保持されていること
+- [ ] **証拠レベル pin**: 周期 fixture で厳密同点を持つメソッド
+  (実測では full_ncc と spectral_envelope)の merged 証拠が
+  `AmbiguousAlignment` とマークされ、かつ `candidates` が保持
+  されていること。厳密同点を持たないメソッド(band_ncc・
+  gcc_phat — 帯域エッジ過渡・位相白色化で厳密周期が崩れる、
+  T1 実測で確定)は非曖昧のまま投票に参加し、合意不足で拒否に
+  寄与する混在機構を意図する(2026-10-14 実測により
+  「全4メソッド曖昧」の想定から修正)
 - [ ] 非周期埋め込み対照(`pin-periodic-control`)が正しい位置で
   受理される(golden 既存 tolerance 64)
 - [ ] `case_repeated_source`、`case_loop_material`、およびその他の

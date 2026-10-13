@@ -1,7 +1,7 @@
 ---
 id: "DISC-034Fl0OeHprFoFHitMqBid"
 type: "discovery"
-status: "active"
+status: "resolved"
 title: "Locate consensus argmax ambiguity contract"
 created: "2026-10-13"
 updated: "2026-10-14"

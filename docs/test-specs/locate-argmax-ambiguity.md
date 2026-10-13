@@ -4,7 +4,7 @@ type: "test-spec"
 status: "draft"
 title: "locate 合議 argmax 曖昧性契約の検証"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -135,10 +135,15 @@ locate の4メソッド証拠と合議が、raw 相関曲線上の argmax 同点
 ### Rule D: golden / 永続化の pin
 
 - Rule: `pin-periodic` fixture は受理されず結果
-  `validity == "ambiguous_alignment"`、全4メソッドの merged 証拠が
-  `AmbiguousAlignment` + 候補保持、full_ncc の `candidates` ≥2
-  かつ全位置が周期(1024)の整数倍として観測可能。判定は実行間
-  および CPU dispatch(scalar / SIMD)間で決定的
+  `validity == "ambiguous_alignment"`。厳密同点を持つ
+  full_ncc / spectral_envelope の merged 証拠は
+  `AmbiguousAlignment` + 候補保持で、full_ncc の `candidates` ≥2
+  かつ全位置が周期(1024)の整数倍として観測可能。
+  band_ncc / gcc_phat は厳密同点を持たず(帯域エッジ過渡・
+  位相白色化で厳密周期が崩れる、T1 実測)非曖昧のまま — 拒否は
+  「曖昧証拠の投票除外 + 非曖昧票の合意不足」の混在機構で成立
+  する。判定は実行間および CPU dispatch(scalar / SIMD)間で
+  決定的
 - Rule: `pin-periodic-control` は正しい位置で受理(既存
   tolerance 64)。`case_repeated_source`・`case_loop_material`
   ほか受理系 golden は全て受理を維持し、受理系では全メソッドの

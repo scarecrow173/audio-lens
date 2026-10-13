@@ -559,10 +559,13 @@ spec Req 6-7 に従い、`rel_eps`/`abs_floor` の実現可能レンジを実装
   al-math 内 characterization test の実運用サイズ dispatch 偏差実測
   から `rel_eps`/`abs_floor` の最終値が実測記録と共に確定されている
 - [ ] `pin-periodic` が受理されず `validity == "ambiguous_alignment"`、
-  全4メソッドの merged 証拠が `AmbiguousAlignment` + `candidates`
-  保持 + `reject_reason` が "indistinguishable" を含む。full_ncc
-  候補 ≥2 かつ全位置が周期倍数として観測可能。判定が実行間・
-  dispatch 間で決定的
+  厳密同点を持つメソッド(実測: full_ncc / spectral_envelope)の
+  merged 証拠が `AmbiguousAlignment` + `candidates` 保持 +
+  `reject_reason` が "indistinguishable" を含む。full_ncc
+  候補 ≥2 かつ全位置が周期倍数として観測可能。band_ncc /
+  gcc_phat は厳密同点を持たず非曖昧のまま合意不足へ寄与する
+  混在機構(T1 実測で「全4メソッド曖昧」の想定から修正)。
+  判定が実行間・dispatch 間で決定的
 - [ ] `pin-periodic-control` が tolerance 64 で受理を維持し、
   `case_repeated_source`/`case_loop_material` ほか受理系 golden で
   全メソッドの merged 証拠が非曖昧のまま受理される(false positive

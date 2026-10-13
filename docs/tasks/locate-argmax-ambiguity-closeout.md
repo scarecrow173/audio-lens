@@ -1,10 +1,10 @@
 ---
 id: "TASK-034Fo9fbMBjYA189SBNMGL"
 type: "task"
-status: "todo"
+status: "done"
 title: "argmax 曖昧性: 回帰計測・Implementation Record・closeout"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []

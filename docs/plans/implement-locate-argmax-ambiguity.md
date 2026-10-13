@@ -1,10 +1,10 @@
 ---
 id: "PLAN-034Fo8JsxsjegvrZWwahTO"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "locate 合議 argmax 曖昧性検出の実装"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source:
@@ -240,7 +240,7 @@ eps 確定値・意図的契約変更の記録)、関連 doc 更新、最終 wor
 | spec AC / 設計検証(要旨) | 検証方法 | 担当 |
 |---|---|---|
 | T1 計測が実装に先行し `rel_eps`/`abs_floor` が実測記録と共に確定 | 特性計測テスト追加 + IR 実測転記 + git 履歴(計測が実装に先行) | T1 |
-| pin-periodic が不受理・`validity == "ambiguous_alignment"`・全4メソッド merged 証拠が `AmbiguousAlignment`+候補保持・full_ncc 候補 ≥2 かつ周期倍数・実行間/dispatch 間で決定的 | `cargo test -p al-locate --test golden` + 証拠レベル pin | T2 |
+| pin-periodic が不受理・`validity == "ambiguous_alignment"`・厳密同点メソッド(full_ncc / spectral_envelope)の merged 証拠が `AmbiguousAlignment`+候補保持・full_ncc 候補 ≥2 かつ周期倍数・実行間/dispatch 間で決定的(「全4メソッド曖昧」の当初想定は T1 実測で混在機構へ修正 — band_ncc/gcc_phat は非曖昧で合意不足) | `cargo test -p al-locate --test golden` + 証拠レベル pin | T2 |
 | pin-periodic-control が tolerance 64 で受理、repeated/loop ほか受理系 golden が受理維持・全メソッド merged 非曖昧(false positive なし) | golden 全件 + merged 証拠 pin | T2 |
 | `pinned_low_coherence_no_inflated_lag` が不受理・`agreeing_methods < 2` 維持 | 既存 golden | T2 |
 | ユニットテスト: 厳密同点・近同点・平坦 plateau が曖昧+候補保持、単一候補・意味ある分離・幅広平坦頭部の単峰が非曖昧、全証拠曖昧で合議 `AmbiguousAlignment`(LowCorrelation/InsufficientSupport に落ちない)、符号 ±1.0 同点が曖昧 | `cargo test -p al-locate` モジュール内テスト | T2 |
