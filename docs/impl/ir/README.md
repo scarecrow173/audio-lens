@@ -50,6 +50,13 @@ Directory: `docs/impl/ir`
 | locate-skeleton-dsp | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
 | locate-stage-cli | [locate-stage-cli.md](./locate-stage-cli.md) |
 | locate-tracking | [locate-tracking.md](./locate-tracking.md) |
+| mech-cleanup-a15-interleave-block-writes | [mech-cleanup-a15-interleave-block-writes.md](./mech-cleanup-a15-interleave-block-writes.md) |
+| mech-cleanup-a16-row-major-fast-paths | [mech-cleanup-a16-row-major-fast-paths.md](./mech-cleanup-a16-row-major-fast-paths.md) |
+| mech-cleanup-a6-bandpass-batching | [mech-cleanup-a6-bandpass-batching.md](./mech-cleanup-a6-bandpass-batching.md) |
+| mech-cleanup-a7-a8-csd-inlining | [mech-cleanup-a7-a8-csd-inlining.md](./mech-cleanup-a7-a8-csd-inlining.md) |
+| mech-cleanup-a9-a12-cheap-pass-consolidation | [mech-cleanup-a9-a12-cheap-pass-consolidation.md](./mech-cleanup-a9-a12-cheap-pass-consolidation.md) |
+| mech-cleanup-bench-baseline-characterization | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
+| mech-cleanup-measurement-ir-closeout | [mech-cleanup-measurement-ir-closeout.md](./mech-cleanup-measurement-ir-closeout.md) |
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
 | observability-cli-wiring | [observability-cli-wiring.md](./observability-cli-wiring.md) |
 | observability-crate | [observability-crate.md](./observability-crate.md) |

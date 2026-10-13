@@ -164,11 +164,17 @@ pub fn prepare_input(
             .parent()
             .ok_or_else(|| bad("PCM path has no parent"))?,
     )?;
-    let mut bytes = Vec::new();
+    // Frame-major interleave staged through one reusable row
+    // buffer: one `extend_from_slice` per frame instead of one
+    // 8-byte extend per sample.
+    let ch = channels.len();
+    let mut bytes = Vec::with_capacity(params.frames as usize * ch * 8);
+    let mut row = vec![0u8; ch * 8];
     for frame in 0..params.frames as usize {
-        for channel in &channels {
-            bytes.extend_from_slice(&channel[frame].to_le_bytes());
+        for (c, channel) in channels.iter().enumerate() {
+            row[c * 8..c * 8 + 8].copy_from_slice(&channel[frame].to_le_bytes());
         }
+        bytes.extend_from_slice(&row);
     }
     al_job::fsutil::write_durable(&absolute, &bytes)?;
     let record = ArtifactRecord {

@@ -30,6 +30,7 @@ relations:
   superseded-by: []
   related:
     - "../adr/caller-side-optimizations-structure.md"
+    - "./mechanical-caller-cleanup.md"
   refines: []
   refined-by: []
   derives-from:

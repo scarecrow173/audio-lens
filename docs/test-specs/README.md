@@ -19,6 +19,7 @@ Directory: `docs/test-specs`
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
 | TSPEC-034z8k5ftvcMaUeWq1L4D4 | locate-method-consensus | proposed | [locate-method-consensus.md](./locate-method-consensus.md) |
 | TSPEC-034z8k5JiNwiAsnNVpk7vn | locate-tracking-residual | proposed | [locate-tracking-residual.md](./locate-tracking-residual.md) |
+| TSPEC-034EO3X1gkbTna1zfQoEG8 | 機械的 caller クリーンアップ検証仕様 | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | TSPEC-035jRegcnGwUqH1RD6oUtJ | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | proposed | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
