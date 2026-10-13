@@ -14,6 +14,7 @@ Directory: `docs/discovery`
 | DISC-034yYFlTHXyXnjrEm19mGq | AudioLens 要件取りまとめ | resolved | [initial-requirements-consolidation.md](./initial-requirements-consolidation.md) |
 | DISC-034EMosQizFcChc9KKeaWS | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・アロケーション削減 (A6-A16) | active | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | DISC-034EdbeKlegRxkqHB283iU | observability foundation: tracing 基盤と stage 計時 | active | [observability-foundation-logging-and-profiling.md](./observability-foundation-logging-and-profiling.md) |
+| DISC-034FcymLiMavdGUpbV1oTT | 残余 issue ロードマップ分析: 13 open issue の優先度・依存順序・フェーズ構造 | active | [remaining-issues-roadmap.md](./remaining-issues-roadmap.md) |
 | DISC-8QyfdU1NnGhLDa1c1oqzf2 | spectral_envelope の fft_size 契約と silent 置き換え問題 | resolved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | DISC-034AajDKh03yeDOK42xdhe | 検証 fixture マトリクスのギャップ | resolved | [validation-fixture-gaps.md](./validation-fixture-gaps.md) |
 | DISC-034AajwySUrLTGaPkqCqe8 | 映像フレーム特徴と A/V 同期のギャップ | resolved | [video-av-feature-gaps.md](./video-av-feature-gaps.md) |
