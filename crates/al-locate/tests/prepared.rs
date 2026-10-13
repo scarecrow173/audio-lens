@@ -1,6 +1,7 @@
 //! 入力準備の再利用と、区間・版・レートによる分離。
 use std::sync::Arc;
 
+use al_core::Validity;
 use al_locate::methods::{BandNcc, FullNcc, LocateMethod, propose_coarse_to_fine};
 use al_locate::prepared::InputCache;
 
@@ -73,6 +74,10 @@ fn prepared_methods_keep_all_global_evidence_exactly() {
     let trace = propose_coarse_to_fine(&template, &signal, rate, &t, &s).unwrap();
     let (evidence, actual_trace) = FullNcc.locate_coarse_to_fine(&template, &signal, rate, &t, &s);
     assert_eq!(evidence, FullNcc.locate(&template, &signal, rate));
+    // `template` / `-template` の2出現で |corr| が厳密同点となるため、
+    // 証拠は AmbiguousAlignment + 候補保持となる(意味論シフト)。
+    assert_eq!(evidence.validity, Validity::AmbiguousAlignment);
+    assert!(evidence.candidates.len() >= 2);
     assert_eq!(
         actual_trace.unwrap().refined_positions,
         trace.refined_positions
@@ -132,7 +137,7 @@ fn coarse_fallback_preserves_periodic_broad_and_threshold_adjacent_evidence() {
                     signal.len() as u64,
                     &config,
                     "test",
-                    "1",
+                    "2",
                 )
             };
             assert_eq!(evaluate(actual).accepted, evaluate(expected).accepted);
