@@ -1,7 +1,7 @@
 ---
 id: "TASK-034Fo9cS08WsbNrLoq6t6a"
 type: "task"
-status: "todo"
+status: "done"
 title: "argmax 同点検出: 受理系 fixture マージンと scalar↔dispatch 偏差の特性計測"
 created: "2026-10-13"
 updated: "2026-10-13"
@@ -17,7 +17,8 @@ relations:
     generated: []
   implements:
     - "docs/plans/implement-locate-argmax-ambiguity.md"
-  implemented-by: []
+  implemented-by:
+    - "docs/impl/ir/locate-argmax-tie-eps-calibration.md"
   depends-on:
     - "docs/plans/implement-locate-argmax-ambiguity.md"
   blocks:
