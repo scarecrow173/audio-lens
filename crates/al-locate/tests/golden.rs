@@ -197,6 +197,20 @@ fn assert_not_accepted(body: &serde_json::Value) {
     );
 }
 
+/// 受理系 fixture では全メソッドの merged 証拠が非曖昧でなければ
+/// ならない(曖昧性の false positive なし — spec AC)。`result` は
+/// `result.json` の result ノードまたは residual 子結果。
+fn assert_no_ambiguous_merged_evidence(result: &serde_json::Value) {
+    for e in result["evidence"].as_array().unwrap() {
+        assert_ne!(
+            e["validity"].as_str().unwrap(),
+            "ambiguous_alignment",
+            "{}: accepted result carries ambiguous merged evidence",
+            e["method"]
+        );
+    }
+}
+
 fn noise_source(len: usize, seed: u64) -> Vec<f64> {
     signal::noise(len, seed, 1.0)
 }
@@ -224,6 +238,7 @@ fn case_exact_insert() {
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 9_600, 64);
     assert!(body["result"]["agreeing_methods"].as_u64().unwrap() >= 3);
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== ゲイン変更された挿入 ====
@@ -240,6 +255,7 @@ fn case_gain_insert() {
         .as_f64()
         .expect("mixer matrix");
     expect_close("mixer gain", 0.4, m, Tolerance::abs(0.1));
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== EQ フィルタ済み挿入 ====
@@ -254,6 +270,7 @@ fn case_eq_filtered_insert() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 8_000, 64);
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 無音境界 ====
@@ -270,6 +287,7 @@ fn case_silence_boundary() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, 25_000, 64);
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 強周期信号(偽ピークを持つ素材)====
@@ -289,6 +307,7 @@ fn case_periodic_source_locates_at_phase_consistent_position() {
     run_locate(&fx);
     let body = result_json(&fx, 0, 0);
     assert_accepted_at(&body, embed_at as u64, 64);
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== ループ素材 ====
@@ -323,6 +342,7 @@ fn case_loop_material() {
     // loop_occurrences に全パスが残る
     let tm = time_map_json(&fx, 0, 0);
     assert_eq!(tm["loop_occurrences"].as_array().unwrap().len(), 3);
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 複数の正当な出現 ====
@@ -355,6 +375,7 @@ fn case_repeated_source() {
     for (got, expected) in all.iter().zip([5_000u64, 18_000, 33_000]) {
         expect_close_u64("occurrence position", expected, *got, 64);
     }
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 一定オフセットの長尺ソース ====
@@ -386,6 +407,7 @@ fn case_long_source_constant_offset() {
         let c = a["capture"].as_u64().unwrap();
         expect_close_u64("anchor offset", s + embed_at as u64, c, 96);
     }
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 線形ドリフトの長尺ソース ====
@@ -428,6 +450,7 @@ fn case_long_source_linear_drift() {
         drifts[0],
         Tolerance::abs_rel(0.002, 0.005),
     );
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== スキップ + 再開 ====
@@ -457,6 +480,7 @@ fn case_skip_and_resume() {
         kinds.contains(&"skip"),
         "expected skip segment in {kinds:?} ({tm})"
     );
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== マルチチャンネルダウンミックス ====
@@ -483,6 +507,7 @@ fn case_multichannel_downmix() {
     let m10 = matrix[1][0].as_f64().unwrap();
     expect_close("mixer L", 0.6, m00, Tolerance::abs(0.15));
     expect_close("mixer R", -0.4, m10, Tolerance::abs(0.15));
+    assert_no_ambiguous_merged_evidence(&body["result"]);
 }
 
 // ==== 支配的 BGM に覆われた静かな素材 ====
@@ -526,6 +551,7 @@ fn case_bgm_residual_search() {
         "bgm result: {}",
         bgm_body["result"]
     );
+    assert_no_ambiguous_merged_evidence(&bgm_body["result"]);
     // 直接検索では quiet は埋もれて受理されない
     let quiet_direct = result_json(&fx, 1, 0);
     assert_not_accepted(&quiet_direct);
@@ -541,6 +567,7 @@ fn case_bgm_residual_search() {
         "residual child: {}",
         residual["child"]
     );
+    assert_no_ambiguous_merged_evidence(&residual["child"]);
     expect_close_u64(
         "residual position",
         embed_at as u64,
@@ -615,18 +642,46 @@ fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
     let result = &body["result"];
     assert_not_accepted(&body);
     assert_eq!(result["validity"], "ambiguous_alignment");
-    assert!(
-        result["reject_reason"]
-            .as_str()
-            .unwrap()
-            .contains("method(s) agree")
+    // 混在機構の pin: 曖昧証拠2件が投票除外され、非曖昧の
+    // band_ncc / gcc_phat の argmax は散乱して合意不足で拒否される。
+    assert_eq!(
+        result["reject_reason"].as_str().unwrap(),
+        "only 1 method(s) agree (need 2); 2 method(s) excluded as ambiguous"
     );
-    let full_ncc = result["evidence"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|e| e["method"] == "full_ncc")
-        .unwrap();
+    let evidence = result["evidence"].as_array().unwrap();
+    let evidence_of = |method: &str| {
+        evidence
+            .iter()
+            .find(|e| e["method"] == method)
+            .unwrap_or_else(|| panic!("missing {method} evidence"))
+    };
+    // 構造的同点を持つ full_ncc / spectral_envelope の merged 証拠は
+    // 曖昧 + 候補保持。帯域エッジ・位相白色化で厳密周期が崩れる
+    // band_ncc / gcc_phat は非曖昧のまま(T1 実測の混在構造)。
+    for method in ["full_ncc", "spectral_envelope"] {
+        let e = evidence_of(method);
+        assert_eq!(e["validity"], "ambiguous_alignment", "{method}");
+        assert!(
+            e["candidates"].as_array().unwrap().len() >= 2,
+            "{method}: tied peaks must remain observable"
+        );
+        assert!(
+            e["reject_reason"]
+                .as_str()
+                .unwrap()
+                .contains("indistinguishable"),
+            "{method}: {}",
+            e["reject_reason"]
+        );
+    }
+    for method in ["band_ncc", "gcc_phat"] {
+        assert_ne!(
+            evidence_of(method)["validity"].as_str().unwrap(),
+            "ambiguous_alignment",
+            "{method}: merged evidence must stay non-ambiguous"
+        );
+    }
+    let full_ncc = evidence_of("full_ncc");
     let candidates = full_ncc["candidates"].as_array().unwrap();
     assert!(
         candidates.len() >= 2,
@@ -651,7 +706,9 @@ fn pinned_periodic_everywhere_not_accepted_at_wrong_phase() {
         serde_json::json!({}),
     );
     run_locate(&control_fx);
-    assert_accepted_at(&result_json(&control_fx, 0, 0), 6_000, 64);
+    let control_body = result_json(&control_fx, 0, 0);
+    assert_accepted_at(&control_body, 6_000, 64);
+    assert_no_ambiguous_merged_evidence(&control_body["result"]);
 }
 
 // ==== ピン留め: 低コヒーレンス時の optimal-lag 過大推定 ====

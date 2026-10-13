@@ -20,7 +20,9 @@ use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
 use crate::decode::{DecodedInput, decode_input};
 use crate::dsp::ncc;
-use crate::methods::{CoarseSearch, FullNcc, default_methods, peaks_from_correlation};
+use crate::methods::{
+    CoarseSearch, FullNcc, argmax_tie_count, default_methods, peaks_from_correlation,
+};
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
 use crate::prepared::{InputCache, PreparedChannel};
@@ -169,7 +171,7 @@ impl LocateStage {
             reject_reason: Some(reason.into()),
             accepted: false,
             algorithm_id: "locate-consensus".into(),
-            algorithm_version: "1".into(),
+            algorithm_version: "2".into(),
             params: serde_json::to_value(&self.config).unwrap_or_default(),
         }
     }
@@ -242,6 +244,11 @@ impl LocateStage {
             let template = &src_ch[w_off..w_off + window];
             for cap_ch in &capture.channel_samples {
                 let corr = ncc(template, &cap_ch[lo..hi], hi - lo - window);
+                // 同点のウィンドウマッチは位置の証拠ではない —
+                // ペア単位でアンカーに寄与させない。
+                if argmax_tie_count(&corr) >= 2 {
+                    continue;
+                }
                 if let Some(c) = peaks_from_correlation(&corr, 1).into_iter().next()
                     && best.as_ref().is_none_or(|b| c.score > b.score)
                 {
@@ -447,13 +454,20 @@ fn run_method_tasks(tasks: &[MethodTask<'_>]) -> Vec<MethodOutput> {
 
 /// Keep, per method, the evidence of the strongest channel pair.
 /// `pairs` must be grouped by method (see [`LocateStage::locate_channels`]).
+/// 非曖昧の証拠は曖昧な証拠より先頭スコアに依らず優先される —
+/// merged が曖昧となるのは全ペアが曖昧の場合に限る。
 fn merged_votes(pairs: &[PairEvidence]) -> Vec<MethodEvidence> {
-    let top = |e: &MethodEvidence| e.candidates.first().map(|c| c.score).unwrap_or(0.0);
+    let key = |e: &MethodEvidence| {
+        (
+            e.validity != Validity::AmbiguousAlignment,
+            e.candidates.first().map(|c| c.score).unwrap_or(0.0),
+        )
+    };
     let mut merged: Vec<MethodEvidence> = Vec::new();
     for pair in pairs {
         match merged.last_mut() {
             Some(m) if m.method == pair.evidence.method => {
-                if top(&pair.evidence) > top(m) {
+                if key(&pair.evidence) > key(m) {
                     *m = pair.evidence.clone();
                 }
             }
@@ -668,7 +682,7 @@ impl Stage for LocateStage {
                     capture_len,
                     &self.config.consensus,
                     "locate-consensus",
-                    "1",
+                    "2",
                 );
 
                 prepared_sources[src_index]
@@ -1034,7 +1048,7 @@ impl Stage for LocateStage {
                         capture_len,
                         &self.config.consensus,
                         "locate-consensus",
-                        "1",
+                        "2",
                     );
                     child_result.params["coarse_search"] = serde_json::to_value(
                         pairs

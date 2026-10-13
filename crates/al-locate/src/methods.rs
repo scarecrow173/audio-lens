@@ -18,6 +18,21 @@ const MIN_ENERGY: f64 = 1e-9;
 const MIN_PEAK_TO_BACKGROUND: f64 = 2.0;
 /// Maximum candidates reported per method.
 const MAX_CANDIDATES: usize = 8;
+/// 同点とみなす相対イプシロン。T1 特性計測で較正(dispatch 間偏差
+/// ~1e-15 から十分上、受理系最小マージン 1.65e-8 から十分下)。
+const TIE_REL_EPS: f64 = 1e-11;
+/// スコア 0 近傍で判定が発散しないための絶対床。
+const TIE_ABS_FLOOR: f64 = 1e-11;
+
+/// Rank-1 anchored の同点集合 |T| を返す。
+/// T = { i : |corr[i]| >= M - tie_window },
+/// tie_window = max(TIE_REL_EPS * M, TIE_ABS_FLOOR)、M = max_i |corr[i]|
+/// |T| はサンプル(index)数 — 連続する等値 plateau は潰さない。
+pub(crate) fn argmax_tie_count(corr: &[f64]) -> usize {
+    let m = corr.iter().map(|v| v.abs()).fold(0.0_f64, f64::max);
+    let window = (TIE_REL_EPS * m).max(TIE_ABS_FLOOR);
+    corr.iter().filter(|v| v.abs() >= m - window).count()
+}
 
 /// 粗候補と原レート近傍精密化の実行記録。合議用の証拠ではない。
 #[derive(Debug, Clone, serde::Serialize)]
@@ -278,13 +293,31 @@ fn evidence_from_corr(method: &'static str, version: &'static str, corr: &[f64])
                 reject_reason: Some("peak-to-background below threshold".into()),
             }
         }
-        Some(_) => MethodEvidence {
-            method: method.into(),
-            method_version: version.into(),
-            candidates,
-            validity: Validity::Valid,
-            reject_reason: None,
-        },
+        // Valid 相当の証拠にのみ曖昧性を判定する。raw 曲線の argmax
+        // が一意でない(同点集合が2サンプル以上)なら、順位の偶然に
+        // 依る受理を許さず曖昧としてマークする。候補列は保持する。
+        Some(_) => {
+            let tied = argmax_tie_count(corr);
+            if tied >= 2 {
+                MethodEvidence {
+                    method: method.into(),
+                    method_version: version.into(),
+                    candidates,
+                    validity: Validity::AmbiguousAlignment,
+                    reject_reason: Some(format!(
+                        "top correlation peaks indistinguishable within tolerance ({tied} positions)"
+                    )),
+                }
+            } else {
+                MethodEvidence {
+                    method: method.into(),
+                    method_version: version.into(),
+                    candidates,
+                    validity: Validity::Valid,
+                    reject_reason: None,
+                }
+            }
+        }
     }
 }
 
@@ -325,7 +358,7 @@ impl LocateMethod for FullNcc {
         "full_ncc"
     }
     fn version(&self) -> &'static str {
-        "1"
+        "2"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
         let span = tracing::info_span!(
@@ -381,7 +414,7 @@ impl LocateMethod for BandNcc {
         "band_ncc"
     }
     fn version(&self) -> &'static str {
-        "1"
+        "2"
     }
     fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence {
         let span = tracing::info_span!(
@@ -454,7 +487,7 @@ impl LocateMethod for GccPhat {
         "gcc_phat"
     }
     fn version(&self) -> &'static str {
-        "1"
+        "2"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
         let span = tracing::info_span!(
@@ -508,7 +541,7 @@ impl LocateMethod for SpectralEnvelope {
         "spectral_envelope"
     }
     fn version(&self) -> &'static str {
-        "1"
+        "2"
     }
     fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
         let span = tracing::info_span!(
@@ -653,5 +686,103 @@ mod tests {
         }
         let ev = SpectralEnvelope::default().locate(&template, &signal, 48000);
         assert!(ev.validity == Validity::Valid || !ev.candidates.is_empty());
+    }
+
+    #[test]
+    fn exact_and_near_ties_mark_evidence_ambiguous_with_candidates_kept() {
+        // 分離した厳密同点ピーク: argmax が一意でない。
+        let mut corr = vec![0.05; 64];
+        corr[10] = 0.9;
+        corr[40] = 0.9;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::AmbiguousAlignment);
+        assert!(
+            ev.candidates.len() >= 2,
+            "tied peaks stay observable: {:?}",
+            ev.candidates
+        );
+        assert!(
+            ev.reject_reason
+                .as_deref()
+                .unwrap()
+                .contains("indistinguishable")
+        );
+
+        // eps 窓内の近同点も同じく曖昧。
+        let mut corr = vec![0.05; 64];
+        corr[10] = 0.9;
+        corr[40] = 0.9 - 5e-12;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::AmbiguousAlignment);
+    }
+
+    #[test]
+    fn flat_plateau_is_ambiguous() {
+        // 等値 plateau は is_peak が末尾1点に潰すが、raw 曲線では
+        // plateau 内のどのサンプルも argmax 足り得るため曖昧。
+        let mut corr = vec![0.02; 64];
+        corr[30] = 0.95;
+        corr[31] = 0.95;
+        corr[32] = 0.95;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::AmbiguousAlignment);
+        assert!(!ev.candidates.is_empty());
+    }
+
+    #[test]
+    fn signed_magnitude_tie_is_ambiguous() {
+        // +peak / −peak(極性反転出現)は大きさで同点 → 曖昧。
+        let mut corr = vec![0.05; 64];
+        corr[10] = 0.9;
+        corr[40] = -0.9;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::AmbiguousAlignment);
+    }
+
+    #[test]
+    fn wide_flat_topped_single_peak_is_not_ambiguous() {
+        // 競合する別位置を持たない単峰曲線: 頂部が広く浅くても、
+        // 肩の差が tie_window を超える限り argmax は一意。
+        let mut corr = vec![0.02; 128];
+        for k in 1..=8usize {
+            corr[64 - k] = 0.9 - 1e-4 * k as f64;
+            corr[64 + k] = 0.9 - 1e-4 * k as f64;
+        }
+        corr[64] = 0.9;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::Valid);
+    }
+
+    #[test]
+    fn separated_or_below_window_peaks_are_not_ambiguous() {
+        // 窓直下の第二ピークも、意味ある分離を持つ第二ピークも非曖昧。
+        let mut corr = vec![0.05; 64];
+        corr[10] = 0.9;
+        corr[40] = 0.9 - 1e-9;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::Valid);
+
+        let mut corr = vec![0.05; 64];
+        corr[10] = 0.9;
+        corr[40] = 0.4;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::Valid);
+
+        // 単一候補のみの曲線も非曖昧。
+        let mut corr = vec![0.05; 64];
+        corr[30] = 0.9;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::Valid);
+    }
+
+    #[test]
+    fn tied_but_weak_peaks_stay_low_correlation() {
+        // 曖昧判定は既存 reject 分岐の後: p2b 不足で棄却済みの曲線は
+        // 同点でも LowCorrelation のまま(曖昧へ格上げしない)。
+        let mut corr = vec![0.5; 64];
+        corr[10] = 0.6;
+        corr[40] = 0.6;
+        let ev = evidence_from_corr("test", "2", &corr);
+        assert_eq!(ev.validity, Validity::LowCorrelation);
     }
 }

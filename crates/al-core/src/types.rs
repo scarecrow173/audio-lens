@@ -77,7 +77,9 @@ pub enum Validity {
     LowCorrelation,
     /// Coherence is too low to trust the measurement.
     LowCoherence,
-    /// The alignment underpinning the measurement is ambiguous.
+    /// The alignment underpinning the measurement is ambiguous —
+    /// 合議結果だけでなく、argmax が一意でないメソッド証拠の
+    /// マークにも用いる。
     AmbiguousAlignment,
     /// The requested frequency range is outside what is supported.
     OutOfSupportedFrequencyRange,

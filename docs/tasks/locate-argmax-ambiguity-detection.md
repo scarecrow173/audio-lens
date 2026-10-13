@@ -1,10 +1,10 @@
 ---
 id: "TASK-034Fo9dDtnY4bqipAEqfDV"
 type: "task"
-status: "todo"
+status: "done"
 title: "argmax 曖昧性検出の実装: evidence 分岐・投票除外・merged_votes/best_window_match・バージョン"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -190,34 +190,51 @@ golden/prepared 追随)。T1 で確定した `TIE_REL_EPS`/
 
 ## Done When
 
-- [ ] `argmax_tie_count` がサンプル数計数・`|corr|` 大きさ基準・
+- [x] `argmax_tie_count` がサンプル数計数・`|corr|` 大きさ基準・
   rank-1 anchored で実装され、`evidence_from_corr` の曖昧分岐が
   既存 reject 分岐の後に評価される
-- [ ] 曖昧証拠が `AmbiguousAlignment` + 候補保持 +
+- [x] 曖昧証拠が `AmbiguousAlignment` + 候補保持 +
   "indistinguishable" を含む reject_reason を持つ
-- [ ] `evaluate` が曖昧証拠を投票から除外し、空投票+曖昧証拠
+- [x] `evaluate` が曖昧証拠を投票から除外し、空投票+曖昧証拠
   ≥1 で `AmbiguousAlignment` + 専用文言を既存分類より先に返す
-- [ ] `merged_votes` が非曖昧ペアを優先し、全ペア曖昧時のみ
+- [x] `merged_votes` が非曖昧ペアを優先し、全ペア曖昧時のみ
   merged が曖昧となる
-- [ ] `best_window_match` が同点ペアを `continue` で非寄与とし、
+- [x] `best_window_match` が同点ペアを `continue` で非寄与とし、
   全ペア同点/閾値未達時のみ `None` を返す
-- [ ] 全4メソッド `method_version` と `algorithm_version` が `"2"`
+- [x] 全4メソッド `method_version` と `algorithm_version` が `"2"`
   で永続化される(4 impl + stage.rs 3箇所 + テスト記録引数)
-- [ ] 新規ユニットテスト(flat plateau 曖昧・幅広平坦頭部単峰
+- [x] 新規ユニットテスト(flat plateau 曖昧・幅広平坦頭部単峰
   非曖昧・符号 ±1.0 同点・全証拠曖昧分類・文言 pin)が pass
-- [ ] golden の受理系 fixture 全件で全メソッドの merged 証拠が
+- [x] golden の受理系 fixture 全件で全メソッドの merged 証拠が
   非曖昧である証拠レベル pin を追加(T1 計測ではなく本タスクの
   責務)
-- [ ] golden/prepared が新契約で green
+- [x] golden/prepared が新契約で green
 
 ## Verification
 
-- [ ] `mise exec -- cargo test -p al-locate` が green(新規ユニット
+- [x] `mise exec -- cargo test -p al-locate` が green(新規ユニット
   テスト・golden・prepared を含む)
-- [ ] `mise exec -- cargo test -p al-math` が green
-- [ ] `mise exec -- cargo build --workspace` が green
-- [ ] `mise exec -- cargo clippy --workspace --all-targets -- -D
+- [x] `mise exec -- cargo test -p al-math` が green
+- [x] `mise exec -- cargo build --workspace` が green
+- [x] `mise exec -- cargo clippy --workspace --all-targets -- -D
   warnings`・`mise exec -- cargo fmt --all -- --check` が green
-- [ ] `rg '"1"' crates/al-locate/src/stage.rs` で
+- [x] `rg '"1"' crates/al-locate/src/stage.rs` で
   `algorithm_version` の `"1"` 残存がないこと(`residual.rs` の
   stub は対象外)
+
+## 実施記録
+
+- `pin-periodic` golden の実測挙動: T1 修正済み予測通りの混在機構
+  — full_ncc(28 positions)/spectral_envelope(219 positions)の
+  merged 証拠が `AmbiguousAlignment` + 候補保持で投票除外され、
+  非曖昧の band_ncc / gcc_phat の argmax は散乱して `agreeing=1`
+  の合意不足経路で拒否される。結果 `reject_reason` は
+  `"only 1 method(s) agree (need 2); 2 method(s) excluded as
+  ambiguous"`(空投票の専用文言ではない)として pin した。
+- `prepared_methods_keep_all_global_evidence_exactly`: `template`/
+  `-template` 厳密同点により証拠 validity が `Valid` →
+  `AmbiguousAlignment` + 候補保持へ意味的に変化(候補観測・
+  locate==prepared 同一性断言は候補保持により存続、
+  `assert_eq!(evidence.validity, AmbiguousAlignment)` を pin 追加)。
+- `coarse_fallback_...`: 周期 sin は採用窓で同点とならず(T1
+  実測済み)、受理可否比較は「同じ分類に落ちる」形で存続。
