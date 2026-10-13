@@ -26,7 +26,8 @@ relations:
     - "docs/tasks/al-analysis-vec-migration.md"
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "docs/discovery/locate-consensus-argmax-ambiguity-contract.md"
   refines: []
   refined-by: []
   derives-from:
