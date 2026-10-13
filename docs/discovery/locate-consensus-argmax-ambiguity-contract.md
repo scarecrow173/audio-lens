@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "Locate consensus argmax ambiguity contract"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source:
@@ -30,7 +30,9 @@ relations:
   refined-by: []
   derives-from:
     - "docs/discovery/remaining-issues-roadmap.md"
-  derived-by: []
+  derived-by:
+    - "docs/specs/locate-consensus-ambiguity-contract.md"
+    - "docs/adr/locate-argmax-ambiguity-representation.md"
   verifies: []
   verified-by: []
   references: []
