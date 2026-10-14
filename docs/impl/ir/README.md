@@ -83,3 +83,5 @@ Directory: `docs/impl/ir`
 | spec-residual-contract-finalization | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 
 | ipd-lag-search-fix | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
+
+| ncc-plan-workspace-foundation | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |

@@ -1,7 +1,7 @@
 ---
 id: "TASK-034FQrcCGZZgIfcHyHbt58"
 type: "task"
-status: "todo"
+status: "done"
 title: "FFT と相関の不変planと排他workspaceを分離する"
 created: "2026-10-14"
 updated: "2026-10-14"
@@ -51,11 +51,17 @@ relations:
 
 ## Acceptance Criteria
 
-- [ ] 上記sliceの契約・検証・独立reviewを満たす。
-- [ ] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
+- [x] 上記sliceの契約・検証・独立reviewを満たす。
+- [x] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
 
 ## Verification
 
 [承認済みplanのVerification Matrix](../plans/implement-ncc-plan-workspace-reuse.md)に従う。
 今回同義具体化は2026-10-15 plan Judge ACCEPTに含む。依存/Cargo.lock変更は禁止、mise経由で実行する。
 あなたは他者と共存するため所有外の変更をrevertしない。
+
+## 2026-10-15 Review
+
+A/B/Validator追加0、B独立workspace7pass/pinnedhash一致、Judge ACCEPT。
+承認はmath基盤と対象検証のみ。hot caller移行/速度実証は次slice。
+[実績](../impl/ir/ncc-plan-workspace-foundation.md)を参照。

@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034FQfhDbOOCKmh4QhnP51"
 type: "plan"
-status: "approved"
+status: "in-progress"
 title: "NCC plan/workspaceを分離し2サイトを再利用へ移す"
 created: "2026-10-14"
 updated: "2026-10-14"
