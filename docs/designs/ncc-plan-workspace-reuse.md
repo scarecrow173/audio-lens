@@ -211,3 +211,9 @@ packingだけでなくskew stage領域もconstructorが所有し、explicit real
 
 A/B candidates各0、Validator追加0、Judge APPROVED/ACCEPT、Blocker0。
 前P1のTLS workspace責務はdesign上resolved。実装のfirstcold/解放/等価性/性能は未検証。
+
+## 2026-10-15 Façade適用境界
+
+al-analysisは既存al_locate::dsp経由で数学APIを消費する。新depを追加せず
+crates/al-locate/src/dsp.rsの既存pubuseへCorrelationPlan/Workspace2公開型を1行追加する。
+coordinatorが既存backend中立境界の最小拡張と確認。al-locatecallerの移行はしない。

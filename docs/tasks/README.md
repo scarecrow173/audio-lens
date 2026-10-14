@@ -100,7 +100,7 @@ Directory: `docs/tasks`
 | TASK-034AaFXpJRZWcxVPOfKCdh | mp4: ingest stage 配線 + 成果物記録 | done | [mp4-ingest-stage.md](./mp4-ingest-stage.md) |
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
-| TASK-034FQrcP4zy8KVn51A8pyX | 2hot callerを再利用に移し確保と速度を検証する | todo | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
+| TASK-034FQrcP4zy8KVn51A8pyX | 2hot callerを再利用に移し確保と速度を検証する | done | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
 | TASK-034FQrcCGZZgIfcHyHbt58 | FFT と相関の不変planと排他workspaceを分離する | done | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
 | TASK-034EeviFOOrOAjrYXMGXHO | al-cli の logging 配線 | done | [observability-cli-wiring.md](./observability-cli-wiring.md) |
 | TASK-034EevbtmmkzTShLCB0Mw0 | al-observability crate の新設 | done | [observability-crate.md](./observability-crate.md) |

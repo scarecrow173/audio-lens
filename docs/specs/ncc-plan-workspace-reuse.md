@@ -62,14 +62,14 @@ IPD driftの既存caller不具合を先に独立修正する。
 
 ## Acceptance Criteria
 
-- [ ] 独立回帰テストが修正前red、修正後greenとなり、既知の異なるsigned lag間のdriftを報告する。
-- [ ] 固定lag、零探索幅、短入力でIPD driftの境界挙動を検証する。signed lag原点も最低意味層で検証する。
-- [ ] reuse経路とfree functionをNCC/PHAT双方で独立参照または既存goldenと比較し、既存の許容誤差・候補方向・極性を保つ。
-- [ ] 異なるshape、空入力、ゼロエネルギー、連続再利用で前回buffer内容が結果へ混入しない。
-- [ ] planのSend+Sync共有をコンパイル検証し、共有planとworker別workspaceの並列結果が逐次結果と一致する。
-- [ ] 反復2サイトでplan構築/確保回数をbaselineと比較し、内側ループのplan再構築・scratch確保を除去した証拠を保存する。
-- [ ] cold/steady-state、p50/p95、RSSとfixture・環境・shapeを保存し、速度向上を未計測で主張しない。
-- [ ] IPD修正がplan API移行と独立した先行commitになり、移行範囲が2サイトに収まる。
+- [x] 独立回帰テストが修正前red、修正後greenとなり、既知の異なるsigned lag間のdriftを報告する。
+- [x] 固定lag、零探索幅、短入力でIPD driftの境界挙動を検証する。signed lag原点も最低意味層で検証する。
+- [x] reuse経路とfree functionをNCC/PHAT双方で独立参照または既存goldenと比較し、既存の許容誤差・候補方向・極性を保つ。
+- [x] 異なるshape、空入力、ゼロエネルギー、連続再利用で前回buffer内容が結果へ混入しない。
+- [x] planのSend+Sync共有をコンパイル検証し、共有planとworker別workspaceの並列結果が逐次結果と一致する。
+- [x] 反復2サイトでplan構築/確保回数をbaselineと比較し、内側ループのplan再構築・scratch確保を除去した証拠を保存する。
+- [x] cold/steady-state、p50/p95、RSSとfixture・環境・shapeを保存し、速度向上を未計測で主張しない。
+- [x] IPD修正がplan API移行と独立した先行commitになり、移行範囲が2サイトに収まる。
 
 ## Deferred Design Concerns
 
@@ -86,3 +86,10 @@ shape不一致契約、具体API、結果buffer返却方式、測定fixture/誤�
 
 A/B candidates各0、Validator追加0、Judge ACCEPT。coordinatorが意思決定のみ承認。
 red/green、等価性・共有・確保削減・性能実証は未実施であり、この承認に含まれない。
+
+## 2026-10-15 Acceptance Evidence
+
+IPD独立red/greenは[IPD IR](../impl/ir/ipd-lag-search-fix.md)、
+所有/数値/firstcold/dropは[基盤IR](../impl/ir/ncc-plan-workspace-foundation.md)、
+2site確保/実caller全出力同値/速度観測は[完成IR](../impl/ir/ncc-hot-caller-reuse-verification.md)を参照。
+今回完成Judge ACCEPT。性能は記録したfixtureの観測であり統計的有意性を主張しない。
