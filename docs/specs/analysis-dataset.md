@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "分析データセットスキーマ"
 created: "2026-10-02"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -98,12 +98,14 @@ validity セマンティクス(最低限の区別):
 - Parquet: フレーム / セグメント特徴、locate マッチ、イベント
 - Zarr 等のチャンクテンソル形式: STFT、PSD/CSD/コヒーレンス /
   伝達関数テンソル
-- WAV / FLAC: デコード済み / アライン済み / 残差音声。
-  現行 audio store は WAV を実装し、FLAC 保存は #33 の承認済み defer。
+- WAV のみ: dataset の中間 / アライン済み / 残差音声出力。
+  FLAC 出力エンコードは現行要件に含めない。decoded.f64le の内部 PCM 正本は維持する。
   Float64 WAV の残差は再取得時に解析サンプルを保持し、音声 artifact と
   親 source/alignment・混合行列の provenance を辿れる。
-  RIFF サイズ上限を超える保存はエラーとする。FLAC や大容量コンテナの
-  新依存・方式選定は別途承認する ([判断記録](../tasks/spec-residual-decisions.md))。
+  RIFF サイズ上限を超える保存はエラーとする。圧縮形式は容量・保存時間・I/O の
+  実測が問題となった場合に別 Issue で検討する。浮動小数 PCM の量子化損失を含め
+  解析に必要な精度を損なわないことを採用条件とする。入力 FLAC デコードとは独立。
+  [今回仕様](spec-residual-contract-finalization.md) と [旧判断履歴](../tasks/spec-residual-decisions.md) を参照。
 
 推奨レイアウト:
 

@@ -86,3 +86,5 @@ job-orchestration (不変ジョブ / ステージ計画)
   toolchain / crate 構成の具体化は `mise.toml` と開発環境整備で行う
 - 各詳細設計の status は `draft`。少なくとも 1 件の詳細設計が
   レビュアー承認(`approved`)されるまでは planning に進まない
+
+| [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) | #33 確定仕様の文書適用設計(approved) | 今回spec、ADR |

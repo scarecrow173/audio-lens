@@ -4,7 +4,7 @@ type: "adr"
 status: "proposed"
 title: "残存課題を責務境界で修正し仕様判断を分離する"
 created: "2026-10-10"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -110,3 +110,13 @@ coordinator は task の事前質問に対し、候補検出の fused 実行を�
 独立実装修正は分解能のみのため task 分割不要も承認された。
 この承認は #33 の方式判断に限り、本 ADR 全体の status は変更しない。
 [選択肢・理由・再検討条件・証拠](../tasks/spec-residual-decisions.md) を参照。
+
+## #33 現在の正式契約 (2026-10-14)
+
+2026-10-11 の FLAC defer 判断とその完了証拠は履歴として保持する。2026-10-14 に
+ユーザーは残差・中間音声出力を WAV のみと正式仕様化し、FLAC 出力を現行要件から外した。
+fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
+Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
+将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
+今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+旧taskのdoneは今回検証を意味しない。
