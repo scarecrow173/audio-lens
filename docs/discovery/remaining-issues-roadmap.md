@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "残余 issue ロードマップ分析: 13 open issue の優先度・依存順序・フェーズ構造"
 created: "2026-10-13"
-updated: "2026-10-13"
+updated: "2026-10-14"
 owners: []
 relations:
   source:
@@ -82,18 +82,22 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | Issue | Title | Domain | Prio | Effort | Stage | Phase |
 | --- | --- | --- | --- | --- | --- | --- |
 | #59 | 合議argmaxのFPノイズ依存を解消 | Locate | P0 | M | 未解決 | 0 |
-| #36 | 主要コーデックの実デコード対応 | Media | P1 | XL | 一部実装 | 1 |
-| #52 | NCC plan/workspaceの再利用 | DSP | P1 | M | 未着手 | 1 |
-| #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 未着手 | 1 |
-| #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 一部実装 | 1 |
-| #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 未着手 | 1 |
-| #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装 | 1 |
+| #36 | 主要コーデックの実デコード対応 | Media | P1 | XL | 一部実装※ | 1 |
+| #52 | NCC plan/workspaceの再利用 | DSP | P1 | M | 未着手※ | 1 |
+| #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 未着手※ | 1 |
+| #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 一部実装※ | 1 |
+| #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 未着手※ | 1 |
+| #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装※ | 1 |
 | #53 | local_lagの全探索を高速化 | Reference | P1 | L | 未着手 | 2 |
 | #40 | coarse-to-fineと帯域cacheの残件 | Locate | P2 | L | 一部実装 | 2 |
 | #57 | envelopeを線形時間化 | Cheap | P2 | M | 未着手 | 2 |
 | #58 | matrix_to_tensorコピーを除去 | Dataset | P3 | M | 未着手 | 2 |
 | #54 | cheap/reference stage内部の並列化 | Runner | P1 | XL | 未着手 | 3 |
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
+
+※ 2026-10-14 の deep-dive セッションで Phase 1 各 issue(#52/#56/#36/#42/
+#55/#33)の設計決定が**確定**済み。いずれも実装は未着手であり、Stage の
+実装状態は変わらない。確定内容は各 issue セクションの「確定決定」を参照。
 
 ## 依存 DAG(11 edge — すべて推奨順序の提案)
 
@@ -184,6 +188,8 @@ issue/PR 混在):
 - **現状**: Issueによればband_gain::windows等で約98K回のncc呼出しがあり、毎回RealFft::new(16384)と複数Vec確保が発生。
 - **ギャップ**: FFT plan・scratchの繰り返し構築。公開API、スレッド所有権、shape keyed cache未設計。
 - **提案決定**: 不変のFFT planと可変workspaceを分離。既存ncc wrapperを残し、明示ctx APIで内側ループのみ最適化。
+- **確定決定(2026-10-14)**: **案B + 分離型で確定**。不変 `RealFftPlan`(FFT長紐づけ、Send+Sync 共有可)と、呼出側/worker が排他所有する mutable Workspace を分離し、`plan.ncc(&mut ws, template, signal)` 形とする。基盤は汎用化し、NCC と GCC-PHAT が FFT plan を共有できる構造にする(PHAT 正規化は実行時指定とし plan には持たせない)。呼出し側移行は `band_gain::windows`(約98K calls)と `cheap.rs` IPD drift(約1.8K calls)の**2サイト限定**。al-locate の ncc 系は shape が入力依存で plan ライフサイクル設計が複雑なため対象外(将来プロファイルで有意なら別途)。TLS キャッシュ・scratch pool は棄却。`ncc()`/`gcc_phat()` フリー関数は維持。
+- **前提条件(2026-10-14 発見の既存バグ)**: `cheap.rs:1278-1280` の IPD drift は `xa`/`ya` が同長 `block` のため、`ncc` 内で `max_lag` が `signal.len()-template.len()=0` に clamp され、drift 計測が実質 lag 0 しか見ていない既存バグ。Plan API 移行前に独立して修正・検証する。
 - **手順**:
   1. 呼出shapeのヒストグラムとallocate回数をプロファイルして基準値を固定。
   2. CorrelationPlan/CorrelationWorkspaceを設計し、key=(FFT長,手法,精度,backend)を検討。
@@ -215,6 +221,8 @@ issue/PR 混在):
 - **現状**: Issueによれば同一入力を約3回デコード、対象例は137MB級。
 - **ギャップ**: job/stageを跨ぐPCMライフタイム・メモリ上限・decode backendとの境界未決定。
 - **提案決定**: cacheableなDecodeHandleをjob内に導入し、サイズ上限・参照カウント・再デコードfallbackを設ける。
+- **確定決定(2026-10-14)**: 正本は manifest の `decoded_pcm` artifact(`decoded.f64le`、interleaved f64 LE)とし、Artifact ID を識別子とする。メモリキャッシュは正本ではなく artifact の派生ビュー。共有表現は Artifact ID に紐づく job-scoped bounded cache の read-only PCM ビューとし、mmap を第一候補・`fs::read` fallback を用意する。`Stage` trait 契約(stage 間通信は manifest Artifact ID のみ・隠れた共有状態禁止)を維持し、`DecodedInput` の stage 間直接受け渡しは採用しない(共有は不変 PCM ビューのみ)。deinterleave 済み `Vec<Vec<f64>>` はキャッシュせず、消費側が必要 ch・範囲を正規化+deinterleave する(全長必要ならその範囲だけ materialize)。#56 では部分読み取り対応への全体改修はしない。resume で manifest+artifact から独立復元可能であり、cache hit/miss・eviction で解析結果が不変であること。materialize PCM と worker scratch には別メモリ予算を設ける(mmap だけでは RSS 上限を保証しない)。
+- **検証前提(2026-10-14)**: OS ページキャッシュで既に物理 I/O が消えている可能性があるため、`fs::read` vs mmap vs 直接 deinterleave を実測比較する(alloc 量・変換 CPU・peak RSS・e2e)。job-scoped cache の利益が小さければ cache 管理を追加せず per-stage mmap ビューのみも許容。
 - **手順**:
   1. 再デコード発生箇所・実データ量・ステージ跨ぎ参照寿命をtracingで可視化。
   2. decoder backendから独立したNormalizedPcmIdとPCM handleを定義。
@@ -243,6 +251,7 @@ issue/PR 混在):
 - **現状**: PR #44でMediaDecoder registryとnative backend統合が実装済み。WAV/AVI PCMとMP4メタデータ・PCM demuxが基盤。
 - **ギャップ**: AAC/H.264/HEVC/Opus/AV1等の実デコーダ、主要コンテナの幅広い対応、バックエンド選択/運用契約が未完成。
 - **提案決定**: 依存追加の承認を受け、最初の実コーデック対象を決定する。推奨は音声純Rust優先+映像ffmpeg subprocess fallback。
+- **確定決定(2026-10-14)**: 音声は **symphonia(純 Rust)を依存追加して registry backend として採用**(依存追加は承認済み)。native 優先 resolve を維持し、第1対象は AAC-LC in MP4。部分結果統合: symphonia が音声を復号しても native が取得した映像・timing 情報を保持する。正確性検証は PCM値・チャンネル・sample_rate・AAC priming/delay・PTS・複数トラック選択を対象とし、provenance/attempts/unavailable 契約を維持する。映像は既存 AVI 非圧縮デコードを維持し、MP4/H.264 の VideoThumbs・VideoFeatureArtifact は Unavailable 継続で理由を明示する。H.264/H.265 実デコードは次フェーズの optional ffmpeg subprocess backend(外部バイナリ不在でも音声解析は実行可能)。
 - **手順**:
   1. 対応マトリクスを must / should / later と decode/probe別に定義。AAC/H.264入りMP4を最優先。
   2. decoder backendをCapabilities→Probe→Decodeに分け、エラーをunavailable/malformed/fallbackに分類。
@@ -275,6 +284,7 @@ issue/PR 混在):
 - **現状**: PR #44でal-math/pulp SIMD・FFT/NCC導入、PR #45でsplit re/im公開境界へ移行。PR #45の実使用経路は概ね改善、直接plan経路で約10%の劣後事例。
 - **ギャップ**: Issueが元来掲げたFFT 3×以上などの目標はPR #44時点で一部未達。rustfft置換案は現在のアーキテクチャと再比較が必要。
 - **提案決定**: 既存split APIを維持したまま実負荷プロファイルを更新。交換可能なkernel adapterを内部に限定し、採用はベンチと等価性で決める。
+- **確定決定(2026-10-14)**: **rustfft 導入は棚上げ**。issue の前提(手書き radix-2 複素FFT・非SIMD)は PR #44/#45 の pulp SIMD 実数FFT で既に解消済み。#52 完了後に実使用プロファイルで再ベースラインし、kernel 本体が律速なら rustfft prototype と等価性・速度を比較する。依存追加はその時点で再承認とする。計測には pow2 非適合サイズを含める(現行は pow2 pad 限定で、混基数の利点が残り得る)。e2e 改善が小さければ close with rationale。3x 目標は microbench 単発ではなく実使用経路の改善に再定義する。
 - **手順**:
   1. #44/#45/#49/#50/#51マージ後の同一機材・同じデータでbaselineを更新。
   2. kernelをreal-FFT、bandpass、NCC、呼出し時plan構築に分解してボトルネック判定。
@@ -289,9 +299,9 @@ issue/PR 混在):
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
-  | A 現pulp内部のhybrid AoS/SoA最適化 | ワークスペースの局所layoutとFFTサイズ特化を内部で調整 | 依存追加不要、公開API維持 | サイズ別チューニング/保守負担が大きい | 中 | ○ |
+  | A 現pulp内部のhybrid AoS/SoA最適化 | ワークスペースの局所layoutとFFTサイズ特化を内部で調整 | 依存追加不要、公開API維持 | サイズ別チューニング/保守負担が大きい | 中 | — |
   | B rustfft/realfftを内部backend追加 | FFT実装をライブラリに差し替える実験 | 混合基数・実数FFTの成熟実装を利用 | 外部依存・版・変換copyが増え、必ずしも速いとは限らない | 高 | — |
-  | C カーネル現状維持し#52に集中 | plan/cache最適化と呼出し局所化のみを進める | 最小変更でe2eの効果を拾いやすい | 単体FFT目標が未達のまま | 高 | — |
+  | C カーネル現状維持し#52に集中 | plan/cache最適化と呼出し局所化のみを進める | 最小変更でe2eの効果を拾いやすい | 単体FFT目標が未達のまま | 高 | ○ |
 
 - **リスク**: 旧NumPy比較は現HEAD性能を表さない / 交換によるFFTサイズ/paddingの変更と丸め差 / 直接planとfacade経路で性能の方向が異なる
 - **影響**: al-math, al-locate, al-analysis, API/ABI, Numerical, 所有権
@@ -305,6 +315,7 @@ issue/PR 混在):
 - **現状**: Issueでは4MiBごとのsync_allが1run約1〜2千回発生しWindowsで秒単位コストと報告。
 - **ギャップ**: 頻度低減すると電源断後に失われるchunk範囲・manifestとの整合が変わる。ユーザー承認が必要。
 - **提案決定**: 成果物種別に耐久性等級を定義し、書込完了はtemp→sync(file)→rename→必要に応じparent dir fsyncで保証。
+- **確定決定(2026-10-14)**: **無条件の耐久性等級(モード切替なし)**。manifest + 最終 export は full durability(temp→sync→rename→dir sync)を維持し、中間 artifact(`decoded.f64le`・normalized PCM・tensor chunk 等の再生成可能物)は緩和する。順序規約: manifest が artifact 完了を記録する前にその artifact は耐久化済みとし、resume は「manifest 記録 = 存在かつ完全」を前提にできる。理由: 正本はユーザー提供入力ファイルであり、中間物喪失は再実行で済みデータ損失ではない。補足: 現状の fsync 大量発生の本体は artifact 毎の `write_durable`(issue の「4MiB毎」記述は概算/旧実装)。
 - **手順**:
   1. chunk同期/ファイル同期/commitの関係とOS別fsync挙動を整理し、旧保証を書き下す。
   2. scratch派生物と正式manifestで durability policy を区別するADR。
@@ -334,6 +345,7 @@ issue/PR 混在):
 - **現状**: 候補はExpensiveAnalysisStage内部で抽出済み、WAV保存とparams経由のsample_rate保持も実装。PR #44でstage構造とsample_rate適合の一部が処理されたと記述。
 - **ギャップ**: 候補のみ再計算できない、FLAC encodeなし、Resolutionにsample_rateが第一級でない(現行Issue本文記載)。
 - **提案決定**: 3論点を一括実装しない。まず仕様とのズレが機能要件か記述だけかを選び、sample_rate型追加は低リスクだがスキーマの移行方針を定義。
+- **確定決定(2026-10-14)**: ①候補検出は独立 StageKind を追加せず `ExpensiveAnalysisStage` 内 fused を維持し、spec 文言を実装に合わせて改訂する。候補データは `events/candidates` の独立成果物契約を維持(空テーブルでも保存し「候補なし」と「未実行」を区別)。manifest/resume 境界は不変。将来単独実行需要が出たら再検討。②FLAC は実装せず WAV のみを正式仕様にする(spec 改訂)。FLAC エンコーダ依存は導入しない。将来は別 Issue(浮動小数点 PCM の量子化精度損失に注意)。#36 の FLAC デコード(入力)とエンコード(出力)は独立。③`Resolution.sample_rate` は実装済み(`types.rs:67`、5箇所の構築サイト、commit 3386fab)のため確認して close のみ。残作業は **spec 文言改訂のみ(実装不要の docs タスク)**。
 - **手順**:
   1. 候補抽出: pure function化し、独立StageKindは「単独再実行」ユースケースがある場合のみ追加。
   2. sample_rate: ResolutionにOptional/Requiredを決めて第一級フィールド化し既存consumerを監査。
@@ -348,8 +360,8 @@ issue/PR 混在):
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
-  | A 現状追認(仕様を更新) | fused stage維持、WAV維持、rateはparams経由を正規契約化 | 変更最小で機能欠落は実質少ない | Stage単独再実行不可、FLAC省容量化なし | 中 | — |
-  | B 独立タスクごと段階適合 | candidate関数分離、rate第一級化、FLACは容量根拠に従う | 必要な汎用性だけ確保し無駄な抽象化を避ける | spec全文に対して即時完全適合にはならない | 高 | ○ |
+  | A 現状追認(仕様を更新) | fused stage維持、WAV維持、rateはparams経由を正規契約化 | 変更最小で機能欠落は実質少ない | Stage単独再実行不可、FLAC省容量化なし | 中 | ○ |
+  | B 独立タスクごと段階適合 | candidate関数分離、rate第一級化、FLACは容量根拠に従う | 必要な汎用性だけ確保し無駄な抽象化を避ける | spec全文に対して即時完全適合にはならない | 高 | — |
   | C 仕様厳密実装 | 独立StageKind+FLAC+schema刷新を同時に実施 | 仕様と実装が全点一致 | 新しい変更面が広く性能改善から脱線 | 高 | — |
 
 - **リスク**: 独立stageでcheckpoint/順序/manifestが増える / FLAC encode依存とlossless保証 / sample_rate二重表現の不整合
@@ -573,15 +585,25 @@ issue/PR 混在):
 
 ## Open Questions
 
-- #42: 再 baseline 計測の結果、「FFT 3×」目標の適用範囲と close 条件を
-  どう再定義するか(レポート手順 1/5 の実行結果待ち)
-- #36: 依存追加(ffmpeg subprocess 等)の承認と、最初の実コーデック対象の
-  決定 — ユーザー承認が必要
-- #55: 耐久性等級のユーザー承認(fast/safe モードの保証説明)
+- ~~#42: 再 baseline 計測の結果、「FFT 3×」目標の適用範囲と close 条件を
+  どう再定義するか~~ → **2026-10-14 確定**: 3x 目標は実使用経路の改善に
+  再定義済み。残件は #52 後の再ベースライン実測のみ(改善が小さければ
+  close with rationale)
+- ~~#36: 依存追加(ffmpeg subprocess 等)の承認と、最初の実コーデック対象の
+  決定~~ → **2026-10-14 確定**: symphonia 依存追加は承認済み、第1対象は
+  AAC-LC in MP4。映像 H.264/H.265 は次フェーズの optional ffmpeg
+  subprocess backend
+- ~~#55: 耐久性等級のユーザー承認(fast/safe モードの保証説明)~~ →
+  **2026-10-14 確定**: モード切替なしの無条件等級(manifest+最終exportは
+  full durability、中間 artifact は緩和)
 - #59: 同率許容幅・曖昧性閾値の具体的値 — fixture 計測と spec で確定
-- #33: 3 論点それぞれ「機能要件か記述だけか」の切り分け結果
+- ~~#33: 3 論点それぞれ「機能要件か記述だけか」の切り分け結果~~ →
+  **2026-10-14 確定**: ①fused 維持+spec 改訂、②FLAC 非実装で WAV のみ
+  正式仕様、③`Resolution.sample_rate` は実装済みで close のみ。
+  残作業は spec 文言改訂のみ
 - #54: 並列化の前提契約(worker 別 workspace、PCM 寿命、ordered commit)
-  が Phase 1 で揃うか
+  が Phase 1 で揃うか → **2026-10-14 部分解消**: worker 別 workspace(#52)・
+  PCM 寿命(#56)・durability 規約(#55)の契約は確定済み。実装は未着手
 
 ## Promotion Candidates
 
