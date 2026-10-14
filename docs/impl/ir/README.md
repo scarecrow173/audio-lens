@@ -81,3 +81,5 @@ Directory: `docs/impl/ir`
 | wav-decode-and-hash | [wav-decode-and-hash.md](./wav-decode-and-hash.md) |
 
 | spec-residual-contract-finalization | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
+
+| ipd-lag-search-fix | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |

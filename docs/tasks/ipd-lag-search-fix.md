@@ -1,7 +1,7 @@
 ---
 id: "TASK-034FQrcq7vbkfsYZwC2wrc"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "IPD 検索窓と signed lag 原点を修復する"
 created: "2026-10-14"
 updated: "2026-10-14"
@@ -50,11 +50,17 @@ relations:
 
 ## Acceptance Criteria
 
-- [ ] 上記sliceの契約・検証・独立reviewを満たす。
-- [ ] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
+- [x] 上記sliceの契約・検証・独立reviewを満たす。
+- [x] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
 
 ## Verification
 
 [承認済みplanのVerification Matrix](../plans/implement-ncc-plan-workspace-reuse.md)に従う。
 今回同義具体化は2026-10-15 plan Judge ACCEPTに含む。依存/Cargo.lock変更は禁止、mise経由で実行する。
 あなたは他者と共存するため所有外の変更をrevertしない。
+
+## 2026-10-15 Review
+
+A/B/Validator追加0、Judgeがsourcefixと対象検証をACCEPT。cheap17/IPD6の独立確認と
+pinnedhash一致。性能baselineは後続で取得し、reuse実証を承認したとは扱わない。
+[実績](../impl/ir/ipd-lag-search-fix.md)を参照。
