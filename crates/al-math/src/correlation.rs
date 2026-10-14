@@ -1,95 +1,236 @@
 //! 符号付きの窓 NCC と GCC-PHAT。候補の順位付け・validity は利用側が所有する。
 
-use crate::{Simd, WithSimd, dispatch, fft::RealFft};
+use crate::{
+    Simd, WithSimd, dispatch,
+    fft::{RealFftPlan, RealFftWorkspace},
+};
 
-/// `signal[lag..lag + template.len()]` との NCC を返す。
-/// 空素材・短い signal は空、ゼロエネルギー窓は 0。極性反転の符号を保持する。
-pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
-    dispatch(Correlation {
-        template,
-        signal,
-        max_lag,
-        phat: false,
-    })
+/// 固定入力形状の不変相関 plan。NCC/PHAT は実行時に選ぶ。
+pub struct CorrelationPlan {
+    template_len: usize,
+    signal_len: usize,
+    fft: Option<RealFftPlan>,
+    n: usize,
 }
 
-/// FFT を用いた NCC。窓 NCC と同じ正規化・lag 方向を持つ。
+/// 相関の排他的作業領域。すべての確保は constructor が所有する。
+pub struct CorrelationWorkspace {
+    template_len: usize,
+    signal_len: usize,
+    fft: Option<RealFftWorkspace>,
+    real: Vec<f64>,
+    a_re: Vec<f64>,
+    a_im: Vec<f64>,
+    b_re: Vec<f64>,
+    b_im: Vec<f64>,
+    template_squares: Vec<f64>,
+    signal_squares: Vec<f64>,
+    cumulative: Vec<f64>,
+    norms: Vec<f64>,
+    phat_energy: Vec<f64>,
+}
+
+impl CorrelationPlan {
+    /// 空素材/短い signal は演算不要 shape。長さの算術 overflow は panic する。
+    pub fn new(template_len: usize, signal_len: usize) -> Self {
+        let n = if template_len == 0 || signal_len < template_len {
+            0
+        } else {
+            signal_len
+                .checked_add(template_len - 1)
+                .and_then(usize::checked_next_power_of_two)
+                .expect("correlation FFT length overflow")
+        };
+        Self {
+            template_len,
+            signal_len,
+            fft: (n != 0).then(|| RealFftPlan::new(n)),
+            n,
+        }
+    }
+
+    /// NCC curve を workspace から借用する。shape 不一致は演算前に panic する。
+    /// 借用結果を保持したまま workspace を再使用できない。
+    ///
+    /// ```compile_fail
+    /// use al_math::correlation::{CorrelationPlan, CorrelationWorkspace};
+    /// let plan = CorrelationPlan::new(2, 4);
+    /// let mut ws = CorrelationWorkspace::new(&plan);
+    /// let first = plan.ncc(&mut ws, &[1.0; 2], &[1.0; 4], 2);
+    /// let second = plan.ncc(&mut ws, &[1.0; 2], &[1.0; 4], 2);
+    /// assert_eq!(first, second);
+    /// ```
+    pub fn ncc<'w>(
+        &self,
+        workspace: &'w mut CorrelationWorkspace,
+        template: &[f64],
+        signal: &[f64],
+        max_lag: usize,
+    ) -> &'w [f64] {
+        self.run(workspace, template, signal, max_lag, false)
+    }
+
+    /// 同じ FFT plan で PHAT curve を生成する。ゼロ cross bin は 0。
+    pub fn gcc_phat<'w>(
+        &self,
+        workspace: &'w mut CorrelationWorkspace,
+        template: &[f64],
+        signal: &[f64],
+        max_lag: usize,
+    ) -> &'w [f64] {
+        self.run(workspace, template, signal, max_lag, true)
+    }
+
+    fn run<'w>(
+        &self,
+        workspace: &'w mut CorrelationWorkspace,
+        template: &[f64],
+        signal: &[f64],
+        max_lag: usize,
+        phat: bool,
+    ) -> &'w [f64] {
+        assert_eq!(
+            template.len(),
+            self.template_len,
+            "correlation template shape"
+        );
+        assert_eq!(signal.len(), self.signal_len, "correlation signal shape");
+        assert_eq!(
+            (workspace.template_len, workspace.signal_len),
+            (self.template_len, self.signal_len),
+            "correlation workspace shape"
+        );
+        if self.n == 0 {
+            return &workspace.real[..0];
+        }
+        dispatch(Correlation {
+            plan: self,
+            workspace,
+            template,
+            signal,
+            max_lag,
+            phat,
+        })
+    }
+}
+
+impl CorrelationWorkspace {
+    /// shape ごとの最大領域を確保し、実行時の resize を不要にする。
+    pub fn new(plan: &CorrelationPlan) -> Self {
+        let bins = if plan.n == 0 { 0 } else { plan.n / 2 + 1 };
+        let len = if plan.n == 0 { 0 } else { plan.template_len };
+        let signal_len = if plan.n == 0 { 0 } else { plan.signal_len };
+        let count = if plan.n == 0 { 0 } else { signal_len - len + 1 };
+        Self {
+            template_len: plan.template_len,
+            signal_len: plan.signal_len,
+            fft: plan.fft.as_ref().map(RealFftWorkspace::new),
+            real: vec![0.0; plan.n],
+            a_re: vec![0.0; bins],
+            a_im: vec![0.0; bins],
+            b_re: vec![0.0; bins],
+            b_im: vec![0.0; bins],
+            template_squares: vec![0.0; len],
+            signal_squares: vec![0.0; signal_len],
+            cumulative: vec![0.0; if plan.n == 0 { 0 } else { signal_len + 1 }],
+            norms: vec![0.0; count],
+            phat_energy: vec![0.0; bins],
+        }
+    }
+}
+
+/// `signal[lag..lag + template.len()]` との符号付き NCC。owned curve の便利な入口。
+pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
+    let plan = CorrelationPlan::new(template.len(), signal.len());
+    let mut workspace = CorrelationWorkspace::new(&plan);
+    plan.ncc(&mut workspace, template, signal, max_lag).to_vec()
+}
+
+/// 窓 NCC と同じ正規化・lag 方向を持つ。
 pub use ncc as fft_ncc;
 
-/// `conj(template_fft) * signal_fft` を振幅で白色化する。
-/// ゼロ bin は 0、lag は `0..=min(max_lag, signal.len()-template.len())`。
+/// PHAT の owned curve。lag は `0..=min(max_lag, signal.len()-template.len())`。
 pub fn gcc_phat(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
-    dispatch(Correlation {
-        template,
-        signal,
-        max_lag,
-        phat: true,
-    })
+    let plan = CorrelationPlan::new(template.len(), signal.len());
+    let mut workspace = CorrelationWorkspace::new(&plan);
+    plan.gcc_phat(&mut workspace, template, signal, max_lag)
+        .to_vec()
 }
 
-struct Correlation<'a> {
-    template: &'a [f64],
-    signal: &'a [f64],
+struct Correlation<'p, 'w, 'i> {
+    plan: &'p CorrelationPlan,
+    workspace: &'w mut CorrelationWorkspace,
+    template: &'i [f64],
+    signal: &'i [f64],
     max_lag: usize,
     phat: bool,
 }
 
-impl WithSimd for Correlation<'_> {
-    type Output = Vec<f64>;
+impl<'w> WithSimd for Correlation<'_, 'w, '_> {
+    type Output = &'w [f64];
     #[inline(always)]
     fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
         let Self {
+            plan,
+            workspace,
             template,
             signal,
             max_lag,
             phat,
         } = self;
         let len = template.len();
-        if len == 0 || signal.len() < len {
-            return Vec::new();
-        }
         let max_lag = max_lag.min(signal.len() - len);
-        // 同じ標本順で加算し、レーン数に依存する reduction 順序を避ける。
-        // PHAT は窓エネルギーを使わず、非ゼロ cross-spectrum のみで正規化する。
-        let template_energy: f64 = if phat {
+        let CorrelationWorkspace {
+            fft,
+            real,
+            a_re,
+            a_im,
+            b_re,
+            b_im,
+            template_squares,
+            signal_squares,
+            cumulative,
+            norms,
+            phat_energy,
+            ..
+        } = workspace;
+        let fft_plan = plan.fft.as_ref().expect("nonempty shape has FFT plan");
+        let fft_workspace = fft.as_mut().expect("nonempty shape has FFT workspace");
+        real.fill(0.0);
+        // 従来と同じ標本順の加算。PHAT は窓エネルギーを使わない。
+        let template_energy = if phat {
             1.0
         } else {
-            let mut values = vec![0.0; len];
-            square(simd, template, &mut values);
-            values.iter().sum()
+            square(simd, template, template_squares);
+            template_squares.iter().sum::<f64>()
         };
         if template_energy == 0.0 {
-            return vec![0.0; max_lag + 1];
+            return &real[..=max_lag];
         }
-        let n = (signal.len() + len - 1).next_power_of_two();
-        let mut plan = RealFft::new(n);
-        let mut real = vec![0.0; n];
-        let bins = n / 2 + 1;
-        let mut a_re = vec![0.0; bins];
-        let mut a_im = vec![0.0; bins];
-        let mut b_re = vec![0.0; bins];
-        let mut b_im = vec![0.0; bins];
         real[..len].copy_from_slice(template);
-        plan.forward_with_simd(simd, &real, &mut a_re, &mut a_im);
+        fft_plan.forward_with_simd(simd, fft_workspace, real, a_re, a_im);
         real.fill(0.0);
         real[..signal.len()].copy_from_slice(signal);
-        plan.forward_with_simd(simd, &real, &mut b_re, &mut b_im);
-        cross_spectrum(simd, &mut a_re, &mut a_im, &b_re, &b_im, phat);
-        plan.inverse_with_simd(simd, &a_re, &a_im, &mut real);
-        real.truncate(max_lag + 1);
+        fft_plan.forward_with_simd(simd, fft_workspace, real, b_re, b_im);
+        cross_spectrum(simd, a_re, a_im, b_re, b_im, phat, phat_energy);
+        fft_plan.inverse_with_simd(simd, fft_workspace, a_re, a_im, real);
         if !phat {
-            let mut squares = vec![0.0; signal.len()];
-            square(simd, signal, &mut squares);
-            let mut cumulative = vec![0.0; signal.len() + 1];
-            for (i, &value) in squares.iter().enumerate() {
+            square(simd, signal, signal_squares);
+            cumulative[0] = 0.0;
+            for (i, &value) in signal_squares.iter().enumerate() {
                 cumulative[i + 1] = cumulative[i] + value;
             }
-            let norms: Vec<_> = (0..=max_lag)
-                .map(|lag| (cumulative[lag + len] - cumulative[lag]).max(0.0))
-                .collect();
-            normalize(simd, &mut real, &norms, template_energy.sqrt());
+            for (lag, norm) in norms[..=max_lag].iter_mut().enumerate() {
+                *norm = (cumulative[lag + len] - cumulative[lag]).max(0.0);
+            }
+            normalize(
+                simd,
+                &mut real[..=max_lag],
+                &norms[..=max_lag],
+                template_energy.sqrt(),
+            );
         }
-        real
+        &real[..=max_lag]
     }
 }
 
@@ -114,6 +255,7 @@ fn cross_spectrum<S: Simd>(
     b_re: &[f64],
     b_im: &[f64],
     phat: bool,
+    energy: &mut [f64],
 ) {
     let (arv, art) = S::as_mut_simd_f64s(a_re);
     let (aiv, ait) = S::as_mut_simd_f64s(a_im);
@@ -134,18 +276,17 @@ fn cross_spectrum<S: Simd>(
     }
     if phat {
         // bin ごとのエネルギーで re/im 両成分を同一規則で白色化する。
-        let mut energy = vec![0.0; a_re.len()];
         let (arv, art) = S::as_simd_f64s(a_re);
         let (aiv, ait) = S::as_simd_f64s(a_im);
-        let (ev, et) = S::as_mut_simd_f64s(&mut energy);
+        let (ev, et) = S::as_mut_simd_f64s(energy);
         for ((&ar, &ai), e) in arv.iter().zip(aiv).zip(ev) {
             *e = simd.add_f64s(simd.mul_f64s(ar, ar), simd.mul_f64s(ai, ai));
         }
         for ((&ar, &ai), e) in art.iter().zip(ait).zip(et) {
             *e = ar * ar + ai * ai;
         }
-        normalize(simd, a_re, &energy, 1.0);
-        normalize(simd, a_im, &energy, 1.0);
+        normalize(simd, a_re, energy, 1.0);
+        normalize(simd, a_im, energy, 1.0);
     }
 }
 
@@ -181,14 +322,28 @@ mod tests {
             for polarity in [-1.0, 1.0] {
                 let template: Vec<_> = signal[len..len * 2].iter().map(|x| x * polarity).collect();
                 for phat in [false, true] {
-                    let kernel = || Correlation {
+                    let plan = CorrelationPlan::new(template.len(), signal.len());
+                    let mut native_ws = CorrelationWorkspace::new(&plan);
+                    let mut scalar_ws = CorrelationWorkspace::new(&plan);
+                    let native = dispatch(Correlation {
+                        plan: &plan,
+                        workspace: &mut native_ws,
                         template: &template,
                         signal: &signal,
                         max_lag: usize::MAX,
                         phat,
-                    };
-                    let native = dispatch(kernel());
-                    let scalar = pulp::Scalar.vectorize(kernel());
+                    })
+                    .to_vec();
+                    let scalar = pulp::Scalar
+                        .vectorize(Correlation {
+                            plan: &plan,
+                            workspace: &mut scalar_ws,
+                            template: &template,
+                            signal: &signal,
+                            max_lag: usize::MAX,
+                            phat,
+                        })
+                        .to_vec();
                     for (a, b) in native.iter().zip(scalar) {
                         assert!((a - b).abs() < 1e-10, "len={len}, phat={phat}: {a} != {b}");
                     }
@@ -230,14 +385,28 @@ mod tests {
                 signal[embed_at + i] += v;
             }
             for phat in [false, true] {
-                let kernel = || Correlation {
+                let plan = CorrelationPlan::new(template.len(), signal.len());
+                let mut native_ws = CorrelationWorkspace::new(&plan);
+                let mut scalar_ws = CorrelationWorkspace::new(&plan);
+                let native = dispatch(Correlation {
+                    plan: &plan,
+                    workspace: &mut native_ws,
                     template: &template,
                     signal: &signal,
                     max_lag: usize::MAX,
                     phat,
-                };
-                let native = dispatch(kernel());
-                let scalar = pulp::Scalar.vectorize(kernel());
+                })
+                .to_vec();
+                let scalar = pulp::Scalar
+                    .vectorize(Correlation {
+                        plan: &plan,
+                        workspace: &mut scalar_ws,
+                        template: &template,
+                        signal: &signal,
+                        max_lag: usize::MAX,
+                        phat,
+                    })
+                    .to_vec();
                 assert_eq!(native.len(), scalar.len());
                 let mut max_abs = 0.0f64;
                 let mut max_rel = 0.0f64;
