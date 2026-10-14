@@ -24,6 +24,7 @@ Directory: `docs/test-specs`
 | TSPEC-034EO3X1gkbTna1zfQoEG8 | 機械的 caller クリーンアップ検証仕様 | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | TSPEC-035jRegcnGwUqH1RD6oUtJ | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | proposed | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
+| TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |

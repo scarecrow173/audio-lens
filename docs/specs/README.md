@@ -20,6 +20,7 @@ Directory: `docs/specs`
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |
 | SPEC-034EMwMaXGBCfumSazX7zs | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
+| SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
