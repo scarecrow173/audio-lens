@@ -2,7 +2,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
 use al_locate::{
-    dsp::{dot, ncc, sum_sq},
+    dsp::{CorrelationPlan, CorrelationWorkspace, dot, sum_sq},
     prepared::InputCache,
 };
 
@@ -81,11 +81,18 @@ fn windows(
     if n < 2 * margin + window {
         return Vec::new();
     }
+    let plan = CorrelationPlan::new(window, window + 2 * max);
+    let mut workspace = CorrelationWorkspace::new(&plan);
     (margin..=n - margin - window)
         .step_by(hop)
         .map(|start| {
             let a = &x[start..start + window];
-            let curve = ncc(a, &y[start - max..start + window + max], 2 * max);
+            let curve = plan.ncc(
+                &mut workspace,
+                a,
+                &y[start - max..start + window + max],
+                2 * max,
+            );
             let peak = curve.iter().map(|c| c.abs()).fold(0.0, f64::max);
             // FFT の丸め誤差内の同点は、絶対 lag と固定符号順で選ぶ。
             let best = (0..curve.len())

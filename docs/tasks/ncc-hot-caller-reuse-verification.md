@@ -1,7 +1,7 @@
 ---
 id: "TASK-034FQrcP4zy8KVn51A8pyX"
 type: "task"
-status: "todo"
+status: "done"
 title: "2hot callerを再利用に移し確保と速度を検証する"
 created: "2026-10-14"
 updated: "2026-10-14"
@@ -52,11 +52,17 @@ relations:
 
 ## Acceptance Criteria
 
-- [ ] 上記sliceの契約・検証・独立reviewを満たす。
-- [ ] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
+- [x] 上記sliceの契約・検証・独立reviewを満たす。
+- [x] 実行結果を対応irへ記録し、上流planの順序/commit境界を維持する。
 
 ## Verification
 
 [承認済みplanのVerification Matrix](../plans/implement-ncc-plan-workspace-reuse.md)に従う。
 今回同義具体化は2026-10-15 plan Judge ACCEPTに含む。依存/Cargo.lock変更は禁止、mise経由で実行する。
 あなたは他者と共存するため所有外の変更をrevertしない。
+
+## 2026-10-15 Completion Review
+
+A/B/Validator追加0、23artifactSHA一致、production全出力byte同値、基盤loop無確保と
+caller再利用・観測採用条件を確認してJudge ACCEPT、Blocker0。
+統計的有意性/全job改善は承認対象ではなく、本IRの観測条件と限界を維持する。

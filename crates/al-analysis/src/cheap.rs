@@ -9,7 +9,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Resolution, ResolutionClass, Value};
 use al_locate::decode::DecodedInput;
-use al_locate::dsp::{corr0, ncc, rms, sum_sq};
+use al_locate::dsp::{CorrelationPlan, CorrelationWorkspace, corr0, rms, sum_sq};
 
 use crate::records::{RecordBuilder, robust_summary};
 use crate::stft::{StftMatrix, band_power, complex_coherence, envelope, stft, third_octave_bands};
@@ -1306,10 +1306,14 @@ fn ipd_lags(x: &[f64], y: &[f64], block: usize, max_lag: usize) -> Vec<f64> {
     if n < block || max_lag > (n - block) / 2 {
         return Vec::new();
     }
+    let plan = CorrelationPlan::new(block, block + 2 * max_lag);
+    let mut workspace = CorrelationWorkspace::new(&plan);
     (max_lag..=n - block - max_lag)
         .step_by(block)
         .map(|start| {
             ipd_block_lag(
+                &plan,
+                &mut workspace,
                 &x[start..start + block],
                 &y[start - max_lag..start + block + max_lag],
                 max_lag,
@@ -1319,8 +1323,14 @@ fn ipd_lags(x: &[f64], y: &[f64], block: usize, max_lag: usize) -> Vec<f64> {
 }
 
 /// NCC index は探索窓先頭からの offset。中央の原点を引き signed lag にする。
-fn ipd_block_lag(template: &[f64], search: &[f64], origin: usize) -> f64 {
-    let curve = ncc(template, search, 2 * origin);
+fn ipd_block_lag(
+    plan: &CorrelationPlan,
+    workspace: &mut CorrelationWorkspace,
+    template: &[f64],
+    search: &[f64],
+    origin: usize,
+) -> f64 {
+    let curve = plan.ncc(workspace, template, search, 2 * origin);
     let (index, _) = curve
         .iter()
         .enumerate()
@@ -1406,11 +1416,16 @@ mod tests {
     fn ipd_lag_search_origin_preserves_signed_offsets_including_edges() {
         let template = ipd_noise(64);
         let origin = 8;
+        let plan = CorrelationPlan::new(template.len(), template.len() + 2 * origin);
+        let mut workspace = CorrelationWorkspace::new(&plan);
         for lag in [-8_isize, -3, 0, 5, 8] {
             let mut search = vec![0.0; template.len() + 2 * origin];
             let offset = (origin as isize + lag) as usize;
             search[offset..offset + template.len()].copy_from_slice(&template);
-            assert_eq!(ipd_block_lag(&template, &search, origin), lag as f64);
+            assert_eq!(
+                ipd_block_lag(&plan, &mut workspace, &template, &search, origin),
+                lag as f64
+            );
         }
     }
 

@@ -85,3 +85,5 @@ Directory: `docs/impl/ir`
 | ipd-lag-search-fix | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
 
 | ncc-plan-workspace-foundation | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
+
+| ncc-hot-caller-reuse-verification | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |

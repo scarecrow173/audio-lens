@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034FQfhDbOOCKmh4QhnP51"
 type: "plan"
-status: "in-progress"
+status: "completed"
 title: "NCC plan/workspaceを分離し2サイトを再利用へ移す"
 created: "2026-10-14"
 updated: "2026-10-14"
@@ -161,3 +161,15 @@ plan reviewには同義test-spec/task案を束ね、承認後の生成を新判�
 
 A/B0、Validator追加0、pinnedhash一致/diffcheck0、Judge ACCEPT。
 bundledtest-spec1件/task3件の上流同義内容も承認。動的実証は未実施。
+
+## 2026-10-15 Façade適用境界
+
+al-analysisは既存al_locate::dsp経由で数学APIを消費する。新depを追加せず
+crates/al-locate/src/dsp.rsの既存pubuseへCorrelationPlan/Workspace2公開型を1行追加する。
+coordinatorが既存backend中立境界の最小拡張と確認。al-locatecallerの移行はしない。
+
+## 2026-10-15 Completion Review
+
+A/B/Validator追加0、23artifactSHA一致、production全出力byte同値、基盤loop無確保と
+caller再利用・観測採用条件を確認してJudge ACCEPT、Blocker0。
+統計的有意性/全job改善は承認対象ではなく、本IRの観測条件と限界を維持する。
