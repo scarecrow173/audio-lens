@@ -79,3 +79,5 @@ Directory: `docs/impl/ir`
 | viz-waveform-lod | [viz-waveform-lod.md](./viz-waveform-lod.md) |
 | wav-audio-store | [wav-audio-store.md](./wav-audio-store.md) |
 | wav-decode-and-hash | [wav-decode-and-hash.md](./wav-decode-and-hash.md) |
+
+| spec-residual-contract-finalization | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

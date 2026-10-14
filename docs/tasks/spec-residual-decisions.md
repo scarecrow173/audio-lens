@@ -4,7 +4,7 @@ type: "task"
 status: "done"
 title: "spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate"
 created: "2026-10-10"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -180,3 +180,13 @@ codec 依存、read/write 境界と来歴を review し、依存追加の明示�
 
 新 codec 依存や Cargo.lock の変更はない。#32 の既存残差 PCM 永続化を
 前提として再検証し、音声 store 自体の再実装は行っていない。
+
+## #33 現在の正式契約 (2026-10-14)
+
+2026-10-11 の FLAC defer 判断とその完了証拠は履歴として保持する。2026-10-14 に
+ユーザーは残差・中間音声出力を WAV のみと正式仕様化し、FLAC 出力を現行要件から外した。
+fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
+Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
+将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
+今回の承認/適用/検証は [今回task](spec-residual-contract-finalization.md) に記録する。
+旧taskのdoneは今回検証を意味しない。

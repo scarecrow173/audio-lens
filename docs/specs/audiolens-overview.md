@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "AudioLens 全体仕様"
 created: "2026-10-02"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -89,7 +89,8 @@ Visualization Dataset
 `ExpensiveAnalysisStage` の先頭で候補生成 → `events/candidates` 保存 →
 トリガ評価の順に実行する。独立した StageKind や候補のみの再実行は
 要求しない。高コスト解析が抑制されても候補テーブルを保存し、元の
-cheap/reference 特徴と観測へのリンクを保持する。
+cheap/reference 特徴と観測へのリンクを保持する。候補0件でも空テーブルを保存し、
+候補なしと未実行を区別する。候補データは解析結果から独立して参照できる。
 この仕様改訂は #33 の coordinator 承認による
 ([判断と証拠](../tasks/spec-residual-decisions.md))。
 
@@ -155,10 +156,13 @@ cheap/reference 特徴と観測へのリンクを保持する。
 - 保存形式の原則:
   - 表形式 / 時系列特徴: Parquet または同等のカラムナ形式
   - 大規模 N 次元テンソル: チャンク化された Zarr 相当形式
-  - 音声の中間物 / 残差: WAV / FLAC。現行保存は WAV のみ。
-    FLAC 保存は #33 の承認済み defer であり実装済みとは扱わない。
-    減算後残差は Float64 WAV で解析値と来歴を保持する。
-    圧縮保存の再検討条件と制約は [判断記録](../tasks/spec-residual-decisions.md) を参照。
+  - 音声の中間物 / 残差の出力: WAV のみ。減算後残差は Float64 WAV で
+    解析値と来歴を保持する。decoded.f64le の内部 PCM 正本契約は変更しない。
+    FLAC 出力エンコードは現行要件に含めず、入力デコードとは独立に扱う。
+    圧縮は容量・保存時間・I/O の実測が問題となった場合に別 Issue で検討し、
+    PCM の量子化による精度損失を含め解析に必要な精度を保持することを条件とする。
+    [今回の正式仕様](spec-residual-contract-finalization.md) と
+    [旧判断履歴](../tasks/spec-residual-decisions.md) を参照。
   - メタデータ / スキーマ / 来歴: JSON
   - 複素 STFT と代替解析を導出できる十分な基礎量を保持する
   - アルゴリズムバージョン、パラメータ、サンプルレート、
