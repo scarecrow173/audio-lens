@@ -4,7 +4,7 @@ type: "impl"
 status: "completed"
 title: "al-locate dsp re-export vec migration"
 created: "2026-10-12"
-updated: "2026-10-12"
+updated: "2026-10-14"
 owners: []
 relations:
   source: []
@@ -22,7 +22,8 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "docs/discovery/locate-consensus-argmax-ambiguity-contract.md"
   refines: []
   refined-by: []
   derives-from: []
@@ -91,7 +92,11 @@ task `docs/tasks/al-locate-vec-migration.md`、design
 
 ### Decisions During Implementation
 
-- **envelope NCC の `corr0` 置換を残存許容へ逸脱**:
+- **envelope NCC の `corr0` 置換を残存許容へ逸脱**(解消済み
+  2026-10-14 — T3 `docs/tasks/locate-spectral-envelope-corr0.md`
+  で `dsp::corr0` へ置換完了。`argmax_tie_count` の構造的曖昧検出
+  (#59)により厳密同点は `AmbiguousAlignment` として投票除外され、
+  拒否は維持される):
   `methods.rs` envelope NCC を `dsp::corr0` に置換すると、
   golden テスト
   `pinned_periodic_everywhere_not_accepted_at_wrong_phase` が

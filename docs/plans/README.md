@@ -15,6 +15,7 @@ Directory: `docs/plans`
 | PLAN-034AaBtyLhpTxk9Vb4eftR | ゴールデン fixture マトリクスの実装 | completed | [golden-validation.md](./golden-validation.md) |
 | PLAN-034z0yzgmf43IGEQwzG9gE | インジェストとAVタイミングの実装 | completed | [implement-ingest-av.md](./implement-ingest-av.md) |
 | PLAN-034yZp5w0ziN8jQO61t3nW | ジョブオーケストレーション基盤の実装 | completed | [implement-job-orchestration-foundation.md](./implement-job-orchestration-foundation.md) |
+| PLAN-034Fo8JsxsjegvrZWwahTO | locate 合議 argmax 曖昧性検出の実装 | completed | [implement-locate-argmax-ambiguity.md](./implement-locate-argmax-ambiguity.md) |
 | PLAN-034z7HA18FxYMCQPBZ6Gg2 | ソース定位・トラッキングの実装 | completed | [locate-and-tracking.md](./locate-and-tracking.md) |
 | PLAN-034EO41zt4R9uACMi7eaFH | 機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | completed | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |

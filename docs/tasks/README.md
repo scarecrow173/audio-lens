@@ -66,6 +66,9 @@ Directory: `docs/tasks`
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
+| TASK-034Fo9fbMBjYA189SBNMGL | argmax 曖昧性: 回帰計測・Implementation Record・closeout | done | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
+| TASK-034Fo9dDtnY4bqipAEqfDV | argmax 曖昧性検出の実装: evidence 分岐・投票除外・merged_votes/best_window_match・バージョン | done | [locate-argmax-ambiguity-detection.md](./locate-argmax-ambiguity-detection.md) |
+| TASK-034Fo9cS08WsbNrLoq6t6a | argmax 同点検出: 受理系 fixture マージンと scalar↔dispatch 偏差の特性計測 | done | [locate-argmax-tie-eps-characterization.md](./locate-argmax-tie-eps-characterization.md) |
 | TASK-035gGKtgDKLiTaF31a5GUM | locate: 帯域キャッシュ + coarse-to-fine 間引き探索 | done | [locate-coarse-fine.md](./locate-coarse-fine.md) |
 | TASK-034z8kB6w92jCsle2QoqKe | 合議受理 + 失敗モードフラグ | done | [locate-consensus.md](./locate-consensus.md) |
 | TASK-034z8kK3Fu6B5tJ0qnORg0 | locate 結合テスト(合成 fixture) | done | [locate-integration-tests.md](./locate-integration-tests.md) |
@@ -76,6 +79,7 @@ Directory: `docs/tasks`
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | done | [locate-residual.md](./locate-residual.md) |
 | TASK-034z8kAE3mkxbYycE0kq7l | LocateResult スキーマ + AlignmentId 発行 | done | [locate-result-schema.md](./locate-result-schema.md) |
 | TASK-034z8kzGSMXKkTFTGi2GJ6 | al-locate 骨格 + DSP プリミティブ + workspace 配線 | done | [locate-skeleton-dsp.md](./locate-skeleton-dsp.md) |
+| TASK-034Fo9esKwwz1f702dj84C | spectral_envelope 逐次 NCC の dsp::corr0 移行(完了証明) | done | [locate-spectral-envelope-corr0.md](./locate-spectral-envelope-corr0.md) |
 | TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | done | [locate-stage-cli.md](./locate-stage-cli.md) |
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
 | TASK-034EO4rKpEFHb4NpDpz5py | 機械的 caller クリーンアップ A15: interleave/deinterleave のブロック書き込み化 | done | [mech-cleanup-a15-interleave-block-writes.md](./mech-cleanup-a15-interleave-block-writes.md) |

@@ -41,6 +41,8 @@ Directory: `docs/impl/ir`
 | ingest-stage-and-cli-wiring | [ingest-stage-and-cli-wiring.md](./ingest-stage-and-cli-wiring.md) |
 | init-rust-workspace | [init-rust-workspace.md](./init-rust-workspace.md) |
 | job-manifest-registry | [job-manifest-registry.md](./job-manifest-registry.md) |
+| locate-argmax-ambiguity-closeout | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
+| locate-argmax-tie-eps-characterization | [locate-argmax-tie-eps-calibration.md](./locate-argmax-tie-eps-calibration.md) |
 | locate-consensus | [locate-consensus.md](./locate-consensus.md) |
 | locate-integration-tests | [locate-integration-tests.md](./locate-integration-tests.md) |
 | locate-methods | [locate-methods.md](./locate-methods.md) |

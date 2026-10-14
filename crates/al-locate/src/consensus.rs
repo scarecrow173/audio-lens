@@ -75,10 +75,21 @@ pub fn evaluate(
     // Usable top candidates: one vote per method, and its top peak
     // clears the score/background floors. Scores are signed (negative
     // = polarity inversion); agreement is judged on magnitude.
+    // Ambiguous evidence is excluded alongside failed computations —
+    // a tied argmax is not a position vote.
+    let n_ambiguous = evidence
+        .iter()
+        .filter(|e| e.validity == Validity::AmbiguousAlignment)
+        .count();
     let mut seen_methods: Vec<&str> = Vec::new();
     let votes: Vec<u64> = evidence
         .iter()
-        .filter(|e| e.validity != Validity::ComputationFailed)
+        .filter(|e| {
+            !matches!(
+                e.validity,
+                Validity::ComputationFailed | Validity::AmbiguousAlignment
+            )
+        })
         .filter_map(|e| {
             if seen_methods.contains(&e.method.as_str()) {
                 return None;
@@ -132,6 +143,19 @@ pub fn evaluate(
     };
 
     if votes.is_empty() {
+        // 曖昧性による投票除外は「証拠が弱い」ではなく「曖昧である」と
+        // 報告する — any_valid 分岐より先に判定する。
+        if n_ambiguous >= 1 {
+            return result(
+                false,
+                0,
+                0,
+                None,
+                Confidence::Low,
+                Validity::AmbiguousAlignment,
+                Some("all voting methods produced ambiguous (tied) peaks".into()),
+            );
+        }
         let any_valid = evidence.iter().any(|e| e.validity == Validity::Valid);
         return result(
             false,
@@ -171,6 +195,13 @@ pub fn evaluate(
 
     let contested = clusters.len() > 1 && clusters[1].len() as u32 >= config.min_agreeing_methods;
     if agreeing < config.min_agreeing_methods {
+        let mut reason = format!(
+            "only {agreeing} method(s) agree (need {})",
+            config.min_agreeing_methods
+        );
+        if n_ambiguous >= 1 {
+            reason.push_str(&format!("; {n_ambiguous} method(s) excluded as ambiguous"));
+        }
         return result(
             false,
             agreeing,
@@ -178,10 +209,7 @@ pub fn evaluate(
             Some(position),
             Confidence::Low,
             Validity::AmbiguousAlignment,
-            Some(format!(
-                "only {agreeing} method(s) agree (need {})",
-                config.min_agreeing_methods
-            )),
+            Some(reason),
         );
     }
     if contested {
@@ -219,7 +247,7 @@ mod tests {
     fn ev(method: &str, pos: u64, score: f64) -> MethodEvidence {
         MethodEvidence {
             method: method.into(),
-            method_version: "1".into(),
+            method_version: "2".into(),
             candidates: vec![LocateCandidate {
                 position: pos,
                 score,
@@ -247,7 +275,7 @@ mod tests {
             ev("phat", 1050, 0.8),
             ev("env", 9999, 0.7),
         ];
-        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "1");
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
         assert!(r.accepted);
         assert_eq!(r.agreeing_methods, 2);
         assert_eq!(r.capture_range.start, 1000);
@@ -262,7 +290,7 @@ mod tests {
             ev("phat", 9000, 0.8),
             ev("env", 4000, 0.7),
         ];
-        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "1");
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
         assert!(!r.accepted);
         assert_eq!(r.validity, Validity::AmbiguousAlignment);
         // Evidence preserved even on rejection.
@@ -273,7 +301,7 @@ mod tests {
     fn rejects_when_no_votes() {
         let mut e = ev("ncc", 100, 0.9);
         e.candidates.clear();
-        let r = evaluate(&[e], "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "1");
+        let r = evaluate(&[e], "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
         assert!(!r.accepted);
     }
 
@@ -293,7 +321,7 @@ mod tests {
             position_tolerance: 100,
             ..Default::default()
         };
-        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg, "locate", "1");
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg, "locate", "2");
         assert!(!r.accepted);
         assert_eq!(r.agreeing_methods, 2);
         assert!(r.position_spread <= 100);
@@ -307,8 +335,76 @@ mod tests {
             ev("env", 9000, 0.85),
             ev("band", 9020, 0.75),
         ];
-        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "1");
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
         assert!(!r.accepted);
         assert_eq!(r.validity, Validity::AmbiguousAlignment);
+    }
+
+    fn ambiguous_ev(method: &str, pos: u64, score: f64) -> MethodEvidence {
+        let mut e = ev(method, pos, score);
+        e.validity = Validity::AmbiguousAlignment;
+        e.reject_reason =
+            Some("top correlation peaks indistinguishable within tolerance (2 positions)".into());
+        e
+    }
+
+    #[test]
+    fn all_ambiguous_evidence_yields_ambiguous_result() {
+        // 全証拠が曖昧 → 投票が空でも LowCorrelation /
+        // InsufficientSupport には落ちない。
+        let e = vec![
+            ambiguous_ev("ncc", 1000, 0.9),
+            ambiguous_ev("phat", 2000, 0.8),
+            ambiguous_ev("env", 3000, 0.7),
+        ];
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
+        assert!(!r.accepted);
+        assert_eq!(r.validity, Validity::AmbiguousAlignment);
+        assert_eq!(
+            r.reject_reason.as_deref().unwrap(),
+            "all voting methods produced ambiguous (tied) peaks"
+        );
+        assert!(
+            !r.reject_reason
+                .as_deref()
+                .unwrap()
+                .contains("method(s) agree")
+        );
+        assert_eq!(r.agreeing_methods, 0);
+        assert_eq!(r.position_spread, 0);
+        assert_eq!(r.confidence, Confidence::Low);
+    }
+
+    #[test]
+    fn empty_votes_with_ambiguous_take_precedence_over_weak_split() {
+        // 曖昧証拠と混在する空投票は any_valid → LowCorrelation /
+        // InsufficientSupport より先に曖昧として分類される。
+        let mut no_peak = ev("env", 4000, 0.7);
+        no_peak.candidates.clear(); // Valid だが候補なし → 投票しない
+        let e = vec![ambiguous_ev("ncc", 1000, 0.9), no_peak];
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
+        assert!(!r.accepted);
+        assert_eq!(r.validity, Validity::AmbiguousAlignment);
+        assert_eq!(
+            r.reject_reason.as_deref().unwrap(),
+            "all voting methods produced ambiguous (tied) peaks"
+        );
+    }
+
+    #[test]
+    fn agreement_shortage_notes_excluded_ambiguous_evidence() {
+        // 非曖昧投票の合意不足では、除外された曖昧証拠を理由に付記する。
+        let e = vec![
+            ev("ncc", 1000, 0.9),
+            ambiguous_ev("phat", 2000, 0.8),
+            ambiguous_ev("env", 3000, 0.7),
+        ];
+        let r = evaluate(&e, "IN-s", "IN-c", 500, 48000, &cfg(), "locate", "2");
+        assert!(!r.accepted);
+        assert_eq!(r.validity, Validity::AmbiguousAlignment);
+        assert_eq!(
+            r.reject_reason.as_deref().unwrap(),
+            "only 1 method(s) agree (need 2); 2 method(s) excluded as ambiguous"
+        );
     }
 }
