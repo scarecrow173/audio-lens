@@ -1270,21 +1270,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         if dec.channel_samples.len() >= 2 {
             let x = &dec.channel_samples[0];
             let y = &dec.channel_samples[1];
-            let n = x.len().min(y.len());
             let block = ((0.1 * rate as f64).round() as usize).max(64);
             let max_lag = ((cfg.ipd_max_lag_s * 4.0) * rate as f64).round() as usize;
-            let mut lags = Vec::new();
-            for start in (0..n.saturating_sub(block)).step_by(block) {
-                let xa = &x[start..start + block];
-                let ya = &y[start..start + block];
-                let curve = ncc(xa, ya, max_lag);
-                let (li, _) = curve
-                    .iter()
-                    .enumerate()
-                    .max_by(|a, b| a.1.total_cmp(b.1))
-                    .unwrap_or((0, &0.0));
-                lags.push(li as f64 - max_lag as f64);
-            }
+            let lags = ipd_lags(x, y, block, max_lag);
             if !lags.is_empty() {
                 let drift = lags.iter().copied().fold(f64::MIN, f64::max)
                     - lags.iter().copied().fold(f64::MAX, f64::min);
@@ -1311,6 +1299,36 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
     out
 }
 
+/// IPD の各 block に左右の探索余白を確保し、符号付き lag を返す。
+fn ipd_lags(x: &[f64], y: &[f64], block: usize, max_lag: usize) -> Vec<f64> {
+    let n = x.len().min(y.len());
+    // この条件により block + 2 * max_lag が入力内に収まる。
+    if n < block || max_lag > (n - block) / 2 {
+        return Vec::new();
+    }
+    (max_lag..=n - block - max_lag)
+        .step_by(block)
+        .map(|start| {
+            ipd_block_lag(
+                &x[start..start + block],
+                &y[start - max_lag..start + block + max_lag],
+                max_lag,
+            )
+        })
+        .collect()
+}
+
+/// NCC index は探索窓先頭からの offset。中央の原点を引き signed lag にする。
+fn ipd_block_lag(template: &[f64], search: &[f64], origin: usize) -> f64 {
+    let curve = ncc(template, search, 2 * origin);
+    let (index, _) = curve
+        .iter()
+        .enumerate()
+        .max_by(|a, b| a.1.total_cmp(b.1))
+        .expect("IPD search window contains the complete template");
+    index as f64 - origin as f64
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1332,6 +1350,108 @@ mod tests {
             .iter()
             .find(|r| r.feature_id == id)
             .unwrap_or_else(|| panic!("missing record {id}"))
+    }
+
+    fn ipd_noise(n: usize) -> Vec<f64> {
+        let mut state = 0x52_u64;
+        (0..n)
+            .map(|_| {
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                ((state >> 33) as f64 / (1_u64 << 31) as f64 - 0.5) * 0.4
+            })
+            .collect()
+    }
+
+    #[test]
+    fn ipd_lag_drift_reports_negative_to_positive_change_for_first_pair() {
+        let rate = 8000;
+        let x = ipd_noise(4800);
+        let y: Vec<_> = (0..x.len())
+            .map(|j| {
+                let lag = if j < x.len() / 2 { -3 } else { 5 };
+                let source = j as isize - lag;
+                if source >= 0 {
+                    x.get(source as usize).copied().unwrap_or(0.0)
+                } else {
+                    0.0
+                }
+            })
+            .collect();
+        let out = analyze_input(
+            &dec(vec![x, y, vec![0.0; 4800]], rate),
+            &CheapConfig::default(),
+        );
+        let record = rec(&out, "mod.lag_drift_samples");
+        assert_eq!(record.target, Some(8.0));
+        assert_eq!(
+            record.channels,
+            Some(al_dataset::types::ChannelSelector::ChannelPair(0, 1))
+        );
+    }
+
+    #[test]
+    fn ipd_lag_zero_width_exact_block_is_observed() {
+        let x = ipd_noise(800);
+        let cfg = CheapConfig {
+            ipd_max_lag_s: 0.0,
+            ..CheapConfig::default()
+        };
+        let out = analyze_input(&dec(vec![x.clone(), x], 8000), &cfg);
+        let record = rec(&out, "mod.lag_drift_samples");
+        assert_eq!(record.target, Some(0.0));
+        assert_eq!(record.support_count, 1);
+    }
+
+    #[test]
+    fn ipd_lag_search_origin_preserves_signed_offsets_including_edges() {
+        let template = ipd_noise(64);
+        let origin = 8;
+        for lag in [-8_isize, -3, 0, 5, 8] {
+            let mut search = vec![0.0; template.len() + 2 * origin];
+            let offset = (origin as isize + lag) as usize;
+            search[offset..offset + template.len()].copy_from_slice(&template);
+            assert_eq!(ipd_block_lag(&template, &search, origin), lag as f64);
+        }
+    }
+
+    #[test]
+    fn ipd_lag_fixed_offset_has_no_drift() {
+        let x = ipd_noise(512);
+        for lag in [-3_isize, 5] {
+            let y: Vec<_> = (0..x.len())
+                .map(|j| {
+                    let source = j as isize - lag;
+                    if source >= 0 {
+                        x.get(source as usize).copied().unwrap_or(0.0)
+                    } else {
+                        0.0
+                    }
+                })
+                .collect();
+            let lags = ipd_lags(&x, &y, 64, 8);
+            assert!(!lags.is_empty());
+            assert!(lags.iter().all(|&v| v == lag as f64), "{lags:?}");
+        }
+    }
+
+    #[test]
+    fn ipd_lag_requires_complete_margins_in_both_channels() {
+        let x = ipd_noise(128);
+        assert!(ipd_lags(&x[..63], &x[..63], 64, 0).is_empty());
+        assert!(ipd_lags(&x, &x[..79], 64, 8).is_empty());
+        assert_eq!(ipd_lags(&x[..80], &x[..80], 64, 8), vec![0.0]);
+        assert!(ipd_lags(&x, &x, 64, usize::MAX).is_empty());
+    }
+
+    #[test]
+    fn ipd_lag_negative_config_keeps_zero_width_conversion() {
+        let x = ipd_noise(800);
+        let cfg = CheapConfig {
+            ipd_max_lag_s: -0.001,
+            ..CheapConfig::default()
+        };
+        let out = analyze_input(&dec(vec![x.clone(), x], 8000), &cfg);
+        assert_eq!(rec(&out, "mod.lag_drift_samples").target, Some(0.0));
     }
 
     #[test]

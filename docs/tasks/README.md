@@ -66,7 +66,7 @@ Directory: `docs/tasks`
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
-| TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | in-progress | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
+| TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
 | TASK-034Fo9fbMBjYA189SBNMGL | argmax 曖昧性: 回帰計測・Implementation Record・closeout | done | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
 | TASK-034Fo9dDtnY4bqipAEqfDV | argmax 曖昧性検出の実装: evidence 分岐・投票除外・merged_votes/best_window_match・バージョン | done | [locate-argmax-ambiguity-detection.md](./locate-argmax-ambiguity-detection.md) |
