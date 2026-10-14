@@ -103,3 +103,24 @@ patch SHA256 F036A6E04814D791ADAC3C19007B6D05B166F2333AE7F3695BC67D98A1C3543F。
 
 A/B/Validator追加0、Judge ACCEPT。独立cheap17/IPD6検証とsourcehash一致を確認。
 callerfixのみをmath/reuseと独立commitする。
+
+## Fix後の相関microbenchmark Baseline
+
+IPD独立commit f12e9203be8bfda20b6075be9099db3f62318b81でfreeonly baselineを取得。
+artifact target/ncc-reuse-evidence/baseline-f12e920/manifest.json、SHA256 d5cd1e7a88da22c6a87cf6a84a58a61fe631a1b1f6c3884de796b25c7ceb7267。
+binary SHA256 77ae18fab7c337f82f75c6ad10ad9c940973e75718edaff8f1b297b057b4dab4。
+6case×raw3000call samples、cold、p50/p95、phaseRSS/PID/UTCinterval、host/toolchain/ISA、
+fixturebytes/harness/outputhashを保存。ISA probeは同hostのpulp::Arch::new()。
+
+| shape/mode | p50 ms | p95 ms | cold ms |
+| --- | --- | --- |
+| band-ncc | 0.321200 | 0.642300 | 0.717300 |
+| band-phat | 0.321800 | 0.589800 | 0.710800 |
+| ipd-ncc | 0.320500 | 0.632900 | 0.733500 |
+| ipd-phat | 0.319500 | 0.603800 | 0.687900 |
+| large-ncc | 10.449900 | 13.042300 | 12.030800 |
+| large-phat | 10.752800 | 16.246900 | 13.877900 |
+
+一時harness/probeは自作ファイルだけ除去。製品依存追加なし。これは相関freecallの基準であり
+2site実caller e2eのbaselineではない。後続slice3でcaller計測を別途確認し、速度改善はまだ主張しない。
+phaseRSSはcurrent working set、peakはprocess lifetimeでありphasepeakではない。

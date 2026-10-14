@@ -140,3 +140,12 @@ impl-record auditで必須section欠落5件を持つため、全体ir監査成�
 
 今回独立A/B候補各0、Validator追加0、Judge ACCEPT。14 passedのworker証拠と
 一時検証による恒久保証なしの限界を受理。元dirty/並行#52をstageしない。
+
+## 2026-10-15 Graph Closure
+
+#52判断/IPD先行fixを論理commitした後、git status --porcelainが空となり
+保持した#33 baselineに対して新dirtyなし、strict commit gateを通過した。
+既存legacyIRの5欠落は独立maintenancecommit f627391で解消。IR72/task120 findingsなし、
+all audit253文書 blocking0/findingsなしを確認。宣言route implementation→followup-triage→
+exit-audit→completeを1辺ずつ実行し、complete nodeのterminalを確認した。
+#33 commit a725ba8、後続#52の動的AC/性能実証はこのterminalの範囲外。
