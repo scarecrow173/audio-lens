@@ -88,3 +88,5 @@ job-orchestration (不変ジョブ / ステージ計画)
   レビュアー承認(`approved`)されるまでは planning に進まない
 
 | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) | #33 確定仕様の文書適用設計(approved) | 今回spec、ADR |
+
+| [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) | #52 不変plan/排他workspaceと2site再利用(approved) | NCC reuse spec、ADR |

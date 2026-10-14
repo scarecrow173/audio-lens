@@ -1,5 +1,6 @@
 # DESIGN Documents
 
+
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/designs`
@@ -21,6 +22,7 @@ Directory: `docs/designs`
 | DESIGN-034ENh1Caa1pUN8HBonU2b | 機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) の実装設計 | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | DESIGN-034DlwOAFNKWY4VRafyYzo | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | DESIGN-034AasAnWroBLn28EPuQ5Y | MP4 demux とタイミング観測設計 | approved | [mp4-ingest.md](./mp4-ingest.md) |
+| DESIGN-034FPWNHT7czdzzGSNBU2Q | NCC plan/workspace 分離と2サイト再利用設計 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |
 | DESIGN-034DlyKvtWhb8oy1WLAsPV | 残存課題の責務境界と検証設計 | approved | [residual-fixes.md](./residual-fixes.md) |
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
