@@ -196,4 +196,81 @@ mod tests {
             }
         }
     }
+
+    /// 決定的ノイズ(al-locate 計測と同じ LCG)。
+    fn noise(len: usize, seed: u64) -> Vec<f64> {
+        let mut s = seed;
+        (0..len)
+            .map(|_| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                ((s >> 11) as f64 / (1u64 << 53) as f64) * 2.0 - 1.0
+            })
+            .collect()
+    }
+
+    // T1 characterization(TASK-034Fo9cS08WsbNrLoq6t6a / test-spec
+    // `locate-argmax-tie-eps-calibration.md` Rule B): 実運用 FFT
+    // サイズでの scalar↔dispatch 偏差上限を実測する。本番 NCC は
+    // `(signal.len()+template.len()-1).next_power_of_two()` の
+    // RealFFT(golden 規模 ~64k-point)で、既存の小入力アサーション
+    // (上記、信号 ≤ 382)はその偏差を直接カバーしない。
+    #[test]
+    fn dispatch_deviation_at_production_fft_size() {
+        // (signal_len, template_len, embed_at): n = 65536 と 32768。
+        for (signal_len, template_len, embed_at) in [
+            (40_000usize, 4_096usize, 9_600usize),
+            (24_576, 8_192, 12_000),
+        ] {
+            let n = (signal_len + template_len - 1).next_power_of_two();
+            let template = noise(template_len, 41);
+            let mut signal = noise(signal_len, 43);
+            for (i, &v) in template.iter().enumerate() {
+                signal[embed_at + i] += v;
+            }
+            for phat in [false, true] {
+                let kernel = || Correlation {
+                    template: &template,
+                    signal: &signal,
+                    max_lag: usize::MAX,
+                    phat,
+                };
+                let native = dispatch(kernel());
+                let scalar = pulp::Scalar.vectorize(kernel());
+                assert_eq!(native.len(), scalar.len());
+                let mut max_abs = 0.0f64;
+                let mut max_rel = 0.0f64;
+                let mut top_dev = 0.0f64;
+                // dispatch 側の argmax 近傍(上位値)での偏差も記録する
+                // — 同点判定は最大値近傍の偏差だけが反転を起こし得る。
+                let (argmax, m) = native
+                    .iter()
+                    .enumerate()
+                    .max_by(|a, b| a.1.abs().total_cmp(&b.1.abs()))
+                    .map(|(i, v)| (i, v.abs()))
+                    .unwrap();
+                for (i, (&a, &b)) in native.iter().zip(&scalar).enumerate() {
+                    let d = (a - b).abs();
+                    max_abs = max_abs.max(d);
+                    max_rel = max_rel.max(d / a.abs().max(b.abs()).max(1.0));
+                    if a.abs() >= m - 1e-3 {
+                        top_dev = top_dev.max(d);
+                    }
+                    // 採用 eps(TIE_REL_EPS=1e-11)より厳密に小さいこと
+                    // を dispatch 不変性の要求として pin する
+                    // (計測値は ≤ ~5e-18)。
+                    assert!(
+                        d < 1e-12,
+                        "n={n} phat={phat} lag={i}: dispatch {a} vs scalar {b}"
+                    );
+                }
+                eprintln!(
+                    "correlation dispatch-dev: n={n} phat={phat} \
+                     max_abs={max_abs:.3e} max_rel={max_rel:.3e} \
+                     argmax={argmax} M={m:.6e} dev_within_1e-3_of_M={top_dev:.3e}"
+                );
+            }
+        }
+    }
 }

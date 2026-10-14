@@ -177,6 +177,49 @@ mod tests {
         }
     }
 
+    // T1 characterization(TASK-034Fo9cS08WsbNrLoq6t6a / test-spec
+    // `locate-argmax-tie-eps-calibration.md` Rule B): `Envelope`
+    // カーネルの scalar↔dispatch 偏差を実運用サイズで実測する。
+    // production では `SpectralEnvelope::locate` が fft_size=1024・
+    // bins=32 でテンプレート長(数kサンプル)の窓へ適用し、実効
+    // FFT は `max(fft_size, len.next_power_of_two())`。
+    #[test]
+    fn dispatch_deviation_envelope_at_production_sizes() {
+        let mut s = 7u64;
+        let mut noise = |len: usize| -> Vec<f64> {
+            (0..len)
+                .map(|_| {
+                    s = s
+                        .wrapping_mul(6364136223846793005)
+                        .wrapping_add(1442695040888963407);
+                    ((s >> 11) as f64 / (1u64 << 53) as f64) * 2.0 - 1.0
+                })
+                .collect()
+        };
+        for len in [2_048usize, 4_096, 8_192] {
+            let input = noise(len);
+            let n = 1_024usize.max(len.next_power_of_two());
+            let kernel = || Envelope {
+                samples: &input,
+                fft_size: 1_024,
+                bins: 32,
+            };
+            let native = dispatch(kernel());
+            let scalar = pulp::Scalar.vectorize(kernel());
+            assert_eq!(native.len(), scalar.len());
+            let mut max_abs = 0.0f64;
+            for (&a, &b) in native.iter().zip(&scalar) {
+                let d = (a - b).abs();
+                max_abs = max_abs.max(d);
+                // 採用 eps(TIE_REL_EPS=1e-11)より厳密に小さいことを
+                // dispatch 不変性の要求として pin する(計測値は
+                // ≤ ~5e-16)。
+                assert!(d < 1e-12, "n={n}: dispatch {a} vs scalar {b}");
+            }
+            eprintln!("envelope dispatch-dev: len={len} fft_n={n} max_abs={max_abs:.3e}");
+        }
+    }
+
     #[test]
     #[should_panic(expected = "fft_size must be a non-zero power of two")]
     fn envelope_panics_on_zero_fft_size() {

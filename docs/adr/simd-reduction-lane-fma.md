@@ -28,6 +28,7 @@ relations:
     - "../specs/al-math-vec-primitives.md"
     - "al-math-vec-primitives-slice-boundary.md"
     - "al-math-api-fft-split-re-im.md"
+    - "locate-argmax-ambiguity-representation.md"
   refines: []
   refined-by: []
   derives-from:

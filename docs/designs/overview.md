@@ -53,6 +53,7 @@ relations:
 | [visualization-export.md](./visualization-export.md) | 可視化派生データ・サマリ・パッケージ | 可視化・エクスポート・検証 spec、派生 ADR |
 
 | [residual-fixes.md](./residual-fixes.md) | #28〜#33 の残存契約修正・仕様判断(draft) | 残件 spec、責務境界 ADR |
+| [locate-consensus-argmax-ambiguity.md](./locate-consensus-argmax-ambiguity.md) | #59 合議 argmax 曖昧性検出契約の実装設計(draft) | 曖昧性契約 spec、証拠表現 ADR、探索 |
 
 ## 層構造と依存
 

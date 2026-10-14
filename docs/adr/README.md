@@ -14,6 +14,7 @@ Directory: `docs/adr`
 | ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | proposed | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |
 | ADR-034yYyq7wrVYD7X3NvjeX0 | 不変ジョブと再開可能なステージ実行を採用する | proposed | [immutable-resumable-job.md](./immutable-resumable-job.md) |
 | ADR-034yZb7m1ru4R4k7m8jLme | 実装言語に Rust を採用しコア処理を自前モジュールで実装する | accepted | [implementation-stack.md](./implementation-stack.md) |
+| ADR-034FlIKrgxUPy1AQk3WGlb | 合議 argmax 曖昧性の証拠レベル表現 | accepted | [locate-argmax-ambiguity-representation.md](./locate-argmax-ambiguity-representation.md) |
 | ADR-034EdkLsGVFb43OUttkjdR | ログ sink・format・activation の契約 | accepted | [logging-sink-format-activation-contract.md](./logging-sink-format-activation-contract.md) |
 | ADR-034yYy5vgxc67xWxy1A4kH | 観測出力を評決より優先する | proposed | [measurement-over-verdict.md](./measurement-over-verdict.md) |
 | ADR-034DxdUT164IPZdcbKOLQo | MediaDecoder は native 優先の registry と段階的 backend 導入を採用する | accepted | [media-decoder-backend.md](./media-decoder-backend.md) |
