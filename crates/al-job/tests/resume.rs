@@ -31,11 +31,17 @@ impl Stage for StubStage {
         if self.fail.get() {
             return Err(StageError::new(self.kind, "stub failure"));
         }
+        let rel = PathBuf::from(format!("intermediate/{:?}.json", self.kind).to_lowercase());
+        // A completed stage's recorded artifacts must exist on disk:
+        // resume verifies them before skipping the stage.
+        let abs = ctx.registry.job_dir().join(&rel);
+        std::fs::create_dir_all(abs.parent().unwrap()).unwrap();
+        std::fs::write(&abs, b"{}").unwrap();
         let id = ctx.registry.issue();
         Ok(vec![ArtifactRecord {
             artifact_id: id,
             role: format!("{:?}_output", self.kind).to_lowercase(),
-            path: PathBuf::from(format!("intermediate/{:?}.json", self.kind).to_lowercase()),
+            path: rel,
             produced_by: Some(self.kind),
             inputs: vec![],
             params: serde_json::json!({}),
@@ -446,6 +452,161 @@ fn dependency_order_violation_is_rejected() {
     .unwrap();
     let mut trio = stub_trio();
     assert!(runner.run(&def, &mut trio.stages).is_err());
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Stage that writes a file artifact and records its `byte_len`, so
+/// resume can detect truncation, not just absence.
+struct ByteLenStage {
+    runs: Rc<Cell<usize>>,
+}
+
+impl Stage for ByteLenStage {
+    fn kind(&self) -> StageKind {
+        StageKind::Ingest
+    }
+
+    fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
+        self.runs.set(self.runs.get() + 1);
+        let rel = PathBuf::from("intermediate/pcm.bin");
+        let abs = ctx.registry.job_dir().join(&rel);
+        std::fs::create_dir_all(abs.parent().unwrap()).unwrap();
+        let payload = b"sixty-four-bytes-of-payload";
+        std::fs::write(&abs, payload).unwrap();
+        Ok(vec![ArtifactRecord {
+            artifact_id: ctx.registry.issue(),
+            role: "decoded_pcm".into(),
+            path: rel,
+            produced_by: Some(StageKind::Ingest),
+            inputs: vec![],
+            params: serde_json::json!({"byte_len": payload.len() as u64}),
+        }])
+    }
+}
+
+/// Stage that produces a directory store root and records its member
+/// files in `params.files`, like a dataset table/tensor store.
+struct DirStage {
+    runs: Rc<Cell<usize>>,
+}
+
+impl Stage for DirStage {
+    fn kind(&self) -> StageKind {
+        StageKind::Ingest
+    }
+
+    fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
+        self.runs.set(self.runs.get() + 1);
+        let rel = PathBuf::from("store/table");
+        let abs = ctx.registry.job_dir().join(&rel);
+        std::fs::create_dir_all(abs.join("col_a")).unwrap();
+        std::fs::write(abs.join("index.json"), b"{}").unwrap();
+        std::fs::write(abs.join("col_a/000000.bin"), b"chunk").unwrap();
+        Ok(vec![ArtifactRecord {
+            artifact_id: ctx.registry.issue(),
+            role: "table_store".into(),
+            path: rel,
+            produced_by: Some(StageKind::Ingest),
+            inputs: vec![],
+            params: serde_json::json!({"files": ["index.json", "col_a/000000.bin"]}),
+        }])
+    }
+}
+
+#[test]
+fn resume_regenerates_missing_completed_artifact() {
+    let dir = temp_dir("missing");
+    let runner = StageRunner::new(&dir);
+    let def = sample_def(&dir);
+    let mut trio = stub_trio();
+
+    runner.run(&def, &mut trio.stages).unwrap();
+    // Simulate a power-loss drop of a relaxed-tier artifact that the
+    // manifest already recorded under a completed stage.
+    std::fs::remove_file(runner.job_dir(&def.job_id).join("intermediate/ingest.json")).unwrap();
+
+    runner.resume(&def, &mut trio.stages).unwrap();
+    // Only the demoted stage re-runs; intact completed stages skip.
+    assert_eq!(
+        (trio.a_runs.get(), trio.b_runs.get(), trio.c_runs.get()),
+        (2, 1, 1)
+    );
+    // The stale artifact record was replaced by the regenerated one.
+    let manifest = Manifest::load(&runner.job_dir(&def.job_id)).unwrap();
+    assert_eq!(
+        manifest.stage(StageKind::Ingest).unwrap().artifacts.len(),
+        1
+    );
+    let path = manifest
+        .artifact(&manifest.stage(StageKind::Ingest).unwrap().artifacts[0])
+        .unwrap();
+    assert!(runner.job_dir(&def.job_id).join(&path.path).exists());
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn resume_regenerates_truncated_byte_len_artifact() {
+    let dir = temp_dir("truncated");
+    let runner = StageRunner::new(&dir);
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, capture)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    )
+    .unwrap();
+    let runs = Rc::new(Cell::new(0));
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(ByteLenStage { runs: runs.clone() })];
+
+    runner.run(&def, &mut stages).unwrap();
+    // Truncate the recorded file: existence passes but byte_len fails.
+    let artifact = runner.job_dir(&def.job_id).join("intermediate/pcm.bin");
+    std::fs::write(&artifact, b"short").unwrap();
+
+    runner.resume(&def, &mut stages).unwrap();
+    assert_eq!(runs.get(), 2);
+    assert_eq!(
+        std::fs::read(&artifact).unwrap(),
+        b"sixty-four-bytes-of-payload"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn resume_regenerates_dir_artifact_with_missing_member() {
+    let dir = temp_dir("dirmiss");
+    let runner = StageRunner::new(&dir);
+    let capture = dir.join("capture.mkv");
+    std::fs::write(&capture, b"fixture capture").unwrap();
+    let def = JobDefinition::create(
+        vec![input(InputRole::CaptureBug, capture)],
+        serde_json::json!({}),
+        vec![StageKind::Ingest],
+    )
+    .unwrap();
+    let runs = Rc::new(Cell::new(0));
+    let mut stages: Vec<Box<dyn Stage>> = vec![Box::new(DirStage { runs: runs.clone() })];
+
+    runner.run(&def, &mut stages).unwrap();
+    std::fs::remove_file(
+        runner
+            .job_dir(&def.job_id)
+            .join("store/table/col_a/000000.bin"),
+    )
+    .unwrap();
+
+    runner.resume(&def, &mut stages).unwrap();
+    assert_eq!(runs.get(), 2);
+    assert!(
+        runner
+            .job_dir(&def.job_id)
+            .join("store/table/col_a/000000.bin")
+            .exists()
+    );
 
     std::fs::remove_dir_all(&dir).ok();
 }

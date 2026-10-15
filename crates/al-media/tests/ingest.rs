@@ -255,10 +255,16 @@ fn resume_reuses_completed_ingest_artifacts() {
         }
         fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
             self.ran.set(self.ran.get() + 1);
+            // A completed stage's recorded artifacts must exist on
+            // disk: resume verifies them before skipping the stage.
+            let rel = std::path::PathBuf::from("intermediate/probe.json");
+            let abs = ctx.registry.job_dir().join(&rel);
+            std::fs::create_dir_all(abs.parent().unwrap()).unwrap();
+            std::fs::write(&abs, b"{}").unwrap();
             Ok(vec![ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
                 role: "probe".into(),
-                path: "intermediate/probe.json".into(),
+                path: rel,
                 produced_by: Some(StageKind::Locate),
                 inputs: vec![],
                 params: serde_json::json!({}),
