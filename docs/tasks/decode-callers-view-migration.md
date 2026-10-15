@@ -1,7 +1,7 @@
 ---
 id: "TASK-034G5V4SprTlEV2DE7NzIS"
 type: "task"
-status: "todo"
+status: "done"
 title: "decode_input/read_normalized_record の view 移行"
 created: "2026-10-15"
 updated: "2026-10-15"
