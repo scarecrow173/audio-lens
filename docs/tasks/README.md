@@ -62,6 +62,7 @@ Directory: `docs/tasks`
 | TASK-034dLdqYk3HXx4PdtOgnVz | al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW) | done | [expensive-review-consistency.md](./expensive-review-consistency.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
 | TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | done | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
+| TASK-034GsRM5JI2xVj38GXTd9s | fsutil-atomic-write-primitives | done | [fsutil-atomic-write-primitives.md](./fsutil-atomic-write-primitives.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
@@ -111,6 +112,8 @@ Directory: `docs/tasks`
 | TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | done | [observability-stage-timing.md](./observability-stage-timing.md) |
 | TASK-034G5V4oS9KJDKepLo5oND | PcmView 基盤(mmap/fallback + 融合 deinterleave) | done | [pcm-view-foundation.md](./pcm-view-foundation.md) |
 | TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | done | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
+| TASK-034GsRN1DDq3D5ZJHgcq6d | relaxed-tier-callsite-migration | done | [relaxed-tier-callsite-migration.md](./relaxed-tier-callsite-migration.md) |
+| TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |

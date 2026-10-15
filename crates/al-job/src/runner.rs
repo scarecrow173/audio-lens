@@ -204,7 +204,104 @@ impl StageRunner {
                 "resume stage plan differs from the recorded job definition",
             ));
         }
+        self.verify_completed_artifacts(&mut manifest, &job_dir)?;
         self.execute(&mut manifest, &job_dir, def, stages)
+    }
+
+    /// Verify that artifacts recorded under Completed/Skipped stages
+    /// still exist on disk. Relaxed-tier artifact writes skip fsync,
+    /// so a power loss can drop a file after the manifest recorded the
+    /// stage complete; demote the owning stage to Pending so `execute`
+    /// regenerates it. Demotion removes the stale artifact records —
+    /// downstream lineage may keep dangling ids, which `lineage_of`
+    /// tolerates, and deterministic regeneration keeps downstream
+    /// outputs equivalent.
+    fn verify_completed_artifacts(
+        &self,
+        manifest: &mut Manifest,
+        job_dir: &std::path::Path,
+    ) -> Result<(), StageError> {
+        let mut demoted: Vec<StageKind> = Vec::new();
+        for record in &manifest.stages {
+            if !matches!(record.status, StageStatus::Completed | StageStatus::Skipped) {
+                continue;
+            }
+            let intact = record.artifacts.iter().all(|id| {
+                manifest
+                    .artifact(id)
+                    .map(|a| Self::artifact_intact(job_dir, a))
+                    .unwrap_or(false)
+            });
+            if !intact {
+                demoted.push(record.stage);
+            }
+        }
+        if demoted.is_empty() {
+            return Ok(());
+        }
+        for kind in &demoted {
+            let removed: Vec<al_core::ArtifactId> = manifest
+                .stage(*kind)
+                .map(|r| r.artifacts.clone())
+                .unwrap_or_default();
+            manifest
+                .artifacts
+                .retain(|a| !removed.contains(&a.artifact_id));
+            if let Some(record) = manifest.stage_mut(*kind) {
+                record.status = StageStatus::Pending;
+                record.artifacts.clear();
+                record.error = None;
+                record.duration_ms = None;
+            }
+            tracing::warn!(
+                stage = ?kind,
+                job_id = %manifest.job_id,
+                "completed-stage artifact missing or truncated; demoting stage for regeneration"
+            );
+        }
+        manifest
+            .save(job_dir)
+            .map_err(|e| StageError::new(StageKind::Ingest, format!("cannot save manifest: {e}")))
+    }
+
+    /// Whether one recorded artifact is present and consistent with
+    /// the producer-recorded verification metadata.
+    ///
+    /// Files must exist and match `params.byte_len` when the producer
+    /// recorded it; directories (store roots) must exist with every
+    /// entry of `params.files` present. I/O errors and job-dir escapes
+    /// count as missing — regeneration is the conservative direction.
+    fn artifact_intact(
+        job_dir: &std::path::Path,
+        record: &crate::manifest::ArtifactRecord,
+    ) -> bool {
+        if record.path.as_os_str().is_empty() {
+            // Declared inputs live outside the job directory.
+            return true;
+        }
+        let abs = match crate::fsutil::checked_job_path(job_dir, &record.path) {
+            Ok(p) => p,
+            Err(_) => return false,
+        };
+        let Ok(meta) = std::fs::metadata(&abs) else {
+            return false;
+        };
+        // Producer-recorded metadata pins the expected kind: a record
+        // with `byte_len` must resolve to a matching file, a record
+        // with `files` to a directory containing every member.
+        if let Some(len) = record.params.get("byte_len").and_then(|v| v.as_u64()) {
+            return meta.is_file() && meta.len() == len;
+        }
+        if let Some(files) = record.params.get("files").and_then(|v| v.as_array()) {
+            return meta.is_dir()
+                && files.iter().all(|f| {
+                    f.as_str()
+                        .map(|rel| abs.join(rel).is_file())
+                        .unwrap_or(false)
+                });
+        }
+        // Older records carry no verification metadata: existence only.
+        meta.is_file() || meta.is_dir()
     }
 
     fn execute(

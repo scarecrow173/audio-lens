@@ -14,6 +14,7 @@ Directory: `docs/test-specs`
 | TSPEC-034z87fIonHcU07IHGb1dE | dataset 来歴と validity セマンティクス | proposed | [dataset-provenance-validity.md](./dataset-provenance-validity.md) |
 | TSPEC-034z87feL8uCPOIagychsT | dataset store 往復と部分読み出し | proposed | [dataset-store-roundtrip.md](./dataset-store-roundtrip.md) |
 | TSPEC-034G5V3XG7NaO7sBJ1UFew | decoded/normalized PCM read-only view の契約 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
+| TSPEC-034GsRevKRO1s5QbTzJ7c8 | durability-tiers-resume-verification | approved | [durability-tiers-resume-verification.md](./durability-tiers-resume-verification.md) |
 | TSPEC-034AaE4Ihkxe6GMzxNwRog | Expensive 追加ファミリの検証 | proposed | [expensive-families.md](./expensive-families.md) |
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |

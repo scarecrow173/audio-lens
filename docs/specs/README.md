@@ -16,6 +16,7 @@ Directory: `docs/specs`
 | SPEC-034yYlFacHOsi95HzKHN7M | 候補イベントモデルと確度伝播 | proposed | [candidate-event-model.md](./candidate-event-model.md) |
 | SPEC-034yYlu5QuhtAFuUQWBBvQ | 常時実行の低コスト特徴量 | proposed | [cheap-analysis-features.md](./cheap-analysis-features.md) |
 | SPEC-034G5M6Djv4xJOZKHXQniH | decoded/normalized PCM read-only view | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
+| SPEC-034GsJJVWBOQmxiKManOlL | Artifact durability tiers and resume verification (issue #55) | approved | [durability-tiered-artifact-writes.md](./durability-tiered-artifact-writes.md) |
 | SPEC-034yYlEMw8LnaoJcOc4v9z | 高コスト詳細解析 | proposed | [expensive-analysis.md](./expensive-analysis.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |

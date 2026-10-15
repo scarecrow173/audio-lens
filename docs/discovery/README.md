@@ -11,6 +11,7 @@ Directory: `docs/discovery`
 | DISC-034EHtcL712sw3rAvtFX5g | caller 側最適化チェーン: FIR 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | active | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | DISC-034AajDdIqPQODwBlBJPPC | コンテナカバレッジのギャップ(MP4/ISO-BMFF) | resolved | [container-coverage-gaps.md](./container-coverage-gaps.md) |
 | DISC-034G5xCv4iLN5jsNmiiY8u | Issue 56 decoded PCM read-only view の適用境界 | active | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
+| DISC-034GsIf9DWqfDWmEdUfBdz | Issue 55 耐久性等級: artifact 書き込み fsync の再設計 | active | [durability-tiers-artifact-fsync.md](./durability-tiers-artifact-fsync.md) |
 | DISC-034AajCHW8VrVBAMwzlOzL | 高コスト解析の未実装ファミリ | resolved | [expensive-family-gaps.md](./expensive-family-gaps.md) |
 | DISC-034GsCb9zcTq5N9ewsGvON | FFT re-baseline after plan/workspace split (issue #42) | resolved | [fft-rebaseline-post-plan-workspace.md](./fft-rebaseline-post-plan-workspace.md) |
 | DISC-034yYFlTHXyXnjrEm19mGq | AudioLens 要件取りまとめ | resolved | [initial-requirements-consolidation.md](./initial-requirements-consolidation.md) |

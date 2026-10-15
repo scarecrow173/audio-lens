@@ -95,3 +95,6 @@ Directory: `docs/impl/ir`
 | symphoniadecoder-backend-for-aac-lc-in-mp4 | [symphonia-decoder-backend-for-aac-lc.md](./symphonia-decoder-backend-for-aac-lc.md) |
 | decoder-registry-audio-fallback-merge-and-stage-wiring | [registry-audio-fallback-merge.md](./registry-audio-fallback-merge.md) |
 | aac-lc-mp4-fixture-and-ingest-e2e-tests | [aac-lc-fixture-e2e-tests.md](./aac-lc-fixture-e2e-tests.md) |
+| fsutil-atomic-write-primitives | [add-atomic-write-primitives-to-fsutil.md](./add-atomic-write-primitives-to-fsutil.md) |
+| resume-artifact-verification | [verify-recorded-artifacts-before-skipping-completed-stages.md](./verify-recorded-artifacts-before-skipping-completed-stages.md) |
+| relaxed-tier-callsite-migration | [migrate-relaxed-tier-call-sites-to-atomic-writes.md](./migrate-relaxed-tier-call-sites-to-atomic-writes.md) |

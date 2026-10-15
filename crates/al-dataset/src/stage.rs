@@ -32,6 +32,32 @@ impl DatasetStage {
     }
 }
 
+/// Recursively list regular files under `root` as `/`-separated
+/// relative paths, sorted. Recorded in `params.files` so resume can
+/// verify that a relaxed-tier store survived power loss intact.
+fn collect_files(root: &std::path::Path) -> std::io::Result<Vec<String>> {
+    let mut out = Vec::new();
+    let mut stack = vec![root.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        for entry in fs::read_dir(&dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if entry.file_type()?.is_dir() {
+                stack.push(path);
+            } else if entry.file_type()?.is_file() {
+                out.push(
+                    path.strip_prefix(root)
+                        .map_err(std::io::Error::other)?
+                        .to_string_lossy()
+                        .replace('\\', "/"),
+                );
+            }
+        }
+    }
+    out.sort();
+    Ok(out)
+}
+
 /// WAV encoding that holds the decoded samples losslessly for a
 /// given source codec. Integer sources keep integer-scale values;
 /// 8-bit samples (decoded to a signed range) fit in s16. Float
@@ -456,6 +482,10 @@ impl Stage for DatasetStage {
         all_lineage.extend(self.materialize_locate(ctx, &mut writer)?);
 
         let manifest = writer.finish().map_err(err)?;
+        // The dataset root is a directory artifact: record its member
+        // files so resume can detect relaxed-tier chunks dropped by a
+        // power loss after the manifest recorded the stage Completed.
+        let dataset_files = collect_files(&analysis).map_err(err)?;
 
         let mut records = vec![
             ArtifactRecord {
@@ -467,6 +497,7 @@ impl Stage for DatasetStage {
                 params: serde_json::json!({
                     "schema_version": manifest.schema_version,
                     "artifact_count": manifest.artifacts.len(),
+                    "files": dataset_files,
                 }),
             },
             ArtifactRecord {
