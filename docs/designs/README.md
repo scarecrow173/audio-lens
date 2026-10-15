@@ -1,6 +1,5 @@
 # DESIGN Documents
 
-
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/designs`
@@ -13,6 +12,7 @@ Directory: `docs/designs`
 | DESIGN-034yYLbNoalTLdhNR8vS37 | 解析ステージ・イベント設計 | approved | [analysis-stages.md](./analysis-stages.md) |
 | DESIGN-034EIsK2SiNLNZYXmumzOe | caller 側最適化: FIR 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向の実装設計 | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | DESIGN-034yYLaOKRSfRJMRKiYgQV | 分析データセット設計 | approved | [dataset-schema.md](./dataset-schema.md) |
+| DESIGN-034G5QmSv6Yzg756IThZZi | decoded/normalized PCM read-only view 設計 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | DESIGN-034AaszqnyPGmacvhSzO83 | Expensive 追加解析ファミリ設計 | approved | [expensive-families.md](./expensive-families.md) |
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |

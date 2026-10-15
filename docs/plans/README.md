@@ -1,6 +1,5 @@
 # PLAN Documents
 
-
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/plans`
@@ -14,6 +13,7 @@ Directory: `docs/plans`
 | PLAN-034EJg701ux76Ga7UWPP0j | caller 側最適化チェーン: 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | completed | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | PLAN-034AaBrYBgbeSTDlZzbaGl | Expensive 追加解析ファミリの実装 | completed | [expensive-families.md](./expensive-families.md) |
 | PLAN-034AaBtyLhpTxk9Vb4eftR | ゴールデン fixture マトリクスの実装 | completed | [golden-validation.md](./golden-validation.md) |
+| PLAN-034G5TxZGhHh39SQ8S5su4 | decoded/normalized PCM read-only view の実装 | approved | [implement-decoded-pcm-artifact-view.md](./implement-decoded-pcm-artifact-view.md) |
 | PLAN-034z0yzgmf43IGEQwzG9gE | インジェストとAVタイミングの実装 | completed | [implement-ingest-av.md](./implement-ingest-av.md) |
 | PLAN-034yZp5w0ziN8jQO61t3nW | ジョブオーケストレーション基盤の実装 | completed | [implement-job-orchestration-foundation.md](./implement-job-orchestration-foundation.md) |
 | PLAN-034Fo8JsxsjegvrZWwahTO | locate 合議 argmax 曖昧性検出の実装 | completed | [implement-locate-argmax-ambiguity.md](./implement-locate-argmax-ambiguity.md) |

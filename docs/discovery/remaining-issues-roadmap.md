@@ -84,7 +84,7 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #59 | 合議argmaxのFPノイズ依存を解消 | Locate | P0 | M | 未解決 | 0 |
 | #36 | 主要コーデックの実デコード対応 | Media | P1 | XL | 一部実装※ | 1 |
 | #52 | NCC plan/workspaceの再利用 | DSP | P1 | M | 未着手※ | 1 |
-| #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 未着手※ | 1 |
+| #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 実装済み | 1 |
 | #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 一部実装※ | 1 |
 | #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 未着手※ | 1 |
 | #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装※ | 1 |
@@ -215,7 +215,7 @@ issue/PR 混在):
 - **証拠**: [caller側最適化の残件調査](https://github.com/scarecrow173/audio-lens/blob/main/docs/discovery/caller-side-optimizations.md), [機械的cleanupの除外対象](https://github.com/scarecrow173/audio-lens/blob/main/docs/discovery/mechanical-caller-cleanup.md)
 - **優先度の理由**: 反復回数の根拠があり、他のFFT利用と並列化の共通基盤になる。
 
-#### #56 同一入力PCMの再デコードを回避 — P1 / M / 未着手 / Ingest
+#### #56 同一入力PCMの再デコードを回避 — P1 / M / 実装済み / Ingest
 
 - **概要**: 入力PCMをjob内で再利用する
 - **現状**: Issueによれば同一入力を約3回デコード、対象例は137MB級。
@@ -223,6 +223,7 @@ issue/PR 混在):
 - **提案決定**: cacheableなDecodeHandleをjob内に導入し、サイズ上限・参照カウント・再デコードfallbackを設ける。
 - **確定決定(2026-10-14)**: 正本は manifest の `decoded_pcm` artifact(`decoded.f64le`、interleaved f64 LE)とし、Artifact ID を識別子とする。メモリキャッシュは正本ではなく artifact の派生ビュー。共有表現は Artifact ID に紐づく job-scoped bounded cache の read-only PCM ビューとし、mmap を第一候補・`fs::read` fallback を用意する。`Stage` trait 契約(stage 間通信は manifest Artifact ID のみ・隠れた共有状態禁止)を維持し、`DecodedInput` の stage 間直接受け渡しは採用しない(共有は不変 PCM ビューのみ)。deinterleave 済み `Vec<Vec<f64>>` はキャッシュせず、消費側が必要 ch・範囲を正規化+deinterleave する(全長必要ならその範囲だけ materialize)。#56 では部分読み取り対応への全体改修はしない。resume で manifest+artifact から独立復元可能であり、cache hit/miss・eviction で解析結果が不変であること。materialize PCM と worker scratch には別メモリ予算を設ける(mmap だけでは RSS 上限を保証しない)。
 - **検証前提(2026-10-14)**: OS ページキャッシュで既に物理 I/O が消えている可能性があるため、`fs::read` vs mmap vs 直接 deinterleave を実測比較する(alloc 量・変換 CPU・peak RSS・e2e)。job-scoped cache の利益が小さければ cache 管理を追加せず per-stage mmap ビューのみも許容。
+- **実装結果(2026-10-15)**: `PcmView`(mmap 第一候補・owned fallback・融合 scale+deinterleave)を `crates/al-locate/src/decode.rs` に実装し、`decode_input` / `read_normalized_record` を移行。36MB・368MB fixture の計測で mmap `open` は materialize の 0.00-0.04% のため **job cache は不採用・per-call view で確定**。alloc bytes は baseline 比 1/3、p50 は 1.13-1.14x。3経路 bit-identical。詳細は `docs/impl/ir/pcmview-measurement-cache-decision.md`。
 - **手順**:
   1. 再デコード発生箇所・実データ量・ステージ跨ぎ参照寿命をtracingで可視化。
   2. decoder backendから独立したNormalizedPcmIdとPCM handleを定義。

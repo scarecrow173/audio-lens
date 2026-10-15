@@ -11,6 +11,7 @@
 
 use std::fs;
 use std::io;
+use std::path::Path;
 
 use al_core::ArtifactId;
 use al_job::fsutil::checked_job_path;
@@ -101,20 +102,15 @@ pub(crate) fn read_normalized_record(
     if record.path != expected_path {
         return Err(bad("normalized_pcm path inconsistent with artifact id"));
     }
-    let bytes = fs::read(checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
+    let view = PcmView::open(&checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
     let length = params.frames as u128 * params.channels as u128 * 8;
-    if bytes.len() as u128 != length {
+    if view.byte_len() as u128 != length {
         return Err(bad(
             "normalized_pcm byte length inconsistent with frame layout",
         ));
     }
-    let samples: Vec<f64> = bytes
-        .as_chunks::<8>()
-        .0
-        .iter()
-        .map(|b| f64::from_le_bytes(*b))
-        .collect();
-    if samples.iter().any(|s| !s.is_finite()) {
+    let channel_samples = view.deinterleave(params.channels, 1.0);
+    if channel_samples.iter().flatten().any(|s| !s.is_finite()) {
         return Err(bad("normalized_pcm has non-finite samples"));
     }
     Ok(PreparedInput {
@@ -122,7 +118,7 @@ pub(crate) fn read_normalized_record(
             input_id: params.input_id.clone(),
             sample_rate: params.sample_rate,
             channels: params.channels,
-            channel_samples: deinterleave(&samples, params.channels),
+            channel_samples,
             artifact_ids: vec![record.artifact_id.clone()],
         },
         record: record.clone(),
@@ -277,6 +273,95 @@ pub fn read_alignment_pcm(
     Ok(Some((source, capture)))
 }
 
+/// Read-only backing for an f64le PCM artifact: a memory map when the
+/// platform provides one, otherwise an owned buffer from `fs::read`.
+enum PcmBacking {
+    Mapped(memmap2::Mmap),
+    Owned(Vec<u8>),
+}
+
+impl PcmBacking {
+    fn bytes(&self) -> &[u8] {
+        match self {
+            Self::Mapped(m) => m,
+            Self::Owned(v) => v,
+        }
+    }
+}
+
+/// Read-only view over one f64le PCM artifact. The view is a derived
+/// representation, never the source of truth — the manifest artifact
+/// remains authoritative. Each call opens its own view; nothing here
+/// shares decoded PCM across stages.
+pub(crate) struct PcmView {
+    backing: PcmBacking,
+}
+
+impl PcmView {
+    /// Open `path` read-only. Memory-maps when the file is a non-empty
+    /// regular file and mapping succeeds; falls back to an owned read
+    /// otherwise. I/O errors from opening or reading propagate.
+    fn open(path: &Path) -> io::Result<Self> {
+        let file = fs::File::open(path)?;
+        let meta = file.metadata()?;
+        if meta.is_file() && meta.len() > 0 {
+            // SAFETY: artifact files are immutable once `write_durable`
+            // publishes them via rename, and the manifest only records an
+            // artifact after that point — no writer mutates or truncates
+            // the file while this mapping is alive.
+            if let Ok(mmap) = unsafe { memmap2::Mmap::map(&file) } {
+                return Ok(Self {
+                    backing: PcmBacking::Mapped(mmap),
+                });
+            }
+        }
+        Self::open_owned(path)
+    }
+
+    /// Open `path` as an owned buffer, bypassing mmap. Used as the
+    /// fallback and by tests to force the non-mmap path.
+    pub(crate) fn open_owned(path: &Path) -> io::Result<Self> {
+        Ok(Self {
+            backing: PcmBacking::Owned(fs::read(path)?),
+        })
+    }
+
+    fn byte_len(&self) -> usize {
+        self.backing.bytes().len()
+    }
+
+    fn sample_count(&self) -> usize {
+        self.byte_len() / 8
+    }
+
+    fn sample(&self, index: usize) -> f64 {
+        let offset = index * 8;
+        f64::from_le_bytes(self.backing.bytes()[offset..offset + 8].try_into().unwrap())
+    }
+
+    /// Per-sample `scale` division fused with deinterleave, equivalent
+    /// to collecting scaled `Vec<f64>` and then `dsp::deinterleave`:
+    /// only complete frames are emitted (a trailing partial frame is
+    /// dropped), `channels == 0` yields an empty vector, and channel
+    /// order is preserved.
+    fn deinterleave(&self, channels: u16, scale: f64) -> Vec<Vec<f64>> {
+        let channels = usize::from(channels);
+        if channels == 0 {
+            return Vec::new();
+        }
+        let frames = self.sample_count() / channels;
+        (0..channels)
+            .map(|ch| {
+                let mut out = Vec::with_capacity(frames);
+                for f in 0..frames {
+                    out.push(self.sample(f * channels + ch) / scale);
+                }
+                out
+            })
+            .collect()
+    }
+}
+
 /// Decoded PCM of one input, with channel structure restored.
 #[derive(Debug)]
 pub struct DecodedInput {
@@ -361,20 +446,14 @@ pub fn decode_input(
         None => 1.0,
     };
 
-    let bytes = fs::read(checked_job_path(job_dir, &decoded.path)?)?;
-    if bytes.len() % 8 != 0 {
+    let view = PcmView::open(&checked_job_path(job_dir, &decoded.path)?)?;
+    if view.byte_len() % 8 != 0 {
         return Err(bad(format!(
             "decoded_pcm has {} bytes, not a multiple of 8",
-            bytes.len()
+            view.byte_len()
         )));
     }
-    let samples: Vec<f64> = bytes
-        .as_chunks::<8>()
-        .0
-        .iter()
-        .map(|b| f64::from_le_bytes(*b) / scale)
-        .collect();
-    let channel_samples = deinterleave(&samples, channels);
+    let channel_samples = view.deinterleave(channels, scale);
     let mut artifact_ids = vec![decoded.artifact_id.clone()];
     if let Some(m) = metadata {
         artifact_ids.push(m.artifact_id.clone());
@@ -386,4 +465,486 @@ pub fn decode_input(
         channel_samples,
         artifact_ids,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::alloc::{GlobalAlloc, Layout, System};
+    use std::cell::Cell;
+    use std::io::Write;
+    use std::sync::atomic::{AtomicU64, Ordering};
+    use std::time::Instant;
+
+    static NEXT_DIR: AtomicU64 = AtomicU64::new(0);
+
+    /// Write `samples` as little-endian f64 to a fresh temp file and
+    /// return (dir, file) so callers can clean up.
+    fn temp_f64le(name: &str, samples: &[f64]) -> (std::path::PathBuf, std::path::PathBuf) {
+        let dir = std::env::temp_dir().join(format!(
+            "al_pcmview_{}_{}_{}",
+            std::process::id(),
+            name,
+            NEXT_DIR.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join(format!("{name}.f64le"));
+        let mut file = fs::File::create(&path).unwrap();
+        for s in samples {
+            file.write_all(&s.to_le_bytes()).unwrap();
+        }
+        (dir, path)
+    }
+
+    /// Baseline oracle: `fs::read` → per-sample scale division →
+    /// `dsp::deinterleave` — the pipeline the view replaces.
+    fn oracle(path: &Path, channels: u16, scale: f64) -> Vec<Vec<f64>> {
+        let bytes = fs::read(path).unwrap();
+        let samples: Vec<f64> = bytes
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b) / scale)
+            .collect();
+        crate::dsp::deinterleave(&samples, channels)
+    }
+
+    #[test]
+    fn pcm_view_matches_oracle_across_scales_and_channels() {
+        let cases: Vec<(u16, f64, Vec<f64>)> = vec![
+            (1, 1.0, vec![0.5, -0.25, 1.0, -1.0, 0.0]),
+            (2, 1.0, vec![0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7]),
+            (
+                2,
+                32768.0,
+                vec![16384.0, -8192.0, 100.5, -32768.0, 0.0, 1.0],
+            ),
+            (2, 128.0, vec![64.0, -128.0, 32.0, -16.0]),
+            (3, 1.0, (0..10).map(|i| i as f64 * 0.25).collect()),
+            (6, 1.0, (0..12).map(|i| i as f64).collect()),
+        ];
+        for (channels, scale, samples) in cases {
+            let (dir, path) = temp_f64le("equiv", &samples);
+            let expected = oracle(&path, channels, scale);
+            for view in [
+                PcmView::open(&path).unwrap(),
+                PcmView::open_owned(&path).unwrap(),
+            ] {
+                assert_eq!(view.deinterleave(channels, scale), expected);
+            }
+            fs::remove_dir_all(&dir).unwrap();
+        }
+    }
+
+    #[test]
+    fn pcm_view_partial_frame_and_channel_edges() {
+        // 3ch 10 samples → 3 complete frames; the trailing sample of the
+        // partial fourth frame is dropped, matching `chunks_exact`.
+        let samples: Vec<f64> = (0..10).map(|i| i as f64).collect();
+        let (dir, path) = temp_f64le("partial", &samples);
+        let view = PcmView::open(&path).unwrap();
+        assert_eq!(
+            view.deinterleave(3, 1.0),
+            vec![
+                vec![0.0, 3.0, 6.0],
+                vec![1.0, 4.0, 7.0],
+                vec![2.0, 5.0, 8.0]
+            ]
+        );
+        // channels == 0 yields an empty vector, like `dsp::deinterleave`.
+        assert!(view.deinterleave(0, 1.0).is_empty());
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_empty_file_falls_back_to_owned() {
+        let (dir, path) = temp_f64le("empty", &[]);
+        let view = PcmView::open(&path).unwrap();
+        assert!(matches!(view.backing, PcmBacking::Owned(_)));
+        assert_eq!(view.byte_len(), 0);
+        let out = view.deinterleave(2, 1.0);
+        assert_eq!(out, vec![Vec::<f64>::new(), Vec::<f64>::new()]);
+        assert_eq!(oracle(&path, 2, 1.0), out);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_open_prefers_mmap_and_matches_owned() {
+        let samples: Vec<f64> = (0..1024).map(|i| (i as f64 * 0.5).sin()).collect();
+        let (dir, path) = temp_f64le("mapped", &samples);
+        let mapped = PcmView::open(&path).unwrap();
+        assert!(matches!(mapped.backing, PcmBacking::Mapped(_)));
+        let owned = PcmView::open_owned(&path).unwrap();
+        for ch in [1u16, 2, 3] {
+            assert_eq!(mapped.deinterleave(ch, 1.0), owned.deinterleave(ch, 1.0));
+        }
+        assert_eq!(mapped.byte_len(), owned.byte_len());
+        assert_eq!(mapped.sample(100), owned.sample(100));
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_sample_floor_and_byte_len() {
+        // 3 whole samples plus 4 trailing bytes → sample_count floors.
+        let (dir, path) = temp_f64le("floor", &[1.0, 2.0, 3.0]);
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(&[0xAA; 4])
+            .unwrap();
+        let view = PcmView::open(&path).unwrap();
+        assert_eq!(view.byte_len(), 28);
+        assert_eq!(view.sample_count(), 3);
+        assert_eq!(view.sample(0), 1.0);
+        assert_eq!(view.sample(2), 3.0);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_missing_file_errors() {
+        let missing = std::env::temp_dir().join("al_pcmview_missing_zzz.f64le");
+        assert!(PcmView::open(&missing).is_err());
+        assert!(PcmView::open_owned(&missing).is_err());
+    }
+
+    // --- Measurement harness (baseline vs mmap view vs Owned view) ---
+
+    #[derive(Clone, Copy, Default, Debug)]
+    struct Counts {
+        calls: usize,
+        reallocs: usize,
+        bytes: usize,
+        freed: usize,
+    }
+
+    thread_local! {
+        static TRACK: Cell<(bool, Counts)> = const {
+            Cell::new((
+                false,
+                Counts {
+                    calls: 0,
+                    reallocs: 0,
+                    bytes: 0,
+                    freed: 0,
+                },
+            ))
+        };
+    }
+
+    struct Counter;
+    unsafe impl GlobalAlloc for Counter {
+        unsafe fn alloc(&self, l: Layout) -> *mut u8 {
+            let p = unsafe { System.alloc(l) };
+            let _ = TRACK.try_with(|t| {
+                let (on, mut c) = t.get();
+                if on {
+                    c.calls += 1;
+                    c.bytes += l.size();
+                    t.set((on, c));
+                }
+            });
+            p
+        }
+        unsafe fn dealloc(&self, p: *mut u8, l: Layout) {
+            let _ = TRACK.try_with(|t| {
+                let (on, mut c) = t.get();
+                if on {
+                    c.freed += l.size();
+                    t.set((on, c));
+                }
+            });
+            unsafe { System.dealloc(p, l) }
+        }
+        unsafe fn realloc(&self, p: *mut u8, l: Layout, n: usize) -> *mut u8 {
+            let q = unsafe { System.realloc(p, l, n) };
+            let _ = TRACK.try_with(|t| {
+                let (on, mut c) = t.get();
+                if on {
+                    c.reallocs += 1;
+                    c.bytes += n;
+                    c.freed += l.size();
+                    t.set((on, c));
+                }
+            });
+            q
+        }
+    }
+
+    #[global_allocator]
+    static ALLOC: Counter = Counter;
+
+    fn track_start() {
+        TRACK.with(|t| t.set((true, Counts::default())));
+    }
+
+    fn track_stop() -> Counts {
+        TRACK.with(|t| {
+            let (_, c) = t.get();
+            t.set((false, c));
+            c
+        })
+    }
+
+    /// Pre-view pipeline: `fs::read` → per-sample scale division →
+    /// `dsp::deinterleave`.
+    fn baseline_materialize(path: &Path, channels: u16, scale: f64) -> Vec<Vec<f64>> {
+        let bytes = fs::read(path).unwrap();
+        let samples: Vec<f64> = bytes
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b) / scale)
+            .collect();
+        crate::dsp::deinterleave(&samples, channels)
+    }
+
+    /// Wall-clock percentile over sorted microsecond samples.
+    fn percentile(sorted: &[u128], pct: usize) -> u128 {
+        let idx = (sorted.len() * pct).div_ceil(100) - 1;
+        sorted[idx]
+    }
+
+    /// Best-effort RSS of the current process, in bytes.
+    #[cfg(target_os = "linux")]
+    fn rss_bytes() -> Option<u64> {
+        let status = fs::read_to_string("/proc/self/status").ok()?;
+        let kb: u64 = status
+            .lines()
+            .find(|l| l.starts_with("VmRSS"))?
+            .split_whitespace()
+            .nth(1)?
+            .parse()
+            .ok()?;
+        Some(kb * 1024)
+    }
+
+    #[cfg(target_os = "windows")]
+    fn rss_bytes() -> Option<u64> {
+        // LIST format: the working-set line is the last line and is
+        // locale-dependent, so parse digits from the final line.
+        let out = std::process::Command::new("tasklist")
+            .args([
+                "/FI",
+                &format!("PID eq {}", std::process::id()),
+                "/FO",
+                "LIST",
+            ])
+            .output()
+            .ok()?;
+        let text = String::from_utf8_lossy(&out.stdout);
+        let line = text.lines().rfind(|l| !l.trim().is_empty())?;
+        let digits: String = line.chars().filter(|c| c.is_ascii_digit()).collect();
+        digits.parse::<u64>().ok().map(|kb| kb * 1024)
+    }
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    fn rss_bytes() -> Option<u64> {
+        None
+    }
+
+    fn assert_bit_identical(a: &[Vec<f64>], b: &[Vec<f64>]) {
+        assert_eq!(a.len(), b.len());
+        for (x, y) in a.iter().zip(b) {
+            assert_eq!(x.len(), y.len());
+            for (u, v) in x.iter().zip(y) {
+                assert_eq!(u.to_bits(), v.to_bits());
+            }
+        }
+    }
+
+    struct PathReport {
+        name: &'static str,
+        open_p50_us: u128,
+        total_p50_us: u128,
+        total_p95_us: u128,
+        allocs: Counts,
+        rss_before: Option<u64>,
+        rss_after: Option<u64>,
+    }
+
+    /// Run the 3-path comparison on one fixture: bit-identical outputs,
+    /// N timing iterations after warmup, allocator counts for one
+    /// materialization, RSS before/after. Returns per-path reports.
+    fn measure_three_paths(
+        path: &Path,
+        channels: u16,
+        scale: f64,
+        iters: usize,
+    ) -> Vec<PathReport> {
+        type Materialize = fn(&Path, u16, f64) -> Vec<Vec<f64>>;
+        let mut reports = Vec::new();
+        let mut expected: Option<Vec<Vec<f64>>> = None;
+        let paths: [(&'static str, Materialize); 3] = [
+            (
+                "baseline(fs::read+collect+dsp::deinterleave)",
+                baseline_materialize,
+            ),
+            ("mmap_view(PcmView::open+deinterleave)", |p, ch, s| {
+                PcmView::open(p).unwrap().deinterleave(ch, s)
+            }),
+            (
+                "owned_view(PcmView::open_owned+deinterleave)",
+                |p, ch, s| PcmView::open_owned(p).unwrap().deinterleave(ch, s),
+            ),
+        ];
+        for (name, run) in paths {
+            let rss_before = rss_bytes();
+            for _ in 0..3 {
+                std::hint::black_box(run(path, channels, scale));
+            }
+            track_start();
+            let first = run(path, channels, scale);
+            let allocs = track_stop();
+            if let Some(e) = &expected {
+                assert_bit_identical(e, &first);
+            } else {
+                expected = Some(first);
+            }
+            let mut opens = Vec::with_capacity(iters);
+            let mut totals = Vec::with_capacity(iters);
+            for _ in 0..iters {
+                if name.starts_with("baseline") {
+                    let t = Instant::now();
+                    std::hint::black_box(run(path, channels, scale));
+                    totals.push(t.elapsed().as_micros());
+                    opens.push(0u128);
+                } else {
+                    let t = Instant::now();
+                    let view = if name.starts_with("mmap") {
+                        PcmView::open(path).unwrap()
+                    } else {
+                        PcmView::open_owned(path).unwrap()
+                    };
+                    let open_elapsed = t.elapsed().as_micros();
+                    let out = view.deinterleave(channels, scale);
+                    totals.push(t.elapsed().as_micros());
+                    opens.push(open_elapsed);
+                    std::hint::black_box(&out);
+                }
+            }
+            opens.sort_unstable();
+            totals.sort_unstable();
+            reports.push(PathReport {
+                name,
+                open_p50_us: percentile(&opens, 50),
+                total_p50_us: percentile(&totals, 50),
+                total_p95_us: percentile(&totals, 95),
+                allocs,
+                rss_before,
+                rss_after: rss_bytes(),
+            });
+        }
+        reports
+    }
+
+    fn write_evidence(dir: &Path, fixture: &Path, reports: &[PathReport]) -> std::path::PathBuf {
+        let fixture_len = fs::metadata(fixture).map(|m| m.len()).unwrap_or(0);
+        let mmap = &reports[1];
+        let baseline = &reports[0];
+        let open_share = if mmap.total_p50_us > 0 {
+            mmap.open_p50_us as f64 / mmap.total_p50_us as f64
+        } else {
+            0.0
+        };
+        let mut report = String::new();
+        report.push_str("# PCM view measurement evidence\n\n");
+        report.push_str(&format!(
+            "- env: {}-{} (test profile, debug build)\n",
+            std::env::consts::OS,
+            std::env::consts::ARCH
+        ));
+        report.push_str(&format!(
+            "- fixture: {} ({} bytes, f64le interleaved)\n",
+            fixture.display(),
+            fixture_len
+        ));
+        report.push_str("- iterations: 30 timed after 3 warmup\n\n");
+        report.push_str(
+            "| path | open p50 (us) | total p50 (us) | total p95 (us) | alloc calls | alloc bytes | freed bytes | RSS before | RSS after |\n",
+        );
+        report.push_str("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        for r in reports {
+            report.push_str(&format!(
+                "| {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",
+                r.name,
+                if r.name.starts_with("baseline") {
+                    "-".to_string()
+                } else {
+                    r.open_p50_us.to_string()
+                },
+                r.total_p50_us,
+                r.total_p95_us,
+                r.allocs.calls,
+                r.allocs.bytes,
+                r.allocs.freed,
+                r.rss_before
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "n/a".into()),
+                r.rss_after
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "n/a".into()),
+            ));
+        }
+        report.push_str(&format!(
+            "\n- mmap open share of materialization p50: {:.2}%\n",
+            open_share * 100.0
+        ));
+        report.push_str(&format!(
+            "- mmap vs baseline p50 speedup: {:.2}x\n",
+            baseline.total_p50_us as f64 / mmap.total_p50_us.max(1) as f64
+        ));
+        report.push_str("- 3-path channel_samples: bit-identical (asserted)\n");
+        let out_path = dir.join(format!(
+            "pcm-view-measurement-{}.md",
+            fixture.file_stem().unwrap_or_default().to_string_lossy()
+        ));
+        fs::write(&out_path, report).unwrap();
+        out_path
+    }
+
+    /// Generate a deterministic f64le stereo fixture of `frames` frames.
+    fn write_stereo_fixture(path: &Path, frames: usize) {
+        let mut x = 0x52_u64;
+        let mut bytes = Vec::with_capacity(frames * 2 * 8);
+        for _ in 0..frames * 2 {
+            x = x.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let v = ((x >> 33) as f64 / (1_u64 << 31) as f64 - 0.5) * 0.4;
+            bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        fs::File::create(path).unwrap().write_all(&bytes).unwrap();
+    }
+
+    fn evidence_dir() -> std::path::PathBuf {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/pcm-view-evidence");
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn pcm_view_measure_three_paths_ci_fixture() {
+        // ~36 MB stereo fixture: CI-scale comparison run.
+        let dir = evidence_dir();
+        let fixture = dir.join("fixture-stereo-36mb.f64le");
+        if !fixture.exists() {
+            write_stereo_fixture(&fixture, 2_250_000);
+        }
+        let reports = measure_three_paths(&fixture, 2, 1.0, 30);
+        let out = write_evidence(&dir, &fixture, &reports);
+        eprintln!("pcm-view evidence written to {}", out.display());
+    }
+
+    #[test]
+    #[ignore = "large real-size fixture; run explicitly for evidence"]
+    fn pcm_view_measure_three_paths_large_fixture() {
+        // ~368 MB stereo fixture: real-size comparison run.
+        let dir = evidence_dir();
+        let fixture = dir.join("fixture-stereo-368mb.f64le");
+        if !fixture.exists() {
+            write_stereo_fixture(&fixture, 23_000_000);
+        }
+        let reports = measure_three_paths(&fixture, 2, 1.0, 30);
+        let out = write_evidence(&dir, &fixture, &reports);
+        eprintln!("pcm-view evidence written to {}", out.display());
+    }
 }
