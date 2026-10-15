@@ -12,6 +12,7 @@ Directory: `docs/discovery`
 | DISC-034AajDdIqPQODwBlBJPPC | コンテナカバレッジのギャップ(MP4/ISO-BMFF) | resolved | [container-coverage-gaps.md](./container-coverage-gaps.md) |
 | DISC-034G5xCv4iLN5jsNmiiY8u | Issue 56 decoded PCM read-only view の適用境界 | active | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | DISC-034AajCHW8VrVBAMwzlOzL | 高コスト解析の未実装ファミリ | resolved | [expensive-family-gaps.md](./expensive-family-gaps.md) |
+| DISC-034GsCb9zcTq5N9ewsGvON | FFT re-baseline after plan/workspace split (issue #42) | resolved | [fft-rebaseline-post-plan-workspace.md](./fft-rebaseline-post-plan-workspace.md) |
 | DISC-034yYFlTHXyXnjrEm19mGq | AudioLens 要件取りまとめ | resolved | [initial-requirements-consolidation.md](./initial-requirements-consolidation.md) |
 | DISC-034Fl0OeHprFoFHitMqBid | Locate consensus argmax ambiguity contract | resolved | [locate-consensus-argmax-ambiguity-contract.md](./locate-consensus-argmax-ambiguity-contract.md) |
 | DISC-034EMosQizFcChc9KKeaWS | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・アロケーション削減 (A6-A16) | active | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |

@@ -27,11 +27,13 @@ relations:
     - "./mechanical-caller-cleanup.md"
     - "./caller-side-optimizations.md"
     - "./al-math-simd-reduction.md"
+    - "./fft-rebaseline-post-plan-workspace.md"
   refines: []
   refined-by: []
   derives-from: []
   derived-by:
     - "./locate-consensus-argmax-ambiguity-contract.md"
+    - "./fft-rebaseline-post-plan-workspace.md"
   verifies: []
   verified-by: []
   references: []
@@ -85,7 +87,7 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #36 | 主要コーデックの実デコード対応 | Media | P1 | XL | 一部実装※ | 1 |
 | #52 | NCC plan/workspaceの再利用 | DSP | P1 | M | 未着手※ | 1 |
 | #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 実装済み | 1 |
-| #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 一部実装※ | 1 |
+| #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 計測完了・close | 1 |
 | #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 未着手※ | 1 |
 | #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装※ | 1 |
 | #53 | local_lagの全探索を高速化 | Reference | P1 | L | 未着手 | 2 |
@@ -286,6 +288,7 @@ issue/PR 混在):
 - **ギャップ**: Issueが元来掲げたFFT 3×以上などの目標はPR #44時点で一部未達。rustfft置換案は現在のアーキテクチャと再比較が必要。
 - **提案決定**: 既存split APIを維持したまま実負荷プロファイルを更新。交換可能なkernel adapterを内部に限定し、採用はベンチと等価性で決める。
 - **確定決定(2026-10-14)**: **rustfft 導入は棚上げ**。issue の前提(手書き radix-2 複素FFT・非SIMD)は PR #44/#45 の pulp SIMD 実数FFT で既に解消済み。#52 完了後に実使用プロファイルで再ベースラインし、kernel 本体が律速なら rustfft prototype と等価性・速度を比較する。依存追加はその時点で再承認とする。計測には pow2 非適合サイズを含める(現行は pow2 pad 限定で、混基数の利点が残り得る)。e2e 改善が小さければ close with rationale。3x 目標は microbench 単発ではなく実使用経路の改善に再定義する。
+- **実施結果(2026-10-15)**: **close with rationale**。`crates/al-math/benches/fft_kernel.rs` で plan/forward/inverse を分離計測し、NumPy rfft(2.5.4, 同一環境)と比較した。現行 pulp SIMD `RealFft` は全サイズ(1024-4M)で NumPy を約1.5-3.2x上回り、起票時の「~2.7x劣後」は反転済み。pad非適合入力のwasteは1.30-1.99xを観測したが、実呼出側はpow2ブロックを自前選択するoverlap-save構造で限定要因。rustfft換装は棚上げ、将来FFT支配かつ非pow2律速が判明した場合のみ再検討。詳細: `docs/discovery/fft-rebaseline-post-plan-workspace.md`。
 - **手順**:
   1. #44/#45/#49/#50/#51マージ後の同一機材・同じデータでbaselineを更新。
   2. kernelをreal-FFT、bandpass、NCC、呼出し時plan構築に分解してボトルネック判定。
