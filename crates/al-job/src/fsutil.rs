@@ -31,6 +31,22 @@ pub fn checked_job_path(job_dir: &Path, rel: &Path) -> io::Result<PathBuf> {
 
 /// Write `bytes` to `path` atomically and durably.
 pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    write_via_tmp(path, bytes, true)
+}
+
+/// Write `bytes` to `path` atomically but without fsyncs.
+///
+/// The rename keeps concurrent readers safe — they see either the old
+/// file or the new one, never a torn write — but a power loss may lose
+/// the file entirely or leave it truncated. Only use this for data that
+/// is fully regenerable from the job's declared inputs; the resume-time
+/// artifact verification detects such loss and re-runs the stage.
+pub fn write_atomic(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    write_via_tmp(path, bytes, false)
+}
+
+/// Shared tmp-write skeleton for `write_durable` and `write_atomic`.
+fn write_via_tmp(path: &Path, bytes: &[u8], durable: bool) -> io::Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -39,9 +55,15 @@ pub fn write_durable(path: &Path, bytes: &[u8]) -> io::Result<()> {
         {
             let mut file = fs::File::create(&tmp)?;
             file.write_all(bytes)?;
-            file.sync_all()?;
+            if durable {
+                file.sync_all()?;
+            }
         }
-        rename_durable(&tmp, path)
+        if durable {
+            rename_durable(&tmp, path)
+        } else {
+            rename_atomic(&tmp, path)
+        }
     })();
     if result.is_err() {
         // A failed write must not leave the temp file behind.
@@ -65,6 +87,16 @@ pub fn rename_durable(tmp: &Path, path: &Path) -> io::Result<()> {
         let _ = dir.sync_all();
     }
     Ok(())
+}
+
+/// Rename a temp file over `path` without flushing the directory
+/// entry. Same loss semantics as [`write_atomic`]: atomic for
+/// concurrent readers, not durable across power loss.
+///
+/// For streamed writes: create the temp file with
+/// [`tmp_path_for`], write it (no `sync_all`), then call this.
+pub fn rename_atomic(tmp: &Path, path: &Path) -> io::Result<()> {
+    fs::rename(tmp, path)
 }
 
 /// The sibling temp path `write_durable` uses for `path`.
@@ -124,6 +156,31 @@ mod tests {
         write_durable(&path, b"second").unwrap();
         assert_eq!(fs::read(&path).unwrap(), b"second");
         assert!(!tmp_path_for(&path).exists());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn write_atomic_replaces_existing_destination() {
+        let dir = std::env::temp_dir().join(format!("fsutil-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("chunk.bin");
+        write_atomic(&path, b"first").unwrap();
+        write_atomic(&path, b"second").unwrap();
+        assert_eq!(fs::read(&path).unwrap(), b"second");
+        assert!(!tmp_path_for(&path).exists());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn rename_atomic_renames_without_sync() {
+        let dir = std::env::temp_dir().join(format!("fsutil-{}", al_core::JobId::new()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("out.wav");
+        let tmp = tmp_path_for(&path);
+        fs::write(&tmp, b"payload").unwrap();
+        rename_atomic(&tmp, &path).unwrap();
+        assert_eq!(fs::read(&path).unwrap(), b"payload");
+        assert!(!tmp.exists());
         fs::remove_dir_all(&dir).ok();
     }
 }

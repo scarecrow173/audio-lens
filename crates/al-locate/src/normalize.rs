@@ -30,6 +30,12 @@ pub struct NormalizedParams {
     /// t0 秒の有理数。現在の FIR は遅延を完全に補償する。
     pub time_origin_numerator: i64,
     pub time_origin_denominator: u64,
+    /// Serialized size of the produced artifact in bytes
+    /// (`frames * channels * 8`). Recorded so resume's artifact
+    /// verification can detect a truncated relaxed-tier write.
+    /// Deterministic for a given transform, so it participates in
+    /// dedup equality like any other parameter.
+    pub byte_len: u64,
 }
 
 fn transform(plan: &ResamplePlan) -> serde_json::Value {
@@ -60,6 +66,7 @@ impl NormalizedParams {
             || self.time_origin_numerator != 0
             || self.time_origin_denominator != 1
             || self.frames != plan.output_len(original).map_err(bad)? as u64
+            || self.byte_len != self.frames * u64::from(self.channels) * 8
             || self.transform != transform(&plan)
         {
             return Err(bad("inconsistent normalized_pcm layout or transform"));
@@ -130,7 +137,7 @@ pub fn prepare_input(
     {
         return Err(bad("decoded PCM channel layout inconsistent"));
     }
-    let params = NormalizedParams {
+    let mut params = NormalizedParams {
         input_id: input.input_id.clone(),
         sample_rate: rate,
         channels: input.channels,
@@ -142,7 +149,9 @@ pub fn prepare_input(
         transform: transform(&plan),
         time_origin_numerator: 0,
         time_origin_denominator: 1,
+        byte_len: 0, // replaced below once frames are known
     };
+    params.byte_len = params.frames * u64::from(params.channels) * 8;
     let value = serde_json::to_value(&params).map_err(bad)?;
     if let Some(record) = records
         .iter()
@@ -176,7 +185,10 @@ pub fn prepare_input(
         }
         bytes.extend_from_slice(&row);
     }
-    al_job::fsutil::write_durable(&absolute, &bytes)?;
+    // Relaxed tier: normalized PCM is regenerable from the decoded
+    // input, so the fsync is skipped and resume's artifact
+    // verification re-runs the stage if power loss dropped it.
+    al_job::fsutil::write_atomic(&absolute, &bytes)?;
     let record = ArtifactRecord {
         artifact_id: artifact_id.clone(),
         role: "normalized_pcm".into(),
