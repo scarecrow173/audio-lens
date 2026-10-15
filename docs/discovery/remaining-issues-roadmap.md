@@ -88,7 +88,7 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #52 | NCC plan/workspaceの再利用 | DSP | P1 | M | 未着手※ | 1 |
 | #56 | 同一入力PCMの再デコードを回避 | Ingest | P1 | M | 実装済み | 1 |
 | #42 | FFTカーネルの性能目標・再評価 | DSP | P2 | L | 計測完了・close | 1 |
-| #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 未着手※ | 1 |
+| #55 | al-datasetのfsync頻度を再設計 | Dataset | P2 | M | 実装済み | 1 |
 | #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装※ | 1 |
 | #53 | local_lagの全探索を高速化 | Reference | P1 | L | 未着手 | 2 |
 | #40 | coarse-to-fineと帯域cacheの残件 | Locate | P2 | L | 一部実装 | 2 |
@@ -313,13 +313,14 @@ issue/PR 混在):
 - **証拠**: [PR #44：SIMD基盤実装・目標一部未達](https://github.com/scarecrow173/audio-lens/pull/44), [PR #45：公開境界変更と性能結果](https://github.com/scarecrow173/audio-lens/pull/45), [pulp採用ADR](https://github.com/scarecrow173/audio-lens/blob/main/docs/adr/simd-arithmetic-pulp.md)
 - **優先度の理由**: 重要だが基盤は実装済み。旧性能比較をそのまま現課題の優先順位に用いない。
 
-#### #55 al-datasetのfsync頻度を再設計 — P2 / M / 未着手 / Dataset
+#### #55 al-datasetのfsync頻度を再設計 — P2 / M / 実装済み / Dataset
 
 - **概要**: 成果物種別の固定耐久性等級で fsync を削減(モード切替なし)
 - **現状**: Issueでは4MiBごとのsync_allが1run約1〜2千回発生しWindowsで秒単位コストと報告。
 - **ギャップ**: 頻度低減すると電源断後に失われるchunk範囲・manifestとの整合が変わる。ユーザー承認が必要。
 - **提案決定**: 成果物種別に耐久性等級を定義し、書込完了はtemp→sync(file)→rename→必要に応じparent dir fsyncで保証。
 - **確定決定(2026-10-14)**: **無条件の耐久性等級(モード切替なし)**。manifest + 最終 export は full durability(temp→sync→rename→dir sync)を維持し、中間 artifact(`decoded.f64le`・normalized PCM・tensor chunk 等の再生成可能物)は緩和する。順序規約: manifest が artifact 完了を記録する前にその artifact は耐久化済みとし、resume は「manifest 記録 = 存在かつ完全」を前提にできる。理由: 正本はユーザー提供入力ファイルであり、中間物喪失は再実行で済みデータ損失ではない。補足: 現状の fsync 大量発生の本体は artifact 毎の `write_durable`(issue の「4MiB毎」記述は概算/旧実装)。
+- **実装結果(2026-10-15)**: `fsutil` に non-durable atomic 書込み `write_atomic`/`rename_atomic` を追加し、`decoded.f64le`・normalized PCM・table/tensor chunk・WAV payload を relaxed 等級に移行。manifest・store メタデータ(schema/index/array.json)・記録系 JSON は `write_durable` 維持。resume で Completed/Skipped stage の記録 artifact を実在検証(file: 存在+`params.byte_len`、dir: `params.files` 全員)し、失敗時は当該 stage のみ Pending 降格・stale 記録除去・durable 保存して再実行。`NormalizedParams.byte_len` は構造体の正規フィールドとして定義(表現ドリフト回避)。詳細は ADR `docs/adr/artifact-durability-tiers-relaxed-bulk-writes.md`・design `docs/designs/artifact-durability-tiers-resume-verification.md`・IR 3件。
 - **手順**:
   1. chunk同期/ファイル同期/commitの関係とOS別fsync挙動を整理し、旧保証を書き下す。
   2. scratch派生物と正式manifestで durability policy を区別するADR。

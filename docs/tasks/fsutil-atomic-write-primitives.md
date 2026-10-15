@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GsRM5JI2xVj38GXTd9s"
 type: "task"
-status: "todo"
+status: "done"
 title: "fsutil-atomic-write-primitives"
 created: "2026-10-15"
 updated: "2026-10-15"
