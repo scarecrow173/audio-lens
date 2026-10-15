@@ -9,6 +9,7 @@ pub mod format;
 pub mod metadata;
 pub mod mp4;
 pub mod stage;
+pub mod symphonia;
 pub mod timing;
 pub mod video;
 pub mod wav;

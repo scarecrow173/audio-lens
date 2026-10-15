@@ -6,6 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034Gs7Y9aM823BFJ6lNIuO | AAC-LC MP4 fixture and ingest e2e tests | done | [aac-lc-mp4-fixture-and-ingest-e2e-tests.md](./aac-lc-mp4-fixture-and-ingest-e2e-tests.md) |
 | TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | done | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |
 | TASK-034DYiGC8yp76ElLB8R0J5 | al-locate: dsp::fft と bench_dsp の split API 追従 | done | [al-locate-split-re-im-fft.md](./al-locate-split-re-im-fft.md) |
 | TASK-034EpPesSpbjbAQBsmjvJx | al-locate: dsp re-export と vec プリミティブ移行 | done | [al-locate-vec-migration.md](./al-locate-vec-migration.md) |
@@ -49,6 +50,7 @@ Directory: `docs/tasks`
 | TASK-034z889vFy9QDdh0EG6Nj4 | DatasetStage 実装と CLI 接続 | done | [dataset-stage.md](./dataset-stage.md) |
 | TASK-034z888EftCjwJOLuS09K0 | provenance レコードと dataset-writer | done | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
 | TASK-034G5V4SprTlEV2DE7NzIS | decode_input/read_normalized_record の view 移行 | done | [decode-callers-view-migration.md](./decode-callers-view-migration.md) |
+| TASK-034Gs7XEgQOjkzbXJwYUU5 | decoder registry audio fallback merge and stage wiring | done | [decoder-registry-audio-fallback-merge-and-stage-wiring.md](./decoder-registry-audio-fallback-merge-and-stage-wiring.md) |
 | TASK-034AaFTafwUqSb6Zp9Pr8J | exp-channel: 周波数依存混合行列 + intermod 証拠 | done | [exp-channel-matrix.md](./exp-channel-matrix.md) |
 | TASK-034AaFEfKrZkVSHWqbJo7H | exp-codec: pre-echo + transient smear | done | [exp-codec-preecho.md](./exp-codec-preecho.md) |
 | TASK-034AaFDINCaNF95aiWa0oQ | exp-dynamics: transfer-curve + pumping + level依存 | done | [exp-dynamics-curve.md](./exp-dynamics-curve.md) |
@@ -113,6 +115,7 @@ Directory: `docs/tasks`
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
+| TASK-034Gs7XaxwczdCjzEW33CL | SymphoniaDecoder backend for AAC-LC in MP4 | done | [symphoniadecoder-backend-for-aac-lc-in-mp4.md](./symphoniadecoder-backend-for-aac-lc-in-mp4.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
 | TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | done | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |

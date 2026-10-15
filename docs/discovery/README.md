@@ -20,5 +20,6 @@ Directory: `docs/discovery`
 | DISC-034FcymLiMavdGUpbV1oTT | 残余 issue ロードマップ分析: 13 open issue の優先度・依存順序・フェーズ構造 | active | [remaining-issues-roadmap.md](./remaining-issues-roadmap.md) |
 | DISC-034FPdDmmo6fGWovNellpV | Issue 33 確定仕様の適用境界 | active | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | DISC-8QyfdU1NnGhLDa1c1oqzf2 | spectral_envelope の fft_size 契約と silent 置き換え問題 | resolved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
+| DISC-034GrYP6nZKwj0gFCaknA0 | symphonia AAC-LC decoder backend | active | [symphonia-aac-lc-decoder-backend.md](./symphonia-aac-lc-decoder-backend.md) |
 | DISC-034AajDKh03yeDOK42xdhe | 検証 fixture マトリクスのギャップ | resolved | [validation-fixture-gaps.md](./validation-fixture-gaps.md) |
 | DISC-034AajwySUrLTGaPkqCqe8 | 映像フレーム特徴と A/V 同期のギャップ | resolved | [video-av-feature-gaps.md](./video-av-feature-gaps.md) |
