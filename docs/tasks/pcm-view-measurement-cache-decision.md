@@ -1,7 +1,7 @@
 ---
 id: "TASK-034G5V5nHwcNPj19b1UpuN"
 type: "task"
-status: "todo"
+status: "done"
 title: "PCM view 計測と job cache 導入判定"
 created: "2026-10-15"
 updated: "2026-10-15"

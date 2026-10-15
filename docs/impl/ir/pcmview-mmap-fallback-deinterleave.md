@@ -1,7 +1,7 @@
 ---
 id: "IMPL-034G5Xo5i1U2eFPNXIb2la"
 type: "impl"
-status: "in-progress"
+status: "completed"
 title: "PcmView 基盤(mmap/fallback + 融合 deinterleave)"
 created: "2026-10-15"
 updated: "2026-10-15"
@@ -44,14 +44,14 @@ metadata:
 
 `decoded_pcm` / `normalized_pcm`(f64le interleaved)artifact を
 read-only の `PcmView` で読む基盤を `crates/al-locate/src/decode.rs`
-に実装し、`decode_input` と `read_normalized_record` の2経路を
-移行した。mmap を第一候補とし、空ファイル・非 regular・mmap 失敗時は
-`fs::read` ベースの owned buffer に fallback する。
+に実装した。mmap を第一候補とし、空ファイル・非 regular・
+mmap 失敗時は `fs::read` ベースの owned buffer に fallback する。
+caller 側の移行は
+`docs/impl/ir/pcmview-caller-migration.md` を参照。
 
 ## Context
 
-`docs/tasks/pcm-view-foundation.md`(Slice 1)および
-`docs/tasks/decode-callers-view-migration.md`(Slice 2)を実施。
+`docs/tasks/pcm-view-foundation.md`(Slice 1)を実施。
 `docs/designs/decoded-pcm-artifact-view.md` と
 `docs/adr/artifact-id-read-only-pcm-view-cache.md` の決定 —
 永続正本は manifest の artifact、共有表現は Artifact ID に紐づく
@@ -74,22 +74,15 @@ read-only view、deinterleave 済み `Vec<Vec<f64>>` はキャッシュ
   中間 interleaved `Vec<f64>` を生成しない。`chunks_exact` 相当の
   部分フレーム drop・`channels == 0` で空・チャンネル順序保持の
   逐語契約は `dsp::deinterleave` に揃えた。
-- `decode_input`: `fs::read` + interleaved `Vec<f64>` 構築を
-  `PcmView::open` + `view.deinterleave(channels, scale)` に置き換え。
-  `len % 8 != 0` のエラー文言は `view.byte_len()` で完全に維持。
-- `read_normalized_record`: 同様に `view.deinterleave(channels, 1.0)`
-  に置き換え。byte length・有限性の検証を materialize 後の
-  `channel_samples` 上で行い、同値の値集合で結果を保持。
+- `cfg(test)` に oracle 等価・境界・fallback テストを追加
+  (`PcmView` は `pub(crate)` のため integration test から不可視)。
 
 ### Decisions During Implementation
 
-- caller 移行(Slice 2)は基盤が未使用だと non-test build で
-  dead_code になるため、同一ファイル内で一連の変更として実装し、
-  コミットは依存追加と機能実装の2つに分割した。
-- 有限性検証は従来 interleaved `Vec<f64>` 上で行っていたが、
-  deinterleave 後の `channel_samples.iter().flatten()` に移した。
-  byte length 検証(`frames*ch*8` と厳密一致)を先に通るため
-  部分フレームは存在せず、検査対象の値集合は同値。
+- 基盤だけでは non-test build が dead_code になるため、caller 移行
+  (`decode-callers-view-migration`)と同一コミットでリリースした。
+  IR は task 単位で分割し、caller 側の変更・判断は
+  `pcmview-caller-migration.md` に記録する。
 
 ## Related Experiments
 
@@ -122,6 +115,5 @@ read-only view、deinterleave 済み `Vec<Vec<f64>>` はキャッシュ
 
 ## Follow-ups
 
-- Slice 3: allocation/wall-time/RSS 計測と job-scoped cache 要否の
-  判定(`docs/tasks/pcm-view-measurement-cache-decision.md`)。
-- 判定結果に応じて roadmap・closeout を更新。
+- caller 移行: `docs/impl/ir/pcmview-caller-migration.md`
+- 計測・cache 判定: `docs/impl/ir/pcmview-measurement-cache-decision.md`
