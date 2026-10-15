@@ -1,5 +1,6 @@
 # TASK Documents
 
+
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/tasks`
@@ -65,6 +66,7 @@ Directory: `docs/tasks`
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
+| TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
 | TASK-034Fo9fbMBjYA189SBNMGL | argmax 曖昧性: 回帰計測・Implementation Record・closeout | done | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
 | TASK-034Fo9dDtnY4bqipAEqfDV | argmax 曖昧性検出の実装: evidence 分岐・投票除外・merged_votes/best_window_match・バージョン | done | [locate-argmax-ambiguity-detection.md](./locate-argmax-ambiguity-detection.md) |
@@ -98,12 +100,15 @@ Directory: `docs/tasks`
 | TASK-034AaFXpJRZWcxVPOfKCdh | mp4: ingest stage 配線 + 成果物記録 | done | [mp4-ingest-stage.md](./mp4-ingest-stage.md) |
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
+| TASK-034FQrcP4zy8KVn51A8pyX | 2hot callerを再利用に移し確保と速度を検証する | done | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
+| TASK-034FQrcCGZZgIfcHyHbt58 | FFT と相関の不変planと排他workspaceを分離する | done | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
 | TASK-034EeviFOOrOAjrYXMGXHO | al-cli の logging 配線 | done | [observability-cli-wiring.md](./observability-cli-wiring.md) |
 | TASK-034EevbtmmkzTShLCB0Mw0 | al-observability crate の新設 | done | [observability-crate.md](./observability-crate.md) |
 | TASK-034EevkeIeBV0D2XgS6uTw | criterion smoke bench と samply 手順書 | done | [observability-criterion-samply.md](./observability-criterion-samply.md) |
 | TASK-034EevjKiDgtt3CwF4qTtW | leaf crate への span 計装 | done | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
 | TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | done | [observability-stage-timing.md](./observability-stage-timing.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
+| TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |

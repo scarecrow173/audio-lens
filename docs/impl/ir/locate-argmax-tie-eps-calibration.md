@@ -4,7 +4,7 @@ type: "impl"
 status: "completed"
 title: "locate argmax 同点検出: tie eps 特性計測(T1)"
 created: "2026-10-13"
-updated: "2026-10-14"
+updated: "2026-10-15"
 owners: []
 relations:
   source: []
@@ -94,7 +94,11 @@ spec の候補レンジ(`rel_eps` 相対 1e-9..1e-6、`abs_floor` ~1e-9)
   実運用 fft_size(1024、len 2048/4096/8192 → 実効 n 同)で
   同様に A/B
 
-## Measured: dispatch 偏差(Rule B)
+## Implementation
+
+以下は T1 の既存計測記録である。T3 の差分記録も本 IR に残す。
+
+### Measured: dispatch 偏差(Rule B)
 
 `dispatch(kernel)` vs `pulp::Scalar.vectorize(kernel)` の最大
 絶対偏差(本計測環境、AVX 系 dispatch):
@@ -117,14 +121,14 @@ max ~1e-15 級。`band_ncc` の累積曲線は per-band `ncc` 偏差の和で
 
 **max(dispatch 偏差) ≈ 5e-16(実測)/ ~1e-14(伝播込み保守値)**。
 
-## Measured: fixture マージン(Rule A)
+### Measured: fixture マージン(Rule A)
 
 `margin = M − max_{i≠argmax}|corr[i]|`(argmax のショルダー自身を
 含む全サンプル第二順位)。括弧内は M(band_ncc は帯域和のため
 ~5 まで到達し得る)。全受理系 fixture は全メソッド
 `valid-path=true`(既存3分岐を抜けて曖昧判定に到達する曲線)。
 
-### 受理系(マージン下限の拘束側)
+#### 受理系(マージン下限の拘束側)
 
 | fixture | full_ncc | band_ncc | gcc_phat | spectral_envelope |
 |---------|----------|----------|----------|-------------------|
@@ -159,7 +163,7 @@ max ~1e-15 級。`band_ncc` の累積曲線は per-band `ncc` 偏差の和で
   `polarity_inverted`(6.7e-7)が曖昧化する — eps 上限の実質
   拘束は spectral_envelope が担う
 
-### 拒否系 / 混同リスク
+#### 拒否系 / 混同リスク
 
 | fixture | full_ncc | band_ncc | gcc_phat | spectral_envelope |
 |---------|----------|----------|----------|-------------------|
@@ -193,7 +197,7 @@ max ~1e-15 級。`band_ncc` の累積曲線は per-band `ncc` 偏差の和で
   `ambiguous_alignment` + "only N method(s) agree" 文言の
   現行 pin は維持される見込み
 
-## eps 確定
+### eps 確定
 
 窓条件 `max(dispatch 偏差) << tie_window << min(受理系マージン)`:
 
@@ -229,7 +233,16 @@ const TIE_ABS_FLOOR: f64 = 1e-11;
   で全サンプルが T に入り曖昧 — 弱スコアで投票しないため
   受理結果へ影響しない、design §2 記載の意味論)
 
-## Verification
+## Related Experiments
+
+本 IR の `metadata.experiments.adopted` / `rejected` に登録された
+Experiment Log はない。
+
+## Validation
+
+以下の green および T3 の実測結果は実装当時の記録である。
+2026-10-15 の必須 section 整理ではコードテストを再実行していない。
+この整理は #33 / #52 の実装・検証証拠を追加するものではない。
 
 - `mise exec -- cargo test -p al-locate --test
   argmax_tie_characterization -- --nocapture`: 全 fixture の
@@ -242,7 +255,7 @@ const TIE_ABS_FLOOR: f64 = 1e-11;
   nocapture`: 上記偏差表を出力し、偏差 < 1e-12(採用 eps の
   1/10 以下)をアサートして green
 
-## T3: spectral_envelope corr0 置換の差分記録
+### T3: spectral_envelope corr0 置換の差分記録
 
 `docs/tasks/locate-spectral-envelope-corr0.md`(TASK-034Fo9esKwwz1f702dj84C)
 に従い、`methods.rs` `SpectralEnvelope::locate` の逐次内積/ノルム
@@ -259,7 +272,7 @@ const TIE_ABS_FLOOR: f64 = 1e-11;
   全 visited lag が同点になる — `argmax_tie_count` が
   `AmbiguousAlignment` へ構造的に検出するため拒否は維持される
 
-### T3 後の実測(特性計測テスト再実行)
+#### T3 後の実測(特性計測テスト再実行)
 
 `argmax_tie_characterization` を corr0 経路へ追随させて再実行:
 
@@ -275,13 +288,22 @@ const TIE_ABS_FLOOR: f64 = 1e-11;
   ambiguous"` で不受理 — 拒否が argmax 順序の ulp 依存ではなく
   構造的検出によって固定されることを確認(完了証明)
 
-## Open items / 留意事項
+## Risks
+
+以下は既存の計測範囲・意味論に関する留意事項である。
 
 - `best_window_match` の同点ガードが適用されるウィンドウ NCC
   曲線(anchor_window=512 の短窓)は T1 の計測対象外(タスク文の
   fixture 範囲外)。短窓曲線はより浅いマージンを持ち得るが、
   同点時の挙動は `continue`(寄与なし)であり受理系証拠の
-  曖昧化ではない。design §5 の退化受諾と併せて T2 で観測する
+  曖昧化ではない
 - `spectral_envelope` の hop 疎化曲線の未評価 lag(0.0)は
   `M ≲ TIE_ABS_FLOOR` の曲線のみ T に入る — 弱スコア曲線では
   全サンプル同点となり得るが投票しないため無害(design §2)
+
+## Follow-ups
+
+T1 当時は、上記の短窓曲線を design §5 の退化受諾と併せて T2
+(`docs/tasks/locate-argmax-ambiguity-detection.md`)で観測する方針を
+記録した。今回の section 整理では、その観測の完了・未完了を
+新たに判定していない。

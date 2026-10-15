@@ -20,9 +20,11 @@ Directory: `docs/adr`
 | ADR-034DxdUT164IPZdcbKOLQo | MediaDecoder は native 優先の registry と段階的 backend 導入を採用する | accepted | [media-decoder-backend.md](./media-decoder-backend.md) |
 | ADR-034AapIjxqSGmopfqOgcJ5 | MP4 は demux とタイミング観測のみ対応しコーデック decode は行わない | accepted | [mp4-demux-decode.md](./mp4-demux-decode.md) |
 | ADR-034yYy6pBGTFj1fMRdqJdg | locate 受理に複数手法の合議を要求する | proposed | [multi-method-locate-consensus.md](./multi-method-locate-consensus.md) |
+| ADR-034FnccPlanWsReuse0003 | 不変 FFT plan と排他 workspace を分離する | accepted | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | ADR-034EdkF9d9cVHx4NSumGSL | observability を専用 crate に集約する | accepted | [observability-dedicated-crate.md](./observability-dedicated-crate.md) |
 | ADR-034DlyK8LKvSfTztL5Bfu5 | 残存課題を責務境界で修正し仕様判断を分離する | proposed | [residual-issue-boundaries.md](./residual-issue-boundaries.md) |
 | ADR-035pmRjqxvweesfcw4L90A | 独自 SIMD 算術クレートの基盤に pulp を採用する | accepted | [simd-arithmetic-pulp.md](./simd-arithmetic-pulp.md) |
 | ADR-034EoHxzsvsHp9BOdCK2Cn | SIMD reduction 順序は lane アキュムレートと FMA を許容し等価性を許容誤差で定義する | accepted | [simd-reduction-lane-fma.md](./simd-reduction-lane-fma.md) |
+| ADR-034FP1KCQ5PnMOE20EmIjo | 候補成果物を独立保存し音声出力を WAV に限定する | accepted | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | ADR-z2U7XfOoFCqimI9EpcPc8B | spectral_envelope の fft_size を入口 assert で非ゼロ 2 冪必須とし底上げ規則を維持する | accepted | [spectral-envelope-fft-size-assert.md](./spectral-envelope-fft-size-assert.md) |
 | ADR-034EdkLSef7miMOT11Ca50 | stage 計時を manifest に永続化する | accepted | [stage-timing-manifest-persistence.md](./stage-timing-manifest-persistence.md) |

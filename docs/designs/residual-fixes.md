@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "残存課題の責務境界と検証設計"
 created: "2026-10-10"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -73,7 +73,7 @@ Issue ごとの修正境界と検証設計。#33 の方式判断を実装修正�
 | #30 | fixture builder とテスト所有者 | 実コンテナ契約に沿った padding/index/stride、強い assertion、失敗時 cleanup、合成来歴の説明を管理する |
 | #31 | config 入力と avsync | マーカーの有限時刻と明示クロックを入力境界で検証し、検出イベントと同じ時刻表現へ一箇所で変換して既存照合へ合流する |
 | #32 | residual_search と audio store、alignment PCM 読込境界 | 減算済みチャネルを既存 residual ロールで保存し、残差を独立した signal version として child alignment の使用 PCM に明示参照する。search JSON と親 source/alignment の lineage を同時に登録する |
-| #33 | stage orchestration と dataset schema | 承認済み: 候補検出を論理段として fused 実行を仕様化、FLAC 保存を defer、Resolution.sample_rate を u32 で第一級化 |
+| #33 | stage orchestration と dataset schema | 承認済み: 候補検出を論理段として fused 実行を仕様化、2026-10-11 判断: FLAC 保存を defer、Resolution.sample_rate を u32 で第一級化 |
 
 ### #28 の実施契約(2026-10-11)
 
@@ -172,3 +172,13 @@ input artifact、video_features、metadata の lineage は既存経路を継承�
 未指定または空配列では既存の全 avsync レコードを維持し、検出イベントの
 params に marker キーを追加しない。新規入力 role と外部 marker ファイルは
 採用しない(config 入力で要件を満たす)。
+
+## #33 現在の正式契約 (2026-10-14)
+
+2026-10-11 の FLAC defer 判断とその完了証拠は履歴として保持する。2026-10-14 に
+ユーザーは残差・中間音声出力を WAV のみと正式仕様化し、FLAC 出力を現行要件から外した。
+fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
+Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
+将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
+今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+旧taskのdoneは今回検証を意味しない。

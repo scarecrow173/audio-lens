@@ -170,17 +170,60 @@ impl WithSimd for StageRun<'_> {
     type Output = ();
     #[inline(always)]
     fn with_simd<S: Simd>(self, simd: S) {
-        let n = self.src_re.len();
-        let (wre, wim) = (self.ws_re, self.ws_im);
-        let tw = &self.plan.twiddles;
-        if self.inverse {
-            stage_out::<S, true>(simd, self.src_re, self.src_im, wre, wim, tw, n);
-            butterfly_from::<S, true>(simd, wre, wim, &tw[tw_segment(n / 4)..], n / 4);
-        } else {
-            stage_out::<S, false>(simd, self.src_re, self.src_im, wre, wim, tw, n);
-            butterfly_from::<S, false>(simd, wre, wim, &tw[tw_segment(n / 4)..], n / 4);
-        }
+        run_stages(
+            simd,
+            self.plan,
+            self.src_re,
+            self.src_im,
+            self.ws_re,
+            self.ws_im,
+            self.inverse,
+        );
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+#[inline(always)]
+fn run_stages<S: Simd>(
+    simd: S,
+    plan: &Fft,
+    src_re: &[f64],
+    src_im: &[f64],
+    wre: &mut [f64],
+    wim: &mut [f64],
+    inverse: bool,
+) {
+    let n = src_re.len();
+    let tw = &plan.twiddles;
+    if inverse {
+        stage_out::<S, true>(simd, src_re, src_im, wre, wim, tw, n);
+        butterfly_from::<S, true>(simd, wre, wim, &tw[tw_segment(n / 4)..], n / 4);
+    } else {
+        stage_out::<S, false>(simd, src_re, src_im, wre, wim, tw, n);
+        butterfly_from::<S, false>(simd, wre, wim, &tw[tw_segment(n / 4)..], n / 4);
+    }
+}
+
+#[inline(always)]
+fn transform_explicit_ws<S: Simd>(
+    simd: S,
+    plan: &Fft,
+    re: &mut [f64],
+    im: &mut [f64],
+    stage: &mut [f64],
+    inverse: bool,
+) {
+    let n = re.len();
+    if n < WS_MIN {
+        transform(simd, plan, re, im, inverse);
+        return;
+    }
+    let (wre, rest) = stage.split_at_mut(n + WS_SKEW);
+    let wre = &mut wre[..n];
+    let wim = &mut rest[..n];
+    run_stages(simd, plan, re, im, wre, wim, inverse);
+    let scale = if inverse { 1.0 / n as f64 } else { 1.0 };
+    gather_permute(wre, wim, re, im, scale);
 }
 
 // workspace 上の digit-reversed 出力を呼び出し側配列へ書き戻す。
@@ -711,22 +754,80 @@ fn stage_out<S: Simd, const INVERSE: bool>(
     }
 }
 
-/// 実数変換の係数と半長の scratch。寿命と再利用は呼び出し側が管理する。
-/// spectrum の正本は非負周波数 N/2+1 bins (N=1 は 1 bin) で、
-/// 実部・虚部を分離した等長スライスで受け渡す。
-pub struct RealFft {
+/// 実数 FFT の不変係数。複数スレッドで共有できる。
+/// 非負周波数 N/2+1 bins (N=1 は 1 bin) を split re/im で扱う。
+pub struct RealFftPlan {
     n: usize,
     fft: Fft,
-    // [re 部 | pad | im 部] と [re | pad | im] を各 1 本にまとめる。
-    // roots の pad は TW_PAD (64B で副表を別 L1 セットへ)、scratch の
-    // pad は WS_SKEW と同根拠 (512B で re/im のページオフセット一致を解く)。
-    // 内部 FFT は transform_ws 経由で、m >= WS_MIN では skew 付き
-    // workspace 上で stage を回す。
     roots: Vec<f64>,
+}
+
+/// 実数 FFT の排他的作業領域。変換時の確保や TLS 借用は不要。
+pub struct RealFftWorkspace {
+    n: usize,
     scratch: Vec<f64>,
+    stage: Vec<f64>,
+}
+
+impl RealFftWorkspace {
+    /// plan に必要な packing と大変換用 stage 領域を全確保する。
+    pub fn new(plan: &RealFftPlan) -> Self {
+        let m = (plan.n / 2).max(1);
+        Self {
+            n: plan.n,
+            scratch: vec![0.0; 2 * m + WS_SKEW],
+            stage: vec![0.0; if m >= WS_MIN { 2 * m + WS_SKEW } else { 0 }],
+        }
+    }
+}
+
+/// 不変 plan と排他的 workspace を所有する実数 FFT。
+pub struct RealFft {
+    plan: RealFftPlan,
+    workspace: RealFftWorkspace,
 }
 
 impl RealFft {
+    /// 非ゼロの 2 のべき乗長を受ける。不正長は panic する。
+    pub fn new(n: usize) -> Self {
+        let plan = RealFftPlan::new(n);
+        let workspace = RealFftWorkspace::new(&plan);
+        Self { plan, workspace }
+    }
+    /// 実数から非負周波数へ変換する。
+    pub fn forward(&mut self, input: &[f64], out_re: &mut [f64], out_im: &mut [f64]) {
+        self.plan
+            .forward(&mut self.workspace, input, out_re, out_im);
+    }
+    /// 非負周波数から実数へ 1/N 正規化して復元する。
+    pub fn inverse(&mut self, in_re: &[f64], in_im: &[f64], output: &mut [f64]) {
+        self.plan.inverse(&mut self.workspace, in_re, in_im, output);
+    }
+    #[inline(always)]
+    pub(crate) fn forward_with_simd<S: Simd>(
+        &mut self,
+        simd: S,
+        input: &[f64],
+        out_re: &mut [f64],
+        out_im: &mut [f64],
+    ) {
+        self.plan
+            .forward_with_simd(simd, &mut self.workspace, input, out_re, out_im);
+    }
+    #[inline(always)]
+    pub(crate) fn inverse_with_simd<S: Simd>(
+        &mut self,
+        simd: S,
+        in_re: &[f64],
+        in_im: &[f64],
+        output: &mut [f64],
+    ) {
+        self.plan
+            .inverse_with_simd(simd, &mut self.workspace, in_re, in_im, output);
+    }
+}
+
+impl RealFftPlan {
     /// 非ゼロの 2 のべき乗長を受ける。不正長は panic する。
     pub fn new(n: usize) -> Self {
         assert!(
@@ -744,17 +845,35 @@ impl RealFft {
             n,
             fft: Fft::new(m),
             roots,
-            scratch: vec![0.0; 2 * m + WS_SKEW],
         }
     }
 
+    #[inline(always)]
+    fn validate_workspace(&self, workspace: &RealFftWorkspace) {
+        let m = (self.n / 2).max(1);
+        assert_eq!(workspace.n, self.n, "real FFT workspace shape mismatch");
+        assert_eq!(workspace.scratch.len(), 2 * m + WS_SKEW);
+        assert_eq!(
+            workspace.stage.len(),
+            if m >= WS_MIN { 2 * m + WS_SKEW } else { 0 }
+        );
+    }
+
     /// 実数から非負周波数へ変換する。入力/出力長が不一致なら panic する。
-    pub fn forward(&mut self, input: &[f64], out_re: &mut [f64], out_im: &mut [f64]) {
+    pub fn forward(
+        &self,
+        workspace: &mut RealFftWorkspace,
+        input: &[f64],
+        out_re: &mut [f64],
+        out_im: &mut [f64],
+    ) {
+        self.validate_workspace(workspace);
         assert_eq!(input.len(), self.n);
         assert_eq!(out_re.len(), self.n / 2 + 1);
         assert_eq!(out_im.len(), self.n / 2 + 1);
         dispatch(RealTransform {
             plan: self,
+            workspace,
             real: RealBuffer::Input(input),
             spectrum: SpectrumBuffer::Output(out_re, out_im),
         });
@@ -763,7 +882,14 @@ impl RealFft {
     /// 非負周波数から実数へ 1/N 正規化して復元する。
     /// DC/Nyquist の虚部は使用しない。入力/出力長が不一致なら panic する。
     /// `in_re` と `in_im` は同一スライスを共有してはならない。
-    pub fn inverse(&mut self, in_re: &[f64], in_im: &[f64], output: &mut [f64]) {
+    pub fn inverse(
+        &self,
+        workspace: &mut RealFftWorkspace,
+        in_re: &[f64],
+        in_im: &[f64],
+        output: &mut [f64],
+    ) {
+        self.validate_workspace(workspace);
         assert_eq!(output.len(), self.n);
         assert_eq!(in_re.len(), self.n / 2 + 1);
         assert_eq!(in_im.len(), self.n / 2 + 1);
@@ -773,6 +899,7 @@ impl RealFft {
         );
         dispatch(RealTransform {
             plan: self,
+            workspace,
             real: RealBuffer::Output(output),
             spectrum: SpectrumBuffer::Input(in_re, in_im),
         });
@@ -781,17 +908,20 @@ impl RealFft {
     // 複合カーネルは一度選択した ISA を全変換で共有する。
     #[inline(always)]
     pub(crate) fn forward_with_simd<S: Simd>(
-        &mut self,
+        &self,
         simd: S,
+        workspace: &mut RealFftWorkspace,
         input: &[f64],
         out_re: &mut [f64],
         out_im: &mut [f64],
     ) {
+        self.validate_workspace(workspace);
         assert_eq!(input.len(), self.n);
         assert_eq!(out_re.len(), self.n / 2 + 1);
         assert_eq!(out_im.len(), self.n / 2 + 1);
         RealTransform {
             plan: self,
+            workspace,
             real: RealBuffer::Input(input),
             spectrum: SpectrumBuffer::Output(out_re, out_im),
         }
@@ -800,12 +930,14 @@ impl RealFft {
 
     #[inline(always)]
     pub(crate) fn inverse_with_simd<S: Simd>(
-        &mut self,
+        &self,
         simd: S,
+        workspace: &mut RealFftWorkspace,
         in_re: &[f64],
         in_im: &[f64],
         output: &mut [f64],
     ) {
+        self.validate_workspace(workspace);
         assert_eq!(output.len(), self.n);
         assert_eq!(in_re.len(), self.n / 2 + 1);
         assert_eq!(in_im.len(), self.n / 2 + 1);
@@ -815,6 +947,7 @@ impl RealFft {
         );
         RealTransform {
             plan: self,
+            workspace,
             real: RealBuffer::Output(output),
             spectrum: SpectrumBuffer::Input(in_re, in_im),
         }
@@ -831,7 +964,8 @@ enum SpectrumBuffer<'a> {
     Output(&'a mut [f64], &'a mut [f64]),
 }
 struct RealTransform<'a> {
-    plan: &'a mut RealFft,
+    plan: &'a RealFftPlan,
+    workspace: &'a mut RealFftWorkspace,
     real: RealBuffer<'a>,
     spectrum: SpectrumBuffer<'a>,
 }
@@ -844,12 +978,8 @@ impl WithSimd for RealTransform<'_> {
         let n1 = p.n == 1;
         let m = p.n / 2;
         // im 副表は re の直後 + TW_PAD に続く。
-        let RealFft {
-            fft,
-            roots,
-            scratch,
-            ..
-        } = p;
+        let RealFftPlan { fft, roots, .. } = p;
+        let RealFftWorkspace { scratch, stage, .. } = self.workspace;
         let roots_re = &roots[..m + 1];
         let roots_im = &roots[m + 1 + TW_PAD..m + 1 + TW_PAD + m + 1];
         let (sre, sim_) = {
@@ -868,7 +998,7 @@ impl WithSimd for RealTransform<'_> {
                     sre[i] = input[2 * i];
                     sim_[i] = input[2 * i + 1];
                 }
-                transform_ws(simd, fft, sre, sim_, false);
+                transform_explicit_ws(simd, fft, sre, sim_, stage, false);
                 let zr = sre[0];
                 let zi = sim_[0];
                 out_re[0] = zr + zi;
@@ -935,7 +1065,7 @@ impl WithSimd for RealTransform<'_> {
                     &mut sim_[1..m],
                     true,
                 );
-                transform_ws(simd, fft, sre, sim_, true);
+                transform_explicit_ws(simd, fft, sre, sim_, stage, true);
                 for i in 0..m {
                     output[2 * i] = sre[i];
                     output[2 * i + 1] = sim_[i];
@@ -1084,7 +1214,8 @@ mod tests {
             let mut scalar_im = native_im.clone();
             plan.forward(&input, &mut native_re, &mut native_im);
             pulp::Scalar.vectorize(RealTransform {
-                plan: &mut plan,
+                plan: &plan.plan,
+                workspace: &mut plan.workspace,
                 real: RealBuffer::Input(&input),
                 spectrum: SpectrumBuffer::Output(&mut scalar_re, &mut scalar_im),
             });
@@ -1099,7 +1230,8 @@ mod tests {
             }
             let mut output = vec![0.0; n];
             pulp::Scalar.vectorize(RealTransform {
-                plan: &mut plan,
+                plan: &plan.plan,
+                workspace: &mut plan.workspace,
                 real: RealBuffer::Output(&mut output),
                 spectrum: SpectrumBuffer::Input(&scalar_re, &scalar_im),
             });
