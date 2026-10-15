@@ -1,6 +1,5 @@
 # TASK Documents
 
-
 <!-- doc-suite:generated-index -->
 
 Directory: `docs/tasks`
@@ -49,6 +48,7 @@ Directory: `docs/tasks`
 | TASK-034z881eeUpQjjpRLhM0io | al-core Validity 置き換えと al-dataset 骨格・結果形状・manifest | done | [dataset-skeleton.md](./dataset-skeleton.md) |
 | TASK-034z889vFy9QDdh0EG6Nj4 | DatasetStage 実装と CLI 接続 | done | [dataset-stage.md](./dataset-stage.md) |
 | TASK-034z888EftCjwJOLuS09K0 | provenance レコードと dataset-writer | done | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
+| TASK-034G5V4SprTlEV2DE7NzIS | decode_input/read_normalized_record の view 移行 | todo | [decode-callers-view-migration.md](./decode-callers-view-migration.md) |
 | TASK-034AaFTafwUqSb6Zp9Pr8J | exp-channel: 周波数依存混合行列 + intermod 証拠 | done | [exp-channel-matrix.md](./exp-channel-matrix.md) |
 | TASK-034AaFEfKrZkVSHWqbJo7H | exp-codec: pre-echo + transient smear | done | [exp-codec-preecho.md](./exp-codec-preecho.md) |
 | TASK-034AaFDINCaNF95aiWa0oQ | exp-dynamics: transfer-curve + pumping + level依存 | done | [exp-dynamics-curve.md](./exp-dynamics-curve.md) |
@@ -107,6 +107,8 @@ Directory: `docs/tasks`
 | TASK-034EevkeIeBV0D2XgS6uTw | criterion smoke bench と samply 手順書 | done | [observability-criterion-samply.md](./observability-criterion-samply.md) |
 | TASK-034EevjKiDgtt3CwF4qTtW | leaf crate への span 計装 | done | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
 | TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | done | [observability-stage-timing.md](./observability-stage-timing.md) |
+| TASK-034G5V4oS9KJDKepLo5oND | PcmView 基盤(mmap/fallback + 融合 deinterleave) | todo | [pcm-view-foundation.md](./pcm-view-foundation.md) |
+| TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | todo | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
