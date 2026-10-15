@@ -104,11 +104,13 @@ impl IngestStage {
             video_config: video_cfg.clone(),
             ..Default::default()
         };
-        let media = DecoderRegistry::native()
-            .decode(&bytes, &request)
-            .map_err(|e| {
-                StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
-            })?;
+        let mut registry = DecoderRegistry::native();
+        registry
+            .register(Box::new(crate::symphonia::SymphoniaDecoder))
+            .map_err(|e| StageError::new(StageKind::Ingest, e.to_string()))?;
+        let media = registry.decode(&bytes, &request).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
+        })?;
         self.ingest_decoded(input, media, source_hash, ctx)
     }
 

@@ -9,6 +9,7 @@ al-core.workspace = true
 al-job.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+symphonia = { version = "0.5.5", default-features = false, features = ["aac", "isomp4"] }
 tracing.workspace = true
 
 [dev-dependencies]

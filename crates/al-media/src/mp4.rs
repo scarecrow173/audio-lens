@@ -187,6 +187,12 @@ pub struct Mp4Track {
     pub sync_samples: Option<Vec<u32>>,
     /// `elst` presence. Edit lists are recorded, not interpreted.
     pub has_edit_list: bool,
+    /// First non-empty `elst` entry's `media_time` in media timescale
+    /// ticks (e.g. the AAC encoder-delay offset). `None` when there is
+    /// no edit list or every leading entry is an empty edit
+    /// (`media_time == -1`). The value is recorded, not applied here —
+    /// consumers that need the media start offset read it directly.
+    pub edit_media_time_ticks: Option<u64>,
     /// Sound sample entry fields for `soun` tracks.
     pub audio: Option<Mp4SoundInfo>,
     /// Visual sample entry dimensions for `vide` tracks.
@@ -374,6 +380,40 @@ fn parse_tkhd(body: &[u8]) -> Result<(u32, u64), MediaError> {
             "unsupported tkhd version {v}"
         ))),
     }
+}
+
+/// Parse `elst` (v0/v1): `media_time` of the first non-empty edit
+/// entry (`media_time >= 0`), or `None` when there is none.
+fn parse_elst_media_time(body: &[u8]) -> Result<Option<u64>, MediaError> {
+    if body.len() < 8 {
+        return Err(MediaError::malformed("elst shorter than header"));
+    }
+    let version = body[0];
+    let count = be_u32(body, 4)? as usize;
+    let entry_len = match version {
+        0 => 12,
+        1 => 20,
+        v => {
+            return Err(MediaError::malformed(format!(
+                "unsupported elst version {v}"
+            )));
+        }
+    };
+    if body.len() < 8 + count * entry_len {
+        return Err(MediaError::malformed("elst shorter than declared entries"));
+    }
+    let mut at = 8;
+    for _ in 0..count {
+        let media_time = match version {
+            0 => i64::from(i32::from_be_bytes(body[at + 4..at + 8].try_into().unwrap())),
+            _ => i64::from_be_bytes(body[at + 8..at + 16].try_into().unwrap()),
+        };
+        if media_time >= 0 {
+            return Ok(Some(media_time as u64));
+        }
+        at += entry_len;
+    }
+    Ok(None)
 }
 
 /// Parse `mvhd` (v0/v1): movie timescale + duration.
@@ -1042,6 +1082,7 @@ fn parse_trak(
             sample_count: 0,
             sync_samples: None,
             has_edit_list: false,
+            edit_media_time_ticks: None,
             audio: None,
             video: None,
         },
@@ -1066,6 +1107,8 @@ fn parse_trak(
                 for c in child_boxes(data, h.body_start, h.body_end, "edts")? {
                     if &c.tag == b"elst" {
                         trak.track.has_edit_list = true;
+                        trak.track.edit_media_time_ticks =
+                            parse_elst_media_time(&data[c.body_start..c.body_end])?;
                     } else {
                         skipped.push(format!("moov/trak/edts/{}", fourcc_text(&c.tag)));
                     }

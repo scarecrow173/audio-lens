@@ -91,3 +91,7 @@ Directory: `docs/impl/ir`
 | pcm-view-foundation | [pcmview-mmap-fallback-deinterleave.md](./pcmview-mmap-fallback-deinterleave.md) |
 | decode-callers-view-migration | [pcmview-caller-migration.md](./pcmview-caller-migration.md) |
 | pcm-view-measurement-cache-decision | [pcmview-measurement-cache-decision.md](./pcmview-measurement-cache-decision.md) |
+
+| symphoniadecoder-backend-for-aac-lc-in-mp4 | [symphonia-decoder-backend-for-aac-lc.md](./symphonia-decoder-backend-for-aac-lc.md) |
+| decoder-registry-audio-fallback-merge-and-stage-wiring | [registry-audio-fallback-merge.md](./registry-audio-fallback-merge.md) |
+| aac-lc-mp4-fixture-and-ingest-e2e-tests | [aac-lc-fixture-e2e-tests.md](./aac-lc-fixture-e2e-tests.md) |
