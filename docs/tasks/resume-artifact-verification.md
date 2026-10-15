@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GsRMzsYQltCJEffwBfb"
 type: "task"
-status: "todo"
+status: "done"
 title: "resume-artifact-verification"
 created: "2026-10-15"
 updated: "2026-10-15"

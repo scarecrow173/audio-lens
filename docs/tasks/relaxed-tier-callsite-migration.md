@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GsRN1DDq3D5ZJHgcq6d"
 type: "task"
-status: "todo"
+status: "done"
 title: "relaxed-tier-callsite-migration"
 created: "2026-10-15"
 updated: "2026-10-15"
