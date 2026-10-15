@@ -1,7 +1,7 @@
 ---
 id: "TASK-034Gs7XaxwczdCjzEW33CL"
 type: "task"
-status: "todo"
+status: "done"
 title: "SymphoniaDecoder backend for AAC-LC in MP4"
 created: "2026-10-15"
 updated: "2026-10-15"

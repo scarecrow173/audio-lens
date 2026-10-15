@@ -1,7 +1,7 @@
 ---
 id: "TASK-034Gs7Y9aM823BFJ6lNIuO"
 type: "task"
-status: "todo"
+status: "done"
 title: "AAC-LC MP4 fixture and ingest e2e tests"
 created: "2026-10-15"
 updated: "2026-10-15"
