@@ -1,7 +1,7 @@
 ---
 id: "TASK-034Gs7XEgQOjkzbXJwYUU5"
 type: "task"
-status: "todo"
+status: "done"
 title: "decoder registry audio fallback merge and stage wiring"
 created: "2026-10-15"
 updated: "2026-10-15"

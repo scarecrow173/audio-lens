@@ -78,13 +78,25 @@ merge する」が確定済み。ここではその合成経路と `SymphoniaDec
   - `decode`: symphonia で packet を読み、AAC-LC track を選択して
     decode し、`IngestResult{audio, provenance.streams}` を返す。
     track の選択は track order で最初の decoder 生成可能な track
-    (AAC のみを対象)。symphonia の `track.id` は MP4 の `tkhd`
-    track_id に対応し、`StreamResult.stream` にはこれを記録する。
+    (AAC のみを対象)。symphonia の `track.id` は MP4 の trak 順
+    index(tkhd ではない。0.5.5 で実測確認)であり、
+    `StreamResult.stream` にはこれを記録する。
 - merge(registry): fallback 結果の `audio` を採用する際、
-  `result.mp4.facts.tracks` で `track_id → track_index` を解決し、
-  `provenance.streams` の該当 audio entry を `decoded: true,
-  unavailable: None` に更新する。track_id が facts に無い場合は
-  merge を棄却し、symphonia の失敗として記録する。
+  `result.mp4.facts.tracks` で fallback の track ID を native
+  track へ逆引きする — tkhd `track_id` 一致を優先、なければ
+  moov 順 `track_index` 一致(いずれも `handler == "soun"` 必須)。
+  対応不能なら棄却し、symphonia の失敗として記録する。
+  採用時は `provenance.streams` の該当 audio entry を
+  `decoded: true, unavailable: None` に更新し、AAC priming を
+  除いた `DecodedAudio` を `result.audio` に設定する。
+- `Mp4Track.edit_media_time_ticks`(native、mp4.rs): `elst` の
+  最初の非空 entry の `media_time`(media timescale ticks)を記録
+  する新規フィールド。AAC encoder delay は symphonia/isomp4 が
+  `trim_start`/`delay` に反映しないため(0.5.5 実測)、container
+  fact を native が記録し、merge 時に `media_time` フレームを
+  先頭から除去 + `duration_ticks - media_time` に truncate して
+  priming/padding を除去する。単位は media timescale →
+  sample_rate で換算する。
 
 ## Data and Control Flow
 
@@ -110,8 +122,11 @@ merge する」が確定済み。ここではその合成経路と `SymphoniaDec
    b. `format.tracks()` を順に走査し `codec_params.codec ==
       CODEC_TYPE_AAC` の最初の track を選択、`make_decoder`。
    c. `format.next_packet()` ループで選択 track の packet を
-      `packet.trim()`(`FormatOptions::enable_gapless` 経由の
-      priming/delay/padding 除去)してから `decoder.decode`。
+      `decoder.decode`(`FormatOptions::enable_gapless` 有効;
+      demuxer が `trim_start`/`trim_end` を載せた場合は decoder が
+      除去する。isomp4 では現状 elst を packet trim に反映しない
+      ため、AAC priming は merge 側の `edit_media_time_ticks` が
+      担う — 上記 merge 項参照)。
    d. `DecodedAudioRef` を `SampleBuffer::<f64>` 経由で interleave、
       `DecodedAudio{channels, sample_rate, bits_per_sample: 32,
       sample_format: Float32, codec: "aac"}` に積算。
@@ -137,16 +152,17 @@ merge する」が確定済み。ここではその合成経路と `SymphoniaDec
 
 ## Risks and Trade-offs
 
-- symphonia track_id と native track_index の対応: 通常一致しない
-  (track_id は tkhd、track_index は moov 内順序)ため、merge 時に
-  `facts.tracks` の `track_id` で逆引きする。対応不能なら棄却して
-  native の Unavailable を維持する(誤った stream を decoded と
-  記録しない方が安全)。
-- `elst` edit list: native は「記録のみ・解釈しない」方針のため、
-  AAC priming は symphonia 側の gapless trim が担う。edit list に
-  より先頭オフセットがある入力でも native timing は sample table
-  由来で不変 — 音声 PCM の長さが trim 反映後の期待値と一致するかは
-  fixture テストで検証する。
+- symphonia `track.id` と native `track_index`/`track_id` の対応:
+  0.5.5 実測で `track.id` は moov 順 index(tkhd ではない)。
+  merge は `track_id`(tkhd)一致を優先し、なければ `track_index`
+  一致にフォールバックする。対応不能なら棄却して native の
+  Unavailable を維持する(誤った stream を decoded と記録しない
+  方が安全)。
+- `elst` edit list: symphonia/isomp4 は elst を packet trim に
+  反映しないため、AAC encoder delay は native が記録した
+  `edit_media_time_ticks` で merge 時に除去する。native timing は
+  sample table 由来で不変。trim 後の frames 数は fixture テストで
+  検証する。
 - symphonia の API 変更リスク: pin 版で固定し、trait 境界内に
   閉じ込める。
 
