@@ -108,7 +108,7 @@ Directory: `docs/tasks`
 | TASK-034EevjKiDgtt3CwF4qTtW | leaf crate への span 計装 | done | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
 | TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | done | [observability-stage-timing.md](./observability-stage-timing.md) |
 | TASK-034G5V4oS9KJDKepLo5oND | PcmView 基盤(mmap/fallback + 融合 deinterleave) | done | [pcm-view-foundation.md](./pcm-view-foundation.md) |
-| TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | todo | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
+| TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | done | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |

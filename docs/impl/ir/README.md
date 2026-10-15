@@ -88,4 +88,6 @@ Directory: `docs/impl/ir`
 
 | ncc-hot-caller-reuse-verification | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
 
-| pcm-view-foundation + decode-callers-view-migration | [pcmview-mmap-fallback-deinterleave.md](./pcmview-mmap-fallback-deinterleave.md) |
+| pcm-view-foundation | [pcmview-mmap-fallback-deinterleave.md](./pcmview-mmap-fallback-deinterleave.md) |
+| decode-callers-view-migration | [pcmview-caller-migration.md](./pcmview-caller-migration.md) |
+| pcm-view-measurement-cache-decision | [pcmview-measurement-cache-decision.md](./pcmview-measurement-cache-decision.md) |
