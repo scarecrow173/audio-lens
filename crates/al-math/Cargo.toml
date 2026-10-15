@@ -24,3 +24,7 @@ harness = false
 [[bench]]
 name = "lstsq"
 harness = false
+
+[[bench]]
+name = "fft_kernel"
+harness = false
