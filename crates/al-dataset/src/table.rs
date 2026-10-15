@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use al_job::fsutil::write_durable;
+use al_job::fsutil::{write_atomic, write_durable};
 
 /// Default rows per column chunk.
 pub const DEFAULT_CHUNK_ROWS: u64 = 65_536;
@@ -191,7 +191,10 @@ impl TableWriter {
             bytes.extend_from_slice(&payload);
             let dir = self.root.join(&col.name);
             fs::create_dir_all(&dir)?;
-            write_durable(&dir.join(format!("{chunk_idx:06}.bin")), &bytes)?;
+            // Relaxed tier: chunks are bulk data regenerable by
+            // re-running the pipeline; index.json (durable) is the
+            // store's completion record.
+            write_atomic(&dir.join(format!("{chunk_idx:06}.bin")), &bytes)?;
         }
         self.row_count += n as u64;
         self.buffered.clear();

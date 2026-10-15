@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use al_job::fsutil::write_durable;
+use al_job::fsutil::{write_atomic, write_durable};
 
 /// Serialized array metadata (`array.json`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -163,7 +163,10 @@ impl TensorWriter {
         let bytes: Vec<u8> = data.iter().flat_map(|v| v.to_le_bytes()).collect();
         let path = chunk_path(&self.root, chunk_coords);
         fs::create_dir_all(path.parent().unwrap())?;
-        write_durable(&path, &bytes)
+        // Relaxed tier: chunk payloads are regenerable bulk data;
+        // array.json (durable, committed flag) is the completion
+        // record.
+        write_atomic(&path, &bytes)
     }
 
     /// Mark the array committed and re-write `array.json`. Call after

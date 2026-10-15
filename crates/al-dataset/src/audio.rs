@@ -5,11 +5,12 @@ use std::fs::{self, File};
 use std::io;
 use std::path::Path;
 
-use al_job::fsutil::{rename_durable, tmp_path_for};
+use al_job::fsutil::{rename_atomic, tmp_path_for};
 use al_media::wav::{DecodedAudio, WavEncoding, WavWriter, decode_wav};
 
 /// Write `samples` (interleaved f64 in `encoding`'s native scale) to
-/// `path` as a RIFF/WAVE file, atomically and durably.
+/// `path` as a RIFF/WAVE file, atomically but without fsyncs
+/// (relaxed tier — regenerable bulk data).
 pub fn write_wav(
     path: &Path,
     encoding: WavEncoding,
@@ -35,8 +36,10 @@ pub fn write_wav(
             writer.write_samples(block)?;
         }
         let file = writer.finish()?;
-        file.sync_all()?;
-        rename_durable(&tmp, path)
+        // Relaxed tier: WAV payloads are regenerable bulk data —
+        // skip fsync; resume verification regenerates on loss.
+        drop(file);
+        rename_atomic(&tmp, path)
     })();
     if result.is_err() {
         let _ = fs::remove_file(&tmp);
