@@ -178,11 +178,12 @@ impl IngestStage {
             StageError::new(StageKind::Ingest, format!("cannot create inputs dir: {e}"))
         })?;
 
-        // Artifact writes go through write_durable (tmp+fsync+rename):
-        // the manifest can mark the stage Completed durably, so the
-        // artifacts it points at must be durable too — otherwise a power
-        // loss could leave Completed next to a truncated artifact, which
-        // resume would wrongly skip as finished.
+        // Small record files go through write_durable (tmp+fsync+
+        // rename). The large decoded PCM payload uses write_atomic
+        // instead: it is regenerable from the source input, so its
+        // fsync is skipped and resume's artifact verification re-runs
+        // the stage if power loss dropped it after the manifest had
+        // already recorded the stage Completed.
 
         // Link produced artifacts to the declared-input artifact so the
         // manifest lineage reaches back to the source file.
@@ -201,7 +202,7 @@ impl IngestStage {
                 .join(input.input_id.as_str())
                 .join("decoded.f64le");
             let pcm_bytes: Vec<u8> = a.samples.iter().flat_map(|v| v.to_le_bytes()).collect();
-            al_job::fsutil::write_durable(&job_dir.join(&pcm_rel), &pcm_bytes).map_err(|e| {
+            al_job::fsutil::write_atomic(&job_dir.join(&pcm_rel), &pcm_bytes).map_err(|e| {
                 StageError::new(StageKind::Ingest, format!("cannot write PCM: {e}"))
             })?;
             records.push(ArtifactRecord {
@@ -214,6 +215,7 @@ impl IngestStage {
                     "codec": a.codec,
                     "sample_rate": a.sample_rate,
                     "channels": a.channels,
+                    "byte_len": pcm_bytes.len() as u64,
                 }),
             });
         }
