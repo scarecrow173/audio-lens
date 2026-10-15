@@ -9,6 +9,7 @@ Directory: `docs/adr`
 | ADR-034DXb88VbwPFg3jZqRxkv | al-math 公開 API からバックエンド型を排除し FFT 境界を split re/im 表現にする | accepted | [al-math-api-fft-split-re-im.md](./al-math-api-fft-split-re-im.md) |
 | ADR-034EoHr8hchpVwmk758yL4 | al-math vec プリミティブ層のスライス公開境界と dsp ファサード消費経路 | accepted | [al-math-vec-primitives-slice-boundary.md](./al-math-vec-primitives-slice-boundary.md) |
 | ADR-034yYy5Xx8zznKyVgAgdtP | Analysis Dataset の保存形式を分割する | proposed | [analysis-dataset-storage.md](./analysis-dataset-storage.md) |
+| ADR-034GsJKnwUmeinOPVoR2RQ | Artifact durability tiers: relaxed bulk writes with resume verification | accepted | [artifact-durability-tiers-relaxed-bulk-writes.md](./artifact-durability-tiers-relaxed-bulk-writes.md) |
 | ADR-034G5M7bOVOeKSPQVOhN14 | Artifact ID 紐づけ read-only PCM view と計測ファーストの cache 判定 | accepted | [artifact-id-read-only-pcm-view-cache.md](./artifact-id-read-only-pcm-view-cache.md) |
 | ADR-034Gs0lgFjV7eNdvRdduFg | audio fallback pipeline: native container facts + symphonia decode | accepted | [audio-fallback-pipeline-native-container-facts-symphonia-decode.md](./audio-fallback-pipeline-native-container-facts-symphonia-decode.md) |
 | ADR-034AapHIAOqZfyrLPIa14w | 映像フレームデコードは非圧縮 AVI に限定する | accepted | [avi.md](./avi.md) |
