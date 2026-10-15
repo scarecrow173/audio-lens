@@ -96,17 +96,17 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
 
 ※ 2026-10-14 の deep-dive セッションで Phase 1 各 issue(#52/#56/#36/#42/
-#55/#33)の設計決定が**確定**済み。いずれも実装は未着手であり、Stage の
-実装状態は変わらない。確定内容は各 issue セクションの「確定決定」を参照。
+#55/#33)の設計決定が**確定**済み。今回の確定は実装完了を意味せず、Stage の
+実装状態は変わらない(#33 の sample_rate は既に実装済み)。確定内容は各 issue セクションの「確定決定」を参照。
 
-## 依存 DAG(11 edge — すべて推奨順序の提案)
+## 依存 DAG(11 edge — Phase 1 確定順序を反映した推奨順序)
 
 | Source | → | Target | Strength | Reason |
 | --- | --- | --- | --- | --- |
 | #59 | → | #42 | 推奨 | FFT/相関の数値挙動を変更する前に曖昧位置の判定契約を決める |
 | #59 | → | #40 | 推奨 | 間引き/帯域検索の変更前に周期・ループ誤受理を固定 |
 | #36 | → | #56 | 推奨 | デコーダ非依存PCM handleの責務境界を先に揃える |
-| #42 | → | #52 | 推奨 | 既存split APIとkernel交換可能性を前提にplan APIを設計 |
+| #52 | → | #42 | 確定順序 | plan 再利用後に再計測し、kernel 交換の必要性を判定 |
 | #42 | → | #40 | 任意 | bandpass方式見直しとFFT backend設計を整合させる |
 | #42 | → | #53 | 任意 | FFT kernel・実数サイズ形状を考慮してlocal_lagを設計 |
 | #52 | → | #53 | 推奨 | 高頻度窓NCCでplan/workspace再利用を活用 |
@@ -311,7 +311,7 @@ issue/PR 混在):
 
 #### #55 al-datasetのfsync頻度を再設計 — P2 / M / 未着手 / Dataset
 
-- **概要**: 耐久性を選択可能にしてfsyncを集約
+- **概要**: 成果物種別の固定耐久性等級で fsync を削減(モード切替なし)
 - **現状**: Issueでは4MiBごとのsync_allが1run約1〜2千回発生しWindowsで秒単位コストと報告。
 - **ギャップ**: 頻度低減すると電源断後に失われるchunk範囲・manifestとの整合が変わる。ユーザー承認が必要。
 - **提案決定**: 成果物種別に耐久性等級を定義し、書込完了はtemp→sync(file)→rename→必要に応じparent dir fsyncで保証。
@@ -325,13 +325,13 @@ issue/PR 混在):
   - 再開時に未コミットpartが見えない
   - 正常完了時のartifact+manifestが整合
   - sync回数とe2e短縮効果を測定
-  - fast/safeモードの保証がユーザーに説明可能
+  - 固定等級と manifest 記録前の耐久化順序が説明・検証可能
 - **選択肢**:
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
   | A sync_allを最後1回だけにする | 全chunk同期を最終file同期へ集約 | 変更量少・fsync回数最少 | 中途障害でchunkを失い、既存保証を暗黙に変更 | 中 | — |
-  | B artifact単位atomic commit + durability policy | tmp write→file sync→rename→manifest順序を管理 | 再開境界と耐久性を明文化、運用で選べる | OS別検証・writer API変更が必要 | 高 | ○ |
+  | B artifact単位atomic commit + durability policy | tmp write→file sync→rename→manifest順序を管理 | 再開境界と成果物種別の固定耐久性を明文化 | OS別検証・writer API変更が必要 | 高 | ○ |
   | C 現行chunk fsyncを維持 | 既存同期契約のまま | クラッシュ時粒度を維持 | 大きなfsyncコストが残る | 高 | — |
 
 - **リスク**: renameは必ずしも電源断耐久性を意味しない / filesystem差異を無視した簡略化 / 既存のchunk単位耐久保証を黙って弱めること
@@ -347,20 +347,20 @@ issue/PR 混在):
 - **提案決定**: 3論点を一括実装しない。まず仕様とのズレが機能要件か記述だけかを選び、sample_rate型追加は低リスクだがスキーマの移行方針を定義。
 - **確定決定(2026-10-14)**: ①候補検出は独立 StageKind を追加せず `ExpensiveAnalysisStage` 内 fused を維持し、spec 文言を実装に合わせて改訂する。候補データは `events/candidates` の独立成果物契約を維持(空テーブルでも保存し「候補なし」と「未実行」を区別)。manifest/resume 境界は不変。将来単独実行需要が出たら再検討。②FLAC は実装せず WAV のみを正式仕様にする(spec 改訂)。FLAC エンコーダ依存は導入しない。将来は別 Issue(浮動小数点 PCM の量子化精度損失に注意)。#36 の FLAC デコード(入力)とエンコード(出力)は独立。③`Resolution.sample_rate` は実装済み(`types.rs:67`、5箇所の構築サイト、commit 3386fab)のため確認して close のみ。残作業は **spec 文言改訂のみ(実装不要の docs タスク)**。
 - **手順**:
-  1. 候補抽出: pure function化し、独立StageKindは「単独再実行」ユースケースがある場合のみ追加。
-  2. sample_rate: ResolutionにOptional/Requiredを決めて第一級フィールド化し既存consumerを監査。
-  3. FLAC: 保存サイズ/CPU、外部依存/配布を評価し#36のcodec基盤と切り離して実装判断。
-  4. README/spec/実装の整合をADRで明文化し、3小タスクに分割。
+  1. spec の候補検出を fused 実行として改訂し、候補抽出→トリガ評価→Expensive Analysis の順序を明記する。
+  2. `events/candidates` の独立参照・空テーブル保存契約と、現行 manifest/resume 境界を明記する。
+  3. 残差・中間音声の出力仕様を WAV のみに改訂し、FLAC 出力は将来の別 Issue とする。
+  4. 実装済み `Resolution.sample_rate` と構築サイトの整合を確認し、close 可否の根拠を記録する。
 - **テスト**:
   - 候補-only再計算の要否と契約がドキュメントで決まる
   - Resolution sample_rateとrecord params間の整合
-  - WAV/FLAC双方のprovenanceとround-trip確認
+  - WAV 出力仕様と既存 provenance 契約の整合を確認(FLAC encode は対象外)
   - 仕様改訂を選んでも未実装理由が明記される
 - **選択肢**:
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
-  | A 現状追認(仕様を更新) | fused stage維持、WAV維持、rateはparams経由を正規契約化 | 変更最小で機能欠落は実質少ない | Stage単独再実行不可、FLAC省容量化なし | 中 | ○ |
+  | A 現状追認(仕様を更新) | fused stage維持、WAV維持、実装済みResolution.sample_rateを確認 | 変更最小で機能欠落は実質少ない | Stage単独再実行不可、FLAC省容量化なし | 中 | ○ |
   | B 独立タスクごと段階適合 | candidate関数分離、rate第一級化、FLACは容量根拠に従う | 必要な汎用性だけ確保し無駄な抽象化を避ける | spec全文に対して即時完全適合にはならない | 高 | — |
   | C 仕様厳密実装 | 独立StageKind+FLAC+schema刷新を同時に実施 | 仕様と実装が全点一致 | 新しい変更面が広く性能改善から脱線 | 高 | — |
 
@@ -570,7 +570,7 @@ issue/PR 混在):
 - confirmed(混同禁止): **#52 の plan 再利用と #42 の kernel 差し替えは
   別の問題**であり、まず両者を独立計測する。plan 再利用による e2e 改善が
   kernel 交換の必要性評価を左右するため、#52 を先に固める順序が提案される
-  (#42→#52 は推奨 edge)。
+  (#52→#42 は Phase 1 で確定した順序)。
 - confirmed(ゲート): #59 は性能系の先行条件 — FFT/相関の数値挙動や
   coarse-to-fine を変更する前に、曖昧位置の判定契約(uncertain の第一級化)
   を固定する。
