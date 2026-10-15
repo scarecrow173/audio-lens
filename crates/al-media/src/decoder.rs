@@ -220,6 +220,140 @@ impl DecoderRegistry {
                 .iter()
                 .find_map(|s| s.unavailable.clone()),
         });
+        // Audio fallback: resolved backend が音声を生成しない場合に限り、
+        // 残りの backend を detect 順に試行して `audio` のみ merge する。
+        // container facts/timing/probe facts は resolved backend のまま。
+        if request.audio && result.audio.is_none() {
+            for fallback in self
+                .backends
+                .iter()
+                .map(|b| b.as_ref())
+                .filter(|b| b.id() != backend.id())
+            {
+                if fallback.detect(source).is_none() {
+                    continue;
+                }
+                let attempt = fallback
+                    .probe(source)
+                    .and_then(|fb_probe| fallback.decode(source, &fb_probe, request));
+                match attempt {
+                    Ok(fb) if fb.audio.is_some() => {
+                        // 採用は `audio` のみ。fallback backend の track
+                        // ID は backend 固有のため、mp4 facts への対応は
+                        // tkhd `track_id` → moov 順 `track_index` の順で
+                        // 逆引きする(どちらも `soun` track に限定)。
+                        // 対応不能なら棄却してネイティブ観測を維持する。
+                        let fb_track_id = fb
+                            .provenance
+                            .streams
+                            .iter()
+                            .find(|s| s.kind == "audio" && s.decoded)
+                            .and_then(|s| s.stream);
+                        let track = fb_track_id.and_then(|id| {
+                            result.mp4.as_ref().and_then(|mp4| {
+                                mp4.tracks
+                                    .iter()
+                                    .find(|t| t.handler == "soun" && t.track_id == Some(id))
+                                    .or_else(|| {
+                                        mp4.tracks
+                                            .iter()
+                                            .find(|t| t.handler == "soun" && t.track_index == id)
+                                    })
+                            })
+                        });
+                        match track {
+                            Some(track) => {
+                                let index = track.track_index;
+                                let timescale = u64::from(track.timescale).max(1);
+                                let offset = track
+                                    .edit_media_time_ticks
+                                    .unwrap_or(0)
+                                    .min(track.duration_ticks);
+                                let duration = track.duration_ticks;
+                                let mut audio = fb.audio.expect("audio checked");
+                                // elst の media_time は AAC encoder delay
+                                // 等のメディア開始オフセット。native が
+                                // 記録した値で priming 分を除き、再生
+                                // 区間(duration_ticks - media_time)に
+                                // 揃える。単位は media timescale →
+                                // sample rate で換算する。
+                                let rate = u64::from(audio.sample_rate);
+                                let front = offset * rate / timescale;
+                                let playable = (duration - offset) * rate / timescale;
+                                let ch = usize::from(audio.channels);
+                                let start = (front as usize) * ch;
+                                let len = (playable as usize) * ch;
+                                if start < audio.samples.len() {
+                                    audio.samples.drain(..start);
+                                } else {
+                                    audio.samples.clear();
+                                }
+                                audio.samples.truncate(len);
+                                result.audio = Some(audio);
+                                result.provenance.fallback = true;
+                                if let Some(entry) = result
+                                    .provenance
+                                    .streams
+                                    .iter_mut()
+                                    .find(|s| s.kind == "audio" && s.stream == Some(index))
+                                {
+                                    entry.decoded = true;
+                                    entry.unavailable = None;
+                                } else {
+                                    result.provenance.streams.push(StreamResult {
+                                        stream: Some(index),
+                                        kind: "audio".into(),
+                                        decoded: true,
+                                        unavailable: None,
+                                    });
+                                }
+                                result.provenance.attempts.push(BackendAttempt {
+                                    backend: fallback.id().into(),
+                                    version: fallback.version().into(),
+                                    executed: true,
+                                    outcome: "decoded".into(),
+                                    reason: None,
+                                });
+                                break;
+                            }
+                            None => {
+                                result.provenance.attempts.push(BackendAttempt {
+                                    backend: fallback.id().into(),
+                                    version: fallback.version().into(),
+                                    executed: true,
+                                    outcome: "unavailable".into(),
+                                    reason: Some(Unavailable::capability(
+                                        "fallback audio could not be mapped to a native track",
+                                    )),
+                                });
+                            }
+                        }
+                    }
+                    Ok(fb) => {
+                        result.provenance.attempts.push(BackendAttempt {
+                            backend: fallback.id().into(),
+                            version: fallback.version().into(),
+                            executed: true,
+                            outcome: "unavailable".into(),
+                            reason: fb
+                                .provenance
+                                .streams
+                                .iter()
+                                .find_map(|s| s.unavailable.clone()),
+                        });
+                    }
+                    Err(e) => {
+                        result.provenance.attempts.push(BackendAttempt {
+                            backend: fallback.id().into(),
+                            version: fallback.version().into(),
+                            executed: true,
+                            outcome: "error".into(),
+                            reason: Some(Unavailable::from_error(&e)),
+                        });
+                    }
+                }
+            }
+        }
         Ok(result)
     }
 }
