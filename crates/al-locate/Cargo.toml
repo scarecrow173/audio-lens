@@ -13,6 +13,7 @@ al-dataset.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+memmap2 = "0.9.11"
 
 [dev-dependencies]
 al-testkit.workspace = true
