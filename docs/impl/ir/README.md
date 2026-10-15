@@ -79,3 +79,11 @@ Directory: `docs/impl/ir`
 | viz-waveform-lod | [viz-waveform-lod.md](./viz-waveform-lod.md) |
 | wav-audio-store | [wav-audio-store.md](./wav-audio-store.md) |
 | wav-decode-and-hash | [wav-decode-and-hash.md](./wav-decode-and-hash.md) |
+
+| spec-residual-contract-finalization | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
+
+| ipd-lag-search-fix | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
+
+| ncc-plan-workspace-foundation | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
+
+| ncc-hot-caller-reuse-verification | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |

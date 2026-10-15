@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "残存レビュー指摘と仕様適合の追跡"
 created: "2026-10-10"
-updated: "2026-10-11"
+updated: "2026-10-14"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -83,7 +83,7 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 
 ## Existing Spec Alignment
 
-#33 の候補検出順序は audiolens-overview の独立段に由来し、候補イベントの情報保存は candidate-event-model に従う。WAV/FLAC は audiolens-overview と analysis-dataset に明記される。sample_rate の第一級化は Issue #33 の提案であり、analysis-dataset の分解能要件を補足する判断が必要。本 spec はこれらを削除・弱めず、実装か仕様改訂かの承認を要求する。
+#33 の初回棚卸し時点では独立候補段と WAV/FLAC が原仕様にあり、sample_rate の第一級化に判断が必要だった。2026-10-11 の承認/実施判断を下に履歴として保持する。現在契約は末尾の 2026-10-14 改訂による WAV のみ・fused 独立候補成果物・必須 sample_rate とする。
 
 #31 は video-av-timing のユーザーマーカー例を具体化する。#32 は locate-tracking の減算来歴と analysis-dataset の中間物保持を補足する。#30 の既存 defer は今回勝手に実装対象へ戻さず、項目・理由・再検討条件を対応付ける。
 
@@ -109,3 +109,13 @@ OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応�
 仕様改訂、FLAC 保存の承認済み defer、Resolution.sample_rate の第一級 u32
 実装に対応させた。FLAC を実装済み適合とは扱わない。
 [task の項目別判断と証拠](../tasks/spec-residual-decisions.md) を正本として参照する。
+
+## #33 現在の正式契約 (2026-10-14)
+
+2026-10-11 の FLAC defer 判断とその完了証拠は履歴として保持する。2026-10-14 に
+ユーザーは残差・中間音声出力を WAV のみと正式仕様化し、FLAC 出力を現行要件から外した。
+fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
+Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
+将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
+今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+旧taskのdoneは今回検証を意味しない。
