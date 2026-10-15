@@ -11,6 +11,7 @@
 
 use std::fs;
 use std::io;
+use std::path::Path;
 
 use al_core::ArtifactId;
 use al_job::fsutil::checked_job_path;
@@ -101,20 +102,15 @@ pub(crate) fn read_normalized_record(
     if record.path != expected_path {
         return Err(bad("normalized_pcm path inconsistent with artifact id"));
     }
-    let bytes = fs::read(checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
+    let view = PcmView::open(&checked_job_path(ctx.registry.job_dir(), &record.path)?)?;
     let length = params.frames as u128 * params.channels as u128 * 8;
-    if bytes.len() as u128 != length {
+    if view.byte_len() as u128 != length {
         return Err(bad(
             "normalized_pcm byte length inconsistent with frame layout",
         ));
     }
-    let samples: Vec<f64> = bytes
-        .as_chunks::<8>()
-        .0
-        .iter()
-        .map(|b| f64::from_le_bytes(*b))
-        .collect();
-    if samples.iter().any(|s| !s.is_finite()) {
+    let channel_samples = view.deinterleave(params.channels, 1.0);
+    if channel_samples.iter().flatten().any(|s| !s.is_finite()) {
         return Err(bad("normalized_pcm has non-finite samples"));
     }
     Ok(PreparedInput {
@@ -122,7 +118,7 @@ pub(crate) fn read_normalized_record(
             input_id: params.input_id.clone(),
             sample_rate: params.sample_rate,
             channels: params.channels,
-            channel_samples: deinterleave(&samples, params.channels),
+            channel_samples,
             artifact_ids: vec![record.artifact_id.clone()],
         },
         record: record.clone(),
@@ -277,6 +273,95 @@ pub fn read_alignment_pcm(
     Ok(Some((source, capture)))
 }
 
+/// Read-only backing for an f64le PCM artifact: a memory map when the
+/// platform provides one, otherwise an owned buffer from `fs::read`.
+enum PcmBacking {
+    Mapped(memmap2::Mmap),
+    Owned(Vec<u8>),
+}
+
+impl PcmBacking {
+    fn bytes(&self) -> &[u8] {
+        match self {
+            Self::Mapped(m) => m,
+            Self::Owned(v) => v,
+        }
+    }
+}
+
+/// Read-only view over one f64le PCM artifact. The view is a derived
+/// representation, never the source of truth — the manifest artifact
+/// remains authoritative. Each call opens its own view; nothing here
+/// shares decoded PCM across stages.
+pub(crate) struct PcmView {
+    backing: PcmBacking,
+}
+
+impl PcmView {
+    /// Open `path` read-only. Memory-maps when the file is a non-empty
+    /// regular file and mapping succeeds; falls back to an owned read
+    /// otherwise. I/O errors from opening or reading propagate.
+    fn open(path: &Path) -> io::Result<Self> {
+        let file = fs::File::open(path)?;
+        let meta = file.metadata()?;
+        if meta.is_file() && meta.len() > 0 {
+            // SAFETY: artifact files are immutable once `write_durable`
+            // publishes them via rename, and the manifest only records an
+            // artifact after that point — no writer mutates or truncates
+            // the file while this mapping is alive.
+            if let Ok(mmap) = unsafe { memmap2::Mmap::map(&file) } {
+                return Ok(Self {
+                    backing: PcmBacking::Mapped(mmap),
+                });
+            }
+        }
+        Self::open_owned(path)
+    }
+
+    /// Open `path` as an owned buffer, bypassing mmap. Used as the
+    /// fallback and by tests to force the non-mmap path.
+    pub(crate) fn open_owned(path: &Path) -> io::Result<Self> {
+        Ok(Self {
+            backing: PcmBacking::Owned(fs::read(path)?),
+        })
+    }
+
+    fn byte_len(&self) -> usize {
+        self.backing.bytes().len()
+    }
+
+    fn sample_count(&self) -> usize {
+        self.byte_len() / 8
+    }
+
+    fn sample(&self, index: usize) -> f64 {
+        let offset = index * 8;
+        f64::from_le_bytes(self.backing.bytes()[offset..offset + 8].try_into().unwrap())
+    }
+
+    /// Per-sample `scale` division fused with deinterleave, equivalent
+    /// to collecting scaled `Vec<f64>` and then `dsp::deinterleave`:
+    /// only complete frames are emitted (a trailing partial frame is
+    /// dropped), `channels == 0` yields an empty vector, and channel
+    /// order is preserved.
+    fn deinterleave(&self, channels: u16, scale: f64) -> Vec<Vec<f64>> {
+        let channels = usize::from(channels);
+        if channels == 0 {
+            return Vec::new();
+        }
+        let frames = self.sample_count() / channels;
+        (0..channels)
+            .map(|ch| {
+                let mut out = Vec::with_capacity(frames);
+                for f in 0..frames {
+                    out.push(self.sample(f * channels + ch) / scale);
+                }
+                out
+            })
+            .collect()
+    }
+}
+
 /// Decoded PCM of one input, with channel structure restored.
 #[derive(Debug)]
 pub struct DecodedInput {
@@ -361,20 +446,14 @@ pub fn decode_input(
         None => 1.0,
     };
 
-    let bytes = fs::read(checked_job_path(job_dir, &decoded.path)?)?;
-    if bytes.len() % 8 != 0 {
+    let view = PcmView::open(&checked_job_path(job_dir, &decoded.path)?)?;
+    if view.byte_len() % 8 != 0 {
         return Err(bad(format!(
             "decoded_pcm has {} bytes, not a multiple of 8",
-            bytes.len()
+            view.byte_len()
         )));
     }
-    let samples: Vec<f64> = bytes
-        .as_chunks::<8>()
-        .0
-        .iter()
-        .map(|b| f64::from_le_bytes(*b) / scale)
-        .collect();
-    let channel_samples = deinterleave(&samples, channels);
+    let channel_samples = view.deinterleave(channels, scale);
     let mut artifact_ids = vec![decoded.artifact_id.clone()];
     if let Some(m) = metadata {
         artifact_ids.push(m.artifact_id.clone());
@@ -386,4 +465,143 @@ pub fn decode_input(
         channel_samples,
         artifact_ids,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    static NEXT_DIR: AtomicU64 = AtomicU64::new(0);
+
+    /// Write `samples` as little-endian f64 to a fresh temp file and
+    /// return (dir, file) so callers can clean up.
+    fn temp_f64le(name: &str, samples: &[f64]) -> (std::path::PathBuf, std::path::PathBuf) {
+        let dir = std::env::temp_dir().join(format!(
+            "al_pcmview_{}_{}_{}",
+            std::process::id(),
+            name,
+            NEXT_DIR.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join(format!("{name}.f64le"));
+        let mut file = fs::File::create(&path).unwrap();
+        for s in samples {
+            file.write_all(&s.to_le_bytes()).unwrap();
+        }
+        (dir, path)
+    }
+
+    /// Baseline oracle: `fs::read` → per-sample scale division →
+    /// `dsp::deinterleave` — the pipeline the view replaces.
+    fn oracle(path: &Path, channels: u16, scale: f64) -> Vec<Vec<f64>> {
+        let bytes = fs::read(path).unwrap();
+        let samples: Vec<f64> = bytes
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|b| f64::from_le_bytes(*b) / scale)
+            .collect();
+        crate::dsp::deinterleave(&samples, channels)
+    }
+
+    #[test]
+    fn pcm_view_matches_oracle_across_scales_and_channels() {
+        let cases: Vec<(u16, f64, Vec<f64>)> = vec![
+            (1, 1.0, vec![0.5, -0.25, 1.0, -1.0, 0.0]),
+            (2, 1.0, vec![0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7]),
+            (
+                2,
+                32768.0,
+                vec![16384.0, -8192.0, 100.5, -32768.0, 0.0, 1.0],
+            ),
+            (2, 128.0, vec![64.0, -128.0, 32.0, -16.0]),
+            (3, 1.0, (0..10).map(|i| i as f64 * 0.25).collect()),
+            (6, 1.0, (0..12).map(|i| i as f64).collect()),
+        ];
+        for (channels, scale, samples) in cases {
+            let (dir, path) = temp_f64le("equiv", &samples);
+            let expected = oracle(&path, channels, scale);
+            for view in [
+                PcmView::open(&path).unwrap(),
+                PcmView::open_owned(&path).unwrap(),
+            ] {
+                assert_eq!(view.deinterleave(channels, scale), expected);
+            }
+            fs::remove_dir_all(&dir).unwrap();
+        }
+    }
+
+    #[test]
+    fn pcm_view_partial_frame_and_channel_edges() {
+        // 3ch 10 samples → 3 complete frames; the trailing sample of the
+        // partial fourth frame is dropped, matching `chunks_exact`.
+        let samples: Vec<f64> = (0..10).map(|i| i as f64).collect();
+        let (dir, path) = temp_f64le("partial", &samples);
+        let view = PcmView::open(&path).unwrap();
+        assert_eq!(
+            view.deinterleave(3, 1.0),
+            vec![
+                vec![0.0, 3.0, 6.0],
+                vec![1.0, 4.0, 7.0],
+                vec![2.0, 5.0, 8.0]
+            ]
+        );
+        // channels == 0 yields an empty vector, like `dsp::deinterleave`.
+        assert!(view.deinterleave(0, 1.0).is_empty());
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_empty_file_falls_back_to_owned() {
+        let (dir, path) = temp_f64le("empty", &[]);
+        let view = PcmView::open(&path).unwrap();
+        assert!(matches!(view.backing, PcmBacking::Owned(_)));
+        assert_eq!(view.byte_len(), 0);
+        let out = view.deinterleave(2, 1.0);
+        assert_eq!(out, vec![Vec::<f64>::new(), Vec::<f64>::new()]);
+        assert_eq!(oracle(&path, 2, 1.0), out);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_open_prefers_mmap_and_matches_owned() {
+        let samples: Vec<f64> = (0..1024).map(|i| (i as f64 * 0.5).sin()).collect();
+        let (dir, path) = temp_f64le("mapped", &samples);
+        let mapped = PcmView::open(&path).unwrap();
+        assert!(matches!(mapped.backing, PcmBacking::Mapped(_)));
+        let owned = PcmView::open_owned(&path).unwrap();
+        for ch in [1u16, 2, 3] {
+            assert_eq!(mapped.deinterleave(ch, 1.0), owned.deinterleave(ch, 1.0));
+        }
+        assert_eq!(mapped.byte_len(), owned.byte_len());
+        assert_eq!(mapped.sample(100), owned.sample(100));
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_sample_floor_and_byte_len() {
+        // 3 whole samples plus 4 trailing bytes → sample_count floors.
+        let (dir, path) = temp_f64le("floor", &[1.0, 2.0, 3.0]);
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .unwrap()
+            .write_all(&[0xAA; 4])
+            .unwrap();
+        let view = PcmView::open(&path).unwrap();
+        assert_eq!(view.byte_len(), 28);
+        assert_eq!(view.sample_count(), 3);
+        assert_eq!(view.sample(0), 1.0);
+        assert_eq!(view.sample(2), 3.0);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn pcm_view_missing_file_errors() {
+        let missing = std::env::temp_dir().join("al_pcmview_missing_zzz.f64le");
+        assert!(PcmView::open(&missing).is_err());
+        assert!(PcmView::open_owned(&missing).is_err());
+    }
 }

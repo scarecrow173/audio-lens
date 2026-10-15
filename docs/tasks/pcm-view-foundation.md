@@ -1,7 +1,7 @@
 ---
 id: "TASK-034G5V4oS9KJDKepLo5oND"
 type: "task"
-status: "todo"
+status: "done"
 title: "PcmView 基盤(mmap/fallback + 融合 deinterleave)"
 created: "2026-10-15"
 updated: "2026-10-15"

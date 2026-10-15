@@ -87,3 +87,5 @@ Directory: `docs/impl/ir`
 | ncc-plan-workspace-foundation | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
 
 | ncc-hot-caller-reuse-verification | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
+
+| pcm-view-foundation + decode-callers-view-migration | [pcmview-mmap-fallback-deinterleave.md](./pcmview-mmap-fallback-deinterleave.md) |
