@@ -26,6 +26,8 @@ relations:
     - "docs/discovery/locate-consensus-argmax-ambiguity-contract.md"
     - "docs/discovery/fft-rebaseline-post-plan-workspace.md"
     - "docs/discovery/reference-analysis-analyze-pair-band-gain.md"
+    - "docs/specs/valid-fft-ncc-plan-issue-71-p1.md"
+    - "docs/adr/ncc-valid-fft-plan-gcc-phat-plan.md"
   refines: []
   refined-by: []
   derives-from: []

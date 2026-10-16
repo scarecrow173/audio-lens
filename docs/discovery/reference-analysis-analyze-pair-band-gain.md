@@ -32,7 +32,8 @@ relations:
   refined-by: []
   derives-from:
     - "./remaining-issues-roadmap.md"
-  derived-by: []
+  derived-by:
+    - "../specs/valid-fft-ncc-plan-issue-71-p1.md"
   verifies: []
   verified-by: []
   references:

@@ -26,6 +26,7 @@ Directory: `docs/adr`
 | ADR-034AapIjxqSGmopfqOgcJ5 | MP4 は demux とタイミング観測のみ対応しコーデック decode は行わない | accepted | [mp4-demux-decode.md](./mp4-demux-decode.md) |
 | ADR-034yYy6pBGTFj1fMRdqJdg | locate 受理に複数手法の合議を要求する | proposed | [multi-method-locate-consensus.md](./multi-method-locate-consensus.md) |
 | ADR-034FnccPlanWsReuse0003 | 不変 FFT plan と排他 workspace を分離する | accepted | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
+| ADR-034H5mcOUBGtY1QeJj877L | NCC valid FFT plan と GCC-PHAT plan の分離 | proposed | [ncc-valid-fft-plan-gcc-phat-plan.md](./ncc-valid-fft-plan-gcc-phat-plan.md) |
 | ADR-034EdkF9d9cVHx4NSumGSL | observability を専用 crate に集約する | accepted | [observability-dedicated-crate.md](./observability-dedicated-crate.md) |
 | ADR-034DlyK8LKvSfTztL5Bfu5 | 残存課題を責務境界で修正し仕様判断を分離する | proposed | [residual-issue-boundaries.md](./residual-issue-boundaries.md) |
 | ADR-035pmRjqxvweesfcw4L90A | 独自 SIMD 算術クレートの基盤に pulp を採用する | accepted | [simd-arithmetic-pulp.md](./simd-arithmetic-pulp.md) |
