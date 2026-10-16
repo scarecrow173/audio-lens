@@ -142,7 +142,17 @@ fn long_source_persists_coarse_proposals_and_global_evidence() {
     use al_locate::LocateMethod;
     assert_eq!(
         full["candidates"],
-        serde_json::to_value(al_locate::FullNcc.locate(&source, &capture, 512).candidates).unwrap()
+        serde_json::to_value(
+            al_locate::FullNcc
+                .locate(
+                    &source,
+                    &capture,
+                    512,
+                    &mut al_locate::pool::CorrelationPool::new()
+                )
+                .candidates,
+        )
+        .unwrap()
     );
     fs::remove_dir_all(&fx.dir).ok();
 }
