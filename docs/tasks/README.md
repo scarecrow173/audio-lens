@@ -74,8 +74,8 @@ Directory: `docs/tasks`
 | TASK-034GMMK00SyuEB3Ztrq2v7 | InputCache hit/miss 計数と release 検証口 | done | [inputcache-hit-miss-release.md](./inputcache-hit-miss-release.md) |
 | TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
-| TASK-034GNyEFEOZSC93dTivNPe | local_lag を OverlapCorr 経由へ移行 | todo | [local-lag-overlapcorr-migration.md](./local-lag-overlapcorr-migration.md) |
-| TASK-034GNyF8pIMrWca9EKOhHN | 小窓交差の実測と閾値判定・検証記録 | todo | [local-lag-small-window-measurement.md](./local-lag-small-window-measurement.md) |
+| TASK-034GNyEFEOZSC93dTivNPe | local_lag を OverlapCorr 経由へ移行 | done | [local-lag-overlapcorr-migration.md](./local-lag-overlapcorr-migration.md) |
+| TASK-034GNyF8pIMrWca9EKOhHN | 小窓交差の実測と閾値判定・検証記録 | done | [local-lag-small-window-measurement.md](./local-lag-small-window-measurement.md) |
 | TASK-034Fo9fbMBjYA189SBNMGL | argmax 曖昧性: 回帰計測・Implementation Record・closeout | done | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
 | TASK-034Fo9dDtnY4bqipAEqfDV | argmax 曖昧性検出の実装: evidence 分岐・投票除外・merged_votes/best_window_match・バージョン | done | [locate-argmax-ambiguity-detection.md](./locate-argmax-ambiguity-detection.md) |
 | TASK-034Fo9cS08WsbNrLoq6t6a | argmax 同点検出: 受理系 fixture マージンと scalar↔dispatch 偏差の特性計測 | done | [locate-argmax-tie-eps-characterization.md](./locate-argmax-tie-eps-characterization.md) |
@@ -117,8 +117,8 @@ Directory: `docs/tasks`
 | TASK-034EevkeIeBV0D2XgS6uTw | criterion smoke bench と samply 手順書 | done | [observability-criterion-samply.md](./observability-criterion-samply.md) |
 | TASK-034EevjKiDgtt3CwF4qTtW | leaf crate への span 計装 | done | [observability-leaf-instrumentation.md](./observability-leaf-instrumentation.md) |
 | TASK-034EevjbT8l6ojq2mAPkn0 | stage 計時の manifest 永続化と runner 計装 | done | [observability-stage-timing.md](./observability-stage-timing.md) |
-| TASK-034GNyEfl8Rs2lzZbeJNoc | OverlapCorr 逐点比較と dispatch 同等性テスト | todo | [overlapcorr-corr-at-parity.md](./overlapcorr-corr-at-parity.md) |
-| TASK-034GNyDJKV8WtTW1TbBP06 | OverlapCorrPlan/OverlapCorrWorkspace を al-math に追加 | todo | [overlapcorr-plan-workspace.md](./overlapcorr-plan-workspace.md) |
+| TASK-034GNyEfl8Rs2lzZbeJNoc | OverlapCorr 逐点比較と dispatch 同等性テスト | done | [overlapcorr-corr-at-parity.md](./overlapcorr-corr-at-parity.md) |
+| TASK-034GNyDJKV8WtTW1TbBP06 | OverlapCorrPlan/OverlapCorrWorkspace を al-math に追加 | done | [overlapcorr-plan-workspace.md](./overlapcorr-plan-workspace.md) |
 | TASK-034G5V4oS9KJDKepLo5oND | PcmView 基盤(mmap/fallback + 融合 deinterleave) | done | [pcm-view-foundation.md](./pcm-view-foundation.md) |
 | TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | done | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
 | TASK-034GsRN1DDq3D5ZJHgcq6d | relaxed-tier-callsite-migration | done | [relaxed-tier-callsite-migration.md](./relaxed-tier-callsite-migration.md) |

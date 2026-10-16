@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034GNwfwp4fXb0aKjI0LOC"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "local_lag FFT 厳密再現化の実装計画"
 created: "2026-10-16"
 updated: "2026-10-16"

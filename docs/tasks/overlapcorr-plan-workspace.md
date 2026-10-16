@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GNyDJKV8WtTW1TbBP06"
 type: "task"
-status: "todo"
+status: "done"
 title: "OverlapCorrPlan/OverlapCorrWorkspace を al-math に追加"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -68,8 +68,8 @@ relations:
 
 ## Done When
 
-- [ ] corr0 逐点再現のカーネルがコンパイルされて借用契約を持つ
+- [x] corr0 逐点再現のカーネルがコンパイルされて借用契約を持つ
 
 ## Verification
 
-- [ ] `cargo check -p al-math`
+- [x] `cargo check -p al-math`
