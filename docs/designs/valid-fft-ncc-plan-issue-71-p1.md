@@ -27,6 +27,7 @@ relations:
   superseded-by: []
   related:
     - "../discovery/issue-40-locate-pair-plan-cache.md"
+    - "./streaming-bandpass-issue-71-p2.md"
   refines: []
   refined-by: []
   derives-from:

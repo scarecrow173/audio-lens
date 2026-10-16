@@ -34,6 +34,7 @@ relations:
     - "./remaining-issues-roadmap.md"
   derived-by:
     - "../specs/valid-fft-ncc-plan-issue-71-p1.md"
+    - "../specs/streaming-bandpass-issue-71-p2.md"
   verifies: []
   verified-by: []
   references:
@@ -119,7 +120,8 @@ P1 適用後も locate ステージ wall は ~274s でほぼ不変だった。
   ~7s/pair の壁にしか効かず、wall をほぼ改善しなかった。
 - anchor 探索の構造的改善は #71 の P1 スコープ外(新たな形状問題:
   窓ごとの信号長変動→plan 再構築、範囲限定検索の効率化、
-  フォールバック削減)。P2/P3 より優先すべき大きい対象。
+  フォールバック削減)。P2/P3 より優先すべき大きい対象として
+  **issue #76** に切り出した。
 
 ## Exploration Goal
 

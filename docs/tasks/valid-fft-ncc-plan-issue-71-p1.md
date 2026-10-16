@@ -24,7 +24,8 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "./streaming-bandpass-issue-71-p2.md"
   refines: []
   refined-by: []
   derives-from:
