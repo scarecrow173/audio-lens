@@ -73,6 +73,54 @@ relations:
 - `corr0` 意味・guard・polarity 選択・support 計数・`ref.band_*` /
   locate evidence 契約を維持
 
+## P1 実装結果(2026-10-17 実測)
+
+### Valid FFT NCC(plan 分離)の効果
+
+`CorrelationPlan::new_ncc`(FFT `nextpow2(S)`)+ pool キー mode 分離を実装し、
+実サンプル run(JOB-91hlZ4jzSCEkXwqbQqwLYg、44.1kHz)で span busy を
+比較した(基準: JOB-OImbl1Liin7N49xrIp3APk の変更前計測)。
+
+| 対象 | 変更前 | 変更後 | 変化 |
+| --- | --- | --- | --- |
+| `locate::band_ncc` busy/呼出 | ~11.0s | ~6.26s | **−43%** |
+| `locate::full_ncc` busy/呼出 | ~5.23s | ~3.08s | **−41%** |
+| `locate::gcc_phat` busy/呼出 | ~4.6s | ~4.5s | 不変(設計通り) |
+| `locate::spectral_envelope` | ~2.1s | ~2.2s | 不変 |
+| `analysis::reference`(analyze_pair) | 28.7s/pair | 20.8s/pair | **−27.5%** |
+
+- FFT 長は band_ncc/full_ncc で 8.4M→4.2M、band_gain 窓で 16K→8K と
+  半減したが、norm/prefix 積分・バッファ充填など O(S) 線形分が残るため
+  実効は −41~43%(band_gain 窓は −27.5% 全体に寄与)に留まった。
+- 数値契約: 全有効ラグ一致(argmax 一致含む)・scalar↔dispatch 同等・
+  `new_ncc`+`gcc_phat` は panic で検出 — 全テスト pass。
+
+### 重要な追加発見: locate wall は window_anchors_in が支配
+
+P1 適用後も locate ステージ wall は ~274s でほぼ不変だった。
+ステージ内の非計装区間を一時計装で分解した結果(JOB-ieq4MI3zdTwiAGbWp4I8eT):
+
+| フェーズ | cap0 | cap1 | 内容 |
+| --- | --- | --- | --- |
+| `prepare_input`(resample+正規化PCM書出) | 2.54s | 0.24s | 小さい |
+| `prepare_channels`(bandpass_many+coarse) | 1.75s | 1.74s | 小さい |
+| `locate_channels`(全16メソッド並列) | 7.26s | 6.49s | 既に並列で十分速い |
+| **`window_anchors_in`** | **113.8s** | **112.6s** | **locate の ~83%** |
+
+- 514 窓 × `best_window_match`(1回につき最大 4ch-pair `pool.ncc`)。
+  802/804 回の narrow+フォールバック呼出、推定 ~3200 NCC 呼出。
+- コスト構造(推定): (a) narrow 信号 hi-lo が窓ごとに変動 → pool 形状
+  キーが毎回異なり MAX_SHAPES=8 を超えて plan/workspace 再構築が
+  頻発、(b) narrow 失敗時の全範囲フォールバック(signal≈2.2M、
+  valid FFT で短縮不可の 4.19M FFT×4ch-pair)、(c) narrow NCC 自体
+  (valid FFT 化済みだが小さい)。
+- つまり **#71 で想定した「band_ncc が e2e 最大」は誤りで、locate
+  の真の壁は anchor 探索だった**。band_ncc busy 削減は並列で
+  ~7s/pair の壁にしか効かず、wall をほぼ改善しなかった。
+- anchor 探索の構造的改善は #71 の P1 スコープ外(新たな形状問題:
+  窓ごとの信号長変動→plan 再構築、範囲限定検索の効率化、
+  フォールバック削減)。P2/P3 より優先すべき大きい対象。
+
 ## Exploration Goal
 
 #54(stage 内並列化)に着手する前に、reference_analysis の本体である
