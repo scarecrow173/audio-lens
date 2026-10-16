@@ -37,7 +37,7 @@ pub use al_math::correlation::{
     overlap_corr_curve,
 };
 pub use al_math::fft::Fft;
-pub use al_math::filter::{bandpass, bandpass_many, spectral_envelope};
+pub use al_math::filter::{BandFilter, bandpass, bandpass_many, spectral_envelope};
 pub use al_math::vec::{axpy, corr0, dot, mag_sq, rms, scale, sub_scaled, sum_sq};
 
 /// In-place FFT (fused radix-4 stages, large transforms run on a skewed
