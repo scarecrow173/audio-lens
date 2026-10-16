@@ -1,7 +1,7 @@
 ---
 id: "TASK-034H5pLyx9R2CtnfPe4b03"
 type: "task"
-status: "todo"
+status: "done"
 title: "Valid FFT NCC plan 実装 (issue #71 P1)"
 created: "2026-10-16"
 updated: "2026-10-17"
@@ -74,17 +74,19 @@ SIMD カーネルは変更しない。
 
 ## Done When
 
-- [ ] `new_ncc`(仮称)で `nextpow2(S)` の plan が生成され、全有効ラグの
+- [x] `new_ncc`(仮称)で `nextpow2(S)` の plan が生成され、全有効ラグの
       出力が従来 plan と既存許容基準内で一致
-- [ ] `new_ncc` 由来 plan での `gcc_phat` が panic
-- [ ] pool で同一 shape の ncc/phat が別 plan になり、`dsp` フリー関数と
+- [x] `new_ncc` 由来 plan での `gcc_phat` が panic
+- [x] pool で同一 shape の ncc/phat が別 plan になり、`dsp` フリー関数と
       pool 結果が一致
-- [ ] `dsp::ncc` / `band_gain` / `ipd_lags` が valid plan を使用
-- [ ] `dsp::gcc_phat` / `pool.gcc_phat` が従来値を維持
+- [x] `dsp::ncc` / `band_gain` / `ipd_lags` が valid plan を使用
+- [x] `dsp::gcc_phat` / `pool.gcc_phat` が従来値を維持
 
 ## Verification
 
-- [ ] `cargo test -p al-math` / `-p al-locate` / `-p al-analysis` 全 pass
-- [ ] `cargo clippy --workspace --all-targets` clean
-- [ ] `node scripts/audit_docs.js` clean
-- [ ] 実サンプル run で band_ncc / band_gain busy 改善を確認・記録
+- [x] `cargo test -p al-math` / `-p al-locate` / `-p al-analysis` 全 pass
+- [x] `cargo clippy --workspace --all-targets` clean
+- [x] `node scripts/audit_docs.js` clean
+- [x] 実サンプル run で band_ncc / band_gain busy 改善を確認・記録
+      (band_ncc −43% / full_ncc −41%。`analysis::reference` は
+      busy/idle 分解のため wall 比較へ訂正 — discovery 参照)

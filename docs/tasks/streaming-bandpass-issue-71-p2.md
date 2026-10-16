@@ -1,10 +1,10 @@
 ---
 id: "TASK-034H79j4zxpqdARj0xtWcM"
 type: "task"
-status: "todo"
+status: "done"
 title: "Streaming Bandpass 実装 (issue #71 P2)"
 created: "2026-10-16"
-updated: "2026-10-16"
+updated: "2026-10-17"
 owners: []
 relations:
   source:
@@ -76,20 +76,27 @@ mask/IFFT)を追加し、`bandpass_many` はそれへ委譲。
 
 ## Done When
 
-- [ ] `BandFilter::new`/`band` が `bandpass_many` と同一仕様
+- [x] `BandFilter::new`/`band` が `bandpass_many` と同一仕様
       (mask・切り戻し・NaN hi・空入力)で動作する
-- [ ] `bandpass_many` が `BandFilter` 経路と同じ内部実装を共有する
-- [ ] `band_gain::analyze` が `InputCache` 非経由で帯域逐次生成する
-- [ ] `prepare_with_bands`/`PreparedChannel`/`InputCache` が無変更
+- [x] `bandpass_many` が `BandFilter` 経路と同じ内部実装を共有する
+      (共通 `FilterCore`)
+- [x] `band_gain::analyze` が `InputCache` 非経由で帯域逐次生成する
+- [x] `prepare_with_bands`/`PreparedChannel`/`InputCache` が無変更
       (locate 契約維持)
-- [ ] 全テスト・clippy・doc audit が通る
-- [ ] 実サンプル run で `analysis::reference` busy とメモリを記録し、
-      discovery doc に反映する
+- [x] 全テスト・clippy・doc audit が通る
+- [x] 実サンプル run で `analysis::reference` busy とメモリを記録し、
+      discovery doc に反映する(wall 指標へ訂正のうえ記録)
 
 ## Verification
 
-- [ ] `cargo test -p al-math -p al-locate -p al-analysis`
-- [ ] `cargo clippy --workspace --all-targets`
-- [ ] `node .agents/skills/doc-status/scripts/audit_docs.js --type all`
-- [ ] counting allocator テストで帯域同時生存が 2 信号以内であること
-- [ ] 実サンプル run で busy/RSS の before/after を記録
+- [x] `cargo test -p al-math -p al-locate -p al-analysis` — 全 pass
+- [x] `cargo clippy --workspace --all-targets` — no warnings
+- [x] `node .agents/skills/doc-status/scripts/audit_docs.js --type all`
+      — No findings
+- [x] counting allocator テストで帯域同時生存が 2 信号以内であること
+      (streaming max_live 16.8MB vs batch 276.8MB、16×)
+- [x] 実サンプル run で busy/RSS の before/after を記録
+      (JOB-H2F4 baseline vs JOB-zPn6 P2: reference ステージ中
+      peak WS 2186MB→937MB、−57%。pair wall は同等。
+      `analysis::reference` busy は idle 分解で不安定なため
+      wall=busy+idle を比較指標とする — discovery 訂正節参照)

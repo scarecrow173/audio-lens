@@ -123,6 +123,76 @@ P1 適用後も locate ステージ wall は ~274s でほぼ不変だった。
   フォールバック削減)。P2/P3 より優先すべき大きい対象として
   **issue #76** に切り出した。
 
+### 訂正: `analysis::reference` の busy 比較は計測アーティファクト
+
+P2 実測時に判明: `analysis::reference` span は `time.busy` と
+`time.idle` に大きく分解され、**busy だけの比較は有効な指標では
+なかった**。同一ジョブ形式の span close レコードを並べると:
+
+| Job | busy | idle | wall(busy+idle) |
+| --- | --- | --- | --- |
+| JOB-1HTX(P1 前) | 27.5s / 27.7s | 26.6s / 24.0s | ~52-54s |
+| JOB-OImbl(P1 前) | 29.1s / 28.3s | 1.94s / 2.01s | ~30-31s |
+| JOB-91hl(P1) | 20.6s / 21.0s | 29.5s / 36.0s | ~50-57s |
+| JOB-br2L(P2) | 51.5s / 52.1s | 2.15s / 2.01s | ~53-54s |
+
+- span は他スレッドの仕事と交代するたびに exit/enter し、その
+  非占有分が `time.idle` に計上される。スケジューリング状態で
+  busy/idle の内訳が大きく揺れるため、**比較には wall
+  (busy+idle) または stage 合計を使うべき**。
+- これにより上表の「`analysis::reference` 28.7→20.8s −27.5%」は
+  アーティファクトと訂正する(wall ではほぼ不変〜数%範囲)。
+  なお JOB-OImbl の wall ~30s は計装版バイナリで条件が異なる
+  ため直接は比較しない。
+- `locate::band_ncc` 等の busy はワーカースレッド内の連続計測で
+  idle 分解がほぼなく、P1 の −41~43% はこの影響を受けない。
+
+## P2 実装結果(2026-10-17 実測)
+
+### Streaming Bandpass の効果
+
+`BandFilter`(forward FFT 1 回 + 帯域ごと mask→IFFT→切り戻し)へ
+`band_gain` を移行し、全帯域波形の同時保持を解消。`bandpass_many`
+は同一 `FilterCore` を経由するため仕様は字句通り一致。
+
+**同一セッション・同一データ(2,205,000 サンプル × 2ch、26 帯域)
+での直接対決(release 計測):**
+
+| 経路 | 帯域生成 | 窓解析 | 計/ch |
+| --- | --- | --- | --- |
+| 旧(`prepare_with_bands` ×2、全帯域保持 + coarse) | 18.6s | 3.8s | ~22.4s |
+| 新(`BandFilter` ×2 + 逐次 `band()`) | 17.6s | 3.7s | ~21.4s |
+
+- 帯域生成の速度は同等(計測分解: `band()` ≈ 330ms/回、
+  `bandpass_many` の帯域あたりと一致)。差の ~1s/ch は除去した
+  coarse resample 分で **P2 はわずかに高速**。
+- 帯域 IFFT 52 回が band_gain コストの本体(実ジョブの
+  analyze_pair wall ~54s/pair 中 ~80%)。このコストは P2 で
+  変わらない設計であり、削減は P3(適応 dispatch/Blocked FFT)
+  の対象。
+
+**メモリ(構造検証、`crates/al-math/tests/band_filter.rs` の
+counting allocator):**
+
+- len=1<<20、26 帯域: streaming max_live **16.8MB**(帯域 2 本分)
+  vs batch max_live **276.8MB** → **16× 削減**。
+- 実ジョブ形状(2.2M×8B×26帯域×2ch)換算: 帯域波形の同時保持
+  ~915MB → ~35MB。
+
+**実 run の WS(1s 間隔ポーリング × ログ timestamp 相関):**
+
+| 指標 | baseline(main、JOB-H2F4) | P2(JOB-zPn6) | 差 |
+| --- | --- | --- | --- |
+| **reference ステージ中 peak WS** | **2186MB** | **937MB** | **−57%(−1.25GB)** |
+| pair wall(busy+idle) | 56.4s / 57.6s | 57.3s / 64.4s | 同等(実行分散内) |
+| プロセス全体 peak WS | 6.35GB | 6.49GB | 不変(locate ステージが支配) |
+
+- P2 の主成果である reference ステージのメモリ削減を確認。
+  帯域波形 ~915MB 分＋バッファ差分がそのまま −1.25GB に対応。
+- CPU は設計通り同等(coarse 除去分の微差は run 分散より小さい)。
+- プロセス peak は locate(`window_anchors_in` 周辺)が支配する
+  ため変わらず — 全行程の削減には #76 側が効く。
+
 ## Exploration Goal
 
 #54(stage 内並列化)に着手する前に、reference_analysis の本体である
