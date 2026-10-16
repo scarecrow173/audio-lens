@@ -25,6 +25,15 @@ struct Entry {
     workspace: CorrelationWorkspace,
 }
 
+/// plan の演算範囲。NCC は有効ラグ域の短縮 FFT(`new_ncc`)、
+/// PHAT は FFT 長依存の位相正規化のため従来の全域 FFT(`new`)を使う。
+/// 同一 (template_len, signal_len) でも mode ごとに別 plan を持つ。
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum PoolMode {
+    Ncc,
+    Phat,
+}
+
 /// pool の計測値。`builds` は plan/workspace を新規構築した回数。
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct PoolStats {
@@ -32,11 +41,11 @@ pub struct PoolStats {
     pub hits: u64,
 }
 
-/// (template_len, signal_len) をキーに plan/workspace を再利用する。
+/// (template_len, signal_len, mode) をキーに plan/workspace を再利用する。
 /// 呼出側(ワーカー)が排他所有し、スレッド間で共有しない。
 #[derive(Default)]
 pub struct CorrelationPool {
-    entries: HashMap<(usize, usize), Entry>,
+    entries: HashMap<(usize, usize, PoolMode), Entry>,
     builds: u64,
     hits: u64,
 }
@@ -49,20 +58,20 @@ impl CorrelationPool {
     /// `signal[lag..lag + template.len()]` との NCC。返却曲線は
     /// pool を借用し、保持したまま pool を再使用できない。
     pub fn ncc<'w>(&'w mut self, template: &[f64], signal: &[f64], max_lag: usize) -> &'w [f64] {
-        let entry = self.entry(template.len(), signal.len());
+        let entry = self.entry(template.len(), signal.len(), PoolMode::Ncc);
         entry
             .plan
             .ncc(&mut entry.workspace, template, signal, max_lag)
     }
 
-    /// 同じ形状キーの plan で PHAT を実行する。
+    /// 同じ形状キー(Phat mode)の plan で PHAT を実行する。
     pub fn gcc_phat<'w>(
         &'w mut self,
         template: &[f64],
         signal: &[f64],
         max_lag: usize,
     ) -> &'w [f64] {
-        let entry = self.entry(template.len(), signal.len());
+        let entry = self.entry(template.len(), signal.len(), PoolMode::Phat);
         entry
             .plan
             .gcc_phat(&mut entry.workspace, template, signal, max_lag)
@@ -81,13 +90,16 @@ impl CorrelationPool {
         }
     }
 
-    fn entry(&mut self, template_len: usize, signal_len: usize) -> &mut Entry {
-        let key = (template_len, signal_len);
+    fn entry(&mut self, template_len: usize, signal_len: usize, mode: PoolMode) -> &mut Entry {
+        let key = (template_len, signal_len, mode);
         if !self.entries.contains_key(&key) {
             if self.entries.len() >= MAX_SHAPES {
                 self.entries.clear();
             }
-            let plan = CorrelationPlan::new(template_len, signal_len);
+            let plan = match mode {
+                PoolMode::Ncc => CorrelationPlan::new_ncc(template_len, signal_len),
+                PoolMode::Phat => CorrelationPlan::new(template_len, signal_len),
+            };
             let workspace = CorrelationWorkspace::new(&plan);
             self.entries.insert(key, Entry { plan, workspace });
             self.builds += 1;
@@ -130,10 +142,13 @@ mod tests {
         assert_eq!(stats.builds, 1);
         assert_eq!(stats.hits, 1);
 
-        // 同一 shape の PHAT も同じ plan を再利用する。
+        // 同一 shape の PHAT は別 mode の plan を構築する(NCC は
+        // 有効ラグ域の短縮 FFT、PHAT は位相正規化が FFT 長依存のため
+        // plan を共有できない)。
         let phat: Vec<f64> = pool.gcc_phat(&template, &signal, max_lag).to_vec();
         assert_eq!(phat, dsp::gcc_phat(&template, &signal, max_lag));
-        assert_eq!(pool.stats().builds, 1);
+        assert_eq!(pool.stats().builds, 2);
+        assert_eq!(pool.entry_count(), 2);
     }
 
     #[test]

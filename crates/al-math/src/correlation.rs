@@ -5,12 +5,26 @@ use crate::{
     fft::{RealFftPlan, RealFftWorkspace},
 };
 
+/// plan が保証する演算範囲。`Full` は線形相関全域をカバーする FFT 長
+/// `nextpow2(S+L−1)` で NCC/PHAT の両方を実行できる。`NccValid` は
+/// 有効ラグ域 `0..=S−L` の NCC だけを対象に FFT 長を `nextpow2(S)`
+/// へ短縮する。返却 index `k ≤ S−L` は `c[k−n]`・`c[k+n]` の
+/// wraparound 項がいずれも定義域外(`k−n < −(L−1)`、`k+n ≥ S`)のため
+/// `n ≥ S` で無汚染となる。PHAT の bin 正規化は FFT 長依存なので
+/// `NccValid` plan での `gcc_phat` は契約違反。
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PlanMode {
+    Full,
+    NccValid,
+}
+
 /// 固定入力形状の不変相関 plan。NCC/PHAT は実行時に選ぶ。
 pub struct CorrelationPlan {
     template_len: usize,
     signal_len: usize,
     fft: Option<RealFftPlan>,
     n: usize,
+    mode: PlanMode,
 }
 
 /// 相関の排他的作業領域。すべての確保は constructor が所有する。
@@ -32,6 +46,8 @@ pub struct CorrelationWorkspace {
 
 impl CorrelationPlan {
     /// 空素材/短い signal は演算不要 shape。長さの算術 overflow は panic する。
+    /// NCC と PHAT の両方を実行できる plan。NCC しか使わない経路は
+    /// [`Self::new_ncc`] の方が FFT 長を短縮できる。
     pub fn new(template_len: usize, signal_len: usize) -> Self {
         let n = if template_len == 0 || signal_len < template_len {
             0
@@ -46,6 +62,28 @@ impl CorrelationPlan {
             signal_len,
             fft: (n != 0).then(|| RealFftPlan::new(n)),
             n,
+            mode: PlanMode::Full,
+        }
+    }
+
+    /// 有効ラグ域 `0..=signal_len − template_len` の NCC 専用 plan。
+    /// FFT 長は `nextpow2(signal_len)` で、返却される有効ラグ値は
+    /// [`Self::new`] の NCC と同一契約。この plan で `gcc_phat` を
+    /// 呼ぶと panic する(PHAT の位相正規化は FFT 長依存のため)。
+    pub fn new_ncc(template_len: usize, signal_len: usize) -> Self {
+        let n = if template_len == 0 || signal_len < template_len {
+            0
+        } else {
+            signal_len
+                .checked_next_power_of_two()
+                .expect("correlation FFT length overflow")
+        };
+        Self {
+            template_len,
+            signal_len,
+            fft: (n != 0).then(|| RealFftPlan::new(n)),
+            n,
+            mode: PlanMode::NccValid,
         }
     }
 
@@ -71,6 +109,8 @@ impl CorrelationPlan {
     }
 
     /// 同じ FFT plan で PHAT curve を生成する。ゼロ cross bin は 0。
+    /// `new_ncc` で作った plan では panic する(短縮 FFT 長では
+    /// PHAT の位相正規化結果が変わる)。
     pub fn gcc_phat<'w>(
         &self,
         workspace: &'w mut CorrelationWorkspace,
@@ -78,6 +118,11 @@ impl CorrelationPlan {
         signal: &[f64],
         max_lag: usize,
     ) -> &'w [f64] {
+        assert_eq!(
+            self.mode,
+            PlanMode::Full,
+            "gcc_phat requires CorrelationPlan::new; new_ncc plans are NCC-only"
+        );
         self.run(workspace, template, signal, max_lag, true)
     }
 
@@ -252,7 +297,7 @@ pub fn overlap_corr_curve(x: &[f64], y: &[f64], max_lag: usize) -> Vec<f64> {
 
 /// `signal[lag..lag + template.len()]` との符号付き NCC。owned curve の便利な入口。
 pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
-    let plan = CorrelationPlan::new(template.len(), signal.len());
+    let plan = CorrelationPlan::new_ncc(template.len(), signal.len());
     let mut workspace = CorrelationWorkspace::new(&plan);
     plan.ncc(&mut workspace, template, signal, max_lag).to_vec()
 }
@@ -787,5 +832,112 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// NCC-valid plan(FFT `nextpow2(S)`)は返却される全有効ラグで
+    /// Full plan(`nextpow2(S+L−1)`)と同一契約の値を返す。
+    /// wraparound 汚染は index `> S−L` にのみ発生する。
+    #[test]
+    fn ncc_valid_plan_matches_full_plan_on_all_returned_lags() {
+        for (template_len, signal_len, max_lag) in [
+            (1usize, 8usize, usize::MAX),
+            (4, 4, usize::MAX),      // 等長(K=1)
+            (4, 5, usize::MAX),
+            (3, 33, usize::MAX),
+            (33, 64, usize::MAX),
+            (64, 100, usize::MAX),   // 16384 未満でも FFT 半減する形状
+            (100, 1000, usize::MAX),
+            (512, 4096, usize::MAX),
+            (4410, 7938, usize::MAX), // 44.1k band_gain 形状(16K→8K)
+            (4800, 8640, usize::MAX), // 48k band_gain 形状(縮小なし)
+            (96_000, 100_800, usize::MAX),
+            (16, 64, 10),            // max_lag < S−L
+            (16, 64, 0),             // lag 0 のみ
+        ] {
+            let template = noise(template_len, 11);
+            let signal = noise(signal_len, 13);
+            let full = CorrelationPlan::new(template_len, signal_len);
+            let valid = CorrelationPlan::new_ncc(template_len, signal_len);
+            let mut full_ws = CorrelationWorkspace::new(&full);
+            let mut valid_ws = CorrelationWorkspace::new(&valid);
+            let expected =
+                full.ncc(&mut full_ws, &template, &signal, max_lag).to_vec();
+            let actual =
+                valid.ncc(&mut valid_ws, &template, &signal, max_lag).to_vec();
+            assert_eq!(
+                expected.len(),
+                actual.len(),
+                "shape=({template_len},{signal_len})"
+            );
+            let argmax_full = expected
+                .iter()
+                .enumerate()
+                .max_by(|a, b| a.1.abs().total_cmp(&b.1.abs()))
+                .map(|(i, _)| i);
+            let argmax_valid = actual
+                .iter()
+                .enumerate()
+                .max_by(|a, b| a.1.abs().total_cmp(&b.1.abs()))
+                .map(|(i, _)| i);
+            for (i, (&a, &b)) in expected.iter().zip(&actual).enumerate() {
+                let d = (a - b).abs();
+                assert!(
+                    d < 1e-10 || d / a.abs().max(1.0) < 1e-10,
+                    "shape=({template_len},{signal_len}) lag={i}: full {a} vs valid {b}"
+                );
+            }
+            assert_eq!(
+                argmax_full, argmax_valid,
+                "shape=({template_len},{signal_len}) peak"
+            );
+        }
+    }
+
+    /// valid plan の NCC も scalar↔runtime-dispatch で等しい。
+    #[test]
+    fn ncc_valid_plan_scalar_and_dispatch_match() {
+        for (template_len, signal_len) in [(4usize, 5usize), (33, 64), (4410, 7938)] {
+            let template = noise(template_len, 17);
+            let signal = noise(signal_len, 19);
+            let plan = CorrelationPlan::new_ncc(template_len, signal_len);
+            let mut native_ws = CorrelationWorkspace::new(&plan);
+            let mut scalar_ws = CorrelationWorkspace::new(&plan);
+            let native = dispatch(Correlation {
+                plan: &plan,
+                workspace: &mut native_ws,
+                template: &template,
+                signal: &signal,
+                max_lag: usize::MAX,
+                phat: false,
+            })
+            .to_vec();
+            let scalar = pulp::Scalar
+                .vectorize(Correlation {
+                    plan: &plan,
+                    workspace: &mut scalar_ws,
+                    template: &template,
+                    signal: &signal,
+                    max_lag: usize::MAX,
+                    phat: false,
+                })
+                .to_vec();
+            assert_eq!(native.len(), scalar.len());
+            for (i, (&a, &b)) in native.iter().zip(&scalar).enumerate() {
+                assert!(
+                    (a - b).abs() < 1e-10,
+                    "shape=({template_len},{signal_len}) lag={i}: dispatch {a} vs scalar {b}"
+                );
+            }
+        }
+    }
+
+    /// NCC-valid plan での PHAT 呼出は FFT 長依存の位相正規化契約に
+    /// 反するため panic で検出する。
+    #[test]
+    #[should_panic(expected = "NCC-only")]
+    fn gcc_phat_panics_on_ncc_valid_plan() {
+        let plan = CorrelationPlan::new_ncc(4, 8);
+        let mut ws = CorrelationWorkspace::new(&plan);
+        plan.gcc_phat(&mut ws, &[1.0; 4], &[1.0; 8], 4);
     }
 }

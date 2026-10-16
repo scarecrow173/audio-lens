@@ -32,5 +32,6 @@ Directory: `docs/designs`
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | DESIGN-034FPeXgGtwiUXHI98tTsU | Issue 33 確定仕様の文書適用設計 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | DESIGN-UuNFjPBJ3weQkbJMWWpkh0 | spectral_envelope の fft_size 入口 assert と底上げ契約の明文化 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
+| DESIGN-034H5ozhtFnMNl0ZABihBS | Valid FFT NCC plan 設計 (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
 | DESIGN-034yYLceYoIOUbV56hSfsg | 可視化・エクスポート設計 | approved | [visualization-export.md](./visualization-export.md) |

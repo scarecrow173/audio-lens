@@ -81,7 +81,7 @@ fn windows(
     if n < 2 * margin + window {
         return Vec::new();
     }
-    let plan = CorrelationPlan::new(window, window + 2 * max);
+    let plan = CorrelationPlan::new_ncc(window, window + 2 * max);
     let mut workspace = CorrelationWorkspace::new(&plan);
     (margin..=n - margin - window)
         .step_by(hop)

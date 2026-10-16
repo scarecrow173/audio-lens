@@ -131,6 +131,7 @@ Directory: `docs/tasks`
 | TASK-034Gs7XaxwczdCjzEW33CL | SymphoniaDecoder backend for AAC-LC in MP4 | done | [symphoniadecoder-backend-for-aac-lc-in-mp4.md](./symphoniadecoder-backend-for-aac-lc-in-mp4.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
+| TASK-034H5pLyx9R2CtnfPe4b03 | Valid FFT NCC plan 実装 (issue #71 P1) | todo | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | done | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |
