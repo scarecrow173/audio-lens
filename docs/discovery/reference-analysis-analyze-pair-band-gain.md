@@ -4,7 +4,7 @@ type: "discovery"
 status: "active"
 title: "reference_analysis analyze_pair 内訳計測: band_gain が支配的"
 created: "2026-10-16"
-updated: "2026-10-16"
+updated: "2026-10-17"
 owners: []
 relations:
   source:
@@ -35,7 +35,9 @@ relations:
   derived-by: []
   verifies: []
   verified-by: []
-  references: []
+  references:
+    - "../research/issue-71-band-correlation/algorithm-research-report.md"
+    - "../research/issue-71-band-correlation/oss-deep-dive.md"
   defers: []
   deferred-by: []
 ---
@@ -119,7 +121,7 @@ relations:
 
 | Option | Pros | Cons | Lean |
 | --- | --- | --- | --- |
-| band_gain の kernel 構造最適化(窓相関の一括計算・bandpass plan 化) | reference の ~8割を直撃、#54 と独立に進められる | 数値再現性の検証が必要、設計が要る | yes |
+| band_gain の kernel 構造最適化(Valid FFT / Blocked FFT / dispatch + Streaming Bandpass) | reference の ~8割を直撃、#54 と独立に進められる | 数値再現性の検証が必要、設計が要る。窓相関の一括計算は調査で非成立と判明 | yes |
 | #54 stage 並列化を先に実施 | 前提 issue は全て解決済み | 支配部(band_gain)の逐次コストは残る。並列化の効果はコア数依存 | maybe |
 | band_gain 最適化を #60 に統合 | issue を増やさない | #60 は P3/S の棚卸し枠で規模が合わない(L 級の変更) | no |
 
@@ -130,12 +132,29 @@ relations:
   「26帯域スペクトルマスクフィルタ(~4.4s/ch)」が半々。
 - **confirmed**: 「I/O 支配」仮説は棄却。write path は ~200MB/s で
   健全、異常 run は環境要因の一過性悪化。
-- **hypothesis**: `windows()` の各窓 NCC は、局所相互相関を帯域信号
-  全体に一括計算する構造(OverlapCorrPlan 系の FFT 化と同系の発想、
-  または sliding NCC の共有化)に置き換えられれば数倍効く可能性。
-  分子は窓対応の局所相互相関、分母は prefix 二乗和で構成できる。
-- **hypothesis**: `prepare_with_bands` の `bandpass_many` は
-  FFT plan・中間バッファの共有でさらに削れる可能性。
+- **confirmed(修正)**: 当初仮説の「窓相関を帯域信号全体の一括相関に
+  再構成」は**数学的に不成立**と判明(調査レポート §4.F/§5.3)。
+  分子は lag ごとに異なる積時系列で、全ラグ prefix 化は O(NR) に
+  なり既定形状では巨大。また時間窓の切り出しと周波数マスクは
+  可換でない。
+- **confirmed(調査由来)**: `band_gain` の帯域波形同時保持は
+  source+capture×2ch で **~1.8GB**(26帯域×2.2M×8B×2入力×2ch)。
+  Streaming Bandpass(帯域ごとに IFFT→窓解析→破棄)でピークメモリを
+  大幅削減できる。これは CPU 時間よりもメモリ削減が主成果。
+- **hypothesis(調査由来、互換維持の最優先案)**: NCC 有効ラグ専用
+  FFT長 — テンプレートが信号内に完全収まる valid lag のみなら
+  `nextpow2(S+L-1)` ではなく `nextpow2(S)` で十分(STUMPY `sdp.py`
+  と同型)。等長 band_ncc で FFT 長を半減できる。**GCC-PHAT には
+  適用不可**(周波数ビン位相正規化が FFT 長依存のため plan 分離必須)。
+- **hypothesis(調査由来)**: `band_gain` 局所 NCC の Blocked FFT
+  (現行 16384×3 → 8192×5、N log N モデルで ~23% 演算量減)は
+  実測比較が必要な次候補。OpenCV `templmatch.cpp` が先例。
+- **hypothesis(調査由来)**: Direct SIMD / Valid FFT / Blocked FFT の
+  形状適応 dispatch(SciPy `choose_conv_method` 型)を基盤 API 化。
+- **confirmed(調査由来)**: 音声専用 OSS(librosa multirate、pyfar
+  SOS/FIR、ViSQOL 段階整列、Essentia/aubio 帯域集約、指紋系)は
+  すべて**別推定器**であり #71 の互換維持最適化には直接使えない。
+  導入するなら別 feature_id/メタデータ版管理で別 issue。
 
 ## Open Questions
 
@@ -145,9 +164,15 @@ relations:
   #60 の小項目枠には編入しない)。
 - `windows()` の局所 NCC を一括計算化する場合、guard/端点除外・
   polarity 選択・support 計数の既存契約をどう保持するか。
+  → 調査により一括計算は非成立と判明。代替は Blocked FFT /
+  dispatch で、契約保持の検証項目はレポート §9.1 に列挙済み。
 - 改善後の効果上限: band_gain が ~0 になっても reference は
   ~4-5s/pair 残る(similarity/residuals)。locate band_ncc との
   優先度比較をどう置くか。
+- (調査由来) Valid FFT 短縮が効く条件 `nextpow2(S+L-1) >
+  nextpow2(S)` を実ジョブ形状がどの程度満たすかは未計測。
+- (調査由来) Streaming Bandpass 導入時のメモリ上限と #54 並列化の
+  相互作用(worker 数 × 帯域バッファ)はピーク RSS 計測後に決める。
 
 ## Promotion Candidates
 
@@ -159,7 +184,13 @@ relations:
 
 - 実測 run: `samples/_runs/JOB-OImbl1Liin7N49xrIp3APk`(計装付き、
   --log info)、`JOB-1HTXimeq88yelFUExgzI0O`(I/O 異常 run)
-- 上流: `remaining-issues-roadmap.md` の #54/#60 エントリ
+- 上流: `remaining-issues-roadmap.md` の #54/#60/#71 エントリ
 - 関連: `issue-40-locate-pair-plan-cache.md`(CorrelationPool)、
   `issue-53-local-lag-fft.md`(OverlapCorrPlan。本調査の lag セクション
   が既に軽いことの根拠)
+- 調査証拠(2026-10-17 取り込み、references):
+  - `docs/research/issue-71-band-correlation/algorithm-research-report.md`
+    — 改善案 A–I の比較・実施 Phase 計画・受入試験要件。14 OSS の
+    実装調査に基づく。新規ベンチ未実施の調査結論である点に注意。
+  - `docs/research/issue-71-band-correlation/oss-deep-dive.md`
+    — 各 OSS の設計思想・具体コード・ライセンスの詳細。
