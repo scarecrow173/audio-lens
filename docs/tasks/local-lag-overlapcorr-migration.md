@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GNyEFEOZSC93dTivNPe"
 type: "task"
-status: "todo"
+status: "done"
 title: "local_lag を OverlapCorr 経由へ移行"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -67,8 +67,8 @@ relations:
 
 ## Done When
 
-- [ ] `ref.lag_*` を返す既存テストが不変で pass
+- [x] `ref.lag_*` を返す既存テストが不変で pass
 
 ## Verification
 
-- [ ] `cargo test -p al-analysis`
+- [x] `cargo test -p al-analysis`

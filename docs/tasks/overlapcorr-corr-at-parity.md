@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GNyEfl8Rs2lzZbeJNoc"
 type: "task"
-status: "todo"
+status: "done"
 title: "OverlapCorr 逐点比較と dispatch 同等性テスト"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -66,8 +66,8 @@ relations:
 
 ## Done When
 
-- [ ] peak 一致とスコア許容誤差を pin するテストが pass
+- [x] peak 一致とスコア許容誤差を pin するテストが pass
 
 ## Verification
 
-- [ ] `cargo test -p al-math`
+- [x] `cargo test -p al-math`
