@@ -3,6 +3,7 @@ use std::hint::black_box;
 use std::time::Instant;
 
 use al_locate::methods::{BandNcc, FullNcc, LocateMethod};
+use al_locate::pool::CorrelationPool;
 use al_locate::prepared::InputCache;
 
 const RATE: u32 = 48_000;
@@ -71,12 +72,28 @@ fn main() {
     // 比較前に全証拠 (位置・順位・背景比・半値幅・競合比) の一致を確認する。
     for (source, prepared) in sources.iter().zip(&templates) {
         assert_eq!(
-            BandNcc.locate(source, &capture, RATE),
-            BandNcc.locate_prepared(source, &capture, RATE, prepared, &signal)
+            BandNcc.locate(source, &capture, RATE, &mut CorrelationPool::new()),
+            BandNcc.locate_prepared(
+                source,
+                &capture,
+                RATE,
+                prepared,
+                &signal,
+                &mut CorrelationPool::new()
+            )
         );
-        let (evidence, trace) =
-            FullNcc.locate_coarse_to_fine(source, &capture, RATE, prepared, &signal);
-        assert_eq!(evidence, FullNcc.locate(source, &capture, RATE));
+        let (evidence, trace) = FullNcc.locate_coarse_to_fine(
+            source,
+            &capture,
+            RATE,
+            prepared,
+            &signal,
+            &mut CorrelationPool::new(),
+        );
+        assert_eq!(
+            evidence,
+            FullNcc.locate(source, &capture, RATE, &mut CorrelationPool::new())
+        );
         let trace = trace.unwrap();
         println!(
             "coarse_frames={} radius={} refined={:?} fallback={}",
@@ -86,37 +103,56 @@ fn main() {
             trace.fallback_reason
         );
     }
+    fn report(label: &str, pool: &CorrelationPool) {
+        let stats = pool.stats();
+        println!("{label}: pool builds={} hits={}", stats.builds, stats.hits);
+    }
+    let mut pool = CorrelationPool::new();
     measure("band-ncc-uncached-two-pairs", || {
         for source in sources {
-            black_box(BandNcc.locate(source, &capture, RATE));
+            black_box(BandNcc.locate(source, &capture, RATE, &mut pool));
         }
     });
+    report("band-ncc-uncached", &pool);
+    let mut pool = CorrelationPool::new();
     measure("band-ncc-prepared-two-pairs", || {
         for (source, prepared) in sources.iter().zip(&templates) {
-            black_box(BandNcc.locate_prepared(source, &capture, RATE, prepared, &signal));
+            black_box(
+                BandNcc.locate_prepared(source, &capture, RATE, prepared, &signal, &mut pool),
+            );
         }
     });
+    report("band-ncc-prepared", &pool);
+    let mut pool = CorrelationPool::new();
     measure("coarse-ncc-two-pairs-proposal-only", || {
         for prepared in &templates {
             let t = prepared.coarse_samples().unwrap();
             let s = signal.coarse_samples().unwrap();
-            let corr = al_locate::dsp::ncc(t, s, s.len() - t.len());
-            black_box(al_locate::methods::peaks_from_correlation(&corr, 8));
+            let corr = pool.ncc(t, s, s.len() - t.len());
+            black_box(al_locate::methods::peaks_from_correlation(corr, 8));
         }
     });
+    report("coarse-ncc-proposal", &pool);
+    let mut pool = CorrelationPool::new();
     measure("full-ncc-two-pairs", || {
         for source in sources {
-            black_box(FullNcc.locate(source, &capture, RATE));
+            black_box(FullNcc.locate(source, &capture, RATE, &mut pool));
         }
     });
+    report("full-ncc", &pool);
+    let mut pool = CorrelationPool::new();
     measure("coarse-fine-and-global-evidence-two-pairs", || {
         for (source, prepared) in sources.iter().zip(&templates) {
-            black_box(FullNcc.locate_coarse_to_fine(source, &capture, RATE, prepared, &signal));
+            black_box(
+                FullNcc.locate_coarse_to_fine(source, &capture, RATE, prepared, &signal, &mut pool),
+            );
         }
     });
+    report("coarse-fine-and-global", &pool);
     // 準備と探索を同じ計測内で含める。再利用時の値と混同しない。
     measure("cold-prepared-band-and-full-two-pairs", || {
         let mut cache = InputCache::default();
+        let mut pool = CorrelationPool::new();
         let signal = cache
             .prepare("capture", 0, RATE, "original", &capture)
             .unwrap();
@@ -124,14 +160,20 @@ fn main() {
             let prepared = cache
                 .prepare(&format!("source-{i}"), 0, RATE, "original", source)
                 .unwrap();
-            black_box(BandNcc.locate_prepared(source, &capture, RATE, &prepared, &signal));
-            black_box(FullNcc.locate_coarse_to_fine(source, &capture, RATE, &prepared, &signal));
+            black_box(
+                BandNcc.locate_prepared(source, &capture, RATE, &prepared, &signal, &mut pool),
+            );
+            black_box(
+                FullNcc
+                    .locate_coarse_to_fine(source, &capture, RATE, &prepared, &signal, &mut pool),
+            );
         }
     });
+    let mut pool = CorrelationPool::new();
     measure("uncached-band-and-full-two-pairs", || {
         for source in sources {
-            black_box(BandNcc.locate(source, &capture, RATE));
-            black_box(FullNcc.locate(source, &capture, RATE));
+            black_box(BandNcc.locate(source, &capture, RATE, &mut pool));
+            black_box(FullNcc.locate(source, &capture, RATE, &mut pool));
         }
     });
 }

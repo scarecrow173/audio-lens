@@ -26,6 +26,7 @@ relations:
   related:
     - "docs/tasks/al-locate-vec-migration.md"
     - "docs/impl/ir/al-locate-dsp-re-export-vec-migration.md"
+    - "docs/discovery/issue-40-locate-pair-plan-cache.md"
   refines: []
   refined-by: []
   derives-from:
