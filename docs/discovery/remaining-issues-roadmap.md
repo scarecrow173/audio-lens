@@ -98,7 +98,9 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
 
 ※ 2026-10-14 の deep-dive セッションで Phase 1 各 issue(#52/#56/#36/#42/
-#55/#33)の設計決定が**確定**済み。今回の確定は実装完了を意味せず、Stage の
+#55/#33)の設計決定が**確定**済み。2026-10-15 の deep-dive で Phase 2 各
+issue(#53/#40/#57/#58)の進め方も**確定**(#57/#58 は計測ファーストで
+不採用の可能性を含む)。今回の確定は実装完了を意味せず、Stage の
 実装状態は変わらない(#33 の sample_rate は既に実装済み)。確定内容は各 issue セクションの「確定決定」を参照。
 
 ## 依存 DAG(11 edge — Phase 1 確定順序を反映した推奨順序)
@@ -383,6 +385,7 @@ issue/PR 混在):
 - **現状**: reference.rsのlocal_lagは±512 lagについて窓ごとにcorr0を全走査する。Issue見積もりは約18G MACs/pair。
 - **ギャップ**: FFT-NCCへの単純置換ではper-lag energyとoverlap/boundary semanticsが変わり、結果の意味が変化する可能性。
 - **提案決定**: まず現行式を数学的に固定し、FFTで分子を計算しても分母は同一範囲の累積二乗和で再現する。
+- **確定決定(2026-10-15)**: **Option B 採用** — FFT 分子(同一 overlap の Σxy)+ prefix 二乗和分母(同一範囲)で現行 corr0 を厳密再現する。一致基準は **peak lag 一致 + スコア相対誤差閾値**、tie 近傍の argmax 入替は #59 の曖昧性処理(`argmax_tie_count`)に委譲、明確な peak 変化のみ回帰扱い。小窓対応は実測駆動: prototype FFT 版と直接和を複数窓サイズで A/B し、交差があれば閾値 dispatch、なければ FFT 一本。既存 NCC 置換(Option A)は推定量が変わるため不採用、直接和 SIMD のみ(Option C)も不採用。スコープは `reference.rs` の `local_lag` のみ(locate 合議経路は対象外)。
 - **手順**:
   1. 現行スカラー実装をreference oracleとして保存し、同長/短長/端点/ゼロ窓をテスト化。
   2. 分子をFFT相関、分母をlagごとのprefix energyで構成するprototypeと、窓サイズ別SIMD直接法を比較。
@@ -412,6 +415,7 @@ issue/PR 混在):
 - **現状**: PR #44で間引きcoarse-to-fineと入力単位bandpass cacheが導入済み。
 - **ギャップ**: PR #44によりpair間の再利用は後続対応と明記。bandpass方式のIIR化等も未評価。
 - **提案決定**: 実装済み範囲を再監査し、pair間の共通フィルタ結果だけをbounded shared cache化。帯域特性が変わるIIR移行は別判断。
+- **確定決定(2026-10-15)**: スコープは **監査計測 + NCC plan 再利用** に限定。`InputCache`/`PreparedChannel` の帯域共有は既に実装済みのため、残件は (a) `prepare` の呼出数 vs 実フィルタ実行数の hit/miss 計測と `release()` 実効性・ピーク RSS の bounded 性確認、(b) coarse-to-fine の座標換算・近傍半径・boundary マークの監査(既知オフセット fixture で粗候補→精密化の到達を検証)、(c) `dsp::ncc` 呼出ごとの `CorrelationPlan` 再構築を形状キー(template_len, signal_len)で pair/帯域間再利用(#52 と同パターン)。IIR/SOS 帯域化は位相応答が変わるため引き続き別 Issue として棚上げ。
 - **手順**:
   1. 実際にinput-local/cache同一性とペアループでのfilter呼出回数を測定。
   2. cache keyをinput-id/sample-rate/ch/band/algorithm params/normalizationで構成。
@@ -425,7 +429,7 @@ issue/PR 混在):
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
-  | A pairをまたぐbounded cache | 既存spectral mask出力をinput+band keyで共用 | 数学結果不変、実装変更が局所的 | 大きいcapture×band数分のメモリ | 高 | ○ |
+  | A pairをまたぐbounded cache | 既存spectral mask出力をinput+band keyで共用 | 数学結果不変、実装変更が局所的 | 大きいcapture×band数分のメモリ | 高 | ○(実装済み) |
   | B IIR/SOS帯域抽出へ移行 | spectral mask FFT→IIR系へ変更 | 計算量とストリーミング適性改善余地 | 位相/過渡/零位相応答が変わるため互換性コスト大 | 中 | — |
   | C 1 forward FFT→bandごとの逆FFT | bandpass_manyや内部の共有スペクトルを一層徹底 | 既存周波数応答を維持しやすい | 長尺保持とinverse本数が必要 | 高 | — |
 
@@ -441,6 +445,7 @@ issue/PR 混在):
 - **現状**: cheap.rs envelopeは直接和O(len×width)。単純prefix sumでは大きい累積値の差分で桁落ち懸念。
 - **ギャップ**: 浮動小数の長尺キャンセレーション、許容誤差、短い窓での overhead の定量化が必要。
 - **提案決定**: 補償付きsliding sumを中心に、定期的な直接再計算で累積誤差の上限を制御。ブロックprefixも比較。
+- **確定決定(2026-10-15)**: **計測ファースト**。現行コードでは `envelope` の唯一の呼出しは `cheap.rs` の STFT magnitude 行(~1025 bins × 窓8)で推定コストはステージの ~0.05% 未満 — issue の「長尺 prefix ~1e6」前提と実コードが食い違う。まず `cheap_analysis`(計測時 76.3s)の内訳をプロファイルし、envelope が支配的でなければ close、または真の支配要因へ retarget する。前提が誤りなら精度リスクを負う O(n) 化はしない。
 - **手順**:
   1. 窓幅別・信号分布別(DC、小ノイズ、極端dynamics、長尺)で現行値を保存。
   2. naive prefix、block-prefix、compensated sliding、direct baselineを比較。
@@ -456,7 +461,7 @@ issue/PR 混在):
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
   | A 単純prefix sum | 累積積算から各window差分を取る | 最短実装で計算量O(n) | 長尺で差のキャンセレーション、精度低下 | 中 | — |
-  | B 補償付きsliding sum + 定期rebase | 窓の入出力を補償加算し定期的に窓を直接再評価 | O(n)かつ長尺ドリフトを制御しやすい | rebase周期と初期化誤差の検証が必要 | 高 | ○ |
+  | B 補償付きsliding sum + 定期rebase | 窓の入出力を補償加算し定期的に窓を直接再評価 | O(n)かつ長尺ドリフトを制御しやすい | rebase周期と初期化誤差の検証が必要 | 高 | △(計測で支配的な場合のみ) |
   | C ブロックprefix + 高精度局所和 | 一定block内のみprefixを作り、境界を個別加算 | 長さ依存のキャンセレーションを抑えられる | 窓幅跨ぎの処理が複雑 | 高 | — |
 
 - **リスク**: 窓幅固定でも長尺累積ドリフト / bit一致を無理に要求すると改善できない / 局所数値差がcandidate threshold近傍へ伝播
@@ -470,6 +475,7 @@ issue/PR 混在):
 - **現状**: matrix_to_tensorでフレーム行列からtensor用に再flatten copy。PR #51では永続形式に波及するため除外。
 - **ギャップ**: row-majorのin-memory viewとchunk writerの契約、永続フォーマットを変えるか未決定。
 - **提案決定**: 永続フォーマットを維持してborrowed row-major adapter/iterator経由でchunk書込。型/寿命が障害なら現行copyを維持。
+- **確定決定(2026-10-15)**: **計測ファースト**。`matrix_to_tensor` の flatten copy は大きい行列でも memcpy 数十 ms 級で CPU 的に微小。alloc bytes / peak RSS の削減効果を #56 の計数基盤で計測し、無視できる規模なら close、有意なら borrowed row-major adapter(永続形式 byte-identical)を実装する。
 - **手順**:
   1. matrix_to_tensorのcopy/alloc bytesとwriter側連続chunk変換を計測。
   2. row-viewとchunk encoderを分離し、永続フォーマットはbyte-identical優先。
@@ -483,7 +489,7 @@ issue/PR 混在):
 
   | Option | Change | Pros | Cons | Generality | 採用 |
   | --- | --- | --- | --- | --- | --- |
-  | A borrowed row-major streaming encoder | frame毎sliceを受けchunkingし永続形式不変 | 汎用reader互換、コピー削減、変更局所 | 現行writer APIを一般化する必要 | 高 | ○ |
+  | A borrowed row-major streaming encoder | frame毎sliceを受けchunkingし永続形式不変 | 汎用reader互換、コピー削減、変更局所 | 現行writer APIを一般化する必要 | 高 | △(計測で有意な場合のみ) |
   | B row-major in-memory型へ統一 | STFT/feature生成時点から単一flat buffer | 連続化とSIMD最適化に有利 | 解析側API広範囲変更・コピーの移設の可能性 | 中 | — |
   | C 永続schemaを変更 | tensor storeに新しいframe-row layoutを採用 | 将来的なzero-copy可能性 | 互換/マイグレーション/全consumer変更が重い | 中 | — |
 
