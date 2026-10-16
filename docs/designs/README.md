@@ -21,6 +21,7 @@ Directory: `docs/designs`
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
 | DESIGN-034yYLaqu0owt08BLocFDQ | ソース定位・トラッキング設計 | approved | [localization.md](./localization.md) |
 | DESIGN-034Fn25qh0mE8cz5ymYKfD | 合議 argmax 曖昧性検出の実装設計 | approved | [locate-consensus-argmax-ambiguity.md](./locate-consensus-argmax-ambiguity.md) |
+| DESIGN-034GMCyaWWhAaXk0LVJK4j | locate 相関 plan ワーカープール | approved | [locate-plan.md](./locate-plan.md) |
 | DESIGN-034ENh1Caa1pUN8HBonU2b | 機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) の実装設計 | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | DESIGN-034DlwOAFNKWY4VRafyYzo | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | DESIGN-034AasAnWroBLn28EPuQ5Y | MP4 demux とタイミング観測設計 | approved | [mp4-ingest.md](./mp4-ingest.md) |

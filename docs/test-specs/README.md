@@ -22,6 +22,7 @@ Directory: `docs/test-specs`
 | TSPEC-034Fo8Wnl0C3P71Q2uPUWP | locate 合議 argmax 曖昧性契約の検証 | draft | [locate-argmax-ambiguity.md](./locate-argmax-ambiguity.md) |
 | TSPEC-034Fo8X1B0qsgQldLzy9C2 | argmax 同点 epsilon 較正の特性計測 | draft | [locate-argmax-tie-eps-calibration.md](./locate-argmax-tie-eps-calibration.md) |
 | TSPEC-034z8k5ftvcMaUeWq1L4D4 | locate-method-consensus | proposed | [locate-method-consensus.md](./locate-method-consensus.md) |
+| TSPEC-034GMJZTDO67z7TO6TNSzl | locate plan pool・InputCache 監査・coarse-to-fine 境界 | draft | [locate-plan-pool-inputcache-coarse-to-fine.md](./locate-plan-pool-inputcache-coarse-to-fine.md) |
 | TSPEC-034z8k5JiNwiAsnNVpk7vn | locate-tracking-residual | proposed | [locate-tracking-residual.md](./locate-tracking-residual.md) |
 | TSPEC-034EO3X1gkbTna1zfQoEG8 | 機械的 caller クリーンアップ検証仕様 | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | TSPEC-035jRegcnGwUqH1RD6oUtJ | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | proposed | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |

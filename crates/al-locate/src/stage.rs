@@ -19,12 +19,12 @@ use al_job::stage::{Stage, StageContext, StageError};
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
 use crate::decode::{DecodedInput, decode_input};
-use crate::dsp::ncc;
 use crate::methods::{
     CoarseSearch, FullNcc, argmax_tie_count, default_methods, peaks_from_correlation,
 };
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
+use crate::pool::CorrelationPool;
 use crate::prepared::{InputCache, PreparedChannel};
 use crate::residual::{assemble_residual_search, persist_residual, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
@@ -233,9 +233,10 @@ impl LocateStage {
         capture: &DecodedInput,
         w_off: usize,
         window: usize,
-        lo: usize,
-        hi: usize,
+        capture_range: std::ops::Range<usize>,
+        pool: &mut CorrelationPool,
     ) -> Option<(u64, f64)> {
+        let (lo, hi) = (capture_range.start, capture_range.end);
         if hi.saturating_sub(lo) < window || w_off + window > source.channel_samples[0].len() {
             return None;
         }
@@ -243,13 +244,13 @@ impl LocateStage {
         for src_ch in &source.channel_samples {
             let template = &src_ch[w_off..w_off + window];
             for cap_ch in &capture.channel_samples {
-                let corr = ncc(template, &cap_ch[lo..hi], hi - lo - window);
+                let corr = pool.ncc(template, &cap_ch[lo..hi], hi - lo - window);
                 // 同点のウィンドウマッチは位置の証拠ではない —
                 // ペア単位でアンカーに寄与させない。
-                if argmax_tie_count(&corr) >= 2 {
+                if argmax_tie_count(corr) >= 2 {
                     continue;
                 }
-                if let Some(c) = peaks_from_correlation(&corr, 1).into_iter().next()
+                if let Some(c) = peaks_from_correlation(corr, 1).into_iter().next()
                     && best.as_ref().is_none_or(|b| c.score > b.score)
                 {
                     best = Some(c);
@@ -299,7 +300,7 @@ impl LocateStage {
         let tol = self.config.consensus.position_tolerance;
         let gap = self.config.anchor_gap;
         let rate_tol = self.config.rate_tolerance;
-        run_pool(offsets.len(), &|i| {
+        run_pool(offsets.len(), &CorrelationPool::new, &|i, pool| {
             let w_off = offsets[i];
             let slack = (w_off as f64 * rate_tol) as u64 + tol + gap;
             let expected = origin + w_off as u64;
@@ -308,16 +309,18 @@ impl LocateStage {
             // Narrow first; widen ×8 so jumps still land before paying
             // for the caller's whole range, which misses and large
             // deviations still reach.
-            self.best_window_match(source, capture, w_off, window, w_lo, w_hi)
+            self.best_window_match(source, capture, w_off, window, w_lo..w_hi, pool)
                 .or_else(|| {
                     let slack8 = slack.saturating_mul(8);
                     let m_lo = expected.saturating_sub(slack8).max(lo as u64) as usize;
                     let m_hi = (expected + window as u64 + slack8).min(hi as u64) as usize;
                     ((m_lo, m_hi) != (w_lo, w_hi))
-                        .then(|| self.best_window_match(source, capture, w_off, window, m_lo, m_hi))
+                        .then(|| {
+                            self.best_window_match(source, capture, w_off, window, m_lo..m_hi, pool)
+                        })
                         .flatten()
                 })
-                .or_else(|| self.best_window_match(source, capture, w_off, window, lo, hi))
+                .or_else(|| self.best_window_match(source, capture, w_off, window, lo..hi, pool))
                 .map(|(capture, score)| Anchor {
                     source: base + w_off as u64,
                     capture,
@@ -387,8 +390,14 @@ struct MethodOutput {
 }
 
 /// Run `n_tasks` independent units of work over a worker pool,
-/// collecting one result per task in input order.
-fn run_pool<T: Send>(n_tasks: usize, work: &(dyn Fn(usize) -> T + Sync)) -> Vec<T> {
+/// collecting one result per task in input order. Each worker builds
+/// its own context via `make_ctx`, so per-worker resources (e.g.
+/// [`CorrelationPool`]) stay exclusively owned by that thread.
+fn run_pool<T: Send, C>(
+    n_tasks: usize,
+    make_ctx: &(dyn Fn() -> C + Sync),
+    work: &(dyn Fn(usize, &mut C) -> T + Sync),
+) -> Vec<T> {
     let slots: Vec<std::sync::Mutex<Option<T>>> =
         (0..n_tasks).map(|_| std::sync::Mutex::new(None)).collect();
     let next = std::sync::atomic::AtomicUsize::new(0);
@@ -399,12 +408,13 @@ fn run_pool<T: Send>(n_tasks: usize, work: &(dyn Fn(usize) -> T + Sync)) -> Vec<
     std::thread::scope(|scope| {
         for _ in 0..workers {
             scope.spawn(|| {
+                let mut ctx = make_ctx();
                 loop {
                     let idx = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                     if idx >= n_tasks {
                         return;
                     }
-                    *slots[idx].lock().unwrap() = Some(work(idx));
+                    *slots[idx].lock().unwrap() = Some(work(idx, &mut ctx));
                 }
             });
         }
@@ -421,7 +431,7 @@ fn run_pool<T: Send>(n_tasks: usize, work: &(dyn Fn(usize) -> T + Sync)) -> Vec<
 /// builds its own method set and only evidence crosses the thread
 /// boundary.
 fn run_method_tasks(tasks: &[MethodTask<'_>]) -> Vec<MethodOutput> {
-    run_pool(tasks.len(), &|idx| {
+    run_pool(tasks.len(), &CorrelationPool::new, &|idx, pool| {
         let methods = default_methods();
         let task = &tasks[idx];
         if methods[task.method].id() == "full_ncc" {
@@ -431,6 +441,7 @@ fn run_method_tasks(tasks: &[MethodTask<'_>]) -> Vec<MethodOutput> {
                 task.rate,
                 task.prepared_template,
                 task.prepared_signal,
+                pool,
             );
             return MethodOutput {
                 evidence,
@@ -444,6 +455,7 @@ fn run_method_tasks(tasks: &[MethodTask<'_>]) -> Vec<MethodOutput> {
             task.rate,
             task.prepared_template,
             task.prepared_signal,
+            pool,
         );
         MethodOutput {
             evidence,
@@ -816,14 +828,22 @@ impl Stage for LocateStage {
                     let window =
                         (self.config.anchor_window as usize).min(source.channel_samples[0].len());
                     let tol = tolerance as usize;
+                    let mut pool = CorrelationPool::new();
                     let verified: Vec<usize> = (0..loops.len())
                         .filter(|&i| {
                             detected[i] == primary || {
                                 let pos = detected[i] as usize;
                                 let lo = pos.saturating_sub(tol);
                                 let hi = (pos + window + tol).min(cap_n);
-                                self.best_window_match(source, capture, 0, window, lo, hi)
-                                    .is_some()
+                                self.best_window_match(
+                                    source,
+                                    capture,
+                                    0,
+                                    window,
+                                    lo..hi,
+                                    &mut pool,
+                                )
+                                .is_some()
                             }
                         })
                         .collect();

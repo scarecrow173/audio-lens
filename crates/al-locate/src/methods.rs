@@ -9,6 +9,7 @@ use al_core::Validity;
 
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::dsp;
+use crate::pool::CorrelationPool;
 use crate::prepared::{PreparedChannel, bands_for_rate};
 
 /// Minimum template energy to attempt correlation; below this the
@@ -61,10 +62,18 @@ pub fn propose_coarse_to_fine(
     rate: u32,
     prepared_template: &PreparedChannel,
     prepared_signal: &PreparedChannel,
+    pool: &mut CorrelationPool,
 ) -> Option<CoarseSearch> {
-    let mut search = propose_coarse(template, signal, rate, prepared_template, prepared_signal)?;
-    let corr = dsp::ncc(template, signal, signal.len() - template.len());
-    refine_coarse(&mut search, &corr);
+    let mut search = propose_coarse(
+        template,
+        signal,
+        rate,
+        prepared_template,
+        prepared_signal,
+        pool,
+    )?;
+    let corr = pool.ncc(template, signal, signal.len() - template.len());
+    refine_coarse(&mut search, corr);
     Some(search)
 }
 
@@ -74,6 +83,7 @@ fn propose_coarse(
     rate: u32,
     prepared_template: &PreparedChannel,
     prepared_signal: &PreparedChannel,
+    pool: &mut CorrelationPool,
 ) -> Option<CoarseSearch> {
     if template.is_empty() || template.len() < rate as usize * 2 || signal.len() < template.len() {
         return None;
@@ -86,7 +96,7 @@ fn propose_coarse(
     }
     let max_lag = signal.len() - template.len();
     let radius = prepared_signal.radius;
-    let coarse = peaks_from_correlation(&dsp::ncc(t, s, s.len() - t.len()), MAX_CANDIDATES);
+    let coarse = peaks_from_correlation(pool.ncc(t, s, s.len() - t.len()), MAX_CANDIDATES);
     let positions: Vec<_> = coarse
         .iter()
         .map(|c| {
@@ -138,8 +148,15 @@ pub trait LocateMethod {
     fn id(&self) -> &'static str;
     /// Method version.
     fn version(&self) -> &'static str;
-    /// Produce evidence for `template` inside `signal`.
-    fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence;
+    /// Produce evidence for `template` inside `signal`. `pool` は
+    /// 呼出スレッドが排他所有する相関 plan/workspace の再利用口。
+    fn locate(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        sample_rate: u32,
+        pool: &mut CorrelationPool,
+    ) -> MethodEvidence;
 
     /// 入力準備層が共有するフィルタを利用する。証拠の探索域は変更しない。
     fn locate_prepared(
@@ -149,8 +166,9 @@ pub trait LocateMethod {
         sample_rate: u32,
         _prepared_template: &PreparedChannel,
         _prepared_signal: &PreparedChannel,
+        pool: &mut CorrelationPool,
     ) -> MethodEvidence {
-        self.locate(template, signal, sample_rate)
+        self.locate(template, signal, sample_rate, pool)
     }
 }
 
@@ -333,6 +351,7 @@ impl FullNcc {
         rate: u32,
         prepared_template: &PreparedChannel,
         prepared_signal: &PreparedChannel,
+        pool: &mut CorrelationPool,
     ) -> (MethodEvidence, Option<CoarseSearch>) {
         let span = tracing::info_span!(
             "locate::full_ncc",
@@ -344,12 +363,19 @@ impl FullNcc {
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return (e, None);
         }
-        let mut search = propose_coarse(template, signal, rate, prepared_template, prepared_signal);
-        let corr = dsp::ncc(template, signal, signal.len() - template.len());
+        let mut search = propose_coarse(
+            template,
+            signal,
+            rate,
+            prepared_template,
+            prepared_signal,
+            pool,
+        );
+        let corr = pool.ncc(template, signal, signal.len() - template.len());
         if let Some(search) = &mut search {
-            refine_coarse(search, &corr);
+            refine_coarse(search, corr);
         }
-        (evidence_from_corr(self.id(), self.version(), &corr), search)
+        (evidence_from_corr(self.id(), self.version(), corr), search)
     }
 }
 
@@ -360,7 +386,13 @@ impl LocateMethod for FullNcc {
     fn version(&self) -> &'static str {
         "2"
     }
-    fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+    fn locate(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        _rate: u32,
+        pool: &mut CorrelationPool,
+    ) -> MethodEvidence {
         let span = tracing::info_span!(
             "locate::full_ncc",
             method = self.id(),
@@ -371,8 +403,8 @@ impl LocateMethod for FullNcc {
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
-        let corr = dsp::ncc(template, signal, signal.len() - template.len());
-        evidence_from_corr(self.id(), self.version(), &corr)
+        let corr = pool.ncc(template, signal, signal.len() - template.len());
+        evidence_from_corr(self.id(), self.version(), corr)
     }
 }
 
@@ -385,6 +417,7 @@ impl BandNcc {
         &self,
         curve_len: usize,
         bands: impl Iterator<Item = (&'a [f64], &'a [f64])>,
+        pool: &mut CorrelationPool,
     ) -> MethodEvidence {
         let mut acc = vec![0.0; curve_len];
         let mut bands_used = 0;
@@ -392,7 +425,7 @@ impl BandNcc {
             if dsp::sum_sq(t) < MIN_ENERGY {
                 continue;
             }
-            for (a, c) in acc.iter_mut().zip(dsp::ncc(t, s, s.len() - t.len())) {
+            for (a, c) in acc.iter_mut().zip(pool.ncc(t, s, s.len() - t.len())) {
                 *a += c;
             }
             bands_used += 1;
@@ -416,7 +449,13 @@ impl LocateMethod for BandNcc {
     fn version(&self) -> &'static str {
         "2"
     }
-    fn locate(&self, template: &[f64], signal: &[f64], sample_rate: u32) -> MethodEvidence {
+    fn locate(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        sample_rate: u32,
+        pool: &mut CorrelationPool,
+    ) -> MethodEvidence {
         let span = tracing::info_span!(
             "locate::band_ncc",
             method = self.id(),
@@ -444,6 +483,7 @@ impl LocateMethod for BandNcc {
                 .iter()
                 .zip(&signals)
                 .map(|((_, t), s)| (t.as_slice(), s.as_slice())),
+            pool,
         )
     }
 
@@ -454,6 +494,7 @@ impl LocateMethod for BandNcc {
         _sample_rate: u32,
         prepared_template: &PreparedChannel,
         prepared_signal: &PreparedChannel,
+        pool: &mut CorrelationPool,
     ) -> MethodEvidence {
         let span = tracing::info_span!(
             "locate::band_ncc",
@@ -475,6 +516,7 @@ impl LocateMethod for BandNcc {
                     assert_eq!(band, signal_band);
                     (t.as_ref(), s.as_ref())
                 }),
+            pool,
         )
     }
 }
@@ -489,7 +531,13 @@ impl LocateMethod for GccPhat {
     fn version(&self) -> &'static str {
         "2"
     }
-    fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+    fn locate(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        _rate: u32,
+        pool: &mut CorrelationPool,
+    ) -> MethodEvidence {
         let span = tracing::info_span!(
             "locate::gcc_phat",
             method = self.id(),
@@ -500,8 +548,8 @@ impl LocateMethod for GccPhat {
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
-        let corr = dsp::gcc_phat(template, signal, signal.len() - template.len());
-        evidence_from_corr(self.id(), self.version(), &corr)
+        let corr = pool.gcc_phat(template, signal, signal.len() - template.len());
+        evidence_from_corr(self.id(), self.version(), corr)
     }
 }
 
@@ -543,7 +591,13 @@ impl LocateMethod for SpectralEnvelope {
     fn version(&self) -> &'static str {
         "2"
     }
-    fn locate(&self, template: &[f64], signal: &[f64], _rate: u32) -> MethodEvidence {
+    fn locate(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        _rate: u32,
+        _pool: &mut CorrelationPool,
+    ) -> MethodEvidence {
         let span = tracing::info_span!(
             "locate::spectral_envelope",
             method = self.id(),
@@ -605,7 +659,7 @@ mod tests {
     fn full_ncc_finds_embedded_source() {
         let signal = noise_signal(7, 4096);
         let template = signal[1500..2000].to_vec();
-        let ev = FullNcc.locate(&template, &signal, 48000);
+        let ev = FullNcc.locate(&template, &signal, 48000, &mut CorrelationPool::new());
         assert_eq!(ev.validity, Validity::Valid);
         assert_eq!(ev.candidates[0].position, 1500);
     }
@@ -617,7 +671,7 @@ mod tests {
         let methods: Vec<Box<dyn LocateMethod>> =
             vec![Box::new(FullNcc), Box::new(BandNcc), Box::new(GccPhat)];
         for method in methods {
-            let evidence = method.locate(&template, &signal, 48000);
+            let evidence = method.locate(&template, &signal, 48000, &mut CorrelationPool::new());
             assert_eq!(evidence.validity, Validity::Valid, "{}", method.id());
             assert_eq!(evidence.candidates[0].position, 1500, "{}", method.id());
             assert!(evidence.candidates[0].score < 0.0, "{}", method.id());
@@ -629,7 +683,7 @@ mod tests {
         let signal = noise_signal(3, 2048);
         let silence = vec![0.0; 512];
         for m in default_methods() {
-            let ev = m.locate(&silence, &signal, 48000);
+            let ev = m.locate(&silence, &signal, 48000, &mut CorrelationPool::new());
             assert_eq!(
                 ev.validity,
                 Validity::SilenceInsufficientEnergy,
@@ -639,7 +693,12 @@ mod tests {
             assert!(ev.reject_reason.is_some());
         }
         let short = noise_signal(5, 64);
-        let ev = FullNcc.locate(&noise_signal(9, 512), &short, 48000);
+        let ev = FullNcc.locate(
+            &noise_signal(9, 512),
+            &short,
+            48000,
+            &mut CorrelationPool::new(),
+        );
         assert_eq!(ev.validity, Validity::InsufficientSupport);
     }
 
@@ -648,7 +707,7 @@ mod tests {
         // Signal identical in length to the template → correlation of
         // length 1; the sole lag is still a valid peak.
         let template = noise_signal(13, 512);
-        let ev = FullNcc.locate(&template, &template, 48000);
+        let ev = FullNcc.locate(&template, &template, 48000, &mut CorrelationPool::new());
         assert_eq!(ev.validity, Validity::Valid);
         assert_eq!(ev.candidates.len(), 1);
         assert_eq!(ev.candidates[0].position, 0);
@@ -676,7 +735,12 @@ mod tests {
         for (i, &v) in template.iter().enumerate() {
             signal[4000 + i] = v * 3.0;
         }
-        let ev = SpectralEnvelope::default().locate(&template, &signal, 48000);
+        let ev = SpectralEnvelope::default().locate(
+            &template,
+            &signal,
+            48000,
+            &mut CorrelationPool::new(),
+        );
         assert!(ev.validity == Validity::Valid || !ev.candidates.is_empty());
     }
 

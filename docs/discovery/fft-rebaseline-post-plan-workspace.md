@@ -27,6 +27,7 @@ relations:
     - "docs/discovery/remaining-issues-roadmap.md"
     - "docs/discovery/al-math-api-fft.md"
     - "docs/adr/al-math-api-fft-split-re-im.md"
+    - "docs/discovery/issue-40-locate-pair-plan-cache.md"
   refines: []
   refined-by: []
   derives-from:
