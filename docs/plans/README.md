@@ -21,6 +21,7 @@ Directory: `docs/plans`
 | PLAN-034FQfhDbOOCKmh4QhnP51 | NCC plan/workspaceを分離し2サイトを再利用へ移す | completed | [implement-ncc-plan-workspace-reuse.md](./implement-ncc-plan-workspace-reuse.md) |
 | PLAN-034FPmSqSPhY2WlFZJB0VY | Issue 33 確定仕様を正式文書へ適用する | completed | [implement-spec-residual-contract-finalization.md](./implement-spec-residual-contract-finalization.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
+| PLAN-034GNwfwp4fXb0aKjI0LOC | local_lag FFT 厳密再現化の実装計画 | approved | [local-lag-fft.md](./local-lag-fft.md) |
 | PLAN-034z7HA18FxYMCQPBZ6Gg2 | ソース定位・トラッキングの実装 | completed | [locate-and-tracking.md](./locate-and-tracking.md) |
 | PLAN-034GMK73n1nSCbsGEfC6Np | locate 相関 plan ワーカープール導入 | completed | [locate-plan.md](./locate-plan.md) |
 | PLAN-034EO41zt4R9uACMi7eaFH | 機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | completed | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
