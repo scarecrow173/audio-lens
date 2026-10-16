@@ -92,8 +92,8 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #33 | spec #1への残差適合 | Contract | P3 | L | 一部実装※ | 1 |
 | #53 | local_lagの全探索を高速化 | Reference | P1 | L | 未着手 | 2 |
 | #40 | coarse-to-fineと帯域cacheの残件 | Locate | P2 | L | 一部実装 | 2 |
-| #57 | envelopeを線形時間化 | Cheap | P2 | M | 未着手 | 2 |
-| #58 | matrix_to_tensorコピーを除去 | Dataset | P3 | M | 未着手 | 2 |
+| #57 | envelopeを線形時間化 | Cheap | P2 | M | 完了(計測で非支配的→close) | 2 |
+| #58 | matrix_to_tensorコピーを除去 | Dataset | P3 | M | 完了(計測で微小→close) | 2 |
 | #54 | cheap/reference stage内部の並列化 | Runner | P1 | XL | 未着手 | 3 |
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
 
@@ -446,6 +446,7 @@ issue/PR 混在):
 - **ギャップ**: 浮動小数の長尺キャンセレーション、許容誤差、短い窓での overhead の定量化が必要。
 - **提案決定**: 補償付きsliding sumを中心に、定期的な直接再計算で累積誤差の上限を制御。ブロックprefixも比較。
 - **確定決定(2026-10-15)**: **計測ファースト**。現行コードでは `envelope` の唯一の呼出しは `cheap.rs` の STFT magnitude 行(~1025 bins × 窓8)で推定コストはステージの ~0.05% 未満 — issue の「長尺 prefix ~1e6」前提と実コードが食い違う。まず `cheap_analysis`(計測時 76.3s)の内訳をプロファイルし、envelope が支配的でなければ close、または真の支配要因へ retarget する。前提が誤りなら精度リスクを負う O(n) 化はしない。
+- **計測結果(2026-10-16)**: `profile_cheap` example(50s/48kHz stereo、stft 2048/1024)で envelope は **36.3ms/ch**(analyze_input 全体 ~986ms/2ch の ~4%)。支配 kernel は stft 56.5ms と scalar feature 群の long tail(~50%)。**前提が誤りと判明 → close**(issue コメントに詳細)。
 - **手順**:
   1. 窓幅別・信号分布別(DC、小ノイズ、極端dynamics、長尺)で現行値を保存。
   2. naive prefix、block-prefix、compensated sliding、direct baselineを比較。
@@ -476,6 +477,7 @@ issue/PR 混在):
 - **ギャップ**: row-majorのin-memory viewとchunk writerの契約、永続フォーマットを変えるか未決定。
 - **提案決定**: 永続フォーマットを維持してborrowed row-major adapter/iterator経由でchunk書込。型/寿命が障害なら現行copyを維持。
 - **確定決定(2026-10-15)**: **計測ファースト**。`matrix_to_tensor` の flatten copy は大きい行列でも memcpy 数十 ms 級で CPU 的に微小。alloc bytes / peak RSS の削減効果を #56 の計数基盤で計測し、無視できる規模なら close、有意なら borrowed row-major adapter(永続形式 byte-identical)を実装する。
+- **計測結果(2026-10-16)**: `profile_cheap` で 38.4MB 行列の flatten は **~8-10ms/枚**、1ch あたり ~7枚 ≈ ~60-70ms(analyze_input の ~7%、e2e <0.5%)。RSS への寄与は一時 +38MB 級で、ステージが既に保持する ~190MB/ch の行列群に対し微小。**close**(issue コメントに詳細)。
 - **手順**:
   1. matrix_to_tensorのcopy/alloc bytesとwriter側連続chunk変換を計測。
   2. row-viewとchunk encoderを分離し、永続フォーマットはbyte-identical優先。
