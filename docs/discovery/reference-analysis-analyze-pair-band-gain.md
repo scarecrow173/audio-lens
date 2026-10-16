@@ -10,6 +10,7 @@ relations:
   source:
     - "https://github.com/scarecrow173/audio-lens/issues/54"
     - "https://github.com/scarecrow173/audio-lens/issues/60"
+    - "https://github.com/scarecrow173/audio-lens/issues/71"
   changes:
     added: []
     modified: []
@@ -138,8 +139,10 @@ relations:
 
 ## Open Questions
 
-- band_gain 最適化は新 issue とするか、#60 のスコープに編入するか
-  (現行 #60 は residual gather / lod / interleave の小項目枠)。
+- ~~band_gain 最適化は新 issue とするか、#60 のスコープに編入するか~~
+  → **解決(2026-10-16)**: 新 issue #71 として起票。locate の
+  `band_ncc` と `band_gain` を同一の構造問題として扱う(L 級のため
+  #60 の小項目枠には編入しない)。
 - `windows()` の局所 NCC を一括計算化する場合、guard/端点除外・
   polarity 選択・support 計数の既存契約をどう保持するか。
 - 改善後の効果上限: band_gain が ~0 になっても reference は
