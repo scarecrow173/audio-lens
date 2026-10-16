@@ -44,6 +44,34 @@ relations:
 
 # reference_analysis analyze_pair 内訳計測: band_gain が支配的
 
+## 確定方針(2026-10-17 deep-dive 確定)
+
+### スコープ
+
+- **#71 は「既存推定量の互換維持する構造高速化」のみ**に限定。
+  multirate / SOS / FIR / ERB / ViSQOL 型の別推定器、音声指紋・H1 等の
+  新特徴量は**別 issue**(別 feature_id・メタデータ版管理)とする。
+- GCC-PHAT は Valid FFT の**対象外**(位相正規化が FFT 長依存のため
+  別契約)。CorrelationPlan の NCC/PHAT は plan/mode で分離する。
+- STOMP 型更新・全ラグ prefix 積は演算量上非現実的で**棄却**(調査 §4.E/F)。
+
+### 実施順(各 Phase は独立 PR)
+
+| Phase | 内容 | 期待効果 | 受入 |
+| --- | --- | --- | --- |
+| **P1 Valid FFT NCC** | NCC 専用 plan で `nextpow2(S)` を選択(GCC-PHAT は `nextpow2(S+L-1)` 維持)。`nextpow2(S) < nextpow2(S+L-1)` の形状のみ適用する**形状適応** | band_ncc/full_ncc: 8.4M→4.2M に半減(レート非依存、ほぼ常時)。band_gain: 44.1kHz で 16K→8K(形状依存、48kHz では効果なし) | 全有効ラグ・peak/tie/順位・曖昧性・テンソルが既存契約内一致 + busy 半減前後を実測 |
+| **P2 Streaming Bandpass** | band_gain の帯域波形を全帯域同時保持(26帯域×2入力×2ch ≈ 1.8GB)から、帯域ごと IFFT→窓解析→破棄の逐次生成へ。`prepare_with_bands` が無駄に計算する未使用 `coarse` resample も除去 | ピークメモリ大幅削減(主成果)。CPU は IFFT/NCC 回数不変だが coarse 除去で一部改善の可能性 | 全 Tensor・record・帯域順・guard・400Hz anchor 一致 + peak RSS 削減を実測 |
+| **P3 適応 dispatch + Blocked FFT** | (template_len, signal_len, n_lags, memory) で direct SIMD / Valid FFT / Blocked を選択(SciPy `choose_conv_method` 型)。band_ncc の K=237 で直接法、band_gain 窓で 16384→8192×2 を実測比較 | 形状によっては direct 化でさらに改善。Blocked FFT は試算 ~23% 減だが実測必須 | 3方式の形状ベンチで採否。効かない形状は従来経路へ dispatch |
+
+### 共通受入基準
+
+- 全有効ラグ値・peak/tie/順位・evidence(候補/背景/幅/曖昧性)・
+  全テンソルが既存契約・scalar↔runtime-dispatch 基準内で一致
+- busy・wall・peak RSS・FFT 回数/サイズ・alloc bytes を同一入力・
+  同一環境で実測し、効かない形状は従来経路へフォールバック
+- `corr0` 意味・guard・polarity 選択・support 計数・`ref.band_*` /
+  locate evidence 契約を維持
+
 ## Exploration Goal
 
 #54(stage 内並列化)に着手する前に、reference_analysis の本体である
