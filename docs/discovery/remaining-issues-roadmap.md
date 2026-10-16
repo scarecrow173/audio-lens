@@ -28,12 +28,14 @@ relations:
     - "./caller-side-optimizations.md"
     - "./al-math-simd-reduction.md"
     - "./fft-rebaseline-post-plan-workspace.md"
+    - "./reference-analysis-analyze-pair-band-gain.md"
   refines: []
   refined-by: []
   derives-from: []
   derived-by:
     - "./locate-consensus-argmax-ambiguity-contract.md"
     - "./fft-rebaseline-post-plan-workspace.md"
+    - "./reference-analysis-analyze-pair-band-gain.md"
   verifies: []
   verified-by: []
   references: []
