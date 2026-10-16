@@ -139,6 +139,117 @@ impl CorrelationWorkspace {
     }
 }
 
+/// 等長窓の両側 lag 相関の不変 plan。shape キーは窓長のみ。
+///
+/// `CorrelationPlan`(片側スライドの固定長正規化)とは別の演算契約:
+/// lag ∈ [−max_lag, +max_lag] の各点で overlap 長 `L−|lag|` の
+/// 非中心化正規化相関(overlap 区間の corr0)を返す。
+pub struct OverlapCorrPlan {
+    window_len: usize,
+    fft: Option<RealFftPlan>,
+    n: usize,
+}
+
+/// OverlapCorr の排他的作業領域。すべての確保は constructor が所有する。
+pub struct OverlapCorrWorkspace {
+    window_len: usize,
+    fft: Option<RealFftWorkspace>,
+    real: Vec<f64>,
+    a_re: Vec<f64>,
+    a_im: Vec<f64>,
+    b_re: Vec<f64>,
+    b_im: Vec<f64>,
+    x_prefix: Vec<f64>,
+    y_prefix: Vec<f64>,
+    curve: Vec<f64>,
+}
+
+impl OverlapCorrPlan {
+    /// 窓長 L を shape に取る。N = 2L−1 を 2 のべき乗へ切り上げる。
+    /// 長さの算術 overflow は panic する。
+    pub fn new(window_len: usize) -> Self {
+        let n = if window_len == 0 {
+            0
+        } else {
+            window_len
+                .checked_mul(2)
+                .and_then(|v| v.checked_sub(1))
+                .and_then(usize::checked_next_power_of_two)
+                .expect("overlap correlation FFT length overflow")
+        };
+        Self {
+            window_len,
+            fft: (n != 0).then(|| RealFftPlan::new(n)),
+            n,
+        }
+    }
+
+    /// `lag = i − max_lag` の相関値を持つ長さ `2·max_lag+1` の曲線を
+    /// workspace から借用する。窓長不一致は panic。
+    /// 借用結果を保持したまま workspace を再使用できない。
+    ///
+    /// `max_lag ≥ window_len` では `|lag| ≥ window_len` の要素が 0.0。
+    pub fn curve<'w>(
+        &self,
+        workspace: &'w mut OverlapCorrWorkspace,
+        x: &[f64],
+        y: &[f64],
+        max_lag: usize,
+    ) -> &'w [f64] {
+        assert_eq!(x.len(), self.window_len, "overlap corr x shape");
+        assert_eq!(y.len(), self.window_len, "overlap corr y shape");
+        assert_eq!(
+            workspace.window_len, self.window_len,
+            "overlap corr workspace shape"
+        );
+        let out_len = 2 * max_lag + 1;
+        if self.n == 0 {
+            workspace
+                .curve
+                .resize(out_len.max(workspace.curve.len()), 0.0);
+            workspace.curve[..out_len].fill(0.0);
+            return &workspace.curve[..out_len];
+        }
+        dispatch(OverlapCorr {
+            plan: self,
+            workspace,
+            x,
+            y,
+            max_lag,
+        })
+    }
+}
+
+impl OverlapCorrWorkspace {
+    /// shape ごとの最大領域を確保し、実行時の resize を不要にする。
+    /// `curve` は全 lag(|lag| ≤ L−1)を収める `2L−1` で確保する。
+    pub fn new(plan: &OverlapCorrPlan) -> Self {
+        let bins = if plan.n == 0 { 0 } else { plan.n / 2 + 1 };
+        let l = plan.window_len;
+        Self {
+            window_len: l,
+            fft: plan.fft.as_ref().map(RealFftWorkspace::new),
+            real: vec![0.0; plan.n],
+            a_re: vec![0.0; bins],
+            a_im: vec![0.0; bins],
+            b_re: vec![0.0; bins],
+            b_im: vec![0.0; bins],
+            x_prefix: vec![0.0; l + 1],
+            y_prefix: vec![0.0; l + 1],
+            curve: vec![0.0; (2 * l).max(1) - 1],
+        }
+    }
+}
+
+/// 等長窓の両側 lag 相関曲線。owned curve の便利な入口。
+/// `curve[i]` は `lag = i − max_lag` の値。
+pub fn overlap_corr_curve(x: &[f64], y: &[f64], max_lag: usize) -> Vec<f64> {
+    assert_eq!(x.len(), y.len(), "overlap corr window shapes");
+    let plan = OverlapCorrPlan::new(x.len());
+    let mut workspace = OverlapCorrWorkspace::new(&plan);
+    plan.curve(&mut workspace, x, y, max_lag).to_vec()
+}
+
 /// `signal[lag..lag + template.len()]` との符号付き NCC。owned curve の便利な入口。
 pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
     let plan = CorrelationPlan::new(template.len(), signal.len());
@@ -155,6 +266,113 @@ pub fn gcc_phat(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
     let mut workspace = CorrelationWorkspace::new(&plan);
     plan.gcc_phat(&mut workspace, template, signal, max_lag)
         .to_vec()
+}
+
+struct OverlapCorr<'p, 'w, 'i> {
+    plan: &'p OverlapCorrPlan,
+    workspace: &'w mut OverlapCorrWorkspace,
+    x: &'i [f64],
+    y: &'i [f64],
+    max_lag: usize,
+}
+
+impl<'w> WithSimd for OverlapCorr<'_, 'w, '_> {
+    type Output = &'w [f64];
+    #[inline(always)]
+    fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
+        let Self {
+            plan,
+            workspace,
+            x,
+            y,
+            max_lag,
+        } = self;
+        let l = x.len();
+        let n = plan.n;
+        let out_len = 2 * max_lag + 1;
+        let OverlapCorrWorkspace {
+            fft,
+            real,
+            a_re,
+            a_im,
+            b_re,
+            b_im,
+            x_prefix,
+            y_prefix,
+            curve,
+            ..
+        } = workspace;
+        let fft_plan = plan.fft.as_ref().expect("nonempty shape has FFT plan");
+        let fft_workspace = fft.as_mut().expect("nonempty shape has FFT workspace");
+        // `max_lag` は呼出し時の値なので、要求長をここで保証する
+        // (2L−1 超の max_lag 指定でも |lag| ≥ L は 0.0 を返すだけ)。
+        if curve.len() < out_len {
+            curve.resize(out_len, 0.0);
+        }
+        // 直接法は ~3·(2·max_lag+1)·L flop(corr0 の 3 累積)、
+        // FFT 法は ~15·N·log2(N) flop(3 変換+合成)。実測の交差
+        // (L=128 で直接、L=512/lag=128 で FFT)に合わせた仕事量比較。
+        let direct_ops = out_len.saturating_mul(l).saturating_mul(3);
+        let fft_ops = 15usize
+            .saturating_mul(n)
+            .saturating_mul(n.trailing_zeros() as usize);
+        if direct_ops < fft_ops {
+            for (i, out) in curve.iter_mut().enumerate().take(out_len) {
+                let lag = i as isize - max_lag as isize;
+                let a = lag.unsigned_abs();
+                *out = if a >= l {
+                    0.0
+                } else {
+                    let (xs, ys) = if lag >= 0 {
+                        (&x[..l - a], &y[a..])
+                    } else {
+                        (&x[a..], &y[..l - a])
+                    };
+                    crate::vec::corr0_kernel(simd, xs, ys)
+                };
+            }
+            return &curve[..out_len];
+        }
+        // 分子: 線形相互相関 c[k] = Σ x[i]·y[i+k]。N ≥ 2L−1 の
+        // ゼロ埋めで巡回 wraparound は混入しない。負 lag −a は
+        // c[N−a] = Σ x[i]·y[i−a] に対応する。
+        real.fill(0.0);
+        real[..l].copy_from_slice(x);
+        fft_plan.forward_with_simd(simd, fft_workspace, real, a_re, a_im);
+        real.fill(0.0);
+        real[..l].copy_from_slice(y);
+        fft_plan.forward_with_simd(simd, fft_workspace, real, b_re, b_im);
+        cross_spectrum(simd, a_re, a_im, b_re, b_im, false, &mut []);
+        fft_plan.inverse_with_simd(simd, fft_workspace, a_re, a_im, real);
+        // 分母: overlap 範囲のエネルギーを prefix 二乗和から得る。
+        x_prefix[0] = 0.0;
+        y_prefix[0] = 0.0;
+        for i in 0..l {
+            x_prefix[i + 1] = x_prefix[i] + x[i] * x[i];
+            y_prefix[i + 1] = y_prefix[i] + y[i] * y[i];
+        }
+        for (i, out) in curve.iter_mut().enumerate().take(out_len) {
+            let lag = i as isize - max_lag as isize;
+            let a = lag.unsigned_abs();
+            *out = if a >= l {
+                0.0
+            } else {
+                let (num, ex, ey) = if lag >= 0 {
+                    // x[..L−a] vs y[a..L]
+                    (real[a], x_prefix[l - a], y_prefix[l] - y_prefix[a])
+                } else {
+                    // x[a..L] vs y[..L−a]、分子は巡回インデックス N−a
+                    (real[n - a], x_prefix[l] - x_prefix[a], y_prefix[l - a])
+                };
+                if ex > 0.0 && ey > 0.0 {
+                    num / (ex * ey).sqrt()
+                } else {
+                    0.0
+                }
+            };
+        }
+        &curve[..out_len]
+    }
 }
 
 struct Correlation<'p, 'w, 'i> {
@@ -348,6 +566,134 @@ mod tests {
                         assert!((a - b).abs() < 1e-10, "len={len}, phat={phat}: {a} != {b}");
                     }
                 }
+            }
+        }
+    }
+
+    /// reference.rs `corr_at` の逐点再現 oracle。overlap 区間の
+    /// `corr0` を lag ごとに直接評価する。
+    fn corr_at(x: &[f64], y: &[f64], lag: isize) -> f64 {
+        let (xs, ys) = if lag >= 0 {
+            (
+                &x[..x.len() - (lag as usize).min(x.len())],
+                &y[lag as usize..],
+            )
+        } else {
+            (
+                &x[(-lag) as usize..],
+                &y[..y.len() - (-lag as usize).min(y.len())],
+            )
+        };
+        let n = xs.len().min(ys.len());
+        if n == 0 {
+            return 0.0;
+        }
+        crate::vec::corr0(&xs[..n], &ys[..n])
+    }
+
+    #[test]
+    fn overlap_corr_matches_corr_at_pointwise() {
+        // 既知オフセット埋め込み + 複数窓サイズ・max_lag で網羅。
+        for (l, max_lag, shift) in [
+            (64usize, 16usize, 5isize),
+            (256, 40, -17),
+            (1024, 96, 200),
+            (300, 130, 41), // 非2冪の窓長
+        ] {
+            let x = noise(l, 7);
+            let mut y = noise(l, 11);
+            let a = shift.unsigned_abs().min(l);
+            // y に x のシフトコピーを混ぜて確定的なピークを作る。
+            for i in 0..l - a {
+                if shift >= 0 {
+                    y[i + a] = 0.8 * x[i] + 0.2 * y[i + a];
+                } else {
+                    y[i] = 0.8 * x[i + a] + 0.2 * y[i];
+                }
+            }
+            let curve = overlap_corr_curve(&x, &y, max_lag);
+            assert_eq!(curve.len(), 2 * max_lag + 1);
+            let oracle: Vec<f64> = (-(max_lag as isize)..=max_lag as isize)
+                .map(|lag| corr_at(&x, &y, lag))
+                .collect();
+            let peak_new = curve
+                .iter()
+                .enumerate()
+                .max_by(|p, q| p.1.total_cmp(q.1))
+                .map(|(i, _)| i as isize - max_lag as isize)
+                .unwrap();
+            let peak_old = oracle
+                .iter()
+                .enumerate()
+                .max_by(|p, q| p.1.total_cmp(q.1))
+                .map(|(i, _)| i as isize - max_lag as isize)
+                .unwrap();
+            assert_eq!(peak_new, peak_old, "l={l} peak lag mismatch");
+            for (i, (&new, &old)) in curve.iter().zip(&oracle).enumerate() {
+                let rel = (new - old).abs() / old.abs().max(1e-12);
+                assert!(
+                    rel < 1e-9 || (new - old).abs() < 1e-12,
+                    "l={l} lag={}: {new} vs {old}",
+                    i as isize - max_lag as isize
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn overlap_corr_guards_silence_and_out_of_range_lags() {
+        let zero = vec![0.0; 128];
+        let x = noise(128, 3);
+        // 片側無音 → 全 lag が 0.0
+        let curve = overlap_corr_curve(&x, &zero, 30);
+        assert!(curve.iter().all(|&v| v == 0.0));
+        // max_lag ≥ L: |lag| ≥ L の要素は 0.0 で panic しない
+        let curve = overlap_corr_curve(&x, &x, 200);
+        assert_eq!(curve.len(), 401);
+        for (i, &v) in curve.iter().enumerate() {
+            let lag = i as isize - 200;
+            if lag.unsigned_abs() >= 128 {
+                assert_eq!(v, 0.0, "lag {lag} must be 0.0");
+            }
+        }
+        // 自己相関の lag=0 は 1.0
+        assert!((curve[200] - 1.0).abs() < 1e-12);
+        // 空窓は全 0
+        let curve = overlap_corr_curve(&[], &[], 4);
+        assert_eq!(curve, vec![0.0; 9]);
+    }
+
+    #[test]
+    fn overlap_corr_scalar_and_dispatch_match() {
+        for l in [1usize, 33, 100, 511] {
+            let x = noise(l, 5);
+            let y = noise(l, 9);
+            let max_lag = l.min(40);
+            let plan = OverlapCorrPlan::new(l);
+            let mut native_ws = OverlapCorrWorkspace::new(&plan);
+            let mut scalar_ws = OverlapCorrWorkspace::new(&plan);
+            let native = dispatch(OverlapCorr {
+                plan: &plan,
+                workspace: &mut native_ws,
+                x: &x,
+                y: &y,
+                max_lag,
+            })
+            .to_vec();
+            let scalar = pulp::Scalar
+                .vectorize(OverlapCorr {
+                    plan: &plan,
+                    workspace: &mut scalar_ws,
+                    x: &x,
+                    y: &y,
+                    max_lag,
+                })
+                .to_vec();
+            for (i, (&a, &b)) in native.iter().zip(&scalar).enumerate() {
+                assert!(
+                    (a - b).abs() < 1e-12,
+                    "l={l} idx={i}: dispatch {a} vs scalar {b}"
+                );
             }
         }
     }
