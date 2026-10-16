@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GMMKYWaNUIglxx3wXe3"
 type: "task"
-status: "todo"
+status: "done"
 title: "LocateMethod 経路を CorrelationPool へ移行"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -40,7 +40,12 @@ relations:
 
 ## Work
 
-<!-- Describe the implementation slice. -->
+LocateMethod 経路の相関呼出を `CorrelationPool` へ移行する。
+
+- `FullNcc`/`BandNcc`/`GccPhat`/`SpectralEnvelope` の `locate`/`locate_prepared`/`locate_coarse_to_fine` に `pool: &mut CorrelationPool` を追加
+- `propose_coarse_to_fine`/`refine_coarse`/`evidence_from_corr` は借用曲線をその場消費
+- `SpectralEnvelope` は corr0 経路のため pool を受け取るが使わない
+- tests/examples 全呼出点を追従
 
 ## Classification
 
@@ -48,20 +53,27 @@ relations:
 
 ## Upstream Documents
 
-- <!-- plan, spec, ADR, or task path -->
+- `docs/plans/locate-plan.md`
+- `docs/specs/locate-plan-cache.md`
 
 ## Dependencies
 
-- <!-- prerequisite, blocker, or related task -->
+- `docs/plans/locate-plan.md`
 
 ## Affected Files
 
-- <!-- file, directory, module, or interface -->
+- `crates/al-locate/src/methods.rs`
+- `crates/al-locate/tests/locate.rs`
+- `crates/al-locate/tests/prepared.rs`
+- `crates/al-locate/examples/bench_ncc.rs`
+- `crates/al-locate/examples/bench_locate_prepared.rs`
 
 ## Done When
 
-- [ ] <!-- completion criterion -->
+- [x] 全メソッド経路が pool 経由で相関する
+- [x] 既存証拠・golden テストが全て pass
 
 ## Verification
 
-- [ ] <!-- command, test, review step, or observable behavior -->
+- [x] `cargo test -p al-locate`
+- [x] `cargo test --workspace`

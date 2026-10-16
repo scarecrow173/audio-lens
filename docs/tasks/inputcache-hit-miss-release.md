@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GMMK00SyuEB3Ztrq2v7"
 type: "task"
-status: "todo"
+status: "done"
 title: "InputCache hit/miss 計数と release 検証口"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -40,7 +40,10 @@ relations:
 
 ## Work
 
-<!-- Describe the implementation slice. -->
+`InputCache` に hit/miss 計数と監査口を追加する。
+
+- `hits`/`misses` カウンタ、`CacheStats`(`stats()`)、`len()`/`is_empty()`
+- `release(id, version)` が一致エントリのみを除去することをテストで検証
 
 ## Classification
 
@@ -48,20 +51,22 @@ relations:
 
 ## Upstream Documents
 
-- <!-- plan, spec, ADR, or task path -->
+- `docs/plans/locate-plan.md`
+- `docs/specs/locate-plan-cache.md`
 
 ## Dependencies
 
-- <!-- prerequisite, blocker, or related task -->
+- `docs/plans/locate-plan.md`
 
 ## Affected Files
 
-- <!-- file, directory, module, or interface -->
+- `crates/al-locate/src/prepared.rs`
 
 ## Done When
 
-- [ ] <!-- completion criterion -->
+- [x] 再利用呼出が hit、初回/再 prepare が miss として計上される
+- [x] release が対象 id/version のみを除去する
 
 ## Verification
 
-- [ ] <!-- command, test, review step, or observable behavior -->
+- [x] `cargo test -p al-locate prepared`

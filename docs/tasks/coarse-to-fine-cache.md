@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GMMLy26EDCzZmTAUf9y"
 type: "task"
-status: "todo"
+status: "done"
 title: "coarse-to-fine 境界・cache 監査テスト"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -40,7 +40,11 @@ relations:
 
 ## Work
 
-<!-- Describe the implementation slice. -->
+coarse-to-fine 境界と InputCache の監査テストを追加する。
+
+- coarse 位置のフルレート換算が半径内に真オフセットを含むこと
+- 探索範囲端の候補が `boundary-candidate` とマークされること
+- hit/miss 計数と release 後の再 miss を検証
 
 ## Classification
 
@@ -48,20 +52,24 @@ relations:
 
 ## Upstream Documents
 
-- <!-- plan, spec, ADR, or task path -->
+- `docs/plans/locate-plan.md`
+- `docs/specs/locate-plan-cache.md`
 
 ## Dependencies
 
-- <!-- prerequisite, blocker, or related task -->
+- `docs/plans/locate-plan.md`
 
 ## Affected Files
 
-- <!-- file, directory, module, or interface -->
+- `crates/al-locate/tests/prepared.rs`
+- `crates/al-locate/src/prepared.rs`
 
 ## Done When
 
-- [ ] <!-- completion criterion -->
+- [x] coarse_positions_land_within_radius_of_the_true_offset が pass
+- [x] candidates_at_the_search_range_edges_are_marked_boundary が pass
+- [x] hit/miss/release テストが pass
 
 ## Verification
 
-- [ ] <!-- command, test, review step, or observable behavior -->
+- [x] `cargo test -p al-locate --test prepared`
