@@ -40,9 +40,11 @@ Directory: `docs/tasks`
 | TASK-034EJgPpxRSjjhOJVeBUup | caller 側最適化: 事後計測・Implementation Record 記録・最終検証 | done | [caller-opt-measurement-ir-closeout.md](./caller-opt-measurement-ir-closeout.md) |
 | TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
+| TASK-034GMMLy26EDCzZmTAUf9y | coarse-to-fine 境界・cache 監査テスト | todo | [coarse-to-fine-cache.md](./coarse-to-fine-cache.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
 | TASK-wjixVNPct4FFdTgz7uqvU9 | 共有ドメイン型と安定 id の実装 | done | [core-domain-types.md](./core-domain-types.md) |
+| TASK-034GMMJwLQfp3HEnhqRERT | CorrelationPool 新設(形状キー plan/workspace 再利用) | todo | [correlationpool-plan-workspace.md](./correlationpool-plan-workspace.md) |
 | TASK-036edNsnBEJeHcDgX1EWwK | analysis: キャプチャ間経路校正(#41) | done | [cross-capture-calibration.md](./cross-capture-calibration.md) |
 | TASK-034z889WFC0CLXorGLm3bG | dataset 結合テスト | done | [dataset-integration-tests.md](./dataset-integration-tests.md) |
 | TASK-034z8896wbdQ95hRyjJY0y | dataset-reader(manifest 経由参照) | done | [dataset-reader.md](./dataset-reader.md) |
@@ -69,6 +71,7 @@ Directory: `docs/tasks`
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
+| TASK-034GMMK00SyuEB3Ztrq2v7 | InputCache hit/miss 計数と release 検証口 | todo | [inputcache-hit-miss-release.md](./inputcache-hit-miss-release.md) |
 | TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
 | TASK-034Fo9fbMBjYA189SBNMGL | argmax 曖昧性: 回帰計測・Implementation Record・closeout | done | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
@@ -79,6 +82,7 @@ Directory: `docs/tasks`
 | TASK-034z8kK3Fu6B5tJ0qnORg0 | locate 結合テスト(合成 fixture) | done | [locate-integration-tests.md](./locate-integration-tests.md) |
 | TASK-034z8kAawdMoi8AxPYZjrB | locate-methods 4手法 + 候補/証拠型 | done | [locate-methods.md](./locate-methods.md) |
 | TASK-034z8kIHPMPeuyRptsxAAF | mixer-fit: 最小二乗混合行列推定 | done | [locate-mixer.md](./locate-mixer.md) |
+| TASK-034GMMM1tcW8J95GVhHG9W | 全検証と計測記録 | todo | [locate-plan-verification-measurement.md](./locate-plan-verification-measurement.md) |
 | TASK-035h6IfQGjVLTZjgH6kiRT | locate: サンプルレート正規化(リジェクト→リサンプル統一) | done | [locate-resample-normalize.md](./locate-resample-normalize.md) |
 | TASK-034dLdqYvyaMjl7hTgg6IT | al-locate: 2ソース残差探索の残差PCMを保存する | done | [locate-residual-pcm.md](./locate-residual-pcm.md) |
 | TASK-034z8kJaSUxUrTrHj1cMG7 | residual-search: 2段階探索 + 減算来歴 | done | [locate-residual.md](./locate-residual.md) |
@@ -87,6 +91,7 @@ Directory: `docs/tasks`
 | TASK-034Fo9esKwwz1f702dj84C | spectral_envelope 逐次 NCC の dsp::corr0 移行(完了証明) | done | [locate-spectral-envelope-corr0.md](./locate-spectral-envelope-corr0.md) |
 | TASK-034z8kJCh6jSerzLdxIwnb | LocateStage + CLI 接続 | done | [locate-stage-cli.md](./locate-stage-cli.md) |
 | TASK-034z8kIgVL2y1o3HNiBmfD | tracking: anchor/segment/TimeMap + ループ反復識別 | done | [locate-tracking.md](./locate-tracking.md) |
+| TASK-034GMMKYWaNUIglxx3wXe3 | LocateMethod 経路を CorrelationPool へ移行 | todo | [locatemethod-correlationpool.md](./locatemethod-correlationpool.md) |
 | TASK-034EO4rKpEFHb4NpDpz5py | 機械的 caller クリーンアップ A15: interleave/deinterleave のブロック書き込み化 | done | [mech-cleanup-a15-interleave-block-writes.md](./mech-cleanup-a15-interleave-block-writes.md) |
 | TASK-034EO4yi7Vv8c3JuAdt1Z0 | 機械的 caller クリーンアップ A16: 行優先累積・dom mag_sq scratch・video 融合・tensor fast path | done | [mech-cleanup-a16-row-major-fast-paths.md](./mech-cleanup-a16-row-major-fast-paths.md) |
 | TASK-034EO4gPvPkx3voaC6KOlY | 機械的 caller クリーンアップ A6: band_correlation の bandpass_many バッチ化 | done | [mech-cleanup-a6-bandpass-batching.md](./mech-cleanup-a6-bandpass-batching.md) |
@@ -115,6 +120,7 @@ Directory: `docs/tasks`
 | TASK-034GsRN1DDq3D5ZJHgcq6d | relaxed-tier-callsite-migration | done | [relaxed-tier-callsite-migration.md](./relaxed-tier-callsite-migration.md) |
 | TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
+| TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | todo | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |

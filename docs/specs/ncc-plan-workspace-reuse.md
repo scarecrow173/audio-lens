@@ -10,6 +10,7 @@ relations:
   source: []
   related:
     - "../adr/ncc-plan-workspace-reuse.md"
+    - "./locate-plan-cache.md"
   derives-from:
     - "../discovery/ncc-plan-workspace-reuse.md"
   references:
