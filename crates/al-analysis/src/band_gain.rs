@@ -1,10 +1,8 @@
-//! 帯域ラグ補償 LS。算術は al-math の既存 re-export、入力準備は prepared 層。
+//! 帯域ラグ補償 LS。算術は al-math の既存 re-export、帯域波形は
+//! `BandFilter` で帯域ごと逐次生成する(全帯域同時保持を避ける)。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
-use al_locate::{
-    dsp::{CorrelationPlan, CorrelationWorkspace, dot, sum_sq},
-    prepared::InputCache,
-};
+use al_locate::dsp::{BandFilter, CorrelationPlan, CorrelationWorkspace, dot, sum_sq};
 
 const MIN_CORRELATION: f64 = 0.5;
 // コヒーレントなパワーが半分以上の帯域だけを支持する。
@@ -203,21 +201,16 @@ pub(crate) fn analyze(
     let window = (cfg.band_window_s * rate as f64).round().max(1.0) as usize;
     let hop = (cfg.band_hop_s * rate as f64).round().max(1.0) as usize;
     let max = (cfg.band_max_lag_s * rate as f64).round().max(1.0) as usize;
-    let mut cache = InputCache::default();
     for (channel, (x, y)) in src.src.iter().zip(&src.cap).enumerate() {
-        let a = cache
-            .prepare_with_bands("source", channel, rate, alignment, x, &bands)
-            .expect("nonzero analysis rate");
-        let b = cache
-            .prepare_with_bands("capture", channel, rate, alignment, y, &bands)
-            .expect("nonzero analysis rate");
+        let mut src_bands = BandFilter::new(x, rate);
+        let mut cap_bands = BandFilter::new(y, rate);
         let coh = coherence(x, y, rate, cfg, &bands);
-        let all: Vec<_> = a
-            .bands()
+        let all: Vec<_> = bands
             .iter()
-            .zip(b.bands())
-            .map(|(((lo, _), x), (_, y))| {
-                windows(x, y, window, hop, max, (rate as f64 / lo).ceil() as usize)
+            .map(|&(lo, hi)| {
+                let x = src_bands.band(lo, hi);
+                let y = cap_bands.band(lo, hi);
+                windows(&x, &y, window, hop, max, (rate as f64 / lo).ceil() as usize)
             })
             .collect();
         // 400Hz は同じ帯域・同じ極性群の推定値だけを参照する。

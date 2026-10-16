@@ -33,35 +33,142 @@ impl WithSimd for Bandpass<'_> {
         if self.samples.is_empty() || self.bands.is_empty() {
             return vec![Vec::new(); self.bands.len()];
         }
-        let n = self.samples.len().next_power_of_two();
+        let mut core = FilterCore::forward(simd, self.samples, self.sample_rate);
+        // FFT は closure 外で実行し、選択した ISA コンテキストへインラインする。
+        self.bands
+            .iter()
+            .map(|&(lo, hi)| core.band(simd, lo, hi))
+            .collect()
+    }
+}
+
+/// 全区間の forward スペクトルと IFFT 用スクラッチ。mask の bin 判定・
+/// 切り戻し規則の単一実装をここに置き、`bandpass_many` 一括生成と
+/// `BandFilter` 逐次生成の両方が同じ手順を通る。
+struct FilterCore {
+    plan: RealFft,
+    bin_hz: f64,
+    len: usize,
+    spectrum_re: Vec<f64>,
+    spectrum_im: Vec<f64>,
+    masked_re: Vec<f64>,
+    masked_im: Vec<f64>,
+    real: Vec<f64>,
+}
+
+impl FilterCore {
+    fn forward<S: Simd>(simd: S, samples: &[f64], sample_rate: u32) -> Self {
+        if samples.is_empty() {
+            return Self {
+                plan: RealFft::new(1),
+                bin_hz: 0.0,
+                len: 0,
+                spectrum_re: Vec::new(),
+                spectrum_im: Vec::new(),
+                masked_re: Vec::new(),
+                masked_im: Vec::new(),
+                real: Vec::new(),
+            };
+        }
+        let n = samples.len().next_power_of_two();
         let mut plan = RealFft::new(n);
         let mut real = vec![0.0; n];
-        real[..self.samples.len()].copy_from_slice(self.samples);
+        real[..samples.len()].copy_from_slice(samples);
         let mut spectrum_re = vec![0.0; n / 2 + 1];
         let mut spectrum_im = vec![0.0; n / 2 + 1];
         plan.forward_with_simd(simd, &real, &mut spectrum_re, &mut spectrum_im);
-        let mut masked_re = spectrum_re.clone();
-        let mut masked_im = spectrum_im.clone();
-        let bin_hz = f64::from(self.sample_rate) / n as f64;
-        // FFT は closure 外で実行し、選択した ISA コンテキストへインラインする。
-        let mut output = Vec::with_capacity(self.bands.len());
-        for &(lo, hi) in self.bands {
-            // 連続した passband だけコピーし、範囲外はゼロにする。
-            // 比較を周波数値で行い、旧実装の境界丸め規則を保つ。
-            let lo_bin = lower_bin(spectrum_re.len(), |k| bin_hz * (k as f64) < lo);
-            let hi_bin = lower_bin(spectrum_re.len(), |k| {
-                hi.is_nan() || bin_hz * (k as f64) < hi
-            });
-            masked_re.fill(0.0);
-            masked_im.fill(0.0);
-            if lo_bin < hi_bin {
-                masked_re[lo_bin..hi_bin].copy_from_slice(&spectrum_re[lo_bin..hi_bin]);
-                masked_im[lo_bin..hi_bin].copy_from_slice(&spectrum_im[lo_bin..hi_bin]);
-            }
-            plan.inverse_with_simd(simd, &masked_re, &masked_im, &mut real);
-            output.push(real[..self.samples.len()].to_vec());
+        Self {
+            plan,
+            bin_hz: f64::from(sample_rate) / n as f64,
+            len: samples.len(),
+            spectrum_re,
+            spectrum_im,
+            masked_re: vec![0.0; n / 2 + 1],
+            masked_im: vec![0.0; n / 2 + 1],
+            real,
         }
-        output
+    }
+
+    fn band<S: Simd>(&mut self, simd: S, lo_hz: f64, hi_hz: f64) -> Vec<f64> {
+        if self.len == 0 {
+            return Vec::new();
+        }
+        // 連続した passband だけコピーし、範囲外はゼロにする。
+        // 比較を周波数値で行い、旧実装の境界丸め規則を保つ。
+        let lo_bin = lower_bin(self.spectrum_re.len(), |k| self.bin_hz * (k as f64) < lo_hz);
+        let hi_bin = lower_bin(self.spectrum_re.len(), |k| {
+            hi_hz.is_nan() || self.bin_hz * (k as f64) < hi_hz
+        });
+        self.masked_re.fill(0.0);
+        self.masked_im.fill(0.0);
+        if lo_bin < hi_bin {
+            self.masked_re[lo_bin..hi_bin].copy_from_slice(&self.spectrum_re[lo_bin..hi_bin]);
+            self.masked_im[lo_bin..hi_bin].copy_from_slice(&self.spectrum_im[lo_bin..hi_bin]);
+        }
+        self.plan.inverse_with_simd(
+            simd,
+            &self.masked_re,
+            &self.masked_im,
+            &mut self.real,
+        );
+        self.real[..self.len].to_vec()
+    }
+}
+
+/// 1 回の forward FFT で保持したスペクトルから帯域を逐次生成する
+/// フィルタ。帯域を 1 本ずつ消費する呼出側で、全帯域波形の同時保持を
+/// 避ける。帯域ごとの出力は `bandpass_many` と同一規則。
+pub struct BandFilter {
+    core: FilterCore,
+}
+
+impl BandFilter {
+    /// 全区間の forward FFT を 1 回だけ行い、スペクトルを保持する。
+    pub fn new(samples: &[f64], sample_rate: u32) -> Self {
+        dispatch(BandForward {
+            samples,
+            sample_rate,
+        })
+    }
+
+    /// `[lo_hz, hi_hz)` の帯域波形を 1 本生成する。`bandpass_many` と
+    /// 同一の mask・IFFT・切り戻し規則。スクラッチを共有するため
+    /// `&mut self` を取る。
+    pub fn band(&mut self, lo_hz: f64, hi_hz: f64) -> Vec<f64> {
+        dispatch(BandInverse {
+            core: &mut self.core,
+            lo_hz,
+            hi_hz,
+        })
+    }
+}
+
+struct BandForward<'a> {
+    samples: &'a [f64],
+    sample_rate: u32,
+}
+
+impl WithSimd for BandForward<'_> {
+    type Output = BandFilter;
+    #[inline(always)]
+    fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
+        BandFilter {
+            core: FilterCore::forward(simd, self.samples, self.sample_rate),
+        }
+    }
+}
+
+struct BandInverse<'a> {
+    core: &'a mut FilterCore,
+    lo_hz: f64,
+    hi_hz: f64,
+}
+
+impl WithSimd for BandInverse<'_> {
+    type Output = Vec<f64>;
+    #[inline(always)]
+    fn with_simd<S: Simd>(self, simd: S) -> Self::Output {
+        self.core.band(simd, self.lo_hz, self.hi_hz)
     }
 }
 
@@ -164,6 +271,31 @@ mod tests {
             for (a, b) in native.iter().flatten().zip(scalar.iter().flatten()) {
                 assert!((a - b).abs() < 1e-10);
             }
+            // BandFilter の逐次生成も両経路で一致する。
+            let mut native: BandFilter = dispatch(BandForward {
+                samples: &input,
+                sample_rate: 2048,
+            });
+            let mut scalar: BandFilter = pulp::Scalar.vectorize(BandForward {
+                samples: &input,
+                sample_rate: 2048,
+            });
+            for &(lo, hi) in &bands {
+                let a = dispatch(BandInverse {
+                    core: &mut native.core,
+                    lo_hz: lo,
+                    hi_hz: hi,
+                });
+                let b = pulp::Scalar.vectorize(BandInverse {
+                    core: &mut scalar.core,
+                    lo_hz: lo,
+                    hi_hz: hi,
+                });
+                assert_eq!(a.len(), b.len());
+                for (a, b) in a.iter().zip(&b) {
+                    assert!((a - b).abs() < 1e-10);
+                }
+            }
             let kernel = || Envelope {
                 samples: &input,
                 fft_size: 256,
@@ -173,6 +305,29 @@ mod tests {
             let scalar = pulp::Scalar.vectorize(kernel());
             for (a, b) in native.iter().zip(scalar) {
                 assert!((a - b).abs() < 1e-10);
+            }
+        }
+    }
+
+    // BandFilter の逐次生成は `bandpass_many` の一括生成と帯域ごとに
+    // 完全一致する(同一 forward・mask・IFFT・切り戻し)。空入力・
+    // NaN hi・全帯域のエッジも同じ観測結果を返す。
+    #[test]
+    fn band_filter_matches_bandpass_many_per_band() {
+        for len in [0, 1, 3, 33, 256, 1027, 4096] {
+            let input: Vec<_> = (0..len).map(|i| (i as f64 * 0.713).sin()).collect();
+            let bands = [
+                (0.0, 100.0),
+                (100.0, 250.0),
+                (0.0, 1025.0),
+                (250.0, 250.0),
+                (500.0, f64::NAN),
+                (0.0, f64::INFINITY),
+            ];
+            let mut filter = BandFilter::new(&input, 2048);
+            let expected = bandpass_many(&input, 2048, &bands);
+            for ((lo, hi), expected) in bands.iter().zip(expected) {
+                assert_eq!(filter.band(*lo, *hi), expected, "len={len} band=({lo},{hi})");
             }
         }
     }
