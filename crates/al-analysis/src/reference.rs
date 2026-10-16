@@ -126,36 +126,14 @@ fn ls_gain(x: &[f64], y: &[f64]) -> f64 {
     if den > 0.0 { dot(x, y) / den } else { 0.0 }
 }
 
-/// Normalized correlation of `x` and `y` at relative `lag` (y
-/// shifted by `lag` samples; positive lag = y later). The shorter
-/// overlap decides the support.
-fn corr_at(x: &[f64], y: &[f64], lag: isize) -> f64 {
-    let (xs, ys) = if lag >= 0 {
-        (
-            &x[..x.len() - (lag as usize).min(x.len())],
-            &y[lag as usize..],
-        )
-    } else {
-        (
-            &x[(-lag) as usize..],
-            &y[..y.len() - (-lag as usize).min(y.len())],
-        )
-    };
-    let n = xs.len().min(ys.len());
-    if n == 0 {
-        return 0.0;
-    }
-    corr0(&xs[..n], &ys[..n])
-}
-
 /// Peak lag + score + half-max width over `[-max_lag, max_lag]`.
-fn local_lag(x: &[f64], y: &[f64], max_lag: usize) -> (isize, f64, f64) {
+/// `curve[i]` は `lag = i − max_lag` の `corr_at` 等価値を持つ
+/// (OverlapCorr カーネル、FFT 分子 + prefix 二乗和分母)。
+fn local_lag(curve: &[f64], max_lag: usize) -> (isize, f64, f64) {
     let max_lag = max_lag as isize;
     let mut best = (0isize, f64::MIN);
-    let mut curve = Vec::with_capacity((2 * max_lag + 1) as usize);
-    for lag in -max_lag..=max_lag {
-        let c = corr_at(x, y, lag);
-        curve.push(c);
+    for (i, &c) in curve.iter().enumerate() {
+        let lag = i as isize - max_lag;
         if c > best.1 {
             best = (lag, c);
         }
@@ -331,10 +309,14 @@ pub fn analyze_pair(
     let mut lag_scores = Vec::new();
     let mut lag_widths = Vec::new();
     if n >= cfg.lag_window {
+        // plan/workspace は窓長だけに依存するため全窓で再利用する。
+        let lag_plan = al_locate::dsp::OverlapCorrPlan::new(cfg.lag_window);
+        let mut lag_ws = al_locate::dsp::OverlapCorrWorkspace::new(&lag_plan);
         for start in (0..=n - cfg.lag_window).step_by(cfg.lag_hop) {
             let xa = &src_mono[start..start + cfg.lag_window];
             let ya = &cap_mono[start..start + cfg.lag_window];
-            let (lag, score, width) = local_lag(xa, ya, cfg.lag_max);
+            let curve = lag_plan.curve(&mut lag_ws, xa, ya, cfg.lag_max);
+            let (lag, score, width) = local_lag(curve, cfg.lag_max);
             lags.push(lag as f64);
             lag_scores.push(score);
             lag_widths.push(width);
