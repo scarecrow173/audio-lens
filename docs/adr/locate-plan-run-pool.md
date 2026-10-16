@@ -25,6 +25,7 @@ relations:
   supersedes: []
   superseded-by: []
   related:
+    - "docs/adr/lag-al-math-plan.md"
     - "./al-math-api-fft-split-re-im.md"
   refines: []
   refined-by: []

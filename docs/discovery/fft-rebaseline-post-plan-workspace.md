@@ -24,6 +24,7 @@ relations:
   supersedes: []
   superseded-by: []
   related:
+    - "docs/discovery/issue-53-local-lag-fft.md"
     - "docs/discovery/remaining-issues-roadmap.md"
     - "docs/discovery/al-math-api-fft.md"
     - "docs/adr/al-math-api-fft-split-re-im.md"

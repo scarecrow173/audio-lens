@@ -19,6 +19,7 @@ Directory: `docs/designs`
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
+| DESIGN-034GNsEgwjRPsPqegmSEWU | local_lag FFT 化の設計 | approved | [local-lag-fft.md](./local-lag-fft.md) |
 | DESIGN-034yYLaqu0owt08BLocFDQ | ソース定位・トラッキング設計 | approved | [localization.md](./localization.md) |
 | DESIGN-034Fn25qh0mE8cz5ymYKfD | 合議 argmax 曖昧性検出の実装設計 | approved | [locate-consensus-argmax-ambiguity.md](./locate-consensus-argmax-ambiguity.md) |
 | DESIGN-034GMCyaWWhAaXk0LVJK4j | locate 相関 plan ワーカープール | approved | [locate-plan.md](./locate-plan.md) |

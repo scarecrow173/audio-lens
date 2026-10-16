@@ -19,6 +19,7 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
+| TSPEC-034GNwf4Cw9BJVBt8akOXm | OverlapCorr/local_lag 検証と小窓計測 | draft | [local-lag-overlap-corr.md](./local-lag-overlap-corr.md) |
 | TSPEC-034Fo8Wnl0C3P71Q2uPUWP | locate 合議 argmax 曖昧性契約の検証 | draft | [locate-argmax-ambiguity.md](./locate-argmax-ambiguity.md) |
 | TSPEC-034Fo8X1B0qsgQldLzy9C2 | argmax 同点 epsilon 較正の特性計測 | draft | [locate-argmax-tie-eps-calibration.md](./locate-argmax-tie-eps-calibration.md) |
 | TSPEC-034z8k5ftvcMaUeWq1L4D4 | locate-method-consensus | proposed | [locate-method-consensus.md](./locate-method-consensus.md) |
