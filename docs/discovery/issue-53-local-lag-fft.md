@@ -25,6 +25,7 @@ relations:
   related:
     - "docs/discovery/locate-consensus-argmax-ambiguity-contract.md"
     - "docs/discovery/fft-rebaseline-post-plan-workspace.md"
+    - "docs/discovery/reference-analysis-analyze-pair-band-gain.md"
   refines: []
   refined-by: []
   derives-from: []

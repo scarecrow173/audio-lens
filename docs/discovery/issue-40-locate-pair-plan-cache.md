@@ -31,6 +31,7 @@ relations:
     - "./ncc-plan-workspace-reuse.md"
     - "./fft-rebaseline-post-plan-workspace.md"
     - "./locate-consensus-argmax-ambiguity-contract.md"
+    - "./reference-analysis-analyze-pair-band-gain.md"
   refines: []
   refined-by: []
   derives-from: []
