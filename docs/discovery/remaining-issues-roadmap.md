@@ -97,7 +97,7 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #57 | envelopeを線形時間化 | Cheap | P2 | M | 完了(計測で非支配的→close) | 2 |
 | #58 | matrix_to_tensorコピーを除去 | Dataset | P3 | M | 完了(計測で微小→close) | 2 |
 | #54 | cheap/reference stage内部の並列化 | Runner | P1 | XL | 未着手 | 3 |
-| #71 | band系相関の構造最適化(locate band_ncc / reference band_gain) | DSP | P1 | L | 未着手(実測で支配部を特定) | 3 |
+| #71 | band系相関の構造最適化(locate band_ncc / reference band_gain) | DSP | P1 | L | 方針確定(P1 Valid FFT→P2 Streaming Bandpass→P3 dispatch/Blocked) | 3 |
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
 
 ※ 2026-10-14 の deep-dive セッションで Phase 1 各 issue(#52/#56/#36/#42/
