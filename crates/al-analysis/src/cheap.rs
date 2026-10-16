@@ -1306,7 +1306,7 @@ fn ipd_lags(x: &[f64], y: &[f64], block: usize, max_lag: usize) -> Vec<f64> {
     if n < block || max_lag > (n - block) / 2 {
         return Vec::new();
     }
-    let plan = CorrelationPlan::new(block, block + 2 * max_lag);
+    let plan = CorrelationPlan::new_ncc(block, block + 2 * max_lag);
     let mut workspace = CorrelationWorkspace::new(&plan);
     (max_lag..=n - block - max_lag)
         .step_by(block)
@@ -1416,7 +1416,7 @@ mod tests {
     fn ipd_lag_search_origin_preserves_signed_offsets_including_edges() {
         let template = ipd_noise(64);
         let origin = 8;
-        let plan = CorrelationPlan::new(template.len(), template.len() + 2 * origin);
+        let plan = CorrelationPlan::new_ncc(template.len(), template.len() + 2 * origin);
         let mut workspace = CorrelationWorkspace::new(&plan);
         for lag in [-8_isize, -3, 0, 5, 8] {
             let mut search = vec![0.0; template.len() + 2 * origin];
