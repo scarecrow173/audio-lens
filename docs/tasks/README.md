@@ -128,10 +128,11 @@ Directory: `docs/tasks`
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
+| TASK-034H79j4zxpqdARj0xtWcM | Streaming Bandpass 実装 (issue #71 P2) | done | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | TASK-034Gs7XaxwczdCjzEW33CL | SymphoniaDecoder backend for AAC-LC in MP4 | done | [symphoniadecoder-backend-for-aac-lc-in-mp4.md](./symphoniadecoder-backend-for-aac-lc-in-mp4.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
-| TASK-034H5pLyx9R2CtnfPe4b03 | Valid FFT NCC plan 実装 (issue #71 P1) | todo | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
+| TASK-034H5pLyx9R2CtnfPe4b03 | Valid FFT NCC plan 実装 (issue #71 P1) | done | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | done | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |
 | TASK-034AaFByhnoqebVdh0M46q | video/A-V 結合テスト(合成 AVI) | done | [video-av-integration-tests.md](./video-av-integration-tests.md) |
 | TASK-034AaFzOsSmhBfpjb1kM9F | video_features 成果物を ingest で永続化 | done | [video-features-ingest.md](./video-features-ingest.md) |

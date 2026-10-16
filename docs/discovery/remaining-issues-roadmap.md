@@ -97,7 +97,8 @@ audio_lens_issue_dashboard.html`)。本ドキュメントは同ファイル内�
 | #57 | envelopeを線形時間化 | Cheap | P2 | M | 完了(計測で非支配的→close) | 2 |
 | #58 | matrix_to_tensorコピーを除去 | Dataset | P3 | M | 完了(計測で微小→close) | 2 |
 | #54 | cheap/reference stage内部の並列化 | Runner | P1 | XL | 未着手 | 3 |
-| #71 | band系相関の構造最適化(locate band_ncc / reference band_gain) | DSP | P1 | L | P1実装済み(method NCC −41~43%)。残 P2/P3。ただし実測で locate wall は window_anchors_in(~83%)が支配と判明 — 要別枠検討 | 3 |
+| #71 | band系相関の構造最適化(locate band_ncc / reference band_gain) | DSP | P1 | L | P1/P2実装済み(method NCC −41~43%、ref ステージ WS −57%)。残 P3 | 3 |
+| #76 | window_anchors_in の構造最適化 | Locate | P1 | L | 新規(locate wall の ~83% と実測判明。#71 P1 の副次発見) | 3 |
 | #60 | 残余小項目の性能棚卸し | Polish | P3 | S | 未着手 | 4 |
 
 ※ 2026-10-14 の deep-dive セッションで Phase 1 各 issue(#52/#56/#36/#42/

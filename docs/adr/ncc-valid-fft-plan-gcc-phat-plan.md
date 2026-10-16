@@ -27,6 +27,7 @@ relations:
   related:
     - "../discovery/issue-40-locate-pair-plan-cache.md"
     - "../discovery/issue-53-local-lag-fft.md"
+    - "./bandfilter-inputcache.md"
   refines: []
   refined-by: []
   derives-from:

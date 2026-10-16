@@ -13,6 +13,7 @@ Directory: `docs/adr`
 | ADR-034G5M7bOVOeKSPQVOhN14 | Artifact ID 紐づけ read-only PCM view と計測ファーストの cache 判定 | accepted | [artifact-id-read-only-pcm-view-cache.md](./artifact-id-read-only-pcm-view-cache.md) |
 | ADR-034Gs0lgFjV7eNdvRdduFg | audio fallback pipeline: native container facts + symphonia decode | accepted | [audio-fallback-pipeline-native-container-facts-symphonia-decode.md](./audio-fallback-pipeline-native-container-facts-symphonia-decode.md) |
 | ADR-034AapHIAOqZfyrLPIa14w | 映像フレームデコードは非圧縮 AVI に限定する | accepted | [avi.md](./avi.md) |
+| ADR-034H775tTm4fDkJtwoGDwL | BandFilter 型による帯域逐次生成と InputCache バイパス | proposed | [bandfilter-inputcache.md](./bandfilter-inputcache.md) |
 | ADR-034EHHl9H4TTHHr0OQEa39 | caller 側最適化の構造決定: LeastSquares 列指向 API・FIR 畳み込みの FFT 化・STFT plan 所有境界 | accepted | [caller-side-optimizations-structure.md](./caller-side-optimizations-structure.md) |
 | ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | proposed | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |
 | ADR-034yYyq7wrVYD7X3NvjeX0 | 不変ジョブと再開可能なステージ実行を採用する | proposed | [immutable-resumable-job.md](./immutable-resumable-job.md) |
