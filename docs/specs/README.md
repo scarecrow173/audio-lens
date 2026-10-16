@@ -18,6 +18,7 @@ Directory: `docs/specs`
 | SPEC-034G5M6Djv4xJOZKHXQniH | decoded/normalized PCM read-only view | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | SPEC-034GsJJVWBOQmxiKManOlL | Artifact durability tiers and resume verification (issue #55) | approved | [durability-tiered-artifact-writes.md](./durability-tiered-artifact-writes.md) |
 | SPEC-034yYlEMw8LnaoJcOc4v9z | 高コスト詳細解析 | proposed | [expensive-analysis.md](./expensive-analysis.md) |
+| SPEC-034GNsDtc88g3RPbhoW9RS | local_lag オーバーラップ正規化相関の FFT 化 | draft | [local-lag-overlap-corr-fft.md](./local-lag-overlap-corr-fft.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
 | SPEC-034GMyXJaIeUXOZB86GpDC | locate 相関 plan ワーカープールと共有 cache 監査 | approved | [locate-plan-cache.md](./locate-plan-cache.md) |
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |
