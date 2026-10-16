@@ -1,7 +1,7 @@
 ---
 id: "PLAN-034GMK73n1nSCbsGEfC6Np"
 type: "plan"
-status: "approved"
+status: "completed"
 title: "locate 相関 plan ワーカープール導入"
 created: "2026-10-16"
 updated: "2026-10-16"

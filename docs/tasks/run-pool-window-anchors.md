@@ -1,7 +1,7 @@
 ---
 id: "TASK-034GMMKt9UyD6jcOVtDgiW"
 type: "task"
-status: "todo"
+status: "done"
 title: "run_pool ワーカーコンテキスト拡張と window_anchors 移行"
 created: "2026-10-16"
 updated: "2026-10-16"
@@ -40,7 +40,11 @@ relations:
 
 ## Work
 
-<!-- Describe the implementation slice. -->
+`run_pool` をワーカーコンテキスト生成方式に拡張し、全呼出点を移行する。
+
+- `run_pool(n, make_ctx, work)` — 各ワーカーが `make_ctx()` で `CorrelationPool` を所有
+- `run_method_tasks` と `window_anchors_in` の両呼出点を `CorrelationPool::new` コンテキストに移行
+- `best_window_match` は `pool: &mut CorrelationPool` を受け取り、検索範囲を `Range<usize>` に整理
 
 ## Classification
 
@@ -48,20 +52,24 @@ relations:
 
 ## Upstream Documents
 
-- <!-- plan, spec, ADR, or task path -->
+- `docs/plans/locate-plan.md`
+- `docs/specs/locate-plan-cache.md`
 
 ## Dependencies
 
-- <!-- prerequisite, blocker, or related task -->
+- `docs/plans/locate-plan.md`
 
 ## Affected Files
 
-- <!-- file, directory, module, or interface -->
+- `crates/al-locate/src/stage.rs`
 
 ## Done When
 
-- [ ] <!-- completion criterion -->
+- [x] run_pool 両呼出点がワーカー所有プールを使う
+- [x] best_window_match が pool を引数に取る
+- [x] clippy too_many_arguments を引かない
 
 ## Verification
 
-- [ ] <!-- command, test, review step, or observable behavior -->
+- [x] `cargo test -p al-locate`
+- [x] `cargo clippy --workspace --all-targets -- -D warnings`
