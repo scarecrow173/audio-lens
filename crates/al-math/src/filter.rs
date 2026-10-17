@@ -35,10 +35,11 @@ impl WithSimd for Bandpass<'_> {
         }
         let mut core = FilterCore::forward(simd, self.samples, self.sample_rate);
         // FFT は closure 外で実行し、選択した ISA コンテキストへインラインする。
-        self.bands
-            .iter()
-            .map(|&(lo, hi)| core.band(simd, lo, hi))
-            .collect()
+        let mut output = Vec::with_capacity(self.bands.len());
+        for &(lo, hi) in self.bands {
+            output.push(core.band(simd, lo, hi));
+        }
+        output
     }
 }
 
@@ -57,6 +58,10 @@ struct FilterCore {
 }
 
 impl FilterCore {
+    // simd カーネルは dispatch の ISA コンテキストへ畳み込むため
+    // #[inline(always)] が必須。通常呼出境界になるとベクトル命令が
+    // スカラー化し、4.19M 変換が ~65ms→~325ms に悪化する (issue #71 P2)。
+    #[inline(always)]
     fn forward<S: Simd>(simd: S, samples: &[f64], sample_rate: u32) -> Self {
         if samples.is_empty() {
             return Self {
@@ -89,6 +94,7 @@ impl FilterCore {
         }
     }
 
+    #[inline(always)]
     fn band<S: Simd>(&mut self, simd: S, lo_hz: f64, hi_hz: f64) -> Vec<f64> {
         if self.len == 0 {
             return Vec::new();
