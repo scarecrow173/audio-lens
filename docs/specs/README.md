@@ -6,6 +6,7 @@ Directory: `docs/specs`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| SPEC-034HiHWQhvLOEFEnriCF0A | shape-adaptive NCC dispatch (issue #71 P3) | draft | [adaptive-ncc-dispatch-issue-71-p3.md](./adaptive-ncc-dispatch-issue-71-p3.md) |
 | SPEC-034DXcFaOvk0LFMoPMjkaS | al-math 公開 API のバックエンド中立化と split re/im FFT 境界 | approved | [al-math-api-boundary.md](./al-math-api-boundary.md) |
 | SPEC-034EoHgAtLogjk6xxhiJWm | al-math vec プリミティブ集約と dsp ファサード経由の公開 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | SPEC-034yYltIfR72sgyFIMvsdh | 分析データセットスキーマ | proposed | [analysis-dataset.md](./analysis-dataset.md) |

@@ -25,6 +25,7 @@ relations:
   superseded-by: []
   related:
     - "./ncc-valid-fft-plan-gcc-phat-plan.md"
+    - "./ncc-plan-time-dispatch-issue-71-p3.md"
   refines: []
   refined-by: []
   derives-from:
