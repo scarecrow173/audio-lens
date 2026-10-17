@@ -164,9 +164,15 @@ P2 実測時に判明: `analysis::reference` span は `time.busy` と
 | 旧(`prepare_with_bands` ×2、全帯域保持 + coarse) | 18.6s | 3.8s | ~22.4s |
 | 新(`BandFilter` ×2 + 逐次 `band()`) | 17.6s | 3.7s | ~21.4s |
 
-- 帯域生成の速度は同等(計測分解: `band()` ≈ 330ms/回、
+- ~~帯域生成の速度は同等(計測分解: `band()` ≈ 330ms/回、
   `bandpass_many` の帯域あたりと一致)。差の ~1s/ch は除去した
-  coarse resample 分で **P2 はわずかに高速**。
+  coarse resample 分で **P2 はわずかに高速**~~。← 訂正(後述):
+  この対決で「旧経路」とした `bandpass_many` は既に P2 の
+  `FilterCore` 経由だったため、両者ともスカラー化した同条件の
+  比較だった。真の baseline(b532396)は bandpass_many 全体で
+  1.86s/26帯域(~70ms/帯域)であり、P2 時点の ~330ms/帯域は
+  **4.7× の回帰**だった(e2e A/B 計測で発覚、下記「P3 実装結果」
+  節の事後修正を参照)。
 - 帯域 IFFT 52 回が band_gain コストの本体(実ジョブの
   analyze_pair wall ~54s/pair 中 ~80%)。このコストは P2 で
   変わらない設計であり、削減は P3(適応 dispatch/Blocked FFT)
@@ -239,6 +245,32 @@ max_lag クランプ・ゼロエネルギー early return は FFT 経路と
   が支配するため e2e はほぼ不変 — 残ターゲットは #76。
   anchor 探索の narrow/fallback 形状は K が大きく Valid FFT
   を維持するため P3 では変わらない(設計通り)。
+
+### e2e A/B 計測で発覚した P2 回帰と修正(5bbf3fc)
+
+ユーザー指示の e2e サンプル計測(#71 全相前 `b532396` vs
+P3 後 `40c1643`、各 2 回)で `analysis::reference` busy が
+~58s→~112s(+93%)と再現性ある悪化を検出。`analyze_pair`
+単体ベンチ(2.2M×2ch)でも 28.0s→52.0s、コミット bisect で
+P2(`e67dd77`)が起点と確定。
+
+**根本原因**: P2 で導入した `FilterCore::forward`/`band` が
+通常 `fn` で、pulp dispatch の `#[target_feature]` コンテキストへ
+畳み込まれる呼出チェイン(`#[inline(always)]` 規約、
+fft.rs 内コメントが不変条件として明記)を断ち切り、
+内部の `inverse_with_simd` 経由の FFT 全体がスカラー化した。
+計測: 4.19M 逆変換 ~65ms→~325ms(4.8×)、`bandpass_many`
+26帯域 1.86s→8.8s、`.map()` 内呼出も同様(クロージャ境界)。
+
+**修正**: `FilterCore::forward`/`band` に `#[inline(always)]`
+を付与し、`Bandpass::with_simd` の `.map()` を明示ループへ
+戻した。修正後: `bandpass_many` ~2.0s、`analyze_pair` ~22.6s
+(baseline 28.0s、P1 後 20.1s と同等に回復)。
+
+**教訓**: al-math で SIMD カーネルを経由する関数に呼出境界を
+作ると target_feature が伝播せず数倍悪化する。P2 時点の
+「新旧同等」検証は「旧経路」が既に FilterCore 経由だったため
+誤判定しており、真の baseline バイナリとの比較が必要だった。
 
 ## Exploration Goal
 
