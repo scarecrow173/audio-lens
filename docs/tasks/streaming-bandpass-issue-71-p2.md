@@ -101,3 +101,10 @@ mask/IFFT)を追加し、`bandpass_many` はそれへ委譲。
       peak WS 2186MB→937MB、−57%。pair wall は同等。
       `analysis::reference` busy は idle 分解で不安定なため
       wall=busy+idle を比較指標とする — discovery 訂正節参照)
+- [x] 事後修正(5bbf3fc): `FilterCore::forward`/`band` が通常 fn で
+      pulp dispatch の #[target_feature] コンテキストから切れ、
+      内部 FFT がスカラー化していた回帰を `#[inline(always)]` 化で
+      修正(bandpass_many 26帯域 8.8s→~2.0s、analyze_pair 52s→~23s)。
+      `.map()` 内の `core.band` も同理由で明示ループへ戻した。
+      SIMD カーネルを経由する関数は呼出境界を作らない規約を
+      fft.rs コメントの不変条件として確認済み
