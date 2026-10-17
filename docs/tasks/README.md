@@ -7,6 +7,7 @@ Directory: `docs/tasks`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | TASK-034Gs7Y9aM823BFJ6lNIuO | AAC-LC MP4 fixture and ingest e2e tests | done | [aac-lc-mp4-fixture-and-ingest-e2e-tests.md](./aac-lc-mp4-fixture-and-ingest-e2e-tests.md) |
+| TASK-034HiHYbV7buE9EkLxWNbB | shape-adaptive NCC dispatch 実装 (issue #71 P3) | done | [adaptive-ncc-dispatch-issue-71-p3.md](./adaptive-ncc-dispatch-issue-71-p3.md) |
 | TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | done | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |
 | TASK-034DYiGC8yp76ElLB8R0J5 | al-locate: dsp::fft と bench_dsp の split API 追従 | done | [al-locate-split-re-im-fft.md](./al-locate-split-re-im-fft.md) |
 | TASK-034EpPesSpbjbAQBsmjvJx | al-locate: dsp re-export と vec プリミティブ移行 | done | [al-locate-vec-migration.md](./al-locate-vec-migration.md) |

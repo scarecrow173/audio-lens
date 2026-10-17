@@ -26,6 +26,7 @@ relations:
   superseded-by: []
   related:
     - "./streaming-bandpass-issue-71-p2.md"
+    - "./adaptive-ncc-dispatch-issue-71-p3.md"
   refines: []
   refined-by: []
   derives-from:
