@@ -25,6 +25,7 @@ relations:
   superseded-by: []
   related:
     - "./valid-fft-ncc-plan-issue-71-p1.md"
+    - "./adaptive-ncc-dispatch-issue-71-p3.md"
   refines: []
   refined-by: []
   derives-from:

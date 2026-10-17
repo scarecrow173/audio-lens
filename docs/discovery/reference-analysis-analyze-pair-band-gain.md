@@ -35,6 +35,7 @@ relations:
   derived-by:
     - "../specs/valid-fft-ncc-plan-issue-71-p1.md"
     - "../specs/streaming-bandpass-issue-71-p2.md"
+    - "../specs/adaptive-ncc-dispatch-issue-71-p3.md"
   verifies: []
   verified-by: []
   references:
@@ -192,6 +193,52 @@ counting allocator):**
 - CPU は設計通り同等(coarse 除去分の微差は run 分散より小さい)。
 - プロセス peak は locate(`window_anchors_in` 周辺)が支配する
   ため変わらず — 全行程の削減には #76 側が効く。
+
+## P3 実装結果(2026-10-17 実測)
+
+### 適応 NCC dispatch(plan 構築時の形状選択)
+
+`CorrelationPlan::new_ncc` が `(L, S)` から `K = S−L` を求め、
+`L·(K+1) ≤ 8·n·log2(n)` かつ `K+1 ≤ 2048` のとき FFT なしの
+直接計算 plan(`NccDirect`、分子を `axpy` 蓄積)を選択。
+分子だけを置き換え、窓エネルギー prefix 積・normalize・
+max_lag クランプ・ゼロエネルギー early return は FFT 経路と
+同一のまま。Blocked FFT は形状ベンチで有効域が消えたため棄却
+(大きい近似形状は direct、窓・狭帯域形状は Valid FFT が既に
+最速のため)。
+
+**形状ベンチ(release、`crates/al-math/tests/direct_ncc_bench.rs`):**
+
+| 形状 | adaptive(`new_ncc`) | Full FFT(`new`) | 選択 |
+| --- | --- | --- | --- |
+| band_ncc/full_ncc(L=2.2M,K=236) | **79.6ms** | 433.1ms | direct(5.4×) |
+| coarse_ncc(L=551K,K=59) | **9.0ms** | 111.2ms | direct(12×) |
+| band_gain window(L=4410,K=3528) | **262µs** | 317µs | Valid FFT |
+| narrow anchor 小(L=4410,K=8820) | **345µs** | 620µs | Valid FFT |
+| narrow anchor 中(L=4410,K=61.7K) | 4.6ms | **3.7ms** | Valid FFT |
+| tiny 8kHz(L=800,K=638) | **44.6µs** | 66.9µs | Valid FFT |
+
+誤差は全形状で ≤2e-16(契約内)。`new` 比は P1 前の一律経路との
+対比で、adaptive 列には P1 の Valid FFT 効果も含む。
+
+**実サンプル run(JOB-kaXkVSPpXfhPKlVdUTCDip、`--log info`):**
+
+| span | P1+P2 後 | P3 | 変化 |
+| --- | --- | --- | --- |
+| `locate::band_ncc` | ~6.26s/呼出 | **~1.0s/呼出**(0.85–1.15) | **−84%** |
+| `locate::full_ncc` | ~3.08s/呼出 | **~0.32s/呼出**(0.25–0.48) | **−90%** |
+| `locate::gcc_phat` | (Full plan) | 2.3–2.9s | 経路不変 |
+| `analysis::reference` | ~52s/pair | ~51.8s/pair | 不変(予測通り) |
+| プロセス peak WS | 6.49GB | 6.49GB | 不変(locate 支配) |
+
+- P1 前(~11.0s/5.2s)からの累計で band_ncc **−91%**、
+  full_ncc **−94%**。
+- `band_ncc`/`full_ncc` はワーカー内連続計測で idle 分解が
+  ほぼないため busy 比較は有効。
+- locate ステージ wall は `window_anchors_in`(非計装 ~227s)
+  が支配するため e2e はほぼ不変 — 残ターゲットは #76。
+  anchor 探索の narrow/fallback 形状は K が大きく Valid FFT
+  を維持するため P3 では変わらない(設計通り)。
 
 ## Exploration Goal
 
