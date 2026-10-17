@@ -3,6 +3,7 @@
 use crate::{
     Simd, WithSimd, dispatch,
     fft::{RealFftPlan, RealFftWorkspace},
+    vec::axpy_kernel,
 };
 
 /// plan が保証する演算範囲。`Full` は線形相関全域をカバーする FFT 長
@@ -10,12 +11,25 @@ use crate::{
 /// 有効ラグ域 `0..=S−L` の NCC だけを対象に FFT 長を `nextpow2(S)`
 /// へ短縮する。返却 index `k ≤ S−L` は `c[k−n]`・`c[k+n]` の
 /// wraparound 項がいずれも定義域外(`k−n < −(L−1)`、`k+n ≥ S`)のため
-/// `n ≥ S` で無汚染となる。PHAT の bin 正規化は FFT 長依存なので
-/// `NccValid` plan での `gcc_phat` は契約違反。
+/// `n ≥ S` で無汚染となる。`NccDirect` は同じ有効ラグ域を FFT なしの
+/// 直接計算で求める。PHAT の bin 正規化は FFT 長依存なので
+/// `NccValid`/`NccDirect` plan での `gcc_phat` は契約違反。
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PlanMode {
     Full,
     NccValid,
+    NccDirect,
+}
+
+/// `NccDirect` を選ぶ形状判定。有効ラグ数 `K = S−L` が小さいほど
+/// 分子の直接計算 `L·(K+1)` MAC が `n·log2(n)` の 3 回 FFT より
+/// 安い。係数 8 は現環境ベンチ(direct ≈ 5 GMAC/s、FFT ≈
+/// 1.8 ns·n·log2n、実形状 6 点で実測最速側と一致)で校正した
+/// 保守値。`K+1 ≤ 2048` の上限は acc ベクトルを ~16KB(L1)に
+/// 留め、大 K 形状でのキャッシュ劣化を構造的に排除する。
+fn prefers_direct(template_len: usize, signal_len: usize, n: usize) -> bool {
+    let k = (signal_len - template_len + 1) as f64;
+    k <= 2048.0 && (template_len as f64 * k) <= 8.0 * (n as f64) * (n as f64).log2()
 }
 
 /// 固定入力形状の不変相関 plan。NCC/PHAT は実行時に選ぶ。
@@ -68,22 +82,31 @@ impl CorrelationPlan {
 
     /// 有効ラグ域 `0..=signal_len − template_len` の NCC 専用 plan。
     /// FFT 長は `nextpow2(signal_len)` で、返却される有効ラグ値は
-    /// [`Self::new`] の NCC と同一契約。この plan で `gcc_phat` を
-    /// 呼ぶと panic する(PHAT の位相正規化は FFT 長依存のため)。
+    /// [`Self::new`] の NCC と同一契約。有効ラグ数 `K = S−L` が
+    /// 小さい形状では FFT を持たない直接計算 plan(`NccDirect`)を
+    /// 選ぶ(係数はベンチ校正済み、選び損ねても出力契約は不変)。
+    /// この plan で `gcc_phat` を呼ぶと panic する(PHAT の
+    /// 位相正規化は FFT 長依存のため)。
     pub fn new_ncc(template_len: usize, signal_len: usize) -> Self {
-        let n = if template_len == 0 || signal_len < template_len {
-            0
+        let (n, mode) = if template_len == 0 || signal_len < template_len {
+            (0, PlanMode::NccValid)
         } else {
-            signal_len
+            let n = signal_len
                 .checked_next_power_of_two()
-                .expect("correlation FFT length overflow")
+                .expect("correlation FFT length overflow");
+            let mode = if prefers_direct(template_len, signal_len, n) {
+                PlanMode::NccDirect
+            } else {
+                PlanMode::NccValid
+            };
+            (n, mode)
         };
         Self {
             template_len,
             signal_len,
-            fft: (n != 0).then(|| RealFftPlan::new(n)),
+            fft: (n != 0 && mode != PlanMode::NccDirect).then(|| RealFftPlan::new(n)),
             n,
-            mode: PlanMode::NccValid,
+            mode,
         }
     }
 
@@ -161,16 +184,30 @@ impl CorrelationPlan {
 
 impl CorrelationWorkspace {
     /// shape ごとの最大領域を確保し、実行時の resize を不要にする。
+    /// `NccDirect` plan は FFT バッファを持たず、`real` は有効ラグ
+    /// 域 `S−L+1` の出力領域として使う。
     pub fn new(plan: &CorrelationPlan) -> Self {
-        let bins = if plan.n == 0 { 0 } else { plan.n / 2 + 1 };
+        let direct = plan.mode == PlanMode::NccDirect;
+        let bins = if plan.n == 0 || direct {
+            0
+        } else {
+            plan.n / 2 + 1
+        };
         let len = if plan.n == 0 { 0 } else { plan.template_len };
         let signal_len = if plan.n == 0 { 0 } else { plan.signal_len };
         let count = if plan.n == 0 { 0 } else { signal_len - len + 1 };
+        let real_len = if plan.n == 0 {
+            0
+        } else if direct {
+            count
+        } else {
+            plan.n
+        };
         Self {
             template_len: plan.template_len,
             signal_len: plan.signal_len,
             fft: plan.fft.as_ref().map(RealFftWorkspace::new),
-            real: vec![0.0; plan.n],
+            real: vec![0.0; real_len],
             a_re: vec![0.0; bins],
             a_im: vec![0.0; bins],
             b_re: vec![0.0; bins],
@@ -457,8 +494,6 @@ impl<'w> WithSimd for Correlation<'_, 'w, '_> {
             phat_energy,
             ..
         } = workspace;
-        let fft_plan = plan.fft.as_ref().expect("nonempty shape has FFT plan");
-        let fft_workspace = fft.as_mut().expect("nonempty shape has FFT workspace");
         real.fill(0.0);
         // 従来と同じ標本順の加算。PHAT は窓エネルギーを使わない。
         let template_energy = if phat {
@@ -470,13 +505,25 @@ impl<'w> WithSimd for Correlation<'_, 'w, '_> {
         if template_energy == 0.0 {
             return &real[..=max_lag];
         }
-        real[..len].copy_from_slice(template);
-        fft_plan.forward_with_simd(simd, fft_workspace, real, a_re, a_im);
-        real.fill(0.0);
-        real[..signal.len()].copy_from_slice(signal);
-        fft_plan.forward_with_simd(simd, fft_workspace, real, b_re, b_im);
-        cross_spectrum(simd, a_re, a_im, b_re, b_im, phat, phat_energy);
-        fft_plan.inverse_with_simd(simd, fft_workspace, a_re, a_im, real);
+        if plan.mode == PlanMode::NccDirect {
+            // 分子を直接計算: real[k] = Σ_i template[i]·signal[k+i]。
+            // real は有効ラグ域長、signal の参照窓は i に対し K+1
+            // 要素のスライドなのでキャッシュ局所性が高い。
+            for (i, &ai) in template.iter().enumerate() {
+                axpy_kernel(simd, &mut real[..=max_lag], ai, &signal[i..i + max_lag + 1]);
+            }
+        } else {
+            let fft_plan = plan.fft.as_ref().expect("nonempty shape has FFT plan");
+            let fft_workspace = fft.as_mut().expect("nonempty shape has FFT workspace");
+            real.fill(0.0);
+            real[..len].copy_from_slice(template);
+            fft_plan.forward_with_simd(simd, fft_workspace, real, a_re, a_im);
+            real.fill(0.0);
+            real[..signal.len()].copy_from_slice(signal);
+            fft_plan.forward_with_simd(simd, fft_workspace, real, b_re, b_im);
+            cross_spectrum(simd, a_re, a_im, b_re, b_im, phat, phat_energy);
+            fft_plan.inverse_with_simd(simd, fft_workspace, a_re, a_im, real);
+        }
         if !phat {
             square(simd, signal, signal_squares);
             cumulative[0] = 0.0;
@@ -931,12 +978,196 @@ mod tests {
         }
     }
 
-    /// NCC-valid plan での PHAT 呼出は FFT 長依存の位相正規化契約に
-    /// 反するため panic で検出する。
+    /// 形状ベンチの 6 代表形状で、コストモデルが実測最速側を選ぶ
+    /// ことを固定する。閾値回帰で FFT/direct が逆転しないよう
+    /// shape→mode を pin する。
+    #[test]
+    fn ncc_plan_mode_pins_benchmarked_shapes() {
+        for (template_len, signal_len, expected) in [
+            (2_205_000usize, 2_205_236usize, PlanMode::NccDirect), // band_ncc/full_ncc
+            (551_250, 551_309, PlanMode::NccDirect),               // coarse_ncc
+            (4_410, 7_938, PlanMode::NccValid),                    // band_gain window
+            (4_410, 13_230, PlanMode::NccValid),                   // narrow anchor 小
+            (4_410, 66_150, PlanMode::NccValid),                   // narrow anchor 中
+            (800, 1_438, PlanMode::NccValid),                      // tiny 8kHz
+        ] {
+            let plan = CorrelationPlan::new_ncc(template_len, signal_len);
+            assert_eq!(
+                plan.mode, expected,
+                "shape=({template_len},{signal_len})"
+            );
+            assert_eq!(
+                plan.fft.is_none(),
+                expected == PlanMode::NccDirect,
+                "shape=({template_len},{signal_len})"
+            );
+        }
+    }
+
+    /// direct plan は FFT plan/バッファを持たず、`real` は有効ラグ
+    /// 域長の出力領域になる。共有の正規化バッファのみ残る。
+    #[test]
+    fn ncc_direct_plan_skips_fft_buffers() {
+        let plan = CorrelationPlan::new_ncc(256, 300);
+        assert_eq!(plan.mode, PlanMode::NccDirect);
+        assert!(plan.fft.is_none());
+        let ws = CorrelationWorkspace::new(&plan);
+        assert!(ws.fft.is_none());
+        assert!(ws.a_re.is_empty() && ws.a_im.is_empty());
+        assert!(ws.b_re.is_empty() && ws.b_im.is_empty());
+        assert!(ws.phat_energy.is_empty());
+        assert_eq!(ws.real.len(), 300 - 256 + 1);
+        assert_eq!(ws.template_squares.len(), 256);
+        assert_eq!(ws.signal_squares.len(), 300);
+        assert_eq!(ws.cumulative.len(), 301);
+        assert_eq!(ws.norms.len(), 45);
+    }
+
+    /// direct plan の NCC は Full FFT plan と有効ラグ全域で一致し、
+    /// argmax・max_lag クランプ・戻り範囲も同一。
+    #[test]
+    fn ncc_direct_matches_full_plan_on_all_returned_lags() {
+        for (template_len, signal_len, max_lag) in [
+            (4usize, 4usize, usize::MAX), // 等長(K=0)
+            (1, 8, usize::MAX),
+            (3, 33, usize::MAX),
+            (33, 64, usize::MAX),
+            (64, 100, usize::MAX),
+            (256, 300, usize::MAX),
+            (16, 64, 10), // max_lag < S−L
+            (16, 64, 0),  // lag 0 のみ
+        ] {
+            let template = noise(template_len, 11);
+            let signal = noise(signal_len, 13);
+            let full = CorrelationPlan::new(template_len, signal_len);
+            let direct = CorrelationPlan::new_ncc(template_len, signal_len);
+            assert_eq!(
+                direct.mode,
+                PlanMode::NccDirect,
+                "shape=({template_len},{signal_len})"
+            );
+            let mut full_ws = CorrelationWorkspace::new(&full);
+            let mut direct_ws = CorrelationWorkspace::new(&direct);
+            let expected = full
+                .ncc(&mut full_ws, &template, &signal, max_lag)
+                .to_vec();
+            let actual = direct
+                .ncc(&mut direct_ws, &template, &signal, max_lag)
+                .to_vec();
+            assert_eq!(
+                expected.len(),
+                actual.len(),
+                "shape=({template_len},{signal_len})"
+            );
+            let argmax = |c: &[f64]| {
+                c.iter()
+                    .enumerate()
+                    .max_by(|a, b| a.1.abs().total_cmp(&b.1.abs()))
+                    .map(|(i, _)| i)
+            };
+            for (i, (&a, &b)) in expected.iter().zip(&actual).enumerate() {
+                let d = (a - b).abs();
+                assert!(
+                    d < 1e-10 || d / a.abs().max(1.0) < 1e-10,
+                    "shape=({template_len},{signal_len}) lag={i}: full {a} vs direct {b}"
+                );
+            }
+            assert_eq!(
+                argmax(&expected),
+                argmax(&actual),
+                "shape=({template_len},{signal_len}) peak"
+            );
+        }
+    }
+
+    /// direct 経路も scalar↔runtime-dispatch で一致する。
+    #[test]
+    fn ncc_direct_scalar_and_dispatch_match() {
+        for (template_len, signal_len) in [(4usize, 5usize), (33, 64), (256, 300)] {
+            let template = noise(template_len, 17);
+            let signal = noise(signal_len, 19);
+            let plan = CorrelationPlan::new_ncc(template_len, signal_len);
+            assert_eq!(plan.mode, PlanMode::NccDirect);
+            let mut native_ws = CorrelationWorkspace::new(&plan);
+            let mut scalar_ws = CorrelationWorkspace::new(&plan);
+            let native = dispatch(Correlation {
+                plan: &plan,
+                workspace: &mut native_ws,
+                template: &template,
+                signal: &signal,
+                max_lag: usize::MAX,
+                phat: false,
+            })
+            .to_vec();
+            let scalar = pulp::Scalar
+                .vectorize(Correlation {
+                    plan: &plan,
+                    workspace: &mut scalar_ws,
+                    template: &template,
+                    signal: &signal,
+                    max_lag: usize::MAX,
+                    phat: false,
+                })
+                .to_vec();
+            assert_eq!(native.len(), scalar.len());
+            for (i, (&a, &b)) in native.iter().zip(&scalar).enumerate() {
+                assert!(
+                    (a - b).abs() < 1e-10,
+                    "shape=({template_len},{signal_len}) lag={i}: dispatch {a} vs scalar {b}"
+                );
+            }
+        }
+    }
+
+    /// direct plan でも Full plan と同じエッジ契約(ゼロ
+    /// テンプレートの全 0 返却、無音窓の 0、max_lag クランプ、
+    /// template > signal の空返却)が成り立つ。
+    #[test]
+    fn ncc_direct_preserves_edge_contracts() {
+        let plan = CorrelationPlan::new_ncc(4, 8);
+        assert_eq!(plan.mode, PlanMode::NccDirect);
+        let mut ws = CorrelationWorkspace::new(&plan);
+        // ゼロテンプレート → 全ラグ 0(workspace 再利用の stale
+        // を残さないよう非ゼロ入力の後に検査する)。
+        let _ = plan.ncc(&mut ws, &noise(4, 37), &noise(8, 41), usize::MAX);
+        let curve = plan.ncc(&mut ws, &[0.0; 4], &noise(8, 43), usize::MAX);
+        assert_eq!(curve.len(), 5);
+        assert!(curve.iter().all(|&v| v == 0.0));
+        // 無音窓 → そのラグの出力は 0
+        let mut signal = noise(8, 29);
+        signal[2..6].fill(0.0);
+        let curve = plan.ncc(&mut ws, &noise(4, 31), &signal, usize::MAX);
+        assert_eq!(curve.len(), 5);
+        assert_eq!(curve[2], 0.0);
+        // template > signal → 空
+        let empty = CorrelationPlan::new_ncc(8, 4);
+        let mut empty_ws = CorrelationWorkspace::new(&empty);
+        let curve = empty.ncc(&mut empty_ws, &[0.0; 8], &[0.0; 4], usize::MAX);
+        assert!(curve.is_empty());
+        // ゼロテンプレート → 空(template_len==0)
+        let empty = CorrelationPlan::new_ncc(0, 4);
+        let mut empty_ws = CorrelationWorkspace::new(&empty);
+        let curve = empty.ncc(&mut empty_ws, &[], &[0.0; 4], usize::MAX);
+        assert!(curve.is_empty());
+    }
+
+    /// NCC 専用 plan(Valid FFT / Direct いずれも)での PHAT 呼出は
+    /// FFT 長依存の位相正規化契約に反するため panic で検出する。
     #[test]
     #[should_panic(expected = "NCC-only")]
     fn gcc_phat_panics_on_ncc_valid_plan() {
+        let plan = CorrelationPlan::new_ncc(4_410, 7_938);
+        assert_eq!(plan.mode, PlanMode::NccValid);
+        let mut ws = CorrelationWorkspace::new(&plan);
+        plan.gcc_phat(&mut ws, &[1.0; 4_410], &[1.0; 7_938], 3_528);
+    }
+
+    /// direct plan での PHAT 呼出も同じ契約で panic する。
+    #[test]
+    #[should_panic(expected = "NCC-only")]
+    fn gcc_phat_panics_on_ncc_direct_plan() {
         let plan = CorrelationPlan::new_ncc(4, 8);
+        assert_eq!(plan.mode, PlanMode::NccDirect);
         let mut ws = CorrelationWorkspace::new(&plan);
         plan.gcc_phat(&mut ws, &[1.0; 4], &[1.0; 8], 4);
     }
