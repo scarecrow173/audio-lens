@@ -12,9 +12,8 @@ UV_EXCLUDE_NEWER = "1 week"
 rust = "1.98.1"
 python = "3.12"
 uv = "0.11"
-# apm.lock.yaml は apm 0.28.0 で生成。0.30.0 は Windows で path dep 解決が
-# 壊れているため lock 生成版に pin する。
-"pipx:apm-cli"  = { version = "0.28.0", uvx_args = "--prerelease allow" }
+# apm.lock.yaml は apm 0.33.0 で生成。lock 生成版に pin する。
+"pipx:apm-cli"  = { version = "0.33.0", uvx_args = "--prerelease allow" }
 "pipx:serena-agent" = "1.7.0"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
