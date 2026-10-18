@@ -25,12 +25,17 @@ Bash 不要)。
 
 ```bash
 mise install --locked
-mise run setup   # apm install
+mise run setup   # apm install + prek install (git hooks)
 ```
+
+`mise run setup` は `prek install` で pre-commit hook も有効化する。
+hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形・
+衛生 check のみ担い、重い検証は `mise run lint` / `mise run test` に
+委ねる。
 
 ユーザー環境の global mise config に追加ツールがある場合は、
 toolchain を明示した
-`mise install --locked python uv pipx:apm-cli pipx:serena-agent`
+`mise install --locked rust python uv pipx:apm-cli pipx:serena-agent prek`
 を使う。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する

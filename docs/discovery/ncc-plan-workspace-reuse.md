@@ -55,4 +55,3 @@ spec/ADRの判断は2026-10-15 Judge ACCEPT。動的実証は未実施。owners�
 ## Promotion Candidates
 
 focused spec/ADRをreviewprotocolへ提出し、承認後にgraph routeを再投影する。
-

@@ -34,8 +34,10 @@ fn timed<T>(label: &str, f: impl FnOnce() -> T) -> T {
 fn main() {
     let n = RATE as usize * SECS;
     let cfg = CheapConfig::default();
-    println!("input: {SECS}s stereo @{RATE} ({n} samples/ch), stft {}/{}",
-        cfg.stft_window, cfg.stft_hop);
+    println!(
+        "input: {SECS}s stereo @{RATE} ({n} samples/ch), stft {}/{}",
+        cfg.stft_window, cfg.stft_hop
+    );
 
     // --- analyze_input 全体(実パイプラインと同じ処理) ---
     let dec = DecodedInput {
@@ -46,7 +48,11 @@ fn main() {
         artifact_ids: Vec::new(),
     };
     let res = timed("analyze_input(total, 2ch)", || analyze_input(&dec, &cfg));
-    println!("  records={} tensors={}", res.records.len(), res.tensors.len());
+    println!(
+        "  records={} tensors={}",
+        res.records.len(),
+        res.tensors.len()
+    );
 
     // --- 単ch分の kernel 分解 ---
     let samples = &dec.channel_samples[0];
@@ -98,13 +104,16 @@ fn main() {
         ("power", &pow),
     ] {
         let bytes: usize = mat.iter().map(Vec::len).sum::<usize>() * 8;
-        timed(&format!("flatten {label} ({:.1} MB)", bytes as f64 / 1e6), || {
-            let mut data = Vec::with_capacity(mat.iter().map(Vec::len).sum());
-            for row in mat {
-                data.extend_from_slice(row);
-            }
-            black_box(data)
-        });
+        timed(
+            &format!("flatten {label} ({:.1} MB)", bytes as f64 / 1e6),
+            || {
+                let mut data = Vec::with_capacity(mat.iter().map(Vec::len).sum());
+                for row in mat {
+                    data.extend_from_slice(row);
+                }
+                black_box(data)
+            },
+        );
     }
     // per-frame 形状ループ相当(centroid/flatness/rolloff/entropy/flux)
     timed("per-frame shape loop", || {
@@ -130,7 +139,11 @@ fn main() {
                 .sum();
             acc += -h / (half as f64).ln();
             if let Some(p) = &prev {
-                acc += row.iter().zip(p).map(|(&a, &b)| (a - b).max(0.0)).sum::<f64>();
+                acc += row
+                    .iter()
+                    .zip(p)
+                    .map(|(&a, &b)| (a - b).max(0.0))
+                    .sum::<f64>();
             }
             prev = Some(row.to_vec());
         }
