@@ -1,0 +1,31 @@
+# prek(pre-commit 互換 runner)の hook 定義。
+# commit 時点で高速な整形・衛生 check のみ担い、重い検証は `mise run lint` /
+# `mise run test` と CI に委ねる。整形系は auto-fix で動き、修正が入った
+# commit は一旦失敗する(再 stage して commit し直す pre-commit 系の慣習どおり)。
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      # .ps1/.bat/.cmd の改行は .gitattributes(eol=crlf)が管轄する領域のため
+      # 対象外。.ps1 の BOM も Windows PowerShell の解釈に関わるため除外する
+      - id: mixed-line-ending
+        exclude: '\.(ps1|bat|cmd)$'
+      - id: fix-byte-order-marker
+        exclude: '\.ps1$'
+      - id: check-yaml
+      - id: check-toml
+      # 秘密情報コミット禁止(AGENTS.md Never)と Windows 非互換 file 名の guard
+      - id: detect-private-key
+      - id: check-illegal-windows-names
+  - repo: local
+    hooks:
+      # workspace 全体を整形するため file list は渡さない
+      # (staged .rs があれば発火する)。
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all
+        language: system
+        types: [rust]
+        pass_filenames: false

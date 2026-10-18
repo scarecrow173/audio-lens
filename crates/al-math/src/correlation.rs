@@ -888,18 +888,18 @@ mod tests {
     fn ncc_valid_plan_matches_full_plan_on_all_returned_lags() {
         for (template_len, signal_len, max_lag) in [
             (1usize, 8usize, usize::MAX),
-            (4, 4, usize::MAX),      // 等長(K=1)
+            (4, 4, usize::MAX), // 等長(K=1)
             (4, 5, usize::MAX),
             (3, 33, usize::MAX),
             (33, 64, usize::MAX),
-            (64, 100, usize::MAX),   // 16384 未満でも FFT 半減する形状
+            (64, 100, usize::MAX), // 16384 未満でも FFT 半減する形状
             (100, 1000, usize::MAX),
             (512, 4096, usize::MAX),
             (4410, 7938, usize::MAX), // 44.1k band_gain 形状(16K→8K)
             (4800, 8640, usize::MAX), // 48k band_gain 形状(縮小なし)
             (96_000, 100_800, usize::MAX),
-            (16, 64, 10),            // max_lag < S−L
-            (16, 64, 0),             // lag 0 のみ
+            (16, 64, 10), // max_lag < S−L
+            (16, 64, 0),  // lag 0 のみ
         ] {
             let template = noise(template_len, 11);
             let signal = noise(signal_len, 13);
@@ -907,10 +907,10 @@ mod tests {
             let valid = CorrelationPlan::new_ncc(template_len, signal_len);
             let mut full_ws = CorrelationWorkspace::new(&full);
             let mut valid_ws = CorrelationWorkspace::new(&valid);
-            let expected =
-                full.ncc(&mut full_ws, &template, &signal, max_lag).to_vec();
-            let actual =
-                valid.ncc(&mut valid_ws, &template, &signal, max_lag).to_vec();
+            let expected = full.ncc(&mut full_ws, &template, &signal, max_lag).to_vec();
+            let actual = valid
+                .ncc(&mut valid_ws, &template, &signal, max_lag)
+                .to_vec();
             assert_eq!(
                 expected.len(),
                 actual.len(),
@@ -992,10 +992,7 @@ mod tests {
             (800, 1_438, PlanMode::NccValid),                      // tiny 8kHz
         ] {
             let plan = CorrelationPlan::new_ncc(template_len, signal_len);
-            assert_eq!(
-                plan.mode, expected,
-                "shape=({template_len},{signal_len})"
-            );
+            assert_eq!(plan.mode, expected, "shape=({template_len},{signal_len})");
             assert_eq!(
                 plan.fft.is_none(),
                 expected == PlanMode::NccDirect,
@@ -1048,9 +1045,7 @@ mod tests {
             );
             let mut full_ws = CorrelationWorkspace::new(&full);
             let mut direct_ws = CorrelationWorkspace::new(&direct);
-            let expected = full
-                .ncc(&mut full_ws, &template, &signal, max_lag)
-                .to_vec();
+            let expected = full.ncc(&mut full_ws, &template, &signal, max_lag).to_vec();
             let actual = direct
                 .ncc(&mut direct_ws, &template, &signal, max_lag)
                 .to_vec();

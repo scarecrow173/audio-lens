@@ -44,7 +44,10 @@ fn normalize_like_ncc(num: &mut [f64], b: &[f64], len: usize, template_energy: f
 }
 
 fn max_err(a: &[f64], b: &[f64]) -> f64 {
-    a.iter().zip(b).map(|(x, y)| (x - y).abs()).fold(0.0, f64::max)
+    a.iter()
+        .zip(b)
+        .map(|(x, y)| (x - y).abs())
+        .fold(0.0, f64::max)
 }
 
 #[test]
