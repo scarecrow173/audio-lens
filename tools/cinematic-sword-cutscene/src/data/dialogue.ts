@@ -1,6 +1,6 @@
-import {Timeline} from './shots';
+import type { Timeline } from "./shots";
 
-export type ActiveDialogue = {speaker: 'KAEL' | 'VAREN'; text: string};
+export type ActiveDialogue = { speaker: "KAEL" | "VAREN"; text: string };
 
 // Dialogue is attached to shots; shown slightly inset from the cut.
 export const dialogueAt = (tl: Timeline, t: number): ActiveDialogue | null => {

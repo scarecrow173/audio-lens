@@ -19,6 +19,8 @@ uv = "0.11"
 "pipx:serena-agent" = "1.7.0"
 # pre-commit 互換 runner(aqua:j178/prek)。hook 定義は .pre-commit-config.yaml
 prek = "0.5.5"
+# aqua:biomejs/biome(npm 非経由)。biome.json の schema version に揃える
+biome = "2.5.15"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
 # canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
@@ -38,8 +40,11 @@ description = "cargo test --workspace"
 run = "cargo test --workspace"
 
 [tasks.lint]
-description = "cargo clippy --workspace -- -D warnings"
-run = "cargo clippy --workspace --all-targets -- -D warnings"
+description = "biome check + cargo clippy --workspace -- -D warnings"
+run = [
+  "biome check",
+  "cargo clippy --workspace --all-targets -- -D warnings",
+]
 
 [tasks.fmt]
 description = "cargo fmt --all -- --check"

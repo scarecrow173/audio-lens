@@ -1,15 +1,16 @@
-import React, {useLayoutEffect, useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {createRng} from '../../utils/seededRandom';
+import type React from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { createRng } from "../../utils/seededRandom";
 
 // Rubble, machinery blocks and distant structures filling out the
 // collapsed-facility look.
 export const Ruins: React.FC = () => {
-  const {debrisM, machines, structures} = useMemo(() => {
+  const { debrisM, machines, structures } = useMemo(() => {
     const rng = createRng(9021);
     const debrisM: THREE.Matrix4[] = [];
-    const machines: {pos: [number, number, number]; size: [number, number, number]}[] = [];
-    const structures: {pos: [number, number, number]; size: [number, number, number]}[] = [];
+    const machines: { pos: [number, number, number]; size: [number, number, number] }[] = [];
+    const structures: { pos: [number, number, number]; size: [number, number, number] }[] = [];
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
     const e = new THREE.Euler();
@@ -28,15 +29,15 @@ export const Ruins: React.FC = () => {
       const x = (rng() - 0.5) * 24;
       const z = -9 - rng() * 4;
       const h = 1 + rng() * 1.6;
-      machines.push({pos: [x, h / 2, z], size: [1.2 + rng() * 1.6, h, 0.9 + rng()]});
+      machines.push({ pos: [x, h / 2, z], size: [1.2 + rng() * 1.6, h, 0.9 + rng()] });
     }
     for (let i = 0; i < 9; i++) {
       const x = (rng() - 0.5) * 44;
       const z = -18 - rng() * 14;
       const h = 3 + rng() * 8;
-      structures.push({pos: [x, h / 2, z], size: [3 + rng() * 6, h, 2 + rng() * 4]});
+      structures.push({ pos: [x, h / 2, z], size: [3 + rng() * 6, h, 2 + rng() * 4] });
     }
-    return {debrisM, machines, structures};
+    return { debrisM, machines, structures };
   }, []);
 
   const debrisGeo = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
@@ -44,7 +45,9 @@ export const Ruins: React.FC = () => {
   useLayoutEffect(() => {
     const mesh = debrisRef.current;
     if (!mesh) return;
-    debrisM.forEach((mtx, i) => mesh.setMatrixAt(i, mtx));
+    debrisM.forEach((mtx, i) => {
+      mesh.setMatrixAt(i, mtx);
+    });
     mesh.instanceMatrix.needsUpdate = true;
   }, [debrisM]);
 
@@ -64,7 +67,7 @@ export const Ruins: React.FC = () => {
             <boxGeometry args={[mc.size[0] * 0.7, 0.05, 0.02]} />
             <meshStandardMaterial
               color="#06222a"
-              emissive={i % 3 === 0 ? '#a0222b' : '#0f7f8f'}
+              emissive={i % 3 === 0 ? "#a0222b" : "#0f7f8f"}
               emissiveIntensity={1.4}
             />
           </mesh>

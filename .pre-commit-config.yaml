@@ -21,6 +21,15 @@ repos:
       - id: check-illegal-windows-names
   - repo: local
     hooks:
+      # biome.json の files.includes を mirror する。scope 外の file を明示
+      # 渡しすると biome が "No files were processed" で exit 1 になるため、
+      # files/exclude で hook の発火対象を限定する。
+      - id: biome-check
+        name: biome check --write
+        entry: biome check --write
+        language: system
+        files: '\.(js|mjs|cjs|ts|mts|cts|jsx|tsx|json|jsonc)$'
+        exclude: '(^|/)package-lock\.json$|(^|/)(dist|node_modules)/'
       # workspace 全体を整形するため file list は渡さない
       # (staged .rs があれば発火する)。
       - id: cargo-fmt

@@ -1,16 +1,12 @@
-import * as THREE from 'three';
-import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {staticFile} from 'remotion';
+import { staticFile } from "remotion";
+import * as THREE from "three";
+import { type GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 // Synchronous GLTF store. Assets are fully parsed BEFORE the scene mounts
 // (gated by delayRender), so components never suspend — which keeps
 // Remotion frame captures deterministic.
 
-const ASSETS = [
-  'models/Rogue.glb',
-  'models/Knight.glb',
-  'weapons/sword_1handed.gltf',
-];
+const ASSETS = ["models/Rogue.glb", "models/Knight.glb", "weapons/sword_1handed.gltf"];
 
 const cache = new Map<string, GLTF>();
 let loadPromise: Promise<void> | null = null;
@@ -30,10 +26,10 @@ export const preloadAssets = (): Promise<void> => {
                 resolve();
               },
               undefined,
-              (e) => reject(new Error(`failed to load ${u}: ${e}`))
-            )
-          )
-      )
+              (e) => reject(new Error(`failed to load ${u}: ${e}`)),
+            ),
+          ),
+      ),
     ).then(() => undefined);
   }
   return loadPromise;

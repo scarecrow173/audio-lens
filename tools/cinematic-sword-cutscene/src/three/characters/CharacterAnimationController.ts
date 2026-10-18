@@ -1,8 +1,8 @@
-import {AnimSeg, CharacterTrack} from '../../data/shots';
-import {clipDuration} from '../../data/kaykitManifest';
-import {clamp, evalKeys, smoothstep} from '../../utils/frameTime';
+import { clipDuration } from "../../data/kaykitManifest";
+import type { AnimSeg, CharacterTrack } from "../../data/shots";
+import { clamp, evalKeys, smoothstep } from "../../utils/frameTime";
 
-export type ActiveClip = {clip: string; time: number; weight: number};
+export type ActiveClip = { clip: string; time: number; weight: number };
 
 const HOLD_EPS = 1e-3;
 
@@ -32,7 +32,7 @@ export const activeClipsAt = (anims: readonly AnimSeg[], t: number): ActiveClip[
         ? local % clipDur
         : 0
       : Math.min(local, clipDur - HOLD_EPS);
-    out.push({clip: seg.clip, time: Math.max(0, clipT), weight});
+    out.push({ clip: seg.clip, time: Math.max(0, clipT), weight });
   }
 
   if (out.length === 0 && anims.length > 0) {
@@ -42,17 +42,21 @@ export const activeClipsAt = (anims: readonly AnimSeg[], t: number): ActiveClip[
     const clipDur = clipDuration(fallback.clip);
     const endT = fallback.end ?? fallback.start + clipDur;
     const local = Math.min(endT - fallback.start, clipDur) * (fallback.timeScale ?? 1);
-    out.push({clip: fallback.clip, time: Math.max(0, Math.min(local / (fallback.timeScale ?? 1), clipDur - HOLD_EPS)), weight: 1});
+    out.push({
+      clip: fallback.clip,
+      time: Math.max(0, Math.min(local / (fallback.timeScale ?? 1), clipDur - HOLD_EPS)),
+      weight: 1,
+    });
   }
   return out;
 };
 
 export const positionAt = (
   track: CharacterTrack,
-  t: number
-): {x: number; z: number; yaw: number} => {
-  const xs = track.pos.map((k) => ({t: k.t, v: k.v[0]}));
-  const zs = track.pos.map((k) => ({t: k.t, v: k.v[1]}));
+  t: number,
+): { x: number; z: number; yaw: number } => {
+  const xs = track.pos.map((k) => ({ t: k.t, v: k.v[0] }));
+  const zs = track.pos.map((k) => ({ t: k.t, v: k.v[1] }));
   return {
     x: evalKeys(xs, t),
     z: evalKeys(zs, t),
@@ -63,11 +67,9 @@ export const positionAt = (
 const ATTACK_RE = /Attack|Stab|Chop|Slice|Spin/;
 
 export const isAttackingAt = (anims: readonly AnimSeg[], t: number): boolean =>
-  activeClipsAt(anims, t).some(
-    (c) => c.weight > 0.35 && ATTACK_RE.test(c.clip)
-  );
+  activeClipsAt(anims, t).some((c) => c.weight > 0.35 && ATTACK_RE.test(c.clip));
 
 export const activeClipNames = (anims: readonly AnimSeg[], t: number): string =>
   activeClipsAt(anims, t)
     .map((c) => `${c.clip}@${c.time.toFixed(2)} w${c.weight.toFixed(2)}`)
-    .join(' | ') || '-';
+    .join(" | ") || "-";

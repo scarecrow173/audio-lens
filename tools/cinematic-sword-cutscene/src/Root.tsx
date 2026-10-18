@@ -1,8 +1,8 @@
-import React from 'react';
-import {Composition} from 'remotion';
-import {GameCapture, GameCaptureProps} from './compositions/GameCapture';
-import {NO_BUG} from './bugs/bugs';
-import {AUDIO_BUG_VARIANTS, audioMixFile} from './bugs/audioBugs';
+import type React from "react";
+import { Composition } from "remotion";
+import { AUDIO_BUG_VARIANTS, audioMixFile } from "./bugs/audioBugs";
+import { NO_BUG } from "./bugs/bugs";
+import { GameCapture, type GameCaptureProps } from "./compositions/GameCapture";
 
 const W = 640;
 const H = 360;
@@ -19,7 +19,7 @@ export const Root: React.FC = () => (
       durationInFrames={300}
       defaultProps={
         {
-          timelineId: 'test',
+          timelineId: "test",
           bug: NO_BUG,
           debug: false,
         } satisfies GameCaptureProps
@@ -34,7 +34,7 @@ export const Root: React.FC = () => (
       durationInFrames={1500}
       defaultProps={
         {
-          timelineId: 'master',
+          timelineId: "master",
           bug: NO_BUG,
           debug: false,
         } satisfies GameCaptureProps
@@ -50,7 +50,7 @@ export const Root: React.FC = () => (
       durationInFrames={1500}
       defaultProps={
         {
-          timelineId: 'master',
+          timelineId: "master",
           bug: NO_BUG,
           debug: true,
         } satisfies GameCaptureProps
@@ -68,7 +68,7 @@ export const Root: React.FC = () => (
         durationInFrames={1500}
         defaultProps={
           {
-            timelineId: 'master',
+            timelineId: "master",
             bug: NO_BUG,
             audioMix: audioMixFile(v.id),
             debug: false,

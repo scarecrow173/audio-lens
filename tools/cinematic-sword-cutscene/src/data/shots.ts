@@ -4,7 +4,7 @@
 export type Vec3 = readonly [number, number, number];
 export type Vec2 = readonly [number, number];
 
-export type Timed<T> = {t: number; v: T};
+export type Timed<T> = { t: number; v: T };
 
 // Character animation segment. The controller evaluates which segments
 // cover time `t` and assigns each a crossfade weight.
@@ -41,10 +41,10 @@ export type ShotDef = {
   start: number;
   end: number;
   camera: CameraTrack;
-  dialogue?: {speaker: 'KAEL' | 'VAREN'; text: string};
+  dialogue?: { speaker: "KAEL" | "VAREN"; text: string };
   // Overlay covering the whole frame (used for the cut-to-black ending).
   blackout?: boolean;
-  title?: {line1: string; line2: string; from: number; to: number};
+  title?: { line1: string; line2: string; from: number; to: number };
 };
 
 export type ImpactEvent = {
@@ -61,12 +61,12 @@ export type Timeline = {
   kael: CharacterTrack;
   varen: CharacterTrack;
   impacts: ImpactEvent[];
-  debrisBursts: {t: number; pos: Vec3}[];
-  dustBursts: {t: number; pos: Vec3}[];
-  warningPulses: {t: number; dur: number}[];
-  powerUp: {start: number; end: number} | null;
+  debrisBursts: { t: number; pos: Vec3 }[];
+  dustBursts: { t: number; pos: Vec3 }[];
+  warningPulses: { t: number; dur: number }[];
+  powerUp: { start: number; end: number } | null;
   combatHudFrom: number;
-  hp: {kael: Timed<number>[]; varen: Timed<number>[]};
+  hp: { kael: Timed<number>[]; varen: Timed<number>[] };
 };
 
 export const shotAt = (tl: Timeline, t: number): ShotDef | undefined =>

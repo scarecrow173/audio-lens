@@ -8,40 +8,44 @@
 //    applied on top (black frames, brightness shifts, flashes).
 
 export type BugProfile =
-  | {type: 'none'}
-  | {type: 'freeze'; startFrame: number; endFrame: number}
-  | {type: 'blackFrame'; frames: readonly number[]}
-  | {type: 'blackFrame'; startFrame: number; length: number}
-  | {type: 'brightness'; kind: 'drop' | 'spike'; startFrame: number; endFrame: number; opacity: number}
-  | {type: 'droppedFrames'; startFrame: number; endFrame: number; period: number; drop: number}
-  | {type: 'stutter'; startFrame: number; endFrame: number}
-  | {type: 'sceneShift'; atFrame: number; deltaFrames: number}
-  | {type: 'missingScene'; startFrame: number; endFrame: number}
-  | {type: 'corruptedTransition'; atFrame: number; flashFrames: number; blackFrames: number};
+  | { type: "none" }
+  | { type: "freeze"; startFrame: number; endFrame: number }
+  | { type: "blackFrame"; frames: readonly number[] }
+  | { type: "blackFrame"; startFrame: number; length: number }
+  | {
+      type: "brightness";
+      kind: "drop" | "spike";
+      startFrame: number;
+      endFrame: number;
+      opacity: number;
+    }
+  | { type: "droppedFrames"; startFrame: number; endFrame: number; period: number; drop: number }
+  | { type: "stutter"; startFrame: number; endFrame: number }
+  | { type: "sceneShift"; atFrame: number; deltaFrames: number }
+  | { type: "missingScene"; startFrame: number; endFrame: number }
+  | { type: "corruptedTransition"; atFrame: number; flashFrames: number; blackFrames: number };
 
-export const NO_BUG: BugProfile = {type: 'none'};
+export const NO_BUG: BugProfile = { type: "none" };
 
 // Map output frame -> source (master timeline) frame.
 export const mapSourceFrame = (outFrame: number, bug: BugProfile): number => {
   switch (bug.type) {
-    case 'freeze':
-      return outFrame >= bug.startFrame && outFrame < bug.endFrame
-        ? bug.startFrame
-        : outFrame;
-    case 'droppedFrames': {
-      const {startFrame: s, endFrame: e, period, drop} = bug;
+    case "freeze":
+      return outFrame >= bug.startFrame && outFrame < bug.endFrame ? bug.startFrame : outFrame;
+    case "droppedFrames": {
+      const { startFrame: s, endFrame: e, period, drop } = bug;
       if (outFrame < s || outFrame >= e) return outFrame;
       const pos = (outFrame - s) % period;
       return pos >= period - drop ? outFrame - (pos - (period - drop)) : outFrame;
     }
-    case 'stutter': {
-      const {startFrame: s, endFrame: e} = bug;
+    case "stutter": {
+      const { startFrame: s, endFrame: e } = bug;
       if (outFrame < s || outFrame >= e) return outFrame;
       // A B A B A B ... alternates between two adjacent source frames.
       return s + ((outFrame - s) % 2);
     }
-    case 'sceneShift': {
-      const {atFrame, deltaFrames: d} = bug;
+    case "sceneShift": {
+      const { atFrame, deltaFrames: d } = bug;
       if (d > 0) {
         // Cut happens d frames later: hold the pre-cut frame, then jump.
         if (outFrame < atFrame) return outFrame;
@@ -49,12 +53,10 @@ export const mapSourceFrame = (outFrame: number, bug: BugProfile): number => {
         return outFrame;
       }
       // Cut happens earlier: skip ahead after the original boundary.
-      return outFrame >= atFrame + d && outFrame < atFrame
-        ? outFrame - d
-        : outFrame;
+      return outFrame >= atFrame + d && outFrame < atFrame ? outFrame - d : outFrame;
     }
-    case 'missingScene': {
-      const {startFrame: s, endFrame: e} = bug;
+    case "missingScene": {
+      const { startFrame: s, endFrame: e } = bug;
       return outFrame >= s ? outFrame + (e - s) : outFrame;
     }
     default:
@@ -64,36 +66,33 @@ export const mapSourceFrame = (outFrame: number, bug: BugProfile): number => {
 
 // Post-process overlays evaluated on the *output* frame.
 export type PostOverlay =
-  | {kind: 'black'}
-  | {kind: 'dim'; opacity: number}
-  | {kind: 'white'; opacity: number};
+  | { kind: "black" }
+  | { kind: "dim"; opacity: number }
+  | { kind: "white"; opacity: number };
 
 export const postOverlaysAt = (outFrame: number, bug: BugProfile): PostOverlay[] => {
   switch (bug.type) {
-    case 'blackFrame': {
+    case "blackFrame": {
       const hit =
-        'frames' in bug
+        "frames" in bug
           ? bug.frames.includes(outFrame)
           : outFrame >= bug.startFrame && outFrame < bug.startFrame + bug.length;
-      return hit ? [{kind: 'black'}] : [];
+      return hit ? [{ kind: "black" }] : [];
     }
-    case 'brightness':
+    case "brightness":
       if (outFrame >= bug.startFrame && outFrame < bug.endFrame) {
-        return bug.kind === 'drop'
-          ? [{kind: 'dim', opacity: bug.opacity}]
-          : [{kind: 'white', opacity: bug.opacity}];
+        return bug.kind === "drop"
+          ? [{ kind: "dim", opacity: bug.opacity }]
+          : [{ kind: "white", opacity: bug.opacity }];
       }
       return [];
-    case 'corruptedTransition': {
-      const {atFrame, flashFrames, blackFrames} = bug;
+    case "corruptedTransition": {
+      const { atFrame, flashFrames, blackFrames } = bug;
       if (outFrame >= atFrame && outFrame < atFrame + flashFrames) {
-        return [{kind: 'white', opacity: 0.9}];
+        return [{ kind: "white", opacity: 0.9 }];
       }
-      if (
-        outFrame >= atFrame + flashFrames &&
-        outFrame < atFrame + flashFrames + blackFrames
-      ) {
-        return [{kind: 'black'}];
+      if (outFrame >= atFrame + flashFrames && outFrame < atFrame + flashFrames + blackFrames) {
+        return [{ kind: "black" }];
       }
       return [];
     }
@@ -104,6 +103,6 @@ export const postOverlaysAt = (outFrame: number, bug: BugProfile): PostOverlay[]
 
 // Machine-readable metadata for audio-lens verification fixtures.
 export const bugMetadata = (bug: BugProfile): Record<string, unknown> => {
-  const {type, ...rest} = bug as Record<string, unknown>;
-  return {type, ...rest};
+  const { type, ...rest } = bug as Record<string, unknown>;
+  return { type, ...rest };
 };

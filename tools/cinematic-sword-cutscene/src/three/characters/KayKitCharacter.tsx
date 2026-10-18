@@ -1,24 +1,20 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from 'react';
-import * as THREE from 'three';
-import {useFrame} from '@react-three/fiber';
-import {clone as skeletonClone} from 'three/examples/jsm/utils/SkeletonUtils.js';
-import {getGltf} from '../../assets';
-import {CharacterManifest} from '../../data/kaykitManifest';
-import {CharacterTrack} from '../../data/shots';
-import {activeClipNames, activeClipsAt, positionAt} from './CharacterAnimationController';
-import {useGameTime} from '../../utils/frameTime';
-import {WeaponSpec, attachWeapon} from './WeaponAttachment';
+import { useFrame } from "@react-three/fiber";
+import type React from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { getGltf } from "../../assets";
+import type { CharacterManifest } from "../../data/kaykitManifest";
+import type { CharacterTrack } from "../../data/shots";
+import { useGameTime } from "../../utils/frameTime";
+import { activeClipNames, activeClipsAt, positionAt } from "./CharacterAnimationController";
+import { attachWeapon, type WeaponSpec } from "./WeaponAttachment";
 
 export type CharacterHandle = {
   // Set the full pose (transform + animation) at source time t.
   poseAt: (t: number) => void;
   // World-space weapon base/tip after posing at t (used by sword trails).
-  weaponPointsAt: (t: number) => {base: THREE.Vector3; tip: THREE.Vector3} | null;
+  weaponPointsAt: (t: number) => { base: THREE.Vector3; tip: THREE.Vector3 } | null;
   positionAt: (t: number) => THREE.Vector3;
   clipLabel: (t: number) => string;
 };
@@ -35,13 +31,13 @@ type Props = {
 };
 
 const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
-  {manifest, track, showNodes, externalWeapon, embeddedTipY = 1.3, rimColor},
-  ref
+  { manifest, track, showNodes, externalWeapon, embeddedTipY = 1.3, rimColor },
+  ref,
 ) => {
   const gltf = getGltf(manifest.file);
   const t = useGameTime();
   const groupRef = useRef<THREE.Group>(null);
-  const markersRef = useRef<{base: THREE.Object3D; tip: THREE.Object3D} | null>(null);
+  const markersRef = useRef<{ base: THREE.Object3D; tip: THREE.Object3D } | null>(null);
 
   const model = useMemo(() => {
     const m = skeletonClone(gltf.scene);
@@ -67,7 +63,7 @@ const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
         const mesh = o as THREE.Mesh;
         if (mesh.isMesh) {
           const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
-          mat.emissive = new THREE.Color('#3d2a20');
+          mat.emissive = new THREE.Color("#3d2a20");
           mat.emissiveIntensity = 0.5;
           mesh.material = mat;
         }
@@ -85,14 +81,14 @@ const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
           const tip = new THREE.Object3D();
           tip.position.set(0, embeddedTipY, 0);
           node.add(base, tip);
-          markersRef.current = {base, tip};
+          markersRef.current = { base, tip };
           break;
         }
       }
     }
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gltf, manifest]);
+  }, [gltf, manifest, showNodes.includes, externalWeapon, showNodes, embeddedTipY]);
 
   const mixer = useMemo(() => new THREE.AnimationMixer(model), [model]);
   const clipMap = useMemo(() => {
@@ -100,7 +96,7 @@ const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
     for (const c of gltf.animations) map.set(c.name, c);
     return map;
   }, [gltf]);
-  const actionMap = useMemo(() => new Map<string, THREE.AnimationAction>(), [mixer]);
+  const actionMap = useMemo(() => new Map<string, THREE.AnimationAction>(), []);
 
   const poseAt = (time: number) => {
     const g = groupRef.current;
@@ -166,13 +162,7 @@ const Inner: React.ForwardRefRenderFunction<CharacterHandle, Props> = (
         decay={2}
       />
       {/* soft front fill keeps faces readable in close-ups */}
-      <pointLight
-        position={[0, 1.4, 1.1]}
-        color="#8fb8c9"
-        intensity={0.9}
-        distance={3}
-        decay={2}
-      />
+      <pointLight position={[0, 1.4, 1.1]} color="#8fb8c9" intensity={0.9} distance={3} decay={2} />
     </group>
   );
 };

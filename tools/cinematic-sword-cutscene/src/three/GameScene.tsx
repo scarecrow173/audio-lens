@@ -1,18 +1,17 @@
-import React, {useRef} from 'react';
-import * as THREE from 'three';
-import {Timeline} from '../data/shots';
-import {Environment} from './environment/Environment';
-import {SceneLighting} from './lighting/SceneLighting';
-import {GameCamera} from './camera/GameCamera';
-import {Kael} from './characters/Kael';
-import {Varen} from './characters/Varen';
-import {CharacterHandle} from './characters/KayKitCharacter';
-import {SwordTrail} from './combat/SwordTrail';
-import {Sparks} from './vfx/Sparks';
-import {ImpactParticles} from './vfx/ImpactParticles';
-import {AmbientDust} from './vfx/AmbientDust';
-import {FogParticles} from './vfx/FogParticles';
-import {PowerParticles} from './vfx/PowerParticles';
+import React from "react";
+import type { Timeline } from "../data/shots";
+import { GameCamera } from "./camera/GameCamera";
+import { Kael } from "./characters/Kael";
+import type { CharacterHandle } from "./characters/KayKitCharacter";
+import { Varen } from "./characters/Varen";
+import { SwordTrail } from "./combat/SwordTrail";
+import { Environment } from "./environment/Environment";
+import { SceneLighting } from "./lighting/SceneLighting";
+import { AmbientDust } from "./vfx/AmbientDust";
+import { FogParticles } from "./vfx/FogParticles";
+import { ImpactParticles } from "./vfx/ImpactParticles";
+import { PowerParticles } from "./vfx/PowerParticles";
+import { Sparks } from "./vfx/Sparks";
 
 export type SceneHandles = {
   kael: React.RefObject<CharacterHandle | null>;
@@ -22,11 +21,11 @@ export type SceneHandles = {
 export const GameScene: React.FC<{
   timeline: Timeline;
   handles: SceneHandles;
-}> = ({timeline, handles}) => {
+}> = ({ timeline, handles }) => {
   return (
     <>
-      <color attach="background" args={['#0e1622']} />
-      <fogExp2 attach="fog" args={['#13202e', 0.034]} />
+      <color attach="background" args={["#0e1622"]} />
+      <fogExp2 attach="fog" args={["#13202e", 0.034]} />
       <SceneLighting timeline={timeline} />
       <Environment />
       {/* trails subscribe before characters so they sample past poses first;

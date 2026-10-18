@@ -1,7 +1,7 @@
-import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
-import {BugProfile, mapSourceFrame, postOverlaysAt} from './bugs';
-import {RenderFrameProvider} from './RenderFrameContext';
+import type React from "react";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { type BugProfile, mapSourceFrame, postOverlaysAt } from "./bugs";
+import { RenderFrameProvider } from "./RenderFrameContext";
 
 // Applies a BugProfile around the unchanged game-capture renderer:
 // source frames are remapped for the scene, and post overlays are painted
@@ -9,7 +9,7 @@ import {RenderFrameProvider} from './RenderFrameContext';
 export const BugRenderer: React.FC<{
   bug: BugProfile;
   children: React.ReactNode;
-}> = ({bug, children}) => {
+}> = ({ bug, children }) => {
   const outFrame = useCurrentFrame();
   const src = mapSourceFrame(outFrame, bug);
   const overlays = postOverlaysAt(outFrame, bug);
@@ -22,9 +22,9 @@ export const BugRenderer: React.FC<{
           key={i}
           style={{
             background:
-              o.kind === 'black'
-                ? '#000'
-                : o.kind === 'dim'
+              o.kind === "black"
+                ? "#000"
+                : o.kind === "dim"
                   ? `rgba(0,0,0,${o.opacity})`
                   : `rgba(255,255,255,${o.opacity})`,
           }}
