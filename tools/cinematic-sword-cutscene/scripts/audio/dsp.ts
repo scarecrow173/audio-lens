@@ -1,20 +1,19 @@
 // Deterministic procedural-audio DSP toolkit.
 // All randomness flows through the seeded RNG — same seed => same WAV bytes.
 
-import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
-import {dirname} from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
 export const SR = 44100;
 
-export type Stereo = {l: Float32Array; r: Float32Array};
+export type Stereo = { l: Float32Array; r: Float32Array };
 
 export const mkBuf = (seconds: number): Stereo => ({
   l: new Float32Array(Math.ceil(seconds * SR)),
   r: new Float32Array(Math.ceil(seconds * SR)),
 });
 
-export const mkMono = (seconds: number): Float32Array =>
-  new Float32Array(Math.ceil(seconds * SR));
+export const mkMono = (seconds: number): Float32Array => new Float32Array(Math.ceil(seconds * SR));
 
 // mulberry32 — identical to src/utils/seededRandom's generator.
 export const rng = (seed: number): (() => number) => {
@@ -30,18 +29,18 @@ export const rng = (seed: number): (() => number) => {
 
 // ---------- oscillators ----------
 
-export type OscKind = 'sine' | 'tri' | 'saw' | 'square';
+export type OscKind = "sine" | "tri" | "saw" | "square";
 
 const oscSample = (kind: OscKind, phase: number): number => {
   const p = phase - Math.floor(phase);
   switch (kind) {
-    case 'sine':
+    case "sine":
       return Math.sin(2 * Math.PI * p);
-    case 'tri':
+    case "tri":
       return p < 0.5 ? 4 * p - 1 : 3 - 4 * p;
-    case 'saw':
+    case "saw":
       return 2 * p - 1;
-    case 'square':
+    case "square":
       return p < 0.5 ? 1 : -1;
   }
 };
@@ -56,14 +55,14 @@ export const addOsc = (
   freq: number | ((u: number) => number),
   gain: number,
   env?: (u: number) => number,
-  detune = 0
+  detune = 0,
 ): void => {
   const start = Math.round(atSec * SR);
   const n = Math.round(durSec * SR);
   let phase = 0;
   for (let i = 0; i < n && start + i < buf.length; i++) {
     const u = i / n;
-    const f = (typeof freq === 'function' ? freq(u) : freq) + detune;
+    const f = (typeof freq === "function" ? freq(u) : freq) + detune;
     phase += f / SR;
     const e = env ? env(u) : 1;
     buf[start + i] += oscSample(kind, phase) * gain * e;
@@ -76,7 +75,7 @@ export const addNoise = (
   atSec: number,
   durSec: number,
   gain: number,
-  env?: (u: number) => number
+  env?: (u: number) => number,
 ): void => {
   const start = Math.round(atSec * SR);
   const n = Math.round(durSec * SR);
@@ -89,8 +88,7 @@ export const addNoise = (
 
 // ---------- envelopes ----------
 
-export const expDecay = (decay: number) => (u: number) =>
-  Math.exp(-u * decay * 6.9); // ~-60dB at u=1*decay scaling
+export const expDecay = (decay: number) => (u: number) => Math.exp(-u * decay * 6.9); // ~-60dB at u=1*decay scaling
 
 export const adsr =
   (a: number, d: number, s: number, r: number) =>
@@ -160,10 +158,10 @@ export const bandpass = (buf: Float32Array, freq: number, q: number): Float32Arr
 };
 
 export const lowShelf = (buf: Float32Array, freq: number, gainDb: number): Float32Array => {
-  const a = Math.pow(10, gainDb / 40);
+  const a = 10 ** (gainDb / 40);
   const w = (2 * Math.PI * freq) / SR;
   const cw = Math.cos(w);
-  const alpha = Math.sin(w) / 2 * Math.sqrt(2);
+  const alpha = (Math.sin(w) / 2) * Math.sqrt(2);
   const b0 = a * (a + 1 - (a - 1) * cw + 2 * Math.sqrt(a) * alpha);
   const b1 = 2 * a * (a - 1 - (a + 1) * cw);
   const b2 = a * (a + 1 - (a - 1) * cw - 2 * Math.sqrt(a) * alpha);
@@ -196,9 +194,9 @@ export const peakingEq = (
   buf: Float32Array,
   freq: number,
   q: number,
-  gainDb: number
+  gainDb: number,
 ): Float32Array => {
-  const a = Math.pow(10, gainDb / 40);
+  const a = 10 ** (gainDb / 40);
   const w = (2 * Math.PI * freq) / SR;
   const alpha = Math.sin(w) / (2 * q);
   const b0 = 1 + alpha * a;
@@ -230,18 +228,18 @@ export const compressor = (
   ratio: number,
   attackMs = 8,
   releaseMs = 140,
-  makeupDb = 0
+  makeupDb = 0,
 ): Float32Array => {
-  const thr = Math.pow(10, thresholdDb / 20);
+  const thr = 10 ** (thresholdDb / 20);
   const att = Math.exp(-1 / ((attackMs / 1000) * SR));
   const rel = Math.exp(-1 / ((releaseMs / 1000) * SR));
-  const makeup = Math.pow(10, makeupDb / 20);
+  const makeup = 10 ** (makeupDb / 20);
   let env = 0;
   for (let i = 0; i < buf.length; i++) {
     const x = Math.abs(buf[i]);
     env = x > env ? att * env + (1 - att) * x : rel * env + (1 - rel) * x;
     let g = 1;
-    if (env > thr) g = Math.pow(thr / env, 1 - 1 / ratio);
+    if (env > thr) g = (thr / env) ** (1 - 1 / ratio);
     buf[i] *= g * makeup;
   }
   return buf;
@@ -269,12 +267,8 @@ export const resampleRate = (src: Float32Array, ratio: number): Float32Array => 
 };
 
 // Trim silence below threshold from both ends, keeping edge padding.
-export const trimSilence = (
-  buf: Float32Array,
-  thresholdDb = -45,
-  padSec = 0.08
-): Float32Array => {
-  const thr = Math.pow(10, thresholdDb / 20);
+export const trimSilence = (buf: Float32Array, thresholdDb = -45, padSec = 0.08): Float32Array => {
+  const thr = 10 ** (thresholdDb / 20);
   let s = 0;
   let e = buf.length - 1;
   while (s < e && Math.abs(buf[s]) < thr) s++;
@@ -288,7 +282,7 @@ export const room = (
   src: Float32Array,
   mixAmt: number,
   timeSec: number,
-  damping = 0.4
+  damping = 0.4,
 ): Float32Array => {
   const out = new Float32Array(src.length);
   const combs = [0.0297, 0.0371, 0.0411, 0.0437].map((d) => ({
@@ -325,23 +319,13 @@ export const toStereo = (src: Float32Array, pan = 0): Stereo => {
   return out;
 };
 
-export const mixMono = (
-  dst: Float32Array,
-  src: Float32Array,
-  atSec: number,
-  gain = 1
-): void => {
+export const mixMono = (dst: Float32Array, src: Float32Array, atSec: number, gain = 1): void => {
   const start = Math.round(atSec * SR);
   const n = Math.min(src.length, dst.length - start);
   for (let i = 0; i < n; i++) dst[start + i] += src[i] * gain;
 };
 
-export const mixInto = (
-  dst: Stereo,
-  src: Stereo,
-  atSec: number,
-  gain = 1
-): void => {
+export const mixInto = (dst: Stereo, src: Stereo, atSec: number, gain = 1): void => {
   const start = Math.round(atSec * SR);
   const n = Math.min(src.l.length, dst.l.length - start);
   for (let i = 0; i < n; i++) {
@@ -368,7 +352,7 @@ export const normalize = (buf: Stereo, peak = 0.89): Stereo => {
 // ---------- WAV I/O ----------
 
 // Read a WAV (PCM16 or IEEE float32, mono or stereo) into Stereo.
-export const readWav = (path: string): {buf: Stereo; sr: number} => {
+export const readWav = (path: string): { buf: Stereo; sr: number } => {
   const b = readFileSync(path);
   const fmt = b.readUInt16LE(20);
   const channels = b.readUInt16LE(22);
@@ -379,9 +363,9 @@ export const readWav = (path: string): {buf: Stereo; sr: number} => {
   let dataOff = 44;
   let dataSize = b.length - 44;
   while (off + 8 <= b.length) {
-    const id = b.toString('ascii', off, off + 4);
+    const id = b.toString("ascii", off, off + 4);
     const size = b.readUInt32LE(off + 4);
-    if (id === 'data') {
+    if (id === "data") {
       dataOff = off + 8;
       dataSize = size;
       break;
@@ -402,21 +386,21 @@ export const readWav = (path: string): {buf: Stereo; sr: number} => {
     out.l[i] = l;
     out.r[i] = r;
   }
-  return {buf: out, sr};
+  return { buf: out, sr };
 };
 
 export const writeWav = (buf: Stereo, path: string): void => {
-  const {l, r} = buf;
+  const { l, r } = buf;
   const dataSize = l.length * 2 * 2;
   const header = new ArrayBuffer(44);
   const v = new DataView(header);
   const ws = (o: number, s: string) => {
     for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i));
   };
-  ws(0, 'RIFF');
+  ws(0, "RIFF");
   v.setUint32(4, 36 + dataSize, true);
-  ws(8, 'WAVE');
-  ws(12, 'fmt ');
+  ws(8, "WAVE");
+  ws(12, "fmt ");
   v.setUint32(16, 16, true);
   v.setUint16(20, 1, true);
   v.setUint16(22, 2, true);
@@ -424,13 +408,13 @@ export const writeWav = (buf: Stereo, path: string): void => {
   v.setUint32(28, SR * 4, true);
   v.setUint16(32, 4, true);
   v.setUint16(34, 16, true);
-  ws(36, 'data');
+  ws(36, "data");
   v.setUint32(40, dataSize, true);
   const pcm = new Int16Array(l.length * 2);
   for (let i = 0; i < l.length; i++) {
     pcm[i * 2] = Math.max(-1, Math.min(1, l[i])) * 32767;
     pcm[i * 2 + 1] = Math.max(-1, Math.min(1, r[i])) * 32767;
   }
-  mkdirSync(dirname(path), {recursive: true});
+  mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, Buffer.concat([Buffer.from(header), Buffer.from(pcm.buffer)]));
 };

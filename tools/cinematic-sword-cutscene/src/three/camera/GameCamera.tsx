@@ -1,11 +1,11 @@
-import React from 'react';
-import {useFrame, useThree} from '@react-three/fiber';
-import {Timeline, shotAt} from '../../data/shots';
-import {useGameTime} from '../../utils/frameTime';
-import {cameraAt} from './CinematicCameraRig';
+import { useFrame, useThree } from "@react-three/fiber";
+import type React from "react";
+import { shotAt, type Timeline } from "../../data/shots";
+import { useGameTime } from "../../utils/frameTime";
+import { cameraAt } from "./CinematicCameraRig";
 
 // Applies the master-timeline camera every rendered frame.
-export const GameCamera: React.FC<{timeline: Timeline}> = ({timeline}) => {
+export const GameCamera: React.FC<{ timeline: Timeline }> = ({ timeline }) => {
   const camera = useThree((s) => s.camera);
   const t = useGameTime();
 
@@ -15,7 +15,7 @@ export const GameCamera: React.FC<{timeline: Timeline}> = ({timeline}) => {
     const pose = cameraAt(shot, t, timeline.impacts);
     camera.position.set(...pose.pos);
     camera.lookAt(...pose.look);
-    const persp = camera as {fov?: number; updateProjectionMatrix?: () => void};
+    const persp = camera as { fov?: number; updateProjectionMatrix?: () => void };
     if (persp.fov !== undefined && persp.fov !== pose.fov) {
       persp.fov = pose.fov;
       persp.updateProjectionMatrix?.();

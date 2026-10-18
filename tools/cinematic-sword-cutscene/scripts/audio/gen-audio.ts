@@ -7,16 +7,16 @@
 // files are tolerated — their events are still recorded.
 //
 // Run: npx tsx scripts/audio/gen-audio.ts
-import {copyFileSync, readFileSync, existsSync, mkdirSync, writeFileSync} from 'node:fs';
-import {basename, join} from 'node:path';
-import {fileURLToPath} from 'node:url';
-import {generateBgm} from './gen-bgm.ts';
-import {generateBugMixes} from './gen-bug-audio.ts';
-import {type GenInfo, SFX_REGISTRY, generateSfx} from './gen-sfx.ts';
-import {AUDIO_MASTER, AUDIO_TEST, type AudioEvent} from '../../src/data/audioTimeline.ts';
-import {AUDIO_BUG_VARIANTS, audioMixFile} from '../../src/bugs/audioBugs.ts';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { AUDIO_BUG_VARIANTS, audioMixFile } from "../../src/bugs/audioBugs.ts";
+import { AUDIO_MASTER, AUDIO_TEST, type AudioEvent } from "../../src/data/audioTimeline.ts";
+import { generateBgm } from "./gen-bgm.ts";
+import { generateBugMixes } from "./gen-bug-audio.ts";
+import { type GenInfo, generateSfx, SFX_REGISTRY } from "./gen-sfx.ts";
 
-const root = join(fileURLToPath(new URL('.', import.meta.url)), '../..');
+const root = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const FPS = 30;
 
 // PCM16 stereo WAV header -> duration seconds
@@ -29,12 +29,12 @@ const wavDuration = (path: string): number | null => {
 };
 
 // Voice generation info — mirrors gen_voice.py settings.
-const VOICE_INFO: Record<string, Omit<GenInfo, 'file' | 'durationSec'>> = {
-  kael_01: {generator: 'chatterbox-mtl-0.1.7+dsp(bright-dry)', seed: 7001},
-  kael_02: {generator: 'chatterbox-mtl-0.1.7+dsp(bright-dry)', seed: 7003},
-  varen_01: {generator: 'chatterbox-mtl-0.1.7+dsp(dark-reverb)', seed: 7002},
-  varen_02: {generator: 'chatterbox-mtl-0.1.7+dsp(dark-reverb)', seed: 7004},
-  varen_03: {generator: 'chatterbox-mtl-0.1.7+dsp(dark-reverb)', seed: 7005},
+const VOICE_INFO: Record<string, Omit<GenInfo, "file" | "durationSec">> = {
+  kael_01: { generator: "chatterbox-mtl-0.1.7+dsp(bright-dry)", seed: 7001 },
+  kael_02: { generator: "chatterbox-mtl-0.1.7+dsp(bright-dry)", seed: 7003 },
+  varen_01: { generator: "chatterbox-mtl-0.1.7+dsp(dark-reverb)", seed: 7002 },
+  varen_02: { generator: "chatterbox-mtl-0.1.7+dsp(dark-reverb)", seed: 7004 },
+  varen_03: { generator: "chatterbox-mtl-0.1.7+dsp(dark-reverb)", seed: 7005 },
 };
 
 generateSfx(root);
@@ -52,13 +52,13 @@ genByFile.set(bgm.file, bgm);
 const sourceFileFor = (e: AudioEvent) => `reference/source-${basename(e.file)}`;
 
 const toMeta = (e: AudioEvent) => {
-  const voiceId = e.file.split('/').pop()?.replace('.wav', '') ?? '';
+  const voiceId = e.file.split("/").pop()?.replace(".wav", "") ?? "";
   const gen =
     genByFile.get(e.file) ??
     (VOICE_INFO[voiceId]
-      ? {...VOICE_INFO[voiceId], durationSec: e.durationSec}
-      : {generator: 'unknown', seed: -1, durationSec: e.durationSec});
-  const realDur = wavDuration(join(root, 'assets', e.file));
+      ? { ...VOICE_INFO[voiceId], durationSec: e.durationSec }
+      : { generator: "unknown", seed: -1, durationSec: e.durationSec });
+  const realDur = wavDuration(join(root, "assets", e.file));
   return {
     id: e.id,
     type: e.type,
@@ -75,32 +75,32 @@ const toMeta = (e: AudioEvent) => {
 };
 
 // --- emit source assets into samples/reference/ ----------------------
-const samplesDir = join(root, '..', '..', 'samples');
-const refDir = join(samplesDir, 'reference');
-mkdirSync(refDir, {recursive: true});
+const samplesDir = join(root, "..", "..", "samples");
+const refDir = join(samplesDir, "reference");
+mkdirSync(refDir, { recursive: true });
 
-const sources: {file: string; type: string; sourceFile: string}[] = [];
+const sources: { file: string; type: string; sourceFile: string }[] = [];
 const seen = new Set<string>();
 for (const e of [...AUDIO_MASTER, ...AUDIO_TEST]) {
   if (seen.has(e.file)) continue;
   seen.add(e.file);
-  const src = join(root, 'assets', e.file);
+  const src = join(root, "assets", e.file);
   if (!existsSync(src)) {
     console.warn(`missing source skipped: ${e.file}`);
     continue;
   }
   copyFileSync(src, join(samplesDir, sourceFileFor(e)));
-  sources.push({file: e.file, type: e.type, sourceFile: sourceFileFor(e)});
+  sources.push({ file: e.file, type: e.type, sourceFile: sourceFileFor(e) });
 }
 console.log(`copied ${sources.length} source assets -> samples/reference/`);
 
 const meta = {
   fps: FPS,
-  timeline: 'master',
+  timeline: "master",
   events: AUDIO_MASTER.map(toMeta),
-  testTimeline: 'test',
+  testTimeline: "test",
   testEvents: AUDIO_TEST.map(toMeta),
-  masterMix: 'audio/generated/master/mix-normal.wav',
+  masterMix: "audio/generated/master/mix-normal.wav",
   sources,
   audioBugVariants: AUDIO_BUG_VARIANTS.map((v) => ({
     id: v.id,
@@ -111,10 +111,7 @@ const meta = {
 };
 
 // Metadata lands with the fixture outputs (samples/metadata/).
-const metaDir = join(samplesDir, 'metadata');
-mkdirSync(metaDir, {recursive: true});
-writeFileSync(
-  join(metaDir, 'audio.json'),
-  JSON.stringify(meta, null, 2) + '\n'
-);
+const metaDir = join(samplesDir, "metadata");
+mkdirSync(metaDir, { recursive: true });
+writeFileSync(join(metaDir, "audio.json"), `${JSON.stringify(meta, null, 2)}\n`);
 console.log(`wrote samples/metadata/audio.json (${meta.events.length} master events)`);

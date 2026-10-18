@@ -1,4 +1,7 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import { useFrame, useThree } from "@react-three/fiber";
+import { ThreeCanvas } from "@remotion/three";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AbsoluteFill,
   Audio,
@@ -6,25 +9,23 @@ import {
   delayRender,
   staticFile,
   useVideoConfig,
-} from 'remotion';
-import {useFrame, useThree} from '@react-three/fiber';
-import {ThreeCanvas} from '@remotion/three';
-import * as THREE from 'three';
-import {preloadAssets} from '../assets';
-import {MASTER_TIMELINE, TEST_TIMELINE} from '../data/masterTimeline';
-import {BugProfile, NO_BUG} from '../bugs/bugs';
-import {BugRenderer} from '../bugs/BugRenderer';
-import {GameScene, createSceneHandles} from '../three/GameScene';
-import {GameHUD} from '../hud/GameHUD';
-import {DebugOverlay} from '../hud/DebugOverlay';
-import {AudioTrack} from '../audio/AudioTrack';
-import {AUDIO_MASTER, AUDIO_TEST} from '../data/audioTimeline';
+} from "remotion";
+import * as THREE from "three";
+import { preloadAssets } from "../assets";
+import { AudioTrack } from "../audio/AudioTrack";
+import { BugRenderer } from "../bugs/BugRenderer";
+import { type BugProfile, NO_BUG } from "../bugs/bugs";
+import { AUDIO_MASTER, AUDIO_TEST } from "../data/audioTimeline";
+import { MASTER_TIMELINE, TEST_TIMELINE } from "../data/masterTimeline";
+import { DebugOverlay } from "../hud/DebugOverlay";
+import { GameHUD } from "../hud/GameHUD";
+import { createSceneHandles, GameScene } from "../three/GameScene";
 
 // Assets are fully parsed before the scene mounts so nothing suspends
 // mid-frame; captures stay deterministic.
 const useReady = () => {
   const [ready, setReady] = useState(false);
-  const [handle] = useState(() => delayRender('preload-assets'));
+  const [handle] = useState(() => delayRender("preload-assets"));
   useEffect(() => {
     preloadAssets()
       .then(() => setReady(true))
@@ -37,7 +38,7 @@ const useReady = () => {
 // Keeps a delayRender handle open until the WebGL canvas has produced at
 // least one frame — Remotion then captures a painted canvas, never an
 // empty one.
-const FirstFrameSignal: React.FC<{handle: number}> = ({handle}) => {
+const FirstFrameSignal: React.FC<{ handle: number }> = ({ handle }) => {
   const done = useRef(false);
   const scene = useThree((s) => s.scene);
   useFrame(() => {
@@ -60,7 +61,7 @@ const KickRender: React.FC = () => {
 };
 
 export type GameCaptureProps = {
-  timelineId: 'master' | 'test';
+  timelineId: "master" | "test";
   bug: BugProfile;
   // When set, plays this pre-mixed WAV (relative to assets/) instead of
   // the per-event AudioTrack — used by audio bug variants whose
@@ -70,26 +71,26 @@ export type GameCaptureProps = {
 };
 
 export const GameCapture: React.FC<GameCaptureProps> = ({
-  timelineId = 'master',
+  timelineId = "master",
   bug = NO_BUG,
   audioMix,
   debug = false,
 }) => {
   const ready = useReady();
-  const [firstFrame] = useState(() => delayRender('first-webgl-frame'));
-  const {width, height} = useVideoConfig();
-  const timeline = timelineId === 'test' ? TEST_TIMELINE : MASTER_TIMELINE;
+  const [firstFrame] = useState(() => delayRender("first-webgl-frame"));
+  const { width, height } = useVideoConfig();
+  const timeline = timelineId === "test" ? TEST_TIMELINE : MASTER_TIMELINE;
   const handles = useMemo(createSceneHandles, []);
 
   return (
     <BugRenderer bug={bug}>
-      <AbsoluteFill style={{background: '#000'}}>
+      <AbsoluteFill style={{ background: "#000" }}>
         <ThreeCanvas
           width={width}
           height={height}
-          gl={{antialias: true, alpha: false, preserveDrawingBuffer: true}}
-          camera={{fov: 42, position: [0, 2, 6], near: 0.1, far: 80}}
-          style={{position: 'absolute', inset: 0}}
+          gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+          camera={{ fov: 42, position: [0, 2, 6], near: 0.1, far: 80 }}
+          style={{ position: "absolute", inset: 0 }}
           onCreated={(state) => {
             state.gl.toneMapping = THREE.ACESFilmicToneMapping;
             state.gl.toneMappingExposure = 1.45;
@@ -107,7 +108,7 @@ export const GameCapture: React.FC<GameCaptureProps> = ({
         {audioMix ? (
           <Audio src={staticFile(audioMix)} />
         ) : (
-          <AudioTrack events={timelineId === 'test' ? AUDIO_TEST : AUDIO_MASTER} />
+          <AudioTrack events={timelineId === "test" ? AUDIO_TEST : AUDIO_MASTER} />
         )}
         {debug ? <DebugOverlay timeline={timeline} bug={bug} /> : null}
       </AbsoluteFill>

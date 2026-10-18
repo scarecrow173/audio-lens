@@ -1,12 +1,12 @@
-import React, {useMemo} from 'react';
-import * as THREE from 'three';
-import {createRng} from '../../utils/seededRandom';
+import type React from "react";
+import { useMemo } from "react";
+import { createRng } from "../../utils/seededRandom";
 
 // Dark facility floor + perimeter walls + raised platforms.
 export const Floor: React.FC = () => {
   const platforms = useMemo(() => {
     const rng = createRng(4101);
-    const list: {pos: [number, number, number]; size: [number, number, number]}[] = [];
+    const list: { pos: [number, number, number]; size: [number, number, number] }[] = [];
     for (let i = 0; i < 7; i++) {
       const x = (rng() - 0.5) * 26;
       const z = -6 - rng() * 10;

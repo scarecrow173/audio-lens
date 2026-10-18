@@ -2,28 +2,26 @@
 // KAEL: slightly brighter + dry/calm.  VAREN: darker, low-weight, room.
 //
 // Run: npx tsx scripts/audio/postprocess-voice.ts
-import {existsSync} from 'node:fs';
-import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
-  SR,
-  type Stereo,
   compressor,
   highpass,
   lowShelf,
-  lowpass,
   mkBuf,
   normalize,
   peakingEq,
   readWav,
   resampleRate,
   room,
+  SR,
   softClip,
   trimSilence,
   writeWav,
-} from './dsp.ts';
+} from "./dsp.ts";
 
-const root = join(fileURLToPath(new URL('.', import.meta.url)), '../..');
+const root = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const RAW = `${root}/assets/audio/generated/voice/raw`;
 const OUT = `${root}/assets/audio/generated/voice`;
 
@@ -55,23 +53,23 @@ const varenChain: Chain = (m) => {
   return v;
 };
 
-const LINES: {id: string; chain: Chain}[] = [
-  {id: 'kael_01', chain: kaelChain},
-  {id: 'kael_02', chain: kaelChain},
-  {id: 'varen_01', chain: varenChain},
-  {id: 'varen_02', chain: varenChain},
-  {id: 'varen_03', chain: varenChain},
+const LINES: { id: string; chain: Chain }[] = [
+  { id: "kael_01", chain: kaelChain },
+  { id: "kael_02", chain: kaelChain },
+  { id: "varen_01", chain: varenChain },
+  { id: "varen_02", chain: varenChain },
+  { id: "varen_03", chain: varenChain },
 ];
 
 let missing = 0;
-for (const {id, chain} of LINES) {
+for (const { id, chain } of LINES) {
   const src = `${RAW}/${id}.wav`;
   if (!existsSync(src)) {
     console.warn(`missing ${src} — run gen_voice.py first`);
     missing++;
     continue;
   }
-  const {buf} = readWav(src);
+  const { buf } = readWav(src);
   const mono = buf.l; // chatterbox output is mono
   const v = chain(mono);
   const st = mkBuf(v.length / SR);
