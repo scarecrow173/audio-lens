@@ -21,14 +21,19 @@ uv = "0.11"
 prek = "0.5.5"
 # aqua:biomejs/biome(npm 非経由)。biome.json の schema version に揃える
 biome = "2.5.15"
+# aqua:git-lfs/git-lfs。LFS objects の materialize は setup task が担う
+git-lfs = "3.8.0"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
 # canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
 [tasks.setup]
-description = "Restore APM dependencies and git hooks for a fresh checkout"
+description = "Restore APM dependencies, git hooks and LFS objects for a fresh checkout"
 run = [
   "apm install",
   "prek install",
+  # `git lfs` は Git for Windows 同梱版が優先されるため binary 直呼びにする
+  "git-lfs install --local",
+  "git-lfs pull",
 ]
 
 [tasks.build]
