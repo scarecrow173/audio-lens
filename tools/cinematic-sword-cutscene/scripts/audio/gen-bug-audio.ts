@@ -8,27 +8,27 @@
 //   non-loop event: plays min(file length, durationSec) from startSec
 //   loop event:     repeated until the timeline end
 //   volume:         linear gain per event
-import {existsSync, mkdirSync, writeFileSync} from 'node:fs';
-import {join} from 'node:path';
-import {AUDIO_MASTER} from '../../src/data/audioTimeline.ts';
+import { existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import {
   AUDIO_BUG_VARIANTS,
-  audioMixFile,
   type AudioBugProfile,
-} from '../../src/bugs/audioBugs.ts';
+  audioMixFile,
+} from "../../src/bugs/audioBugs.ts";
+import { AUDIO_MASTER } from "../../src/data/audioTimeline.ts";
 import {
-  SR,
   bandpass,
   highpass,
   lowpass,
-  mkBuf,
   mixInto,
+  mkBuf,
   readWav,
   rng,
   room,
-  writeWav,
+  SR,
   type Stereo,
-} from './dsp.ts';
+  writeWav,
+} from "./dsp.ts";
 
 export const MASTER_DURATION_SEC = 50;
 
@@ -37,12 +37,12 @@ export const mixMaster = (root: string): Stereo => {
   const mix = mkBuf(MASTER_DURATION_SEC);
   const missing: string[] = [];
   for (const e of AUDIO_MASTER) {
-    const p = join(root, 'assets', e.file);
+    const p = join(root, "assets", e.file);
     if (!existsSync(p)) {
       missing.push(e.file);
       continue;
     }
-    const {buf, sr} = readWav(p);
+    const { buf, sr } = readWav(p);
     if (sr !== SR) {
       throw new Error(`${e.file}: expected ${SR}Hz, got ${sr}Hz`);
     }
@@ -53,10 +53,10 @@ export const mixMaster = (root: string): Stereo => {
       }
     } else {
       const n = Math.min(buf.l.length, Math.round(e.durationSec * SR));
-      mixInto(mix, {l: buf.l.subarray(0, n), r: buf.r.subarray(0, n)}, e.startSec, e.volume);
+      mixInto(mix, { l: buf.l.subarray(0, n), r: buf.r.subarray(0, n) }, e.startSec, e.volume);
     }
   }
-  if (missing.length) console.warn(`missing sources skipped: ${missing.join(', ')}`);
+  if (missing.length) console.warn(`missing sources skipped: ${missing.join(", ")}`);
   return mix;
 };
 
@@ -95,7 +95,7 @@ const addClicks = (
   seed: number,
   count: number,
   fromSec: number,
-  toSec: number
+  toSec: number,
 ): Stereo => {
   const rand = rng(seed);
   const burstLen = Math.round(0.0008 * SR);
@@ -113,39 +113,39 @@ const addClicks = (
 
 export const applyAudioBug = (mix: Stereo, bug: AudioBugProfile): Stereo => {
   switch (bug.type) {
-    case 'dropout':
+    case "dropout":
       zeroRange(mix, bug.startSec, bug.endSec);
       return mix;
-    case 'desync':
+    case "desync":
       return shifted(mix, bug.offsetSec);
-    case 'clipping':
+    case "clipping":
       return hardClipGain(mix, bug.gainDb);
-    case 'reverb':
+    case "reverb":
       return {
         l: room(mix.l, bug.wet, bug.decaySec, 0.25),
         r: room(mix.r, bug.wet, bug.decaySec, 0.25),
       };
-    case 'filter': {
+    case "filter": {
       const f =
-        bug.kind === 'lowpass'
+        bug.kind === "lowpass"
           ? (x: Float32Array) => lowpass(x, bug.cutoffHz, 2)
-          : bug.kind === 'highpass'
+          : bug.kind === "highpass"
             ? (x: Float32Array) => highpass(x, bug.cutoffHz)
             : (x: Float32Array) => bandpass(x, bug.cutoffHz, bug.q ?? 1);
-      return {l: f(mix.l), r: f(mix.r)};
+      return { l: f(mix.l), r: f(mix.r) };
     }
-    case 'clicks':
+    case "clicks":
       return addClicks(mix, bug.seed, bug.count, bug.startSec, bug.endSec);
   }
 };
 
 export const generateBugMixes = (root: string): void => {
-  const dir = join(root, 'assets/audio/generated/master');
-  mkdirSync(dir, {recursive: true});
+  const dir = join(root, "assets/audio/generated/master");
+  mkdirSync(dir, { recursive: true });
   const mix = mixMaster(root);
   // Defensive copy per variant: transforms may mutate in place.
-  const copy = (): Stereo => ({l: mix.l.slice(), r: mix.r.slice()});
-  writeWav(mix, join(dir, 'mix-normal.wav'));
+  const copy = (): Stereo => ({ l: mix.l.slice(), r: mix.r.slice() });
+  writeWav(mix, join(dir, "mix-normal.wav"));
   for (const v of AUDIO_BUG_VARIANTS) {
     writeWav(applyAudioBug(copy(), v.bug), join(dir, `mix-${v.id}.wav`));
     console.log(`bug mix -> ${audioMixFile(v.id)} (${v.description})`);

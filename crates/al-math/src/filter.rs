@@ -111,12 +111,8 @@ impl FilterCore {
             self.masked_re[lo_bin..hi_bin].copy_from_slice(&self.spectrum_re[lo_bin..hi_bin]);
             self.masked_im[lo_bin..hi_bin].copy_from_slice(&self.spectrum_im[lo_bin..hi_bin]);
         }
-        self.plan.inverse_with_simd(
-            simd,
-            &self.masked_re,
-            &self.masked_im,
-            &mut self.real,
-        );
+        self.plan
+            .inverse_with_simd(simd, &self.masked_re, &self.masked_im, &mut self.real);
         self.real[..self.len].to_vec()
     }
 }
@@ -333,7 +329,11 @@ mod tests {
             let mut filter = BandFilter::new(&input, 2048);
             let expected = bandpass_many(&input, 2048, &bands);
             for ((lo, hi), expected) in bands.iter().zip(expected) {
-                assert_eq!(filter.band(*lo, *hi), expected, "len={len} band=({lo},{hi})");
+                assert_eq!(
+                    filter.band(*lo, *hi),
+                    expected,
+                    "len={len} band=({lo},{hi})"
+                );
             }
         }
     }

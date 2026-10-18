@@ -1,6 +1,6 @@
-import {ImpactEvent, ShotDef} from '../../data/shots';
-import {evalKeys3} from '../../utils/frameTime';
-import {noise1D} from '../../utils/seededRandom';
+import type { ImpactEvent, ShotDef } from "../../data/shots";
+import { evalKeys3 } from "../../utils/frameTime";
+import { noise1D } from "../../utils/seededRandom";
 
 export type CameraPose = {
   pos: [number, number, number];
@@ -36,4 +36,3 @@ export const cameraAt = (shot: ShotDef, t: number, impacts: readonly ImpactEvent
     fov: shot.camera.fov ?? 42,
   };
 };
-

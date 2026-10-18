@@ -1,8 +1,9 @@
-import React, {useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {useFrame} from '@react-three/fiber';
-import {useGameTime} from '../../utils/frameTime';
-import {hashRandom} from '../../utils/seededRandom';
+import { useFrame } from "@react-three/fiber";
+import type React from "react";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
+import { useGameTime } from "../../utils/frameTime";
+import { hashRandom } from "../../utils/seededRandom";
 
 export type BurstSpec = {
   t: number;
@@ -28,13 +29,13 @@ export type BurstParams = {
 let spriteTexture: THREE.Texture | null = null;
 export const getSpriteTexture = (): THREE.Texture => {
   if (spriteTexture) return spriteTexture;
-  const c = document.createElement('canvas');
+  const c = document.createElement("canvas");
   c.width = c.height = 64;
-  const ctx = c.getContext('2d')!;
+  const ctx = c.getContext("2d")!;
   const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.4, 'rgba(255,255,255,0.6)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.4, "rgba(255,255,255,0.6)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 64, 64);
   spriteTexture = new THREE.CanvasTexture(c);
@@ -46,15 +47,15 @@ export const getSpriteTexture = (): THREE.Texture => {
 export const ParticleBurst: React.FC<{
   events: readonly BurstSpec[];
   params: BurstParams;
-}> = ({events, params}) => {
+}> = ({ events, params }) => {
   const t = useGameTime();
   const pointsRef = useRef<THREE.Points>(null);
   const matRef = useRef<THREE.PointsMaterial>(null);
 
-  const {count, seed} = params;
+  const { count, seed } = params;
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
     return g;
   }, [count]);
 
@@ -64,7 +65,8 @@ export const ParticleBurst: React.FC<{
     for (let i = 0; i < count; i++) {
       const a = hashRandom(seed, i * 3) * Math.PI * 2;
       const b = (hashRandom(seed, i * 3 + 1) - 0.5) * Math.PI * (1 - params.flatness);
-      const sp = params.speedMin + hashRandom(seed, i * 3 + 2) * (params.speedMax - params.speedMin);
+      const sp =
+        params.speedMin + hashRandom(seed, i * 3 + 2) * (params.speedMax - params.speedMin);
       const up = params.upBias ?? 0;
       arr[i * 3] = Math.cos(a) * Math.cos(b) * sp;
       arr[i * 3 + 1] = (Math.sin(b) + up) * sp;
@@ -76,7 +78,7 @@ export const ParticleBurst: React.FC<{
   useFrame(() => {
     const pts = pointsRef.current;
     if (!pts) return;
-    const attr = geo.getAttribute('position') as THREE.BufferAttribute;
+    const attr = geo.getAttribute("position") as THREE.BufferAttribute;
     const arr = attr.array as Float32Array;
     arr.fill(0);
     let opacity = 0;
@@ -86,12 +88,11 @@ export const ParticleBurst: React.FC<{
       const dt = t - ev.t;
       if (dt < 0 || dt > params.life) continue;
       visible = true;
-      const fade = Math.pow(1 - dt / params.life, params.fadePower ?? 1.6);
+      const fade = (1 - dt / params.life) ** (params.fadePower ?? 1.6);
       opacity = Math.max(opacity, fade);
       for (let i = 0; i < count; i++) {
         arr[i * 3] = ev.pos[0] + vels[i * 3] * dt;
-        arr[i * 3 + 1] =
-          ev.pos[1] + vels[i * 3 + 1] * dt - 0.5 * params.gravity * dt * dt;
+        arr[i * 3 + 1] = ev.pos[1] + vels[i * 3 + 1] * dt - 0.5 * params.gravity * dt * dt;
         arr[i * 3 + 2] = ev.pos[2] + vels[i * 3 + 2] * dt;
       }
     }

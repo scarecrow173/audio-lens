@@ -1,11 +1,12 @@
-import React, {useRef} from 'react';
-import * as THREE from 'three';
-import {useFrame} from '@react-three/fiber';
-import {Timeline} from '../../data/shots';
-import {clamp, useGameTime} from '../../utils/frameTime';
+import { useFrame } from "@react-three/fiber";
+import type React from "react";
+import { useRef } from "react";
+import type * as THREE from "three";
+import type { Timeline } from "../../data/shots";
+import { clamp, useGameTime } from "../../utils/frameTime";
 
 // One lighting rig for the whole video so shots feel like one game session.
-export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
+export const SceneLighting: React.FC<{ timeline: Timeline }> = ({ timeline }) => {
   const t = useGameTime();
   const warningRef = useRef<THREE.PointLight>(null);
   const flashRef = useRef<THREE.PointLight>(null);
@@ -45,7 +46,7 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
     // power-up ramp (cyan, ~2s rise)
     let pw = 0;
     if (timeline.powerUp) {
-      const {start, end} = timeline.powerUp;
+      const { start, end } = timeline.powerUp;
       if (t >= start && t <= end + 0.6) {
         pw = t <= end ? clamp((t - start) / 1.8) : Math.max(0, 1 - (t - end) / 0.6);
       }
@@ -58,13 +59,8 @@ export const SceneLighting: React.FC<{timeline: Timeline}> = ({timeline}) => {
   return (
     <group>
       <ambientLight ref={ambientRef} intensity={1.35} color="#40597a" />
-      <hemisphereLight args={['#5a8fa3', '#1c2530', 0.85]} />
-      <directionalLight
-        ref={keyRef}
-        position={[4, 9, 5]}
-        intensity={2.3}
-        color="#9adfe8"
-      />
+      <hemisphereLight args={["#5a8fa3", "#1c2530", 0.85]} />
+      <directionalLight ref={keyRef} position={[4, 9, 5]} intensity={2.3} color="#9adfe8" />
       <directionalLight position={[-6, 6, -4]} intensity={0.8} color="#4a6284" />
       {/* camera-side fill so faces never fall to black */}
       <directionalLight position={[0, 4, 12]} intensity={0.55} color="#3d5a70" />

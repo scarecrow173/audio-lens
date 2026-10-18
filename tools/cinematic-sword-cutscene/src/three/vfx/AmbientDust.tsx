@@ -1,13 +1,14 @@
-import React, {useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {useFrame} from '@react-three/fiber';
-import {useGameTime} from '../../utils/frameTime';
-import {hashRandom} from '../../utils/seededRandom';
-import {getSpriteTexture} from './ParticleSystem';
+import { useFrame } from "@react-three/fiber";
+import type React from "react";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
+import { useGameTime } from "../../utils/frameTime";
+import { hashRandom } from "../../utils/seededRandom";
+import { getSpriteTexture } from "./ParticleSystem";
 
 const COUNT = 220;
 const SEED = 1207;
-const BOX = {x: 14, y: 5, z: 11};
+const BOX = { x: 14, y: 5, z: 11 };
 
 // Continuously drifting dust motes — position is a pure function of time.
 export const AmbientDust: React.FC = () => {
@@ -16,7 +17,7 @@ export const AmbientDust: React.FC = () => {
 
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
     return g;
   }, []);
 
@@ -31,11 +32,11 @@ export const AmbientDust: React.FC = () => {
       drift[i * 3 + 1] = -0.02 - hashRandom(SEED, i + 4000) * 0.05;
       drift[i * 3 + 2] = (hashRandom(SEED, i + 5000) - 0.5) * 0.1;
     }
-    return {arr, drift};
+    return { arr, drift };
   }, []);
 
   useFrame(() => {
-    const attr = geo.getAttribute('position') as THREE.BufferAttribute;
+    const attr = geo.getAttribute("position") as THREE.BufferAttribute;
     const out = attr.array as Float32Array;
     for (let i = 0; i < COUNT; i++) {
       // wrap each axis into its box (z box is centered at -2)

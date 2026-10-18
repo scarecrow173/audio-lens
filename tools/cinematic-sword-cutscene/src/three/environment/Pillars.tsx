@@ -1,10 +1,11 @@
-import React, {useLayoutEffect, useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {createRng} from '../../utils/seededRandom';
+import type React from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { createRng } from "../../utils/seededRandom";
 
 // Instanced pillars (some intact, some broken/tilted) + ceiling beams.
 export const Pillars: React.FC = () => {
-  const {intact, broken, beams} = useMemo(() => {
+  const { intact, broken, beams } = useMemo(() => {
     const rng = createRng(7703);
     const intactM: THREE.Matrix4[] = [];
     const brokenM: THREE.Matrix4[] = [];
@@ -49,14 +50,10 @@ export const Pillars: React.FC = () => {
       const z = -9 + i * 4;
       e.set(0, (rng() - 0.5) * 0.15, 0);
       q.setFromEuler(e);
-      m.compose(
-        new THREE.Vector3((rng() - 0.5) * 3, 7.6 + rng(), z),
-        q,
-        s.set(1, 1, 1)
-      );
+      m.compose(new THREE.Vector3((rng() - 0.5) * 3, 7.6 + rng(), z), q, s.set(1, 1, 1));
       beamM.push(m.clone());
     }
-    return {intact: intactM, broken: brokenM, beams: beamM};
+    return { intact: intactM, broken: brokenM, beams: beamM };
   }, []);
 
   const pillarGeo = useMemo(() => new THREE.BoxGeometry(0.9, 1, 0.9), []);
@@ -69,7 +66,9 @@ export const Pillars: React.FC = () => {
   useLayoutEffect(() => {
     const apply = (mesh: THREE.InstancedMesh | null, mats: THREE.Matrix4[]) => {
       if (!mesh) return;
-      mats.forEach((mtx, i) => mesh.setMatrixAt(i, mtx));
+      mats.forEach((mtx, i) => {
+        mesh.setMatrixAt(i, mtx);
+      });
       mesh.instanceMatrix.needsUpdate = true;
     };
     apply(intactRef.current, intact);

@@ -1,9 +1,10 @@
-import React, {useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {useFrame, useThree} from '@react-three/fiber';
-import {useGameTime} from '../../utils/frameTime';
-import {hashRandom} from '../../utils/seededRandom';
-import {getSpriteTexture} from './ParticleSystem';
+import { useFrame, useThree } from "@react-three/fiber";
+import type React from "react";
+import { useMemo, useRef } from "react";
+import type * as THREE from "three";
+import { useGameTime } from "../../utils/frameTime";
+import { hashRandom } from "../../utils/seededRandom";
+import { getSpriteTexture } from "./ParticleSystem";
 
 const COUNT = 7;
 const SEED = 3313;
@@ -24,7 +25,7 @@ export const FogParticles: React.FC = () => {
         drift: 0.08 + hashRandom(SEED, i + 170) * 0.12,
         phase: hashRandom(SEED, i + 210) * Math.PI * 2,
       })),
-    []
+    [],
   );
 
   useFrame(() => {
@@ -35,7 +36,7 @@ export const FogParticles: React.FC = () => {
       child.position.set(
         b.x + Math.sin(t * 0.1 + b.phase) * 1.5 + t * b.drift * 0.3,
         b.y + Math.sin(t * 0.07 + b.phase * 2) * 0.25,
-        b.z
+        b.z,
       );
       child.quaternion.copy(camera.quaternion);
     });

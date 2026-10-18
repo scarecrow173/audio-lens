@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import {getGltf} from '../../assets';
+import * as THREE from "three";
+import { getGltf } from "../../assets";
 
 export type WeaponSpec = {
   url: string;
@@ -16,8 +16,8 @@ export type WeaponSpec = {
 // returns the base/tip markers used by the sword trail.
 export const attachWeapon = (
   model: THREE.Object3D,
-  spec: WeaponSpec
-): {base: THREE.Object3D; tip: THREE.Object3D} | null => {
+  spec: WeaponSpec,
+): { base: THREE.Object3D; tip: THREE.Object3D } | null => {
   const slot = model.getObjectByName(spec.slotBone);
   if (!slot) return null;
   const weapon = getGltf(spec.url).scene.clone(true);
@@ -27,7 +27,7 @@ export const attachWeapon = (
       mesh.frustumCulled = false;
       // slight emissive so the blade reads at 640x360 in a dark scene
       const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
-      mat.emissive = new THREE.Color(spec.emissive ?? '#1d3a44');
+      mat.emissive = new THREE.Color(spec.emissive ?? "#1d3a44");
       mat.emissiveIntensity = 0.7;
       mesh.material = mat;
     }
@@ -41,5 +41,5 @@ export const attachWeapon = (
   const tip = new THREE.Object3D();
   tip.position.set(0, spec.tipY, 0);
   weapon.add(base, tip);
-  return {base, tip};
+  return { base, tip };
 };

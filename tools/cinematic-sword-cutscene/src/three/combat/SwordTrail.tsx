@@ -1,10 +1,11 @@
-import React, {useMemo, useRef} from 'react';
-import * as THREE from 'three';
-import {useFrame} from '@react-three/fiber';
-import {useGameTime} from '../../utils/frameTime';
-import {CharacterHandle} from '../characters/KayKitCharacter';
-import {CharacterTrack} from '../../data/shots';
-import {trailActive} from './CombatChoreography';
+import { useFrame } from "@react-three/fiber";
+import type React from "react";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
+import type { CharacterTrack } from "../../data/shots";
+import { useGameTime } from "../../utils/frameTime";
+import type { CharacterHandle } from "../characters/KayKitCharacter";
+import { trailActive } from "./CombatChoreography";
 
 const SAMPLES = 9;
 const WINDOW = 0.28; // seconds of blade history
@@ -15,17 +16,14 @@ export const SwordTrail: React.FC<{
   character: React.RefObject<CharacterHandle | null>;
   track: CharacterTrack;
   color: string;
-}> = ({character, track, color}) => {
+}> = ({ character, track, color }) => {
   const t = useGameTime();
   const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.MeshBasicMaterial>(null);
 
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute(
-      'position',
-      new THREE.BufferAttribute(new Float32Array(SAMPLES * 2 * 3), 3)
-    );
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(SAMPLES * 2 * 3), 3));
     const idx: number[] = [];
     for (let i = 0; i < SAMPLES - 1; i++) {
       const a = i * 2;
@@ -44,7 +42,7 @@ export const SwordTrail: React.FC<{
     if (matRef.current) matRef.current.opacity = active ? 0.55 : 0;
     if (!active) return;
 
-    const attr = geo.getAttribute('position') as THREE.BufferAttribute;
+    const attr = geo.getAttribute("position") as THREE.BufferAttribute;
     const arr = attr.array as Float32Array;
     for (let i = 0; i < SAMPLES; i++) {
       const st = t - (i / (SAMPLES - 1)) * WINDOW;

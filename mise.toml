@@ -9,20 +9,26 @@ UV_EXCLUDE_NEWER = "1 week"
 # 実装言語は Rust(docs/adr/implementation-stack.md)。
 # apm install / serena MCP 用の最小構成に加えて rust を pin する。
 [tools]
-rust = "1.98.1"
+# rustup default profile は環境依存なので fmt/clippy の component を明示する
+# (fresh CI runner で `cargo fmt`/`cargo clippy` が component 欠落しないように)。
+rust = { version = "1.98.1", components = "rustfmt,clippy" }
 python = "3.12"
 uv = "0.11"
-# apm.lock.yaml は apm 0.28.0 で生成。0.30.0 は Windows で path dep 解決が
-# 壊れているため lock 生成版に pin する。
-"pipx:apm-cli"  = { version = "0.28.0", uvx_args = "--prerelease allow" }
+# apm.lock.yaml は apm 0.33.0 で生成。lock 生成版に pin する。
+"pipx:apm-cli"  = { version = "0.33.0", uvx_args = "--prerelease allow" }
 "pipx:serena-agent" = "1.7.0"
+# pre-commit 互換 runner(aqua:j178/prek)。hook 定義は .pre-commit-config.yaml
+prek = "0.5.5"
+# aqua:biomejs/biome(npm 非経由)。biome.json の schema version に揃える
+biome = "2.5.15"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
 # canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
 [tasks.setup]
-description = "Restore APM dependencies for a fresh checkout"
+description = "Restore APM dependencies and git hooks for a fresh checkout"
 run = [
   "apm install",
+  "prek install",
 ]
 
 [tasks.build]
@@ -34,8 +40,11 @@ description = "cargo test --workspace"
 run = "cargo test --workspace"
 
 [tasks.lint]
-description = "cargo clippy --workspace -- -D warnings"
-run = "cargo clippy --workspace --all-targets -- -D warnings"
+description = "biome check + cargo clippy --workspace -- -D warnings"
+run = [
+  "biome check",
+  "cargo clippy --workspace --all-targets -- -D warnings",
+]
 
 [tasks.fmt]
 description = "cargo fmt --all -- --check"

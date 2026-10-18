@@ -8,9 +8,9 @@ status: "調査・設計検討（実装および追加ベンチマークは未�
 
 # AudioLens Issue #71：帯域相関・帯域ゲインの構造最適化に関する技術調査報告書
 
-**対象**：[`scarecrow173/audio-lens` Issue #71 — perf: band 系相関の構造最適化 (locate band_ncc / reference band_gain)](https://github.com/scarecrow173/audio-lens/issues/71)  
-**調査日**：2026年10月17日  
-**対象コード**：調査時点の `main`（後述のリポジトリファイル・Issue記録を参照）  
+**対象**：[`scarecrow173/audio-lens` Issue #71 — perf: band 系相関の構造最適化 (locate band_ncc / reference band_gain)](https://github.com/scarecrow173/audio-lens/issues/71)
+**調査日**：2026年10月17日
+**対象コード**：調査時点の `main`（後述のリポジトリファイル・Issue記録を参照）
 **文書種別**：アルゴリズム調査・代替案比較・実験計画。設計決定（ADR）や実測性能改善の証明ではない。
 
 ## 0. エグゼクティブサマリー

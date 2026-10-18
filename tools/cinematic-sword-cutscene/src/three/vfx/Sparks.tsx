@@ -1,15 +1,15 @@
-import React from 'react';
-import {ImpactEvent} from '../../data/shots';
-import {ParticleBurst} from './ParticleSystem';
+import type React from "react";
+import type { ImpactEvent } from "../../data/shots";
+import { ParticleBurst } from "./ParticleSystem";
 
 // Bright metal-clash sparks at each sword impact.
-export const Sparks: React.FC<{impacts: readonly ImpactEvent[]}> = ({impacts}) => (
+export const Sparks: React.FC<{ impacts: readonly ImpactEvent[] }> = ({ impacts }) => (
   <ParticleBurst
-    events={impacts.map((i) => ({t: i.t, pos: i.pos}))}
+    events={impacts.map((i) => ({ t: i.t, pos: i.pos }))}
     params={{
       count: 70,
       seed: 6121,
-      color: '#ffd77a',
+      color: "#ffd77a",
       speedMin: 1.5,
       speedMax: 5.5,
       flatness: 0.1,

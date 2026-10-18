@@ -8,9 +8,9 @@ status: "技術調査（外部実装をAudioLensへ導入した実測ではな�
 
 # AudioLens Issue #71 — OSS詳細調査報告書
 
-**調査日**：2026-10-17（日本時間）  
-**対象**：`locate::band_ncc` の帯域別全域 NCC、および `reference::band_gain` の1/3オクターブ帯域別局所ラグ補償付き最小二乗ゲイン（M2）。  
-**調査手段**：各OSSの公式説明・リポジトリ・具体的ソースファイル・API文書の照合。外部 OSS のベンチ結果を AudioLens の性能改善として転用しない。  
+**調査日**：2026-10-17（日本時間）
+**対象**：`locate::band_ncc` の帯域別全域 NCC、および `reference::band_gain` の1/3オクターブ帯域別局所ラグ補償付き最小二乗ゲイン（M2）。
+**調査手段**：各OSSの公式説明・リポジトリ・具体的ソースファイル・API文書の照合。外部 OSS のベンチ結果を AudioLens の性能改善として転用しない。
 **姉妹文書**：`audiolens_issue71_algorithm_research_report_detailed.md` は本調査を統合した全体報告書。
 
 ## A. 調査上の問題設定と結論の読み方
