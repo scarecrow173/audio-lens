@@ -25,17 +25,18 @@ Bash 不要)。
 
 ```bash
 mise install --locked
-mise run setup   # apm install + prek install (git hooks)
+mise run setup   # apm install + prek install + git lfs install/pull
 ```
 
 `mise run setup` は `prek install` で pre-commit hook も有効化する。
 hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形・
 衛生 check のみ担い、重い検証は `mise run lint` / `mise run test` に
-委ねる。
+委ねる。`git lfs install --local` + `git lfs pull` で LFS 実体も復元する
+(git-lfs 未導入のまま clone した環境でも pointer のまま残らない)。
 
 ユーザー環境の global mise config に追加ツールがある場合は、
 toolchain を明示した
-`mise install --locked rust python uv pipx:apm-cli pipx:serena-agent prek`
+`mise install --locked rust python uv pipx:apm-cli pipx:serena-agent prek git-lfs`
 を使う。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する

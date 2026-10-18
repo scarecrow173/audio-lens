@@ -46,6 +46,45 @@ url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5
 url_api = "https://api.github.com/repos/biomejs/biome/releases/assets/601227624"
 provenance = "github-attestations"
 
+[[tools.git-lfs]]
+version = "3.8.0"
+backend = "aqua:git-lfs/git-lfs"
+
+[tools.git-lfs."platforms.linux-arm64"]
+checksum = "sha256:ac9c8efac980bb0505ead384d087e2acb6486fd8498691a2165fa174ec6118c2"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-arm64-v3.8.0.tar.gz"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993825"
+
+[tools.git-lfs."platforms.linux-arm64-musl"]
+checksum = "sha256:ac9c8efac980bb0505ead384d087e2acb6486fd8498691a2165fa174ec6118c2"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-arm64-v3.8.0.tar.gz"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993825"
+
+[tools.git-lfs."platforms.linux-x64"]
+checksum = "sha256:e455e00f15d9b95661b8d53498ffb0c3367962cf1ec73c31ab7369516cd6ab8d"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-amd64-v3.8.0.tar.gz"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993734"
+
+[tools.git-lfs."platforms.linux-x64-musl"]
+checksum = "sha256:e455e00f15d9b95661b8d53498ffb0c3367962cf1ec73c31ab7369516cd6ab8d"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-amd64-v3.8.0.tar.gz"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993734"
+
+[tools.git-lfs."platforms.macos-arm64"]
+checksum = "sha256:caff76a7d070d8160c89bc39b6e85d98f24135b6fed038a3b4de2590d25102d8"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-darwin-arm64-v3.8.0.zip"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993595"
+
+[tools.git-lfs."platforms.macos-x64"]
+checksum = "sha256:f1c17aeca0b4eaab9ea606226477dbed3b84b56fe0811a9f967d2ea2b2393c53"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-darwin-amd64-v3.8.0.zip"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993568"
+
+[tools.git-lfs."platforms.windows-x64"]
+checksum = "sha256:b62e7b8ceddee635f691233d77de8eaa4b213e9209e0173811d8cfa77f7882c1"
+url = "https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-windows-amd64-v3.8.0.zip"
+url_api = "https://api.github.com/repos/git-lfs/git-lfs/releases/assets/532993969"
+
 [[tools."pipx:apm-cli"]]
 version = "0.33.0"
 backend = "pipx:apm-cli"
