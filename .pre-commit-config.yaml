@@ -21,12 +21,15 @@ repos:
       - id: check-illegal-windows-names
   - repo: local
     hooks:
+      # local hook は mise 管理 tool を `mise exec --` 経由で呼ぶ
+      # (mise shim が PATH に乗らない環境でも動くように。mise 自体は
+      # システム install 前提)。
       # biome.json の files.includes を mirror する。scope 外の file を明示
       # 渡しすると biome が "No files were processed" で exit 1 になるため、
       # files/exclude で hook の発火対象を限定する。
       - id: biome-check
         name: biome check --write
-        entry: biome check --write
+        entry: mise exec -- biome check --write
         language: system
         files: '\.(js|mjs|cjs|ts|mts|cts|jsx|tsx|json|jsonc)$'
         exclude: '(^|/)package-lock\.json$|(^|/)(dist|node_modules)/'
@@ -34,7 +37,7 @@ repos:
       # (staged .rs があれば発火する)。
       - id: cargo-fmt
         name: cargo fmt
-        entry: cargo fmt --all
+        entry: mise exec -- cargo fmt --all
         language: system
         types: [rust]
         pass_filenames: false
