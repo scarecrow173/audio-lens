@@ -1,13 +1,16 @@
 # .worktreeinclude — gitignored files copied into new Orca worktrees
-# Only literal paths that are also gitignored are copied; globs and
-# negations are skipped, and directories whose own path is not gitignored
-# must be listed as their ignored children (see ruviform#9).
+# Orca copies a path only if the path ITSELF is gitignored; directory-wide
+# entries whose parent dir is not ignored, globs, and negations are skipped.
 
 # APM package sources and deployed agent assets — let worktree agents use
 # skills/hooks/commands immediately without re-running `apm install`
 apm_modules/
 .agents/
 .sdp/
+
+# Deployed agent assets under tool dirs. The parent dirs (.claude/ etc.) are
+# NOT gitignored — .gitignore only ignores these child paths, so each literal
+# child path must be listed individually for Orca to copy it.
 .claude/agents/
 .claude/apm-hooks.json
 .claude/commands/
@@ -46,13 +49,18 @@ apm_modules/
 .windsurf/rules/
 .windsurf/workflows/
 
-# Local secrets/environment (copied only if present and gitignored;
-# `.env.*` is a glob and unsupported, so name concrete files)
+# Local secrets/environment — literal paths only (globs are skipped by Orca)
 .env
+.env.local
+.env.development
+.env.production
+.env.test
 
 # Deliberately not copied (regenerable or path-coupled):
 #   target/           Rust build artifacts
 #   .serena/          Serena local state (absolute paths; re-created per checkout)
-#   node_modules/ .venv/ dist/ build/   package/build outputs
-#   logs/ tmp/ *.log .pytest_cache/ etc.  transient files
+#   node_modules/ .venv/ dist/ build/    package/build outputs
+#   logs/ tmp/ *.log .pytest_cache/ etc. transient files
+#   .mise/            mise local state (.mise/locks/ is the committed
+#                     exception — its contents arrive via checkout anyway)
 #   samples/_runs/ samples/**/*.png      verification runs (and globs)
