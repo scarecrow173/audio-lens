@@ -42,7 +42,7 @@ setup` は原則不要(APM 依存がブランチ間で変わる場合のみ実�
 
 ユーザー環境の global mise config に追加ツールがある場合は、
 toolchain を明示した
-`mise install --locked rust python uv pipx:apm-cli pipx:serena-agent prek git-lfs`
+`mise install --locked rust python uv github:microsoft/apm pipx:serena-agent prek biome git-lfs`
 を使う。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する

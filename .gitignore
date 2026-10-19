@@ -27,6 +27,12 @@ build/
 .mypy_cache/
 .ruff_cache/
 
+# mise local state — .mise/locks/ stays un-ignored because mise lockfile
+# revision 2 stores dep-graph sidecars there for pypi/npm-resolved tools
+# (mise.lock references them by digest; `mise install --locked` fails without)
+.mise/*
+!.mise/locks/
+
 # APM dependencies
 apm_modules/
 
