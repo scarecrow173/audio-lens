@@ -1,0 +1,58 @@
+# .worktreeinclude — gitignored files copied into new Orca worktrees
+# Only literal paths that are also gitignored are copied; globs and
+# negations are skipped, and directories whose own path is not gitignored
+# must be listed as their ignored children (see ruviform#9).
+
+# APM package sources and deployed agent assets — let worktree agents use
+# skills/hooks/commands immediately without re-running `apm install`
+apm_modules/
+.agents/
+.sdp/
+.claude/agents/
+.claude/apm-hooks.json
+.claude/commands/
+.claude/hooks/
+.claude/settings.json
+.claude/skills/
+.codex/agents/
+.codex/apm-hooks.json
+.codex/config.toml
+.codex/hooks/
+.codex/hooks.json
+.codex/prompts/
+.cursor/agents/
+.cursor/apm-hooks.json
+.cursor/commands/
+.cursor/hooks/
+.cursor/hooks.json
+.cursor/mcp.json
+.cursor/rules/
+.github/agents/
+.github/apm-hooks.json
+.github/commands/
+.github/copilot-instructions.md
+.github/extensions/
+.github/hooks/
+.github/instructions/
+.github/mcp.json
+.github/prompts/
+.github/skills/
+.mcp.json
+.vscode/mcp.json
+.windsurf/agents/
+.windsurf/apm-hooks.json
+.windsurf/hooks/
+.windsurf/hooks.json
+.windsurf/rules/
+.windsurf/workflows/
+
+# Local secrets/environment (copied only if present and gitignored;
+# `.env.*` is a glob and unsupported, so name concrete files)
+.env
+
+# Deliberately not copied (regenerable or path-coupled):
+#   target/           Rust build artifacts
+#   .serena/          Serena local state (absolute paths; re-created per checkout)
+#   node_modules/ .venv/ dist/ build/   package/build outputs
+#   logs/ tmp/ *.log .pytest_cache/ etc.  transient files
+#   samples/_runs/ samples/**/*.png      verification runs (and globs)
