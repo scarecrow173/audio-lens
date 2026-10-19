@@ -104,7 +104,7 @@ GitHub issues で管理しています。
 開発環境の正規インターフェースは mise task です。
 
 ```bash
-mise install --locked   # toolchain 復元(mise.lock 準拠)
+mise install            # toolchain 復元(mise.lock 準拠)
 mise run setup          # APM 依存の復元(apm install)
 ```
 

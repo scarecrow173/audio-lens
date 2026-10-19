@@ -24,7 +24,7 @@
 Bash 不要)。
 
 ```bash
-mise install --locked
+mise install
 mise run setup   # apm install + prek install + git lfs install/pull
 ```
 
@@ -40,9 +40,9 @@ checkout からコピーされる。mise toolchain・prek hook・Git LFS 設定�
 マシン全体 / 共有 `.git` に属するため、ワークツリー単位での `mise run
 setup` は原則不要(APM 依存がブランチ間で変わる場合のみ実行する)。
 
-ユーザー環境の global mise config に追加ツールがある場合は、
-toolchain を明示した
-`mise install --locked rust python uv pipx:apm-cli pipx:serena-agent prek git-lfs`
+ユーザー環境の global mise config に追加ツールがある環境で、repo の
+toolchain のみを復元する場合は toolchain を明示した
+`mise install rust python uv github:microsoft/apm pipx:serena-agent prek biome git-lfs`
 を使う。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する

@@ -15,7 +15,9 @@ rust = { version = "1.98.1", components = "rustfmt,clippy" }
 python = "3.12"
 uv = "0.11"
 # apm.lock.yaml は apm 0.33.0 で生成。lock 生成版に pin する。
-"pipx:apm-cli"  = { version = "0.33.0", uvx_args = "--prerelease allow" }
+# github バイナリバックエンドを使う(pipx 版は .mise/locks/ に dep-graph
+# sidecar を要し、Python も不要になる)。
+"github:microsoft/apm" = "0.33.0"
 "pipx:serena-agent" = "1.7.0"
 # pre-commit 互換 runner(aqua:j178/prek)。hook 定義は .pre-commit-config.yaml
 prek = "0.5.5"
