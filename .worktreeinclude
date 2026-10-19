@@ -61,6 +61,5 @@ apm_modules/
 #   .serena/          Serena local state (absolute paths; re-created per checkout)
 #   node_modules/ .venv/ dist/ build/    package/build outputs
 #   logs/ tmp/ *.log .pytest_cache/ etc. transient files
-#   .mise/            mise local state (.mise/locks/ is the committed
-#                     exception — its contents arrive via checkout anyway)
+#   .mise/            mise local state (tracked files arrive via checkout)
 #   samples/_runs/ samples/**/*.png      verification runs (and globs)

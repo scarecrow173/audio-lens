@@ -93,6 +93,7 @@ SOLID・YAGNI・DRY・KISS に従い、現在の要件に必要な範囲で設�
   `.codex/`・`.cursor/`・`.github/`・`.windsurf/`・`.mcp.json`
   等)。ignore 済みかは `.gitignore` を参照
 - clone / fresh worktree 後は `mise run setup` で依存を復元する
+  (Orca 管理ワークツリーは `.worktreeinclude` がコピーするため不要)
 
 ## 境界
 
