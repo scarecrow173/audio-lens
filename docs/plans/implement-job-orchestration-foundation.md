@@ -99,7 +99,7 @@ trait / インターフェースとスタブ実装までを本プランの範囲
 ## Dependencies and Risks
 
 - 依存: Rust toolchain と mise task の整備(リポジトリの
-  `mise install --locked` / `mise run setup` に従う)
+  `mise install` / `mise run setup` に従う)
 - リスク: ステージ間インターフェースを早く固定しすぎると後続解析
   設計と不整合になる → ステージ契約は最小(成果物 id + dataset
   参照)に留め、解析固有の型は後続プランで追加する
