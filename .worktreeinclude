@@ -1,0 +1,65 @@
+# .worktreeinclude — gitignored files copied into new Orca worktrees
+# Orca copies a path only if the path ITSELF is gitignored; directory-wide
+# entries whose parent dir is not ignored, globs, and negations are skipped.
+
+# APM package sources and deployed agent assets — let worktree agents use
+# skills/hooks/commands immediately without re-running `apm install`
+apm_modules/
+.agents/
+.sdp/
+
+# Deployed agent assets under tool dirs. The parent dirs (.claude/ etc.) are
+# NOT gitignored — .gitignore only ignores these child paths, so each literal
+# child path must be listed individually for Orca to copy it.
+.claude/agents/
+.claude/apm-hooks.json
+.claude/commands/
+.claude/hooks/
+.claude/settings.json
+.claude/skills/
+.codex/agents/
+.codex/apm-hooks.json
+.codex/config.toml
+.codex/hooks/
+.codex/hooks.json
+.codex/prompts/
+.cursor/agents/
+.cursor/apm-hooks.json
+.cursor/commands/
+.cursor/hooks/
+.cursor/hooks.json
+.cursor/mcp.json
+.cursor/rules/
+.github/agents/
+.github/apm-hooks.json
+.github/commands/
+.github/copilot-instructions.md
+.github/extensions/
+.github/hooks/
+.github/instructions/
+.github/mcp.json
+.github/prompts/
+.github/skills/
+.mcp.json
+.vscode/mcp.json
+.windsurf/agents/
+.windsurf/apm-hooks.json
+.windsurf/hooks/
+.windsurf/hooks.json
+.windsurf/rules/
+.windsurf/workflows/
+
+# Local secrets/environment — literal paths only (globs are skipped by Orca)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Deliberately not copied (regenerable or path-coupled):
+#   target/           Rust build artifacts
+#   .serena/          Serena local state (absolute paths; re-created per checkout)
+#   node_modules/ .venv/ dist/ build/    package/build outputs
+#   logs/ tmp/ *.log .pytest_cache/ etc. transient files
+#   .mise/            mise local state (tracked files arrive via checkout)
+#   samples/_runs/ samples/**/*.png      verification runs (and globs)
