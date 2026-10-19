@@ -1,6 +1,6 @@
 [settings]
 minimum_release_age = "7d"
-# mise.lock を維持し、install/use で locked version を優先させる
+# mise.lock と整合する固定バージョンを通常の install/use でも利用する
 lockfile = true
 
 [env]

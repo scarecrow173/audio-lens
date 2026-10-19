@@ -34,11 +34,11 @@ hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形�
 委ねる。`git lfs install --local` + `git lfs pull` で LFS 実体も復元する
 (git-lfs 未導入のまま clone した環境でも pointer のまま残らない)。
 
-Orca 管理のワークツリーでは `.worktreeinclude` に列挙した gitignore
-済み生成物(APM 依存・各 agent 向け deploy 物)が作成時に primary
-checkout からコピーされる。mise toolchain・prek hook・Git LFS 設定は
-マシン全体 / 共有 `.git` に属するため、ワークツリー単位での `mise run
-setup` は原則不要(APM 依存がブランチ間で変わる場合のみ実行する)。
+`.worktreeinclude` に列挙した gitignore 済み生成物（APM 依存・各 agent
+向け deploy 物）は、新しいworktreeへ引き継がれる。ツールチェーンが
+導入済みで依存定義も変わらない場合、worktreeごとの `mise run setup` は
+通常不要。APM 依存が変更された場合や生成資産が存在しない場合は
+`mise install` → `mise run setup` で復元する。
 
 ユーザー環境の global mise config に追加ツールがある環境で、repo の
 toolchain のみを復元する場合は toolchain を明示した
@@ -92,8 +92,8 @@ SOLID・YAGNI・DRY・KISS に従い、現在の要件に必要な範囲で設�
   が生成する各 agent 向け deploy 物(`.agents/`・`.claude/`・
   `.codex/`・`.cursor/`・`.github/`・`.windsurf/`・`.mcp.json`
   等)。ignore 済みかは `.gitignore` を参照
-- clone / fresh worktree 後は `mise run setup` で依存を復元する
-  (Orca 管理ワークツリーは `.worktreeinclude` がコピーするため不要)
+- clone / 生成資産のないfresh worktreeでは `mise run setup` で依存を復元する。
+  資産を継承したworktreeでは依存定義の変更時など必要な場合に再実行する。
 
 ## 境界
 
