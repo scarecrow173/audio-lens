@@ -12,7 +12,9 @@ UV_EXCLUDE_NEWER = "1 week"
 # rustup default profile は環境依存なので fmt/clippy の component を明示する
 # (fresh CI runner で `cargo fmt`/`cargo clippy` が component 欠落しないように)。
 rust = { version = "1.98.1", components = "rustfmt,clippy" }
-python = "3.12"
+# python は toolchain に含めない — pipx: バックエンドは uv 経由で uv 管理の
+# cpython に venv を作るため、mise python を参照しない。直接 python を呼ぶ
+# 用途ができた場合のみ追加する。
 # GHSA-hq85-5cpj-mr62 (eMudhra/emSign 中間CA) の修正版 0.13.4 を exact pin
 # する。minimum_release_age = "7d" は exact version には適用されないため、
 # セキュリティ修正を age gate が妨げない。
