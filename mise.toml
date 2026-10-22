@@ -13,7 +13,14 @@ UV_EXCLUDE_NEWER = "1 week"
 # (fresh CI runner で `cargo fmt`/`cargo clippy` が component 欠落しないように)。
 rust = { version = "1.98.1", components = "rustfmt,clippy" }
 python = "3.12"
-uv = "0.11"
+# GHSA-hq85-5cpj-mr62 (eMudhra/emSign 中間CA) の修正版 0.13.4 を exact pin
+# する。minimum_release_age = "7d" は exact version には適用されないため、
+# セキュリティ修正を age gate が妨げない。
+uv = "0.13.4"
+# tools/cinematic-sword-cutscene (Remotion) と .agents/skills 配下の JS
+# スクリプトが使う Node.js。2026-10-21 セキュリティリリースの LTS 修正版を
+# exact pin する(uv のコメント参照)。Remotion 4.x の要件 (Node.js 18+) も満たす。
+node = "24.22.1"
 # apm.lock.yaml は apm 0.33.0 で生成。lock 生成版に pin する。
 # github バイナリバックエンドを使う(pipx 版は .mise/locks/ に dep-graph
 # sidecar を要し、Python も不要になる)。
