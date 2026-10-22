@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-10-20T22:09:00.206811+00:00'
+generated_at: '2026-10-22T10:14:39.840745+00:00'
 apm_version: 0.33.0
 dependencies:
 - repo_url: scarecrow173/apm-packages
@@ -1608,6 +1608,108 @@ dependencies:
     .agents/skills/writing-plans/SKILL.md: sha256:a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a
     .claude/skills/writing-plans/SKILL.md: sha256:a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a
   content_hash: sha256:c2647b5bf067be353a893e5a39a632cbbeb7ad81e61fa5ae227ece5490029073
+- repo_url: scarecrow173/cheaper
+  name: cheaper-hook-claude
+  host: github.com
+  resolved_commit: a980b6d2da978c0e58e4d28fa43caca1fab7f93a
+  resolved_ref: main
+  version: 1.0.0
+  virtual_path: packages/apm-hook-claude
+  is_virtual: true
+  depth: 2
+  resolved_by: scarecrow173/cheaper
+  package_type: apm_package
+  deployed_files:
+  - .claude/hooks/apm-hook-claude/cheaper.ps1
+  - .claude/hooks/apm-hook-claude/cheaper.sh
+  deployed_file_hashes:
+    .claude/hooks/apm-hook-claude/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .claude/hooks/apm-hook-claude/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:78dfffb265af14d7bfa944a68b30cc5f2f600bf322d9d0ef0583667b1ab9eed7
+  target_subset:
+  - claude
+- repo_url: scarecrow173/cheaper
+  name: cheaper-hook-codex
+  host: github.com
+  resolved_commit: a980b6d2da978c0e58e4d28fa43caca1fab7f93a
+  resolved_ref: main
+  version: 1.0.0
+  virtual_path: packages/apm-hook-codex
+  is_virtual: true
+  depth: 2
+  resolved_by: scarecrow173/cheaper
+  package_type: apm_package
+  deployed_files:
+  - .codex/hooks/apm-hook-codex/cheaper.ps1
+  - .codex/hooks/apm-hook-codex/cheaper.sh
+  deployed_file_hashes:
+    .codex/hooks/apm-hook-codex/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .codex/hooks/apm-hook-codex/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:a45b3a860a156071a2278a3f6618132e4f8a02b3a6f1e041660bad7397710929
+  target_subset:
+  - codex
+- repo_url: scarecrow173/cheaper
+  name: cheaper-hook-copilot
+  host: github.com
+  resolved_commit: a980b6d2da978c0e58e4d28fa43caca1fab7f93a
+  resolved_ref: main
+  version: 1.0.0
+  virtual_path: packages/apm-hook-copilot
+  is_virtual: true
+  depth: 2
+  resolved_by: scarecrow173/cheaper
+  package_type: apm_package
+  deployed_files:
+  - .github/hooks/apm-hook-copilot-hooks.json
+  - .github/hooks/scripts/apm-hook-copilot/cheaper.ps1
+  - .github/hooks/scripts/apm-hook-copilot/cheaper.sh
+  deployed_file_hashes:
+    .github/hooks/apm-hook-copilot-hooks.json: sha256:82fc713234a202db7193bd7316194527f612bc5d4dda96a0af35b860e3a18b4a
+    .github/hooks/scripts/apm-hook-copilot/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .github/hooks/scripts/apm-hook-copilot/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:57f498815984a5f1e41846cdd5b71544777f793fdc1c9d768b1780bac69b70bb
+  target_subset:
+  - copilot
+- repo_url: scarecrow173/cheaper
+  name: cheaper-hook-cursor
+  host: github.com
+  resolved_commit: a980b6d2da978c0e58e4d28fa43caca1fab7f93a
+  resolved_ref: main
+  version: 1.0.0
+  virtual_path: packages/apm-hook-cursor
+  is_virtual: true
+  depth: 2
+  resolved_by: scarecrow173/cheaper
+  package_type: apm_package
+  deployed_files:
+  - .cursor/hooks/apm-hook-cursor/cheaper.ps1
+  - .cursor/hooks/apm-hook-cursor/cheaper.sh
+  deployed_file_hashes:
+    .cursor/hooks/apm-hook-cursor/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .cursor/hooks/apm-hook-cursor/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:2a35e5f27a0a48603108a16ba073aed235932bf12a592b014d71d0c7a4ec4030
+  target_subset:
+  - cursor
+- repo_url: scarecrow173/cheaper
+  name: cheaper-hook-windsurf
+  host: github.com
+  resolved_commit: a980b6d2da978c0e58e4d28fa43caca1fab7f93a
+  resolved_ref: main
+  version: 1.0.0
+  virtual_path: packages/apm-hook-windsurf
+  is_virtual: true
+  depth: 2
+  resolved_by: scarecrow173/cheaper
+  package_type: apm_package
+  deployed_files:
+  - .windsurf/hooks/apm-hook-windsurf/cheaper.ps1
+  - .windsurf/hooks/apm-hook-windsurf/cheaper.sh
+  deployed_file_hashes:
+    .windsurf/hooks/apm-hook-windsurf/cheaper.ps1: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+    .windsurf/hooks/apm-hook-windsurf/cheaper.sh: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+  content_hash: sha256:79d1850071a9a358d70e4f88f0f6d8df4e9fd32ed8c3abdacdf80d432daeb718
+  target_subset:
+  - windsurf
 deployments:
 - kind: project-relative
   target: claude
@@ -1618,6 +1720,24 @@ deployments:
   - microsoft/apm/packages/apm-guide
   active_owner: microsoft/apm/packages/apm-guide
   content_hash: sha256:f6cded3e7eef97ad8fff06208bcfd5a0beafb9cfe810f78e10294c90e16fd8ae
+- kind: project-relative
+  target: claude
+  value: .claude/hooks/apm-hook-claude/cheaper.ps1
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-claude
+  active_owner: scarecrow173/cheaper/packages/apm-hook-claude
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+- kind: project-relative
+  target: claude
+  value: .claude/hooks/apm-hook-claude/cheaper.sh
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-claude
+  active_owner: scarecrow173/cheaper/packages/apm-hook-claude
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: project-relative
   target: claude
   value: .claude/skills/adr-doc
@@ -7280,6 +7400,24 @@ deployments:
   active_owner: microsoft/apm/packages/apm-guide
   content_hash: sha256:0b4bec64f7c6ab70df3841237928eaccfb927789d45300870ce56163230498c4
 - kind: project-relative
+  target: codex
+  value: .codex/hooks/apm-hook-codex/cheaper.ps1
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-codex
+  active_owner: scarecrow173/cheaper/packages/apm-hook-codex
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+- kind: project-relative
+  target: codex
+  value: .codex/hooks/apm-hook-codex/cheaper.sh
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-codex
+  active_owner: scarecrow173/cheaper/packages/apm-hook-codex
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+- kind: project-relative
   target: copilot
   value: .github/agents/apm-expert.agent.md
   runtime: null
@@ -7289,6 +7427,33 @@ deployments:
   active_owner: microsoft/apm/packages/apm-guide
   content_hash: sha256:f6cded3e7eef97ad8fff06208bcfd5a0beafb9cfe810f78e10294c90e16fd8ae
 - kind: project-relative
+  target: copilot
+  value: .github/hooks/apm-hook-copilot-hooks.json
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-copilot
+  active_owner: scarecrow173/cheaper/packages/apm-hook-copilot
+  content_hash: sha256:82fc713234a202db7193bd7316194527f612bc5d4dda96a0af35b860e3a18b4a
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/scripts/apm-hook-copilot/cheaper.ps1
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-copilot
+  active_owner: scarecrow173/cheaper/packages/apm-hook-copilot
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+- kind: project-relative
+  target: copilot
+  value: .github/hooks/scripts/apm-hook-copilot/cheaper.sh
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-copilot
+  active_owner: scarecrow173/cheaper/packages/apm-hook-copilot
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
+- kind: project-relative
   target: cursor
   value: .cursor/agents/apm-expert.md
   runtime: null
@@ -7297,6 +7462,24 @@ deployments:
   - microsoft/apm/packages/apm-guide
   active_owner: microsoft/apm/packages/apm-guide
   content_hash: sha256:f6cded3e7eef97ad8fff06208bcfd5a0beafb9cfe810f78e10294c90e16fd8ae
+- kind: project-relative
+  target: cursor
+  value: .cursor/hooks/apm-hook-cursor/cheaper.ps1
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-cursor
+  active_owner: scarecrow173/cheaper/packages/apm-hook-cursor
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+- kind: project-relative
+  target: cursor
+  value: .cursor/hooks/apm-hook-cursor/cheaper.sh
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-cursor
+  active_owner: scarecrow173/cheaper/packages/apm-hook-cursor
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 - kind: uri
   target: mcp
   value: mise
@@ -7387,6 +7570,24 @@ deployments:
   - .
   active_owner: .
   content_hash: null
+- kind: project-relative
+  target: windsurf
+  value: .windsurf/hooks/apm-hook-windsurf/cheaper.ps1
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-windsurf
+  active_owner: scarecrow173/cheaper/packages/apm-hook-windsurf
+  content_hash: sha256:6c96db9a08c98b289d7e560c38a5954f0235c246b4b588b35b9b10dcfe8ac9cb
+- kind: project-relative
+  target: windsurf
+  value: .windsurf/hooks/apm-hook-windsurf/cheaper.sh
+  runtime: null
+  scope: project
+  owners:
+  - scarecrow173/cheaper/packages/apm-hook-windsurf
+  active_owner: scarecrow173/cheaper/packages/apm-hook-windsurf
+  content_hash: sha256:92a804bbdcee4d370f718f1f8dcf62a6d417bc9a68701b0a80eb1a06b7ea94ba
 mcp_servers:
 - mise
 - serena
