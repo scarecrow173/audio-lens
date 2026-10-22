@@ -206,45 +206,6 @@ url = "https://github.com/j178/prek/releases/download/v0.5.5/prek-x86_64-pc-wind
 url_api = "https://api.github.com/repos/j178/prek/releases/assets/611684549"
 provenance = "github-attestations"
 
-[[tools.python]]
-version = "3.12.15"
-backend = "core:python"
-
-[tools.python."platforms.linux-arm64"]
-checksum = "sha256:0b35f4dc08d58534eb82e024989e2db9873885dccd4f2a316ff55c0cec146123"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.linux-arm64-musl"]
-checksum = "sha256:2528ba293c42a9221288e42ecf287394532d73d1bf22b9dcc255819fce418bb7"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-aarch64-unknown-linux-musl-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.linux-x64"]
-checksum = "sha256:7bb1659e3235077b7f63d5b6eb6ce653c6fcd6c5041e9d5f73b42ce10421464d"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.linux-x64-musl"]
-checksum = "sha256:5f1bf9c2ca7873d156a1fe47a0534b7807b27e2931d3a260ba9d65bf85250ca2"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.macos-arm64"]
-checksum = "sha256:10cab8f6ed6202fdd81637aa6eda4af8d5b7eaa8fc42f9df3c6bea4923de0d93"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-aarch64-apple-darwin-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.macos-x64"]
-checksum = "sha256:d101ac54bc34afff54741406261325dc896b7b646a36a58fff4845ef0a00b2ce"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-x86_64-apple-darwin-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.windows-x64"]
-checksum = "sha256:52124cee54126f3f360eaa378288f6f64c402c983a3c14c95eff67f4af986aaa"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.12.15+20261001-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
 [[tools.rust]]
 version = "1.98.1"
 backend = "core:rust"
