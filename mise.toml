@@ -29,9 +29,11 @@ node = "24.22.1"
 "github:microsoft/apm" = "0.33.0"
 "pipx:serena-agent" = "1.7.0"
 # pre-commit 互換 runner(aqua:j178/prek)。hook 定義は .pre-commit-config.yaml
-prek = "0.5.5"
-# aqua:biomejs/biome(npm 非経由)。biome.json の schema version に揃える
-biome = "2.5.15"
+# eMudhra CA 修正版 0.5.7(GHSA-hq85-5cpj-mr62 対応)。
+prek = "0.5.7"
+# aqua:biomejs/biome(npm 非経由)。biome.json の schema version に揃える。
+# eMudhra CA 修正版 2.6.2(GHSA-hq85-5cpj-mr62 対応)。
+biome = "2.6.2"
 # aqua:git-lfs/git-lfs。LFS objects の materialize は setup task が担う
 git-lfs = "3.8.0"
 
