@@ -2,9 +2,7 @@
 
 `audio-lens`(AudioLens)は、ゲームのキャプチャ映像と比較用入力を
 アラインし、音声に何が起きたかを計測して構造化解析データを
-出力する、ゲーム音声デバッグ解析ツール。現行の可視化データ
-生成方式は移行期間のみ存在し、最終的には Ruviform ベースの
-GUI アプリケーションへ置き換える。
+出力する、ゲーム音声デバッグ解析ツール。
 設計・仕様などのドキュメントは `docs/` にまとめる。
 
 ## 作業範囲と完了条件
@@ -21,48 +19,24 @@ GUI アプリケーションへ置き換える。
 
 ## Ruviform とのマルチリポジトリ運用
 
-- 共通マルチメディア基盤は `scarecrow173/ruviform`
-  (https://github.com/scarecrow173/ruviform) が所有し、AudioLens は
-  その利用側アプリケーションとする。処理レベルで独立再利用できる
-  数値演算・DSP・メディア I/O・データモデル等は Ruviform への
-  配置を検討し、ゲーム音声デバッグ固有の locate 判断・解析
-  オーケストレーション・Job・Dataset・GUI の固有画面・操作の
-  意味論は AudioLens に残す。波形・スペクトログラム・時間軸等の
-  汎用的な描画・データ取得の処理は Ruviform へ移植する。
-  責務と移行状況が未確定の既存実装を無条件に削除しない。
-- AudioLens の開発・調査・レビュー中に **Ruviform 側の不具合・
-  契約違反・不足する汎用 API・改善案・機能提案**を発見した場合は、
-  先に Ruviform の既存 Issue を検索し、重複がなければ **Ruviform
-  リポジトリに Issue を起票する**。AudioLens の Issue だけに
-  記録して終わらせない。内容が重複する場合は既存 Issue に
-  参照・追加情報を残す。
-- Ruviform 側 Issue には、背景・実際と期待の挙動・再現手順または
-  根拠・汎用的な責務と対象 API/モジュール・影響範囲・検証条件を
-  明記する。関連する AudioLens の Issue/PR と相互参照し、依存が
-  ある場合は AudioLens 側にもブロッカーとして記録する。
-  RT/非 RT の契約、f32/f64 精度、時刻・ストリーム情報、性能、
-  互換性が関係する場合は、その制約とトレードオフも明記する。
+- `scarecrow173/ruviform`
+  (https://github.com/scarecrow173/ruviform) は再利用可能な
+  共通基盤を担い、AudioLens はその利用側アプリケーションとする。
+  処理単位で用途に依存せず再利用できるものは Ruviform への
+  配置を検討し、AudioLens 固有の処理は AudioLens に残す。
+  責務・不変条件・依存方向を踏まえて判断し、既存実装を
+  無条件に移動・削除しない。
+- AudioLens の開発・調査・レビュー中に Ruviform 側の不具合、
+  契約上の問題、改善案や機能提案を見つけた場合は、Ruviform の
+  既存 Issue を確認し、重複がなければ Ruviform リポジトリに
+  Issue を起票する。既存 Issue がある場合は参照・情報を追加する。
+- Issue には、背景・根拠・期待する振る舞い・影響範囲・検証条件を
+  記載し、関連する両リポジトリの Issue / PR を相互参照する。
+  AudioLens 側の作業が依存する場合は、その依存関係も記録する。
 - Ruviform が責務を持つ問題を、AudioLens 側だけの恒久的な
-  workaround や汎用コードの重複で隠さない。必要な一時回避は
-  理由・削除条件・Ruviform Issue の参照を記録する。
-  **他リポジトリへの実装変更**はそのリポジトリの作業契約・
-  レビュー手順に従い、AudioLens の変更から暗黙に行わない。
-- 方針: 高精度オフライン解析の汎用 API は Ruviform へ追加する。
-  メディアの入出力は Ruviform の抽象境界を使用し、解析に必要な
-  観測情報が不足する場合は Ruviform の I/O 契約を拡張する。
-  共通化の単位はクレート名や API 名ではなく、処理の意味・
-  不変条件・汎用性を基準に判断する。
-- 最終的には `al-viz` の派生 Visualization Dataset / 静的 HTML
-  レポート / Visualization Stage を廃止し、Ruviform の GUI 基盤を
-  使って AudioLens のデスクトップ GUI を実装する。削除は新 GUI が
-  検証された後に行う。Analysis Dataset・中間スペクトル・Feature・
-  Validity/Confidence/Provenance を削除しない。可搬な解析データ
-  export は可視化依存から切り離して保持する。
-- Ruviform は GUI のない CLI/headless アプリケーションの構築にも
-  利用できるよう拡張する。AudioLens の GUI と CLI は同じ非 UI
-  解析/Job サービスを共有し、CLI や core に WebView / GPU などの
-  GUI 依存を持ち込まない。詳細は AudioLens #95/#105/#106 と
-  Ruviform #155/#156/#157 の Issue を参照する。
+  回避策や重複実装で隠さない。一時的な回避策が必要な場合は、
+  理由・解消条件・関連 Issue を明記する。
+  他リポジトリの実装変更は、そのリポジトリの作業規約に従う。
 
 ## 環境とコマンド
 
