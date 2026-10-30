@@ -1,8 +1,10 @@
 # AGENTS.md
 
 `audio-lens`(AudioLens)は、ゲームのキャプチャ映像と比較用入力を
-アラインし、音声に何が起きたかを計測して構造化解析データと
-可視化用データを export する、ゲーム音声デバッグ解析ツール。
+アラインし、音声に何が起きたかを計測して構造化解析データを
+出力する、ゲーム音声デバッグ解析ツール。現行の可視化データ
+生成方式は移行期間のみ存在し、最終的には Ruviform ベースの
+GUI アプリケーションへ置き換える。
 設計・仕様などのドキュメントは `docs/` にまとめる。
 
 ## 作業範囲と完了条件
@@ -24,7 +26,9 @@
   その利用側アプリケーションとする。処理レベルで独立再利用できる
   数値演算・DSP・メディア I/O・データモデル等は Ruviform への
   配置を検討し、ゲーム音声デバッグ固有の locate 判断・解析
-  オーケストレーション・Job・Dataset・可視化は AudioLens に残す。
+  オーケストレーション・Job・Dataset・GUI の固有画面・操作の
+  意味論は AudioLens に残す。波形・スペクトログラム・時間軸等の
+  汎用的な描画・データ取得の処理は Ruviform へ移植する。
   責務と移行状況が未確定の既存実装を無条件に削除しない。
 - AudioLens の開発・調査・レビュー中に **Ruviform 側の不具合・
   契約違反・不足する汎用 API・改善案・機能提案**を発見した場合は、
@@ -48,6 +52,17 @@
   観測情報が不足する場合は Ruviform の I/O 契約を拡張する。
   共通化の単位はクレート名や API 名ではなく、処理の意味・
   不変条件・汎用性を基準に判断する。
+- 最終的には `al-viz` の派生 Visualization Dataset / 静的 HTML
+  レポート / Visualization Stage を廃止し、Ruviform の GUI 基盤を
+  使って AudioLens のデスクトップ GUI を実装する。削除は新 GUI が
+  検証された後に行う。Analysis Dataset・中間スペクトル・Feature・
+  Validity/Confidence/Provenance を削除しない。可搬な解析データ
+  export は可視化依存から切り離して保持する。
+- Ruviform は GUI のない CLI/headless アプリケーションの構築にも
+  利用できるよう拡張する。AudioLens の GUI と CLI は同じ非 UI
+  解析/Job サービスを共有し、CLI や core に WebView / GPU などの
+  GUI 依存を持ち込まない。詳細は AudioLens #95/#105/#106 と
+  Ruviform #155/#156/#157 の Issue を参照する。
 
 ## 環境とコマンド
 
