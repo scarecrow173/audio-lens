@@ -26,5 +26,7 @@
     "note": "al-math は pulp 実行時 SIMD dispatch のため bit-exact 契約は同一 CPU 機能レベルに限定"
   },
   "build_profile": "release (debug=true)",
-  "node": "v26.12.1"
+  "node": "v26.12.1",
+  "baseline_commit": "f346e5d84ba2933fab17dde4b11f8d77022bc52c",
+  "commit_note": "計測実行時点は f6a8037 + 未コミットの baseline tooling(dirty)。f6a8037..baseline_commit 間の差分は docs/tools/tests/baseline 出力のみで製品コード(al 実行バイナリのソース)に変更なし"
 }
