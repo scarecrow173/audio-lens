@@ -6,6 +6,11 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
 | TASK-034Gs7Y9aM823BFJ6lNIuO | AAC-LC MP4 fixture and ingest e2e tests | done | [aac-lc-mp4-fixture-and-ingest-e2e-tests.md](./aac-lc-mp4-fixture-and-ingest-e2e-tests.md) |
 | TASK-034HiHYbV7buE9EkLxWNbB | shape-adaptive NCC dispatch 実装 (issue #71 P3) | done | [adaptive-ncc-dispatch-issue-71-p3.md](./adaptive-ncc-dispatch-issue-71-p3.md) |
 | TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | done | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |
@@ -126,6 +131,7 @@ Directory: `docs/tasks`
 | TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | done | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
+| TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
