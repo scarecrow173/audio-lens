@@ -1,0 +1,14 @@
+# Ruviform(private repo)への Git 依存を解決するため、cargo の Git
+# 取得を system git に委譲する(組み込み libgit2 転送は Git
+# credential helper を使わず private HTTPS repo を認証できない)。
+# ローカルでは Git Credential Manager、CI では Deploy Key +
+# url.insteadOf 書換え( docs/designs/ruviform-dependency-ci.md §4、
+# docs/guides/ruviform-private-access-ci.md )が効く。
+[net]
+git-fetch-with-cli = true
+
+[env]
+# cargo の git checkout が依存 repo の LFS fixture(ruviform の音声
+# テスト資産)を引かないようにする。依存ビルドに必要なのは crate
+# ソースのみ。
+GIT_LFS_SKIP_SMUDGE = "1"

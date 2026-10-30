@@ -22,6 +22,8 @@ dependencies = [
  "al-media",
  "al-testkit",
  "criterion",
+ "ruviform-audio-analysis",
+ "ruviform-dsp",
  "serde",
  "serde_json",
  "tracing",
@@ -70,6 +72,7 @@ name = "al-job"
 version = "0.1.0"
 dependencies = [
  "al-core",
+ "ruviform-exec",
  "serde",
  "serde_json",
  "tracing",
@@ -86,6 +89,8 @@ dependencies = [
  "al-media",
  "al-testkit",
  "memmap2",
+ "ruviform-dsp",
+ "ruviform-math",
  "serde",
  "serde_json",
  "tracing",
@@ -106,6 +111,10 @@ dependencies = [
  "al-core",
  "al-job",
  "al-testkit",
+ "ruviform-audio-core",
+ "ruviform-media-core",
+ "ruviform-media-io",
+ "ruviform-video-core",
  "serde",
  "serde_json",
  "symphonia",
@@ -162,10 +171,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
+name = "arc-swap"
+version = "1.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "380962b3d93b99642e50b9febf72c071e97e8b32d86eae9cf4ef582bb960ae6e"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56"
+
+[[package]]
+name = "audio_thread_priority"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0b30b2f3d2da482d0faeaafd8f88a38fbc62abb58d3b402cfa195793f4c92ab"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "log",
+ "mach2",
+ "windows-sys",
+]
 
 [[package]]
 name = "autocfg"
@@ -379,6 +410,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "fearless_simd"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "629c9d6b6f30b5604089e0980f4d924a013aacb1654a6cdf5d3d852224f68651"
+
+[[package]]
+name = "fearless_simd_macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e91d94c6885390b81782d7ee60fd6583b33907333a8b340de25ccf468353315"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.6",
+]
+
+[[package]]
 name = "find-msvc-tools"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -468,6 +516,15 @@ name = "log"
 version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
+
+[[package]]
+name = "mach2"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d640282b302c0bb0a2a8e0233ead9035e3bed871f0b7e81fe4a1ec829765db44"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "matchers"
@@ -707,10 +764,94 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
+name = "rtrb"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5974e397833d890f2f74963408e0d4a6cd8eda2f6a445ae06750291b5d7a997e"
+
+[[package]]
 name = "rustversion"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+
+[[package]]
+name = "ruviform-audio-analysis"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "ruviform-audio-core",
+ "ruviform-dsp",
+ "ruviform-media-core",
+]
+
+[[package]]
+name = "ruviform-audio-core"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "ruviform-media-core",
+]
+
+[[package]]
+name = "ruviform-dsp"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "ruviform-audio-core",
+ "ruviform-math",
+ "ruviform-media-core",
+]
+
+[[package]]
+name = "ruviform-exec"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "audio_thread_priority",
+ "ruviform-rt",
+]
+
+[[package]]
+name = "ruviform-math"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "fearless_simd",
+ "fearless_simd_macros",
+]
+
+[[package]]
+name = "ruviform-media-core"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+
+[[package]]
+name = "ruviform-media-io"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "ruviform-audio-core",
+ "ruviform-media-core",
+ "ruviform-video-core",
+]
+
+[[package]]
+name = "ruviform-rt"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "arc-swap",
+ "rtrb",
+]
+
+[[package]]
+name = "ruviform-video-core"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+dependencies = [
+ "ruviform-media-core",
+]
 
 [[package]]
 name = "same-file"

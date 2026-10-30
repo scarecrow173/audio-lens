@@ -3,6 +3,7 @@ name = "al-viz"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 
 [dependencies]
 al-core.workspace = true
