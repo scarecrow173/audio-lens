@@ -1,0 +1,22 @@
+{
+  "inputs": [
+    {
+      "input_id": "IN-#1",
+      "role": "capture_bug",
+      "source_path": "<IN:capture_bug>",
+      "source_sha256": "82604eb38ac64130cdfb9a11ed946a6623bf1084d569460ce9c83c749664ba7b"
+    },
+    {
+      "input_id": "IN-#2",
+      "role": "capture_reference",
+      "source_path": "<IN:capture_reference>",
+      "source_sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
+    },
+    {
+      "input_id": "IN-#3",
+      "role": "source_asset",
+      "source_path": "<IN:source_asset>",
+      "source_sha256": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+    }
+  ]
+}

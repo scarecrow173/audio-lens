@@ -1,0 +1,2368 @@
+{
+  "job_id": "JOB-hOWuuND1bZP775mxLyCNnt",
+  "inputs": [
+    {
+      "input_id": "IN-0000000000000000000051",
+      "role": "capture_bug",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\clicks.avi",
+      "source_sha256": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d"
+    },
+    {
+      "input_id": "IN-0000000000000000000052",
+      "role": "capture_reference",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
+      "source_sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
+    },
+    {
+      "input_id": "IN-0000000000000000000053",
+      "role": "source_asset",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-bgm.wav",
+      "source_sha256": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+    }
+  ],
+  "config": {
+    "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
+    "dictionary_text": "{\n  \"version\": \"1\",\n  \"entries\": [\n    {\n      \"topic\": \"codec_hf_cutoff\",\n      \"matches\": { \"codec\": \"aac\" },\n      \"annotation\": {\n        \"kind\": \"expected_high_frequency_cutoff\",\n        \"expected_khz\": [15.0, 20.0],\n        \"note\": \"AAC エンコーダは設定次第で高域をローパスする。観測されたカットオフがこの範囲内なら録画アーティファクトと一致する可能性が高い\"\n      },\n      \"reference\": \"AAC encoder lowpass behavior (general knowledge)\"\n    },\n    {\n      \"topic\": \"codec_hf_cutoff\",\n      \"matches\": { \"codec\": \"mp3\" },\n      \"annotation\": {\n        \"kind\": \"expected_high_frequency_cutoff\",\n        \"expected_khz\": [15.0, 18.5],\n        \"note\": \"MP3 のビットレート依存の高域カットオフ\"\n      },\n      \"reference\": \"MP3 lowpass vs bitrate (general knowledge)\"\n    },\n    {\n      \"topic\": \"container_block_size\",\n      \"matches\": { \"codec\": \"aac\" },\n      \"annotation\": {\n        \"kind\": \"frame_block_size\",\n        \"samples_per_frame\": 1024,\n        \"note\": \"AAC-LC のフレーム長。エネルギーの周期性が 1024 サンプル境界に現れることがある\"\n      },\n      \"reference\": \"AAC-LC frame size\"\n    },\n    {\n      \"topic\": \"container_block_size\",\n      \"matches\": { \"codec\": \"mp3\" },\n      \"annotation\": {\n        \"kind\": \"frame_block_size\",\n        \"samples_per_frame\": 1152,\n        \"note\": \"MP3 のグラニュール/フレーム長\"\n      },\n      \"reference\": \"MP3 frame size\"\n    },\n    {\n      \"topic\": \"src_route\",\n      \"matches\": {},\n      \"annotation\": {\n        \"kind\": \"expected_sample_rate_route\",\n        \"note\": \"OS/キャプチャソフトは 44.1↔48kHz の SRC を挟むことがある。観測された SRC 痕跡(高域フィルタ特性・位相シフト)はこの経路と照合できる\"\n      },\n      \"reference\": null\n    },\n    {\n      \"topic\": \"lossy_codec_present\",\n      \"matches\": { \"codec\": \"aac\" },\n      \"annotation\": {\n        \"kind\": \"lossy_codec_present\",\n        \"note\": \"非可逆コーデック: 波形レベルの差分評価ではエンコード歪みを分けて考える\"\n      },\n      \"reference\": null\n    }\n  ]\n}\n"
+  },
+  "stages": [
+    {
+      "stage": "ingest",
+      "status": "completed",
+      "artifacts": [
+        "ART-H81qzEZK5sgZJ9UlALsVb1",
+        "ART-3CXSYOOuCSfRWXDWumDBnk",
+        "ART-lvOiSb1cfRQL7oZU7Z7B9Y",
+        "ART-f4LAp9382As0WXggchnTN8",
+        "ART-mR4E10LpWNp7FolgT8ueNj",
+        "ART-qlXTjxqTTOv2AVR4enPJIQ",
+        "ART-BVb6EWCzpA0OJQtW65GTl3",
+        "ART-ZRjKD0Tdc07b574hbwLyg8",
+        "ART-xCpneQANyohlNFlSPR8puH",
+        "ART-RRq6W3adjg9DRzMZDmBfxx"
+      ],
+      "error": null,
+      "duration_ms": 1148
+    },
+    {
+      "stage": "locate",
+      "status": "completed",
+      "artifacts": [
+        "ART-dmxqU4pLH9mjk9ubAJU8WY",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-KyfhfEohfeXG1rXpmpZupf",
+        "ART-QMvElYW5taaghxHZy3Fkht",
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-bwGPVFgBEykZ2ZxnfiU5MO",
+        "ART-6hsj3EpjdqwVrOJA90Sw2R",
+        "ART-ysSl5D7jqn3hllLfMqqzEY",
+        "ART-bihICF30z9rJHdqAjOAsER",
+        "ART-bmuJF2nOGMefgSZEEHKiRv",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ",
+        "ART-ViPXqFef0RPzfRw91zabIw",
+        "ART-aGdUPIx80WQaM20f0HiB8N"
+      ],
+      "error": null,
+      "duration_ms": 291214
+    },
+    {
+      "stage": "cheap_analysis",
+      "status": "completed",
+      "artifacts": [
+        "ART-WtdW2lMFXpvfAZfnwl4ZhG",
+        "ART-I2PKkhpNrgTbal6GMB0JNO",
+        "ART-GkTHVcS2dnggEXrwbHm42N"
+      ],
+      "error": null,
+      "duration_ms": 6714
+    },
+    {
+      "stage": "reference_analysis",
+      "status": "completed",
+      "artifacts": [
+        "ART-Q59hs1e5zWOHBMlPKOn8zS",
+        "ART-DsfwUcHYOAgv2iOE8qLE6G"
+      ],
+      "error": null,
+      "duration_ms": 92433
+    },
+    {
+      "stage": "expensive_analysis",
+      "status": "completed",
+      "artifacts": [
+        "ART-U1tk3d6W0TUTYIaBw2KcMT",
+        "ART-m7XJTTxnnFxbk9dkzg91Nz",
+        "ART-O7Juih1rMcAiURuYvUt7KF",
+        "ART-nu1MexU5o4C0E6MUYCvNWV",
+        "ART-hoBoXuLYysVlTMrHlxDuJc"
+      ],
+      "error": null,
+      "duration_ms": 6765
+    },
+    {
+      "stage": "dataset",
+      "status": "completed",
+      "artifacts": [
+        "ART-kNnRHDf0v58NgkhuiroWGQ",
+        "ART-BtC3I43GUS84qMIO2r62eJ",
+        "ART-jCn9RRpFddfUp4VNYZOLhb",
+        "ART-yvtSjYRjo4rS5dCJAmvQfv",
+        "ART-MSWpgVUU3PGWKaHGPg1GKE",
+        "ART-jPoGSBJO1qwfXOYKChPAht",
+        "ART-FdI25OKuf4fAzvFmgDdORG",
+        "ART-plS3ZPA2MqQh5m5B8U9vIx",
+        "ART-MrYSeSuu6vr3uzmhFKmKOV"
+      ],
+      "error": null,
+      "duration_ms": 260
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "ART-CH5ONzq8DM0dMGA3hVeyBL",
+      "role": "declared_input",
+      "path": "",
+      "produced_by": null,
+      "inputs": [],
+      "params": {
+        "input_id": "IN-0000000000000000000051",
+        "input_role": "capture_bug",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\clicks.avi",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\clicks.avi",
+        "source_sha256": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d"
+      }
+    },
+    {
+      "artifact_id": "ART-mh1fu7PAhUsBOlKDHypow0",
+      "role": "declared_input",
+      "path": "",
+      "produced_by": null,
+      "inputs": [],
+      "params": {
+        "input_id": "IN-0000000000000000000052",
+        "input_role": "capture_reference",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
+        "source_sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
+      }
+    },
+    {
+      "artifact_id": "ART-k5eHfwbWmG8cfoqodDvYmB",
+      "role": "declared_input",
+      "path": "",
+      "produced_by": null,
+      "inputs": [],
+      "params": {
+        "input_id": "IN-0000000000000000000053",
+        "input_role": "source_asset",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-bgm.wav",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-bgm.wav",
+        "source_sha256": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+      }
+    },
+    {
+      "artifact_id": "ART-H81qzEZK5sgZJ9UlALsVb1",
+      "role": "decoded_pcm",
+      "path": "inputs\\IN-0000000000000000000051\\decoded.f64le",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL"
+      ],
+      "params": {
+        "byte_len": 38403840,
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "sample_rate": 48000
+      }
+    },
+    {
+      "artifact_id": "ART-3CXSYOOuCSfRWXDWumDBnk",
+      "role": "video_features",
+      "path": "inputs\\IN-0000000000000000000051\\video_features.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL"
+      ],
+      "params": {
+        "codec": "rawvideo",
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "events": 29,
+        "frames": 502,
+        "status": "decoded",
+        "stream": 0
+      }
+    },
+    {
+      "artifact_id": "ART-lvOiSb1cfRQL7oZU7Z7B9Y",
+      "role": "video_thumbs",
+      "path": "inputs\\IN-0000000000000000000051\\video_thumbs.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL"
+      ],
+      "params": {
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "frames": 84,
+        "height": 90,
+        "width": 160
+      }
+    },
+    {
+      "artifact_id": "ART-f4LAp9382As0WXggchnTN8",
+      "role": "ingest_metadata",
+      "path": "inputs\\IN-0000000000000000000051\\metadata.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL"
+      ],
+      "params": {
+        "annotation_count": 1,
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
+        "dictionary_version": "1",
+        "source_hash": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d"
+      }
+    },
+    {
+      "artifact_id": "ART-mR4E10LpWNp7FolgT8ueNj",
+      "role": "decoded_pcm",
+      "path": "inputs\\IN-0000000000000000000052\\decoded.f64le",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0"
+      ],
+      "params": {
+        "byte_len": 38403840,
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "sample_rate": 48000
+      }
+    },
+    {
+      "artifact_id": "ART-qlXTjxqTTOv2AVR4enPJIQ",
+      "role": "video_features",
+      "path": "inputs\\IN-0000000000000000000052\\video_features.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0"
+      ],
+      "params": {
+        "codec": "rawvideo",
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "events": 29,
+        "frames": 502,
+        "status": "decoded",
+        "stream": 0
+      }
+    },
+    {
+      "artifact_id": "ART-BVb6EWCzpA0OJQtW65GTl3",
+      "role": "video_thumbs",
+      "path": "inputs\\IN-0000000000000000000052\\video_thumbs.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0"
+      ],
+      "params": {
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "frames": 84,
+        "height": 90,
+        "width": 160
+      }
+    },
+    {
+      "artifact_id": "ART-ZRjKD0Tdc07b574hbwLyg8",
+      "role": "ingest_metadata",
+      "path": "inputs\\IN-0000000000000000000052\\metadata.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0"
+      ],
+      "params": {
+        "annotation_count": 1,
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": null,
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 1,
+              "unavailable": null
+            },
+            {
+              "decoded": true,
+              "kind": "video",
+              "stream": 0,
+              "unavailable": null
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
+        "dictionary_version": "1",
+        "source_hash": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
+      }
+    },
+    {
+      "artifact_id": "ART-xCpneQANyohlNFlSPR8puH",
+      "role": "decoded_pcm",
+      "path": "inputs\\IN-0000000000000000000053\\decoded.f64le",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-k5eHfwbWmG8cfoqodDvYmB"
+      ],
+      "params": {
+        "byte_len": 35280000,
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": {
+                "kind": "capability",
+                "reason": "video decode unavailable"
+              },
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 0,
+              "unavailable": null
+            },
+            {
+              "decoded": false,
+              "kind": "video",
+              "stream": null,
+              "unavailable": {
+                "kind": "capability",
+                "reason": "video decode unavailable"
+              }
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "sample_rate": 44100
+      }
+    },
+    {
+      "artifact_id": "ART-RRq6W3adjg9DRzMZDmBfxx",
+      "role": "ingest_metadata",
+      "path": "inputs\\IN-0000000000000000000053\\metadata.json",
+      "produced_by": "ingest",
+      "inputs": [
+        "ART-k5eHfwbWmG8cfoqodDvYmB"
+      ],
+      "params": {
+        "annotation_count": 1,
+        "decoder": {
+          "attempts": [
+            {
+              "backend": "native",
+              "executed": true,
+              "outcome": "decoded",
+              "reason": {
+                "kind": "capability",
+                "reason": "video decode unavailable"
+              },
+              "version": "0.1.0"
+            }
+          ],
+          "backend": "native",
+          "fallback": false,
+          "request": {
+            "audio": true,
+            "audio_stream": null,
+            "timing": true,
+            "video": true,
+            "video_config": {
+              "luminance_step_threshold": 32.0,
+              "motion_min_run": 2,
+              "motion_threshold": 4.0,
+              "rois": [],
+              "scene_change_threshold": 40.0
+            },
+            "video_stream": null
+          },
+          "settings": {
+            "channel_layout": "unknown",
+            "pcm": "unscaled_interleaved_f64le",
+            "selection": "first_auds_first_vids_or_first_pcm_mp4",
+            "transforms": []
+          },
+          "source_hash": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f",
+          "streams": [
+            {
+              "decoded": true,
+              "kind": "audio",
+              "stream": 0,
+              "unavailable": null
+            },
+            {
+              "decoded": false,
+              "kind": "video",
+              "stream": null,
+              "unavailable": {
+                "kind": "capability",
+                "reason": "video decode unavailable"
+              }
+            }
+          ],
+          "version": "0.1.0"
+        },
+        "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
+        "dictionary_version": "1",
+        "source_hash": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+      }
+    },
+    {
+      "artifact_id": "ART-dmxqU4pLH9mjk9ubAJU8WY",
+      "role": "normalized_pcm",
+      "path": "locate/normalized/ART-dmxqU4pLH9mjk9ubAJU8WY.f64le",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-H81qzEZK5sgZJ9UlALsVb1",
+        "ART-f4LAp9382As0WXggchnTN8"
+      ],
+      "params": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38403840,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400240,
+        "input_id": "IN-0000000000000000000051",
+        "original_frames": 2400240,
+        "original_sample_rate": 48000,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "identity",
+          "algorithm_version": "1",
+          "antialias": false,
+          "clip": false,
+          "compensation_source_frames": 0,
+          "cutoff": 1.0,
+          "delay_source_frames": 0,
+          "down": 1,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 0,
+          "source_rate": 48000,
+          "target_rate": 48000,
+          "up": 1,
+          "window": "none"
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+      "role": "normalized_pcm",
+      "path": "locate/normalized/ART-XQD3Y4CmXgpfkLEp8qrs1Z.f64le",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-xCpneQANyohlNFlSPR8puH",
+        "ART-RRq6W3adjg9DRzMZDmBfxx"
+      ],
+      "params": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38400000,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400000,
+        "input_id": "IN-0000000000000000000053",
+        "original_frames": 2205000,
+        "original_sample_rate": 44100,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "polyphase-blackman-sinc",
+          "algorithm_version": "1",
+          "antialias": true,
+          "clip": false,
+          "compensation_source_frames": 32,
+          "cutoff": 0.94,
+          "delay_source_frames": 32,
+          "down": 147,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 32,
+          "source_rate": 44100,
+          "target_rate": 48000,
+          "up": 160,
+          "window": "blackman"
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-KyfhfEohfeXG1rXpmpZupf",
+      "role": "locate_evidence",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000051\\evidence.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY"
+      ],
+      "params": {
+        "capture_input_id": "IN-0000000000000000000051",
+        "channel_pairs": 16,
+        "source_input_id": "IN-0000000000000000000053"
+      }
+    },
+    {
+      "artifact_id": "ART-QMvElYW5taaghxHZy3Fkht",
+      "role": "time_map",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000051\\time_map.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY"
+      ],
+      "params": {
+        "capture_input_id": "IN-0000000000000000000051",
+        "source_input_id": "IN-0000000000000000000053"
+      }
+    },
+    {
+      "artifact_id": "ART-56kengWQf7WSe5LxjPqwHm",
+      "role": "locate_result",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000051\\result.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY"
+      ],
+      "params": {
+        "accepted": true,
+        "alignment_id": "ALN-M8P69FG4hZzadWt8K5Qm7t",
+        "capture_input_id": "IN-0000000000000000000051",
+        "source_input_id": "IN-0000000000000000000053",
+        "validity": "valid"
+      }
+    },
+    {
+      "artifact_id": "ART-bwGPVFgBEykZ2ZxnfiU5MO",
+      "role": "residual",
+      "path": "locate/residual/IN-0000000000000000000053_ART-bwGPVFgBEykZ2ZxnfiU5MO.wav",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY",
+        "ART-56kengWQf7WSe5LxjPqwHm"
+      ],
+      "params": {
+        "channel_transform": [
+          [
+            0.6136094791170039,
+            0.027753959320248742
+          ],
+          [
+            0.015650933183033316,
+            0.6291418785051464
+          ]
+        ],
+        "encoding": "wav-f64le",
+        "energy": {
+          "after": 0.13969100691182262,
+          "before": 0.1498405819755287
+        },
+        "original_capture_pcm": {
+          "artifact_id": "ART-dmxqU4pLH9mjk9ubAJU8WY",
+          "channels": 2,
+          "sample_rate": 48000
+        },
+        "parent_alignment": "ALN-M8P69FG4hZzadWt8K5Qm7t",
+        "parent_artifact": "ART-56kengWQf7WSe5LxjPqwHm",
+        "parent_source": "IN-0000000000000000000053",
+        "pcm": {
+          "amplitude_scale": "decoded-float-normalized",
+          "byte_len": 38403840,
+          "channels": 2,
+          "format": "interleaved-f64le",
+          "frames": 2400240,
+          "input_id": "IN-0000000000000000000051",
+          "original_frames": 2400240,
+          "original_sample_rate": 48000,
+          "sample_rate": 48000,
+          "time_origin_denominator": 1,
+          "time_origin_numerator": 0,
+          "transform": {
+            "algorithm_id": "identity",
+            "algorithm_version": "1",
+            "antialias": false,
+            "clip": false,
+            "compensation_source_frames": 0,
+            "cutoff": 1.0,
+            "delay_source_frames": 0,
+            "down": 1,
+            "endpoint_extension": "zero",
+            "output_length_rounding": "ceil",
+            "phase_normalization": "unit-dc",
+            "radius": 0,
+            "source_rate": 48000,
+            "target_rate": 48000,
+            "up": 1,
+            "window": "none"
+          }
+        },
+        "source_pcm": {
+          "artifact_id": "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+          "channels": 2,
+          "sample_rate": 48000
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-6hsj3EpjdqwVrOJA90Sw2R",
+      "role": "residual",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000051\\residual_IN-0000000000000000000053.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-bwGPVFgBEykZ2ZxnfiU5MO"
+      ],
+      "params": {
+        "channel_transform": [
+          [
+            0.6136094791170039,
+            0.027753959320248742
+          ],
+          [
+            0.015650933183033316,
+            0.6291418785051464
+          ]
+        ],
+        "child_accepted": false,
+        "child_source": "IN-0000000000000000000053",
+        "confidence": 0.03386791124904892,
+        "parent_alignment": "ALN-M8P69FG4hZzadWt8K5Qm7t",
+        "parent_source": "IN-0000000000000000000053",
+        "residual_pcm": {
+          "artifact_id": "ART-bwGPVFgBEykZ2ZxnfiU5MO",
+          "channels": 2,
+          "sample_rate": 48000
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-ysSl5D7jqn3hllLfMqqzEY",
+      "role": "normalized_pcm",
+      "path": "locate/normalized/ART-ysSl5D7jqn3hllLfMqqzEY.f64le",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-mR4E10LpWNp7FolgT8ueNj",
+        "ART-ZRjKD0Tdc07b574hbwLyg8"
+      ],
+      "params": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38403840,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400240,
+        "input_id": "IN-0000000000000000000052",
+        "original_frames": 2400240,
+        "original_sample_rate": 48000,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "identity",
+          "algorithm_version": "1",
+          "antialias": false,
+          "clip": false,
+          "compensation_source_frames": 0,
+          "cutoff": 1.0,
+          "delay_source_frames": 0,
+          "down": 1,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 0,
+          "source_rate": 48000,
+          "target_rate": 48000,
+          "up": 1,
+          "window": "none"
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-bihICF30z9rJHdqAjOAsER",
+      "role": "locate_evidence",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000052\\evidence.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY"
+      ],
+      "params": {
+        "capture_input_id": "IN-0000000000000000000052",
+        "channel_pairs": 16,
+        "source_input_id": "IN-0000000000000000000053"
+      }
+    },
+    {
+      "artifact_id": "ART-bmuJF2nOGMefgSZEEHKiRv",
+      "role": "time_map",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000052\\time_map.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY"
+      ],
+      "params": {
+        "capture_input_id": "IN-0000000000000000000052",
+        "source_input_id": "IN-0000000000000000000053"
+      }
+    },
+    {
+      "artifact_id": "ART-5kyGWmtOQglpfdXsZAHXXZ",
+      "role": "locate_result",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000052\\result.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY"
+      ],
+      "params": {
+        "accepted": true,
+        "alignment_id": "ALN-C1e7HdMy8aJK1J1VRFIhpa",
+        "capture_input_id": "IN-0000000000000000000052",
+        "source_input_id": "IN-0000000000000000000053",
+        "validity": "valid"
+      }
+    },
+    {
+      "artifact_id": "ART-ViPXqFef0RPzfRw91zabIw",
+      "role": "residual",
+      "path": "locate/residual/IN-0000000000000000000053_ART-ViPXqFef0RPzfRw91zabIw.wav",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ"
+      ],
+      "params": {
+        "channel_transform": [
+          [
+            0.6069650739362396,
+            0.01600714928768304
+          ],
+          [
+            0.010870755249262655,
+            0.6224542138837859
+          ]
+        ],
+        "encoding": "wav-f64le",
+        "energy": {
+          "after": 0.13944743756456435,
+          "before": 0.14952066431154026
+        },
+        "original_capture_pcm": {
+          "artifact_id": "ART-ysSl5D7jqn3hllLfMqqzEY",
+          "channels": 2,
+          "sample_rate": 48000
+        },
+        "parent_alignment": "ALN-C1e7HdMy8aJK1J1VRFIhpa",
+        "parent_artifact": "ART-5kyGWmtOQglpfdXsZAHXXZ",
+        "parent_source": "IN-0000000000000000000053",
+        "pcm": {
+          "amplitude_scale": "decoded-float-normalized",
+          "byte_len": 38403840,
+          "channels": 2,
+          "format": "interleaved-f64le",
+          "frames": 2400240,
+          "input_id": "IN-0000000000000000000052",
+          "original_frames": 2400240,
+          "original_sample_rate": 48000,
+          "sample_rate": 48000,
+          "time_origin_denominator": 1,
+          "time_origin_numerator": 0,
+          "transform": {
+            "algorithm_id": "identity",
+            "algorithm_version": "1",
+            "antialias": false,
+            "clip": false,
+            "compensation_source_frames": 0,
+            "cutoff": 1.0,
+            "delay_source_frames": 0,
+            "down": 1,
+            "endpoint_extension": "zero",
+            "output_length_rounding": "ceil",
+            "phase_normalization": "unit-dc",
+            "radius": 0,
+            "source_rate": 48000,
+            "target_rate": 48000,
+            "up": 1,
+            "window": "none"
+          }
+        },
+        "source_pcm": {
+          "artifact_id": "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+          "channels": 2,
+          "sample_rate": 48000
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-aGdUPIx80WQaM20f0HiB8N",
+      "role": "residual",
+      "path": "locate\\IN-0000000000000000000053\\IN-0000000000000000000052\\residual_IN-0000000000000000000053.json",
+      "produced_by": "locate",
+      "inputs": [
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ",
+        "ART-ViPXqFef0RPzfRw91zabIw"
+      ],
+      "params": {
+        "channel_transform": [
+          [
+            0.6069650739362396,
+            0.01600714928768304
+          ],
+          [
+            0.010870755249262655,
+            0.6224542138837859
+          ]
+        ],
+        "child_accepted": false,
+        "child_source": "IN-0000000000000000000053",
+        "confidence": 0.03368506551705591,
+        "parent_alignment": "ALN-C1e7HdMy8aJK1J1VRFIhpa",
+        "parent_source": "IN-0000000000000000000053",
+        "residual_pcm": {
+          "artifact_id": "ART-ViPXqFef0RPzfRw91zabIw",
+          "channels": 2,
+          "sample_rate": 48000
+        }
+      }
+    },
+    {
+      "artifact_id": "ART-WtdW2lMFXpvfAZfnwl4ZhG",
+      "role": "cheap_features",
+      "path": "analysis/features/cheap/IN-0000000000000000000051.json",
+      "produced_by": "cheap_analysis",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL"
+      ],
+      "params": {}
+    },
+    {
+      "artifact_id": "ART-I2PKkhpNrgTbal6GMB0JNO",
+      "role": "cheap_features",
+      "path": "analysis/features/cheap/IN-0000000000000000000052.json",
+      "produced_by": "cheap_analysis",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0"
+      ],
+      "params": {}
+    },
+    {
+      "artifact_id": "ART-GkTHVcS2dnggEXrwbHm42N",
+      "role": "cheap_features",
+      "path": "analysis/features/cheap/IN-0000000000000000000053.json",
+      "produced_by": "cheap_analysis",
+      "inputs": [
+        "ART-k5eHfwbWmG8cfoqodDvYmB"
+      ],
+      "params": {}
+    },
+    {
+      "artifact_id": "ART-Q59hs1e5zWOHBMlPKOn8zS",
+      "role": "reference_features",
+      "path": "analysis/features/reference/IN-0000000000000000000053__IN-0000000000000000000051.json",
+      "produced_by": "reference_analysis",
+      "inputs": [
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY"
+      ],
+      "params": {}
+    },
+    {
+      "artifact_id": "ART-DsfwUcHYOAgv2iOE8qLE6G",
+      "role": "reference_features",
+      "path": "analysis/features/reference/IN-0000000000000000000053__IN-0000000000000000000052.json",
+      "produced_by": "reference_analysis",
+      "inputs": [
+        "ART-5kyGWmtOQglpfdXsZAHXXZ",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY"
+      ],
+      "params": {}
+    },
+    {
+      "artifact_id": "ART-U1tk3d6W0TUTYIaBw2KcMT",
+      "role": "candidate_events",
+      "path": "analysis/events/candidates",
+      "produced_by": "expensive_analysis",
+      "inputs": [],
+      "params": {
+        "event_count": 32
+      }
+    },
+    {
+      "artifact_id": "ART-m7XJTTxnnFxbk9dkzg91Nz",
+      "role": "cross_capture_features",
+      "path": "analysis/features/cross_capture/IN-0000000000000000000052__IN-0000000000000000000051.json",
+      "produced_by": "expensive_analysis",
+      "inputs": [
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ"
+      ],
+      "params": {
+        "reference_capture_id": "IN-0000000000000000000052",
+        "target_capture_id": "IN-0000000000000000000051"
+      }
+    },
+    {
+      "artifact_id": "ART-O7Juih1rMcAiURuYvUt7KF",
+      "role": "expensive_features",
+      "path": "analysis/features/expensive/IN-0000000000000000000051__r000.json",
+      "produced_by": "expensive_analysis",
+      "inputs": [
+        "ART-H81qzEZK5sgZJ9UlALsVb1",
+        "ART-f4LAp9382As0WXggchnTN8",
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-dmxqU4pLH9mjk9ubAJU8WY"
+      ],
+      "params": {
+        "triggers": [
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-07d321a4074f",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-6b0b2c9fa225",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-39ffc4e34f67",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-65ac4b14aa02",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-ea0009baf7b0",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-deb89a6eefa6",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-59638aaa7237",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-12976cba227e",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-55a57e4162ed",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-7eadb8aa561a",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-0000000000000000000051-0ms-cb5c67b8e05c"
+        ]
+      }
+    },
+    {
+      "artifact_id": "ART-nu1MexU5o4C0E6MUYCvNWV",
+      "role": "expensive_features",
+      "path": "analysis/features/expensive/IN-0000000000000000000052__r000.json",
+      "produced_by": "expensive_analysis",
+      "inputs": [
+        "ART-mR4E10LpWNp7FolgT8ueNj",
+        "ART-ZRjKD0Tdc07b574hbwLyg8",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ",
+        "ART-XQD3Y4CmXgpfkLEp8qrs1Z",
+        "ART-ysSl5D7jqn3hllLfMqqzEY"
+      ],
+      "params": {
+        "triggers": [
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-d89e30e70a7e",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-50d12d799a1c",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-0f9c123cddc0",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-5308362f63b9",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-d920ffa90c34",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-aa0c5ebb1308",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-12d791b85b4a",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-d9643c5b4681",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-36f6b42f1e03",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-e8faa27df9ea",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-0000000000000000000052-0ms-02fd1907ea00"
+        ]
+      }
+    },
+    {
+      "artifact_id": "ART-hoBoXuLYysVlTMrHlxDuJc",
+      "role": "expensive_features",
+      "path": "analysis/features/expensive/IN-0000000000000000000053__r000.json",
+      "produced_by": "expensive_analysis",
+      "inputs": [
+        "ART-xCpneQANyohlNFlSPR8puH",
+        "ART-RRq6W3adjg9DRzMZDmBfxx"
+      ],
+      "params": {
+        "triggers": [
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-5024661057f5",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-ec5697a918e2",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-947ed5f6f1e7",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-ab1e85407451",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-997fe6e0d226",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-0c753d85cbd4",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-81afb1129216",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-a87d091752ca",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-b23751fd32d9",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-0000000000000000000053-0ms-5f717393b26f"
+        ]
+      }
+    },
+    {
+      "artifact_id": "ART-kNnRHDf0v58NgkhuiroWGQ",
+      "role": "analysis_dataset",
+      "path": "analysis",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-k5eHfwbWmG8cfoqodDvYmB",
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-f4LAp9382As0WXggchnTN8",
+        "ART-H81qzEZK5sgZJ9UlALsVb1",
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-ZRjKD0Tdc07b574hbwLyg8",
+        "ART-mR4E10LpWNp7FolgT8ueNj",
+        "ART-k5eHfwbWmG8cfoqodDvYmB",
+        "ART-RRq6W3adjg9DRzMZDmBfxx",
+        "ART-xCpneQANyohlNFlSPR8puH",
+        "ART-3CXSYOOuCSfRWXDWumDBnk",
+        "ART-lvOiSb1cfRQL7oZU7Z7B9Y",
+        "ART-qlXTjxqTTOv2AVR4enPJIQ",
+        "ART-BVb6EWCzpA0OJQtW65GTl3",
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ"
+      ],
+      "params": {
+        "artifact_count": 168,
+        "files": [
+          "events/candidates/algorithm_id/000000.bin",
+          "events/candidates/algorithm_version/000000.bin",
+          "events/candidates/channels/000000.bin",
+          "events/candidates/confidence/000000.bin",
+          "events/candidates/end_s/000000.bin",
+          "events/candidates/event_id/000000.bin",
+          "events/candidates/evidence/000000.bin",
+          "events/candidates/freq_hi_hz/000000.bin",
+          "events/candidates/freq_lo_hz/000000.bin",
+          "events/candidates/index.json",
+          "events/candidates/input_id/000000.bin",
+          "events/candidates/kind/000000.bin",
+          "events/candidates/params/000000.bin",
+          "events/candidates/schema.json",
+          "events/candidates/source_feature/000000.bin",
+          "events/candidates/start_s/000000.bin",
+          "events/candidates/strength/000000.bin",
+          "events/candidates/validity/000000.bin",
+          "features/cheap/IN-0000000000000000000051.json",
+          "features/cheap/IN-0000000000000000000051/ch0/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000051/ch0/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000051/ch0/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000051/ch0/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000051/ch1/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000051/ch1/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000051/ch1/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000051/ch1/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000051/onset_times/array.json",
+          "features/cheap/IN-0000000000000000000051/onset_times/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000052.json",
+          "features/cheap/IN-0000000000000000000052/ch0/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000052/ch0/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000052/ch0/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000052/ch0/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000052/ch1/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000052/ch1/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000052/ch1/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000052/ch1/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000052/onset_times/array.json",
+          "features/cheap/IN-0000000000000000000052/onset_times/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000053.json",
+          "features/cheap/IN-0000000000000000000053/ch0/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000053/ch0/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000053/ch0/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000053/ch0/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000053/ch1/level_trajectory/array.json",
+          "features/cheap/IN-0000000000000000000053/ch1/level_trajectory/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000053/ch1/spec_trajectories/array.json",
+          "features/cheap/IN-0000000000000000000053/ch1/spec_trajectories/chunks/0_0.bin",
+          "features/cheap/IN-0000000000000000000053/onset_times/array.json",
+          "features/cheap/IN-0000000000000000000053/onset_times/chunks/0_0.bin",
+          "features/cross_capture/IN-0000000000000000000052__IN-0000000000000000000051.json",
+          "features/expensive/IN-0000000000000000000051__r000.json",
+          "features/expensive/IN-0000000000000000000051__r000/time_map/array.json",
+          "features/expensive/IN-0000000000000000000051__r000/time_map/chunks/0_0.bin",
+          "features/expensive/IN-0000000000000000000052__r000.json",
+          "features/expensive/IN-0000000000000000000052__r000/time_map/array.json",
+          "features/expensive/IN-0000000000000000000052__r000/time_map/chunks/0_0.bin",
+          "features/expensive/IN-0000000000000000000053__r000.json",
+          "features/reference/IN-0000000000000000000053__IN-0000000000000000000051.json",
+          "features/reference/IN-0000000000000000000053__IN-0000000000000000000052.json",
+          "inputs/IN-0000000000000000000051.metadata.json",
+          "inputs/IN-0000000000000000000051.video_features.json",
+          "inputs/IN-0000000000000000000051.video_thumbs.json",
+          "inputs/IN-0000000000000000000051.wav",
+          "inputs/IN-0000000000000000000052.metadata.json",
+          "inputs/IN-0000000000000000000052.video_features.json",
+          "inputs/IN-0000000000000000000052.video_thumbs.json",
+          "inputs/IN-0000000000000000000052.wav",
+          "inputs/IN-0000000000000000000053.metadata.json",
+          "inputs/IN-0000000000000000000053.wav",
+          "inputs/declared.json",
+          "intermediate/IN-0000000000000000000051/ch0-ch1/coherence/array.json",
+          "intermediate/IN-0000000000000000000051/ch0-ch1/coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0-ch1/csd/array.json",
+          "intermediate/IN-0000000000000000000051/ch0-ch1/csd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/band_power/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/envelope/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/magnitude/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/power/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/psd/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_im/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/stft_re/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch0/third_octave/array.json",
+          "intermediate/IN-0000000000000000000051/ch0/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/band_power/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/envelope/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/magnitude/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/power/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/psd/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_im/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/stft_re/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000051/ch1/third_octave/array.json",
+          "intermediate/IN-0000000000000000000051/ch1/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0-ch1/coherence/array.json",
+          "intermediate/IN-0000000000000000000052/ch0-ch1/coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0-ch1/csd/array.json",
+          "intermediate/IN-0000000000000000000052/ch0-ch1/csd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/band_power/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/envelope/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/magnitude/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/power/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/psd/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_im/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/stft_re/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch0/third_octave/array.json",
+          "intermediate/IN-0000000000000000000052/ch0/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/band_power/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/envelope/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/magnitude/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/power/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/psd/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_im/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/stft_re/chunks/9_0.bin",
+          "intermediate/IN-0000000000000000000052/ch1/third_octave/array.json",
+          "intermediate/IN-0000000000000000000052/ch1/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0-ch1/coherence/array.json",
+          "intermediate/IN-0000000000000000000053/ch0-ch1/coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0-ch1/csd/array.json",
+          "intermediate/IN-0000000000000000000053/ch0-ch1/csd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/band_power/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch0/third_octave/array.json",
+          "intermediate/IN-0000000000000000000053/ch0/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/band_power/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/band_power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/envelope/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/magnitude/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/power/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/psd/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_im/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/5_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/6_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/7_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/stft_re/chunks/8_0.bin",
+          "intermediate/IN-0000000000000000000053/ch1/third_octave/array.json",
+          "intermediate/IN-0000000000000000000053/ch1/third_octave/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/band_gain_psd_ratio/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/band_gain_psd_ratio/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_gain/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_gain/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_lag/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_lag/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_start_samples/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_start_samples/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_support/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_0/band_support/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_gain/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_gain/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_lag/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_lag/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_start_samples/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_start_samples/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_support/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/channel_1/band_support/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/coherence/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/gain_trajectory/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/gain_trajectory/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/lag_trajectory/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/lag_trajectory/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/lr_band_coherence/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/lr_band_coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/psd_ratio/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/psd_ratio/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_detail/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_detail/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000051/transfer_h_t/chunks/4_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/band_gain_psd_ratio/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/band_gain_psd_ratio/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_gain/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_gain/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_lag/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_lag/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_start_samples/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_start_samples/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_support/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_0/band_support/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_correlation/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_correlation/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_gain/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_gain/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_lag/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_lag/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_start_samples/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_start_samples/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_support/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/channel_1/band_support/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/coherence/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/gain_trajectory/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/gain_trajectory/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/lag_trajectory/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/lag_trajectory/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/lr_band_coherence/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/lr_band_coherence/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/psd_ratio/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/psd_ratio/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_detail/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_detail/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/array.json",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/chunks/0_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/chunks/1_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/chunks/2_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/chunks/3_0.bin",
+          "intermediate/IN-0000000000000000000053__IN-0000000000000000000052/transfer_h_t/chunks/4_0.bin",
+          "intermediate/cross_capture/IN-0000000000000000000052__IN-0000000000000000000051/path_gain/array.json",
+          "intermediate/cross_capture/IN-0000000000000000000052__IN-0000000000000000000051/path_gain/chunks/0_0.bin",
+          "locate/IN-0000000000000000000053/IN-0000000000000000000051.json",
+          "locate/IN-0000000000000000000053/IN-0000000000000000000052.json",
+          "locate/summary/agreeing_methods/000000.bin",
+          "locate/summary/alignment_id/000000.bin",
+          "locate/summary/capture_end/000000.bin",
+          "locate/summary/capture_input_id/000000.bin",
+          "locate/summary/capture_start/000000.bin",
+          "locate/summary/confidence/000000.bin",
+          "locate/summary/index.json",
+          "locate/summary/schema.json",
+          "locate/summary/source_input_id/000000.bin",
+          "locate/summary/status/000000.bin",
+          "locate/summary/validity/000000.bin",
+          "manifest.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r0/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r1/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r2/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000051/r3/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r0/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r1/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r2/stft_re/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3.wav",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/band_energy/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/band_energy/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/psd/chunks/9_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/array.json",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/0_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/1_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/2_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/3_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/4_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/5_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/6_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/7_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/8_0.bin",
+          "residual/IN-0000000000000000000053__IN-0000000000000000000052/r3/stft_re/chunks/9_0.bin"
+        ],
+        "schema_version": 1
+      }
+    },
+    {
+      "artifact_id": "ART-BtC3I43GUS84qMIO2r62eJ",
+      "role": "dataset_manifest",
+      "path": "analysis/manifest.json",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-k5eHfwbWmG8cfoqodDvYmB",
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-f4LAp9382As0WXggchnTN8",
+        "ART-H81qzEZK5sgZJ9UlALsVb1",
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-ZRjKD0Tdc07b574hbwLyg8",
+        "ART-mR4E10LpWNp7FolgT8ueNj",
+        "ART-k5eHfwbWmG8cfoqodDvYmB",
+        "ART-RRq6W3adjg9DRzMZDmBfxx",
+        "ART-xCpneQANyohlNFlSPR8puH",
+        "ART-3CXSYOOuCSfRWXDWumDBnk",
+        "ART-lvOiSb1cfRQL7oZU7Z7B9Y",
+        "ART-qlXTjxqTTOv2AVR4enPJIQ",
+        "ART-BVb6EWCzpA0OJQtW65GTl3",
+        "ART-56kengWQf7WSe5LxjPqwHm",
+        "ART-5kyGWmtOQglpfdXsZAHXXZ"
+      ],
+      "params": {
+        "schema_version": 1
+      }
+    },
+    {
+      "artifact_id": "ART-jCn9RRpFddfUp4VNYZOLhb",
+      "role": "dataset_inputs",
+      "path": "analysis/inputs/declared.json",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-k5eHfwbWmG8cfoqodDvYmB"
+      ],
+      "params": {
+        "by_reference": true,
+        "input_count": 3
+      }
+    },
+    {
+      "artifact_id": "ART-yvtSjYRjo4rS5dCJAmvQfv",
+      "role": "dataset_input_audio",
+      "path": "analysis/inputs\\IN-0000000000000000000051.wav",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-H81qzEZK5sgZJ9UlALsVb1"
+      ],
+      "params": {
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "input_id": "IN-0000000000000000000051",
+        "sample_rate": 48000
+      }
+    },
+    {
+      "artifact_id": "ART-MSWpgVUU3PGWKaHGPg1GKE",
+      "role": "dataset_input_metadata",
+      "path": "analysis/inputs\\IN-0000000000000000000051.metadata.json",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-CH5ONzq8DM0dMGA3hVeyBL",
+        "ART-f4LAp9382As0WXggchnTN8"
+      ],
+      "params": {
+        "audio_available": true,
+        "input_id": "IN-0000000000000000000051"
+      }
+    },
+    {
+      "artifact_id": "ART-jPoGSBJO1qwfXOYKChPAht",
+      "role": "dataset_input_audio",
+      "path": "analysis/inputs\\IN-0000000000000000000052.wav",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-mR4E10LpWNp7FolgT8ueNj"
+      ],
+      "params": {
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "input_id": "IN-0000000000000000000052",
+        "sample_rate": 48000
+      }
+    },
+    {
+      "artifact_id": "ART-FdI25OKuf4fAzvFmgDdORG",
+      "role": "dataset_input_metadata",
+      "path": "analysis/inputs\\IN-0000000000000000000052.metadata.json",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-mh1fu7PAhUsBOlKDHypow0",
+        "ART-ZRjKD0Tdc07b574hbwLyg8"
+      ],
+      "params": {
+        "audio_available": true,
+        "input_id": "IN-0000000000000000000052"
+      }
+    },
+    {
+      "artifact_id": "ART-plS3ZPA2MqQh5m5B8U9vIx",
+      "role": "dataset_input_audio",
+      "path": "analysis/inputs\\IN-0000000000000000000053.wav",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-xCpneQANyohlNFlSPR8puH"
+      ],
+      "params": {
+        "channels": 2,
+        "codec": "pcm_s16le",
+        "input_id": "IN-0000000000000000000053",
+        "sample_rate": 44100
+      }
+    },
+    {
+      "artifact_id": "ART-MrYSeSuu6vr3uzmhFKmKOV",
+      "role": "dataset_input_metadata",
+      "path": "analysis/inputs\\IN-0000000000000000000053.metadata.json",
+      "produced_by": "dataset",
+      "inputs": [
+        "ART-k5eHfwbWmG8cfoqodDvYmB",
+        "ART-RRq6W3adjg9DRzMZDmBfxx"
+      ],
+      "params": {
+        "audio_available": true,
+        "input_id": "IN-0000000000000000000053"
+      }
+    }
+  ]
+}

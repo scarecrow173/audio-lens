@@ -1,7 +1,7 @@
 ---
 id: "TASK-034P51k4FtjAZkVTMWcZPl"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "pre-migration baseline の実装と実測"
 created: "2026-10-30"
 updated: "2026-10-31"

@@ -1,0 +1,401 @@
+{
+  "note": "Issue #98 pre-migration baseline の実行定義。各 run の入力・役割・固定 input-ids・stage 指定を記録する。詳細は docs/adr/pre-migration-baseline.md。",
+  "miseTools": {
+    "rust": "1.99.0",
+    "node": "26.12.1",
+    "biome": "2.6.2",
+    "prek": "0.5.7",
+    "git-lfs": "3.8.0"
+  },
+  "derivedInputs": {
+    "normal.avi": {
+      "source": "samples/reference/game-capture-normal.mp4",
+      "output": "samples/_runs/decoded/normal.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "dropout.avi": {
+      "source": "samples/dropout/game-capture-audio-dropout.mp4",
+      "output": "samples/_runs/decoded/dropout.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "desync.avi": {
+      "source": "samples/desync/game-capture-audio-desync.mp4",
+      "output": "samples/_runs/decoded/desync.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "clipping.avi": {
+      "source": "samples/clipping/game-capture-audio-clip.mp4",
+      "output": "samples/_runs/decoded/clipping.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "reverb.avi": {
+      "source": "samples/reverb/game-capture-audio-reverb.mp4",
+      "output": "samples/_runs/decoded/reverb.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "filter.avi": {
+      "source": "samples/filter/game-capture-audio-filter.mp4",
+      "output": "samples/_runs/decoded/filter.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "clicks.avi": {
+      "source": "samples/clicks/game-capture-audio-clicks.mp4",
+      "output": "samples/_runs/decoded/clicks.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    },
+    "test.avi": {
+      "source": "samples/test/game-capture-test.mp4",
+      "output": "samples/_runs/decoded/test.avi",
+      "args": [
+        "-y",
+        "-i",
+        "{in}",
+        "-r:v",
+        "10",
+        "-s",
+        "160x90",
+        "-c:v",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-c:a",
+        "pcm_s16le",
+        "-ar",
+        "48000",
+        "{out}"
+      ]
+    }
+  },
+  "inputs": {
+    "normal.avi": { "derived": "normal.avi", "role": "capture_reference" },
+    "dropout.avi": { "derived": "dropout.avi", "role": "capture_bug" },
+    "desync.avi": { "derived": "desync.avi", "role": "capture_bug" },
+    "clipping.avi": { "derived": "clipping.avi", "role": "capture_bug" },
+    "reverb.avi": { "derived": "reverb.avi", "role": "capture_bug" },
+    "filter.avi": { "derived": "filter.avi", "role": "capture_bug" },
+    "clicks.avi": { "derived": "clicks.avi", "role": "capture_bug" },
+    "test.avi": { "derived": "test.avi", "role": "capture_bug" },
+    "source-bgm.wav": { "path": "samples/reference/source-bgm.wav", "role": "source_asset" },
+    "source-impact_heavy.wav": {
+      "path": "samples/reference/source-impact_heavy.wav",
+      "role": "source_asset"
+    },
+    "source-kael_01.wav": { "path": "samples/reference/source-kael_01.wav", "role": "source_asset" }
+  },
+  "runs": [
+    {
+      "name": "canonical",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/dropout.avi",
+          "id": "IN-0000000000000000000001"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000002"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000003"
+        }
+      ],
+      "note": "samples/README.md の動作確認構成。全 stage。"
+    },
+    {
+      "name": "variant-desync",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/desync.avi",
+          "id": "IN-0000000000000000000011"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000012"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000013"
+        }
+      ],
+      "stages": "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset"
+    },
+    {
+      "name": "variant-clipping",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/clipping.avi",
+          "id": "IN-0000000000000000000021"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000022"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000023"
+        }
+      ],
+      "stages": "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset"
+    },
+    {
+      "name": "variant-reverb",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/reverb.avi",
+          "id": "IN-0000000000000000000031"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000032"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000033"
+        }
+      ],
+      "stages": "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset"
+    },
+    {
+      "name": "variant-filter",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/filter.avi",
+          "id": "IN-0000000000000000000041"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000042"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000043"
+        }
+      ],
+      "stages": "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset"
+    },
+    {
+      "name": "variant-clicks",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/clicks.avi",
+          "id": "IN-0000000000000000000051"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000052"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000053"
+        }
+      ],
+      "stages": "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,dataset"
+    },
+    {
+      "name": "small",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/test.avi",
+          "id": "IN-0000000000000000000061"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000062"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-impact_heavy.wav",
+          "id": "IN-0000000000000000000063"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-kael_01.wav",
+          "id": "IN-0000000000000000000064"
+        }
+      ],
+      "note": "多入力(複数 source_asset)経路を短時間で通す smoke"
+    },
+    {
+      "name": "resume",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/dropout.avi",
+          "id": "IN-0000000000000000000001"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000002"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000003"
+        }
+      ],
+      "resumeAfterStage": "locate",
+      "note": "locate Completed 境界で kill → al resume で完走。canonical と同一入力"
+    },
+    {
+      "name": "aa",
+      "inputs": [
+        {
+          "role": "capture_bug",
+          "path": "samples/_runs/decoded/dropout.avi",
+          "id": "IN-0000000000000000000001"
+        },
+        {
+          "role": "capture_reference",
+          "path": "samples/_runs/decoded/normal.avi",
+          "id": "IN-0000000000000000000002"
+        },
+        {
+          "role": "source_asset",
+          "path": "samples/reference/source-bgm.wav",
+          "id": "IN-0000000000000000000003"
+        }
+      ],
+      "note": "canonical と同一入力の 2 回目(A/A 決定性確認)"
+    }
+  ]
+}

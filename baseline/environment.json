@@ -1,0 +1,30 @@
+{
+  "recorded_at": "2026-10-30T20:59:15.640Z",
+  "commit": "f6a8037b2ada0aa7eb769e8c4821054855a6e409",
+  "branch": "scarecrow173/geoduck",
+  "worktree_dirty": true,
+  "rust": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)"
+  },
+  "mise_tools": {
+    "rust": "1.99.0",
+    "node": "26.12.1",
+    "biome": "2.6.2",
+    "prek": "0.5.7",
+    "git-lfs": "3.8.0"
+  },
+  "ffmpeg": {
+    "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers\r",
+    "path": "C:\\Users\\akiyoshi\\AppData\\Local\\mise\\installs\\ffmpeg\\9.0.2\\.mise-bins\\ffmpeg.cmd\r\nC:\\Users\\akiyoshi\\AppData\\Local\\mise\\shims\\ffmpeg.exe",
+    "note": "repo toolchain 外。派生 AVI 生成のみに使用(比較契約外)"
+  },
+  "os": "Windows_NT 10.0.26200 x64",
+  "cpu": {
+    "model": "Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz",
+    "cores": 16,
+    "note": "al-math は pulp 実行時 SIMD dispatch のため bit-exact 契約は同一 CPU 機能レベルに限定"
+  },
+  "build_profile": "release (debug=true)",
+  "node": "v26.12.1"
+}
