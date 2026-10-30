@@ -6,6 +6,12 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034P51k4FtjAZkVTMWcZPl | pre-migration baseline の実装と実測 | todo | [pre-migration-baseline.md](./pre-migration-baseline.md) |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
 | TASK-034Gs7Y9aM823BFJ6lNIuO | AAC-LC MP4 fixture and ingest e2e tests | done | [aac-lc-mp4-fixture-and-ingest-e2e-tests.md](./aac-lc-mp4-fixture-and-ingest-e2e-tests.md) |
 | TASK-034HiHYbV7buE9EkLxWNbB | shape-adaptive NCC dispatch 実装 (issue #71 P3) | done | [adaptive-ncc-dispatch-issue-71-p3.md](./adaptive-ncc-dispatch-issue-71-p3.md) |
 | TASK-034EpPeS7I91EbO1Kzjqwr | al-analysis: dsp ファサード経由の vec プリミティブ移行 | done | [al-analysis-vec-migration.md](./al-analysis-vec-migration.md) |

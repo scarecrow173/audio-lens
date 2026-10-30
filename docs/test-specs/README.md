@@ -30,6 +30,7 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
+| TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | draft | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-034FPu2UHR9IyKz1LxreDD | Issue 33 正式保存仕様と維持契約 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

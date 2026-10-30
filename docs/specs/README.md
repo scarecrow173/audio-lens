@@ -27,6 +27,7 @@ Directory: `docs/specs`
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
+| SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | draft | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
 | SPEC-034yYlsZHRt4b5fTzZS7Qr | マルチメソッドソース定位 | proposed | [source-localization.md](./source-localization.md) |
