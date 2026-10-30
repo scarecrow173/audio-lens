@@ -15,7 +15,6 @@ relations:
     - "../../crates/al-locate/examples/bench_locate_prepared.rs"
     - "../../crates/al-locate/examples/bench_ncc.rs"
     - "../../crates/al-math/examples/bench_correlation.rs"
-    - "../../target/report-logging-profile-survey.html"
   changes:
     added: []
     modified: []
