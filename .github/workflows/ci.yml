@@ -1,0 +1,118 @@
+name: ci
+
+# Manual verification workflow. Intentionally dispatch-only: run it from the
+# Actions tab after this file is merged into the default branch.
+# Private ruviform git dependencies require the RUVIFORM_DEPLOY_KEY
+# repository secret (read-only Deploy Key) — setup and local verification:
+# docs/guides/ruviform-private-access-ci.md
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Keep sibling OS jobs running so a manual verification run reports
+      # the result for every platform even if one of them fails.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      # `lfs: true` restores the LFS-backed media fixtures the workspace
+      # tests consume.
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          lfs: true
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.0
+
+      - name: Restore tools from mise.lock
+        run: |
+          mise trust
+          mise install --locked
+
+      - name: Restore cargo registry/git index cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Verify pinned toolchain resolution
+        run: mise run verify-toolchain
+
+      # Read-only Deploy Key for the private ruviform repository.
+      # The key material is written to a RUNNER_TEMP file (never echoed),
+      # GitHub's published SSH host keys are pinned via known_hosts, and
+      # url.insteadOf rewrites only the ruviform HTTPS URL to SSH.
+      - name: Configure read-only access to private ruviform dependency
+        shell: bash
+        env:
+          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RUVIFORM_DEPLOY_KEY:-}" ]; then
+            echo "::error::RUVIFORM_DEPLOY_KEY secret is not set; see docs/guides/ruviform-private-access-ci.md"
+            exit 1
+          fi
+          # Forward slashes keep the path usable by both msys and
+          # Win32-OpenSSH on Windows runners.
+          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+          chmod 600 "$key"
+          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+          curl -fsSL https://api.github.com/meta \
+            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+          test -s "$known_hosts"
+          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+      # Probe auth before cargo fetch so a credential failure is
+      # distinguishable from a manifest/lock problem.
+      - name: Probe private ruviform access
+        shell: bash
+        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+      # GIT_LFS_SKIP_SMUDGE: ruviform's LFS payloads (fixtures) are not
+      # needed to compile its crates; skipping smudge keeps the git
+      # checkout independent of LFS auth on the private repo.
+      - name: Fetch locked dependencies (including private git deps)
+        run: mise exec -- cargo fetch --locked
+        env:
+          GIT_LFS_SKIP_SMUDGE: "1"
+
+      - name: Check config files with prek
+        run: mise exec -- prek run --all-files
+
+      - name: Check formatting (mise run fmt)
+        run: mise run fmt
+
+      - name: Type-check workspace (mise run check-ci)
+        run: mise run check-ci
+
+      - name: Lint workspace (mise run lint-ci)
+        run: mise run lint-ci
+
+      - name: Test workspace (mise run test-ci)
+        run: mise run test-ci
+
+      # Headless artifact lane: al-cli must stay free of GUI/WebView/GPU
+      # deps (ruviform #155/#156/#157 boundary). The guard below fails
+      # the job if any such crate enters its dependency tree.
+      - name: Build headless CLI artifact
+        run: mise exec -- cargo build -p al-cli --profile ci
+
+      - name: Verify headless dependency boundary
+        run: mise run check-cli-headless
