@@ -70,3 +70,7 @@ run = [
 [tasks.fmt]
 description = "cargo fmt --all -- --check"
 run = "cargo fmt --all -- --check"
+
+[tasks.baseline]
+description = "Issue #98 pre-migration baseline の計測・収集(tools/baseline)"
+run = "node tools/baseline/capture.mjs"
