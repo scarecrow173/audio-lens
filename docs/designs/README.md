@@ -32,6 +32,7 @@ Directory: `docs/designs`
 | DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | draft | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | DESIGN-034DlyKvtWhb8oy1WLAsPV | 残存課題の責務境界と検証設計 | approved | [residual-fixes.md](./residual-fixes.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
+| DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | DESIGN-034FPeXgGtwiUXHI98tTsU | Issue 33 確定仕様の文書適用設計 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

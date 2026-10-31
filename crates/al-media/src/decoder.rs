@@ -161,6 +161,16 @@ impl DecoderRegistry {
         }
     }
 
+    /// Issue #100 ingest registry: the Ruviform media-I/O backend is
+    /// the decoder of record. Native parsers remain inside the backend
+    /// for container-fact observation only; the old direct Symphonia
+    /// fallback is replaced by `ruviform-io-symphonia`'s AAC decode.
+    pub fn ruviform() -> Self {
+        Self {
+            backends: vec![Box::new(crate::ruviform_backend::RuviformDecoder)],
+        }
+    }
+
     pub fn register(&mut self, backend: Box<dyn MediaDecoder>) -> Result<(), MediaError> {
         if self.backends.iter().any(|b| b.id() == backend.id()) {
             return Err(MediaError::input_unavailable(

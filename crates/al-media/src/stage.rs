@@ -104,10 +104,11 @@ impl IngestStage {
             video_config: video_cfg.clone(),
             ..Default::default()
         };
-        let mut registry = DecoderRegistry::native();
-        registry
-            .register(Box::new(crate::symphonia::SymphoniaDecoder))
-            .map_err(|e| StageError::new(StageKind::Ingest, e.to_string()))?;
+        // Issue #100: ingest decode goes through the Ruviform media-I/O
+        // backends; container-fact observation stays on the AudioLens
+        // parsers (boundary documented in ruviform_backend.rs, tracked
+        // for removal by Issue #104).
+        let registry = DecoderRegistry::ruviform();
         let media = registry.decode(&bytes, &request).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("{}: {e}", input.path.display()))
         })?;
