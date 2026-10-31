@@ -105,15 +105,17 @@ impl Stage for CheapAnalysisStage {
                 let mut provenance = prov(input, ctx);
                 provenance.algorithm_id = "video.roi_luminance.v1".into();
                 provenance.parents = lineage.clone();
-                provenance.params = video_features
-                    .as_ref()
-                    .and_then(|v| match v {
-                        al_media::video::VideoFeatureArtifact::Decoded(v) => {
-                            serde_json::to_value(&v.params).ok()
-                        }
-                        _ => None,
-                    })
-                    .unwrap_or_else(|| serde_json::json!({}));
+                provenance.params = crate::records::with_ruviform_stamp(
+                    video_features
+                        .as_ref()
+                        .and_then(|v| match v {
+                            al_media::video::VideoFeatureArtifact::Decoded(v) => {
+                                serde_json::to_value(&v.params).ok()
+                            }
+                            _ => None,
+                        })
+                        .unwrap_or_else(|| serde_json::json!({})),
+                );
                 write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
             }
             let Some(dec) = decoded else {
@@ -137,7 +139,7 @@ impl Stage for CheapAnalysisStage {
                     support_count: 0,
                     algorithm_id: "cheap.v1".into(),
                     algorithm_version: "1".into(),
-                    params: serde_json::json!({}),
+                    params: crate::records::ruviform_params(),
                     input_id: input.input_id.to_string(),
                     alignment_id: None,
                     lineage: Vec::new(),
@@ -152,6 +154,7 @@ impl Stage for CheapAnalysisStage {
                     &av_cfg,
                     lineage,
                 ));
+                crate::records::stamp_feature_records(&mut all);
                 writer
                     .write_json(
                         "features/cheap",
@@ -191,6 +194,7 @@ impl Stage for CheapAnalysisStage {
             for tensor in &out.tensors {
                 write_tensor(&mut writer, tensor, prov_dec(&dec), chunk_bytes).map_err(err)?;
             }
+            crate::records::stamp_feature_records(&mut out.records);
             writer
                 .write_json(
                     "features/cheap",
@@ -312,16 +316,16 @@ impl Stage for ReferenceAnalysisStage {
                 input_id = %result.source_input_id,
                 len = aligned.src.first().map_or(0, |c| c.len())
             );
-            let out = span.in_scope(|| {
+            let mut out = span.in_scope(|| {
                 reference::analyze_pair(&pair, &result.alignment_id, &aligned, upstream, &cfg)
             });
             let tensor_prov = al_dataset::provenance::Provenance {
                 input_id: result.source_input_id.clone(),
                 algorithm_id: "reference.v1".into(),
                 algorithm_version: "1".into(),
-                params: serde_json::json!({
+                params: crate::records::with_ruviform_stamp(serde_json::json!({
                     "capture_input_id": result.capture_input_id,
-                }),
+                })),
                 alignment_id: Some(result.alignment_id.to_string()),
                 parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
             };
@@ -332,7 +336,9 @@ impl Stage for ReferenceAnalysisStage {
                     .starts_with(&format!("intermediate/{pair}/channel_"))
                 {
                     provenance.algorithm_id = "reference.band_lag_ls.v1".into();
-                    provenance.params = crate::band_gain::parameters(&cfg, aligned.rate);
+                    provenance.params = crate::records::with_ruviform_stamp(
+                        crate::band_gain::parameters(&cfg, aligned.rate),
+                    );
                     provenance.params["capture_input_id"] =
                         serde_json::json!(result.capture_input_id);
                 }
@@ -351,15 +357,16 @@ impl Stage for ReferenceAnalysisStage {
                             input_id: result.source_input_id.clone(),
                             algorithm_id: "reference.v1".into(),
                             algorithm_version: "1".into(),
-                            params: serde_json::json!({
+                            params: crate::records::with_ruviform_stamp(serde_json::json!({
                                 "capture_input_id": result.capture_input_id,
-                            }),
+                            })),
                             alignment_id: Some(result.alignment_id.to_string()),
                             parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                         },
                     )
                     .map_err(err)?;
             }
+            crate::records::stamp_feature_records(&mut out.records);
             writer
                 .write_json(
                     "features/reference",
@@ -369,7 +376,7 @@ impl Stage for ReferenceAnalysisStage {
                         input_id: result.source_input_id.clone(),
                         algorithm_id: "reference.v1".into(),
                         algorithm_version: "1".into(),
-                        params: serde_json::json!({}),
+                        params: crate::records::ruviform_params(),
                         alignment_id: Some(result.alignment_id.to_string()),
                         parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                     },
@@ -381,7 +388,7 @@ impl Stage for ReferenceAnalysisStage {
                 path: PathBuf::from(format!("analysis/{feature_path}.json")),
                 produced_by: Some(StageKind::ReferenceAnalysis),
                 inputs: lineage,
-                params: serde_json::json!({}),
+                params: crate::records::ruviform_params(),
             });
         }
 
@@ -492,7 +499,9 @@ impl Stage for ExpensiveAnalysisStage {
                     input_id: "job".into(),
                     algorithm_id: "events.v1".into(),
                     algorithm_version: "1".into(),
-                    params: serde_json::to_value(&c_cfg).unwrap_or_default(),
+                    params: crate::records::with_ruviform_stamp(
+                        serde_json::to_value(&c_cfg).unwrap_or_default(),
+                    ),
                     alignment_id: None,
                     parents: scanned,
                 },
@@ -504,7 +513,9 @@ impl Stage for ExpensiveAnalysisStage {
             path: PathBuf::from("analysis/events/candidates"),
             produced_by: Some(StageKind::ExpensiveAnalysis),
             inputs: Vec::new(),
-            params: serde_json::json!({"event_count": all_events.len()}),
+            params: crate::records::with_ruviform_stamp(
+                serde_json::json!({"event_count": all_events.len()}),
+            ),
         });
 
         // 2. Plan triggered regions per input and deep-analyze them.
@@ -602,11 +613,12 @@ impl Stage for ExpensiveAnalysisStage {
         });
         for (i, reference) in captures.iter().enumerate() {
             for target in &captures[i + 1..] {
-                let (comparison, tensor) = crate::calibration::compare(
+                let (mut comparison, tensor) = crate::calibration::compare(
                     reference.input_id.as_str(),
                     target.input_id.as_str(),
                     &calibration_evidence,
                 );
+                crate::records::stamp_feature_records(&mut comparison.records);
                 let name = format!("{}__{}", reference.input_id, target.input_id);
                 let provenance = al_dataset::provenance::Provenance {
                     input_id: "job".into(),
@@ -643,7 +655,7 @@ impl Stage for ExpensiveAnalysisStage {
                         })
                         .map(|(a, _, _)| a.artifact_id.clone())
                         .collect(),
-                    params: serde_json::json!({"reference_capture_id": reference.input_id, "target_capture_id": target.input_id}),
+                    params: crate::records::with_ruviform_stamp(serde_json::json!({"reference_capture_id": reference.input_id, "target_capture_id": target.input_id})),
                 });
             }
         }
@@ -742,7 +754,7 @@ impl Stage for ExpensiveAnalysisStage {
                 .collect();
             for (i, region) in regions.iter().enumerate() {
                 let name = format!("{input_id}__r{i:03}");
-                let out = expensive::analyze_region(
+                let mut out = expensive::analyze_region(
                     &input_id,
                     &name,
                     &chans,
@@ -752,13 +764,14 @@ impl Stage for ExpensiveAnalysisStage {
                     pairs.get(&input_id),
                     &e_cfg,
                 );
+                crate::records::stamp_feature_records(&mut out.records);
                 let prov = al_dataset::provenance::Provenance {
                     input_id: input_id.clone(),
                     algorithm_id: "expensive.v1".into(),
                     algorithm_version: "1".into(),
-                    params: serde_json::json!({
+                    params: crate::records::with_ruviform_stamp(serde_json::json!({
                         "triggers": region.triggers,
-                    }),
+                    })),
                     alignment_id: None,
                     parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
                 };
@@ -783,7 +796,9 @@ impl Stage for ExpensiveAnalysisStage {
                     path: PathBuf::from(format!("analysis/features/expensive/{name}.json")),
                     produced_by: Some(StageKind::ExpensiveAnalysis),
                     inputs: lineage.clone(),
-                    params: serde_json::json!({"triggers": region.triggers}),
+                    params: crate::records::with_ruviform_stamp(
+                        serde_json::json!({"triggers": region.triggers}),
+                    ),
                 });
             }
         }
@@ -1051,7 +1066,7 @@ fn prov(
         input_id: input.input_id.to_string(),
         algorithm_id: "cheap.v1".into(),
         algorithm_version: "1".into(),
-        params: serde_json::json!({}),
+        params: crate::records::ruviform_params(),
         alignment_id: None,
         parents,
     }
@@ -1062,7 +1077,7 @@ fn prov_dec(dec: &al_locate::decode::DecodedInput) -> al_dataset::provenance::Pr
         input_id: dec.input_id.clone(),
         algorithm_id: "cheap.v1".into(),
         algorithm_version: "1".into(),
-        params: serde_json::json!({}),
+        params: crate::records::ruviform_params(),
         alignment_id: None,
         parents: dec
             .artifact_ids
@@ -1084,7 +1099,7 @@ fn artifact(ctx: &StageContext<'_>, path: &str, input: &al_job::job::JobInput) -
         path: PathBuf::from(format!("analysis/{path}.json")),
         produced_by: Some(StageKind::CheapAnalysis),
         inputs,
-        params: serde_json::json!({}),
+        params: crate::records::ruviform_params(),
     }
 }
 
@@ -1143,7 +1158,7 @@ mod tests {
             input_id: "in".into(),
             algorithm_id: "reference.v1".into(),
             algorithm_version: "1".into(),
-            params: serde_json::json!({}),
+            params: crate::records::ruviform_params(),
             alignment_id: Some("aln-x".into()),
             parents: vec!["ART-parent".into()],
         };

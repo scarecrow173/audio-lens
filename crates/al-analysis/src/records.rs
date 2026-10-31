@@ -92,6 +92,46 @@ pub fn propagate_confidence(upstream: Confidence, own: Confidence) -> Confidence
     upstream.min(own)
 }
 
+/// 解析 stage が依存する ruviform 群の識別 stamp(#117)。
+/// rev の導出は `al_core::RUVIFORM_REV`(Cargo.lock 解析)の単一経路のみを
+/// 使う。precision は ruviform の f64 scalar 評価契約を表し、crates は
+/// stage が利用する ruviform 依存を列挙した主要パラメータである。
+pub fn ruviform_stamp() -> serde_json::Value {
+    serde_json::json!({
+        "rev": al_core::RUVIFORM_REV,
+        "precision": "f64",
+        "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric",
+        ],
+    })
+}
+
+/// params object へ `ruviform` stamp を挿入して返す。
+/// params は常に JSON object でなければならない(空 object も可)。
+pub fn with_ruviform_stamp(mut params: serde_json::Value) -> serde_json::Value {
+    params
+        .as_object_mut()
+        .expect("artifact params must be a JSON object")
+        .insert("ruviform".into(), ruviform_stamp());
+    params
+}
+
+/// `ruviform` stamp のみを持つ params object。
+pub fn ruviform_params() -> serde_json::Value {
+    with_ruviform_stamp(serde_json::json!({}))
+}
+
+/// artifact 書き出し直前に全 `FeatureRecord` の params へ `ruviform`
+/// stamp を記録する。measure 層が params を上書きするため record 構築
+/// 時点ではなくここで一括適用する。
+pub fn stamp_feature_records(records: &mut [FeatureRecord]) {
+    for r in records {
+        r.params["ruviform"] = ruviform_stamp();
+    }
+}
+
 /// Builder for `FeatureRecord`s with the shared fields pre-filled.
 pub struct RecordBuilder {
     input_id: String,
@@ -236,6 +276,46 @@ mod tests {
             propagate_confidence(Confidence::Medium, Confidence::High),
             Confidence::Medium
         );
+    }
+
+    #[test]
+    fn ruviform_stamp_records_dependency_identity() {
+        let stamp = ruviform_stamp();
+        assert_eq!(stamp["rev"], al_core::RUVIFORM_REV);
+        assert_eq!(stamp["precision"], "f64");
+        assert!(
+            stamp["crates"]
+                .as_array()
+                .unwrap()
+                .contains(&serde_json::json!("ruviform-numeric"))
+        );
+        assert_eq!(stamp, ruviform_stamp());
+    }
+
+    #[test]
+    fn stamp_feature_records_preserves_existing_params() {
+        let mut r = RecordBuilder::new("IN-1", "cheap.v1", ResolutionClass::Segment).scalar(
+            "rms",
+            -12.0,
+            "dbfs",
+            None,
+            Confidence::High,
+            Validity::Valid,
+            None,
+            10,
+        );
+        r.params = serde_json::json!({"region_s": [0.0, 1.0]});
+        let mut records = vec![r];
+        stamp_feature_records(&mut records);
+        assert_eq!(records[0].params["ruviform"]["rev"], al_core::RUVIFORM_REV);
+        assert_eq!(records[0].params["region_s"], serde_json::json!([0.0, 1.0]));
+    }
+
+    #[test]
+    fn with_ruviform_stamp_requires_object_params() {
+        let params = with_ruviform_stamp(serde_json::json!({"event_count": 3}));
+        assert_eq!(params["event_count"], 3);
+        assert_eq!(params["ruviform"]["precision"], "f64");
     }
 
     #[test]
