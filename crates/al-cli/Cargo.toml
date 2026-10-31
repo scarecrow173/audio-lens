@@ -7,17 +7,16 @@ publish.workspace = true
 
 [dependencies]
 al-core.workspace = true
-al-job.workspace = true
-al-media.workspace = true
-al-dataset.workspace = true
-al-locate.workspace = true
-al-analysis.workspace = true
-al-viz.workspace = true
+al-service.workspace = true
 al-observability.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
 
+# テスト・example 用の fixture/in-process stage 参照。binary 本体は
+# al-service 経由に限定する(GUI/CLI で同一 Job 層を共有するため)。
 [dev-dependencies]
+al-job.workspace = true
+al-media.workspace = true
 al-testkit.workspace = true
 tracing-subscriber.workspace = true
 
