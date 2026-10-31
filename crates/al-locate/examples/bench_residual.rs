@@ -4,7 +4,7 @@
 //!
 //! Measures both loop variants on the same representative fixture in one
 //! process — the current transposed-access `*v -= Σ_s m·s[t]` gather, and
-//! the per-source `dsp::sub_scaled(cap, m, s)` reorganization — then checks
+//! the per-source `vec::sub_scaled(cap, m, s)` reorganization — then checks
 //! the elementwise equivalence predicate |a-b| <= 1e-12*max(1,|a|,|b|).
 
 use std::hint::black_box;
@@ -41,7 +41,7 @@ fn reorg_subtract(src: &[Vec<f64>], capture: &[Vec<f64>], matrix: &[Vec<f64>]) -
     let mut residual = capture.to_vec();
     for (cap, row) in residual.iter_mut().zip(matrix) {
         for (s, &m) in src.iter().zip(row) {
-            al_locate::dsp::sub_scaled(cap, m, s);
+            ruviform_numeric::vec::sub_scaled(cap, m, s).expect("equal slice lengths");
         }
     }
     residual

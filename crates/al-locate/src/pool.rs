@@ -1,6 +1,6 @@
 //! ワーカー単位で所有する形状キー相関プール。
 //!
-//! `dsp::ncc`/`dsp::gcc_phat` フリー関数は呼出ごとに
+//! `corr::ncc`/`corr::gcc_phat` フリー関数は呼出ごとに
 //! `CorrelationPlan`(FFT twiddle 構築)と `CorrelationWorkspace`
 //! (O(n) バッファ群)を再構築し、返却のために曲線全体を `.to_vec()`
 //! で複製する。locate のメソッド経路は同一 (template_len, signal_len)
@@ -14,7 +14,7 @@
 
 use std::collections::HashMap;
 
-use crate::dsp::{CorrelationPlan, CorrelationWorkspace};
+use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
 
 /// pool が同時に保持する形状数の上限。帯域フィルタは長さを維持する
 /// ため通常の pair は full-rate と coarse の 2 形状に収束する。
@@ -117,7 +117,7 @@ impl CorrelationPool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dsp;
+    use ruviform_numeric::corr;
 
     fn noise(seed: u64, n: usize) -> Vec<f64> {
         let mut state = seed;
@@ -140,7 +140,11 @@ mod tests {
         let mut pool = CorrelationPool::new();
         let first: Vec<f64> = pool.ncc(&template, &signal, max_lag).to_vec();
         let second: Vec<f64> = pool.ncc(&template, &signal, max_lag).to_vec();
-        assert_eq!(first, dsp::ncc(&template, &signal, max_lag));
+        assert_eq!(
+            first,
+            corr::ncc(&template, &signal, max_lag)
+                .expect("correlation template/signal shapes must be valid")
+        );
         assert_eq!(first, second);
         let stats = pool.stats();
         assert_eq!(stats.builds, 1);
@@ -150,7 +154,11 @@ mod tests {
         // 有効ラグ域の短縮 FFT、PHAT は位相正規化が FFT 長依存のため
         // plan を共有できない)。
         let phat: Vec<f64> = pool.gcc_phat(&template, &signal, max_lag).to_vec();
-        assert_eq!(phat, dsp::gcc_phat(&template, &signal, max_lag));
+        assert_eq!(
+            phat,
+            corr::gcc_phat(&template, &signal, max_lag)
+                .expect("correlation template/signal shapes must be valid")
+        );
         assert_eq!(pool.stats().builds, 2);
         assert_eq!(pool.entry_count(), 2);
     }

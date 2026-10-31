@@ -783,7 +783,7 @@ fn a15_normalized_pcm_f64le_bytes_are_exact() {
         .iter()
         .map(|b| f64::from_le_bytes(*b))
         .collect();
-    let chans = al_locate::dsp::deinterleave(&parsed, 2);
+    let chans = al_locate::deinterleave(&parsed, 2);
     for (c, (a, e)) in chans
         .iter()
         .zip(&prepared.decoded.channel_samples)

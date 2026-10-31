@@ -10,8 +10,8 @@
 use serde::{Deserialize, Serialize};
 
 use al_core::{AlignmentId, ArtifactId};
+use ruviform_numeric::vec;
 
-use crate::dsp;
 use crate::mixer::{MixerEstimate, fit_mix};
 use crate::normalize::{NormalizedParams, PreparedInput, bad};
 use crate::result::{LocateResult, PcmReference};
@@ -134,7 +134,7 @@ pub struct ResidualSearch {
 fn rms(channels: &[Vec<f64>]) -> f64 {
     let (sum, n) = channels
         .iter()
-        .fold((0.0, 0usize), |(s, n), c| (s + dsp::sum_sq(c), n + c.len()));
+        .fold((0.0, 0usize), |(s, n), c| (s + vec::sum_sq(c), n + c.len()));
     if n == 0 { 0.0 } else { (sum / n as f64).sqrt() }
 }
 
@@ -185,7 +185,7 @@ pub fn subtract_fit(
     // (IMPL-034EqSNHDxZ4VHxY5oaaaX).
     for (cap, row) in residual.iter_mut().zip(&est.matrix) {
         for (s, &m) in src_cols.iter().zip(row) {
-            dsp::sub_scaled(cap, m, s);
+            vec::sub_scaled(cap, m, s).expect("source columns are length-normalized above");
         }
     }
     Some((residual, est))

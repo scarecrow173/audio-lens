@@ -19,9 +19,22 @@ use al_job::job::JobInput;
 use al_job::stage::StageContext;
 use al_media::metadata::SampleFormat;
 
-use crate::dsp::deinterleave;
 use crate::normalize::{NormalizedParams, PreparedInput, bad};
 use crate::result::{LocateResult, PcmReference, SampleRange};
+
+/// Split interleaved `samples` into per-channel vectors, dropping the
+/// tail remainder that does not complete a frame. Empty input yields
+/// empty channels. This is AudioLens input-boundary semantics and is
+/// not a Ruviform primitive.
+pub fn deinterleave(samples: &[f64], channels: u16) -> Vec<Vec<f64>> {
+    let ch = usize::from(channels.max(1));
+    let frames = samples.len() / ch;
+    let mut out: Vec<Vec<f64>> = (0..ch).map(|_| Vec::with_capacity(frames)).collect();
+    for (i, &v) in samples[..frames * ch].iter().enumerate() {
+        out[i % ch].push(v);
+    }
+    out
+}
 
 /// normalized PCM または残差 signal version を artifact ID で解決し、配置と区間を検証する。
 pub fn read_normalized_pcm(
@@ -497,7 +510,7 @@ mod tests {
     }
 
     /// Baseline oracle: `fs::read` → per-sample scale division →
-    /// `dsp::deinterleave` — the pipeline the view replaces.
+    /// `deinterleave` — the pipeline the view replaces.
     fn oracle(path: &Path, channels: u16, scale: f64) -> Vec<Vec<f64>> {
         let bytes = fs::read(path).unwrap();
         let samples: Vec<f64> = bytes
@@ -506,7 +519,7 @@ mod tests {
             .iter()
             .map(|b| f64::from_le_bytes(*b) / scale)
             .collect();
-        crate::dsp::deinterleave(&samples, channels)
+        deinterleave(&samples, channels)
     }
 
     #[test]
@@ -687,7 +700,7 @@ mod tests {
     }
 
     /// Pre-view pipeline: `fs::read` → per-sample scale division →
-    /// `dsp::deinterleave`.
+    /// `deinterleave`.
     fn baseline_materialize(path: &Path, channels: u16, scale: f64) -> Vec<Vec<f64>> {
         let bytes = fs::read(path).unwrap();
         let samples: Vec<f64> = bytes
@@ -696,7 +709,7 @@ mod tests {
             .iter()
             .map(|b| f64::from_le_bytes(*b) / scale)
             .collect();
-        crate::dsp::deinterleave(&samples, channels)
+        deinterleave(&samples, channels)
     }
 
     /// Wall-clock percentile over sorted microsecond samples.
@@ -946,5 +959,87 @@ mod tests {
         let reports = measure_three_paths(&fixture, 2, 1.0, 30);
         let out = write_evidence(&dir, &fixture, &reports);
         eprintln!("pcm-view evidence written to {}", out.display());
+    }
+
+    fn noise(seed: u64, n: usize) -> Vec<f64> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                ((s >> 33) as f64 / (1u64 << 31) as f64) * 2.0 - 1.0
+            })
+            .collect()
+    }
+
+    #[test]
+    fn deinterleave_splits_channels() {
+        let interleaved = [1.0, 10.0, 2.0, 20.0, 3.0, 30.0];
+        let ch = deinterleave(&interleaved, 2);
+        assert_eq!(ch[0], vec![1.0, 2.0, 3.0]);
+        assert_eq!(ch[1], vec![10.0, 20.0, 30.0]);
+    }
+
+    /// A15: `deinterleave` oracle — round-robin element order,
+    /// remainder drop, `channels=0` clamp, and empty input.
+    fn deinterleave_oracle(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
+        let ch = usize::from(channels.max(1));
+        let mut out = vec![Vec::new(); ch];
+        for (i, &v) in interleaved.iter().enumerate() {
+            if i % ch < ch {
+                out[i % ch].push(v);
+            }
+        }
+        // Drop tail remainder that does not complete a frame.
+        let frames = interleaved.len() / ch;
+        for c in &mut out {
+            c.truncate(frames);
+        }
+        out
+    }
+
+    fn assert_deinterleave(interleaved: &[f64], channels: u16) {
+        let expected = deinterleave_oracle(interleaved, channels);
+        assert_eq!(deinterleave(interleaved, channels), expected);
+    }
+
+    #[test]
+    fn a15_deinterleave_element_order_and_edges() {
+        // Round-robin order across many channel counts.
+        for ch in [1u16, 2, 3, 6] {
+            let n = ch as usize * 64;
+            let x = noise(50 + u64::from(ch), n);
+            assert_deinterleave(&x, ch);
+        }
+        // Tail remainder is dropped.
+        for ch in [2u16, 3] {
+            let n = ch as usize * 10 + (ch as usize - 1);
+            let x = noise(60 + u64::from(ch), n);
+            assert_deinterleave(&x, ch);
+        }
+        // channels=0 clamps to 1; empty input yields one empty channel.
+        assert_eq!(deinterleave(&[], 0), vec![Vec::<f64>::new()]);
+        assert_eq!(deinterleave(&[1.0, 2.0, 3.0], 0)[0], vec![1.0, 2.0, 3.0]);
+        // Non-power-of-two channel counts.
+        let x = noise(61, 3 * 128);
+        assert_deinterleave(&x, 3);
+        let x = noise(62, 6 * 100);
+        assert_deinterleave(&x, 6);
+    }
+
+    #[test]
+    fn a15_deinterleave_byte_layout_roundtrip() {
+        // interleaved[c * frames + f] must land in out[c][f] — the
+        // layout decode.rs' readers materialize.
+        let channels = 2u16;
+        let frames = 512usize;
+        let x = noise(70, channels as usize * frames);
+        let out = deinterleave(&x, channels);
+        for c in 0..channels as usize {
+            for f in 0..frames {
+                assert_eq!(out[c][f], x[c + f * channels as usize]);
+            }
+        }
     }
 }

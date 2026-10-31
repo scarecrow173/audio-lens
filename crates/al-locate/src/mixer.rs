@@ -9,8 +9,7 @@
 use serde::{Deserialize, Serialize};
 
 use ruviform_numeric::linalg::{LeastSquares, condition_number};
-
-use crate::dsp;
+use ruviform_numeric::vec;
 
 /// Estimated mixing matrix plus fit diagnostics.
 ///
@@ -57,7 +56,7 @@ pub fn fit_mix(
     let mut ata = vec![vec![0.0; n_src]; n_src];
     for (i, ci) in source_channels.iter().enumerate() {
         for (j, cj) in source_channels.iter().enumerate() {
-            ata[i][j] = dsp::dot(ci, cj);
+            ata[i][j] = vec::dot(ci, cj).expect("channel lengths verified above");
         }
     }
     let cond = condition_number(&ata);
@@ -68,7 +67,7 @@ pub fn fit_mix(
     for cap in capture_channels {
         let (coeffs, residual_rms) = factor.solve(cap)?;
         matrix.push(coeffs);
-        let cap_rms = dsp::rms(cap);
+        let cap_rms = vec::rms(cap);
         quality_acc += if cap_rms > 0.0 {
             residual_rms / cap_rms
         } else {
@@ -350,12 +349,12 @@ mod tests {
         // 診断は従来と同じ ridge 前の正規行列を使用し、ridge に依存しない。
         let regularized = fit_mix(&src_refs, &cap_refs, 1e-3).unwrap();
         assert_eq!(est.condition_number, regularized.condition_number);
-        // 参照側の AᵀA も fit_mix と同じ列 `dsp::dot` 累算で組み立てる
+        // 参照側の AᵀA も fit_mix と同じ列 `vec::dot` 累算で組み立てる
         // (行累算とは ulps がずれ得るため assert_eq は同じ累算順が前提)。
         let mut ata = vec![vec![0.0; 2]; 2];
         for (i, ci) in sources.iter().enumerate() {
             for (j, cj) in sources.iter().enumerate() {
-                ata[i][j] = dsp::dot(ci, cj);
+                ata[i][j] = vec::dot(ci, cj).expect("channel lengths are equal");
             }
         }
         assert_eq!(est.condition_number, condition_number(&ata));
