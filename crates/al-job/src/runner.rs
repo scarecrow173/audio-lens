@@ -8,6 +8,73 @@ use crate::manifest::{Manifest, StageRecord};
 use crate::registry::ArtifactRegistry;
 use crate::stage::{Stage, StageContext, StageError};
 
+/// One stage-boundary observation reported to [`RunHooks::on_stage`].
+///
+/// `index`/`total` locate the stage inside the plan so a UI can render
+/// progress without knowing the pipeline order.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct StageEvent {
+    /// Stage the event belongs to.
+    pub stage: StageKind,
+    /// Position of this stage in the plan (`0..total`).
+    pub index: usize,
+    /// Planned stage count.
+    pub total: usize,
+    /// What happened at the boundary.
+    pub kind: StageEventKind,
+}
+
+/// Distinguishes the stage-boundary transitions a [`StageEvent`]
+/// reports.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum StageEventKind {
+    /// Execution is about to start.
+    Started,
+    /// Execution finished successfully.
+    Completed {
+        /// Wall-clock duration of the stage's execution.
+        duration_ms: u64,
+    },
+    /// The manifest already recorded this stage `Completed`/`Skipped`:
+    /// the resume path reuses its artifacts without re-executing.
+    Reused,
+    /// Execution failed; the error is recorded on the manifest.
+    Failed,
+}
+
+/// Optional observers for [`StageRunner::run_with_hooks`] and
+/// [`StageRunner::resume_with_hooks`]. The default is the historical
+/// no-op behavior; `run`/`resume` delegate to the hooked variants.
+#[derive(Default)]
+pub struct RunHooks<'a> {
+    /// Called at every stage boundary. See [`StageEvent`].
+    pub on_stage: Option<&'a dyn Fn(StageEvent)>,
+    /// Polled before each stage's execution. When it returns `true`
+    /// the runner stops *before* starting the next stage: the pending
+    /// stage keeps `StageStatus::Pending`, the manifest is saved, and
+    /// the run returns `Err(StageError)` with a `cancelled` message —
+    /// a later `resume` then continues from the untouched state.
+    /// Cancellation never marks a stage `Failed`.
+    pub is_cancelled: Option<&'a dyn Fn() -> bool>,
+}
+
+impl<'a> RunHooks<'a> {
+    fn emit(&self, stage: StageKind, index: usize, total: usize, kind: StageEventKind) {
+        if let Some(on_stage) = self.on_stage {
+            on_stage(StageEvent {
+                stage,
+                index,
+                total,
+                kind,
+            });
+        }
+    }
+
+    fn cancelled(&self) -> bool {
+        self.is_cancelled.is_some_and(|f| f())
+    }
+}
+
 /// Executes a job's stages in dependency order with resumable semantics.
 ///
 /// The manifest is saved after every stage transition, so a partially
@@ -125,6 +192,16 @@ impl StageRunner {
         def: &JobDefinition,
         stages: &mut Vec<Box<dyn Stage>>,
     ) -> Result<Manifest, StageError> {
+        self.run_with_hooks(def, stages, &RunHooks::default())
+    }
+
+    /// [`run`](Self::run) with progress/cancellation observers.
+    pub fn run_with_hooks(
+        &self,
+        def: &JobDefinition,
+        stages: &mut Vec<Box<dyn Stage>>,
+        hooks: &RunHooks<'_>,
+    ) -> Result<Manifest, StageError> {
         Self::validate_plan(def, stages)?;
         Self::validate_inputs(def)?;
         // Lock before touching the filesystem: no window exists where a
@@ -157,7 +234,7 @@ impl StageRunner {
         manifest.save(&job_dir).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot save manifest: {e}"))
         })?;
-        self.execute(&mut manifest, &job_dir, def, stages)
+        self.execute(&mut manifest, &job_dir, def, stages, hooks)
     }
 
     /// Resume an existing job: reload its manifest and execute only the
@@ -166,6 +243,16 @@ impl StageRunner {
         &self,
         def: &JobDefinition,
         stages: &mut Vec<Box<dyn Stage>>,
+    ) -> Result<Manifest, StageError> {
+        self.resume_with_hooks(def, stages, &RunHooks::default())
+    }
+
+    /// [`resume`](Self::resume) with progress/cancellation observers.
+    pub fn resume_with_hooks(
+        &self,
+        def: &JobDefinition,
+        stages: &mut Vec<Box<dyn Stage>>,
+        hooks: &RunHooks<'_>,
     ) -> Result<Manifest, StageError> {
         Self::validate_plan(def, stages)?;
         Self::validate_inputs(def)?;
@@ -205,7 +292,7 @@ impl StageRunner {
             ));
         }
         self.verify_completed_artifacts(&mut manifest, &job_dir)?;
-        self.execute(&mut manifest, &job_dir, def, stages)
+        self.execute(&mut manifest, &job_dir, def, stages, hooks)
     }
 
     /// Verify that artifacts recorded under Completed/Skipped stages
@@ -310,9 +397,11 @@ impl StageRunner {
         job_dir: &PathBuf,
         def: &JobDefinition,
         stages: &mut Vec<Box<dyn Stage>>,
+        hooks: &RunHooks<'_>,
     ) -> Result<Manifest, StageError> {
         let registry = ArtifactRegistry::new(job_dir);
-        for stage_kind in &def.stages {
+        let total = def.stages.len();
+        for (index, stage_kind) in def.stages.iter().enumerate() {
             let stage = stages
                 .iter_mut()
                 .find(|stage| stage.kind() == *stage_kind)
@@ -333,7 +422,10 @@ impl StageRunner {
                     duration_ms: None,
                 });
             match record.status {
-                StageStatus::Completed | StageStatus::Skipped => continue,
+                StageStatus::Completed | StageStatus::Skipped => {
+                    hooks.emit(*stage_kind, index, total, StageEventKind::Reused);
+                    continue;
+                }
                 StageStatus::Pending | StageStatus::Failed => {}
             }
             for dep in stage.depends_on() {
@@ -347,6 +439,19 @@ impl StageRunner {
                     ));
                 }
             }
+            // Cancellation is observed at stage boundaries only: a
+            // running stage is never interrupted mid-write. The pending
+            // stage keeps Pending so resume replays it cleanly.
+            if hooks.cancelled() {
+                manifest.save(job_dir).map_err(|e| {
+                    StageError::new(*stage_kind, format!("cannot save manifest: {e}"))
+                })?;
+                return Err(StageError::new(
+                    *stage_kind,
+                    format!("cancelled before {stage_kind:?}"),
+                ));
+            }
+            hooks.emit(*stage_kind, index, total, StageEventKind::Started);
             let ctx = StageContext {
                 manifest,
                 registry: &registry,
@@ -384,6 +489,12 @@ impl StageRunner {
                         record.error = None;
                         record.duration_ms = Some(duration_ms);
                     }
+                    hooks.emit(
+                        *stage_kind,
+                        index,
+                        total,
+                        StageEventKind::Completed { duration_ms },
+                    );
                 }
                 Err(err) => {
                     // An `Err` return is still timed and recorded; only a
@@ -401,6 +512,7 @@ impl StageRunner {
                         record.error = Some(err.message.clone());
                         record.duration_ms = Some(duration_ms);
                     }
+                    hooks.emit(*stage_kind, index, total, StageEventKind::Failed);
                     manifest.save(job_dir).map_err(|e| {
                         StageError::new(*stage_kind, format!("cannot save manifest: {e}"))
                     })?;
