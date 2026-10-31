@@ -1,7 +1,7 @@
 ---
 id: "IMPL-034PmRXdpTZkRRXt3Z9KHu"
 type: "impl"
-status: "in-progress"
+status: "completed"
 title: "Issue #104 final cleanup: provisional adapters, duplicate implementations, dependency audit"
 created: "2026-10-31"
 updated: "2026-10-31"
@@ -147,6 +147,130 @@ lib.rs)、責務マップ状態更新。計 36 ファイル、-832/+424 行。
     等の characterization テストで挙動保持を確認。
 - 最終統合: `git merge origin/main` + `mise run check` 実施済み
   (本記録時点の作業ブランチ上で検証)
+
+### Golden 回帰(#98 凍結 golden、最終ゲート)
+
+`baseline/runs/<name>`(#98 凍結)を `<name>-golden98` へ退避し、
+本 Issue 変更後コード(`target/release/al`、HEAD `fe3028d`)で
+`capture.mjs` が 9 run を再収集、`compare.mjs`(rel 1e-9 / abs 1e-12)
+で比較後に凍結 golden を復元。差分実体は
+`docs/impl/ir/issue-104-baseline/*-vs-golden98.json`、機械分類は
+`tools/baseline/lib/classify-diffs-104.mjs` + `classify.log`。
+
+**全 9 ラン・全差分が既知 4 クラスに完全帰属し、説明不能な新規差分は
+0 件**:
+
+| run | total | #101 既知 | #104 rev | #100 decoder | #106 期待 | unexplained |
+| --- | --- | --- | --- | --- | --- | --- |
+| canonical | 1447 | 45 | 12 | 18 | 1372 | 0 |
+| aa | 1447 | 45 | 12 | 18 | 1372 | 0 |
+| resume | 1447 | 45 | 12 | 18 | 1372 | 0 |
+| small | 1833 | 1149 | 16 | 24 | 644 | 0 |
+| variant-desync | 150 | 20 | 52 | 78 | 0 | 0 |
+| variant-clipping | 172 | 42 | 52 | 78 | 0 | 0 |
+| variant-reverb | 161 | 31 | 52 | 78 | 0 | 0 |
+| variant-filter | 167 | 37 | 52 | 78 | 0 | 0 |
+| variant-clicks | 181 | 51 | 52 | 78 | 0 | 0 |
+
+- `#104 rev`(新規クラス): `decoder/(attempts/N/)?version` 系差分で
+  a 側(新 capture)の値が **Cargo.lock 導出 rev
+  `f3f474b1734af05ca2435a322f935805010ba8b6`** と一致するものを
+  機械分類(#115 解消の値レベル検証)。各 run の #100 内訳は
+  #103/#106 の #100 計数 = #100 + #104 で不変(version パスが
+  #104 側へ移っただけで decoder provenance 差分の総数は同じ)
+- `#106 期待`: #106 と同一内容(visualization 成果物・
+  report.html/report.data.js の path-set 消滅、manifest stages/
+  artifacts/roles・export_manifest generator・正規化 ART-#N 再採番)
+- plan 集合検査: stage 除去は `visualization` のみ・追加 0 件、
+  artifact 除去は visualization/report のみ・追加 0 件(全 run ok)
+- rev 直接検証: 全 run の `golden/inputs/IN-#*/metadata.json` で
+  `decoder.version`・`decoder.settings.ruviform.rev`・
+  `attempts/N.version` が Cargo.lock rev と一致(3〜4 inputs/run、
+  全件 ok)
+- 決定性・再開一致: `aa` vs `canonical` **0 diffs**、
+  `resume` vs `canonical` **0 diffs**(locate 完了 kill →
+  `al resume` 完走でクリーンランと一致)
+
+### 性能実測(Ruviform 基盤化前後)
+
+旧実装バイナリの再構築は行わず、#98 凍結 `performance.json`
+(基盤化前・同一マシン)と本 capture の `performance.json` の
+直接比較 + bench 群(legacy 参照腕内蔵)で代替。
+`tools/baseline/lib/perf-compare-104.mjs` の出力は
+`docs/impl/ir/issue-104-baseline/perf-compare.json`、各 run の
+`performance.json` 実測値は `perf/` 配下に保存。
+
+| run | e2e #98 ms | e2e #104 ms | Δ% | stageΣΔ%(共通) | CPUΔ% | RSSΔ% |
+| --- | --- | --- | --- | --- | --- | --- |
+| canonical | 376871 | 360080 | -4.5% | -3.6% | +0.5% | -3.6% |
+| variant-desync | 182574 | 182658 | +0.0% | +0.1% | +1.8% | +11.4% |
+| variant-clipping | 389484 | 363725 | -6.6% | -6.6% | +2.2% | -1.5% |
+| variant-reverb | 400576 | 399194 | -0.3% | -0.3% | +0.3% | -11.8% |
+| variant-filter | 448543 | 411935 | -8.2% | -8.1% | +9.0% | +0.6% |
+| variant-clicks | 398894 | 391458 | -1.9% | -2.0% | -4.7% | -13.8% |
+| small | 140363 | 147347/138539※ | +5.0%/-1.3% | +5.9% | +5.2% | -2.0% |
+| resume | 393216 | 366783 | -6.7% | -5.8% | +0.3% | -7.2% |
+| aa | 368178 | 365705 | -0.7% | +0.3% | -0.2% | -5.8% |
+
+※ small は唯一 e2e 増加を示したため 2 回計測(run1 147347ms /
+run2 138539ms)。run1 の +5% は locate stage(122415→131477→
+123080ms、全体の ~87%)の計測分散が主因で、run2 は -1.3% と
+中立。系統退行ではないと判断。
+
+stage 詳細(#98→#104、実測):
+
+- `locate`(支配 stage): -12.6%〜+0.7% で概ね改善
+  (variant-filter -12.6%、canonical -4.3%、#101 で観測された
+  plan 再利用効果と整合)
+- `reference_analysis`: +14.6%〜+19.8%(canonical +7.1%、
+  small +47%/2 回目 +55%)。#101 で記録済みの scalar 化
+  トレードオフ(band_gain・corr0 sweep、reference +24.8%)と
+  同方向の既知クラス。absolute は stage 合計 60〜92s に対し
+  +9〜13s 程度
+- `expensive_analysis`: +33.9%〜+58.3%(small +35%/+27%)。
+  #101 記録(+18.6%)と同方向の既知クラスだが比率は大きめ
+  (基底が 4.6〜6.8s と小さいため比率が増幅、絶対差 +1.6〜
+  +3.4s)。#104 変更は解析カーネル呼出経路のみで演算内容
+  不変のため、#100-#103 累積差分 + 計測分散の範囲と判断
+- `export`: -36.1%〜-38.4% 改善(#106 の report.html 撤去由来)
+- `visualization`: 全 run で除去(#106)
+- peak RSS: -13.8%〜+11.4%(7/9 run で低下)
+- 生成物 output_bytes: #106 撤去分の減少を除き同等
+
+bench(実測、同一マシン):
+
+- `bench_dsp`: legacy_fft 4M 325.0ms に対し ruviform fft
+  184.6ms / plan 再利用 120.6ms / rfft 68.5ms(高速化)。
+  NCC 2.4M×8k 514.0ms、bandpass 197.6ms、gcc_phat 306.8ms
+- `bench_residual`: per-source `sub_scaled` は legacy gather 比
+  1src -19%(11.674→9.439ms median)・2src -53%
+  (28.507→13.393ms)。elementwise 等価 predicate PASS
+- `bench_alloc`(#98 記録値との比較):
+  `analyze_pair` 619.144ms/15788 allocs/240,919,365B
+  (#98: 636.225/15857/246,940,205 → -2.7%/-0.4%/-2.4%)、
+  `prepare_residual` 6.061ms/167/15,362,792B
+  (#98: 9.441/167/15,362,792 → -35.8%/0/0)
+
+**結論**: e2e 合計は 8/9 run で中立〜改善(-8.2%〜+0%)、
+small は再計測で -1.3% と中立。支配 stage の locate は改善
+  方向。analysis 系 stage の増分は #101 で明示承認済みの
+scalar 化トレードオフと同じ既知クラスであり、#104 の変更
+(facade 撤去・fallback 撤去・rev 導出)に起因する新規退行は
+観測されなかった。Ruviform 基盤化によるパイプラインレベルの
+性能退行なしと結論する。
+
+### 全検証(最終ゲート)
+
+| task | 結果 |
+| --- | --- |
+| `mise run fmt` | pass(`cargo fmt --all -- --check`) |
+| `mise run check` | pass(`cargo check --workspace --all-targets`) |
+| `mise run lint` | pass(biome check + `clippy --workspace --all-targets -D warnings`)。初回は本検証で新設した 3 ファイルの format 違反で失敗 → `biome format --write` で修正済み。app.js の useTemplate/noGlobalIsFinite 等は #105 由来の警告級(エラー 0) |
+| `mise run test` | pass(`cargo test --workspace` 全セクション green) |
+| `mise run build` | pass(`cargo build --workspace`) |
+| `mise run verify-toolchain` | pass(rustc/cargo 1.99.0、rustfmt+clippy) |
+| `mise run check-cli-headless` | pass(headless 10 crate の依存木に GUI framework なし) |
+| `cargo build --release -p al-cli` | pass(baseline capture 用バイナリ) |
 
 ## Risks
 

@@ -1,0 +1,653 @@
+{
+  "canonical": {
+    "e2e_wall_ms": {
+      "old": 376871,
+      "new": 360080,
+      "pct": -4.455370670600815
+    },
+    "stage_sum_common_ms": {
+      "old": 372915,
+      "new": 359537,
+      "pct": -3.5874126811739937,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset",
+        "export"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 2903.21875,
+      "new": 2918.015625,
+      "pct": 0.5096713776734874
+    },
+    "peak_rss_bytes": {
+      "old": 7553609728,
+      "new": 7284035584,
+      "pct": -3.568812179966521
+    },
+    "output_bytes": {
+      "old": 5852696382,
+      "new": 4728701170,
+      "pct": -19.204741518060864
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1133,
+        "new_ms": 1510,
+        "pct": 33.27449249779347
+      },
+      "locate": {
+        "old_ms": 273142,
+        "new_ms": 261528,
+        "pct": -4.25200079079746
+      },
+      "cheap_analysis": {
+        "old_ms": 5909,
+        "new_ms": 5326,
+        "pct": -9.866305635471315
+      },
+      "reference_analysis": {
+        "old_ms": 62693,
+        "new_ms": 67137,
+        "pct": 7.088510679023176
+      },
+      "expensive_analysis": {
+        "old_ms": 5747,
+        "new_ms": 8989,
+        "pct": 56.41204106490343
+      },
+      "dataset": {
+        "old_ms": 231,
+        "new_ms": 226,
+        "pct": -2.1645021645021645
+      },
+      "visualization": {
+        "old_ms": 3585,
+        "new_ms": null,
+        "pct": null,
+        "note": "removed"
+      },
+      "export": {
+        "old_ms": 24060,
+        "new_ms": 14821,
+        "pct": -38.39983374896093
+      }
+    }
+  },
+  "variant-desync": {
+    "e2e_wall_ms": {
+      "old": 182574,
+      "new": 182658,
+      "pct": 0.04600874166091557
+    },
+    "stage_sum_common_ms": {
+      "old": 182172,
+      "new": 182271,
+      "pct": 0.05434424609709505,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 1460.09375,
+      "new": 1486.21875,
+      "pct": 1.789268668535839
+    },
+    "peak_rss_bytes": {
+      "old": 7118499840,
+      "new": 7930503168,
+      "pct": 11.406944528357256
+    },
+    "output_bytes": {
+      "old": 2073443590,
+      "new": 2073449587,
+      "pct": 0.00028922899223894486
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1177,
+        "new_ms": 1547,
+        "pct": 31.43585386576041
+      },
+      "locate": {
+        "old_ms": 142067,
+        "new_ms": 135251,
+        "pct": -4.797736279361146
+      },
+      "cheap_analysis": {
+        "old_ms": 5261,
+        "new_ms": 5111,
+        "pct": -2.851168979281505
+      },
+      "reference_analysis": {
+        "old_ms": 28762,
+        "new_ms": 33932,
+        "pct": 17.975106042695224
+      },
+      "expensive_analysis": {
+        "old_ms": 4641,
+        "new_ms": 6215,
+        "pct": 33.9151045033398
+      },
+      "dataset": {
+        "old_ms": 264,
+        "new_ms": 215,
+        "pct": -18.560606060606062
+      }
+    }
+  },
+  "variant-clipping": {
+    "e2e_wall_ms": {
+      "old": 389484,
+      "new": 363725,
+      "pct": -6.613622125684239
+    },
+    "stage_sum_common_ms": {
+      "old": 389116,
+      "new": 363380,
+      "pct": -6.6139660152756505,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 2939.046875,
+      "new": 3004.515625,
+      "pct": 2.227550385701147
+    },
+    "peak_rss_bytes": {
+      "old": 8185442304,
+      "new": 8061923328,
+      "pct": -1.5090079608726785
+    },
+    "output_bytes": {
+      "old": 2521747098,
+      "new": 2521753031,
+      "pct": 0.00023527339457257503
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1222,
+        "new_ms": 1520,
+        "pct": 24.386252045826513
+      },
+      "locate": {
+        "old_ms": 296463,
+        "new_ms": 277079,
+        "pct": -6.5384213207044395
+      },
+      "cheap_analysis": {
+        "old_ms": 14189,
+        "new_ms": 5712,
+        "pct": -59.74346324617662
+      },
+      "reference_analysis": {
+        "old_ms": 71002,
+        "new_ms": 69675,
+        "pct": -1.86896143770598
+      },
+      "expensive_analysis": {
+        "old_ms": 5980,
+        "new_ms": 9170,
+        "pct": 53.34448160535117
+      },
+      "dataset": {
+        "old_ms": 260,
+        "new_ms": 224,
+        "pct": -13.846153846153847
+      }
+    }
+  },
+  "variant-reverb": {
+    "e2e_wall_ms": {
+      "old": 400576,
+      "new": 399194,
+      "pct": -0.345003195398626
+    },
+    "stage_sum_common_ms": {
+      "old": 400193,
+      "new": 398850,
+      "pct": -0.3355880787520022,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 3338.609375,
+      "new": 3348.96875,
+      "pct": 0.3102901189211451
+    },
+    "peak_rss_bytes": {
+      "old": 9378877440,
+      "new": 8274415616,
+      "pct": -11.7760556214284
+    },
+    "output_bytes": {
+      "old": 2521798068,
+      "new": 2521804009,
+      "pct": 0.00023558587324605724
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1357,
+        "new_ms": 1513,
+        "pct": 11.495946941783346
+      },
+      "locate": {
+        "old_ms": 326950,
+        "new_ms": 312333,
+        "pct": -4.470714176479584
+      },
+      "cheap_analysis": {
+        "old_ms": 5349,
+        "new_ms": 5478,
+        "pct": 2.4116657319125068
+      },
+      "reference_analysis": {
+        "old_ms": 60552,
+        "new_ms": 70176,
+        "pct": 15.893777249306382
+      },
+      "expensive_analysis": {
+        "old_ms": 5750,
+        "new_ms": 9104,
+        "pct": 58.3304347826087
+      },
+      "dataset": {
+        "old_ms": 235,
+        "new_ms": 246,
+        "pct": 4.680851063829787
+      }
+    }
+  },
+  "variant-filter": {
+    "e2e_wall_ms": {
+      "old": 448543,
+      "new": 411935,
+      "pct": -8.16153635214461
+    },
+    "stage_sum_common_ms": {
+      "old": 448097,
+      "new": 411590,
+      "pct": -8.147119931621948,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 3194.046875,
+      "new": 3482.75,
+      "pct": 9.03878797959094
+    },
+    "peak_rss_bytes": {
+      "old": 8289607680,
+      "new": 8341966848,
+      "pct": 0.6316241976845881
+    },
+    "output_bytes": {
+      "old": 2521709177,
+      "new": 2521715193,
+      "pct": 0.00023856835097681845
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1457,
+        "new_ms": 1555,
+        "pct": 6.72614962251201
+      },
+      "locate": {
+        "old_ms": 371559,
+        "new_ms": 324789,
+        "pct": -12.587502926856839
+      },
+      "cheap_analysis": {
+        "old_ms": 7676,
+        "new_ms": 5711,
+        "pct": -25.59927045336113
+      },
+      "reference_analysis": {
+        "old_ms": 61326,
+        "new_ms": 70279,
+        "pct": 14.599028144669472
+      },
+      "expensive_analysis": {
+        "old_ms": 5830,
+        "new_ms": 9034,
+        "pct": 54.95711835334477
+      },
+      "dataset": {
+        "old_ms": 249,
+        "new_ms": 222,
+        "pct": -10.843373493975903
+      }
+    }
+  },
+  "variant-clicks": {
+    "e2e_wall_ms": {
+      "old": 398894,
+      "new": 391458,
+      "pct": -1.8641543868797226
+    },
+    "stage_sum_common_ms": {
+      "old": 398534,
+      "new": 390757,
+      "pct": -1.951401887919224,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 2852.75,
+      "new": 2718.46875,
+      "pct": -4.707080886863553
+    },
+    "peak_rss_bytes": {
+      "old": 7619219456,
+      "new": 6569394176,
+      "pct": -13.77864604192863
+    },
+    "output_bytes": {
+      "old": 2521763231,
+      "new": 2521769344,
+      "pct": 0.00024240975222625886
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1148,
+        "new_ms": 1567,
+        "pct": 36.498257839721255
+      },
+      "locate": {
+        "old_ms": 291214,
+        "new_ms": 293185,
+        "pct": 0.6768218560920836
+      },
+      "cheap_analysis": {
+        "old_ms": 6714,
+        "new_ms": 12107,
+        "pct": 80.32469466785821
+      },
+      "reference_analysis": {
+        "old_ms": 92433,
+        "new_ms": 74036,
+        "pct": -19.903064922700768
+      },
+      "expensive_analysis": {
+        "old_ms": 6765,
+        "new_ms": 9628,
+        "pct": 42.32076866223208
+      },
+      "dataset": {
+        "old_ms": 260,
+        "new_ms": 234,
+        "pct": -10
+      }
+    }
+  },
+  "small": {
+    "e2e_wall_ms": {
+      "old": 140363,
+      "new": 147347,
+      "pct": 4.975670226484188
+    },
+    "stage_sum_common_ms": {
+      "old": 138874,
+      "new": 147130,
+      "pct": 5.944957299422498,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset",
+        "export"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 1078.265625,
+      "new": 1133.890625,
+      "pct": 5.158747409758147
+    },
+    "peak_rss_bytes": {
+      "old": 7390265344,
+      "new": 7243927552,
+      "pct": -1.980142595540342
+    },
+    "output_bytes": {
+      "old": 1741152703,
+      "new": 1479330115,
+      "pct": -15.037313358494094
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 664,
+        "new_ms": 838,
+        "pct": 26.20481927710843
+      },
+      "locate": {
+        "old_ms": 122415,
+        "new_ms": 131477,
+        "pct": 7.402687579136543
+      },
+      "cheap_analysis": {
+        "old_ms": 2249,
+        "new_ms": 3027,
+        "pct": 34.593152512227654
+      },
+      "reference_analysis": {
+        "old_ms": 2619,
+        "new_ms": 3842,
+        "pct": 46.69721267659412
+      },
+      "expensive_analysis": {
+        "old_ms": 1280,
+        "new_ms": 1729,
+        "pct": 35.078125
+      },
+      "dataset": {
+        "old_ms": 179,
+        "new_ms": 169,
+        "pct": -5.58659217877095
+      },
+      "visualization": {
+        "old_ms": 1267,
+        "new_ms": null,
+        "pct": null,
+        "note": "removed"
+      },
+      "export": {
+        "old_ms": 9468,
+        "new_ms": 6048,
+        "pct": -36.12167300380228
+      }
+    }
+  },
+  "resume": {
+    "e2e_wall_ms": {
+      "old": 393216,
+      "new": 366783,
+      "pct": -6.722259521484375
+    },
+    "stage_sum_common_ms": {
+      "old": 388803,
+      "new": 366157,
+      "pct": -5.824543534900708,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset",
+        "export"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 2876.28125,
+      "new": 2883.828125,
+      "pct": 0.2623830684151628
+    },
+    "peak_rss_bytes": {
+      "old": 7849857024,
+      "new": 7283843072,
+      "pct": -7.210500143753956
+    },
+    "output_bytes": {
+      "old": 5852696382,
+      "new": 4728701170,
+      "pct": -19.204741518060864
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1190,
+        "new_ms": 1496,
+        "pct": 25.71428571428571
+      },
+      "locate": {
+        "old_ms": 276698,
+        "new_ms": 265897,
+        "pct": -3.90353381665209
+      },
+      "cheap_analysis": {
+        "old_ms": 4489,
+        "new_ms": 5961,
+        "pct": 32.7912675428826
+      },
+      "reference_analysis": {
+        "old_ms": 57442,
+        "new_ms": 68831,
+        "pct": 19.82695588593712
+      },
+      "expensive_analysis": {
+        "old_ms": 5716,
+        "new_ms": 8886,
+        "pct": 55.45836249125262
+      },
+      "dataset": {
+        "old_ms": 251,
+        "new_ms": 230,
+        "pct": -8.366533864541832
+      },
+      "visualization": {
+        "old_ms": 3633,
+        "new_ms": null,
+        "pct": null,
+        "note": "removed"
+      },
+      "export": {
+        "old_ms": 43017,
+        "new_ms": 14856,
+        "pct": -65.4648162354418
+      }
+    }
+  },
+  "aa": {
+    "e2e_wall_ms": {
+      "old": 368178,
+      "new": 365705,
+      "pct": -0.6716859779780432
+    },
+    "stage_sum_common_ms": {
+      "old": 364125,
+      "new": 365339,
+      "pct": 0.33340199107449364,
+      "stages": [
+        "ingest",
+        "locate",
+        "cheap_analysis",
+        "reference_analysis",
+        "expensive_analysis",
+        "dataset",
+        "export"
+      ]
+    },
+    "cpu_sec_last_sample": {
+      "old": 2917.46875,
+      "new": 2912.859375,
+      "pct": -0.15799226641245084
+    },
+    "peak_rss_bytes": {
+      "old": 7585771520,
+      "new": 7148175360,
+      "pct": -5.768644083812322
+    },
+    "output_bytes": {
+      "old": 5852696382,
+      "new": 4728701170,
+      "pct": -19.204741518060864
+    },
+    "stages": {
+      "ingest": {
+        "old_ms": 1761,
+        "new_ms": 1538,
+        "pct": -12.663259511641112
+      },
+      "locate": {
+        "old_ms": 271648,
+        "new_ms": 264896,
+        "pct": -2.4855695606078454
+      },
+      "cheap_analysis": {
+        "old_ms": 4919,
+        "new_ms": 5546,
+        "pct": 12.746493189672698
+      },
+      "reference_analysis": {
+        "old_ms": 57001,
+        "new_ms": 69107,
+        "pct": 21.238223890808932
+      },
+      "expensive_analysis": {
+        "old_ms": 5637,
+        "new_ms": 9072,
+        "pct": 60.93666844065992
+      },
+      "dataset": {
+        "old_ms": 240,
+        "new_ms": 236,
+        "pct": -1.6666666666666667
+      },
+      "visualization": {
+        "old_ms": 3690,
+        "new_ms": null,
+        "pct": null,
+        "note": "removed"
+      },
+      "export": {
+        "old_ms": 22919,
+        "new_ms": 14944,
+        "pct": -34.79645708800558
+      }
+    }
+  }
+}
