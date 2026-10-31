@@ -1,6 +1,6 @@
 //! AAC-LC in MP4 decode tests: real ffmpeg-generated fixtures exercise the
-//! symphonia fallback path while PCM and broken containers pin the native
-//! boundary contracts (attempts, fallback flag, stream results).
+//! Ruviform media-I/O decode path (Issue #100) while PCM and broken
+//! containers pin the boundary contracts (attempts, stream results).
 
 use std::path::{Path, PathBuf};
 
@@ -9,7 +9,6 @@ use al_job::job::{JobDefinition, input};
 use al_job::runner::StageRunner;
 use al_job::stage::Stage;
 use al_media::decoder::{DecodeRequest, DecoderRegistry};
-use al_media::symphonia::SymphoniaDecoder;
 use al_media::{IngestStage, SampleFormat};
 use al_testkit::mp4::{Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4};
 
@@ -20,11 +19,7 @@ fn temp_dir(tag: &str) -> PathBuf {
 }
 
 fn registry() -> DecoderRegistry {
-    let mut registry = DecoderRegistry::native();
-    registry
-        .register(Box::new(SymphoniaDecoder))
-        .expect("symphonia backend registers");
-    registry
+    DecoderRegistry::ruviform()
 }
 
 fn fixture(name: &str) -> Vec<u8> {
@@ -54,7 +49,7 @@ fn read_metadata(job_dir: &Path, manifest: &al_job::manifest::Manifest) -> serde
 }
 
 #[test]
-fn aac_lc_mp4_decodes_audio_via_fallback() {
+fn aac_lc_mp4_decodes_audio_via_ruviform() {
     let bytes = fixture("aac_lc_48k_stereo.mp4");
     let result = registry()
         .decode(&bytes, &DecodeRequest::default())
@@ -68,12 +63,13 @@ fn aac_lc_mp4_decodes_audio_via_fallback() {
     assert_eq!(audio.frames(), 12000);
     assert_eq!(audio.samples.len(), 24000);
     assert!(audio.samples.iter().all(|s| s.is_finite()));
-    assert!(result.provenance.fallback);
-    assert_eq!(result.provenance.backend, "native");
-    assert_eq!(result.provenance.attempts.len(), 2);
-    assert_eq!(result.provenance.attempts[0].backend, "native");
-    assert_eq!(result.provenance.attempts[1].backend, "symphonia");
-    assert_eq!(result.provenance.attempts[1].outcome, "decoded");
+    // Issue #100: AAC decode happens inside the Ruviform backend, so
+    // there is no AudioLens-side symphonia fallback anymore.
+    assert!(!result.provenance.fallback);
+    assert_eq!(result.provenance.backend, "ruviform");
+    assert_eq!(result.provenance.attempts.len(), 1);
+    assert_eq!(result.provenance.attempts[0].backend, "ruviform");
+    assert_eq!(result.provenance.attempts[0].outcome, "decoded");
     // The decoded audio stream result maps to a native track_index.
     let entry = result
         .provenance
@@ -92,7 +88,7 @@ fn aac_lc_mp4_decodes_audio_via_fallback() {
 }
 
 #[test]
-fn aac_lc_mono_mp4_decodes_audio_via_fallback() {
+fn aac_lc_mono_mp4_decodes_audio_via_ruviform() {
     let bytes = fixture("aac_lc_48k_mono.mp4");
     let result = registry()
         .decode(&bytes, &DecodeRequest::default())
@@ -102,7 +98,7 @@ fn aac_lc_mono_mp4_decodes_audio_via_fallback() {
     assert_eq!(audio.sample_rate, 48000);
     assert_eq!(audio.channels, 1);
     assert_eq!(audio.frames(), 12000);
-    assert!(result.provenance.fallback);
+    assert!(!result.provenance.fallback);
 }
 
 #[test]
@@ -125,11 +121,11 @@ fn multi_track_mp4_selects_first_decodable_audio() {
         .filter(|s| s.kind == "audio" && !s.decoded)
         .count();
     assert!(other >= 1);
-    assert!(result.provenance.fallback);
+    assert!(!result.provenance.fallback);
 }
 
 #[test]
-fn pcm_mp4_never_reaches_symphonia_fallback() {
+fn pcm_mp4_decodes_via_ruviform_native_pcm() {
     let pcm: Vec<u8> = (0..480i16).flat_map(|v| v.to_le_bytes()).collect();
     let bytes = write_mp4(&Mp4Spec {
         major_brand: *b"isom",
@@ -169,7 +165,7 @@ fn pcm_mp4_never_reaches_symphonia_fallback() {
     assert_eq!(audio.codec, "pcm_s16le");
     assert!(!result.provenance.fallback);
     assert_eq!(result.provenance.attempts.len(), 1);
-    assert_eq!(result.provenance.attempts[0].backend, "native");
+    assert_eq!(result.provenance.attempts[0].backend, "ruviform");
 }
 
 #[test]
@@ -213,9 +209,11 @@ fn undecodable_mp4_audio_records_attempts_without_failing() {
         .expect("decode completes without audio");
     assert!(result.audio.is_none());
     assert!(!result.provenance.fallback);
-    assert_eq!(result.provenance.attempts.len(), 2);
-    assert_eq!(result.provenance.attempts[1].backend, "symphonia");
-    assert_ne!(result.provenance.attempts[1].outcome, "decoded");
+    // One backend attempt: the Ruviform decoder reports the track
+    // undecodable and the partial-ingest contract keeps the result.
+    assert_eq!(result.provenance.attempts.len(), 1);
+    assert_eq!(result.provenance.attempts[0].backend, "ruviform");
+    assert_ne!(result.provenance.attempts[0].outcome, "decoded");
 }
 
 #[test]
@@ -238,11 +236,11 @@ fn ingest_stage_writes_decoded_pcm_for_aac_mp4() {
     assert_eq!(meta["audio"]["channels"], 2);
     assert_eq!(meta["audio"]["sample_format"], "float32");
     assert_eq!(meta["audio"]["frames"], 12000);
-    assert_eq!(meta["decoder"]["fallback"], true);
-    assert_eq!(meta["decoder"]["backend"], "native");
+    assert_eq!(meta["decoder"]["fallback"], false);
+    assert_eq!(meta["decoder"]["backend"], "ruviform");
     let attempts = meta["decoder"]["attempts"].as_array().unwrap();
-    assert_eq!(attempts.len(), 2);
-    assert_eq!(attempts[1]["backend"], "symphonia");
+    assert_eq!(attempts.len(), 1);
+    assert_eq!(attempts[0]["backend"], "ruviform");
     assert!(manifest.artifacts.iter().any(|a| a.role == "decoded_pcm"));
 
     // mp4 facts and timing observations remain native-owned.

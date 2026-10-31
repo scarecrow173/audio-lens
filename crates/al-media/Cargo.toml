@@ -10,7 +10,6 @@ al-core.workspace = true
 al-job.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-symphonia = { version = "0.5.5", default-features = false, features = ["aac", "isomp4"] }
 tracing.workspace = true
 # Ruviform メディア I/O 境界の段階導入(AL#100 で消費。
 # docs/designs/ruviform-dependency-ci.md §1)
