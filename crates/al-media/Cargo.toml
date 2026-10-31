@@ -18,6 +18,8 @@ ruviform-media-core.workspace = true
 ruviform-audio-core.workspace = true
 ruviform-video-core.workspace = true
 ruviform-media-io.workspace = true
+ruviform-io-avi.workspace = true
+ruviform-io-symphonia.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true

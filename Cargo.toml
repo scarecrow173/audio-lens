@@ -49,14 +49,16 @@ tracing-appender = "0.2.5"
 # SHA(`rev`)を使うこと。更新時は一括で揃え、Cargo.lock の
 # `git+...?rev=<sha>#<sha>` で再現性を確認する。
 # 根拠: docs/designs/ruviform-dependency-ci.md §1-§2。
-ruviform-media-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-audio-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-video-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-media-io = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-math = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-dsp = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
-ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-media-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-audio-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-video-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-media-io = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-math = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-dsp = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c" }
+ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", rev = "e467ccba8e1cf9d18982387827b61275b4bf3f4c", features = ["mp4", "aac"] }
 
 # Keep full debug info in release builds so external CPU samplers
 # (samply — see docs/guides/profiling-samply.md) resolve symbols.
