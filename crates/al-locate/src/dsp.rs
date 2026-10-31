@@ -1,10 +1,14 @@
 //! DSP primitives for source localization.
 //!
-//! Everything here is self-implemented (no external DSP crates, per
-//! the implementation-stack ADR). All signals are `f64` slices in
-//! whatever native scale the caller uses — the correlation kernels
-//! are scale-invariant; callers that compare absolute quantities must
-//! normalize themselves first.
+//! 汎用 f64 カーネルの実装は `ruviform-numeric`(Ruviform)へ移譲済み
+//! (AL#101)。ここに残るのは AudioLens 固有の `deinterleave` と、
+//! Ruviform の検証 `Result` を従来の panic 契約へ写像する薄い
+//! facade のみ — 呼出側が保証する shape 不変条件の違反は、旧
+//! `al-math` と同じく panic とする。複合型(plan/workspace)は
+//! Ruviform の型をそのまま re-export し、呼出側で `Result` を
+//! 処理する。全信号は呼出側ネイティブスケールの `f64` スライス。
+//! 相関カーネルはスケール不変。絶対量を比較する呼出側は事前に
+//! 正規化する。
 
 #[cfg(test)]
 use std::f64::consts::PI;
@@ -32,74 +36,97 @@ pub fn deinterleave(interleaved: &[f64], channels: u16) -> Vec<Vec<f64>> {
         .collect()
 }
 
-pub use al_math::correlation::{
-    CorrelationPlan, CorrelationWorkspace, OverlapCorrPlan, OverlapCorrWorkspace, gcc_phat, ncc,
-    overlap_corr_curve,
+pub use ruviform_numeric::bands::BandFilter;
+pub use ruviform_numeric::conv::conv;
+pub use ruviform_numeric::corr::{
+    CorrelationPlan, CorrelationWorkspace, OverlapCorrPlan, OverlapCorrWorkspace,
 };
-pub use al_math::fft::Fft;
-pub use al_math::filter::{BandFilter, bandpass, bandpass_many, spectral_envelope};
-pub use al_math::vec::{axpy, corr0, dot, mag_sq, rms, scale, sub_scaled, sum_sq};
 
-/// In-place FFT (fused radix-4 stages, large transforms run on a skewed
-/// workspace). `re`/`im` lengths must be equal powers of two.
+/// In-place FFT. `re`/`im` lengths must be equal powers of two.
+///
+/// `ruviform_numeric::fft::Fft` は長さを検証する。旧 `al-math` の
+/// `Fft` と同じく 2 のべき乗のみ受理し、違反は panic とする。
 pub fn fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
-    let plan = al_math::fft::Fft::new(re.len());
-    plan.transform(re, im, inverse);
+    let mut plan =
+        ruviform_numeric::fft::Fft::new(re.len()).expect("fft length must be a power of two");
+    plan.transform(re, im, inverse)
+        .expect("fft buffer lengths must match the plan");
 }
 
-/// Overlap-save convolution on `al_math::fft::RealFft`: returns the
-/// first `signal.len()` samples of the linear convolution. An empty
-/// `kernel` yields a `signal`-length zero vector and an empty
-/// `signal` yields an empty vector — both early returns must precede
-/// the block-length computation (`m == 0` would underflow `m - 1`).
-pub fn conv(signal: &[f64], kernel: &[f64]) -> Vec<f64> {
-    if kernel.is_empty() {
-        return vec![0.0; signal.len()];
-    }
-    if signal.is_empty() {
-        return Vec::new();
-    }
-    let n = signal.len();
-    let m = kernel.len();
-    // Power-of-two block length (`RealFft::new` contract), bounded to
-    // 8192 for m <= 4096; the 1024 floor amortizes per-block call
-    // overhead for small kernels. Each block emits `l` fresh outputs.
-    let b = (2 * m).next_power_of_two().max(1024);
-    let l = b - m + 1;
-    let bins = b / 2 + 1;
-    let mut plan = al_math::fft::RealFft::new(b);
-    // Kernel spectrum, zero-padded to `b` and transformed once.
-    let mut hbuf = vec![0.0; b];
-    hbuf[..m].copy_from_slice(kernel);
-    let mut hre = vec![0.0; bins];
-    let mut him = vec![0.0; bins];
-    plan.forward(&hbuf, &mut hre, &mut him);
-    let mut xbuf = vec![0.0; b];
-    let mut xre = vec![0.0; bins];
-    let mut xim = vec![0.0; bins];
-    let mut obuf = vec![0.0; b];
-    let mut y = vec![0.0; n];
-    for off in (0..n).step_by(l) {
-        let take = l.min(n - off);
-        // Carry the previous block's last m-1 inputs to the front
-        // (zeros on the first pass), append `take` fresh samples,
-        // zero-pad the tail.
-        xbuf.copy_within(b + 1 - m.., 0);
-        xbuf[m - 1..m - 1 + take].copy_from_slice(&signal[off..off + take]);
-        xbuf[m - 1 + take..].fill(0.0);
-        plan.forward(&xbuf, &mut xre, &mut xim);
-        for k in 0..bins {
-            let zre = xre[k] * hre[k] - xim[k] * him[k];
-            let zim = xre[k] * him[k] + xim[k] * hre[k];
-            xre[k] = zre;
-            xim[k] = zim;
-        }
-        // `RealFft::inverse` already applies the 1/N normalization.
-        plan.inverse(&xre, &xim, &mut obuf);
-        // The first m-1 outputs carry circular wrap-around: discard.
-        y[off..off + take].copy_from_slice(&obuf[m - 1..m - 1 + take]);
-    }
-    y
+/// `a·b` の内積。2 スライスは等長でなければ panic。
+pub fn dot(a: &[f64], b: &[f64]) -> f64 {
+    ruviform_numeric::vec::dot(a, b).expect("slice lengths must be equal")
+}
+
+pub use ruviform_numeric::vec::{rms, sum_sq};
+
+/// `corr(x,y)` at lag 0 (non-centered normalized correlation;
+/// NaN 入力も 0.0)。2 スライスは等長でなければ panic。
+pub fn corr0(x: &[f64], y: &[f64]) -> f64 {
+    ruviform_numeric::vec::corr0(x, y).expect("slice lengths must be equal")
+}
+
+/// `out[i] = a·x[i]`。`x`/`out` は等長でなければ panic。エイリアス不可。
+pub fn scale(x: &[f64], a: f64, out: &mut [f64]) {
+    ruviform_numeric::vec::scale(x, a, out).expect("slice lengths must be equal")
+}
+
+/// `y[i] += a·x[i]`。`y`/`x` は等長でなければ panic。エイリアス不可。
+pub fn axpy(y: &mut [f64], a: f64, x: &[f64]) {
+    ruviform_numeric::vec::axpy(y, a, x).expect("slice lengths must be equal")
+}
+
+/// `y[i] -= a·x[i]`。`y`/`x` は等長でなければ panic。エイリアス不可。
+pub fn sub_scaled(y: &mut [f64], a: f64, x: &[f64]) {
+    ruviform_numeric::vec::sub_scaled(y, a, x).expect("slice lengths must be equal")
+}
+
+/// `out[i] = re[i]² + im[i]²`。3 スライス全て等長でなければ panic。
+pub fn mag_sq(re: &[f64], im: &[f64], out: &mut [f64]) {
+    ruviform_numeric::vec::mag_sq(re, im, out).expect("slice lengths must be equal")
+}
+
+/// Normalized cross-correlation curve `0..=max_lag`。
+/// 旧 `al-math` と同じく shape 違反は panic。
+pub fn ncc(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
+    ruviform_numeric::corr::ncc(template, signal, max_lag)
+        .expect("correlation template/signal shapes must be valid")
+}
+
+/// GCC-PHAT curve `0..=max_lag`。
+/// 旧 `al-math` と同じく shape 違反は panic。
+pub fn gcc_phat(template: &[f64], signal: &[f64], max_lag: usize) -> Vec<f64> {
+    ruviform_numeric::corr::gcc_phat(template, signal, max_lag)
+        .expect("correlation template/signal shapes must be valid")
+}
+
+/// Overlap correlation curve for equal-length `x`/`y`、
+/// `lag = i - max_lag` の `2*max_lag+1` 点。
+/// 旧 `al-math` と同じく shape 違反は panic。
+pub fn overlap_corr_curve(x: &[f64], y: &[f64], max_lag: usize) -> Vec<f64> {
+    ruviform_numeric::corr::overlap_corr_curve(x, y, max_lag)
+        .expect("overlap correlation window shapes must match")
+}
+
+/// FFT ベースの帯域通過 `[lo_hz, hi_hz)`。
+/// 旧 `al-math` と同じく帯域・rate 違反は panic。
+pub fn bandpass(samples: &[f64], sample_rate: u32, lo_hz: f64, hi_hz: f64) -> Vec<f64> {
+    ruviform_numeric::bands::bandpass(samples, sample_rate, lo_hz, hi_hz)
+        .expect("bandpass band/rate must be valid")
+}
+
+/// `bandpass` の複数帯域版。各帯域 `(lo, hi)` に 1 波形。
+/// 旧 `al-math` と同じく帯域・rate 違反は panic。
+pub fn bandpass_many(samples: &[f64], sample_rate: u32, bands: &[(f64, f64)]) -> Vec<Vec<f64>> {
+    ruviform_numeric::bands::bandpass_many(samples, sample_rate, bands)
+        .expect("bandpass band/rate must be valid")
+}
+
+/// Magnitude スペクトル包络。`fft_size` は非ゼロの 2 のべき乗。
+/// 旧 `al-math` と同じく違反は panic。
+pub fn spectral_envelope(samples: &[f64], fft_size: usize, bins: usize) -> Vec<f64> {
+    ruviform_numeric::bands::spectral_envelope(samples, fft_size, bins)
+        .expect("fft_size must be a non-zero power of two")
 }
 
 #[cfg(test)]
@@ -333,7 +360,8 @@ mod tests {
         let c1: Vec<f64> = (0..20).map(|i| (i as f64 * 0.37).sin()).collect();
         let rhs: Vec<f64> = (0..20).map(|i| 2.0 * c0[i] - c1[i]).collect();
         let (x, rms) =
-            al_math::linalg::least_squares(&[c0.as_slice(), c1.as_slice()], &rhs, 0.0).unwrap();
+            ruviform_numeric::linalg::least_squares(&[c0.as_slice(), c1.as_slice()], &rhs, 0.0)
+                .unwrap();
         assert!((x[0] - 2.0).abs() < 1e-6);
         assert!((x[1] + 1.0).abs() < 1e-6);
         assert!(rms < 1e-6);
@@ -342,10 +370,10 @@ mod tests {
     #[test]
     fn condition_number_reports_singular() {
         assert_eq!(
-            al_math::linalg::condition_number(&[vec![1.0, 2.0], vec![2.0, 4.0]]),
+            ruviform_numeric::linalg::condition_number(&[vec![1.0, 2.0], vec![2.0, 4.0]]),
             f64::INFINITY
         );
-        let good = al_math::linalg::condition_number(&[vec![2.0, 0.0], vec![0.0, 1.0]]);
+        let good = ruviform_numeric::linalg::condition_number(&[vec![2.0, 0.0], vec![0.0, 1.0]]);
         assert!((good - 2.0).abs() < 0.2);
     }
 }

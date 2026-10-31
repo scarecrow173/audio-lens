@@ -51,10 +51,10 @@ fn bench_csd_accum(c: &mut Criterion) {
         b.iter(|| {
             let mut pxy = vec![(0.0f64, 0.0f64); bins];
             for f in 0..frames {
-                let c = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
-                for (p, &(cr, ci)) in pxy.iter_mut().zip(&c) {
-                    p.0 += cr;
-                    p.1 += ci;
+                let (cr, ci) = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
+                for (p, (&r, &i)) in pxy.iter_mut().zip(cr.iter().zip(&ci)) {
+                    p.0 += r;
+                    p.1 += i;
                 }
             }
             black_box(pxy)
@@ -88,13 +88,13 @@ fn bench_csd_accum(c: &mut Criterion) {
                 for k in 0..half {
                     let xs = ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
                     row.push(if xs > 0.0 {
-                        let c = csd(
+                        let (cr, ci) = csd(
                             &ms.re[f][k..k + 1],
                             &ms.im[f][k..k + 1],
                             &mc.re[f][k..k + 1],
                             &mc.im[f][k..k + 1],
                         );
-                        ((c[0].0 * c[0].0 + c[0].1 * c[0].1).sqrt()) / xs
+                        ((cr[0] * cr[0] + ci[0] * ci[0]).sqrt()) / xs
                     } else {
                         0.0
                     });

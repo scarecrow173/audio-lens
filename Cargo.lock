@@ -24,6 +24,7 @@ dependencies = [
  "criterion",
  "ruviform-audio-analysis",
  "ruviform-dsp",
+ "ruviform-numeric",
  "serde",
  "serde_json",
  "tracing",
@@ -85,23 +86,15 @@ dependencies = [
  "al-core",
  "al-dataset",
  "al-job",
- "al-math",
  "al-media",
  "al-testkit",
  "memmap2",
  "ruviform-dsp",
  "ruviform-math",
+ "ruviform-numeric",
  "serde",
  "serde_json",
  "tracing",
-]
-
-[[package]]
-name = "al-math"
-version = "0.1.0"
-dependencies = [
- "criterion",
- "pulp",
 ]
 
 [[package]]
@@ -209,12 +202,6 @@ name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
-
-[[package]]
-name = "bitflags"
-version = "2.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
 
 [[package]]
 name = "bumpalo"
@@ -506,12 +493,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
 
 [[package]]
-name = "libm"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
-
-[[package]]
 name = "log"
 version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -566,16 +547,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-complex"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495"
-dependencies = [
- "bytemuck",
- "num-traits",
-]
-
-[[package]]
 name = "num-conv"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -611,12 +582,6 @@ dependencies = [
  "libc",
  "winapi",
 ]
-
-[[package]]
-name = "paste"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pin-project-lite"
@@ -668,44 +633,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "pulp"
-version = "0.22.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "046aa45b989642ec2e4717c8e72d677b13edd831a4d3b6cf37d9a3e54912496a"
-dependencies = [
- "bytemuck",
- "cfg-if",
- "libm",
- "num-complex",
- "paste",
- "pulp-wasm-simd-flag",
- "raw-cpuid",
- "reborrow",
- "version_check",
-]
-
-[[package]]
-name = "pulp-wasm-simd-flag"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d8f70e07b9c3962945a74e59ca1c511bba65b6419468acc217c457d93f3c740"
-
-[[package]]
 name = "quote"
 version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
 dependencies = [
  "proc-macro2",
-]
-
-[[package]]
-name = "raw-cpuid"
-version = "11.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "498cd0dc59d73224351ee52a95fee0f1a617a2eae0e7d9d720cc622c73a54186"
-dependencies = [
- "bitflags 2.13.2",
 ]
 
 [[package]]
@@ -727,12 +660,6 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
 ]
-
-[[package]]
-name = "reborrow"
-version = "0.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03251193000f4bd3b042892be858ee50e8b3719f2b08e5833ac4353724632430"
 
 [[package]]
 name = "regex"
@@ -778,7 +705,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 [[package]]
 name = "ruviform-audio-analysis"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-dsp",
@@ -788,7 +715,7 @@ dependencies = [
 [[package]]
 name = "ruviform-audio-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -796,7 +723,7 @@ dependencies = [
 [[package]]
 name = "ruviform-dsp"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-math",
@@ -806,7 +733,7 @@ dependencies = [
 [[package]]
 name = "ruviform-exec"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "audio_thread_priority",
  "ruviform-rt",
@@ -815,7 +742,7 @@ dependencies = [
 [[package]]
 name = "ruviform-math"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "fearless_simd",
  "fearless_simd_macros",
@@ -824,12 +751,12 @@ dependencies = [
 [[package]]
 name = "ruviform-media-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 
 [[package]]
 name = "ruviform-media-io"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -837,9 +764,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruviform-numeric"
+version = "0.1.0"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
+
+[[package]]
 name = "ruviform-rt"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "arc-swap",
  "rtrb",
@@ -848,7 +780,7 @@ dependencies = [
 [[package]]
 name = "ruviform-video-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=73190d7d26b3197b1da36749798b5952499d1b70#73190d7d26b3197b1da36749798b5952499d1b70"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=f3f474b1734af05ca2435a322f935805010ba8b6#f3f474b1734af05ca2435a322f935805010ba8b6"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -981,7 +913,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea00cc4f79b7f6bb7ff87eddc065a1066f3a43fe1875979056672c9ef948c2af"
 dependencies = [
  "arrayvec",
- "bitflags 1.3.2",
+ "bitflags",
  "bytemuck",
  "lazy_static",
  "log",
@@ -1211,12 +1143,6 @@ name = "valuable"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
-
-[[package]]
-name = "version_check"
-version = "0.9.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "walkdir"

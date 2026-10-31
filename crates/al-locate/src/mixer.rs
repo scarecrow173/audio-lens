@@ -8,7 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use al_math::linalg::{LeastSquares, condition_number};
+use ruviform_numeric::linalg::{LeastSquares, condition_number};
 
 use crate::dsp;
 

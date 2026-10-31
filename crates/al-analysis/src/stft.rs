@@ -1,12 +1,13 @@
 //! Complex STFT and derived spectral intermediates.
 //!
-//! The FFT kernel is `al_locate::dsp::Fft` (radix-2); one plan is
-//! built per call and reused across all frames. Every frame is
-//! zero-padded up to the next power of two when the analysis
-//! window is not already one. All products are deterministic and
-//! persistable as `intermediate`-role tensors.
+//! The STFT kernel is `ruviform_numeric::stft::StftPlan` (AL#101);
+//! one plan is built per call and reused across all frames. Every
+//! frame is zero-padded up to the next power of two when the
+//! analysis window is not already one. All products are
+//! deterministic and persistable as `intermediate`-role tensors.
 
-use al_locate::dsp::{Fft, mag_sq, scale};
+use al_locate::dsp::{mag_sq, scale};
+use ruviform_numeric::{bands, stft as rf_stft, window::Window, xspec};
 
 /// One frame×bin complex matrix produced by [`stft`].
 #[derive(Debug, Clone)]
@@ -91,11 +92,9 @@ impl StftMatrix {
     }
 }
 
-/// Hann window coefficients.
+/// Hann window coefficients (`ruviform_numeric::window::Window::Hann`)。
 pub fn hann(n: usize) -> Vec<f64> {
-    (0..n)
-        .map(|i| 0.5 - 0.5 * (2.0 * std::f64::consts::PI * i as f64 / n as f64).cos())
-        .collect()
+    Window::Hann.coeffs(n)
 }
 
 /// Compute the complex STFT of `samples`.
@@ -104,20 +103,27 @@ pub fn hann(n: usize) -> Vec<f64> {
 /// `hop`, zero-padded to the next power of two. A signal shorter
 /// than one window yields zero frames — callers decide the validity
 /// (`InsufficientSupport`), not this function.
+///
+/// `sample_rate` is recorded on the matrix for `bin_freq`; it is not
+/// validated here. `window == 0` / `hop == 0` yield zero frames —
+/// the `StftPlan` construction is skipped before Ruviform's
+/// validation can reject them (旧 `al-math` 経路と同じ不変条件)。
+/// plan には `sample_rate.max(1)` を渡す: Ruviform は rate 0 を拒否
+/// するが、旧経路は rate を計算に使わず行列へ記録するだけだった
+/// ため、その不変条件を維持する。
 pub fn stft(samples: &[f64], window: usize, hop: usize, sample_rate: u32) -> StftMatrix {
     let fft_size = window.next_power_of_two();
-    let win = hann(window);
     let mut re = Vec::new();
     let mut im = Vec::new();
     if samples.len() >= window && window > 0 && hop > 0 {
-        let plan = Fft::new(fft_size);
-        for start in (0..=samples.len() - window).step_by(hop) {
+        let plan = rf_stft::StftPlan::new(window, hop, Window::Hann, sample_rate.max(1))
+            .expect("stft window/hop validated by caller contract");
+        let mut workspace = rf_stft::StftWorkspace::new(&plan);
+        for frame in 0..plan.frame_count(samples.len()) {
             let mut fre = vec![0.0; fft_size];
             let mut fim = vec![0.0; fft_size];
-            for (i, &v) in samples[start..start + window].iter().enumerate() {
-                fre[i] = v * win[i];
-            }
-            plan.transform(&mut fre, &mut fim, false);
+            plan.frame_into(&mut workspace, samples, frame, &mut fre, &mut fim)
+                .expect("frame index is bounded by plan.frame_count");
             re.push(fre);
             im.push(fim);
         }
@@ -140,73 +146,39 @@ pub fn band_power(
     fft_size: usize,
     bands: &[(f64, f64)],
 ) -> Vec<f64> {
-    let bin_hz = sample_rate as f64 / fft_size as f64;
-    bands
-        .iter()
-        .map(|&(lo, hi)| {
-            let b0 = (lo / bin_hz).floor() as usize;
-            let b1 = (hi / bin_hz).ceil() as usize;
-            (b0..b1.min(row.len())).map(|b| row[b]).sum::<f64>() * bin_hz
-        })
-        .collect()
+    bands::band_power(row, sample_rate as f64 / fft_size as f64, bands)
 }
 
 /// Standard IEC 1/3-octave bands inside `[f_min, f_max]` as
 /// `(lower, upper)` edges around `f_c = 1000·2^(k/3)` centers.
 pub fn third_octave_bands(f_min: f64, f_max: f64) -> Vec<(f64, f64)> {
-    let mut bands = Vec::new();
-    let ratio = 2f64.powf(1.0 / 3.0);
-    let mut center = 1000.0;
-    // Step down below f_min, then walk upward.
-    while center / ratio.sqrt() > f_min {
-        center /= ratio;
-    }
-    while center * ratio.sqrt() <= f_max {
-        bands.push((center / ratio.sqrt(), center * ratio.sqrt()));
-        center *= ratio;
-    }
-    bands
+    bands::third_octave_bands(f_min, f_max).expect("third-octave range must be positive")
 }
 
 /// Cross-spectral density of two aligned frames: `conj(x) * y`
-/// per bin (returns `(re, im)` pairs).
-pub fn csd(x_re: &[f64], x_im: &[f64], y_re: &[f64], y_im: &[f64]) -> Vec<(f64, f64)> {
-    x_re.iter()
-        .zip(x_im)
-        .zip(y_re.iter().zip(y_im))
-        .map(|((&xr, &xi), (&yr, &yi))| (xr * yr + xi * yi, xr * yi - xi * yr))
-        .collect()
+/// per bin (returns `(re, im)` スライスのペア — Ruviform の
+/// 分離レイアウトをそのまま引き継ぐ。長さ不一致は panic。
+pub fn csd(x_re: &[f64], x_im: &[f64], y_re: &[f64], y_im: &[f64]) -> (Vec<f64>, Vec<f64>) {
+    xspec::csd(x_re, x_im, y_re, y_im).expect("csd slice lengths must be equal")
 }
 
 /// Complex coherence `Pxy / sqrt(Pxx * Pyy)` per bin. Bins with zero
-/// auto-power in either signal return `0`.
-pub fn complex_coherence(pxx: &[f64], pyy: &[f64], pxy: &[(f64, f64)]) -> Vec<(f64, f64)> {
-    pxx.iter()
-        .zip(pyy)
-        .zip(pxy)
-        .map(|((&xx, &yy), &(pr, pi))| {
-            let denom = (xx * yy).sqrt();
-            if denom <= 0.0 {
-                (0.0, 0.0)
-            } else {
-                (pr / denom, pi / denom)
-            }
-        })
-        .collect()
+/// auto-power in either signal return `0`. 長さ不一致は panic。
+pub fn complex_coherence(
+    pxx: &[f64],
+    pyy: &[f64],
+    pxy_re: &[f64],
+    pxy_im: &[f64],
+) -> (Vec<f64>, Vec<f64>) {
+    xspec::complex_coherence(pxx, pyy, pxy_re, pxy_im)
+        .expect("coherence slice lengths must be equal")
 }
 
 /// Spectral envelope of a magnitude row: a smoothed log-frequency
 /// curve (moving average in linear magnitude over `bins`-wide
 /// windows), used for coarse shape comparison.
 pub fn envelope(magnitude_row: &[f64], bins: usize) -> Vec<f64> {
-    let bins = bins.max(1);
-    (0..magnitude_row.len())
-        .map(|i| {
-            let lo = i.saturating_sub(bins / 2);
-            let hi = (i + bins / 2 + 1).min(magnitude_row.len());
-            magnitude_row[lo..hi].iter().sum::<f64>() / (hi - lo) as f64
-        })
-        .collect()
+    rf_stft::envelope(magnitude_row, bins)
 }
 
 #[cfg(test)]
@@ -387,14 +359,14 @@ mod tests {
             .collect();
         let m = stft(&samples, 1024, 1024, rate);
         let p = m.power();
-        let pxy = csd(&m.re[0], &m.im[0], &m.re[0], &m.im[0]);
-        let coh = complex_coherence(&p[0], &p[0], &pxy);
+        let (pxy_re, pxy_im) = csd(&m.re[0], &m.im[0], &m.re[0], &m.im[0]);
+        let (coh_re, coh_im) = complex_coherence(&p[0], &p[0], &pxy_re, &pxy_im);
         let (bin, _) = p[0]
             .iter()
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
             .unwrap();
-        assert!((coh[bin].0 - 1.0).abs() < 1e-9);
-        assert!(coh[bin].1.abs() < 1e-9);
+        assert!((coh_re[bin] - 1.0).abs() < 1e-9);
+        assert!(coh_im[bin].abs() < 1e-9);
     }
 }

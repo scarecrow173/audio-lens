@@ -673,12 +673,12 @@ mod mechanical_cleanup {
         let mut sxx = vec![0.0f64; half];
         let mut syy = vec![0.0f64; half];
         for f in 0..fr {
-            let c = csd(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f]);
+            let (cr, ci) = csd(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f]);
             for &k in &band_bins {
                 let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
                 let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
-                sxy[k].0 += c[k].0;
-                sxy[k].1 += c[k].1;
+                sxy[k].0 += cr[k];
+                sxy[k].1 += ci[k];
                 sxx[k] += aa;
                 syy[k] += bb;
             }

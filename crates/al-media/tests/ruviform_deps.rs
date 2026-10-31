@@ -2,7 +2,7 @@
 //! smoke-test。基礎型の構築とリンクのみを検証する
 //! (docs/designs/ruviform-dependency-ci.md §1)。
 use ruviform_audio_core::{AudioBuffer, BufferSpec, ChannelLayout, SampleRate};
-use ruviform_media_core::{MediaTime, TimeBase};
+use ruviform_media_core::{Fact, MediaTime, TimeBase};
 use ruviform_media_io::{CodecDescriptor, CodecFormat, CodecId};
 use ruviform_video_core::{PixelFormat, VideoFrame};
 
@@ -43,6 +43,7 @@ fn media_io_boundary_types() {
         codec: CodecId::Aac,
         codec_private: Vec::new(),
         format: CodecFormat::Data,
+        native_format: Fact::NotDeclared,
     };
     assert_eq!(descriptor.codec.name(), "aac");
     assert!(descriptor.audio_format().is_none());

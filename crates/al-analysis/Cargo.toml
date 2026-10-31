@@ -18,6 +18,8 @@ tracing.workspace = true
 # docs/designs/ruviform-dependency-ci.md §1)
 ruviform-audio-analysis.workspace = true
 ruviform-dsp.workspace = true
+# 汎用 f64 数値カーネル(旧 al-math 相当、AL#101 で移行済)
+ruviform-numeric.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true

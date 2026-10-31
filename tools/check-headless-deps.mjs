@@ -7,11 +7,12 @@ import { execFileSync } from "node:child_process";
 // Crates that must stay free of GUI framework dependencies. `al-viz` is
 // intentionally absent: it is the deprecated display crate whose
 // embedded report assets are tracked for removal by AL#106 (see design
-// §7 recorded exception).
+// §7 recorded exception). `al-math` was removed in AL#101 (its kernels
+// moved to the ruviform-numeric dependency, checked transitively via
+// the remaining crates' dep trees).
 const HEADLESS_CRATES = [
   "al-cli",
   "al-core",
-  "al-math",
   "al-job",
   "al-dataset",
   "al-media",
