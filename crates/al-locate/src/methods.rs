@@ -21,9 +21,9 @@ const MIN_PEAK_TO_BACKGROUND: f64 = 2.0;
 const MAX_CANDIDATES: usize = 8;
 /// 同点とみなす相対イプシロン。T1 特性計測で較正(dispatch 間偏差
 /// ~1e-15 から十分上、受理系最小マージン 1.65e-8 から十分下)。
-const TIE_REL_EPS: f64 = 1e-11;
+pub(crate) const TIE_REL_EPS: f64 = 1e-11;
 /// スコア 0 近傍で判定が発散しないための絶対床。
-const TIE_ABS_FLOOR: f64 = 1e-11;
+pub(crate) const TIE_ABS_FLOOR: f64 = 1e-11;
 
 /// Rank-1 anchored の同点集合 |T| を返す。
 /// T = { i : |corr[i]| >= M - tie_window },
