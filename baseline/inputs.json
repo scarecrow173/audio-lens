@@ -1,0 +1,330 @@
+{
+  "run_inputs": [
+    {
+      "name": "normal.avi",
+      "role": "capture_reference",
+      "path": "samples/_runs/decoded/normal.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/reference/game-capture-normal.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
+    },
+    {
+      "name": "dropout.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/dropout.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/dropout/game-capture-audio-dropout.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "80f1fd16f2ade340bfab35e3aef84ffd24dbcd8628001ef7b4630e65904639b4"
+    },
+    {
+      "name": "desync.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/desync.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/desync/game-capture-audio-desync.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "64f6b446f2bc3cf306b0a077b5bcd7408580f50d2a3073d114942f52a09518b5"
+    },
+    {
+      "name": "clipping.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/clipping.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/clipping/game-capture-audio-clip.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "ce33abd761bdba11c1cc49c5600d7ecb8179d33417c6e78fb1da31b520edb83f"
+    },
+    {
+      "name": "reverb.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/reverb.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/reverb/game-capture-audio-reverb.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "646729ca9c11106857e73feda1436463fb0a81191785546b3b189c9aa1ae86e7"
+    },
+    {
+      "name": "filter.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/filter.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/filter/game-capture-audio-filter.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "82604eb38ac64130cdfb9a11ed946a6623bf1084d569460ce9c83c749664ba7b"
+    },
+    {
+      "name": "clicks.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/clicks.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/clicks/game-capture-audio-clicks.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 31365690,
+      "sha256": "e03043ccae937da6a1f6ca34d319f590be20a82f7c2a2aef0d68bd6084afb26d"
+    },
+    {
+      "name": "test.avi",
+      "role": "capture_bug",
+      "path": "samples/_runs/decoded/test.avi",
+      "origin": {
+        "kind": "derived",
+        "source": "samples/test/game-capture-test.mp4",
+        "command": "-y -i {in} -r:v 10 -s 160x90 -c:v rawvideo -pix_fmt bgr24 -c:a pcm_s16le -ar 48000 {out}",
+        "note": "コンテナ bytes は ffmpeg build 依存。sha256 は観測値(契約外)"
+      },
+      "size": 6351090,
+      "sha256": "a91d17b5a93dfee3580744c544941d88c861541c89a0a951bdbfbc2c25b31d61"
+    },
+    {
+      "name": "source-bgm.wav",
+      "role": "source_asset",
+      "path": "samples/reference/source-bgm.wav",
+      "origin": {
+        "kind": "lfs-sample"
+      },
+      "size": 8820044,
+      "sha256": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+    },
+    {
+      "name": "source-impact_heavy.wav",
+      "role": "source_asset",
+      "path": "samples/reference/source-impact_heavy.wav",
+      "origin": {
+        "kind": "lfs-sample"
+      },
+      "size": 158804,
+      "sha256": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16"
+    },
+    {
+      "name": "source-kael_01.wav",
+      "role": "source_asset",
+      "path": "samples/reference/source-kael_01.wav",
+      "origin": {
+        "kind": "lfs-sample"
+      },
+      "size": 482788,
+      "sha256": "d5162bd0ea4543904510e3cccd4cb7d5ecfde33a56990327bf8696e8716febf8"
+    }
+  ],
+  "all_samples": [
+    {
+      "path": "samples/README.md",
+      "size": 3712,
+      "sha256": "46a288cd44f796708d5ea4286fad460d8478220dfba3120b4b64c07af07aa430"
+    },
+    {
+      "path": "samples/clicks/game-capture-audio-clicks.mp4",
+      "size": 9480636,
+      "sha256": "cce6223061d545b1b7af4b1f120e4751faed6be966afa5d9cfdb00ba589b335f"
+    },
+    {
+      "path": "samples/clipping/game-capture-audio-clip.mp4",
+      "size": 9478333,
+      "sha256": "b77233a9598c219d909429ff723c36bf909cac342fa38cab0fd4530e9e29ceb4"
+    },
+    {
+      "path": "samples/desync/game-capture-audio-desync.mp4",
+      "size": 9478487,
+      "sha256": "338ed474a00d661e8ae281798e234d1a6a60cc0a551ce9d6fa6f626cf5625007"
+    },
+    {
+      "path": "samples/dropout/game-capture-audio-dropout.mp4",
+      "size": 9478454,
+      "sha256": "9f06044e98021abb0f1805733c941bd3cbd1e6ab90f78a64dd5fc899e7481bbf"
+    },
+    {
+      "path": "samples/filter/game-capture-audio-filter.mp4",
+      "size": 9478702,
+      "sha256": "2b473957d9de3cf07bdcc6b9c704c59661fb47cb14b0cae0435c32f88220e480"
+    },
+    {
+      "path": "samples/metadata/audio-clicks.json",
+      "size": 305,
+      "sha256": "cca7cf288aa2f33dde7b493ae644daf254d14f9b4d5bad14c9c89e8e365b2622"
+    },
+    {
+      "path": "samples/metadata/audio-clip.json",
+      "size": 253,
+      "sha256": "157fd9e0e0771a28f207517c5068b57d4f7cb949791ced7379653b410dc84be5"
+    },
+    {
+      "path": "samples/metadata/audio-desync.json",
+      "size": 256,
+      "sha256": "7bd08119b9526ece0a8bd4518e6cb8bbf35d4bf79577c74c6f1eee1065ed7d19"
+    },
+    {
+      "path": "samples/metadata/audio-dropout.json",
+      "size": 276,
+      "sha256": "2582956a43924ca3bc676eeb67b86788eacc349f20e5c60e0714ae027bd897ea"
+    },
+    {
+      "path": "samples/metadata/audio-filter.json",
+      "size": 277,
+      "sha256": "e354a6e3437d4a8c8b413bcc343f11b8bca43b6664a04f53330d9a410f74c2ef"
+    },
+    {
+      "path": "samples/metadata/audio-reverb.json",
+      "size": 270,
+      "sha256": "e8c25233181a833afe20b314c2a3b046c81d1bb289c3a6f68609a4e413ace641"
+    },
+    {
+      "path": "samples/metadata/audio.json",
+      "size": 23292,
+      "sha256": "371587a58b3c6e0f71c26c7be0685d7598c05f872d4c180ca99d330979390860"
+    },
+    {
+      "path": "samples/metadata/normal.json",
+      "size": 183,
+      "sha256": "619707f8f4993e2316de138317126ea004db318d73c3f06f468b9693e5ba330c"
+    },
+    {
+      "path": "samples/metadata/test.json",
+      "size": 171,
+      "sha256": "c187f82b4f323d604898084fab07e6a210c5b910bd99392bc766334348fb2c9b"
+    },
+    {
+      "path": "samples/reference/game-capture-normal.mp4",
+      "size": 9478918,
+      "sha256": "92d0a726e0d5ddb6444973270a623dc356ed7e04f557ce004b3aa29d3c19ed87"
+    },
+    {
+      "path": "samples/reference/source-ambience_loop.wav",
+      "size": 4233644,
+      "sha256": "262e779b4251a0787e6fd501a32b7c1647673b44ff7a65046aaa3ba5ad0bf67c"
+    },
+    {
+      "path": "samples/reference/source-bgm.wav",
+      "size": 8820044,
+      "sha256": "35cbf60d19f1a6fa590994cfc7e914c7132b84faa8d937553758af27151c375f"
+    },
+    {
+      "path": "samples/reference/source-block.wav",
+      "size": 70604,
+      "sha256": "b06794660ee5afd323e7aadb47bdb02296b346cf71e8d3fa7ba9601416467194"
+    },
+    {
+      "path": "samples/reference/source-clash.wav",
+      "size": 132344,
+      "sha256": "3d8eec292ac431c9bcf1a7cd50c99f926c9f3f0390c030102e80e465a12332c6"
+    },
+    {
+      "path": "samples/reference/source-debris.wav",
+      "size": 141164,
+      "sha256": "ab1e4b89d61411bfa384fa5a42a08293d2fcc0e67f9c9b8f9d470a1747f0768c"
+    },
+    {
+      "path": "samples/reference/source-footstep_a.wav",
+      "size": 35324,
+      "sha256": "6db5e0d8eb8f2dc9b673d84033eb34ad4d812bf579394656919f401c84e22eb9"
+    },
+    {
+      "path": "samples/reference/source-footstep_b.wav",
+      "size": 35324,
+      "sha256": "e0157fafd8e11839abc4dbf4557488fb5038c9dd0b2ae0b578e42d73733411f2"
+    },
+    {
+      "path": "samples/reference/source-impact_heavy.wav",
+      "size": 158804,
+      "sha256": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16"
+    },
+    {
+      "path": "samples/reference/source-kael_01.wav",
+      "size": 482788,
+      "sha256": "d5162bd0ea4543904510e3cccd4cb7d5ecfde33a56990327bf8696e8716febf8"
+    },
+    {
+      "path": "samples/reference/source-kael_02.wav",
+      "size": 489608,
+      "sha256": "d2d87bdebb362a1d5cc8c7443154de5c2fbdbceeea7dae2c8d43f9fd38986642"
+    },
+    {
+      "path": "samples/reference/source-landing.wav",
+      "size": 97068,
+      "sha256": "65154e0ede21f56d4cec113549c19d19497845021d618ed570531ebb3ec1a5b4"
+    },
+    {
+      "path": "samples/reference/source-powerup.wav",
+      "size": 458684,
+      "sha256": "34c258a33ceab32872741f6a85dbe9e206fa609f9bce747cb6444171a8d1147a"
+    },
+    {
+      "path": "samples/reference/source-swing_heavy.wav",
+      "size": 84716,
+      "sha256": "2173ac20889c4f44fae78f9c1c8694c9c4100a576e5f85d4a0f2421591d1064a"
+    },
+    {
+      "path": "samples/reference/source-swing_light.wav",
+      "size": 56492,
+      "sha256": "74c28701fa9aa2468b16c1121a5cb4428adec66225c1c636f194528d8488573e"
+    },
+    {
+      "path": "samples/reference/source-title_impact.wav",
+      "size": 388132,
+      "sha256": "3a8032e1b89c618ca7afc28951c65e3d6f67ebf848667448a7c5a8896dd5559d"
+    },
+    {
+      "path": "samples/reference/source-ui_dialogue.wav",
+      "size": 21212,
+      "sha256": "1e2c75fdc765b865c2956526f11060354cdb5930bcf96b829e80a65d15ce4011"
+    },
+    {
+      "path": "samples/reference/source-ui_select.wav",
+      "size": 15920,
+      "sha256": "ee0de5f6b495d96e9893aedf07b60d11fb38559a39c6d5855fc1ee14f2690fe4"
+    },
+    {
+      "path": "samples/reference/source-varen_01.wav",
+      "size": 915136,
+      "sha256": "beedbd05dcf5477121c75343d1ae75f359e410a7338f1687958fd78a79c83be1"
+    },
+    {
+      "path": "samples/reference/source-varen_02.wav",
+      "size": 596996,
+      "sha256": "c369ccdbbf7a6c0b0533a908d0d288da3c61dcbf9649ad89f00a7d14c6b61f9f"
+    },
+    {
+      "path": "samples/reference/source-varen_03.wav",
+      "size": 375912,
+      "sha256": "e2eeacebf14482803658aed271b8a04f28b0cba139e14214f489f86b0df8dd66"
+    },
+    {
+      "path": "samples/reverb/game-capture-audio-reverb.mp4",
+      "size": 9479141,
+      "sha256": "f80daf362e5c136a9f6f04d88ed4015b57ee193bf2b8408372f5ec25824a52f0"
+    },
+    {
+      "path": "samples/test/game-capture-test.mp4",
+      "size": 2019711,
+      "sha256": "4f70f8676fa65815e65b03d9860164890b5fa04de63df7335fb60578723f68cb"
+    }
+  ]
+}

@@ -1,0 +1,8463 @@
+{
+  "anchor_reference": 254400,
+  "anchors": [
+    {
+      "capture": 16182,
+      "score": 0.9920516542906034,
+      "source": 126976
+    },
+    {
+      "capture": 175937,
+      "score": 0.9794904989393697,
+      "source": 121856
+    },
+    {
+      "capture": 255884,
+      "score": 0.5548430811330182,
+      "source": 1024
+    },
+    {
+      "capture": 256524,
+      "score": 0.7472070704668371,
+      "source": 1536
+    },
+    {
+      "capture": 256698,
+      "score": 0.919739467066717,
+      "source": 2048
+    },
+    {
+      "capture": 256765,
+      "score": 0.9720283261267373,
+      "source": 2560
+    },
+    {
+      "capture": 257473,
+      "score": 0.9717498416523841,
+      "source": 3072
+    },
+    {
+      "capture": 257796,
+      "score": 0.984813474668717,
+      "source": 3584
+    },
+    {
+      "capture": 258496,
+      "score": 0.9821253566711732,
+      "source": 4096
+    },
+    {
+      "capture": 258816,
+      "score": 0.9214154645274906,
+      "source": 4608
+    },
+    {
+      "capture": 259328,
+      "score": 0.9520732058699918,
+      "source": 5120
+    },
+    {
+      "capture": 260032,
+      "score": 0.8787153769693842,
+      "source": 5632
+    },
+    {
+      "capture": 260544,
+      "score": 0.9361821444080972,
+      "source": 6144
+    },
+    {
+      "capture": 261364,
+      "score": 0.9299187902432697,
+      "source": 7168
+    },
+    {
+      "capture": 261453,
+      "score": 0.9239002349337669,
+      "source": 6656
+    },
+    {
+      "capture": 262194,
+      "score": 0.6917065705829182,
+      "source": 8704
+    },
+    {
+      "capture": 262274,
+      "score": 0.8420551165343565,
+      "source": 7680
+    },
+    {
+      "capture": 262373,
+      "score": 0.8674123765117846,
+      "source": 8192
+    },
+    {
+      "capture": 263616,
+      "score": 0.7562920013832463,
+      "source": 9216
+    },
+    {
+      "capture": 263914,
+      "score": 0.6924228515556881,
+      "source": 22528
+    },
+    {
+      "capture": 264320,
+      "score": 0.9553445386006991,
+      "source": 9728
+    },
+    {
+      "capture": 264448,
+      "score": 0.9321074388372212,
+      "source": 10240
+    },
+    {
+      "capture": 265152,
+      "score": 0.9300122874632794,
+      "source": 10752
+    },
+    {
+      "capture": 265472,
+      "score": 0.8679417398122867,
+      "source": 11264
+    },
+    {
+      "capture": 266176,
+      "score": 0.9424338863146609,
+      "source": 11776
+    },
+    {
+      "capture": 266496,
+      "score": 0.8706827894894484,
+      "source": 12288
+    },
+    {
+      "capture": 266708,
+      "score": 0.6387479022939815,
+      "source": 25088
+    },
+    {
+      "capture": 267200,
+      "score": 0.8413025781374178,
+      "source": 12800
+    },
+    {
+      "capture": 267712,
+      "score": 0.6908239876320006,
+      "source": 13312
+    },
+    {
+      "capture": 268009,
+      "score": 0.6292770140089674,
+      "source": 14336
+    },
+    {
+      "capture": 268033,
+      "score": 0.8800523434477796,
+      "source": 13824
+    },
+    {
+      "capture": 269855,
+      "score": 0.6854798378208953,
+      "source": 14848
+    },
+    {
+      "capture": 270926,
+      "score": 0.7658463986700813,
+      "source": 15360
+    },
+    {
+      "capture": 270941,
+      "score": 0.8843140177291045,
+      "source": 16896
+    },
+    {
+      "capture": 270975,
+      "score": 0.8927492358859895,
+      "source": 16384
+    },
+    {
+      "capture": 271032,
+      "score": 0.8303595379617021,
+      "source": 15872
+    },
+    {
+      "capture": 271999,
+      "score": 0.8360336312005392,
+      "source": 17408
+    },
+    {
+      "capture": 272320,
+      "score": 0.7612540949572156,
+      "source": 17920
+    },
+    {
+      "capture": 272832,
+      "score": 0.8794422267550316,
+      "source": 18432
+    },
+    {
+      "capture": 273409,
+      "score": 0.5587628381874062,
+      "source": 88576
+    },
+    {
+      "capture": 273536,
+      "score": 0.8857251472083025,
+      "source": 18944
+    },
+    {
+      "capture": 273856,
+      "score": 0.9639481873990688,
+      "source": 19456
+    },
+    {
+      "capture": 274560,
+      "score": 0.8535096962004399,
+      "source": 19968
+    },
+    {
+      "capture": 274880,
+      "score": 0.872547058191407,
+      "source": 20480
+    },
+    {
+      "capture": 275584,
+      "score": 0.8335845900225582,
+      "source": 20992
+    },
+    {
+      "capture": 275713,
+      "score": 0.9237531465816772,
+      "source": 21504
+    },
+    {
+      "capture": 277174,
+      "score": 0.49865604062816293,
+      "source": 23040
+    },
+    {
+      "capture": 277633,
+      "score": 0.5345581028221973,
+      "source": 24064
+    },
+    {
+      "capture": 277789,
+      "score": 0.4407050650485525,
+      "source": 24576
+    },
+    {
+      "capture": 278297,
+      "score": 0.3595340029131791,
+      "source": 23552
+    },
+    {
+      "capture": 280191,
+      "score": 0.4395046906749359,
+      "source": 25600
+    },
+    {
+      "capture": 280435,
+      "score": 0.4576639258032838,
+      "source": 26112
+    },
+    {
+      "capture": 280948,
+      "score": 0.66576076426987,
+      "source": 26624
+    },
+    {
+      "capture": 281537,
+      "score": 0.6084194645756632,
+      "source": 27136
+    },
+    {
+      "capture": 282240,
+      "score": 0.8880995491234388,
+      "source": 27648
+    },
+    {
+      "capture": 282264,
+      "score": 0.4570749238429893,
+      "source": 44544
+    },
+    {
+      "capture": 282560,
+      "score": 0.9813023517917144,
+      "source": 28160
+    },
+    {
+      "capture": 282696,
+      "score": 0.4205453523498488,
+      "source": 80384
+    },
+    {
+      "capture": 283072,
+      "score": 0.8539581526372478,
+      "source": 28672
+    },
+    {
+      "capture": 283392,
+      "score": 0.9036408992685487,
+      "source": 29184
+    },
+    {
+      "capture": 284096,
+      "score": 0.8495246043442692,
+      "source": 29696
+    },
+    {
+      "capture": 284352,
+      "score": 0.7702925457724464,
+      "source": 52224
+    },
+    {
+      "capture": 284416,
+      "score": 0.8822172397848809,
+      "source": 30208
+    },
+    {
+      "capture": 285312,
+      "score": 0.9132869894095382,
+      "source": 30720
+    },
+    {
+      "capture": 285342,
+      "score": 0.9253823813969752,
+      "source": 31232
+    },
+    {
+      "capture": 285943,
+      "score": 0.9210751604467384,
+      "source": 33280
+    },
+    {
+      "capture": 285967,
+      "score": 0.9436459918963496,
+      "source": 32256
+    },
+    {
+      "capture": 286112,
+      "score": 0.9218194587677067,
+      "source": 33792
+    },
+    {
+      "capture": 286144,
+      "score": 0.9390531049972116,
+      "source": 31744
+    },
+    {
+      "capture": 286832,
+      "score": 0.7906954917897007,
+      "source": 22016
+    },
+    {
+      "capture": 287288,
+      "score": 0.8590168116514427,
+      "source": 34304
+    },
+    {
+      "capture": 287314,
+      "score": 0.6928574529950728,
+      "source": 52736
+    },
+    {
+      "capture": 287364,
+      "score": 0.9249067863308917,
+      "source": 32768
+    },
+    {
+      "capture": 287645,
+      "score": 0.6327709237620153,
+      "source": 55808
+    },
+    {
+      "capture": 288534,
+      "score": 0.61120040068772,
+      "source": 46592
+    },
+    {
+      "capture": 288761,
+      "score": 0.7966759146765549,
+      "source": 60416
+    },
+    {
+      "capture": 289216,
+      "score": 0.9301356299341651,
+      "source": 34816
+    },
+    {
+      "capture": 289265,
+      "score": 0.6702873303911558,
+      "source": 61440
+    },
+    {
+      "capture": 289916,
+      "score": 0.8629459687176164,
+      "source": 37888
+    },
+    {
+      "capture": 289919,
+      "score": 0.909493948198394,
+      "source": 35328
+    },
+    {
+      "capture": 290240,
+      "score": 0.9123876983275092,
+      "source": 35840
+    },
+    {
+      "capture": 290556,
+      "score": 0.6060872254446127,
+      "source": 56320
+    },
+    {
+      "capture": 290943,
+      "score": 0.8909302559618724,
+      "source": 36864
+    },
+    {
+      "capture": 290944,
+      "score": 0.9218566376258052,
+      "source": 36352
+    },
+    {
+      "capture": 291072,
+      "score": 0.5927055143052573,
+      "source": 46080
+    },
+    {
+      "capture": 291522,
+      "score": 0.7159873066890899,
+      "source": 38912
+    },
+    {
+      "capture": 291967,
+      "score": 0.8750386502243431,
+      "source": 37376
+    },
+    {
+      "capture": 292108,
+      "score": 0.6573415066058871,
+      "source": 54784
+    },
+    {
+      "capture": 292457,
+      "score": 0.6475174464548931,
+      "source": 66560
+    },
+    {
+      "capture": 292461,
+      "score": 0.5823799549626472,
+      "source": 51712
+    },
+    {
+      "capture": 292965,
+      "score": 0.5029003377538271,
+      "source": 54272
+    },
+    {
+      "capture": 292977,
+      "score": 0.4944860600784556,
+      "source": 66048
+    },
+    {
+      "capture": 292992,
+      "score": 0.7902075416517036,
+      "source": 38400
+    },
+    {
+      "capture": 293287,
+      "score": 0.7306364243605413,
+      "source": 40960
+    },
+    {
+      "capture": 293976,
+      "score": 0.7590726763463943,
+      "source": 59904
+    },
+    {
+      "capture": 294012,
+      "score": 0.5684441269572236,
+      "source": 41984
+    },
+    {
+      "capture": 294145,
+      "score": 0.7329498637267563,
+      "source": 39936
+    },
+    {
+      "capture": 294845,
+      "score": 0.48602451474830544,
+      "source": 42496
+    },
+    {
+      "capture": 294868,
+      "score": 0.8296974248964174,
+      "source": 40448
+    },
+    {
+      "capture": 295872,
+      "score": 0.7120992733982598,
+      "source": 41472
+    },
+    {
+      "capture": 296236,
+      "score": 0.7241479955645752,
+      "source": 39424
+    },
+    {
+      "capture": 296840,
+      "score": 0.4640201085409081,
+      "source": 44032
+    },
+    {
+      "capture": 299641,
+      "score": 0.5189089610021569,
+      "source": 47616
+    },
+    {
+      "capture": 299643,
+      "score": 0.38868766263061355,
+      "source": 43008
+    },
+    {
+      "capture": 299646,
+      "score": 0.5831299529668743,
+      "source": 45056
+    },
+    {
+      "capture": 299651,
+      "score": 0.5473261086097598,
+      "source": 45568
+    },
+    {
+      "capture": 299828,
+      "score": 0.41013669196044167,
+      "source": 47104
+    },
+    {
+      "capture": 299901,
+      "score": 0.4884766017620192,
+      "source": 43520
+    },
+    {
+      "capture": 302701,
+      "score": 0.5030588599839757,
+      "source": 51200
+    },
+    {
+      "capture": 302718,
+      "score": 0.5250748527119454,
+      "source": 50688
+    },
+    {
+      "capture": 302722,
+      "score": 0.5016157832242625,
+      "source": 48128
+    },
+    {
+      "capture": 302756,
+      "score": 0.5412355791261362,
+      "source": 50176
+    },
+    {
+      "capture": 304447,
+      "score": 0.4163484423185286,
+      "source": 48640
+    },
+    {
+      "capture": 304586,
+      "score": 0.45484291263896726,
+      "source": 49664
+    },
+    {
+      "capture": 304702,
+      "score": 0.693297206371238,
+      "source": 53248
+    },
+    {
+      "capture": 304831,
+      "score": 0.3777566688833553,
+      "source": 49152
+    },
+    {
+      "capture": 307464,
+      "score": 0.7269842285689206,
+      "source": 53760
+    },
+    {
+      "capture": 308359,
+      "score": 0.6817289000973525,
+      "source": 55296
+    },
+    {
+      "capture": 308387,
+      "score": 0.61786393383726,
+      "source": 56832
+    },
+    {
+      "capture": 309360,
+      "score": 0.3006397956880626,
+      "source": 57856
+    },
+    {
+      "capture": 311290,
+      "score": 0.7440839708008483,
+      "source": 68608
+    },
+    {
+      "capture": 311509,
+      "score": 0.466104830286347,
+      "source": 57344
+    },
+    {
+      "capture": 313726,
+      "score": 0.5603083763158083,
+      "source": 58880
+    },
+    {
+      "capture": 314624,
+      "score": 0.5951360772896445,
+      "source": 61952
+    },
+    {
+      "capture": 314662,
+      "score": 0.6533417284265209,
+      "source": 60928
+    },
+    {
+      "capture": 315153,
+      "score": 0.5094959763285521,
+      "source": 59392
+    },
+    {
+      "capture": 315478,
+      "score": 0.47220930931584615,
+      "source": 63488
+    },
+    {
+      "capture": 315495,
+      "score": 0.5111848684884798,
+      "source": 64000
+    },
+    {
+      "capture": 315534,
+      "score": 0.4573333626138792,
+      "source": 58368
+    },
+    {
+      "capture": 318430,
+      "score": 0.598851290469463,
+      "source": 65024
+    },
+    {
+      "capture": 318435,
+      "score": 0.4957003973876667,
+      "source": 64512
+    },
+    {
+      "capture": 318672,
+      "score": 0.6508457885504385,
+      "source": 62464
+    },
+    {
+      "capture": 320304,
+      "score": 0.5634375193755392,
+      "source": 62976
+    },
+    {
+      "capture": 321347,
+      "score": 0.4766502068500371,
+      "source": 65536
+    },
+    {
+      "capture": 322195,
+      "score": 0.6252366764286933,
+      "source": 67584
+    },
+    {
+      "capture": 322226,
+      "score": 0.660888232828638,
+      "source": 68096
+    },
+    {
+      "capture": 323086,
+      "score": 0.4450818865728402,
+      "source": 69120
+    },
+    {
+      "capture": 323457,
+      "score": 0.5114921368588279,
+      "source": 72192
+    },
+    {
+      "capture": 324258,
+      "score": 0.3923763127152844,
+      "source": 72704
+    },
+    {
+      "capture": 324366,
+      "score": 0.3893092921500929,
+      "source": 67072
+    },
+    {
+      "capture": 324407,
+      "score": 0.4303551408986798,
+      "source": 71680
+    },
+    {
+      "capture": 324676,
+      "score": 0.32836706353977596,
+      "source": 70656
+    },
+    {
+      "capture": 326752,
+      "score": 0.32856631357056965,
+      "source": 74240
+    },
+    {
+      "capture": 327617,
+      "score": 0.30382541107758476,
+      "source": 74752
+    },
+    {
+      "capture": 327617,
+      "score": 0.39959981513903453,
+      "source": 75264
+    },
+    {
+      "capture": 327828,
+      "score": 0.3960664958855886,
+      "source": 69632
+    },
+    {
+      "capture": 330385,
+      "score": 0.30105700546561986,
+      "source": 76800
+    },
+    {
+      "capture": 332107,
+      "score": 0.39145243668556523,
+      "source": 76288
+    },
+    {
+      "capture": 332303,
+      "score": 0.30873440516903944,
+      "source": 77824
+    },
+    {
+      "capture": 332411,
+      "score": 0.34851551180287643,
+      "source": 75776
+    },
+    {
+      "capture": 334021,
+      "score": 0.3252795615261619,
+      "source": 79360
+    },
+    {
+      "capture": 334026,
+      "score": 0.3010121579213682,
+      "source": 78848
+    },
+    {
+      "capture": 334232,
+      "score": 0.3233280633625338,
+      "source": 77312
+    },
+    {
+      "capture": 336320,
+      "score": 0.4250130346067321,
+      "source": 81920
+    },
+    {
+      "capture": 336911,
+      "score": 0.49713822806675884,
+      "source": 86016
+    },
+    {
+      "capture": 337104,
+      "score": 0.39761354090478573,
+      "source": 82432
+    },
+    {
+      "capture": 337153,
+      "score": 0.37540457502566854,
+      "source": 81408
+    },
+    {
+      "capture": 337789,
+      "score": 0.30543671612907003,
+      "source": 85504
+    },
+    {
+      "capture": 338163,
+      "score": 0.45687542495372324,
+      "source": 83456
+    },
+    {
+      "capture": 341646,
+      "score": 0.9668492490028754,
+      "source": 111104
+    },
+    {
+      "capture": 341655,
+      "score": 0.9784012384890795,
+      "source": 92160
+    },
+    {
+      "capture": 342225,
+      "score": 0.48349276538519764,
+      "source": 89600
+    },
+    {
+      "capture": 343485,
+      "score": 0.5808557100857662,
+      "source": 89088
+    },
+    {
+      "capture": 343927,
+      "score": 0.49426938872633475,
+      "source": 87552
+    },
+    {
+      "capture": 345752,
+      "score": 0.3542931585513248,
+      "source": 86528
+    },
+    {
+      "capture": 345860,
+      "score": 0.4966987999943267,
+      "source": 88064
+    },
+    {
+      "capture": 346098,
+      "score": 0.46392235171121504,
+      "source": 90112
+    },
+    {
+      "capture": 347990,
+      "score": 0.9829316663897306,
+      "source": 92672
+    },
+    {
+      "capture": 348179,
+      "score": 0.9810256095130815,
+      "source": 96768
+    },
+    {
+      "capture": 348316,
+      "score": 0.986437902502453,
+      "source": 95232
+    },
+    {
+      "capture": 348453,
+      "score": 0.9285396007909097,
+      "source": 94208
+    },
+    {
+      "capture": 348917,
+      "score": 0.4920093017027841,
+      "source": 90624
+    },
+    {
+      "capture": 348920,
+      "score": 0.9430295604950747,
+      "source": 91136
+    },
+    {
+      "capture": 349585,
+      "score": 0.9435890539655326,
+      "source": 91648
+    },
+    {
+      "capture": 350214,
+      "score": 0.38961592076407026,
+      "source": 71168
+    },
+    {
+      "capture": 350538,
+      "score": 0.8999677633767069,
+      "source": 100352
+    },
+    {
+      "capture": 350546,
+      "score": 0.43142710619604163,
+      "source": 83968
+    },
+    {
+      "capture": 350616,
+      "score": 0.42979980240838705,
+      "source": 78336
+    },
+    {
+      "capture": 350814,
+      "score": 0.37648177721822124,
+      "source": 73728
+    },
+    {
+      "capture": 351267,
+      "score": 0.40193944556260114,
+      "source": 84992
+    },
+    {
+      "capture": 351443,
+      "score": 0.9509358280565974,
+      "source": 98304
+    },
+    {
+      "capture": 351790,
+      "score": 0.8492596703990984,
+      "source": 98816
+    },
+    {
+      "capture": 352266,
+      "score": 0.9560721990989999,
+      "source": 102400
+    },
+    {
+      "capture": 352621,
+      "score": 0.9656978855167333,
+      "source": 97280
+    },
+    {
+      "capture": 352813,
+      "score": 0.9834199215001852,
+      "source": 94720
+    },
+    {
+      "capture": 353743,
+      "score": 0.9419409295221965,
+      "source": 99328
+    },
+    {
+      "capture": 353943,
+      "score": 0.9510806539927953,
+      "source": 100864
+    },
+    {
+      "capture": 354425,
+      "score": 0.9024283444596626,
+      "source": 99840
+    },
+    {
+      "capture": 354916,
+      "score": 0.37345555030062133,
+      "source": 73216
+    },
+    {
+      "capture": 355780,
+      "score": 0.9600509986573306,
+      "source": 101376
+    },
+    {
+      "capture": 356291,
+      "score": 0.989971517329902,
+      "source": 101888
+    },
+    {
+      "capture": 357315,
+      "score": 0.9837771462533061,
+      "source": 102912
+    },
+    {
+      "capture": 358336,
+      "score": 0.9628853553038847,
+      "source": 103936
+    },
+    {
+      "capture": 359357,
+      "score": 0.9600593246854046,
+      "source": 104960
+    },
+    {
+      "capture": 359535,
+      "score": 0.33286614002395376,
+      "source": 82944
+    },
+    {
+      "capture": 360579,
+      "score": 0.9848081619664616,
+      "source": 105984
+    },
+    {
+      "capture": 360900,
+      "score": 0.9885307081730339,
+      "source": 106496
+    },
+    {
+      "capture": 361600,
+      "score": 0.9835105716099408,
+      "source": 107008
+    },
+    {
+      "capture": 361919,
+      "score": 0.9753464504783153,
+      "source": 107520
+    },
+    {
+      "capture": 362117,
+      "score": 0.9462889346827816,
+      "source": 112128
+    },
+    {
+      "capture": 362237,
+      "score": 0.9757631407554279,
+      "source": 108032
+    },
+    {
+      "capture": 364144,
+      "score": 0.9655975830647556,
+      "source": 109056
+    },
+    {
+      "capture": 364160,
+      "score": 0.9394873959560437,
+      "source": 109568
+    },
+    {
+      "capture": 364674,
+      "score": 0.9692940707809182,
+      "source": 110080
+    },
+    {
+      "capture": 365002,
+      "score": 0.9906619454472535,
+      "source": 110592
+    },
+    {
+      "capture": 366021,
+      "score": 0.9888101033161804,
+      "source": 111616
+    },
+    {
+      "capture": 367229,
+      "score": 0.9658342506840202,
+      "source": 112640
+    },
+    {
+      "capture": 367556,
+      "score": 0.8973658826062434,
+      "source": 113152
+    },
+    {
+      "capture": 368259,
+      "score": 0.9903903409383884,
+      "source": 113664
+    },
+    {
+      "capture": 368579,
+      "score": 0.9775795363492766,
+      "source": 114176
+    },
+    {
+      "capture": 369296,
+      "score": 0.8839050988458061,
+      "source": 105472
+    },
+    {
+      "capture": 369737,
+      "score": 0.9745078544126532,
+      "source": 119296
+    },
+    {
+      "capture": 370816,
+      "score": 0.9576126545142637,
+      "source": 116224
+    },
+    {
+      "capture": 371138,
+      "score": 0.8390437472114306,
+      "source": 116736
+    },
+    {
+      "capture": 372350,
+      "score": 0.9887334000860019,
+      "source": 117760
+    },
+    {
+      "capture": 372982,
+      "score": 0.5436445301669957,
+      "source": 87040
+    },
+    {
+      "capture": 374205,
+      "score": 0.9736302330211581,
+      "source": 119808
+    },
+    {
+      "capture": 374529,
+      "score": 0.9309240077063776,
+      "source": 120320
+    },
+    {
+      "capture": 375553,
+      "score": 0.9982724357028475,
+      "source": 121344
+    },
+    {
+      "capture": 376245,
+      "score": 0.9770715698164583,
+      "source": 108544
+    },
+    {
+      "capture": 376576,
+      "score": 0.9742967862714906,
+      "source": 122368
+    },
+    {
+      "capture": 377336,
+      "score": 0.9369308555379859,
+      "source": 118272
+    },
+    {
+      "capture": 377600,
+      "score": 0.9909918718128835,
+      "source": 123392
+    },
+    {
+      "capture": 378489,
+      "score": 0.9808565247114096,
+      "source": 123904
+    },
+    {
+      "capture": 378980,
+      "score": 0.8890910896531038,
+      "source": 130847
+    },
+    {
+      "capture": 379328,
+      "score": 0.9874828485971218,
+      "source": 124928
+    },
+    {
+      "capture": 379578,
+      "score": 0.8158205074393614,
+      "source": 128000
+    },
+    {
+      "capture": 379799,
+      "score": 0.9259175349772562,
+      "source": 129536
+    },
+    {
+      "capture": 379940,
+      "score": 0.5518571868848046,
+      "source": 130560
+    },
+    {
+      "capture": 380352,
+      "score": 0.9846652679065584,
+      "source": 125952
+    },
+    {
+      "capture": 380955,
+      "score": 0.9057618677612695,
+      "source": 128512
+    },
+    {
+      "capture": 381568,
+      "score": 0.6668799720787205,
+      "source": 125440
+    },
+    {
+      "capture": 412415,
+      "score": 0.9000027787336771,
+      "source": 117248
+    },
+    {
+      "capture": 436230,
+      "score": 0.5859551108685502,
+      "source": 70144
+    },
+    {
+      "capture": 640690,
+      "score": 0.9709617052800785,
+      "source": 118784
+    },
+    {
+      "capture": 711247,
+      "score": 0.9693243479520123,
+      "source": 104448
+    },
+    {
+      "capture": 917498,
+      "score": 0.9434763096326051,
+      "source": 120832
+    },
+    {
+      "capture": 969616,
+      "score": 0.9768581491042534,
+      "source": 96256
+    },
+    {
+      "capture": 982129,
+      "score": 0.9573757281361757,
+      "source": 115712
+    },
+    {
+      "capture": 993424,
+      "score": 0.9926655850178737,
+      "source": 93696
+    },
+    {
+      "capture": 1172032,
+      "score": 0.9897481758897942,
+      "source": 95744
+    },
+    {
+      "capture": 1522504,
+      "score": 0.9782958445310372,
+      "source": 130048
+    },
+    {
+      "capture": 1553196,
+      "score": 0.42921671407829054,
+      "source": 80896
+    },
+    {
+      "capture": 1556748,
+      "score": 0.4116534345310099,
+      "source": 79872
+    },
+    {
+      "capture": 2145541,
+      "score": 0.5812770663552683,
+      "source": 84480
+    },
+    {
+      "capture": 2302323,
+      "score": 0.9774476524351396,
+      "source": 93184
+    },
+    {
+      "capture": 2337419,
+      "score": 0.975000340412965,
+      "source": 127488
+    }
+  ],
+  "capture_pcm": {
+    "artifact_id": "ART-#24",
+    "channels": 2,
+    "sample_rate": 48000
+  },
+  "loop_occurrences": [
+    {
+      "capture_time": 254400,
+      "loop_index": 0,
+      "occurrence_position": 254400,
+      "source_phase": 0,
+      "source_time": 0
+    }
+  ],
+  "source_coordinate_space": "normalized_pcm",
+  "source_pcm": {
+    "artifact_id": "ART-#15",
+    "channels": 2,
+    "sample_rate": 48000
+  },
+  "time_map": {
+    "segments": [
+      {
+        "anchors": [
+          {
+            "capture": 16182,
+            "score": 0.9920516542906034,
+            "source": 126976
+          }
+        ],
+        "capture_range": [
+          16182,
+          16182
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          126976,
+          126976
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 175937,
+            "score": 0.9794904989393697,
+            "source": 121856
+          }
+        ],
+        "capture_range": [
+          16182,
+          175937
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          126976,
+          121856
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 175937,
+            "score": 0.9794904989393697,
+            "source": 121856
+          }
+        ],
+        "capture_range": [
+          175937,
+          175937
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          121856,
+          121856
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 255884,
+            "score": 0.5548430811330182,
+            "source": 1024
+          }
+        ],
+        "capture_range": [
+          175937,
+          255884
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          121856,
+          1024
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 255884,
+            "score": 0.5548430811330182,
+            "source": 1024
+          },
+          {
+            "capture": 256524,
+            "score": 0.7472070704668371,
+            "source": 1536
+          }
+        ],
+        "capture_range": [
+          255884,
+          256524
+        ],
+        "kind": "jitter",
+        "rate": 1.25,
+        "source_range": [
+          1024,
+          1536
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          256524,
+          256698
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          1536,
+          2048
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 256698,
+            "score": 0.919739467066717,
+            "source": 2048
+          }
+        ],
+        "capture_range": [
+          256698,
+          256698
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          256698,
+          256765
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          2048,
+          2560
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 256765,
+            "score": 0.9720283261267373,
+            "source": 2560
+          },
+          {
+            "capture": 257473,
+            "score": 0.9717498416523841,
+            "source": 3072
+          },
+          {
+            "capture": 257796,
+            "score": 0.984813474668717,
+            "source": 3584
+          },
+          {
+            "capture": 258496,
+            "score": 0.9821253566711732,
+            "source": 4096
+          },
+          {
+            "capture": 258816,
+            "score": 0.9214154645274906,
+            "source": 4608
+          }
+        ],
+        "capture_range": [
+          256765,
+          258816
+        ],
+        "kind": "continuous",
+        "rate": 1.00146484375,
+        "source_range": [
+          2560,
+          4608
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 258816,
+            "score": 0.9214154645274906,
+            "source": 4608
+          },
+          {
+            "capture": 259328,
+            "score": 0.9520732058699918,
+            "source": 5120
+          }
+        ],
+        "capture_range": [
+          258816,
+          259328
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          4608,
+          5120
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 259328,
+            "score": 0.9520732058699918,
+            "source": 5120
+          },
+          {
+            "capture": 260032,
+            "score": 0.8787153769693842,
+            "source": 5632
+          }
+        ],
+        "capture_range": [
+          259328,
+          260032
+        ],
+        "kind": "jitter",
+        "rate": 1.375,
+        "source_range": [
+          5120,
+          5632
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 260032,
+            "score": 0.8787153769693842,
+            "source": 5632
+          },
+          {
+            "capture": 260544,
+            "score": 0.9361821444080972,
+            "source": 6144
+          }
+        ],
+        "capture_range": [
+          260032,
+          260544
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          5632,
+          6144
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 260544,
+            "score": 0.9361821444080972,
+            "source": 6144
+          },
+          {
+            "capture": 261364,
+            "score": 0.9299187902432697,
+            "source": 7168
+          }
+        ],
+        "capture_range": [
+          260544,
+          261364
+        ],
+        "kind": "skip",
+        "rate": 0.80078125,
+        "source_range": [
+          6144,
+          7168
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 261453,
+            "score": 0.9239002349337669,
+            "source": 6656
+          }
+        ],
+        "capture_range": [
+          261364,
+          261453
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          7168,
+          6656
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 261453,
+            "score": 0.9239002349337669,
+            "source": 6656
+          }
+        ],
+        "capture_range": [
+          261453,
+          261453
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          6656,
+          6656
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          261453,
+          262194
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          6656,
+          8704
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 262194,
+            "score": 0.6917065705829182,
+            "source": 8704
+          }
+        ],
+        "capture_range": [
+          262194,
+          262194
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          8704,
+          8704
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 262274,
+            "score": 0.8420551165343565,
+            "source": 7680
+          }
+        ],
+        "capture_range": [
+          262194,
+          262274
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          8704,
+          7680
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 262274,
+            "score": 0.8420551165343565,
+            "source": 7680
+          }
+        ],
+        "capture_range": [
+          262274,
+          262274
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          7680,
+          7680
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          262274,
+          262373
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          7680,
+          8192
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 262373,
+            "score": 0.8674123765117846,
+            "source": 8192
+          },
+          {
+            "capture": 263616,
+            "score": 0.7562920013832463,
+            "source": 9216
+          }
+        ],
+        "capture_range": [
+          262373,
+          263616
+        ],
+        "kind": "jitter",
+        "rate": 1.2138671875,
+        "source_range": [
+          8192,
+          9216
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          263616,
+          263914
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          9216,
+          22528
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 263914,
+            "score": 0.6924228515556881,
+            "source": 22528
+          }
+        ],
+        "capture_range": [
+          263914,
+          263914
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          22528,
+          22528
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 264320,
+            "score": 0.9553445386006991,
+            "source": 9728
+          }
+        ],
+        "capture_range": [
+          263914,
+          264320
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          22528,
+          9728
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 264320,
+            "score": 0.9553445386006991,
+            "source": 9728
+          }
+        ],
+        "capture_range": [
+          264320,
+          264320
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          9728,
+          9728
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          264320,
+          264448
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          9728,
+          10240
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 264448,
+            "score": 0.9321074388372212,
+            "source": 10240
+          },
+          {
+            "capture": 265152,
+            "score": 0.9300122874632794,
+            "source": 10752
+          },
+          {
+            "capture": 265472,
+            "score": 0.8679417398122867,
+            "source": 11264
+          },
+          {
+            "capture": 266176,
+            "score": 0.9424338863146609,
+            "source": 11776
+          },
+          {
+            "capture": 266496,
+            "score": 0.8706827894894484,
+            "source": 12288
+          }
+        ],
+        "capture_range": [
+          264448,
+          266496
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          10240,
+          12288
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          266496,
+          266708
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          12288,
+          25088
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 266708,
+            "score": 0.6387479022939815,
+            "source": 25088
+          }
+        ],
+        "capture_range": [
+          266708,
+          266708
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          25088,
+          25088
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 267200,
+            "score": 0.8413025781374178,
+            "source": 12800
+          }
+        ],
+        "capture_range": [
+          266708,
+          267200
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          25088,
+          12800
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 267200,
+            "score": 0.8413025781374178,
+            "source": 12800
+          },
+          {
+            "capture": 267712,
+            "score": 0.6908239876320006,
+            "source": 13312
+          }
+        ],
+        "capture_range": [
+          267200,
+          267712
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          12800,
+          13312
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          267712,
+          268009
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          13312,
+          14336
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 268009,
+            "score": 0.6292770140089674,
+            "source": 14336
+          }
+        ],
+        "capture_range": [
+          268009,
+          268009
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          14336,
+          14336
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 268033,
+            "score": 0.8800523434477796,
+            "source": 13824
+          }
+        ],
+        "capture_range": [
+          268009,
+          268033
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          14336,
+          13824
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 268033,
+            "score": 0.8800523434477796,
+            "source": 13824
+          }
+        ],
+        "capture_range": [
+          268033,
+          268033
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          13824,
+          13824
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          268033,
+          269855
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          13824,
+          14848
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 269855,
+            "score": 0.6854798378208953,
+            "source": 14848
+          }
+        ],
+        "capture_range": [
+          269855,
+          269855
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          14848,
+          14848
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          269855,
+          270926
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          14848,
+          15360
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 270926,
+            "score": 0.7658463986700813,
+            "source": 15360
+          }
+        ],
+        "capture_range": [
+          270926,
+          270926
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          15360,
+          15360
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          270926,
+          270941
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          15360,
+          16896
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 270941,
+            "score": 0.8843140177291045,
+            "source": 16896
+          }
+        ],
+        "capture_range": [
+          270941,
+          270941
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          16896,
+          16896
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 270975,
+            "score": 0.8927492358859895,
+            "source": 16384
+          }
+        ],
+        "capture_range": [
+          270941,
+          270975
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          16896,
+          16384
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 270975,
+            "score": 0.8927492358859895,
+            "source": 16384
+          }
+        ],
+        "capture_range": [
+          270975,
+          270975
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          16384,
+          16384
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 271032,
+            "score": 0.8303595379617021,
+            "source": 15872
+          }
+        ],
+        "capture_range": [
+          270975,
+          271032
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          16384,
+          15872
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 271032,
+            "score": 0.8303595379617021,
+            "source": 15872
+          }
+        ],
+        "capture_range": [
+          271032,
+          271032
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          15872,
+          15872
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          271032,
+          271999
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          15872,
+          17408
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 271999,
+            "score": 0.8360336312005392,
+            "source": 17408
+          },
+          {
+            "capture": 272320,
+            "score": 0.7612540949572156,
+            "source": 17920
+          }
+        ],
+        "capture_range": [
+          271999,
+          272320
+        ],
+        "kind": "skip",
+        "rate": 0.626953125,
+        "source_range": [
+          17408,
+          17920
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 272320,
+            "score": 0.7612540949572156,
+            "source": 17920
+          },
+          {
+            "capture": 272832,
+            "score": 0.8794422267550316,
+            "source": 18432
+          }
+        ],
+        "capture_range": [
+          272320,
+          272832
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          17920,
+          18432
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          272832,
+          273409
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          18432,
+          88576
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 273409,
+            "score": 0.5587628381874062,
+            "source": 88576
+          }
+        ],
+        "capture_range": [
+          273409,
+          273409
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          88576,
+          88576
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 273536,
+            "score": 0.8857251472083025,
+            "source": 18944
+          }
+        ],
+        "capture_range": [
+          273409,
+          273536
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          88576,
+          18944
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 273536,
+            "score": 0.8857251472083025,
+            "source": 18944
+          },
+          {
+            "capture": 273856,
+            "score": 0.9639481873990688,
+            "source": 19456
+          },
+          {
+            "capture": 274560,
+            "score": 0.8535096962004399,
+            "source": 19968
+          },
+          {
+            "capture": 274880,
+            "score": 0.872547058191407,
+            "source": 20480
+          },
+          {
+            "capture": 275584,
+            "score": 0.8335845900225582,
+            "source": 20992
+          }
+        ],
+        "capture_range": [
+          273536,
+          275584
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          18944,
+          20992
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          275584,
+          275713
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          20992,
+          21504
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 275713,
+            "score": 0.9237531465816772,
+            "source": 21504
+          },
+          {
+            "capture": 277174,
+            "score": 0.49865604062816293,
+            "source": 23040
+          }
+        ],
+        "capture_range": [
+          275713,
+          277174
+        ],
+        "kind": "continuous",
+        "rate": 0.951171875,
+        "source_range": [
+          21504,
+          23040
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          277174,
+          277633
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          23040,
+          24064
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 277633,
+            "score": 0.5345581028221973,
+            "source": 24064
+          }
+        ],
+        "capture_range": [
+          277633,
+          277633
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          24064,
+          24064
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          277633,
+          277789
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          24064,
+          24576
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 277789,
+            "score": 0.4407050650485525,
+            "source": 24576
+          }
+        ],
+        "capture_range": [
+          277789,
+          277789
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          24576,
+          24576
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 278297,
+            "score": 0.3595340029131791,
+            "source": 23552
+          }
+        ],
+        "capture_range": [
+          277789,
+          278297
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          24576,
+          23552
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 278297,
+            "score": 0.3595340029131791,
+            "source": 23552
+          },
+          {
+            "capture": 280191,
+            "score": 0.4395046906749359,
+            "source": 25600
+          }
+        ],
+        "capture_range": [
+          278297,
+          280191
+        ],
+        "kind": "skip",
+        "rate": 0.9248046875,
+        "source_range": [
+          23552,
+          25600
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          280191,
+          280435
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          25600,
+          26112
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 280435,
+            "score": 0.4576639258032838,
+            "source": 26112
+          },
+          {
+            "capture": 280948,
+            "score": 0.66576076426987,
+            "source": 26624
+          }
+        ],
+        "capture_range": [
+          280435,
+          280948
+        ],
+        "kind": "continuous",
+        "rate": 1.001953125,
+        "source_range": [
+          26112,
+          26624
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 280948,
+            "score": 0.66576076426987,
+            "source": 26624
+          },
+          {
+            "capture": 281537,
+            "score": 0.6084194645756632,
+            "source": 27136
+          },
+          {
+            "capture": 282240,
+            "score": 0.8880995491234388,
+            "source": 27648
+          }
+        ],
+        "capture_range": [
+          280948,
+          282240
+        ],
+        "kind": "drift",
+        "rate": 1.26171875,
+        "source_range": [
+          26624,
+          27648
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          282240,
+          282264
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          27648,
+          44544
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 282264,
+            "score": 0.4570749238429893,
+            "source": 44544
+          }
+        ],
+        "capture_range": [
+          282264,
+          282264
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          44544,
+          44544
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 282560,
+            "score": 0.9813023517917144,
+            "source": 28160
+          }
+        ],
+        "capture_range": [
+          282264,
+          282560
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          44544,
+          28160
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 282560,
+            "score": 0.9813023517917144,
+            "source": 28160
+          }
+        ],
+        "capture_range": [
+          282560,
+          282560
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          28160,
+          28160
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          282560,
+          282696
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          28160,
+          80384
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 282696,
+            "score": 0.4205453523498488,
+            "source": 80384
+          }
+        ],
+        "capture_range": [
+          282696,
+          282696
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          80384,
+          80384
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 283072,
+            "score": 0.8539581526372478,
+            "source": 28672
+          }
+        ],
+        "capture_range": [
+          282696,
+          283072
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          80384,
+          28672
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 283072,
+            "score": 0.8539581526372478,
+            "source": 28672
+          },
+          {
+            "capture": 283392,
+            "score": 0.9036408992685487,
+            "source": 29184
+          },
+          {
+            "capture": 284096,
+            "score": 0.8495246043442692,
+            "source": 29696
+          }
+        ],
+        "capture_range": [
+          283072,
+          284096
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          28672,
+          29696
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          284096,
+          284352
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          29696,
+          52224
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 284352,
+            "score": 0.7702925457724464,
+            "source": 52224
+          }
+        ],
+        "capture_range": [
+          284352,
+          284352
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          52224,
+          52224
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 284416,
+            "score": 0.8822172397848809,
+            "source": 30208
+          }
+        ],
+        "capture_range": [
+          284352,
+          284416
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          52224,
+          30208
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 284416,
+            "score": 0.8822172397848809,
+            "source": 30208
+          }
+        ],
+        "capture_range": [
+          284416,
+          284416
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          30208,
+          30208
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          284416,
+          285312
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          30208,
+          30720
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 285312,
+            "score": 0.9132869894095382,
+            "source": 30720
+          }
+        ],
+        "capture_range": [
+          285312,
+          285312
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          30720,
+          30720
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          285312,
+          285342
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          30720,
+          31232
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 285342,
+            "score": 0.9253823813969752,
+            "source": 31232
+          }
+        ],
+        "capture_range": [
+          285342,
+          285342
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          31232,
+          31232
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          285342,
+          285943
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          31232,
+          33280
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 285943,
+            "score": 0.9210751604467384,
+            "source": 33280
+          }
+        ],
+        "capture_range": [
+          285943,
+          285943
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          33280,
+          33280
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 285967,
+            "score": 0.9436459918963496,
+            "source": 32256
+          }
+        ],
+        "capture_range": [
+          285943,
+          285967
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          33280,
+          32256
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 285967,
+            "score": 0.9436459918963496,
+            "source": 32256
+          }
+        ],
+        "capture_range": [
+          285967,
+          285967
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          32256,
+          32256
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          285967,
+          286112
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          32256,
+          33792
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 286112,
+            "score": 0.9218194587677067,
+            "source": 33792
+          }
+        ],
+        "capture_range": [
+          286112,
+          286112
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          33792,
+          33792
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 286144,
+            "score": 0.9390531049972116,
+            "source": 31744
+          }
+        ],
+        "capture_range": [
+          286112,
+          286144
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          33792,
+          31744
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 286144,
+            "score": 0.9390531049972116,
+            "source": 31744
+          }
+        ],
+        "capture_range": [
+          286144,
+          286144
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          31744,
+          31744
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 286832,
+            "score": 0.7906954917897007,
+            "source": 22016
+          }
+        ],
+        "capture_range": [
+          286144,
+          286832
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          31744,
+          22016
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 286832,
+            "score": 0.7906954917897007,
+            "source": 22016
+          }
+        ],
+        "capture_range": [
+          286832,
+          286832
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          22016,
+          22016
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          286832,
+          287288
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          22016,
+          34304
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 287288,
+            "score": 0.8590168116514427,
+            "source": 34304
+          }
+        ],
+        "capture_range": [
+          287288,
+          287288
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          34304,
+          34304
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          287288,
+          287314
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          34304,
+          52736
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 287314,
+            "score": 0.6928574529950728,
+            "source": 52736
+          }
+        ],
+        "capture_range": [
+          287314,
+          287314
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          52736,
+          52736
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 287364,
+            "score": 0.9249067863308917,
+            "source": 32768
+          }
+        ],
+        "capture_range": [
+          287314,
+          287364
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          52736,
+          32768
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 287364,
+            "score": 0.9249067863308917,
+            "source": 32768
+          }
+        ],
+        "capture_range": [
+          287364,
+          287364
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          32768,
+          32768
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          287364,
+          287645
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          32768,
+          55808
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 287645,
+            "score": 0.6327709237620153,
+            "source": 55808
+          }
+        ],
+        "capture_range": [
+          287645,
+          287645
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          55808,
+          55808
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 288534,
+            "score": 0.61120040068772,
+            "source": 46592
+          }
+        ],
+        "capture_range": [
+          287645,
+          288534
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          55808,
+          46592
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 288534,
+            "score": 0.61120040068772,
+            "source": 46592
+          }
+        ],
+        "capture_range": [
+          288534,
+          288534
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          46592,
+          46592
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          288534,
+          288761
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          46592,
+          60416
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 288761,
+            "score": 0.7966759146765549,
+            "source": 60416
+          }
+        ],
+        "capture_range": [
+          288761,
+          288761
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          60416,
+          60416
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289216,
+            "score": 0.9301356299341651,
+            "source": 34816
+          }
+        ],
+        "capture_range": [
+          288761,
+          289216
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          60416,
+          34816
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289216,
+            "score": 0.9301356299341651,
+            "source": 34816
+          }
+        ],
+        "capture_range": [
+          289216,
+          289216
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          34816,
+          34816
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          289216,
+          289265
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          34816,
+          61440
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289265,
+            "score": 0.6702873303911558,
+            "source": 61440
+          }
+        ],
+        "capture_range": [
+          289265,
+          289265
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          61440,
+          61440
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289916,
+            "score": 0.8629459687176164,
+            "source": 37888
+          }
+        ],
+        "capture_range": [
+          289265,
+          289916
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          61440,
+          37888
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289916,
+            "score": 0.8629459687176164,
+            "source": 37888
+          }
+        ],
+        "capture_range": [
+          289916,
+          289916
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          37888,
+          37888
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289919,
+            "score": 0.909493948198394,
+            "source": 35328
+          }
+        ],
+        "capture_range": [
+          289916,
+          289919
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          37888,
+          35328
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 289919,
+            "score": 0.909493948198394,
+            "source": 35328
+          },
+          {
+            "capture": 290240,
+            "score": 0.9123876983275092,
+            "source": 35840
+          }
+        ],
+        "capture_range": [
+          289919,
+          290240
+        ],
+        "kind": "skip",
+        "rate": 0.626953125,
+        "source_range": [
+          35328,
+          35840
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          290240,
+          290556
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          35840,
+          56320
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 290556,
+            "score": 0.6060872254446127,
+            "source": 56320
+          }
+        ],
+        "capture_range": [
+          290556,
+          290556
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          56320,
+          56320
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 290943,
+            "score": 0.8909302559618724,
+            "source": 36864
+          }
+        ],
+        "capture_range": [
+          290556,
+          290943
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          56320,
+          36864
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 290943,
+            "score": 0.8909302559618724,
+            "source": 36864
+          }
+        ],
+        "capture_range": [
+          290943,
+          290943
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          36864,
+          36864
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 290944,
+            "score": 0.9218566376258052,
+            "source": 36352
+          }
+        ],
+        "capture_range": [
+          290943,
+          290944
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          36864,
+          36352
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 290944,
+            "score": 0.9218566376258052,
+            "source": 36352
+          }
+        ],
+        "capture_range": [
+          290944,
+          290944
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          36352,
+          36352
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          290944,
+          291072
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          36352,
+          46080
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 291072,
+            "score": 0.5927055143052573,
+            "source": 46080
+          }
+        ],
+        "capture_range": [
+          291072,
+          291072
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          46080,
+          46080
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 291522,
+            "score": 0.7159873066890899,
+            "source": 38912
+          }
+        ],
+        "capture_range": [
+          291072,
+          291522
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          46080,
+          38912
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 291522,
+            "score": 0.7159873066890899,
+            "source": 38912
+          }
+        ],
+        "capture_range": [
+          291522,
+          291522
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          38912,
+          38912
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 291967,
+            "score": 0.8750386502243431,
+            "source": 37376
+          }
+        ],
+        "capture_range": [
+          291522,
+          291967
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          38912,
+          37376
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 291967,
+            "score": 0.8750386502243431,
+            "source": 37376
+          }
+        ],
+        "capture_range": [
+          291967,
+          291967
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          37376,
+          37376
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          291967,
+          292108
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          37376,
+          54784
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292108,
+            "score": 0.6573415066058871,
+            "source": 54784
+          }
+        ],
+        "capture_range": [
+          292108,
+          292108
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          54784,
+          54784
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          292108,
+          292457
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          54784,
+          66560
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292457,
+            "score": 0.6475174464548931,
+            "source": 66560
+          }
+        ],
+        "capture_range": [
+          292457,
+          292457
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          66560,
+          66560
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292461,
+            "score": 0.5823799549626472,
+            "source": 51712
+          }
+        ],
+        "capture_range": [
+          292457,
+          292461
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          66560,
+          51712
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292461,
+            "score": 0.5823799549626472,
+            "source": 51712
+          }
+        ],
+        "capture_range": [
+          292461,
+          292461
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          51712,
+          51712
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          292461,
+          292965
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          51712,
+          54272
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292965,
+            "score": 0.5029003377538271,
+            "source": 54272
+          }
+        ],
+        "capture_range": [
+          292965,
+          292965
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          54272,
+          54272
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          292965,
+          292977
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          54272,
+          66048
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292977,
+            "score": 0.4944860600784556,
+            "source": 66048
+          }
+        ],
+        "capture_range": [
+          292977,
+          292977
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          66048,
+          66048
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292992,
+            "score": 0.7902075416517036,
+            "source": 38400
+          }
+        ],
+        "capture_range": [
+          292977,
+          292992
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          66048,
+          38400
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 292992,
+            "score": 0.7902075416517036,
+            "source": 38400
+          }
+        ],
+        "capture_range": [
+          292992,
+          292992
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          38400,
+          38400
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          292992,
+          293287
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          38400,
+          40960
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 293287,
+            "score": 0.7306364243605413,
+            "source": 40960
+          }
+        ],
+        "capture_range": [
+          293287,
+          293287
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          40960,
+          40960
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          293287,
+          293976
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          40960,
+          59904
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 293976,
+            "score": 0.7590726763463943,
+            "source": 59904
+          }
+        ],
+        "capture_range": [
+          293976,
+          293976
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          59904,
+          59904
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294012,
+            "score": 0.5684441269572236,
+            "source": 41984
+          }
+        ],
+        "capture_range": [
+          293976,
+          294012
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          59904,
+          41984
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294012,
+            "score": 0.5684441269572236,
+            "source": 41984
+          }
+        ],
+        "capture_range": [
+          294012,
+          294012
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          41984,
+          41984
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294145,
+            "score": 0.7329498637267563,
+            "source": 39936
+          }
+        ],
+        "capture_range": [
+          294012,
+          294145
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          41984,
+          39936
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294145,
+            "score": 0.7329498637267563,
+            "source": 39936
+          }
+        ],
+        "capture_range": [
+          294145,
+          294145
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          39936,
+          39936
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          294145,
+          294845
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          39936,
+          42496
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294845,
+            "score": 0.48602451474830544,
+            "source": 42496
+          }
+        ],
+        "capture_range": [
+          294845,
+          294845
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          42496,
+          42496
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294868,
+            "score": 0.8296974248964174,
+            "source": 40448
+          }
+        ],
+        "capture_range": [
+          294845,
+          294868
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          42496,
+          40448
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 294868,
+            "score": 0.8296974248964174,
+            "source": 40448
+          },
+          {
+            "capture": 295872,
+            "score": 0.7120992733982598,
+            "source": 41472
+          }
+        ],
+        "capture_range": [
+          294868,
+          295872
+        ],
+        "kind": "continuous",
+        "rate": 0.98046875,
+        "source_range": [
+          40448,
+          41472
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 296236,
+            "score": 0.7241479955645752,
+            "source": 39424
+          }
+        ],
+        "capture_range": [
+          295872,
+          296236
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          41472,
+          39424
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 296236,
+            "score": 0.7241479955645752,
+            "source": 39424
+          }
+        ],
+        "capture_range": [
+          296236,
+          296236
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          39424,
+          39424
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          296236,
+          296840
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          39424,
+          44032
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 296840,
+            "score": 0.4640201085409081,
+            "source": 44032
+          }
+        ],
+        "capture_range": [
+          296840,
+          296840
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          44032,
+          44032
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          296840,
+          299641
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          44032,
+          47616
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299641,
+            "score": 0.5189089610021569,
+            "source": 47616
+          }
+        ],
+        "capture_range": [
+          299641,
+          299641
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          47616,
+          47616
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299643,
+            "score": 0.38868766263061355,
+            "source": 43008
+          }
+        ],
+        "capture_range": [
+          299641,
+          299643
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          47616,
+          43008
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299643,
+            "score": 0.38868766263061355,
+            "source": 43008
+          }
+        ],
+        "capture_range": [
+          299643,
+          299643
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          43008,
+          43008
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          299643,
+          299646
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          43008,
+          45056
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299646,
+            "score": 0.5831299529668743,
+            "source": 45056
+          }
+        ],
+        "capture_range": [
+          299646,
+          299646
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          45056,
+          45056
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          299646,
+          299651
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          45056,
+          45568
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299651,
+            "score": 0.5473261086097598,
+            "source": 45568
+          }
+        ],
+        "capture_range": [
+          299651,
+          299651
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          45568,
+          45568
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          299651,
+          299828
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          45568,
+          47104
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299828,
+            "score": 0.41013669196044167,
+            "source": 47104
+          }
+        ],
+        "capture_range": [
+          299828,
+          299828
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          47104,
+          47104
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299901,
+            "score": 0.4884766017620192,
+            "source": 43520
+          }
+        ],
+        "capture_range": [
+          299828,
+          299901
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          47104,
+          43520
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 299901,
+            "score": 0.4884766017620192,
+            "source": 43520
+          }
+        ],
+        "capture_range": [
+          299901,
+          299901
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          43520,
+          43520
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          299901,
+          302701
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          43520,
+          51200
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302701,
+            "score": 0.5030588599839757,
+            "source": 51200
+          }
+        ],
+        "capture_range": [
+          302701,
+          302701
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          51200,
+          51200
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302718,
+            "score": 0.5250748527119454,
+            "source": 50688
+          }
+        ],
+        "capture_range": [
+          302701,
+          302718
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          51200,
+          50688
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302718,
+            "score": 0.5250748527119454,
+            "source": 50688
+          }
+        ],
+        "capture_range": [
+          302718,
+          302718
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          50688,
+          50688
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302722,
+            "score": 0.5016157832242625,
+            "source": 48128
+          }
+        ],
+        "capture_range": [
+          302718,
+          302722
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          50688,
+          48128
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302722,
+            "score": 0.5016157832242625,
+            "source": 48128
+          }
+        ],
+        "capture_range": [
+          302722,
+          302722
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          48128,
+          48128
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          302722,
+          302756
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          48128,
+          50176
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 302756,
+            "score": 0.5412355791261362,
+            "source": 50176
+          }
+        ],
+        "capture_range": [
+          302756,
+          302756
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          50176,
+          50176
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304447,
+            "score": 0.4163484423185286,
+            "source": 48640
+          }
+        ],
+        "capture_range": [
+          302756,
+          304447
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          50176,
+          48640
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304447,
+            "score": 0.4163484423185286,
+            "source": 48640
+          }
+        ],
+        "capture_range": [
+          304447,
+          304447
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          48640,
+          48640
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          304447,
+          304586
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          48640,
+          49664
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304586,
+            "score": 0.45484291263896726,
+            "source": 49664
+          }
+        ],
+        "capture_range": [
+          304586,
+          304586
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          49664,
+          49664
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          304586,
+          304702
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          49664,
+          53248
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304702,
+            "score": 0.693297206371238,
+            "source": 53248
+          }
+        ],
+        "capture_range": [
+          304702,
+          304702
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          53248,
+          53248
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304831,
+            "score": 0.3777566688833553,
+            "source": 49152
+          }
+        ],
+        "capture_range": [
+          304702,
+          304831
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          53248,
+          49152
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 304831,
+            "score": 0.3777566688833553,
+            "source": 49152
+          }
+        ],
+        "capture_range": [
+          304831,
+          304831
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          49152,
+          49152
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          304831,
+          307464
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          49152,
+          53760
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 307464,
+            "score": 0.7269842285689206,
+            "source": 53760
+          }
+        ],
+        "capture_range": [
+          307464,
+          307464
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          53760,
+          53760
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          307464,
+          308359
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          53760,
+          55296
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 308359,
+            "score": 0.6817289000973525,
+            "source": 55296
+          }
+        ],
+        "capture_range": [
+          308359,
+          308359
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          55296,
+          55296
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          308359,
+          308387
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          55296,
+          56832
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 308387,
+            "score": 0.61786393383726,
+            "source": 56832
+          },
+          {
+            "capture": 309360,
+            "score": 0.3006397956880626,
+            "source": 57856
+          }
+        ],
+        "capture_range": [
+          308387,
+          309360
+        ],
+        "kind": "continuous",
+        "rate": 0.9501953125,
+        "source_range": [
+          56832,
+          57856
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          309360,
+          311290
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          57856,
+          68608
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 311290,
+            "score": 0.7440839708008483,
+            "source": 68608
+          }
+        ],
+        "capture_range": [
+          311290,
+          311290
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          68608,
+          68608
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 311509,
+            "score": 0.466104830286347,
+            "source": 57344
+          }
+        ],
+        "capture_range": [
+          311290,
+          311509
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          68608,
+          57344
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 311509,
+            "score": 0.466104830286347,
+            "source": 57344
+          }
+        ],
+        "capture_range": [
+          311509,
+          311509
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          57344,
+          57344
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          311509,
+          313726
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          57344,
+          58880
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 313726,
+            "score": 0.5603083763158083,
+            "source": 58880
+          }
+        ],
+        "capture_range": [
+          313726,
+          313726
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          58880,
+          58880
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          313726,
+          314624
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          58880,
+          61952
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 314624,
+            "score": 0.5951360772896445,
+            "source": 61952
+          }
+        ],
+        "capture_range": [
+          314624,
+          314624
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          61952,
+          61952
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 314662,
+            "score": 0.6533417284265209,
+            "source": 60928
+          }
+        ],
+        "capture_range": [
+          314624,
+          314662
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          61952,
+          60928
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 314662,
+            "score": 0.6533417284265209,
+            "source": 60928
+          }
+        ],
+        "capture_range": [
+          314662,
+          314662
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          60928,
+          60928
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315153,
+            "score": 0.5094959763285521,
+            "source": 59392
+          }
+        ],
+        "capture_range": [
+          314662,
+          315153
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          60928,
+          59392
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315153,
+            "score": 0.5094959763285521,
+            "source": 59392
+          }
+        ],
+        "capture_range": [
+          315153,
+          315153
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          59392,
+          59392
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          315153,
+          315478
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          59392,
+          63488
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315478,
+            "score": 0.47220930931584615,
+            "source": 63488
+          }
+        ],
+        "capture_range": [
+          315478,
+          315478
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          63488,
+          63488
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          315478,
+          315495
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          63488,
+          64000
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315495,
+            "score": 0.5111848684884798,
+            "source": 64000
+          }
+        ],
+        "capture_range": [
+          315495,
+          315495
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          64000,
+          64000
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315534,
+            "score": 0.4573333626138792,
+            "source": 58368
+          }
+        ],
+        "capture_range": [
+          315495,
+          315534
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          64000,
+          58368
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 315534,
+            "score": 0.4573333626138792,
+            "source": 58368
+          }
+        ],
+        "capture_range": [
+          315534,
+          315534
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          58368,
+          58368
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          315534,
+          318430
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          58368,
+          65024
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 318430,
+            "score": 0.598851290469463,
+            "source": 65024
+          }
+        ],
+        "capture_range": [
+          318430,
+          318430
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          65024,
+          65024
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 318435,
+            "score": 0.4957003973876667,
+            "source": 64512
+          }
+        ],
+        "capture_range": [
+          318430,
+          318435
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          65024,
+          64512
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 318435,
+            "score": 0.4957003973876667,
+            "source": 64512
+          }
+        ],
+        "capture_range": [
+          318435,
+          318435
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          64512,
+          64512
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 318672,
+            "score": 0.6508457885504385,
+            "source": 62464
+          }
+        ],
+        "capture_range": [
+          318435,
+          318672
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          64512,
+          62464
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 318672,
+            "score": 0.6508457885504385,
+            "source": 62464
+          }
+        ],
+        "capture_range": [
+          318672,
+          318672
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          62464,
+          62464
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          318672,
+          320304
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          62464,
+          62976
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 320304,
+            "score": 0.5634375193755392,
+            "source": 62976
+          }
+        ],
+        "capture_range": [
+          320304,
+          320304
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          62976,
+          62976
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          320304,
+          321347
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          62976,
+          65536
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 321347,
+            "score": 0.4766502068500371,
+            "source": 65536
+          }
+        ],
+        "capture_range": [
+          321347,
+          321347
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          65536,
+          65536
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          321347,
+          322195
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          65536,
+          67584
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 322195,
+            "score": 0.6252366764286933,
+            "source": 67584
+          }
+        ],
+        "capture_range": [
+          322195,
+          322195
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          67584,
+          67584
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          322195,
+          322226
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          67584,
+          68096
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 322226,
+            "score": 0.660888232828638,
+            "source": 68096
+          },
+          {
+            "capture": 323086,
+            "score": 0.4450818865728402,
+            "source": 69120
+          }
+        ],
+        "capture_range": [
+          322226,
+          323086
+        ],
+        "kind": "skip",
+        "rate": 0.83984375,
+        "source_range": [
+          68096,
+          69120
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          323086,
+          323457
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          69120,
+          72192
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 323457,
+            "score": 0.5114921368588279,
+            "source": 72192
+          }
+        ],
+        "capture_range": [
+          323457,
+          323457
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          72192,
+          72192
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          323457,
+          324258
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          72192,
+          72704
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324258,
+            "score": 0.3923763127152844,
+            "source": 72704
+          }
+        ],
+        "capture_range": [
+          324258,
+          324258
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          72704,
+          72704
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324366,
+            "score": 0.3893092921500929,
+            "source": 67072
+          }
+        ],
+        "capture_range": [
+          324258,
+          324366
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          72704,
+          67072
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324366,
+            "score": 0.3893092921500929,
+            "source": 67072
+          }
+        ],
+        "capture_range": [
+          324366,
+          324366
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          67072,
+          67072
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          324366,
+          324407
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          67072,
+          71680
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324407,
+            "score": 0.4303551408986798,
+            "source": 71680
+          }
+        ],
+        "capture_range": [
+          324407,
+          324407
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          71680,
+          71680
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324676,
+            "score": 0.32836706353977596,
+            "source": 70656
+          }
+        ],
+        "capture_range": [
+          324407,
+          324676
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          71680,
+          70656
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 324676,
+            "score": 0.32836706353977596,
+            "source": 70656
+          }
+        ],
+        "capture_range": [
+          324676,
+          324676
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          70656,
+          70656
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          324676,
+          326752
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          70656,
+          74240
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 326752,
+            "score": 0.32856631357056965,
+            "source": 74240
+          }
+        ],
+        "capture_range": [
+          326752,
+          326752
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          74240,
+          74240
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          326752,
+          327617
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          74240,
+          74752
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 327617,
+            "score": 0.30382541107758476,
+            "source": 74752
+          }
+        ],
+        "capture_range": [
+          327617,
+          327617
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          74752,
+          74752
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          327617,
+          327617
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          74752,
+          75264
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 327617,
+            "score": 0.39959981513903453,
+            "source": 75264
+          }
+        ],
+        "capture_range": [
+          327617,
+          327617
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          75264,
+          75264
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 327828,
+            "score": 0.3960664958855886,
+            "source": 69632
+          }
+        ],
+        "capture_range": [
+          327617,
+          327828
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          75264,
+          69632
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 327828,
+            "score": 0.3960664958855886,
+            "source": 69632
+          }
+        ],
+        "capture_range": [
+          327828,
+          327828
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          69632,
+          69632
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          327828,
+          330385
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          69632,
+          76800
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 330385,
+            "score": 0.30105700546561986,
+            "source": 76800
+          }
+        ],
+        "capture_range": [
+          330385,
+          330385
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          76800,
+          76800
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 332107,
+            "score": 0.39145243668556523,
+            "source": 76288
+          }
+        ],
+        "capture_range": [
+          330385,
+          332107
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          76800,
+          76288
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 332107,
+            "score": 0.39145243668556523,
+            "source": 76288
+          }
+        ],
+        "capture_range": [
+          332107,
+          332107
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          76288,
+          76288
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          332107,
+          332303
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          76288,
+          77824
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 332303,
+            "score": 0.30873440516903944,
+            "source": 77824
+          }
+        ],
+        "capture_range": [
+          332303,
+          332303
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          77824,
+          77824
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 332411,
+            "score": 0.34851551180287643,
+            "source": 75776
+          }
+        ],
+        "capture_range": [
+          332303,
+          332411
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          77824,
+          75776
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 332411,
+            "score": 0.34851551180287643,
+            "source": 75776
+          }
+        ],
+        "capture_range": [
+          332411,
+          332411
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          75776,
+          75776
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          332411,
+          334021
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          75776,
+          79360
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 334021,
+            "score": 0.3252795615261619,
+            "source": 79360
+          }
+        ],
+        "capture_range": [
+          334021,
+          334021
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          79360,
+          79360
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 334026,
+            "score": 0.3010121579213682,
+            "source": 78848
+          }
+        ],
+        "capture_range": [
+          334021,
+          334026
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          79360,
+          78848
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 334026,
+            "score": 0.3010121579213682,
+            "source": 78848
+          }
+        ],
+        "capture_range": [
+          334026,
+          334026
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          78848,
+          78848
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 334232,
+            "score": 0.3233280633625338,
+            "source": 77312
+          }
+        ],
+        "capture_range": [
+          334026,
+          334232
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          78848,
+          77312
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 334232,
+            "score": 0.3233280633625338,
+            "source": 77312
+          }
+        ],
+        "capture_range": [
+          334232,
+          334232
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          77312,
+          77312
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          334232,
+          336320
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          77312,
+          81920
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 336320,
+            "score": 0.4250130346067321,
+            "source": 81920
+          }
+        ],
+        "capture_range": [
+          336320,
+          336320
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          81920,
+          81920
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          336320,
+          336911
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          81920,
+          86016
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 336911,
+            "score": 0.49713822806675884,
+            "source": 86016
+          }
+        ],
+        "capture_range": [
+          336911,
+          336911
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          86016,
+          86016
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 337104,
+            "score": 0.39761354090478573,
+            "source": 82432
+          }
+        ],
+        "capture_range": [
+          336911,
+          337104
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          86016,
+          82432
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 337104,
+            "score": 0.39761354090478573,
+            "source": 82432
+          }
+        ],
+        "capture_range": [
+          337104,
+          337104
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          82432,
+          82432
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 337153,
+            "score": 0.37540457502566854,
+            "source": 81408
+          }
+        ],
+        "capture_range": [
+          337104,
+          337153
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          82432,
+          81408
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 337153,
+            "score": 0.37540457502566854,
+            "source": 81408
+          }
+        ],
+        "capture_range": [
+          337153,
+          337153
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          81408,
+          81408
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          337153,
+          337789
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          81408,
+          85504
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 337789,
+            "score": 0.30543671612907003,
+            "source": 85504
+          }
+        ],
+        "capture_range": [
+          337789,
+          337789
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          85504,
+          85504
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 338163,
+            "score": 0.45687542495372324,
+            "source": 83456
+          }
+        ],
+        "capture_range": [
+          337789,
+          338163
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          85504,
+          83456
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 338163,
+            "score": 0.45687542495372324,
+            "source": 83456
+          }
+        ],
+        "capture_range": [
+          338163,
+          338163
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          83456,
+          83456
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          338163,
+          341646
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          83456,
+          111104
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 341646,
+            "score": 0.9668492490028754,
+            "source": 111104
+          }
+        ],
+        "capture_range": [
+          341646,
+          341646
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          111104,
+          111104
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 341655,
+            "score": 0.9784012384890795,
+            "source": 92160
+          }
+        ],
+        "capture_range": [
+          341646,
+          341655
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          111104,
+          92160
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 341655,
+            "score": 0.9784012384890795,
+            "source": 92160
+          }
+        ],
+        "capture_range": [
+          341655,
+          341655
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          92160,
+          92160
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 342225,
+            "score": 0.48349276538519764,
+            "source": 89600
+          }
+        ],
+        "capture_range": [
+          341655,
+          342225
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          92160,
+          89600
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 342225,
+            "score": 0.48349276538519764,
+            "source": 89600
+          }
+        ],
+        "capture_range": [
+          342225,
+          342225
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          89600,
+          89600
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 343485,
+            "score": 0.5808557100857662,
+            "source": 89088
+          }
+        ],
+        "capture_range": [
+          342225,
+          343485
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          89600,
+          89088
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 343485,
+            "score": 0.5808557100857662,
+            "source": 89088
+          }
+        ],
+        "capture_range": [
+          343485,
+          343485
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          89088,
+          89088
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 343927,
+            "score": 0.49426938872633475,
+            "source": 87552
+          }
+        ],
+        "capture_range": [
+          343485,
+          343927
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          89088,
+          87552
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 343927,
+            "score": 0.49426938872633475,
+            "source": 87552
+          }
+        ],
+        "capture_range": [
+          343927,
+          343927
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          87552,
+          87552
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 345752,
+            "score": 0.3542931585513248,
+            "source": 86528
+          }
+        ],
+        "capture_range": [
+          343927,
+          345752
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          87552,
+          86528
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 345752,
+            "score": 0.3542931585513248,
+            "source": 86528
+          }
+        ],
+        "capture_range": [
+          345752,
+          345752
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          86528,
+          86528
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          345752,
+          345860
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          86528,
+          88064
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 345860,
+            "score": 0.4966987999943267,
+            "source": 88064
+          }
+        ],
+        "capture_range": [
+          345860,
+          345860
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          88064,
+          88064
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          345860,
+          346098
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          88064,
+          90112
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 346098,
+            "score": 0.46392235171121504,
+            "source": 90112
+          }
+        ],
+        "capture_range": [
+          346098,
+          346098
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          90112,
+          90112
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          346098,
+          347990
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          90112,
+          92672
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 347990,
+            "score": 0.9829316663897306,
+            "source": 92672
+          }
+        ],
+        "capture_range": [
+          347990,
+          347990
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          92672,
+          92672
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          347990,
+          348179
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          92672,
+          96768
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348179,
+            "score": 0.9810256095130815,
+            "source": 96768
+          }
+        ],
+        "capture_range": [
+          348179,
+          348179
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          96768,
+          96768
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348316,
+            "score": 0.986437902502453,
+            "source": 95232
+          }
+        ],
+        "capture_range": [
+          348179,
+          348316
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          96768,
+          95232
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348316,
+            "score": 0.986437902502453,
+            "source": 95232
+          }
+        ],
+        "capture_range": [
+          348316,
+          348316
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          95232,
+          95232
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348453,
+            "score": 0.9285396007909097,
+            "source": 94208
+          }
+        ],
+        "capture_range": [
+          348316,
+          348453
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          95232,
+          94208
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348453,
+            "score": 0.9285396007909097,
+            "source": 94208
+          }
+        ],
+        "capture_range": [
+          348453,
+          348453
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          94208,
+          94208
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348917,
+            "score": 0.4920093017027841,
+            "source": 90624
+          }
+        ],
+        "capture_range": [
+          348453,
+          348917
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          94208,
+          90624
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348917,
+            "score": 0.4920093017027841,
+            "source": 90624
+          }
+        ],
+        "capture_range": [
+          348917,
+          348917
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          90624,
+          90624
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          348917,
+          348920
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          90624,
+          91136
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 348920,
+            "score": 0.9430295604950747,
+            "source": 91136
+          },
+          {
+            "capture": 349585,
+            "score": 0.9435890539655326,
+            "source": 91648
+          }
+        ],
+        "capture_range": [
+          348920,
+          349585
+        ],
+        "kind": "jitter",
+        "rate": 1.298828125,
+        "source_range": [
+          91136,
+          91648
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350214,
+            "score": 0.38961592076407026,
+            "source": 71168
+          }
+        ],
+        "capture_range": [
+          349585,
+          350214
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          91648,
+          71168
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350214,
+            "score": 0.38961592076407026,
+            "source": 71168
+          }
+        ],
+        "capture_range": [
+          350214,
+          350214
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          71168,
+          71168
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          350214,
+          350538
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          71168,
+          100352
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350538,
+            "score": 0.8999677633767069,
+            "source": 100352
+          }
+        ],
+        "capture_range": [
+          350538,
+          350538
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          100352,
+          100352
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350546,
+            "score": 0.43142710619604163,
+            "source": 83968
+          }
+        ],
+        "capture_range": [
+          350538,
+          350546
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          100352,
+          83968
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350546,
+            "score": 0.43142710619604163,
+            "source": 83968
+          }
+        ],
+        "capture_range": [
+          350546,
+          350546
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          83968,
+          83968
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350616,
+            "score": 0.42979980240838705,
+            "source": 78336
+          }
+        ],
+        "capture_range": [
+          350546,
+          350616
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          83968,
+          78336
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350616,
+            "score": 0.42979980240838705,
+            "source": 78336
+          }
+        ],
+        "capture_range": [
+          350616,
+          350616
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          78336,
+          78336
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350814,
+            "score": 0.37648177721822124,
+            "source": 73728
+          }
+        ],
+        "capture_range": [
+          350616,
+          350814
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          78336,
+          73728
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 350814,
+            "score": 0.37648177721822124,
+            "source": 73728
+          }
+        ],
+        "capture_range": [
+          350814,
+          350814
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          73728,
+          73728
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          350814,
+          351267
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          73728,
+          84992
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 351267,
+            "score": 0.40193944556260114,
+            "source": 84992
+          }
+        ],
+        "capture_range": [
+          351267,
+          351267
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          84992,
+          84992
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          351267,
+          351443
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          84992,
+          98304
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 351443,
+            "score": 0.9509358280565974,
+            "source": 98304
+          },
+          {
+            "capture": 351790,
+            "score": 0.8492596703990984,
+            "source": 98816
+          }
+        ],
+        "capture_range": [
+          351443,
+          351790
+        ],
+        "kind": "skip",
+        "rate": 0.677734375,
+        "source_range": [
+          98304,
+          98816
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          351790,
+          352266
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          98816,
+          102400
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 352266,
+            "score": 0.9560721990989999,
+            "source": 102400
+          }
+        ],
+        "capture_range": [
+          352266,
+          352266
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          102400,
+          102400
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 352621,
+            "score": 0.9656978855167333,
+            "source": 97280
+          }
+        ],
+        "capture_range": [
+          352266,
+          352621
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          102400,
+          97280
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 352621,
+            "score": 0.9656978855167333,
+            "source": 97280
+          }
+        ],
+        "capture_range": [
+          352621,
+          352621
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          97280,
+          97280
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 352813,
+            "score": 0.9834199215001852,
+            "source": 94720
+          }
+        ],
+        "capture_range": [
+          352621,
+          352813
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          97280,
+          94720
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 352813,
+            "score": 0.9834199215001852,
+            "source": 94720
+          }
+        ],
+        "capture_range": [
+          352813,
+          352813
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          94720,
+          94720
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          352813,
+          353743
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          94720,
+          99328
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 353743,
+            "score": 0.9419409295221965,
+            "source": 99328
+          }
+        ],
+        "capture_range": [
+          353743,
+          353743
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          99328,
+          99328
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          353743,
+          353943
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          99328,
+          100864
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 353943,
+            "score": 0.9510806539927953,
+            "source": 100864
+          }
+        ],
+        "capture_range": [
+          353943,
+          353943
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          100864,
+          100864
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 354425,
+            "score": 0.9024283444596626,
+            "source": 99840
+          }
+        ],
+        "capture_range": [
+          353943,
+          354425
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          100864,
+          99840
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 354425,
+            "score": 0.9024283444596626,
+            "source": 99840
+          }
+        ],
+        "capture_range": [
+          354425,
+          354425
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          99840,
+          99840
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 354916,
+            "score": 0.37345555030062133,
+            "source": 73216
+          }
+        ],
+        "capture_range": [
+          354425,
+          354916
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          99840,
+          73216
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 354916,
+            "score": 0.37345555030062133,
+            "source": 73216
+          }
+        ],
+        "capture_range": [
+          354916,
+          354916
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          73216,
+          73216
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          354916,
+          355780
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          73216,
+          101376
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 355780,
+            "score": 0.9600509986573306,
+            "source": 101376
+          },
+          {
+            "capture": 356291,
+            "score": 0.989971517329902,
+            "source": 101888
+          },
+          {
+            "capture": 357315,
+            "score": 0.9837771462533061,
+            "source": 102912
+          },
+          {
+            "capture": 358336,
+            "score": 0.9628853553038847,
+            "source": 103936
+          },
+          {
+            "capture": 359357,
+            "score": 0.9600593246854046,
+            "source": 104960
+          }
+        ],
+        "capture_range": [
+          355780,
+          359357
+        ],
+        "kind": "continuous",
+        "rate": 0.998046875,
+        "source_range": [
+          101376,
+          104960
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 359535,
+            "score": 0.33286614002395376,
+            "source": 82944
+          }
+        ],
+        "capture_range": [
+          359357,
+          359535
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          104960,
+          82944
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 359535,
+            "score": 0.33286614002395376,
+            "source": 82944
+          }
+        ],
+        "capture_range": [
+          359535,
+          359535
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          82944,
+          82944
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          359535,
+          360579
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          82944,
+          105984
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 360579,
+            "score": 0.9848081619664616,
+            "source": 105984
+          },
+          {
+            "capture": 360900,
+            "score": 0.9885307081730339,
+            "source": 106496
+          },
+          {
+            "capture": 361600,
+            "score": 0.9835105716099408,
+            "source": 107008
+          },
+          {
+            "capture": 361919,
+            "score": 0.9753464504783153,
+            "source": 107520
+          }
+        ],
+        "capture_range": [
+          360579,
+          361919
+        ],
+        "kind": "drift",
+        "rate": 0.8723958333333334,
+        "source_range": [
+          105984,
+          107520
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          361919,
+          362117
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          107520,
+          112128
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 362117,
+            "score": 0.9462889346827816,
+            "source": 112128
+          }
+        ],
+        "capture_range": [
+          362117,
+          362117
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          112128,
+          112128
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 362237,
+            "score": 0.9757631407554279,
+            "source": 108032
+          }
+        ],
+        "capture_range": [
+          362117,
+          362237
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          112128,
+          108032
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 362237,
+            "score": 0.9757631407554279,
+            "source": 108032
+          }
+        ],
+        "capture_range": [
+          362237,
+          362237
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          108032,
+          108032
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          362237,
+          364144
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          108032,
+          109056
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 364144,
+            "score": 0.9655975830647556,
+            "source": 109056
+          }
+        ],
+        "capture_range": [
+          364144,
+          364144
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          109056,
+          109056
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          364144,
+          364160
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          109056,
+          109568
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 364160,
+            "score": 0.9394873959560437,
+            "source": 109568
+          },
+          {
+            "capture": 364674,
+            "score": 0.9692940707809182,
+            "source": 110080
+          }
+        ],
+        "capture_range": [
+          364160,
+          364674
+        ],
+        "kind": "continuous",
+        "rate": 1.00390625,
+        "source_range": [
+          109568,
+          110080
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 364674,
+            "score": 0.9692940707809182,
+            "source": 110080
+          },
+          {
+            "capture": 365002,
+            "score": 0.9906619454472535,
+            "source": 110592
+          }
+        ],
+        "capture_range": [
+          364674,
+          365002
+        ],
+        "kind": "skip",
+        "rate": 0.640625,
+        "source_range": [
+          110080,
+          110592
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 365002,
+            "score": 0.9906619454472535,
+            "source": 110592
+          },
+          {
+            "capture": 366021,
+            "score": 0.9888101033161804,
+            "source": 111616
+          }
+        ],
+        "capture_range": [
+          365002,
+          366021
+        ],
+        "kind": "continuous",
+        "rate": 0.9951171875,
+        "source_range": [
+          110592,
+          111616
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 366021,
+            "score": 0.9888101033161804,
+            "source": 111616
+          },
+          {
+            "capture": 367229,
+            "score": 0.9658342506840202,
+            "source": 112640
+          },
+          {
+            "capture": 367556,
+            "score": 0.8973658826062434,
+            "source": 113152
+          },
+          {
+            "capture": 368259,
+            "score": 0.9903903409383884,
+            "source": 113664
+          },
+          {
+            "capture": 368579,
+            "score": 0.9775795363492766,
+            "source": 114176
+          }
+        ],
+        "capture_range": [
+          366021,
+          368579
+        ],
+        "kind": "continuous",
+        "rate": 0.99921875,
+        "source_range": [
+          111616,
+          114176
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 369296,
+            "score": 0.8839050988458061,
+            "source": 105472
+          }
+        ],
+        "capture_range": [
+          368579,
+          369296
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          114176,
+          105472
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 369296,
+            "score": 0.8839050988458061,
+            "source": 105472
+          }
+        ],
+        "capture_range": [
+          369296,
+          369296
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          105472,
+          105472
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          369296,
+          369737
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          105472,
+          119296
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 369737,
+            "score": 0.9745078544126532,
+            "source": 119296
+          }
+        ],
+        "capture_range": [
+          369737,
+          369737
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          119296,
+          119296
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 370816,
+            "score": 0.9576126545142637,
+            "source": 116224
+          }
+        ],
+        "capture_range": [
+          369737,
+          370816
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          119296,
+          116224
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 370816,
+            "score": 0.9576126545142637,
+            "source": 116224
+          },
+          {
+            "capture": 371138,
+            "score": 0.8390437472114306,
+            "source": 116736
+          },
+          {
+            "capture": 372350,
+            "score": 0.9887334000860019,
+            "source": 117760
+          }
+        ],
+        "capture_range": [
+          370816,
+          372350
+        ],
+        "kind": "continuous",
+        "rate": 0.9986979166666666,
+        "source_range": [
+          116224,
+          117760
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 372982,
+            "score": 0.5436445301669957,
+            "source": 87040
+          }
+        ],
+        "capture_range": [
+          372350,
+          372982
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          117760,
+          87040
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 372982,
+            "score": 0.5436445301669957,
+            "source": 87040
+          }
+        ],
+        "capture_range": [
+          372982,
+          372982
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          87040,
+          87040
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          372982,
+          374205
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          87040,
+          119808
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 374205,
+            "score": 0.9736302330211581,
+            "source": 119808
+          },
+          {
+            "capture": 374529,
+            "score": 0.9309240077063776,
+            "source": 120320
+          }
+        ],
+        "capture_range": [
+          374205,
+          374529
+        ],
+        "kind": "skip",
+        "rate": 0.6328125,
+        "source_range": [
+          119808,
+          120320
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 374529,
+            "score": 0.9309240077063776,
+            "source": 120320
+          },
+          {
+            "capture": 375553,
+            "score": 0.9982724357028475,
+            "source": 121344
+          }
+        ],
+        "capture_range": [
+          374529,
+          375553
+        ],
+        "kind": "continuous",
+        "rate": 1,
+        "source_range": [
+          120320,
+          121344
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 376245,
+            "score": 0.9770715698164583,
+            "source": 108544
+          }
+        ],
+        "capture_range": [
+          375553,
+          376245
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          121344,
+          108544
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 376245,
+            "score": 0.9770715698164583,
+            "source": 108544
+          }
+        ],
+        "capture_range": [
+          376245,
+          376245
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          108544,
+          108544
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          376245,
+          376576
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          108544,
+          122368
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 376576,
+            "score": 0.9742967862714906,
+            "source": 122368
+          }
+        ],
+        "capture_range": [
+          376576,
+          376576
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          122368,
+          122368
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 377336,
+            "score": 0.9369308555379859,
+            "source": 118272
+          }
+        ],
+        "capture_range": [
+          376576,
+          377336
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          122368,
+          118272
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 377336,
+            "score": 0.9369308555379859,
+            "source": 118272
+          }
+        ],
+        "capture_range": [
+          377336,
+          377336
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          118272,
+          118272
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          377336,
+          377600
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          118272,
+          123392
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 377600,
+            "score": 0.9909918718128835,
+            "source": 123392
+          }
+        ],
+        "capture_range": [
+          377600,
+          377600
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          123392,
+          123392
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          377600,
+          378489
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          123392,
+          123904
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 378489,
+            "score": 0.9808565247114096,
+            "source": 123904
+          }
+        ],
+        "capture_range": [
+          378489,
+          378489
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          123904,
+          123904
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          378489,
+          378980
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          123904,
+          130847
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 378980,
+            "score": 0.8890910896531038,
+            "source": 130847
+          }
+        ],
+        "capture_range": [
+          378980,
+          378980
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          130847,
+          130847
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 379328,
+            "score": 0.9874828485971218,
+            "source": 124928
+          }
+        ],
+        "capture_range": [
+          378980,
+          379328
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          130847,
+          124928
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 379328,
+            "score": 0.9874828485971218,
+            "source": 124928
+          }
+        ],
+        "capture_range": [
+          379328,
+          379328
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          124928,
+          124928
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          379328,
+          379578
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          124928,
+          128000
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 379578,
+            "score": 0.8158205074393614,
+            "source": 128000
+          }
+        ],
+        "capture_range": [
+          379578,
+          379578
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          128000,
+          128000
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          379578,
+          379799
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          128000,
+          129536
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 379799,
+            "score": 0.9259175349772562,
+            "source": 129536
+          }
+        ],
+        "capture_range": [
+          379799,
+          379799
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          129536,
+          129536
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          379799,
+          379940
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          129536,
+          130560
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 379940,
+            "score": 0.5518571868848046,
+            "source": 130560
+          }
+        ],
+        "capture_range": [
+          379940,
+          379940
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          130560,
+          130560
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 380352,
+            "score": 0.9846652679065584,
+            "source": 125952
+          }
+        ],
+        "capture_range": [
+          379940,
+          380352
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          130560,
+          125952
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 380352,
+            "score": 0.9846652679065584,
+            "source": 125952
+          }
+        ],
+        "capture_range": [
+          380352,
+          380352
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          125952,
+          125952
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          380352,
+          380955
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          125952,
+          128512
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 380955,
+            "score": 0.9057618677612695,
+            "source": 128512
+          }
+        ],
+        "capture_range": [
+          380955,
+          380955
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          128512,
+          128512
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 381568,
+            "score": 0.6668799720787205,
+            "source": 125440
+          }
+        ],
+        "capture_range": [
+          380955,
+          381568
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          128512,
+          125440
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 381568,
+            "score": 0.6668799720787205,
+            "source": 125440
+          }
+        ],
+        "capture_range": [
+          381568,
+          381568
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          125440,
+          125440
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 412415,
+            "score": 0.9000027787336771,
+            "source": 117248
+          }
+        ],
+        "capture_range": [
+          381568,
+          412415
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          125440,
+          117248
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 412415,
+            "score": 0.9000027787336771,
+            "source": 117248
+          }
+        ],
+        "capture_range": [
+          412415,
+          412415
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          117248,
+          117248
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 436230,
+            "score": 0.5859551108685502,
+            "source": 70144
+          }
+        ],
+        "capture_range": [
+          412415,
+          436230
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          117248,
+          70144
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 436230,
+            "score": 0.5859551108685502,
+            "source": 70144
+          }
+        ],
+        "capture_range": [
+          436230,
+          436230
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          70144,
+          70144
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          436230,
+          640690
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          70144,
+          118784
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 640690,
+            "score": 0.9709617052800785,
+            "source": 118784
+          }
+        ],
+        "capture_range": [
+          640690,
+          640690
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          118784,
+          118784
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 711247,
+            "score": 0.9693243479520123,
+            "source": 104448
+          }
+        ],
+        "capture_range": [
+          640690,
+          711247
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          118784,
+          104448
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 711247,
+            "score": 0.9693243479520123,
+            "source": 104448
+          }
+        ],
+        "capture_range": [
+          711247,
+          711247
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          104448,
+          104448
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          711247,
+          917498
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          104448,
+          120832
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 917498,
+            "score": 0.9434763096326051,
+            "source": 120832
+          }
+        ],
+        "capture_range": [
+          917498,
+          917498
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          120832,
+          120832
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 969616,
+            "score": 0.9768581491042534,
+            "source": 96256
+          }
+        ],
+        "capture_range": [
+          917498,
+          969616
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          120832,
+          96256
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 969616,
+            "score": 0.9768581491042534,
+            "source": 96256
+          }
+        ],
+        "capture_range": [
+          969616,
+          969616
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          96256,
+          96256
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          969616,
+          982129
+        ],
+        "kind": "skip",
+        "rate": null,
+        "source_range": [
+          96256,
+          115712
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 982129,
+            "score": 0.9573757281361757,
+            "source": 115712
+          }
+        ],
+        "capture_range": [
+          982129,
+          982129
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          115712,
+          115712
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 993424,
+            "score": 0.9926655850178737,
+            "source": 93696
+          }
+        ],
+        "capture_range": [
+          982129,
+          993424
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          115712,
+          93696
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 993424,
+            "score": 0.9926655850178737,
+            "source": 93696
+          }
+        ],
+        "capture_range": [
+          993424,
+          993424
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          93696,
+          93696
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          993424,
+          1172032
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          93696,
+          95744
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1172032,
+            "score": 0.9897481758897942,
+            "source": 95744
+          }
+        ],
+        "capture_range": [
+          1172032,
+          1172032
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          95744,
+          95744
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          1172032,
+          1522504
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          95744,
+          130048
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1522504,
+            "score": 0.9782958445310372,
+            "source": 130048
+          }
+        ],
+        "capture_range": [
+          1522504,
+          1522504
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          130048,
+          130048
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1553196,
+            "score": 0.42921671407829054,
+            "source": 80896
+          }
+        ],
+        "capture_range": [
+          1522504,
+          1553196
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          130048,
+          80896
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1553196,
+            "score": 0.42921671407829054,
+            "source": 80896
+          }
+        ],
+        "capture_range": [
+          1553196,
+          1553196
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          80896,
+          80896
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1556748,
+            "score": 0.4116534345310099,
+            "source": 79872
+          }
+        ],
+        "capture_range": [
+          1553196,
+          1556748
+        ],
+        "kind": "resume",
+        "rate": null,
+        "source_range": [
+          80896,
+          79872
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 1556748,
+            "score": 0.4116534345310099,
+            "source": 79872
+          }
+        ],
+        "capture_range": [
+          1556748,
+          1556748
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          79872,
+          79872
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          1556748,
+          2145541
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          79872,
+          84480
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 2145541,
+            "score": 0.5812770663552683,
+            "source": 84480
+          }
+        ],
+        "capture_range": [
+          2145541,
+          2145541
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          84480,
+          84480
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          2145541,
+          2302323
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          84480,
+          93184
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 2302323,
+            "score": 0.9774476524351396,
+            "source": 93184
+          }
+        ],
+        "capture_range": [
+          2302323,
+          2302323
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          93184,
+          93184
+        ]
+      },
+      {
+        "anchors": [],
+        "capture_range": [
+          2302323,
+          2337419
+        ],
+        "kind": "gap",
+        "rate": null,
+        "source_range": [
+          93184,
+          127488
+        ]
+      },
+      {
+        "anchors": [
+          {
+            "capture": 2337419,
+            "score": 0.975000340412965,
+            "source": 127488
+          }
+        ],
+        "capture_range": [
+          2337419,
+          2337419
+        ],
+        "kind": "continuous",
+        "rate": null,
+        "source_range": [
+          127488,
+          127488
+        ]
+      }
+    ]
+  }
+}

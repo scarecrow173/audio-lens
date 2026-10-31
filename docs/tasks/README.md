@@ -6,6 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034P51k4FtjAZkVTMWcZPl | pre-migration baseline の実装と実測 | todo | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TASK-034P3OFAlhyz4NNpeFYtTc | Ruviform 依存固定と CI 整備(AL#99) | todo | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | todo | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
