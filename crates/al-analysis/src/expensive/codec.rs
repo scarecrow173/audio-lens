@@ -5,6 +5,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
+use ruviform_numeric::spec;
 
 use super::{Emit, ExpensiveResult, RegionCtx, emit_unsupported};
 
@@ -101,12 +102,9 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let qmin = (0.0002 * rate as f64) as usize;
         let qmax = ((0.05 * rate as f64) as usize).min(size - 1);
         if qmax > qmin {
-            let (qi, &peak) = re[qmin..=qmax]
-                .iter()
-                .enumerate()
-                .max_by(|a, b| a.1.total_cmp(b.1))
+            let (qi, peak) = spec::argmax(&re[qmin..=qmax])
                 .map(|(i, v)| (i + qmin, v))
-                .unwrap_or((qmin, &0.0));
+                .unwrap_or((qmin, 0.0));
             let baseline: f64 = re[qmin..=qmax].iter().sum::<f64>() / (qmax - qmin + 1) as f64;
             let prominence = if baseline.abs() > 1e-12 {
                 (peak - baseline) / baseline.abs()

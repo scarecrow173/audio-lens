@@ -14,6 +14,7 @@ use al_locate::mixer::fit_mix;
 use ruviform_numeric::bands::{bandpass_many, spectral_envelope};
 use ruviform_numeric::conv::conv;
 use ruviform_numeric::corr::gcc_phat;
+use ruviform_numeric::corr::overlap_ncc_direct;
 use ruviform_numeric::fft::Fft;
 use ruviform_numeric::vec::{corr0, dot, mag_sq, rms, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
@@ -1050,10 +1051,17 @@ pub fn analyze_pair(
         let mut best = (0usize, 0.0f64);
         let lo = (rate as f64 / 1000.0) as usize;
         let hi = (rate as f64 / 40.0) as usize;
-        for lag in lo..hi.min(len / 2) {
-            let c = corr0(&x[..len - lag], &x[lag..]).expect("equal lengths");
-            if c > best.1 {
-                best = (lag, c);
+        let end = hi.min(len / 2);
+        if end > lo {
+            // `curve[end−1+lag]` は旧 `corr0(&x[..len−lag], &x[lag..])`
+            // と bit-exact(同一式・同一評価順の直算 API、#168)。
+            let curve =
+                overlap_ncc_direct(x, x, end - 1).expect("self-correlation is equal-length");
+            for lag in lo..end {
+                let c = curve[end - 1 + lag];
+                if c > best.1 {
+                    best = (lag, c);
+                }
             }
         }
         (best.1 > 0.3 && best.0 > 0).then(|| rate as f64 / best.0 as f64)

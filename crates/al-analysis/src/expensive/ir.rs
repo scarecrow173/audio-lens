@@ -13,6 +13,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
+use ruviform_numeric::spec;
 
 use crate::records::{propagate_confidence, propagate_validity};
 
@@ -180,11 +181,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         .expect("fft buffer lengths must match the plan");
     let mut mag2 = vec![0.0; re.len()];
     ruviform_numeric::vec::mag_sq(&re, &im, &mut mag2).expect("equal slice lengths");
-    let (peak, _) = mag2
-        .iter()
-        .enumerate()
-        .max_by(|a, b| a.1.total_cmp(b.1))
-        .unwrap_or((0, &0.0));
+    let (peak, _) = spec::argmax(&mag2).unwrap_or((0, 0.0));
 
     // Early energy: main-peak neighborhood (0.25 ms pre-peak guard
     // through 2.5 ms). Late energy: the remaining tail from 5 ms.

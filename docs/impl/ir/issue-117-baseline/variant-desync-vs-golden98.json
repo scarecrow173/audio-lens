@@ -1,0 +1,7407 @@
+[
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/3/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/3/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/3/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/3/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/3/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/4/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/4/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/4/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/4/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/4/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/5/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/5/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/5/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/5/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/5/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/6/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/6/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/6/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/6/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/6/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/7/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/7/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/7/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/7/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/7/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/8/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/8/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/8/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/8/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/8/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/9/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/9/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/9/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/9/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/9/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/10/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/10/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/10/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/10/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/10/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/11/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/11/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/11/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/11/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/11/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/12/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/12/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/12/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/12/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/12/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/13/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/14/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/17/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/21/params/pcm/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "manifest.normalized.json",
+    "path": "artifacts/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "29/params",
+    "kind": "value",
+    "a": "{\"measured\":0.3661154578389624,\"segment_scope\":true,\"threshold\":0.5}",
+    "b": "{\"measured\":0.3661154578389656,\"segment_scope\":true,\"threshold\":0.5}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "30/params",
+    "kind": "value",
+    "a": "{\"measured\":0.19491787116188675,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.1949178711618829,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "31/params",
+    "kind": "value",
+    "a": "{\"measured\":0.9212064256072195,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.9212064256072378,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/48/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/49/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/50/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/51/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/52/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/53/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/54/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/55/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/56/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/57/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/58/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/59/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/60/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/61/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/62/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/63/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/64/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/65/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/66/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/67/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/68/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/69/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/70/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/71/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/72/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/73/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/74/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/75/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/76/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/77/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/78/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/79/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/80/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/81/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/82/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/83/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/84/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/85/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/86/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/87/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/88/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/89/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/90/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/91/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/92/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/93/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/94/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/95/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/96/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/97/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/98/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/99/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/100/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/101/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/102/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/103/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/104/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/105/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/106/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/107/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/108/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/109/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/110/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/111/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/112/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/113/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#1.json",
+    "path": "records/114/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/48/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/49/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/50/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/51/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/52/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/53/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/54/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/55/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/56/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/57/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/58/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/59/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/60/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/61/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/62/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/63/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/64/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/65/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/66/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/67/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/68/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/69/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/70/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/71/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/72/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/73/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/74/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/75/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/76/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/77/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/78/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/79/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/80/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/81/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/82/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/83/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/84/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/85/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/86/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/87/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/88/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/89/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/90/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/91/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/92/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/93/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/94/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/95/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/96/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/97/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/98/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/99/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/100/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/101/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/102/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/103/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/104/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/105/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/106/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/107/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/108/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/109/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/110/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/111/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/112/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/113/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/114/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/115/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/116/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/117/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/118/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/119/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#2.json",
+    "path": "records/120/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/48/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/49/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/50/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/51/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/52/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/53/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/54/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/55/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/56/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/57/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/58/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/59/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/60/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/61/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/62/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/63/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/64/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/65/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/66/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/67/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/68/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/69/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/70/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/71/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/72/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/73/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/74/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/75/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/76/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/77/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/78/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/79/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/80/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/81/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/82/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/83/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/84/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/85/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cheap/IN-#3.json",
+    "path": "records/86/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/cross_capture/IN-#2__IN-#1.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#1__r000.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/48/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/49/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/50/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/51/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/52/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/53/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/54/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/55/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/56/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/57/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/58/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/59/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/60/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/61/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/62/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/63/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/64/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/65/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/66/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/67/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/68/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/69/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/70/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/71/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/72/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/73/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/74/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/75/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/76/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/77/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/78/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/79/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/80/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/81/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/82/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/83/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/84/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/85/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/86/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/87/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/88/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/89/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/90/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/91/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#2__r000.json",
+    "path": "records/92/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/expensive/IN-#3__r000.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#1.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/0/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/1/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/2/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/3/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/4/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/5/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/6/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/7/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/8/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/9/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/10/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/11/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/12/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/13/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/14/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/15/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/16/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/17/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/18/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/19/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/20/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/21/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/22/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/33/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/34/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/35/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/36/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/37/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/38/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/39/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/40/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/41/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/42/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/43/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/44/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/45/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/46/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/47/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/48/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/49/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/50/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/51/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/52/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/53/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/54/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/55/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/56/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/57/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/58/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/59/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/60/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/61/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/62/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/63/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/64/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/65/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/66/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/67/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/68/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/69/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/70/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/71/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/72/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/73/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/74/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/75/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/76/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/77/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/78/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/79/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/80/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/81/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/82/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/83/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/84/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/85/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/86/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/87/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/88/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/89/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/90/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/91/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/92/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/93/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/94/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/95/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/96/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/97/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/98/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/99/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/100/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/101/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/102/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/103/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/104/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/105/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/106/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/107/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/108/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/109/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/110/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/111/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/112/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/113/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/114/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/115/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/116/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/117/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/118/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/119/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/120/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/121/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/122/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/123/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/124/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/125/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/126/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/127/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/128/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/129/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/130/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/131/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/132/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/133/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/134/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/135/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/136/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/137/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/138/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/139/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/140/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/141/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/142/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/143/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/144/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/145/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/146/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/147/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/148/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/149/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/150/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/151/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/152/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/153/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/154/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/155/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/156/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/157/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/158/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/159/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/160/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/161/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/162/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/163/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/164/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/165/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/166/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/features/reference/IN-#3__IN-#2.json",
+    "path": "records/167/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#1.metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#1.metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#1.metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#1.metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#1.metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#2.metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#2.metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#2.metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#2.metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#2.metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#3.metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#3.metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#3.metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#3.metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/inputs/IN-#3.metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#1.json",
+    "path": "result/params/normalization/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/analysis/locate/IN-#3/IN-#2.json",
+    "path": "result/params/normalization/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/inputs/IN-#1/metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#1/metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/inputs/IN-#1/metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#1/metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/inputs/IN-#1/metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/inputs/IN-#2/metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#2/metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/inputs/IN-#2/metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#2/metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/inputs/IN-#2/metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/inputs/IN-#3/metadata.json",
+    "path": "decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#3/metadata.json",
+    "path": "decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/inputs/IN-#3/metadata.json",
+    "path": "decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/inputs/IN-#3/metadata.json",
+    "path": "decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/inputs/IN-#3/metadata.json",
+    "path": "decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#1/result.json",
+    "path": "result/params/normalization/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/residual_IN-#3.json",
+    "path": "child/params/normalization/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/locate/IN-#3/IN-#2/result.json",
+    "path": "result/params/normalization/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/3/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/3/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/3/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/3/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/3/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/4/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/4/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/4/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/4/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/4/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/5/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/5/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/5/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/5/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/5/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/6/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/6/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/6/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/6/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/6/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/7/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/7/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/7/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/7/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/7/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/8/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/8/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/8/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/8/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/8/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/9/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/9/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/9/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/9/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/9/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/10/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/10/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/10/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/10/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/10/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/11/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/11/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/11/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/11/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/11/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/12/params/decoder/attempts/0/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/12/params/decoder/attempts/0/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/12/params/decoder/backend",
+    "kind": "value",
+    "a": "ruviform",
+    "b": "native"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/12/params/decoder/settings/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/12/params/decoder/version",
+    "kind": "value",
+    "a": "080c228d197ebc645b8f81cd0082be442abaf10c",
+    "b": "0.1.0"
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/13/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/14/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/17/params/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/antialias",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/clip",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/compensation_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/cutoff",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/delay_source_frames",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/down",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/endpoint_extension",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/output_length_rounding",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/phase_normalization",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/radius",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/source_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/stable_id",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/target_rate",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/up",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/21/params/pcm/transform/window",
+    "kind": "key",
+    "a": false,
+    "b": true
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/23/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/24/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/25/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/26/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/27/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/28/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/29/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/30/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/31/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/manifest.json",
+    "path": "artifacts/32/params/ruviform",
+    "kind": "key",
+    "a": true,
+    "b": false
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0-ch1/coherence.payload.json",
+    "path": "values/3070",
+    "kind": "tolerance",
+    "a": -0.0011560789607495282,
+    "b": -0.0011560789551125685,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0/stft_im.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -1.7408297026122455e-13,
+    "b": -1.1759482276829658e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch1/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -5.613287612504791e-13,
+    "b": 9.166001291305292e-13,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/2043",
+    "kind": "tolerance",
+    "a": -0.014340589112019641,
+    "b": -0.014340589087276626,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/2106",
+    "kind": "tolerance",
+    "a": -0.0002687190118936282,
+    "b": -0.0002687190131458473,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6126",
+    "kind": "tolerance",
+    "a": -0.0009014031181419081,
+    "b": -0.0009014031162401205,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6140",
+    "kind": "tolerance",
+    "a": 0.0005765850085642142,
+    "b": 0.00057658498609135,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6157",
+    "kind": "tolerance",
+    "a": -0.00676408618072036,
+    "b": -0.006764086191551983,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2013",
+    "kind": "tolerance",
+    "a": 0.000533928080553421,
+    "b": 0.0005339280740829442,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2043",
+    "kind": "tolerance",
+    "a": -0.5101543521131809,
+    "b": -0.5101543512338289,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2083",
+    "kind": "tolerance",
+    "a": 0.0005339279686553405,
+    "b": 0.000533927978799193,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2106",
+    "kind": "tolerance",
+    "a": -0.016544272486265926,
+    "b": -0.016544272563355902,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6126",
+    "kind": "tolerance",
+    "a": -0.029839323958499742,
+    "b": -0.02983932389554236,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6140",
+    "kind": "tolerance",
+    "a": 0.020323087311425472,
+    "b": 0.020323086519199535,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6157",
+    "kind": "tolerance",
+    "a": -0.29062654350724526,
+    "b": -0.2906265439721208,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h_t.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 268755472.2563588,
+    "b": 268755477.3958464,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/residual/IN-#3__IN-#2/r0/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -4.11226608321158e-13,
+    "b": 6.608047442568932e-13,
+    "rel": 1e-9,
+    "abs": 1e-12
+  }
+]
