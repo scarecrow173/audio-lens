@@ -25,7 +25,8 @@ relations:
   superseded-by: []
   related: []
   refines: []
-  refined-by: []
+  refined-by:
+    - "ruviform-foundation-migration.md"
   derives-from: []
   derived-by: []
   verifies: []

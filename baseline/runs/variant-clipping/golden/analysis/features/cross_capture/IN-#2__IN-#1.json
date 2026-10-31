@@ -1,0 +1,72 @@
+{
+  "common_source_ids": [
+    "IN-#3"
+  ],
+  "records": [
+    {
+      "algorithm_id": "cross_capture.path_gain.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "cross_capture.path_gain",
+      "freq_range": null,
+      "input_id": "job",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#21",
+        "intermediate/IN-#3__IN-#2/transfer_h",
+        "intermediate/IN-#3__IN-#2/coherence",
+        "ART-#15",
+        "intermediate/IN-#3__IN-#1/transfer_h",
+        "intermediate/IN-#3__IN-#1/coherence"
+      ],
+      "params": {
+        "aggregation": "per_bin_median_magnitude_ratio",
+        "bin_frequency": "k * sample_rate / fft_size",
+        "fft_size": 4096,
+        "minimum_magnitude_squared_coherence": 0.5,
+        "reference_capture_id": "IN-#2",
+        "row_units": [
+          "ratio",
+          "db",
+          "count"
+        ],
+        "rows": [
+          "magnitude_ratio",
+          "gain_difference_db",
+          "source_support"
+        ],
+        "sample_rate": 48000,
+        "target_capture_id": "IN-#1",
+        "usable_source_count": 1
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 198,
+      "target": null,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "tensor": {
+          "array": "intermediate/cross_capture/IN-#2__IN-#1/path_gain",
+          "region": [
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              2049
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "reference_capture_id": "IN-#2",
+  "target_capture_id": "IN-#1"
+}

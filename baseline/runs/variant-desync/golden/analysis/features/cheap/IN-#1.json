@@ -1,0 +1,3907 @@
+{
+  "records": [
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.sample_peak",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 1,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.true_peak_est",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "method": "linear4x"
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 1,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.dc_offset",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.0011352447518919982,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.0011352447518919982
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.crest_factor",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 6.605729404654205,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 6.605729404654205
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": -16.39841558791789,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -16.39841558791789
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.trajectory",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 0.15138373656290385,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "tensor": {
+          "array": "features/cheap/IN-#1/ch0/level_trajectory",
+          "region": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4999
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_median_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -19.76914718145676,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -19.76914718145676
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.rms_mad_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 2.1804837827415504,
+      "time_range": null,
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.1804837827415504
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_p05_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -25.35976265589538,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -25.35976265589538
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_p95_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -11.154617593114526,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -11.154617593114526
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.momentary_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no K-weighting"
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 9600,
+        "sample_rate": 48000,
+        "window": 19200
+      },
+      "resolution_class": "wide500ms",
+      "support_count": 249,
+      "target": -6.68656506141682,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -6.68656506141682
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.short_term_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no K-weighting"
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 72000,
+        "sample_rate": 48000,
+        "window": 144000
+      },
+      "resolution_class": "seconds",
+      "support_count": 32,
+      "target": -11.090929411791052,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -11.090929411791052
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.integrated_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no gating/K-weighting"
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 125,
+      "target": -16.397981327716984,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -16.397981327716984
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.loudness_range_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 32,
+      "target": 6.9591609919699025,
+      "time_range": null,
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 6.9591609919699025
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.clipping_rate",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.00003124687531246875,
+      "time_range": null,
+      "unit": "fraction",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.00003124687531246875
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.clip_max_run",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 7,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 7
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.zero_run_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 266,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 266
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.zero_run_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 11870,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 11870
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.stuck_run_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 11869,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 11869
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.discontinuity_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.839599609375,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.839599609375
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "dig.click_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 26,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 26
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "dig.duplicate_block_candidates",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2343,
+      "target": 10,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 10
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "dig.quant_step_est",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 47765,
+      "target": 0.000030517578125,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.000030517578125
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.centroid_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 203.54190345669463,
+        "p95": 4478.428707311761
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 884.1286430436953,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 884.1286430436953
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.bandwidth_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 204.77581261133219,
+        "p95": 4584.297622404193
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 1869.571871293706,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 1869.571871293706
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.rolloff_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 468.75,
+        "p95": 9937.5
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 1546.875,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 1546.875
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.flatness",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 0.0060352947234204,
+        "p95": 0.09304021276692138
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 0.028450206794208562,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.028450206794208562
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.entropy",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 0.049985475276050795,
+        "p95": 0.8251917742087589
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 0.5733251695798152,
+      "time_range": null,
+      "unit": "norm",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.5733251695798152
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.flux",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 36.61407824546151,
+        "p95": 587.665828622318
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 76.85324703990521,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 76.85324703990521
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.slope",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": -1.9228791177403726,
+      "time_range": null,
+      "unit": "log_log",
+      "validity": "valid",
+      "value": {
+        "scalar": -1.9228791177403726
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.narrowband_peaks",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 0,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.narrowband_notches",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 0,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.floor_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -25.35976265589538,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -25.35976265589538
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.tonal_peak_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "peak_mag": 57.939461284110166
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 46.875,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 46.875
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.hum_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 2.203400606428705,
+      "time_range": null,
+      "unit": "fraction",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.203400606428705
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "mod.am_freq_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 0.390625,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.390625
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "mod.am_depth",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 4.336175728496028,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 4.336175728496028
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.sample_peak",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 1,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.true_peak_est",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "method": "linear4x"
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 1,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.dc_offset",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.0011281788589532975,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.0011281788589532975
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.crest_factor",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 6.762364975940757,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 6.762364975940757
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": -16.601972132971163,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -16.601972132971163
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.trajectory",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 0.14787725944367316,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "tensor": {
+          "array": "features/cheap/IN-#1/ch1/level_trajectory",
+          "region": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4999
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_median_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -20.054327061190243,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -20.054327061190243
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.rms_mad_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 2.1386220062932715,
+      "time_range": null,
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.1386220062932715
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_p05_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -25.528521787290302,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -25.528521787290302
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "level.rms_p95_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -11.364580023883224,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -11.364580023883224
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.momentary_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no K-weighting"
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 9600,
+        "sample_rate": 48000,
+        "window": 19200
+      },
+      "resolution_class": "wide500ms",
+      "support_count": 249,
+      "target": -6.441811349922126,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -6.441811349922126
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.short_term_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no K-weighting"
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 72000,
+        "sample_rate": 48000,
+        "window": 144000
+      },
+      "resolution_class": "seconds",
+      "support_count": 32,
+      "target": -11.068433758000275,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -11.068433758000275
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.integrated_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "estimate": "energy, no gating/K-weighting"
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 125,
+      "target": -16.601537870959984,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -16.601537870959984
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "level.loudness_range_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 32,
+      "target": 7.086949579783859,
+      "time_range": null,
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 7.086949579783859
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.clipping_rate",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.00002041462520414625,
+      "time_range": null,
+      "unit": "fraction",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.00002041462520414625
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.clip_max_run",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 19,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 19
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.zero_run_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 246,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 246
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.zero_run_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 11865,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 11865
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.stuck_run_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 11864,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 11864
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "dig.discontinuity_max",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.752899169921875,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.752899169921875
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "dig.click_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 28,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 28
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "dig.duplicate_block_candidates",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2343,
+      "target": 10,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 10
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "dig.quant_step_est",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 47346,
+      "target": 0.000030517578125,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.000030517578125
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.centroid_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 242.96487820603596,
+        "p95": 4499.863845589667
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 676.8305983317049,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 676.8305983317049
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.bandwidth_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 281.53754461687254,
+        "p95": 4596.962389883529
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 1633.1595337207375,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 1633.1595337207375
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.rolloff_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 515.625,
+        "p95": 9984.375
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 984.375,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 984.375
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.flatness",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 0.006196835675283546,
+        "p95": 0.08852775994978038
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 0.022852339330500397,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.022852339330500397
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.entropy",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 0.06722589355067049,
+        "p95": 0.8168668457395539
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 0.5258665488316003,
+      "time_range": null,
+      "unit": "norm",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.5258665488316003
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "spec.flux",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "mad": 36.15156171987936,
+        "p95": 581.7829444166722
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 62.5642301629042,
+      "time_range": null,
+      "unit": "linear",
+      "validity": "valid",
+      "value": {
+        "scalar": 62.5642301629042
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.slope",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": -1.9183848097975011,
+      "time_range": null,
+      "unit": "log_log",
+      "validity": "valid",
+      "value": {
+        "scalar": -1.9183848097975011
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.narrowband_peaks",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 0,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "spec.narrowband_notches",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 0,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.floor_dbfs",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": -25.528521787290302,
+      "time_range": null,
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -25.528521787290302
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.tonal_peak_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "peak_mag": 56.51381525955801
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 2342,
+      "target": 46.875,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 46.875
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "noise.hum_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 1024,
+      "target": 2.2152241855081036,
+      "time_range": null,
+      "unit": "fraction",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.2152241855081036
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "mod.am_freq_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 0.390625,
+      "time_range": null,
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.390625
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "mod.am_depth",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 4.611459855162947,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 4.611459855162947
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "stereo.pair_correlation",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.5224896195300304,
+      "time_range": null,
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.5224896195300304
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "stereo.ild_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": -0.20355654505326015,
+      "time_range": null,
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.20355654505326015
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "stereo.ipd_samples",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {
+        "lag_corr": 0.5224896195300304
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "stereo.ms_power_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.31376163672608826,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.31376163672608826
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "stereo.coherence_mean",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 1024,
+        "sample_rate": 48000,
+        "window": 2048
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 64,
+      "target": 0.46705727134469865,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.46705727134469865
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "trans.onset_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 20,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 20
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "trans.onset_times",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 20,
+      "target": 20,
+      "time_range": null,
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "tensor": {
+          "array": "features/cheap/IN-#1/onset_times",
+          "region": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              20
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "trans.self_similarity",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 480,
+        "sample_rate": 48000,
+        "window": 960
+      },
+      "resolution_class": "mid20ms",
+      "support_count": 4999,
+      "target": 0.9574024214386171,
+      "time_range": null,
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9574024214386171
+      }
+    },
+    {
+      "algorithm_id": "cheap.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "mod.lag_drift_samples",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#1",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": {
+        "hop": 4800,
+        "sample_rate": 48000,
+        "window": 4800
+      },
+      "resolution_class": "broad100ms",
+      "support_count": 499,
+      "target": 384,
+      "time_range": null,
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 384
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 296,
+        "event_kind": "scene_change",
+        "pair": 0,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 29.74,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 29.74
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 296,
+        "event_kind": "scene_change",
+        "pair": 0,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 29.6,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 29.6
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 296,
+        "event_kind": "scene_change",
+        "pair": 0,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.13999999999999702,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.13999999999999702
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 327,
+        "event_kind": "scene_change",
+        "pair": 1,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 32.74,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 32.74
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 327,
+        "event_kind": "scene_change",
+        "pair": 1,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 32.7,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 32.7
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 327,
+        "event_kind": "scene_change",
+        "pair": 1,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.03999999999999915,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.03999999999999915
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 342,
+        "event_kind": "scene_change",
+        "pair": 2,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 34.24,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 34.24
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 342,
+        "event_kind": "scene_change",
+        "pair": 2,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 34.2,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 34.2
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 342,
+        "event_kind": "scene_change",
+        "pair": 2,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.03999999999999915,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.03999999999999915
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 351,
+        "event_kind": "scene_change",
+        "pair": 3,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 35.19,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 35.19
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 351,
+        "event_kind": "scene_change",
+        "pair": 3,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 35.1,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 35.1
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 351,
+        "event_kind": "scene_change",
+        "pair": 3,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.0899999999999963,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.0899999999999963
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 352,
+        "event_kind": "scene_change",
+        "pair": 4,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 35.2,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 35.2
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 352,
+        "event_kind": "scene_change",
+        "pair": 4,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 35.2,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 35.2
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 352,
+        "event_kind": "scene_change",
+        "pair": 4,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 0,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 378,
+        "event_kind": "motion_onset",
+        "pair": 5,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 37.74,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 37.74
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 378,
+        "event_kind": "motion_onset",
+        "pair": 5,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 37.8,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 37.8
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 378,
+        "event_kind": "motion_onset",
+        "pair": 5,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 0.05999999999999517,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.05999999999999517
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 381,
+        "event_kind": "motion_onset",
+        "pair": 6,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 37.9,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 37.9
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 381,
+        "event_kind": "motion_onset",
+        "pair": 6,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 38.1,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 38.1
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 381,
+        "event_kind": "motion_onset",
+        "pair": 6,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 0.20000000000000284,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.20000000000000284
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "scene_change",
+        "pair": 7,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 47.44,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 47.44
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "scene_change",
+        "pair": 7,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 47.4,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 47.4
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "scene_change",
+        "pair": 7,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.03999999999999915,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.03999999999999915
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.audio_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "luminance_step",
+        "pair": 8,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 47.45,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 47.45
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.video_time",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "luminance_step",
+        "pair": 8,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": 47.4,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 47.4
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "audio_start_s": 0,
+        "clock_origin": "audio_pcm_start",
+        "event_frame": 474,
+        "event_kind": "luminance_step",
+        "pair": 8,
+        "roi_name": null
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1,
+      "target": -0.05000000000000426,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.05000000000000426
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.pair_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9,
+      "target": 9,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 9
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.median_delta",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {
+        "match_window_s": 0.5
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9,
+      "target": -0.03999999999999915,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.03999999999999915
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.delta_mad",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9,
+      "target": 0.03999999999999915,
+      "time_range": null,
+      "unit": "s",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.03999999999999915
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "avsync.drift_slope",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9,
+      "target": 0.002702553819955075,
+      "time_range": null,
+      "unit": "s_per_s",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.002702553819955075
+      }
+    },
+    {
+      "algorithm_id": "avsync.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "high",
+      "delta": null,
+      "feature_id": "avsync.unmatched_onsets",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [
+        "ART-#40",
+        "ART-#2",
+        "ART-#4"
+      ],
+      "params": {},
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 20,
+      "target": 11,
+      "time_range": null,
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 11
+      }
+    }
+  ]
+}

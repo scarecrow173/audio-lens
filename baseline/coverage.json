@@ -1,0 +1,327 @@
+{
+  "note": "Issue #98 列挙項目ごとのカバレッジ台帳。kind: e2e=run行列で観測 / existing-test=既存テスト / guard-test=本 Issue で追加した最小ガード / unmeasured=実測未実施(理由付き)。golden 面は contracts.json の分類に従う。",
+  "items": [
+    {
+      "id": "decode.wav_pcm_values",
+      "target": "Decode: WAV の元 PCM 値・format",
+      "kind": "e2e+existing-test",
+      "evidence": [
+        "runs:canonical",
+        "runs:small",
+        "crates/al-media/tests/ingest.rs",
+        "crates/al-media/tests/golden.rs"
+      ],
+      "golden": [
+        "inputs\\IN-*/metadata.json(format/sample_format/channels)",
+        "analysis/inputs/IN-*.wav(bit-exact)",
+        "analysis/inputs/IN-*.metadata.json"
+      ],
+      "note": "source-bgm.wav 等の WAV 入力の decode 済み PCM は inputs\\IN-*/decoded.f64le(tolerance) と analysis/inputs/IN-*.wav(bit-exact) で保持"
+    },
+    {
+      "id": "decode.avi_mp4_aac_fallback",
+      "target": "Decode: AVI/MP4 と AAC fallback",
+      "kind": "e2e+existing-test",
+      "evidence": [
+        "runs:canonical",
+        "runs:variant-*",
+        "crates/al-media/tests/mp4.rs",
+        "crates/al-media/tests/aac.rs"
+      ],
+      "golden": [
+        "inputs\\IN-*/metadata.json(decoder.streams/codec)",
+        "inputs\\IN-*/video_features.json"
+      ],
+      "note": "派生 AVI(PCM 音声)と MP4/AAC 元素材双方を ingest で網羅。AAC fallback 判定は metadata.json の decoder 情報で観測"
+    },
+    {
+      "id": "decode.pts_timebase_vfr",
+      "target": "Decode: PTS/timebase, VFR",
+      "kind": "e2e+existing-test",
+      "evidence": [
+        "runs:canonical",
+        "runs:variant-*",
+        "crates/al-media/tests/mp4.rs",
+        "crates/al-media/tests/golden.rs"
+      ],
+      "golden": [
+        "inputs\\IN-*/metadata.json(av_timing/streams)",
+        "inputs\\IN-*/video_features.json(pts/timebase)"
+      ],
+      "note": "派生 AVI は CFR 10fps 化されるため VFR 観測は元 MP4 を用いた既存 mp4 テストに委譲"
+    },
+    {
+      "id": "decode.multitrack",
+      "target": "Decode: multitrack",
+      "kind": "existing-test",
+      "evidence": ["crates/al-media/tests/mp4.rs", "crates/al-media/tests/fixtures"],
+      "note": "multitrack 素材は al-media テストのフィクスチャで網羅。e2e 実サンプルは単一音声トラック"
+    },
+    {
+      "id": "decode.missing_discontinuous",
+      "target": "Decode: 欠落/不連続の素材",
+      "kind": "e2e+existing-test",
+      "evidence": [
+        "runs:canonical(dropout)",
+        "crates/al-media/tests/ingest.rs",
+        "crates/al-media/tests/golden.rs"
+      ],
+      "golden": [
+        "inputs\\IN-1/metadata.json(gap/drop 情報)",
+        "locate/*/time_map.json(discontinuity)"
+      ],
+      "note": "dropout.avi は音切り素材。不連続は locate の time_map/result で観測"
+    },
+    {
+      "id": "al-math.fft",
+      "target": "al-math: f64 FFT/Real FFT (NaN/Inf/無音/ゼロ長/短長)",
+      "kind": "existing-test+guard-test",
+      "evidence": [
+        "crates/al-math/tests/fft.rs",
+        "crates/al-math/tests/edge_inputs.rs(本 Issue 追加)"
+      ],
+      "note": "NaN 伝播・無音・短入力の観測契約を edge_inputs.rs で固定(アルゴリズム正当性は主張しない)"
+    },
+    {
+      "id": "al-math.stft",
+      "target": "al-math: STFT",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-math/tests/fft.rs",
+        "crates/al-analysis/benches/stft.rs",
+        "runs:canonical"
+      ],
+      "golden": ["analysis/intermediate/*/stft_re|stft_im(tolerance fingerprint)"],
+      "note": "STFT 中間スペクトルは expensive の intermediate tensor として fingerprint 化して保存"
+    },
+    {
+      "id": "al-math.ncc_gcc_phat",
+      "target": "al-math: NCC/GCC-PHAT (無音/ゼロ長/短長/NaN)",
+      "kind": "existing-test+guard-test",
+      "evidence": [
+        "crates/al-math/tests/ncc_workspace.rs",
+        "crates/al-math/tests/correlation_filter.rs",
+        "crates/al-math/tests/edge_inputs.rs(本 Issue 追加)",
+        "crates/al-math/tests/direct_ncc_bench.rs"
+      ],
+      "note": "silent→[0.0]、template>signal→空、GCC-PHAT NaN→ゼロ列 を観測値として固定"
+    },
+    {
+      "id": "al-math.bandpass_resample",
+      "target": "al-math: bandpass/resample (空/無音/非有限)",
+      "kind": "existing-test+guard-test",
+      "evidence": [
+        "crates/al-math/tests/band_filter.rs",
+        "crates/al-math/tests/edge_inputs.rs(本 Issue 追加)"
+      ],
+      "note": "bandpass empty/silence/non-finite・resample empty の観測契約を固定"
+    },
+    {
+      "id": "al-math.linalg",
+      "target": "al-math: 線形代数",
+      "kind": "existing-test",
+      "evidence": ["crates/al-math/tests/fft.rs(als/lstsq)", "crates/al-math/benches/lstsq.rs"],
+      "note": "NaN/Inf 入力の linalg 契約は既存テストで網羅済み(調査済)"
+    },
+    {
+      "id": "al-locate.methods",
+      "target": "al-locate: 全手法(合議/ambiguous argmax/band_ncc)",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-locate/tests/locate.rs",
+        "crates/al-locate/tests/golden.rs",
+        "crates/al-locate/tests/argmax_tie_characterization.rs",
+        "runs:canonical",
+        "runs:variant-*"
+      ],
+      "golden": [
+        "locate/IN-*/IN-*/result.json",
+        "locate/IN-*/IN-*/evidence.json",
+        "locate/*/summary(table)"
+      ],
+      "note": "ambiguous argmax の tie 挙動は argmax_tie_characterization.rs で固定済み"
+    },
+    {
+      "id": "al-locate.anchors_loops_drift_gaps",
+      "target": "al-locate: anchor/loop/drift/gap/skip, window_anchors_in",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-locate/tests/locate.rs",
+        "crates/al-locate/tests/prepared.rs",
+        "runs:variant-desync",
+        "runs:variant-clicks",
+        "runs:canonical(dropout)"
+      ],
+      "golden": [
+        "locate/IN-*/IN-*/time_map.json(anchor/loop/drift/gap)",
+        "locate/residual/*.wav(bit-exact)"
+      ],
+      "note": "desync/clicks/dropout 素材で loop/drift/gap/skip を実観測"
+    },
+    {
+      "id": "al-locate.residuals",
+      "target": "al-locate: 残差",
+      "kind": "e2e",
+      "evidence": ["runs:canonical", "runs:variant-*"],
+      "golden": ["locate/residual/*.wav(bit-exact)", "locate/IN-*/IN-*/residual_*.json"],
+      "note": "残差 WAV は bit-exact 契約、残差 JSON は構造比較"
+    },
+    {
+      "id": "al-analysis.cheap_reference_expensive",
+      "target": "al-analysis: Cheap/Reference/Expensive 各段",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-analysis/tests/reference.rs",
+        "crates/al-analysis/tests/expensive.rs",
+        "crates/al-analysis/tests/golden.rs",
+        "runs:canonical",
+        "runs:variant-*"
+      ],
+      "golden": [
+        "analysis/features/cheap|reference|expensive/IN-*",
+        "analysis/intermediate/*(tolerance fingerprint)"
+      ],
+      "note": "3 段全て実サンプルで実行・保存"
+    },
+    {
+      "id": "al-analysis.band_gain_csd_coherence",
+      "target": "al-analysis: band_gain, CSD/coherence",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-analysis/benches/band_correlation.rs",
+        "crates/al-analysis/benches/csd_accum.rs",
+        "runs:canonical"
+      ],
+      "golden": [
+        "analysis/features/expensive/*(band_gain)",
+        "analysis/intermediate/*/csd|coherence(fingerprint)"
+      ],
+      "note": "CSD/coherence 中間スペクトルは fingerprint 化して保存"
+    },
+    {
+      "id": "al-analysis.feature_validity_support_confidence",
+      "target": "al-analysis: feature validity/support/confidence",
+      "kind": "existing-test+e2e",
+      "evidence": [
+        "crates/al-analysis/tests/golden.rs",
+        "crates/al-analysis/tests/reference.rs",
+        "runs:canonical",
+        "runs:variant-*"
+      ],
+      "golden": [
+        "analysis/features/*/IN-*.json(records.validity/support_count/confidence)",
+        "analysis/events/candidates(table)"
+      ],
+      "note": "validity enum・support_count・confidence を golden で構造比較"
+    },
+    {
+      "id": "al-analysis.complex_spectra",
+      "target": "al-analysis: 複素中間スペクトル",
+      "kind": "e2e",
+      "evidence": ["runs:canonical"],
+      "golden": ["analysis/intermediate/*/stft_re|stft_im|csd(fingerprint)"],
+      "note": "巨大中間 tensor は完全値でなく count/min/max/sum fingerprint で保持(contracts.json)"
+    },
+    {
+      "id": "al-job.result_generation",
+      "target": "al-job: 結果生成",
+      "kind": "e2e",
+      "evidence": ["runs:canonical", "runs:variant-*", "runs:small", "runs:aa"],
+      "golden": ["manifest.normalized.json", "artifacts.index.json", "export/analysis/*"],
+      "note": "manifest+artifact index+export で生成物全体を固定"
+    },
+    {
+      "id": "al-job.resume",
+      "target": "al-job: 再開(resume)",
+      "kind": "e2e+existing-test",
+      "evidence": ["runs:resume", "crates/al-job/tests/resume.rs"],
+      "golden": ["runs:resume/manifest.normalized.json(直列入力との同一性を compare で検証可能)"],
+      "note": "locate 完走直後に kill → al resume で完走。完了 manifest を canonical と同一契約で比較可能"
+    },
+    {
+      "id": "al-job.provenance",
+      "target": "al-job: provenance(lineage)",
+      "kind": "e2e+existing-test",
+      "evidence": ["runs:canonical", "crates/al-dataset/tests/integration.rs"],
+      "golden": ["manifest.normalized.json(artifacts[].inputs lineage)", "analysis/manifest.json"],
+      "note": "artifact.inputs による lineage を normalized manifest で固定"
+    },
+    {
+      "id": "al-dataset.tensors_outputs",
+      "target": "al-dataset: tensor, 生成済み出力",
+      "kind": "existing-test+e2e",
+      "evidence": ["crates/al-dataset/tests/integration.rs", "runs:canonical"],
+      "golden": [
+        "analysis/**/array.json+chunks(tolerance/fingerprint)",
+        "analysis/inputs/*(bit-exact)",
+        "export/analysis/*(record)"
+      ],
+      "note": "tensor 形式(array.json+f64le chunks)は store.mjs で decode 比較"
+    },
+    {
+      "id": "viz.html_dataset",
+      "target": "al-viz: HTML/Visualization Dataset",
+      "kind": "e2e(record-only)",
+      "evidence": ["runs:canonical(visualization stage の既存出力を record-only で保存)"],
+      "note": "Issue #105/#106 で廃止予定のため長期維持対象外。移行前比較の材料として既存出力を記録するのみ"
+    },
+    {
+      "id": "perf.stage_wall",
+      "target": "性能: 処理別 wall/busy time",
+      "kind": "e2e",
+      "evidence": [
+        "runs:*/performance.json(stage_wall_ms from manifest duration_ms)",
+        "runs:*/performance.json(e2e_wall_ms)"
+      ],
+      "note": "stage wall は manifest duration_ms、run e2e は procmon 実測"
+    },
+    {
+      "id": "perf.cpu_mem",
+      "target": "性能: run 単位 CPU(user/kernel)・peak RSS",
+      "kind": "e2e",
+      "evidence": ["runs:*/performance.json(cpu_sec_last_sample/peak_rss_bytes, 1s ポーリング)"],
+      "note": "子プロセスを 1s 間隔で実測"
+    },
+    {
+      "id": "perf.stage_cpu_rss_io",
+      "target": "性能: stage 別 CPU/RSS/IO",
+      "kind": "unmeasured",
+      "reason": "外部ポーリングでは stage 境界を跨ぐプロセス帰属が不可能なため実測未実施。stage wall(manifest duration_ms)のみ記録",
+      "note": "stage 別計測には製品側の計装が必要(スコープ外)"
+    },
+    {
+      "id": "perf.io",
+      "target": "性能: I/O",
+      "kind": "e2e(推定)",
+      "evidence": [
+        "runs:*/artifacts.index.json(生成物 bytes 集計)",
+        "runs:*/performance.json(bytes_by_topdir)"
+      ],
+      "note": "生成物サイズから I/O 書き込み量を推定。実 I/O カウンタは未実装"
+    },
+    {
+      "id": "perf.alloc",
+      "target": "性能: alloc 回数/bytes",
+      "kind": "existing-bench+e2e",
+      "evidence": [
+        "crates/al-analysis/examples/bench_alloc.rs(本 Issue 追加)",
+        "baseline/bench/results.json"
+      ],
+      "note": "al-analysis 主経路の allocation count/bytes を測定"
+    },
+    {
+      "id": "determinism.aa",
+      "target": "決定性: A/A 同一入力 2 回実行",
+      "kind": "e2e",
+      "evidence": ["runs:aa(canonical と同一入力の 2 回目)"],
+      "note": "canonical と aa の normalized golden/artifact index を compare で照合して決定性を検証"
+    },
+    {
+      "id": "old_data_reload_compat",
+      "target": "既存データ再読込互換",
+      "kind": "out-of-scope",
+      "reason": "Pre-release 方針により旧データの再読込互換は要求しない。形式差異はデータ再生成で対処",
+      "note": "contracts/README に明記"
+    }
+  ]
+}

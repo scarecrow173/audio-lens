@@ -1,0 +1,91 @@
+{
+  "note": "pre-migration baseline の比較契約。docs/adr/pre-migration-baseline.md の機械可読版。",
+  "defaultTolerance": {
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  "toleranceOverrides": [
+    {
+      "glob": "**/fingerprint/**",
+      "rel": 1e-9,
+      "abs": 1e-12,
+      "note": "統計 fingerprint(sum 等)も同一既定で比較"
+    }
+  ],
+  "recordOnlyFields": [
+    "duration_ms",
+    "error",
+    "started_at",
+    "finished_at",
+    "recorded_at",
+    "created_at",
+    "timestamp",
+    "command_line",
+    "working_dir"
+  ],
+  "recordOnlySurfaces": [
+    "**/video_thumbs.json",
+    "**/visualization/**",
+    "**/export/**",
+    "*.video_thumbs.json",
+    "**/*.video_thumbs.json"
+  ],
+  "payloadSkipGlobs": [
+    "export/**",
+    "analysis/visualization/**",
+    "**/video_thumbs.json",
+    "*.video_thumbs.json",
+    "**/*.video_thumbs.json"
+  ],
+  "defaultIndexClass": "record-only",
+  "indexClasses": {
+    "bit-exact": [
+      "inputs/*/decoded.f64le",
+      "analysis/inputs/*.wav",
+      "locate/normalized/*.f64le",
+      "**/schema.json",
+      "**/index.json",
+      "**/array.json"
+    ],
+    "tolerance": ["**/chunks/*.bin", "locate/residual/*.wav", "analysis/residual/**/*.wav"],
+    "record-only": [
+      "manifest.json",
+      "**/*.json",
+      "**/*.html",
+      "**/*.js",
+      "**/*.css",
+      "**/*.log",
+      "**/video_thumbs.json",
+      "**/*.bin",
+      "*.video_thumbs.json",
+      "**/*.video_thumbs.json"
+    ]
+  },
+  "goldenJsonGlobs": [
+    "manifest.json",
+    "locate/**/*.json",
+    "analysis/**/*.json",
+    "export/analysis/golden/snapshot.json",
+    "inputs/**/*.json"
+  ],
+  "goldenJsonSkipGlobs": [
+    "**/video_thumbs.json",
+    "analysis/visualization/**",
+    "export/**",
+    "**/chunks/**",
+    "**/array.json",
+    "**/schema.json",
+    "**/index.json",
+    "*.video_thumbs.json",
+    "**/*.video_thumbs.json"
+  ],
+  "semantics": {
+    "float_rule": "|a-b| <= max(abs_tol, rel_tol*max(|a|,|b|)) 要素ごと",
+    "int_rule": "整数は厳密一致。>2^53 は unsafe-int として報告",
+    "null_rule": "null は非有限 or 欠損の潰れ。null==null は一致。区別は payload/fingerprint 面で担保",
+    "nonfinite_sentinel": "{\"$nonfinite\": \"NaN\"|\"Infinity\"|\"-Infinity\"}",
+    "i64_sentinel": "{\"$i64\": \"<decimal>\"}",
+    "small_payload_max": 65536,
+    "classify_order": "bit-exact → tolerance → record-only の順で最初に一致した glob の class。table の列 .bin は Utf8 cell の可変長 ID で size が揺れるため record-only(行 dump golden が比較面)"
+  }
+}

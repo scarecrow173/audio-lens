@@ -6,6 +6,16 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034P51k4FtjAZkVTMWcZPl | pre-migration baseline の実装と実測 | todo | [pre-migration-baseline.md](./pre-migration-baseline.md) |
+| TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | todo | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
+| TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
+| TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
+| TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
+| TASK-034P3OZEY2OrqNMPwTpQnL | Ruviform GUI アプリケーション構築(AL#105) | todo | [ruviform-gui-app.md](./ruviform-gui-app.md) |
+| TASK-034P3OZ5AfOy7hwO4pHUHy | Job・Dataset・Provenance 回帰(AL#103) | todo | [ruviform-job-dataset-regression.md](./ruviform-job-dataset-regression.md) |
+| TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
+| TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
+| TASK-034P3P0cd1tJUcKKBnEB7b | 旧可視化廃止と可搬 export 分離(AL#106) | todo | [ruviform-viz-retirement.md](./ruviform-viz-retirement.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

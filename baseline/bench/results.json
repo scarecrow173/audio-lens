@@ -1,0 +1,28 @@
+{
+  "note": "性能 baseline。e2e/stage wall/CPU/RSS は runs/*/performance.json に、alloc は本ファイルに記録。実測のみ(捏造なし)。",
+  "recorded_at": "see environment.json",
+  "alloc": {
+    "tool": "crates/al-analysis/examples/bench_alloc.rs",
+    "command": "cargo run --release -p al-analysis --example bench_alloc",
+    "unit": {"ms": "milliseconds", "allocs": "allocation count", "bytes": "allocated bytes"},
+    "results": [
+      {"name": "analyze_pair 2s mono (R0-R3, fir_model)", "reps": 3, "mean_ms": 636.225, "mean_allocs": 15857, "mean_bytes": 246940205},
+      {"name": "prepare_residual 2s 2src x 2cap", "reps": 3, "mean_ms": 9.441, "mean_allocs": 167, "mean_bytes": 15362792}
+    ]
+  },
+  "existing_benches": {
+    "note": "既存ベンチ harness は変更せず再利用(移行後も同条件で比較可能)",
+    "command": "cargo bench -p <crate>  (Criterion 0.8.2, target/bench-baseline/)",
+    "crates": {
+      "al-math": ["dsp_smoke", "fft_kernel", "lstsq", "vec_primitives"],
+      "al-analysis": ["band_correlation", "conv", "csd_accum", "quant_step", "spectral_pass", "stft"],
+      "al-locate": ["bench_dsp", "bench_locate_prepared", "bench_ncc", "bench_overlap_corr", "bench_residual (examples)"]
+    },
+    "status": "既存ベンチは移行後比較用に toolchain を固定して再実行するものとし、本 baseline ではその存在・実行方法を記録(本 Issue での全ベンチ実測はスコープ外・実測未実施)"
+  },
+  "unmeasured": [
+    "stage 別 CPU/RSS/IO (外部ポーリングでは stage 帰属不可)",
+    "実 I/O カウンタ (生成物 bytes で推定のみ)",
+    "criterion ベンチ全件の本環境実測値"
+  ]
+}

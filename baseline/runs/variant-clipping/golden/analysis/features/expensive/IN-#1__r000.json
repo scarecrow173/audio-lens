@@ -1,0 +1,6186 @@
+{
+  "records": [
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.cutoff_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 4166.015625,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 4166.015625
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.dictionary_cutoff_delta_khz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "dictionary_version": "1",
+        "expected": "{\"expected_khz\":[15.0,20.0],\"kind\":\"expected_high_frequency_cutoff\",\"note\":\"AAC エンコーダは設定次第で高域をローパスする。観測されたカットオフがこの範囲内なら録画アーティファクトと一致する可能性が高い\"}",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 10.833984375,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "khz",
+      "validity": "valid",
+      "value": {
+        "scalar": 10.833984375
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.narrowband_peak_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 1,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.narrowband_notch_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 6,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 6
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.thd_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.09052602662478593,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.09052602662478593
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.echo_delay_s",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.0030625,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.0030625
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.cepstrum_prominence",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 51.12129462744257,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 51.12129462744257
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.echo2_delay_s",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.019333333333333334,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.019333333333333334
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.echo2_level_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.928107689592598,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.928107689592598
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.pre_echo_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9372,
+      "target": 0.000248144422508241,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.000248144422508241
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.transient_smear_ms",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 9372,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ms",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.spectral_hole_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 1,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.codec_block_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 37503,
+      "target": 1.018955041890625,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 1.018955041890625
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.codec_block_size",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 37503,
+      "target": 1024,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 1024
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.polarity_asymmetry",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2400240,
+      "target": 0.009101123864350934,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.009101123864350934
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.dynamic_range_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2500,
+      "target": 9.469190444840013,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 9.469190444840013
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.attack_db_per_20ms",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2500,
+      "target": 11.146493040481431,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 11.146493040481431
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.release_db_per_20ms",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2500,
+      "target": 8.955079490044177,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 8.955079490044177
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.transfer_knee_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 4999,
+      "target": -1.548925451574361,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -1.548925451574361
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.transfer_slope_above_knee",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 4999,
+      "target": 0.18793468108944236,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.18793468108944236
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.pumping_mod_hz",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 4999,
+      "target": 5.224609375,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 5.224609375
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.pumping_mod_depth_db",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 4999,
+      "target": 1.5958594758803752,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 1.5958594758803752
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.level_transfer_slope",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channel": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "source_channel": 0,
+        "src_level_spread_db": 17.095480158436526,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2492,
+      "target": -0.8349701385979194,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db_per_db",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.8349701385979194
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.level_transfer_corr",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channel": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "source_channel": 0,
+        "src_level_spread_db": 17.095480158436526,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2492,
+      "target": -0.8674782872214076,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": -0.8674782872214076
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.tonal_peak_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.hum_harmonic_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 6,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 6
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.noise_stationary_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.noise_tonal_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.9999919723112151,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9999919723112151
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.noise_modulated_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.052154438796237094,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.052154438796237094
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.noise_class",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "classes": [
+          "stationary",
+          "tonal",
+          "modulated",
+          "unclassified"
+        ],
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 1,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "class",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.freq_lr_coherence",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3050,
+      "target": 0.6305743536203859,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "coherence",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.6305743536203859
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.intermod_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 0.017172947491474844,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.017172947491474844
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.intermod_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 3,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 3
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 111.3623397675424,
+        "start": 88.38834764831843
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          88.38834764831843,
+          111.3623397675424
+        ],
+        "coeff": [
+          [
+            1.9079158507158327,
+            1.9267037774781666
+          ],
+          [
+            -1.000651589060095,
+            -1.6005374191185442
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 35.49469178777877,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8855042747364199,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 5840,
+      "target": 2.71151808763308,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.71151808763308
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 111.3623397675424,
+        "start": 88.38834764831843
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          88.38834764831843,
+          111.3623397675424
+        ],
+        "coeff": [
+          [
+            -0.4967637623366717,
+            1.9302611077769838
+          ],
+          [
+            1.4713305147916822,
+            -1.8412994393000401
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 35.49469178777877,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8754049795712876,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 5840,
+      "target": 2.3569465647154155,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3569465647154155
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 140.3077560386716,
+        "start": 111.3623397675424
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          111.3623397675424,
+          140.3077560386716
+        ],
+        "coeff": [
+          [
+            2.155867923862364,
+            -0.2780785068607608
+          ],
+          [
+            0.4511632763707344,
+            0.3494002827446618
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 6.725235621128332,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7398553413788411,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 5840,
+      "target": 2.1737281709350254,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.1737281709350254
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 140.3077560386716,
+        "start": 111.3623397675424
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          111.3623397675424,
+          140.3077560386716
+        ],
+        "coeff": [
+          [
+            -0.06427019994223179,
+            -0.23764935099513534
+          ],
+          [
+            2.7435366906112297,
+            0.23260328652944506
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 6.725235621128332,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7272119426751562,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 5840,
+      "target": 2.753379353019543,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.753379353019543
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 176.77669529663686,
+        "start": 140.3077560386716
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          140.3077560386716,
+          176.77669529663686
+        ],
+        "coeff": [
+          [
+            2.3941053213172183,
+            -0.18630983371035614
+          ],
+          [
+            -0.029129869411741078,
+            -0.06457923183592604
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 4.74207288324225,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7186824230470894,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 9344,
+      "target": 2.401343716275661,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.401343716275661
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 176.77669529663686,
+        "start": 140.3077560386716
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          140.3077560386716,
+          176.77669529663686
+        ],
+        "coeff": [
+          [
+            0.19112976138114618,
+            -0.07971192885770058
+          ],
+          [
+            2.4463639748942745,
+            -0.25000294775631815
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 4.74207288324225,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7133536830197602,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 9344,
+      "target": 2.4591051566672304,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4591051566672304
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 222.7246795350848,
+        "start": 176.77669529663686
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          176.77669529663686,
+          222.7246795350848
+        ],
+        "coeff": [
+          [
+            2.081134660760527,
+            -0.35440484100264774
+          ],
+          [
+            0.13170401100472603,
+            -0.3492902536000918
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.700153199282358,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9291715657544738,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 10512,
+      "target": 2.1110955136006866,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.1110955136006866
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 222.7246795350848,
+        "start": 176.77669529663686
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          176.77669529663686,
+          222.7246795350848
+        ],
+        "coeff": [
+          [
+            0.017374171238868894,
+            0.1180653725685234
+          ],
+          [
+            2.2476545055763975,
+            0.06267224950462963
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.700153199282358,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9319721413636756,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 10512,
+      "target": 2.2485280935082512,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.2485280935082512
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 280.6155120773432,
+        "start": 222.7246795350848
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          222.7246795350848,
+          280.6155120773432
+        ],
+        "coeff": [
+          [
+            2.5402433025986726,
+            -0.20694434684663554
+          ],
+          [
+            -0.1864116286219248,
+            0.0415726858510879
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2695154310626715,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9073708196489267,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 11680,
+      "target": 2.5486588628314286,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.5486588628314286
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 280.6155120773432,
+        "start": 222.7246795350848
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          222.7246795350848,
+          280.6155120773432
+        ],
+        "coeff": [
+          [
+            -0.03817559551628746,
+            -0.1422296831118748
+          ],
+          [
+            2.510212082171444,
+            -0.1470374515386889
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2695154310626715,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9205437744986452,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 11680,
+      "target": 2.5145148060082065,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.5145148060082065
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 353.5533905932737,
+        "start": 280.6155120773432
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          280.6155120773432,
+          353.5533905932737
+        ],
+        "coeff": [
+          [
+            2.6159847596447636,
+            -0.13015583503435724
+          ],
+          [
+            -0.03967286366824523,
+            -0.08090854688506666
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2400533179618995,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9220147227991448,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16352,
+      "target": 2.619220648224804,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.619220648224804
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 353.5533905932737,
+        "start": 280.6155120773432
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          280.6155120773432,
+          353.5533905932737
+        ],
+        "coeff": [
+          [
+            0.0497993836554919,
+            -0.043534749946288066
+          ],
+          [
+            2.627670016585296,
+            -0.15721067037375497
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2400533179618995,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9318861431612898,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16352,
+      "target": 2.6323686882617214,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.6323686882617214
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 445.4493590701696,
+        "start": 353.5533905932737
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          353.5533905932737,
+          445.4493590701696
+        ],
+        "coeff": [
+          [
+            2.827050713807585,
+            -0.018472011124837512
+          ],
+          [
+            0.15578704114912648,
+            -0.052378913908322174
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2383125802805028,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9605874076851669,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 19856,
+      "target": 2.827111061425598,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.827111061425598
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 445.4493590701696,
+        "start": 353.5533905932737
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          353.5533905932737,
+          445.4493590701696
+        ],
+        "coeff": [
+          [
+            0.1929333063869539,
+            0.09891321170014201
+          ],
+          [
+            2.837945613431781,
+            -0.09487412334956292
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2383125802805028,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9653706690721796,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 19856,
+      "target": 2.8395310183334916,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.8395310183334916
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 561.2310241546865,
+        "start": 445.4493590701696
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          445.4493590701696,
+          561.2310241546865
+        ],
+        "coeff": [
+          [
+            2.7026169406669003,
+            0.06046870999066969
+          ],
+          [
+            0.0004988852978231129,
+            -0.009144003015637387
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1898805295188093,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9388125256997158,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 23360,
+      "target": 2.703293323497776,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.703293323497776
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 561.2310241546865,
+        "start": 445.4493590701696
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          445.4493590701696,
+          561.2310241546865
+        ],
+        "coeff": [
+          [
+            -0.01307836115488435,
+            0.16957253597700858
+          ],
+          [
+            2.779603230843843,
+            0.054079717700909816
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1898805295188093,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9417431690312043,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 23360,
+      "target": 2.7801292662004298,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.7801292662004298
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 707.1067811865474,
+        "start": 561.2310241546865
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          561.2310241546865,
+          707.1067811865474
+        ],
+        "coeff": [
+          [
+            2.561427441978897,
+            -0.023653946455673466
+          ],
+          [
+            -0.020999633959552743,
+            0.07153428149566424
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.211467620435591,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9627698940822627,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 30368,
+      "target": 2.561536657888285,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.561536657888285
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 707.1067811865474,
+        "start": 561.2310241546865
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          561.2310241546865,
+          707.1067811865474
+        ],
+        "coeff": [
+          [
+            0.008998760158049866,
+            0.01933086609164011
+          ],
+          [
+            2.844026937395859,
+            -0.060149201285588906
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.211467620435591,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.958526761451335,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 30368,
+      "target": 2.8446629232737863,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.8446629232737863
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 890.8987181403392,
+        "start": 707.1067811865474
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          707.1067811865474,
+          890.8987181403392
+        ],
+        "coeff": [
+          [
+            2.4858629347052332,
+            -0.0066531063527003435
+          ],
+          [
+            -0.23404874679402007,
+            -0.28847888147768846
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2261226254823325,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9650118136068666,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 38544,
+      "target": 2.4858718377996594,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4858718377996594
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 890.8987181403392,
+        "start": 707.1067811865474
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          707.1067811865474,
+          890.8987181403392
+        ],
+        "coeff": [
+          [
+            -0.21276386843221215,
+            0.05412780552378867
+          ],
+          [
+            2.4589810181139082,
+            -0.11521098605600487
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2261226254823325,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.969058656367413,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 38544,
+      "target": 2.4616785368428005,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4616785368428005
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1122.462048309373,
+        "start": 890.8987181403392
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          890.8987181403392,
+          1122.462048309373
+        ],
+        "coeff": [
+          [
+            2.6643350750368104,
+            0.1895796466404575
+          ],
+          [
+            -0.04360165334052266,
+            0.07654390721252338
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2035416655951283,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.972591029702908,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 46720,
+      "target": 2.6710712896685718,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.6710712896685718
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1122.462048309373,
+        "start": 890.8987181403392
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          890.8987181403392,
+          1122.462048309373
+        ],
+        "coeff": [
+          [
+            0.07694123885472055,
+            0.2810543061456946
+          ],
+          [
+            2.678577289490617,
+            0.13074942294751815
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.2035416655951283,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9730477490436112,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 46720,
+      "target": 2.681766527380042,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.681766527380042
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1414.2135623730949,
+        "start": 1122.462048309373
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1122.462048309373,
+          1414.2135623730949
+        ],
+        "coeff": [
+          [
+            2.5959618379944884,
+            -0.1083746097317235
+          ],
+          [
+            0.037991834574774265,
+            0.004043508143096478
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.209139265840973,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9785947330426311,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 59568,
+      "target": 2.5982230312962407,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.5982230312962407
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1414.2135623730949,
+        "start": 1122.462048309373
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1122.462048309373,
+          1414.2135623730949
+        ],
+        "coeff": [
+          [
+            0.05416705451444067,
+            -0.041527810032622
+          ],
+          [
+            2.767925511558246,
+            0.15902440292895492
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.209139265840973,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9772617010716986,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 59568,
+      "target": 2.772489927531187,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.772489927531187
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1781.7974362806783,
+        "start": 1414.2135623730949
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1414.2135623730949,
+          1781.7974362806783
+        ],
+        "coeff": [
+          [
+            2.287734808329033,
+            -0.1247561869862432
+          ],
+          [
+            0.15608435961792186,
+            0.03458328680609319
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1817301770586257,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9881928136651615,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 74752,
+      "target": 2.2911339243771027,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.2911339243771027
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 1781.7974362806783,
+        "start": 1414.2135623730949
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1414.2135623730949,
+          1781.7974362806783
+        ],
+        "coeff": [
+          [
+            -0.17310303936209362,
+            -0.04831075747052871
+          ],
+          [
+            2.490269876418987,
+            0.008666570195943055
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1817301770586257,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9880817148937402,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 74752,
+      "target": 2.490284956955488,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.490284956955488
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 2244.924096618746,
+        "start": 1781.7974362806783
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1781.7974362806783,
+          2244.924096618746
+        ],
+        "coeff": [
+          [
+            2.2608267482263216,
+            0.010554641712586616
+          ],
+          [
+            -0.1901116572745556,
+            -0.09694657215623144
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1901012860384925,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9908576232511024,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 93440,
+      "target": 2.2608513851992313,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.2608513851992313
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 2244.924096618746,
+        "start": 1781.7974362806783
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          1781.7974362806783,
+          2244.924096618746
+        ],
+        "coeff": [
+          [
+            0.08254469594972938,
+            0.11138325840834024
+          ],
+          [
+            2.2913758300649727,
+            0.0625727955423566
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1901012860384925,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9919028575601544,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 93440,
+      "target": 2.292230038488268,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.292230038488268
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 2828.4271247461897,
+        "start": 2244.924096618746
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          2244.924096618746,
+          2828.4271247461897
+        ],
+        "coeff": [
+          [
+            2.1134126271667393,
+            0.177111111004359
+          ],
+          [
+            0.16173800816730394,
+            0.10576489474647711
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1835410547818352,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9931819826283232,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 116800,
+      "target": 2.120820897272803,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.120820897272803
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 2828.4271247461897,
+        "start": 2244.924096618746
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          2244.924096618746,
+          2828.4271247461897
+        ],
+        "coeff": [
+          [
+            -0.08649956045340884,
+            0.3025607464669778
+          ],
+          [
+            2.5633302360999544,
+            0.11141887023761177
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1835410547818352,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9914906999312378,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 116800,
+      "target": 2.565750584906739,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.565750584906739
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 3563.5948725613566,
+        "start": 2828.4271247461897
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          2828.4271247461897,
+          3563.5948725613566
+        ],
+        "coeff": [
+          [
+            2.353232148816098,
+            -0.017779762189755466
+          ],
+          [
+            0.16916147530355555,
+            -0.09486765021956006
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.182157605239566,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.985270228430302,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 148336,
+      "target": 2.3532993150394517,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3532993150394517
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 3563.5948725613566,
+        "start": 2828.4271247461897
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          2828.4271247461897,
+          3563.5948725613566
+        ],
+        "coeff": [
+          [
+            -0.005270271929766578,
+            -0.060361858182782786
+          ],
+          [
+            2.54915836840843,
+            -0.10131100026834404
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.182157605239566,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9851566875240462,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 148336,
+      "target": 2.551170771626647,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.551170771626647
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 4489.848193237492,
+        "start": 3563.5948725613566
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          3563.5948725613566,
+          4489.848193237492
+        ],
+        "coeff": [
+          [
+            2.439414970074915,
+            0.046509761329427454
+          ],
+          [
+            0.10033688395484822,
+            0.002209413869486622
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1843383485762136,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.947988379289141,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 185712,
+      "target": 2.4398583061572485,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4398583061572485
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 4489.848193237492,
+        "start": 3563.5948725613566
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          3563.5948725613566,
+          4489.848193237492
+        ],
+        "coeff": [
+          [
+            0.11733636326884234,
+            0.04748537808406935
+          ],
+          [
+            2.3816428764095225,
+            -0.03013242821878257
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1843383485762136,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.9569877441918705,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 185712,
+      "target": 2.3818334857799326,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3818334857799326
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 5656.8542494923795,
+        "start": 4489.848193237492
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          4489.848193237492,
+          5656.8542494923795
+        ],
+        "coeff": [
+          [
+            2.3990359613371037,
+            -0.024699977653399062
+          ],
+          [
+            0.0730723936463637,
+            -0.0192486181645818
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.181983371885563,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8662632499503587,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 233600,
+      "target": 2.399163110896114,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.399163110896114
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 5656.8542494923795,
+        "start": 4489.848193237492
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          4489.848193237492,
+          5656.8542494923795
+        ],
+        "coeff": [
+          [
+            0.014046428560353494,
+            -0.0067787308895889105
+          ],
+          [
+            2.4342858262148925,
+            -0.035566370119653225
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.181983371885563,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8781169283793319,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 233600,
+      "target": 2.434545635307379,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.434545635307379
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 7127.189745122713,
+        "start": 5656.8542494923795
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          5656.8542494923795,
+          7127.189745122713
+        ],
+        "coeff": [
+          [
+            2.4523250629647815,
+            0.047227621486907755
+          ],
+          [
+            -0.028450129533555246,
+            -0.017707659852273284
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1817124120591995,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8317999852490902,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 294336,
+      "target": 2.452779782751915,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.452779782751915
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 7127.189745122713,
+        "start": 5656.8542494923795
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          5656.8542494923795,
+          7127.189745122713
+        ],
+        "coeff": [
+          [
+            0.006277985342237331,
+            0.016434443730676398
+          ],
+          [
+            2.466057364272414,
+            -0.008606650768135375
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1817124120591995,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8473313443655697,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 294336,
+      "target": 2.4660723830252125,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4660723830252125
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 8979.696386474983,
+        "start": 7127.189745122713
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          7127.189745122713,
+          8979.696386474983
+        ],
+        "coeff": [
+          [
+            2.3899785043775577,
+            0.04679095446402261
+          ],
+          [
+            0.03606050816448532,
+            -0.05210863297499044
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1824074094221737,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8280361572067351,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 370256,
+      "target": 2.3904364967106826,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3904364967106826
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 8979.696386474983,
+        "start": 7127.189745122713
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          7127.189745122713,
+          8979.696386474983
+        ],
+        "coeff": [
+          [
+            -0.012714170139359654,
+            0.042559538397172816
+          ],
+          [
+            2.4297459898295806,
+            -0.05127691747224144
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1824074094221737,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8453011375211158,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 370256,
+      "target": 2.4302869989691307,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.4302869989691307
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 11313.708498984759,
+        "start": 8979.696386474983
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          8979.696386474983,
+          11313.708498984759
+        ],
+        "coeff": [
+          [
+            2.3684243939024863,
+            -0.019141721684967986
+          ],
+          [
+            0.03619553844738356,
+            -0.00990136811772445
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1819314152302896,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7792383343330879,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 466032,
+      "target": 2.368501744804387,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.368501744804387
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 11313.708498984759,
+        "start": 8979.696386474983
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          8979.696386474983,
+          11313.708498984759
+        ],
+        "coeff": [
+          [
+            -0.011926073847874735,
+            -0.010748909900417433
+          ],
+          [
+            2.388559607181577,
+            0.007619616129455192
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1819314152302896,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.8047906318218953,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 466032,
+      "target": 2.3885717606154038,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3885717606154038
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 14254.379490245426,
+        "start": 11313.708498984759
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          11313.708498984759,
+          14254.379490245426
+        ],
+        "coeff": [
+          [
+            2.341747500512829,
+            0.0028960583146477956
+          ],
+          [
+            0.02004414664794786,
+            0.015615099068507367
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1818079126024712,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7584583913990882,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 587504,
+      "target": 2.3417492913016638,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3417492913016638
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 14254.379490245426,
+        "start": 11313.708498984759
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          11313.708498984759,
+          14254.379490245426
+        ],
+        "coeff": [
+          [
+            0.0023172167572462557,
+            -0.007281174316479913
+          ],
+          [
+            2.3466464169722805,
+            0.020119611484613907
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1818079126024712,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7845095255638187,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 587504,
+      "target": 2.3467326658686827,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3467326658686827
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 17959.392772949966,
+        "start": 14254.379490245426
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          14254.379490245426,
+          17959.392772949966
+        ],
+        "coeff": [
+          [
+            2.334043106325408,
+            -0.03874292174326564
+          ],
+          [
+            -0.021618675349327626,
+            -0.011408696078151604
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1816045448224703,
+        "dominant_src_ch": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.6922741907673678,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 740512,
+      "target": 2.3343646322223024,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.3343646322223024
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": {
+        "channel": 1
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": {
+        "end": 17959.392772949966,
+        "start": 14254.379490245426
+      },
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "band": [
+          14254.379490245426,
+          17959.392772949966
+        ],
+        "coeff": [
+          [
+            0.026347378454618504,
+            -0.014239214163306854
+          ],
+          [
+            2.2707673569055773,
+            -0.00943225758765763
+          ]
+        ],
+        "coeff_sign": 1,
+        "condition": 1.1816045448224703,
+        "dominant_src_ch": 1,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "residual_ratio": 0.7414158874111395,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 740512,
+      "target": 2.2707869465608486,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 2.2707869465608486
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_fit_quality",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channels": [
+          0,
+          1
+        ],
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 46,
+      "target": 0.8965868351488127,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.8965868351488127
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_polarity",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channels": [
+          0,
+          1
+        ],
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 46,
+      "target": 1,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "sign",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.mix_condition",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channels": [
+          0,
+          1
+        ],
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 46,
+      "target": 35.49469178777877,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 35.49469178777877
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.ir_early_late_ratio",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "method": "deconvolution",
+        "pair": "IN-#3__IN-#1",
+        "peak_sample": 4061,
+        "region_s": [
+          0,
+          50.005
+        ],
+        "supported_bin_fraction": 0.83740234375,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 1715,
+      "target": 0.23902998631123784,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.23902998631123784
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.ir_decay_db_per_s",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "edc_range_db": [
+          -5,
+          -35
+        ],
+        "method": "deconvolution",
+        "pair": "IN-#3__IN-#1",
+        "peak_sample": 4061,
+        "region_s": [
+          0,
+          50.005
+        ],
+        "supported_bin_fraction": 0.83740234375,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 538,
+      "target": -678.0926799401605,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "db_per_s",
+      "validity": "valid",
+      "value": {
+        "scalar": -678.0926799401605
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.src_image_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 0.9655908965933827,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9655908965933827
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.src_candidate_rate",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 48000,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 1168,
+      "target": 22050,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 22050
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.repeat_block_score",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2343,
+      "target": 0.9481069685163237,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9481069685163237
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.gap_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 10001,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.splice_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 5984,
+      "target": 5984,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 5984
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.splice_first_s",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 5984,
+      "target": 4.559041666666666,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 4.559041666666666
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.stuck_block_count",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2343,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.stuck_max_ms",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          50.005
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 2343,
+      "target": 0,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "ms",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": "ALN-#1",
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.local_time_map",
+      "freq_range": null,
+      "input_id": "IN-#1",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "capture_channel": 0,
+        "pair": "IN-#3__IN-#1",
+        "region_s": [
+          0,
+          50.005
+        ],
+        "source_channel": 0,
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+          "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+          "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+          "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+          "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+          "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+          "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+          "abnormal_timing",
+          "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+          "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+          "low_similarity",
+          "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+          "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+          "high_residual",
+          "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 4999,
+      "target": 4999,
+      "time_range": {
+        "end": 50.005,
+        "start": 0
+      },
+      "unit": "tensor_ref",
+      "validity": "valid",
+      "value": {
+        "tensor": {
+          "array": "features/expensive/IN-#1__r000/time_map",
+          "region": [
+            [
+              0,
+              4999
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "region_s": [
+    0,
+    50.005
+  ],
+  "triggers": [
+    "candidate:EVT-events.v1-IN-#1-0ms-1d6b3d36f4c2",
+    "candidate:EVT-events.v1-IN-#1-0ms-d1784ad0e2eb",
+    "candidate:EVT-events.v1-IN-#1-0ms-b906cace840d",
+    "candidate:EVT-events.v1-IN-#1-0ms-9859ac98fd55",
+    "candidate:EVT-events.v1-IN-#1-0ms-a9167f336eef",
+    "candidate:EVT-events.v1-IN-#1-0ms-5f73f933b193",
+    "candidate:EVT-events.v1-IN-#1-0ms-7802e84180fe",
+    "abnormal_timing",
+    "candidate:EVT-events.v1-IN-#1-0ms-3a4838b4abde",
+    "candidate:EVT-events.v1-IN-#1-0ms-5b1e9cd6f811",
+    "low_similarity",
+    "candidate:EVT-events.v1-IN-#1-0ms-67a5b40d0175",
+    "candidate:EVT-events.v1-IN-#1-0ms-af76bf87e4cf",
+    "high_residual",
+    "candidate:EVT-events.v1-IN-#1-0ms-2308ee04fa8c"
+  ]
+}

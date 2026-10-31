@@ -29,7 +29,8 @@ relations:
   related: []
   refines:
     - "mp4-demux-decode.md"
-  refined-by: []
+  refined-by:
+    - "ruviform-foundation-migration.md"
   derives-from:
     - "../tasks/media-decoder-adr.md"
     - "../designs/media-format-analysis-extensions.md"
