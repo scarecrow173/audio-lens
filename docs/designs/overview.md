@@ -22,7 +22,6 @@ relations:
     - "localization.md"
     - "dataset-schema.md"
     - "analysis-stages.md"
-    - "visualization-export.md"
     - "simd-dsp-foundation.md"
   derives-from:
     - "../specs/audiolens-overview.md"
@@ -50,7 +49,7 @@ relations:
 | [simd-dsp-foundation.md](./simd-dsp-foundation.md) | SIMD 算術基盤・DSP 移行・定位入力準備 | 定位 spec、pulp ADR |
 | [dataset-schema.md](./dataset-schema.md) | manifest・表・テンソル・音声の構造 | データセット spec、ストレージ ADR |
 | [analysis-stages.md](./analysis-stages.md) | cheap / reference / expensive・イベント | 解析系 spec、観測主義 ADR |
-| [visualization-export.md](./visualization-export.md) | 可視化派生データ・サマリ・パッケージ | 可視化・エクスポート・検証 spec、派生 ADR |
+| [visualization-export.md](./visualization-export.md) | (superseded) 旧可視化派生データ・静的レポート | エクスポート spec は analysis-export.md へ移行 |
 
 | [residual-fixes.md](./residual-fixes.md) | #28〜#33 の残存契約修正・仕様判断(draft) | 残件 spec、責務境界 ADR |
 | [locate-consensus-argmax-ambiguity.md](./locate-consensus-argmax-ambiguity.md) | #59 合議 argmax 曖昧性検出契約の実装設計(draft) | 曖昧性契約 spec、証拠表現 ADR、探索 |
@@ -63,7 +62,7 @@ job-orchestration (不変ジョブ / ステージ計画)
   ├─ localization         … PCM → アラインメント (depends: ingest-av)
   ├─ dataset-schema       … 全成果物の正本 (depends: job-orchestration)
   ├─ analysis-stages      … 3層解析 + イベント (depends: localization, dataset-schema)
-  └─ visualization-export … dataset → 表示用・配布用成果物
+  └─ analysis-export      … dataset → 可搬パッケージ
                               (depends: dataset-schema, analysis-stages)
 ```
 
@@ -77,8 +76,8 @@ job-orchestration (不変ジョブ / ステージ計画)
   (`../adr/multi-method-locate-consensus.md`)
 - 役割分割されたストレージと来歴の完全保持
   (`../adr/analysis-dataset-storage.md`)
-- 可視化は解析意味を持たない派生データ
-  (`../adr/derived-visualization-dataset.md`)
+- 表示は永続化 dataset の直接読み出し(GUI + ruviform-viz)、
+  表示専用の派生データは持たない(Issue #106)
 
 ## 未決定事項
 

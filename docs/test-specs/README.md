@@ -38,4 +38,4 @@ Directory: `docs/test-specs`
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
 | TSPEC-034Gs7WHAxB3WpFCH8fHIQ | symphonia AAC-LC audio decode fallback | draft | [symphonia-aac-lc-audio-decode-fallback.md](./symphonia-aac-lc-audio-decode-fallback.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
-| TSPEC-034z99BMV8hBTVwYrwacBo | 可視化・エクスポート検証 | proposed | [visualization-export.md](./visualization-export.md) |
+| TSPEC-034z99BMV8hBTVwYrwacBo | 可視化・エクスポート検証 | superseded | [visualization-export.md](./visualization-export.md) |

@@ -59,7 +59,7 @@ spec `../specs/analysis-dataset.md` と ADR
 ### Out of Scope
 
 - 各特徴の具体的な算出式(解析設計側)
-- 可視化向けフォーマット(visualization 側)
+- 表示・検査の UI 実装(GUI 側が dataset-reader 経由で直接読む)
 - 保存ライブラリの具体的選定
 
 ## Components and Boundaries
@@ -78,7 +78,7 @@ spec `../specs/analysis-dataset.md` と ADR
 - 各ステージの出力 → dataset-writer が role 別ストアに振り分け
 - manifest.json に入力 / 設定 / スキーマバージョン / 各成果物 id を
   集約
-- downstream(可視化・エクスポート・再解析)は dataset-reader 経由で
+- downstream(表示・エクスポート・再解析)は dataset-reader 経由で
   参照
 - テンソルは chunk / range 読み出しを前提に保持し、スカラー要約を
   代替として扱わない

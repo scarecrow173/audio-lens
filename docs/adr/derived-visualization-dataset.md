@@ -1,10 +1,10 @@
 ---
 id: "ADR-034yYyqyqy2CzywC1zpHME"
 type: "adr"
-status: "proposed"
+status: "superseded"
 title: "可視化を派生データセットとして分離する"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-31"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -21,7 +21,8 @@ relations:
   depends-on: []
   blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../impl/ir/issue-106-viz-removal.md"
   related:
     - "analysis-dataset-storage.md"
     - "../specs/analysis-export.md"
@@ -45,6 +46,15 @@ metadata:
     consulted: []
     informed: []
 ---
+
+> **Superseded (Issue #106)**: この決定は取り消された。派生
+> Visualization Dataset とその生成ステージは廃止され、表示は
+> Analysis Dataset を `al-service`/`DatasetSession` 経由で直接読む
+> `al-gui` + `ruviform-viz` が担う(Ruviform #156/#157)。可搬 export
+> は表示責務から分離され `al-dataset::export` が所有する。移行判断
+> の記録は
+> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> を参照。以下は歴史的記録として残す。
 
 # 可視化を派生データセットとして分離する
 

@@ -1,10 +1,10 @@
 ---
 id: "SPEC-034yYlFXqQaDagzQr4eXWW"
 type: "spec"
-status: "proposed"
+status: "superseded"
 title: "可視化データセット"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-31"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -19,10 +19,10 @@ relations:
   implemented-by: []
   depends-on:
     - "analysis-dataset.md"
-  blocks:
-    - "analysis-export.md"
+  blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../impl/ir/issue-106-viz-removal.md"
   related:
     - "../adr/derived-visualization-dataset.md"
   refines:
@@ -37,6 +37,14 @@ relations:
   defers: []
   deferred-by: []
 ---
+
+> **Superseded (Issue #106)**: 表示専用の Visualization Dataset は
+> 廃止された。GUI (`al-gui`) とその他のコンシューマは永続化した
+> Analysis Dataset を `al-service`/`DatasetSession` の範囲読み API
+> 経由で直接読み、表示レイヤでの再計算や派生データセットは持た
+> ない。移行判断・削除対象・export 分離の記録は
+> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> を参照。以下は歴史的記録として残す。
 
 # 可視化データセット
 

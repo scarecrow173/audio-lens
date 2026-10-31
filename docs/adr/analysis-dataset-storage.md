@@ -92,7 +92,7 @@ Chosen option: "JSON メタデータ + Parquet 表形式 + チャンクテンソ
 ## Implementation Plan
 
 * Affected paths: `analysis/` 配下のデータセットレイアウト、
-  dataset reader / writer、export / visualization builder
+  dataset reader / writer、export builder
 * Patterns to follow: manifest.json にスキーマ / 設定 / 来歴を集約し、
   各ロールの実フォーマットは spec の推奨レイアウトに従う
 * Patterns to avoid: スカラー要約への縮約、単一フォーマットへの

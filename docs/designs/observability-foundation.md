@@ -89,7 +89,7 @@ instrumentation 配置、`StageRecord.duration_ms` の manifest 変更、
 - al-cli の各 `cmd_*` への init 配線と `--log`/`--log-format` flag
   解釈、統合テストの env scrub
 - 計装対象 crate(al-cli・al-job・al-locate・al-analysis・
-  al-media・al-viz・al-dataset)への span/event 配置と命名・field
+  al-media・al-dataset)への span/event 配置と命名・field
   規約の具体化
 - `StageRecord.duration_ms` の追加と runner 両分岐での設定
 - workspace 依存配線(`tracing`/`tracing-subscriber`/
@@ -412,8 +412,7 @@ field 語彙は `job_id`・`stage`・`duration_ms`・`len`・`sha256`・
 | al-locate | 各 `LocateMethod` 実装(`methods.rs`)の `locate`/`locate_prepared` 入口 | `locate::full_ncc`, `locate::band_ncc`, `locate::gcc_phat`, `locate::spectral_envelope` | `method`, `len`(template/signal 長) |
 | al-analysis | `cheap::analyze_input` 呼出し(stage.rs) / `reference::analyze_pair` 呼出し / `expensive::analyze_region` 呼出し + 各 family 呼出し(`expensive/channel.rs` 等) | `analysis::cheap`, `analysis::reference`, `analysis::region`, `analysis::<family>`(channel・codec・dynamics・ir・noise・timing・transfer) | `input_id`, `method`, `len`, `duration_ms` |
 | al-media | `IngestStage::ingest_input` の入力単位 / `DecoderRegistry::decode`・`MediaDecoder::probe` | `media::ingest`, `media::decode`, `media::probe` | `input_id`, `sha256`, `len`(byte 数), `method`(decoder id) |
-| al-viz | `VisualizationStage::run` の生成物単位 / `ExportStage::run` の package・golden | `viz::<product>`(timeline・views・report・summary・tiles・lod), `viz::package`, `viz::golden` | `len`, `duration_ms` |
-| al-dataset | `DatasetStage::run` の書込み単位 | `dataset::write` | `input_id`, `len`, `duration_ms` |
+| al-dataset | `DatasetStage::run` の書込み単位 / `ExportStage::run` の package・golden | `dataset::write`, `dataset::export`, `dataset::export::golden` | `input_id`, `len`, `duration_ms` |
 
 ### 依存配線
 
@@ -430,7 +429,7 @@ field 語彙は `job_id`・`stage`・`duration_ms`・`len`・`sha256`・
   `tracing-subscriber`・`tracing-appender` を `.workspace = true` で
   参照
 - leaf crate(al-cli・al-job・al-locate・al-analysis・al-media・
-  al-viz・al-dataset)の `[dependencies]` に `tracing.workspace =
+  al-dataset)の `[dependencies]` に `tracing.workspace =
   true` を追加。al-cli はさらに `al-observability.workspace = true`
 - `crates/al-cli` の `[dev-dependencies]` に
   `tracing-subscriber.workspace = true` を追加する。metadata-only

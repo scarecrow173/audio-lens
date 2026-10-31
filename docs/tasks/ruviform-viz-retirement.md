@@ -1,7 +1,7 @@
 ---
 id: "TASK-034P3P0cd1tJUcKKBnEB7b"
 type: "task"
-status: "todo"
+status: "done"
 title: "旧可視化廃止と可搬 export 分離(AL#106)"
 created: "2026-10-30"
 updated: "2026-10-30"

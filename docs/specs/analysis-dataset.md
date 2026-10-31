@@ -24,7 +24,6 @@ relations:
     - "reference-analysis.md"
     - "expensive-analysis.md"
     - "candidate-event-model.md"
-    - "visualization-dataset.md"
     - "analysis-export.md"
   supersedes: []
   superseded-by: []
@@ -121,7 +120,6 @@ analysis/
     expensive/
   residual/
   events/
-  visualization/
 ```
 
 バージョニング:
@@ -132,12 +130,12 @@ analysis/
 
 ## Why Now
 
-後段の全仕様(特徴・イベント・可視化・エクスポート)が共通して
+後段の全仕様(特徴・イベント・表示・エクスポート)が共通して
 読み書きする中核契約であり、他領域より先に形を決める必要がある。
 
 ## Users and Value
 
-- データセットのコンシューマ(可視化、エクスポート、将来のツール):
+- データセットのコンシューマ(表示・エクスポート、将来のツール):
   特徴がどう生成されたかを正確に把握できる
 - 解析者: 大規模テンソルを全体読み込みなしに範囲 / チャンクで参照できる
 

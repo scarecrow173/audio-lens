@@ -39,4 +39,4 @@ Directory: `docs/specs`
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
-| SPEC-034yYlFXqQaDagzQr4eXWW | 可視化データセット | proposed | [visualization-dataset.md](./visualization-dataset.md) |
+| SPEC-034yYlFXqQaDagzQr4eXWW | 可視化データセット | superseded | [visualization-dataset.md](./visualization-dataset.md) |

@@ -19,12 +19,10 @@ relations:
   implemented-by: []
   depends-on:
     - "analysis-dataset.md"
-    - "visualization-dataset.md"
   blocks: []
   supersedes: []
   superseded-by: []
   related:
-    - "../adr/derived-visualization-dataset.md"
     - "../adr/analysis-dataset-storage.md"
     - "../adr/measurement-over-verdict.md"
   refines:
@@ -57,7 +55,6 @@ relations:
 - 保持された中間スペクトル / テンソル
 - 残差音声
 - イベントストリーム
-- 可視化データセット
 - アルゴリズム / バージョン / 来歴情報
 
 人間可読サマリー(決定的かつ非 AI で以下を記述する):
@@ -122,5 +119,4 @@ relations:
 
 ## Sources and Relations
 
-`analysis-dataset.md` と `visualization-dataset.md` の成果物を
-束ねて可搬パッケージ化する。
+`analysis-dataset.md` の成果物を可搬パッケージ化する。

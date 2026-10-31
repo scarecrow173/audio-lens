@@ -26,7 +26,6 @@ relations:
     - "../adr/analysis-dataset-storage.md"
     - "../adr/multi-method-locate-consensus.md"
     - "../adr/immutable-resumable-job.md"
-    - "../adr/derived-visualization-dataset.md"
   refines: []
   refined-by:
     - "analysis-job-model.md"
@@ -39,7 +38,6 @@ relations:
     - "expensive-analysis.md"
     - "candidate-event-model.md"
     - "video-av-timing.md"
-    - "visualization-dataset.md"
     - "validation-strategy.md"
     - "analysis-export.md"
   derives-from:
@@ -58,7 +56,7 @@ relations:
 
 ゲームのキャプチャ映像と任意個数の比較用入力(リファレンスキャプチャ、
 ソース素材)を入力として受け取り、堅牢にアラインした上で「音声に何が
-起きたか」を計測し、構造化された解析データと可視化用データを出力する
+起きたか」を計測し、構造化された解析データを出力する
 ゲーム音声デバッグ解析ツールを構築する。
 
 パイプラインの全体構成:
@@ -80,9 +78,7 @@ Expensive Analysis (候補 / 手動 / 常時実行)
   ↓
 Analysis Dataset
   ↓
-Visualization Builder
-  ↓
-Visualization Dataset
+Export(可搬パッケージ) / GUI(範囲読み表示)
 ```
 
 上記は論理的な処理順序を表す。Candidate Detection は
@@ -130,7 +126,7 @@ cheap/reference 特徴と観測へのリンクを保持する。候補0件でも
   区間がどのキャプチャ区間に対応するかを決定する
 - 3 ステージ(cheap / reference / expensive)の計測
 - 観測値・中間スペクトル・確度・validity・来歴を保持する
-  Analysis Dataset と、そこから派生する Visualization Dataset
+  Analysis Dataset(表示・検査は GUI が範囲読み API 経由で直接読む)
 - 「異常が観測されなかった」ことと「計測不能 / 低確度」を
   区別して表現する
 - 正常キャプチャを特別な実行パスではなくリファレンスとして扱う
@@ -167,24 +163,23 @@ cheap/reference 特徴と観測へのリンクを保持する。候補0件でも
   - 複素 STFT と代替解析を導出できる十分な基礎量を保持する
   - アルゴリズムバージョン、パラメータ、サンプルレート、
     window/hop、alignment id、確度、validity、入力来歴を永続化する
-- 可視化出力はスクリーンショットではなく派生データセットであり、
-  visualization builder は新たな意味解析を行わず、Analysis Dataset を
-  waveform LOD ピラミッド、スペクトログラムタイル、ヒートマップ、
-  time-map 系列、イベントマーカー等のレンダリング可能な形に
-  変換するだけであること
+- 表示・検査は永続化した Analysis Dataset を範囲読み API 経由で
+  直接読む GUI が担い、新たな意味解析も表示専用の派生データ
+  セットも行わない(waveform は入力音声の範囲読み、spectrogram は
+  永続化済み複素 STFT のタイル読み)
 
 ## Acceptance Criteria
 
 - [ ] 対象キャプチャと任意個数のリファレンスを 1 ジョブとして
   受け付け、Ingest → Locate → Cheap → Reference → Candidate →
-  Expensive → Dataset → Visualization の各段を実行できる
+  Expensive → Dataset → Export の各段を実行できる
 - [ ] リファレンス不在でも cheap ステージが完走し、リファレンス
   依存の特徴は `not applicable` 等で表現される
 - [ ] 任意の派生値について、生成に使われた入力・アルゴリズム・
   バージョン・パラメータを dataset から追跡できる
 - [ ] 「異常なし」と「計測不能」が異なる状態として記録される
-- [ ] 可視化データの再生成にメディアデコードや特徴抽出の再実行が
-  不要である
+- [ ] 表示・検査のためにメディアデコードや特徴抽出の再実行が
+  不要である(永続化済み dataset を直接読む)
 - [ ] 出力に総合類似度スコアや合否 / severity 判定が含まれない
 
 ## Deferred Design Concerns
@@ -199,5 +194,4 @@ cheap/reference 特徴と観測へのリンクを保持する。候補0件でも
 
 領域別の要件は `refined-by` に列挙した各 spec に分解して記録する。
 横断的なアーキテクチャ決定(観測主義、データセット保存形式、
-locate 合議、ジョブモデル、可視化派生データ)は `related` の
-ADR を参照。
+locate 合議、ジョブモデル)は `related` の ADR を参照。

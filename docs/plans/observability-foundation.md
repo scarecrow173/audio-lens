@@ -65,7 +65,7 @@ T4 の前提となるため、タスク分割の境界は crate 境界と init/e
 - In scope: `crates/al-observability` 新設、al-cli の
   `--log`/`--log-format` 配線と dispatch span、`StageRecord.
   duration_ms` の manifest 永続化と runner の stage span + 計時
-  event、al-locate/al-analysis/al-media/al-viz/al-dataset の span
+  event、al-locate/al-analysis/al-media/al-dataset の span
   配置、al-math の criterion smoke bench、samply 手順書
 - Out of scope(design/spec の Out of Scope を継承): raw payload
   capture、常時計装プロファイラ(puffin/tracy)、CI ベンチ・回帰
@@ -115,7 +115,7 @@ T4 の前提となるため、タスク分割の境界は crate 境界と init/e
 | `crates/al-locate/src/methods.rs` 他 | `locate::full_ncc`/`locate::band_ncc`/`locate::gcc_phat`/`locate::spectral_envelope` span | T4 |
 | `crates/al-analysis/src/*.rs` | `analysis::cheap`/`analysis::reference`/`analysis::region`/`analysis::<family>` span | T4 |
 | `crates/al-media/src/stage.rs`/`decoder.rs` | `media::ingest`/`media::decode`/`media::probe` span | T4 |
-| `crates/al-viz/src/stage.rs`/`package.rs`/`golden.rs` 他 | `viz::<product>`/`viz::package`/`viz::golden` span | T4 |
+| `crates/al-dataset/src/export*.rs` | `dataset::export`/`dataset::export::golden` span | T4 |
 | `crates/al-dataset/src/stage.rs` | `dataset::write` span | T4 |
 | 各 leaf crate `Cargo.toml` | `tracing.workspace = true`(al-job は T3 で実施) | T4 |
 | `crates/al-math/Cargo.toml` | criterion dev-dep(≥7 日経過版 pin)+ `[[bench]] harness = false` | T5 |
@@ -202,7 +202,7 @@ runner.rs/registry.rs)追従。`cargo test -p al-job` で旧 manifest
 
 ### T4: leaf crate instrumentation — `docs/tasks/observability-leaf-instrumentation.md`
 
-al-locate/al-analysis/al-media/al-viz/al-dataset に design の span
+al-locate/al-analysis/al-media/al-dataset に design の span
 map どおり span を配置し、各 `Cargo.toml` に
 `tracing.workspace = true` を追加する。
 

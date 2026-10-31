@@ -1,10 +1,10 @@
 ---
 id: "DESIGN-034yYLceYoIOUbV56hSfsg"
 type: "design"
-status: "approved"
+status: "superseded"
 title: "可視化・エクスポート設計"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-31"
 owners: ["scarecrow173"]
 relations:
   source: []
@@ -22,7 +22,8 @@ relations:
     - "analysis-stages.md"
   blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../impl/ir/issue-106-viz-removal.md"
   related: []
   refines: []
   refined-by: []
@@ -38,6 +39,14 @@ relations:
   defers: []
   deferred-by: []
 ---
+
+> **Superseded (Issue #106)**: 表示専用の派生可視化(LOD/tiles/
+> timeline/views/summary)と静的 HTML レポートは廃止された。表示は
+> `al-gui` + `ruviform-viz` が Analysis Dataset を直接読んで担い、
+> 可搬 export のみ `al-dataset::export` として残る。移行判断の記録
+> は
+> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> を参照。以下は歴史的記録として残す。
 
 # 可視化・エクスポート設計
 
