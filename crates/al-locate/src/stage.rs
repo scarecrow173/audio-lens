@@ -11,6 +11,7 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use al_core::{AlignmentId, Confidence, InputRole, StageKind, Validity};
 use al_job::manifest::ArtifactRecord;
@@ -19,8 +20,12 @@ use al_job::stage::{Stage, StageContext, StageError};
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::consensus::{ConsensusConfig, evaluate};
 use crate::decode::{DecodedInput, decode_input};
+use ruviform_numeric::resample::ResamplePlan;
+use ruviform_numeric::{spec, vec};
+
 use crate::methods::{
-    CoarseSearch, FullNcc, argmax_tie_count, default_methods, peaks_from_correlation,
+    CoarseSearch, FullNcc, TIE_ABS_FLOOR, TIE_REL_EPS, argmax_tie_count, default_methods,
+    peaks_from_correlation,
 };
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
@@ -144,6 +149,120 @@ fn prepare_channels(
         .collect()
 }
 
+/// フォールバック探索の間引き比。粗探索は ~1/8 レートの
+/// アンチエイリアス間引き信号上の全域 NCC で候補を絞る。
+const HIER_DECIMATION: u32 = 8;
+/// 階層探索を適用する最小 signal 長。これ未満では間引き・
+/// 精密化・背景推定の固定コストが直接 NCC を上回るため縮退する。
+const HIER_MIN_SIGNAL: usize = 128 * 1024;
+/// 粗テンプレ長の下限。間引き後にこれ未満しか残らない窓は
+/// 粗相関の根拠として弱いため直接探索を使う。
+const HIER_MIN_COARSE_TEMPLATE: usize = 8;
+/// 粗曲線から原レートで精密化する上位ピーク数。各ピークの
+/// 精密化は ±`refine_radius` の小 NCC で済むため、周期性で
+/// 混み合う曲線の取りこぼしを抑える目的で深めに取る
+/// (実測: K=8 で真の argmax が粗 top-K 圏外になる窓が稀に
+/// 存在した)。
+const HIER_REFINE_PEAKS: usize = 256;
+/// 背景推定に使うフルレート `corr0` の標本数(ラグ軸
+/// ストライド抽出)。曲線全体を計算せずに median を推定する。
+const HIER_BG_SAMPLES: usize = 16 * 1024;
+/// 標本背景の推定誤差が受理閾値(p2b)の採否を左右しないよう、
+/// 閾値 ±この割合の帯に落ちる候補は直接探索へ縮退する。
+/// (実測: full-curve median と標本 median の差は ~0.2% だが、
+/// 閾値直上の候補では採否が反転しうる)
+const HIER_P2B_GATE_MARGIN: f64 = 0.02;
+/// スコア閾値側の絶対帯。スコアは同一ラグで本質的に同一値だが
+/// FFT 丸めで ~1e-14 揺れるため、理論上の境界近傍だけ縮退する。
+const HIER_SCORE_GATE_EPS: f64 = 1e-9;
+
+/// 受理済み (source, capture) ペアで共有する間引き済み全チャンネル。
+/// `window_anchors_in` のフォールバック層が借用し、窓ごとの再
+/// 間引きを避ける。ワーカープールに共有される(信号面は不変、
+/// 計測カウンタのみ atomic 更新)。
+struct AnchorPyramid {
+    /// `coarse_rate` へ間引きした全長ソース(チャンネルごと)。
+    source: Vec<Vec<f64>>,
+    /// `coarse_rate` へ間引きした全長キャプチャ(チャンネルごと)。
+    capture: Vec<Vec<f64>>,
+    /// 約分済み有理比 up/down = coarse_rate/rate。orig→coarse は
+    /// `pos*up/down`、coarse→orig は `idx*down/up`。
+    up: u32,
+    down: u32,
+    /// 精密化の片側近傍幅(原レート samples)。FIR 半径・位相
+    /// 量子化・座標マッピング誤差を内包する。
+    refine_radius: usize,
+    /// 階層ペア評価の呼出回数(計測用)。
+    hier_calls: AtomicUsize,
+    /// 階層評価が曖昧さにより直接探索へ縮退した回数
+    /// (計測用。理由別: 0=形状 1=粗同点 2=粗候補なし
+    /// 3=精密化候補なし 4=精密化後の近同点 5=背景未満
+    /// 6=受理閾値近傍)。
+    exact_fallbacks: [AtomicUsize; 7],
+}
+
+impl AnchorPyramid {
+    fn orig_to_coarse_floor(&self, pos: usize) -> usize {
+        (pos as u128 * u128::from(self.up) / u128::from(self.down)) as usize
+    }
+
+    fn orig_to_coarse_ceil(&self, pos: usize) -> usize {
+        ((pos as u128 * u128::from(self.up)).div_ceil(u128::from(self.down))) as usize
+    }
+
+    fn coarse_to_orig(&self, idx: usize) -> usize {
+        ((idx as u128 * u128::from(self.down) + u128::from(self.up) / 2) / u128::from(self.up))
+            as usize
+    }
+}
+
+/// ~`1/HIER_DECIMATION` レートの間引きピラミッドを共有リサンプラで
+/// 構築する。間引き不能なレートやチャンネル欠損では `None`
+/// (呼出側は全域で直接探索を使う)。
+fn anchor_pyramid(source: &DecodedInput, capture: &DecodedInput) -> Option<AnchorPyramid> {
+    let rate = capture.sample_rate;
+    let coarse_rate = rate / HIER_DECIMATION;
+    if coarse_rate == 0 || source.sample_rate != rate {
+        return None;
+    }
+    let plan = ResamplePlan::new(rate, coarse_rate).ok()?;
+    let source = source
+        .channel_samples
+        .iter()
+        .map(|ch| plan.resample(ch).ok())
+        .collect::<Option<Vec<_>>>()?;
+    let capture = capture
+        .channel_samples
+        .iter()
+        .map(|ch| plan.resample(ch).ok())
+        .collect::<Option<Vec<_>>>()?;
+    Some(AnchorPyramid {
+        source,
+        capture,
+        up: plan.up(),
+        down: plan.down(),
+        refine_radius: 2 * plan.radius() + (rate as usize).div_ceil(coarse_rate as usize),
+        hier_calls: AtomicUsize::new(0),
+        exact_fallbacks: std::array::from_fn(|_| AtomicUsize::new(0)),
+    })
+}
+
+/// 全曲線を計算せずに NCC 背景を推定する。ラグ軸をストライドで
+/// 標本化した `corr0` の median — `peaks_from_correlation` が完全
+/// 曲線から求める量と同じものの標本推定。
+fn sampled_ncc_background(template: &[f64], signal: &[f64], target_samples: usize) -> f64 {
+    let max_lag = signal.len() - template.len();
+    let stride = (max_lag / target_samples).max(1);
+    let mut vals = Vec::with_capacity(max_lag / stride + 1);
+    let mut lag = 0;
+    while lag <= max_lag {
+        let v = vec::corr0(template, &signal[lag..lag + template.len()]).unwrap_or(0.0);
+        vals.push(v.abs());
+        lag += stride;
+    }
+    spec::median(&vals).unwrap_or(0.0).max(1e-12)
+}
+
 impl LocateStage {
     /// Explicit non-accepted result for a pair that cannot be
     /// evaluated (missing/empty decode).
@@ -227,6 +346,12 @@ impl LocateStage {
     /// inside `capture[..][lo..hi]`, taken across every channel pair.
     /// Returns the absolute capture position and score when the peak
     /// clears the consensus thresholds, `None` otherwise.
+    ///
+    /// `hier` があり探索域が `HIER_MIN_SIGNAL` 以上なら、間引き信号
+    /// の粗探索 + 原レート近傍精密化の階層探索で全範囲 NCC を
+    /// 置き換える。曖昧なペアは直接探索へ縮退し、直接探索と同一の
+    /// 判定を維持する。
+    #[allow(clippy::too_many_arguments)]
     fn best_window_match(
         &self,
         source: &DecodedInput,
@@ -235,22 +360,35 @@ impl LocateStage {
         window: usize,
         capture_range: std::ops::Range<usize>,
         pool: &mut CorrelationPool,
+        hier: Option<&AnchorPyramid>,
     ) -> Option<(u64, f64)> {
         let (lo, hi) = (capture_range.start, capture_range.end);
         if hi.saturating_sub(lo) < window || w_off + window > source.channel_samples[0].len() {
             return None;
         }
+        let hier = hier.filter(|_| hi - lo >= HIER_MIN_SIGNAL);
         let mut best: Option<LocateCandidate> = None;
-        for src_ch in &source.channel_samples {
+        for (src_i, src_ch) in source.channel_samples.iter().enumerate() {
             let template = &src_ch[w_off..w_off + window];
-            for cap_ch in &capture.channel_samples {
-                let corr = pool.ncc(template, &cap_ch[lo..hi], hi - lo - window);
-                // 同点のウィンドウマッチは位置の証拠ではない —
-                // ペア単位でアンカーに寄与させない。
-                if argmax_tie_count(corr) >= 2 {
-                    continue;
-                }
-                if let Some(c) = peaks_from_correlation(corr, 1).into_iter().next()
+            let template_coarse = hier.and_then(|h| {
+                let coarse = h.source.get(src_i)?;
+                let t_lo = h.orig_to_coarse_floor(w_off).min(coarse.len());
+                let t_hi = h.orig_to_coarse_ceil(w_off + window).min(coarse.len());
+                (t_hi - t_lo >= HIER_MIN_COARSE_TEMPLATE).then(|| &coarse[t_lo..t_hi])
+            });
+            for (cap_i, cap_ch) in capture.channel_samples.iter().enumerate() {
+                let signal = &cap_ch[lo..hi];
+                let candidate = match (
+                    hier,
+                    template_coarse,
+                    hier.and_then(|h| h.capture.get(cap_i)),
+                ) {
+                    (Some(h), Some(t_c), Some(cap_coarse)) => {
+                        self.pair_match_hier(template, signal, t_c, cap_coarse, lo, h, pool)
+                    }
+                    _ => Self::pair_match(template, signal, pool),
+                };
+                if let Some(c) = candidate
                     && best.as_ref().is_none_or(|b| c.score > b.score)
                 {
                     best = Some(c);
@@ -261,6 +399,171 @@ impl LocateStage {
         (c.score >= self.config.consensus.min_score
             && c.peak_to_background >= self.config.consensus.min_peak_to_background)
             .then(|| (lo as u64 + c.position, c.score))
+    }
+
+    /// 直接ペア評価: 全域 NCC 曲線 → argmax 同点ガード → トップ
+    /// ピーク。同点・背景未満のみの場合、ペアは候補を寄与しない。
+    fn pair_match(
+        template: &[f64],
+        signal: &[f64],
+        pool: &mut CorrelationPool,
+    ) -> Option<LocateCandidate> {
+        if signal.len() < template.len() {
+            return None;
+        }
+        let corr = pool.ncc(template, signal, signal.len() - template.len());
+        if argmax_tie_count(corr) >= 2 {
+            return None;
+        }
+        peaks_from_correlation(corr, 1).into_iter().next()
+    }
+
+    /// 大探索域の階層ペア評価。間引き信号上の粗 NCC が候補ラグを
+    /// 提案し、各候補を原レート近傍で精密化して勝者を決め、
+    /// ストライド `corr0` 標本で直接経路の全曲線と同じ背景を推定
+    /// する。一意な勝者や受理判定を粗・標本証拠で決められない
+    /// 場合(粗同点・候補なし・精密化後の厳密同点・背景未満・
+    /// 受理閾値近傍)は [`Self::pair_match`] へ縮退し、曖昧な
+    /// ケースで直接探索の厳密な結果を保持する。
+    #[allow(clippy::too_many_arguments)]
+    fn pair_match_hier(
+        &self,
+        template: &[f64],
+        signal: &[f64],
+        template_coarse: &[f64],
+        capture_coarse: &[f64],
+        lo: usize,
+        hier: &AnchorPyramid,
+        pool: &mut CorrelationPool,
+    ) -> Option<LocateCandidate> {
+        if signal.len() < template.len() {
+            return None;
+        }
+        hier.hier_calls.fetch_add(1, Ordering::Relaxed);
+        let exact = |pool: &mut CorrelationPool, reason: usize| {
+            hier.exact_fallbacks[reason].fetch_add(1, Ordering::Relaxed);
+            Self::pair_match(template, signal, pool)
+        };
+        let c_lo = hier.orig_to_coarse_floor(lo).min(capture_coarse.len());
+        let c_hi = hier
+            .orig_to_coarse_ceil(lo + signal.len())
+            .min(capture_coarse.len());
+        let signal_coarse = &capture_coarse[c_lo..c_hi.max(c_lo)];
+        if template_coarse.is_empty() || signal_coarse.len() <= template_coarse.len() {
+            return exact(pool, 0);
+        }
+        // 粗曲線は短いテンプレ由来でピーク群が混み合うため、
+        // 「競合数」を曖昧さの根拠にはしない(実測で大半が競合判定
+        // となり階層化が無効化される)。曖昧さは粗同点・候補なし・
+        // 精密化後の近同点・背景未満で判定し、いずれも直接探索へ
+        // 縮退する。
+        let (tied, peaks) = {
+            let corr = pool.ncc(
+                template_coarse,
+                signal_coarse,
+                signal_coarse.len() - template_coarse.len(),
+            );
+            (
+                argmax_tie_count(corr),
+                peaks_from_correlation(corr, HIER_REFINE_PEAKS),
+            )
+        };
+        if tied >= 2 {
+            return exact(pool, 1);
+        }
+        if peaks.is_empty() {
+            return exact(pool, 2);
+        }
+        let max_lag = signal.len() - template.len();
+        let radius = hier.refine_radius;
+        let mut refined: Vec<(usize, f64, u64)> = Vec::with_capacity(peaks.len());
+        for peak in &peaks {
+            let est = hier.coarse_to_orig(c_lo + peak.position as usize);
+            let center = est.saturating_sub(lo).min(max_lag);
+            let (a, b) = (
+                center.saturating_sub(radius),
+                (center + radius).min(max_lag),
+            );
+            if a >= b {
+                continue;
+            }
+            let (arg, score, width) = {
+                let corr = pool.ncc(template, &signal[a..b + template.len()], b - a);
+                let (i, &v) = corr
+                    .iter()
+                    .enumerate()
+                    .max_by(|(_, x), (_, y)| x.abs().total_cmp(&y.abs()))
+                    .unwrap();
+                let half = v.abs() / 2.0;
+                let mut w_lo = i;
+                while w_lo > 0 && corr[w_lo].abs() > half {
+                    w_lo -= 1;
+                }
+                let mut w_hi = i;
+                while w_hi + 1 < corr.len() && corr[w_hi].abs() > half {
+                    w_hi += 1;
+                }
+                (i, v, (w_hi - w_lo) as u64)
+            };
+            refined.push((a + arg, score, width));
+        }
+        if refined.is_empty() {
+            return exact(pool, 3);
+        }
+        // 同一ピーク近傍(±2·refine_radius)はクラスタとして最高
+        // |score| を残す。ラグが十分離れた候補がトップに近接する
+        // 場合は、直接探索の argmax と階層側の勝者が入れ替わりうる
+        // 曖昧な状態とみなし直接探索へ縮退する。
+        refined.sort_by(|x, y| y.1.abs().total_cmp(&x.1.abs()));
+        let mut clusters: Vec<(usize, f64, u64)> = Vec::with_capacity(refined.len());
+        'candidates: for (pos, s, w) in refined {
+            for c in clusters.iter_mut() {
+                if pos.abs_diff(c.0) <= 2 * radius {
+                    if s.abs() > c.1.abs() {
+                        *c = (pos, s, w);
+                    }
+                    continue 'candidates;
+                }
+            }
+            clusters.push((pos, s, w));
+        }
+        // 離れた位置の厳密同点のみ縮退対象とする。既存の同点判定
+        // (argmax_tie_count と同じ tie_window)に揃える — それより
+        // 粗い近同点判定は音楽信号の自己相似で事実上常に発火し、
+        // 階層化が機能しなくなる(実測 97% が縮退)。粗 top-K に
+        // 入らなかった argmax は近同点ではなくカバレッジの問題で、
+        // K の深さで対処する。
+        let m = clusters[0].1.abs();
+        let tie_window = (TIE_REL_EPS * m).max(TIE_ABS_FLOOR);
+        if clusters[1..].iter().any(|c| c.1.abs() >= m - tie_window) {
+            return exact(pool, 4);
+        }
+        let (pos, score, width) = clusters[0];
+        // rank-1 の 1st/2nd 比は精密化候補の 2 位を用いる(全曲線の
+        // 2 位ではないが、このフィールドは anchor 受理判定に未使用)。
+        let ratio_12 = clusters.get(1).map(|c| score.abs() / c.1.abs().max(1e-12));
+        let background = sampled_ncc_background(template, signal, HIER_BG_SAMPLES);
+        if score.abs() <= background {
+            return exact(pool, 5);
+        }
+        // 標本背景は full-curve median の近似のため、受理閾値の
+        // 近傍では採否が直接経路とずれうる。閾値帯の候補は厳密な
+        // 背景を持つ直接探索で判定する(稀な境界ケースのみ)。
+        let p2b = score.abs() / background;
+        let near_p2b = (p2b - self.config.consensus.min_peak_to_background).abs()
+            <= HIER_P2B_GATE_MARGIN * self.config.consensus.min_peak_to_background;
+        let near_score = (score - self.config.consensus.min_score).abs() <= HIER_SCORE_GATE_EPS;
+        if near_p2b || near_score {
+            return exact(pool, 6);
+        }
+        Some(LocateCandidate {
+            position: pos as u64,
+            score,
+            peak_to_background: score.abs() / background,
+            peak_width: width,
+            peak_ratio_12: ratio_12,
+            channel_pair: None,
+        })
     }
 
     /// One anchor per source window, located inside `capture[lo..hi]`
@@ -274,6 +577,10 @@ impl LocateStage {
     /// them on the unrolled pass grid; windows whose peak stays below
     /// the consensus thresholds contribute no anchor. Returns an
     /// empty list when the source fits fewer than two windows.
+    ///
+    /// `hier` はペア共有の間引きピラミッド。フォールバック層
+    /// (widen/full)の大探索域で粗探索+精密化を有効化する。
+    #[allow(clippy::too_many_arguments)]
     fn window_anchors_in(
         &self,
         source: &DecodedInput,
@@ -282,6 +589,7 @@ impl LocateStage {
         hi: usize,
         base: u64,
         origin: u64,
+        hier: Option<&AnchorPyramid>,
     ) -> Vec<Anchor> {
         let window = self.config.anchor_window as usize;
         let hop = self.config.anchor_hop.max(1) as usize;
@@ -300,8 +608,18 @@ impl LocateStage {
         let tol = self.config.consensus.position_tolerance;
         let gap = self.config.anchor_gap;
         let rate_tol = self.config.rate_tolerance;
-        run_pool(offsets.len(), &CorrelationPool::new, &|i, pool| {
+        // 層到達回数・pool 計測(計測イベント用。並列窓処理から
+        // 加算されるため atomic)。
+        let (hit_narrow, hit_widen, hit_full) = (
+            AtomicUsize::new(0),
+            AtomicUsize::new(0),
+            AtomicUsize::new(0),
+        );
+        let (pool_builds, pool_hits) = (AtomicUsize::new(0), AtomicUsize::new(0));
+        let started = std::time::Instant::now();
+        let anchors: Vec<Anchor> = run_pool(offsets.len(), &CorrelationPool::new, &|i, pool| {
             let w_off = offsets[i];
+            let s0 = pool.stats();
             let slack = (w_off as f64 * rate_tol) as u64 + tol + gap;
             let expected = origin + w_off as u64;
             let w_lo = expected.saturating_sub(slack).max(lo as u64) as usize;
@@ -309,27 +627,71 @@ impl LocateStage {
             // Narrow first; widen ×8 so jumps still land before paying
             // for the caller's whole range, which misses and large
             // deviations still reach.
-            self.best_window_match(source, capture, w_off, window, w_lo..w_hi, pool)
+            hit_narrow.fetch_add(1, Ordering::Relaxed);
+            let result = self
+                .best_window_match(source, capture, w_off, window, w_lo..w_hi, pool, None)
                 .or_else(|| {
                     let slack8 = slack.saturating_mul(8);
                     let m_lo = expected.saturating_sub(slack8).max(lo as u64) as usize;
                     let m_hi = (expected + window as u64 + slack8).min(hi as u64) as usize;
                     ((m_lo, m_hi) != (w_lo, w_hi))
                         .then(|| {
-                            self.best_window_match(source, capture, w_off, window, m_lo..m_hi, pool)
+                            hit_widen.fetch_add(1, Ordering::Relaxed);
+                            self.best_window_match(
+                                source,
+                                capture,
+                                w_off,
+                                window,
+                                m_lo..m_hi,
+                                pool,
+                                hier,
+                            )
                         })
                         .flatten()
                 })
-                .or_else(|| self.best_window_match(source, capture, w_off, window, lo..hi, pool))
-                .map(|(capture, score)| Anchor {
-                    source: base + w_off as u64,
-                    capture,
-                    score,
-                })
+                .or_else(|| {
+                    hit_full.fetch_add(1, Ordering::Relaxed);
+                    self.best_window_match(source, capture, w_off, window, lo..hi, pool, hier)
+                });
+            let s1 = pool.stats();
+            pool_builds.fetch_add((s1.builds - s0.builds) as usize, Ordering::Relaxed);
+            pool_hits.fetch_add((s1.hits - s0.hits) as usize, Ordering::Relaxed);
+            result.map(|(capture, score)| Anchor {
+                source: base + w_off as u64,
+                capture,
+                score,
+            })
         })
         .into_iter()
         .flatten()
-        .collect()
+        .collect();
+        tracing::info!(
+            windows = offsets.len(),
+            range = hi - lo,
+            ncc_narrow = hit_narrow.load(Ordering::Relaxed),
+            ncc_widen = hit_widen.load(Ordering::Relaxed),
+            ncc_full = hit_full.load(Ordering::Relaxed),
+            pool_builds = pool_builds.load(Ordering::Relaxed),
+            pool_hits = pool_hits.load(Ordering::Relaxed),
+            hier_calls = hier.map_or(0, |h| h.hier_calls.load(Ordering::Relaxed)),
+            exact_fallbacks = hier.map_or(0, |h| {
+                h.exact_fallbacks
+                    .iter()
+                    .map(|a| a.load(Ordering::Relaxed))
+                    .sum::<usize>()
+            }),
+            fb_shape = hier.map_or(0, |h| h.exact_fallbacks[0].load(Ordering::Relaxed)),
+            fb_coarse_tie = hier.map_or(0, |h| h.exact_fallbacks[1].load(Ordering::Relaxed)),
+            fb_coarse_empty = hier.map_or(0, |h| h.exact_fallbacks[2].load(Ordering::Relaxed)),
+            fb_refined_empty = hier.map_or(0, |h| h.exact_fallbacks[3].load(Ordering::Relaxed)),
+            fb_refined_tie = hier.map_or(0, |h| h.exact_fallbacks[4].load(Ordering::Relaxed)),
+            fb_background = hier.map_or(0, |h| h.exact_fallbacks[5].load(Ordering::Relaxed)),
+            fb_near_gate = hier.map_or(0, |h| h.exact_fallbacks[6].load(Ordering::Relaxed)),
+            anchors = anchors.len(),
+            elapsed_ms = started.elapsed().as_secs_f64() * 1000.0,
+            "window_anchors_in"
+        );
+        anchors
     }
 
     /// Persist one JSON artifact under `dir` and return its record.
@@ -842,6 +1204,7 @@ impl Stage for LocateStage {
                                     window,
                                     lo..hi,
                                     &mut pool,
+                                    None,
                                 )
                                 .is_some()
                             }
@@ -866,8 +1229,9 @@ impl Stage for LocateStage {
                     // coordinates; several verified occurrences are
                     // real passes, so their windows unroll onto the
                     // pass grid.
+                    let hier = anchor_pyramid(source, capture);
                     let mut anchors = if loops.len() <= 1 {
-                        self.window_anchors_in(source, capture, 0, cap_n, 0, primary)
+                        self.window_anchors_in(source, capture, 0, cap_n, 0, primary, hier.as_ref())
                     } else {
                         let min_v = loops.iter().map(|o| o.loop_index).min().unwrap_or(0);
                         loops
@@ -876,7 +1240,15 @@ impl Stage for LocateStage {
                             .flat_map(|(i, o)| {
                                 let base = ((o.loop_index - min_v) * body_len as i64) as u64;
                                 let (lo, hi) = cell_of(&positions, i);
-                                self.window_anchors_in(source, capture, lo, hi, base, positions[i])
+                                self.window_anchors_in(
+                                    source,
+                                    capture,
+                                    lo,
+                                    hi,
+                                    base,
+                                    positions[i],
+                                    hier.as_ref(),
+                                )
                             })
                             .collect()
                     };
@@ -1143,5 +1515,119 @@ mod tests {
                 .unwrap();
         assert_eq!(cfg.consensus.min_agreeing_methods, 3);
         assert_eq!(cfg.ridge, default_ridge());
+    }
+
+    fn noise(n: usize, seed: u64) -> Vec<f64> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                ((s >> 11) as f64) / (1u64 << 53) as f64 * 2.0 - 1.0
+            })
+            .collect()
+    }
+
+    fn input(samples: Vec<f64>, rate: u32) -> DecodedInput {
+        DecodedInput {
+            input_id: "x".into(),
+            sample_rate: rate,
+            channels: 1,
+            channel_samples: vec![samples],
+            artifact_ids: vec![al_core::ArtifactId::new()],
+        }
+    }
+
+    /// 遠方の埋め込み一致で、階層探索が直接探索と同一位置・同一
+    /// スコアを返す(位置と受理の契約は直接探索のもの)。
+    #[test]
+    fn hierarchical_match_agrees_with_direct_on_embedded() {
+        let rate = 48_000;
+        let source = noise(8_192, 11);
+        let mut capture = noise(300_000, 22);
+        let at = 200_000;
+        for (i, &s) in source[..512].iter().enumerate() {
+            capture[at + i] = s * 0.8;
+        }
+        let (src, cap) = (input(source, rate), input(capture, rate));
+        let hier = anchor_pyramid(&src, &cap).unwrap();
+        let stage = LocateStage::default();
+        let mut pool = CorrelationPool::new();
+        let direct = stage.best_window_match(&src, &cap, 0, 512, 0..300_000, &mut pool, None);
+        let hierarch =
+            stage.best_window_match(&src, &cap, 0, 512, 0..300_000, &mut pool, Some(&hier));
+        let (d_pos, d_score) = direct.unwrap();
+        let (h_pos, h_score) = hierarch.unwrap();
+        assert_eq!(d_pos, h_pos, "position diverged");
+        assert!((d_score - h_score).abs() < 1e-9, "score diverged");
+        assert!((h_pos as i64 - at as i64).abs() <= 8);
+    }
+
+    /// 一致なしの純ノイズでは受理判定が一致する(どちらも None)。
+    #[test]
+    fn hierarchical_match_rejects_pure_noise_like_direct() {
+        let rate = 48_000;
+        let src = input(noise(8_192, 33), rate);
+        let cap = input(noise(300_000, 44), rate);
+        let hier = anchor_pyramid(&src, &cap).unwrap();
+        let stage = LocateStage::default();
+        let mut pool = CorrelationPool::new();
+        let direct = stage.best_window_match(&src, &cap, 0, 512, 0..300_000, &mut pool, None);
+        let hierarch =
+            stage.best_window_match(&src, &cap, 0, 512, 0..300_000, &mut pool, Some(&hier));
+        assert_eq!(direct, hierarch);
+    }
+
+    /// 遠隔オフセットのソース全体を対象とした window_anchors_in で、
+    /// 階層探索あり/なしのアンカー列(位置・スコア・件数)が一致する。
+    #[test]
+    fn window_anchors_identical_with_and_without_hierarchy() {
+        let rate = 48_000;
+        let source = noise(8_192, 55);
+        let mut capture = noise(260_000, 66);
+        let embed_at = 150_000;
+        for (i, &s) in source.iter().enumerate() {
+            capture[embed_at + i] = s * 0.9;
+        }
+        let (src, cap) = (input(source, rate), input(capture, rate));
+        let hier = anchor_pyramid(&src, &cap).unwrap();
+        let stage = LocateStage::default();
+        let cap_n = cap.channel_samples[0].len();
+        let direct = stage.window_anchors_in(&src, &cap, 0, cap_n, 0, 0, None);
+        let hierarch = stage.window_anchors_in(&src, &cap, 0, cap_n, 0, 0, Some(&hier));
+        assert_eq!(direct.len(), hierarch.len());
+        assert!(!direct.is_empty());
+        for (d, h) in direct.iter().zip(hierarch.iter()) {
+            assert_eq!(d.source, h.source);
+            assert_eq!(d.capture, h.capture, "capture diverged");
+            assert!((d.score - h.score).abs() < 1e-9, "score diverged");
+        }
+        // 実位置 ~embed_at + w_off の定数オフセットを確認。
+        for a in &hierarch {
+            let expected = embed_at as u64 + a.source;
+            assert!((a.capture as i64 - expected as i64).abs() <= 16);
+        }
+    }
+
+    /// 標本背景は全曲線 median の近似に留まる(受理ゲート用の
+    /// 推定として許容誤差内)。
+    #[test]
+    fn sampled_background_approximates_full_curve_median() {
+        let template = noise(512, 77);
+        let signal = noise(50_000, 88);
+        let bg = sampled_ncc_background(&template, &signal, HIER_BG_SAMPLES);
+        // 参照: 全ラグ corr0 の median(テストなので直接計算)。
+        let max_lag = signal.len() - template.len();
+        let mut vals = Vec::with_capacity(max_lag + 1);
+        for lag in 0..=max_lag {
+            let v = vec::corr0(&template, &signal[lag..lag + template.len()]).unwrap_or(0.0);
+            vals.push(v.abs());
+        }
+        let full = spec::median(&vals).unwrap_or(0.0);
+        assert!(
+            (bg - full).abs() / full.max(1e-12) < 0.3,
+            "bg={bg} full={full}"
+        );
     }
 }
