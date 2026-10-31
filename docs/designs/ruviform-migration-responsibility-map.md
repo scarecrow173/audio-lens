@@ -284,6 +284,10 @@ al-cli/al-service/al-gui ─> al-observability(init はプロセス入口のみ)
   が再評価された時点。`deinterleave` は AL の入力境界処理として
   恒久残留(`decode.rs::PcmView` の scale 除算 fused 版は decode
   adapter の責務として別実装を維持 — 取得経路が異なり責務も別)。
+  **状態更新(AL#104)**: 撤去条件を満たし facade は撤去済み。
+  全呼出側は `ruviform_numeric` 直呼びへ移行し、panic 契約の
+  帰属は呼出側 `expect` に再配置された(`deinterleave` は
+  `decode.rs` へ移設)。詳細は `docs/impl/ir/issue-104-*.md`。
 - Welch 蓄積・H1 伝達関数(§4): `reference.rs::fir_ir` と
   `expensive/channel.rs` の帯域 L/R coherence 蓄積は
   `ruviform_numeric::xspec::CrossSpectrum` へ寄せた(per-bin 加算

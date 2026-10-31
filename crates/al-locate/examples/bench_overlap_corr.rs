@@ -3,7 +3,8 @@
 use std::hint::black_box;
 use std::time::Instant;
 
-use al_locate::dsp::{OverlapCorrPlan, OverlapCorrWorkspace, corr0};
+use ruviform_numeric::corr::{OverlapCorrPlan, OverlapCorrWorkspace};
+use ruviform_numeric::vec::corr0;
 
 fn noise(seed: u64, n: usize) -> Vec<f64> {
     let mut state = seed;
@@ -31,7 +32,7 @@ fn direct_scan(x: &[f64], y: &[f64], max_lag: usize) -> Vec<f64> {
             } else {
                 (&x[a..], &y[..l - a])
             };
-            corr0(xs, ys)
+            corr0(xs, ys).expect("equal slice lengths")
         })
         .collect()
 }

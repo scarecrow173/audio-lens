@@ -1,0 +1,52 @@
+{
+  "e2e_wall_ms": 411935,
+  "stages": {
+    "ingest": {
+      "status": "completed",
+      "duration_ms": 1555
+    },
+    "locate": {
+      "status": "completed",
+      "duration_ms": 324789
+    },
+    "cheap_analysis": {
+      "status": "completed",
+      "duration_ms": 5711
+    },
+    "reference_analysis": {
+      "status": "completed",
+      "duration_ms": 70279
+    },
+    "expensive_analysis": {
+      "status": "completed",
+      "duration_ms": 9034
+    },
+    "dataset": {
+      "status": "completed",
+      "duration_ms": 222
+    }
+  },
+  "process": {
+    "method": "windows:Get-Process",
+    "interval_ms": 1000,
+    "sample_count": 396,
+    "cpu_sec_last_sample": 3482.75,
+    "peak_rss_bytes": 8341966848,
+    "note": "poll 標本値。peak RSS は真のピークを下回り得る下限推定"
+  },
+  "io_estimate": {
+    "input_bytes": 71551424,
+    "output_bytes": 2521715193,
+    "note": "近似値: 読み=入力総サイズ、書き=成果物総サイズ。stage 間の中間再読込は含まない"
+  },
+  "not_measured": [
+    "stage 別 busy/CPU/RSS/IO(外部ポーリングでは stage 境界に帰属不可)",
+    "alloc(bench_alloc.rs 側で別途計測)"
+  ],
+  "artifact_size_by_area": {
+    "analysis": 2206729192,
+    "inputs": 122111060,
+    "locate": 192751668,
+    "manifest.json": 123273
+  }
+}

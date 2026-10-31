@@ -27,8 +27,9 @@ use crate::metadata::{IntegrityObservation, MediaError, SampleFormat};
 use crate::wav::DecodedAudio;
 
 /// The pinned Ruviform revision — recorded in provenance so manifests
-/// keep the exact backend revision in use.
-pub const RUVIFORM_REV: &str = "e467ccba8e1cf9d18982387827b61275b4bf3f4c";
+/// keep the exact backend revision in use. Derived from the resolved
+/// `Cargo.lock` entry (AL#115), so it cannot drift from the pin.
+use al_core::RUVIFORM_REV;
 
 /// Normalize a Ruviform boundary error into the ingest error contract:
 /// `InputUnavailable` for capability gaps, `Malformed` for corrupt
@@ -506,116 +507,72 @@ impl MediaDecoder for RuviformDecoder {
             }
             Err(e) => {
                 let failure = Unavailable::from_error(&e);
-                // Temporary comparison route: fall back to the native
-                // decoders when the Ruviform backend cannot read this
-                // input, and record the fallback reason in provenance.
-                let mut native_integrity = Vec::new();
-                let mut native_stream = None;
-                let native = match probe.format {
-                    MediaFormat::Wav => crate::wav::decode_wav(source).ok(),
-                    MediaFormat::Mp4 => match crate::mp4::decode_mp4(source) {
-                        Ok(media) => {
-                            native_integrity = media.integrity;
-                            native_stream = media.audio_stream;
-                            media.audio
-                        }
-                        Err(_) => None,
-                    },
-                    MediaFormat::Avi => crate::avi::avi_layout(source)
-                        .and_then(|layout| {
-                            crate::avi::decode_layout(layout, &request.video_config, true, false)
-                        })
-                        .ok()
-                        .and_then(|media| media.audio),
-                };
-                match native {
-                    Some(audio) => {
-                        selected_audio = native_stream.or(first_audio_stream);
-                        result.integrity.extend(native_integrity);
-                        result.audio = Some(audio);
-                        result.provenance.settings["ruviform"]["audio_fallback"] = serde_json::json!({
-                            "backend": "native",
-                            "reason": failure.reason,
-                        });
-                        result
-                            .provenance
-                            .streams
-                            .push(crate::decoder::StreamResult {
-                                stream: selected_audio,
-                                kind: "audio".into(),
-                                decoded: true,
-                                unavailable: None,
-                            });
-                    }
-                    None => {
-                        // Per-track unavailability mirrors the MP4
-                        // observation contract (one entry per `soun`
-                        // track); other containers keep a single
-                        // backend-scoped observation.
-                        // `soun` entries precede the backend-generated
-                        // video observations, matching the trak-order
-                        // emission of the native MP4 parser.
-                        let mut track_entries = Vec::new();
-                        if let Some(mp4) = result.mp4.as_ref() {
-                            for track in mp4.tracks.iter().filter(|t| t.handler == "soun") {
-                                track_entries.push(IntegrityObservation::decode_unavailable(
-                                    "audio",
-                                    &failure,
-                                    serde_json::json!({
-                                        "track_index": track.track_index,
-                                        "handler": "soun",
-                                        "codec": track.codec.clone().unwrap_or_default(),
-                                    }),
-                                ));
-                            }
-                        }
-                        let observed = !track_entries.is_empty();
-                        result.integrity.splice(0..0, track_entries);
-                        if !observed {
-                            result
-                                .integrity
-                                .push(IntegrityObservation::decode_unavailable(
-                                    "audio",
-                                    &failure,
-                                    serde_json::json!({"backend": "ruviform"}),
-                                ));
-                        }
-                        result
-                            .provenance
-                            .streams
-                            .push(crate::decoder::StreamResult {
-                                stream: first_audio_stream,
-                                kind: "audio".into(),
-                                decoded: false,
-                                unavailable: Some(failure.clone()),
-                            });
-                        // Remaining audio streams are unselected — the
-                        // native unselected-stream contract carries each
-                        // stream's own decode verdict.
-                        for s in probe
-                            .streams
-                            .iter()
-                            .filter(|s| s.kind == "audio" && Some(s.stream) != first_audio_stream)
-                        {
-                            result
-                                .provenance
-                                .streams
-                                .push(crate::decoder::StreamResult {
-                                    stream: Some(s.stream),
-                                    kind: "audio".into(),
-                                    decoded: false,
-                                    unavailable: Some(s.decode.clone().err().unwrap_or_else(
-                                        || {
-                                            Unavailable::capability(
-                                                "stream not selected by ingest selection policy",
-                                            )
-                                        },
-                                    )),
-                                });
-                        }
-                        result.audio_unavailable = Some(failure.reason);
+                // Ruviform が decode できない入力は capability/malformed
+                // の観測として記録する(#104 で暫定 native 比較経路を
+                // 撤去 — decoder of record は Ruviform 一本)。
+                // Per-track unavailability mirrors the MP4 observation
+                // contract (one entry per `soun` track); other
+                // containers keep a single backend-scoped observation.
+                // `soun` entries precede the backend-generated video
+                // observations, matching the trak-order emission of the
+                // native MP4 parser.
+                let mut track_entries = Vec::new();
+                if let Some(mp4) = result.mp4.as_ref() {
+                    for track in mp4.tracks.iter().filter(|t| t.handler == "soun") {
+                        track_entries.push(IntegrityObservation::decode_unavailable(
+                            "audio",
+                            &failure,
+                            serde_json::json!({
+                                "track_index": track.track_index,
+                                "handler": "soun",
+                                "codec": track.codec.clone().unwrap_or_default(),
+                            }),
+                        ));
                     }
                 }
+                let observed = !track_entries.is_empty();
+                result.integrity.splice(0..0, track_entries);
+                if !observed {
+                    result
+                        .integrity
+                        .push(IntegrityObservation::decode_unavailable(
+                            "audio",
+                            &failure,
+                            serde_json::json!({"backend": "ruviform"}),
+                        ));
+                }
+                result
+                    .provenance
+                    .streams
+                    .push(crate::decoder::StreamResult {
+                        stream: first_audio_stream,
+                        kind: "audio".into(),
+                        decoded: false,
+                        unavailable: Some(failure.clone()),
+                    });
+                // Remaining audio streams are unselected — the
+                // native unselected-stream contract carries each
+                // stream's own decode verdict.
+                for s in probe
+                    .streams
+                    .iter()
+                    .filter(|s| s.kind == "audio" && Some(s.stream) != first_audio_stream)
+                {
+                    result
+                        .provenance
+                        .streams
+                        .push(crate::decoder::StreamResult {
+                            stream: Some(s.stream),
+                            kind: "audio".into(),
+                            decoded: false,
+                            unavailable: Some(s.decode.clone().err().unwrap_or_else(|| {
+                                Unavailable::capability(
+                                    "stream not selected by ingest selection policy",
+                                )
+                            })),
+                        });
+                }
+                result.audio_unavailable = Some(failure.reason);
             }
         }
         // `provenance.streams` keeps the native emission contract:

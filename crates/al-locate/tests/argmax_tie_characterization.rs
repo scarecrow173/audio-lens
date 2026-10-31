@@ -8,21 +8,21 @@
 //! 本テストは計測専用で本番挙動を変えない。曲線生成は production
 //! 経路と同一の式を使う:
 //!
-//! - `full_ncc` / `gcc_phat`: `dsp::ncc` / `dsp::gcc_phat`(
+//! - `full_ncc` / `gcc_phat`: `corr::ncc` / `corr::gcc_phat`(
 //!   `signal.len() - template.len()` の max_lag)
 //! - `band_ncc`: `InputCache::prepare` 経由の prepared bands
 //!   (`locate_prepared` と同一の帯域信号)+ `evidence_from_bands`
 //!   と同じ累積(テンプレート帯域エネルギー `MIN_ENERGY` フィルタ)
 //! - `spectral_envelope`: `methods.rs` `SpectralEnvelope::locate` と
-//!   同じ `dsp::corr0`(post-T3)+ 同一の hop 規則
+//!   同じ `vec::corr0`(post-T3)+ 同一の hop 規則
 //!
 //! `cargo test -p al-locate --test argmax_tie_characterization --
 //! --nocapture` で計測表を出力する。
 
-use al_locate::dsp;
 use al_locate::methods::{SpectralEnvelope, normalize_gain, peaks_from_correlation};
 use al_locate::prepared::InputCache;
 use al_testkit::signal::{self, Biquad};
+use ruviform_numeric::{bands, corr, vec};
 
 /// `methods.rs` と同じ閾値(テンプレート帯域エネルギー・preflight)。
 const MIN_ENERGY: f64 = 1e-9;
@@ -69,10 +69,10 @@ fn preflight_reject(template: &[f64], signal: &[f64]) -> Option<&'static str> {
     if template.is_empty() || signal.len() < template.len() {
         return Some("signal shorter than template");
     }
-    if dsp::sum_sq(template) < MIN_ENERGY {
+    if vec::sum_sq(template) < MIN_ENERGY {
         return Some("template has no usable energy");
     }
-    if dsp::sum_sq(signal) < MIN_ENERGY {
+    if vec::sum_sq(signal) < MIN_ENERGY {
         return Some("signal has no usable energy");
     }
     None
@@ -95,13 +95,13 @@ fn band_ncc_curve(
     let mut bands_used = 0usize;
     for ((band_t, t_band), (band_s, s_band)) in t.bands().iter().zip(s.bands()) {
         assert_eq!(band_t, band_s);
-        if dsp::sum_sq(t_band) < MIN_ENERGY {
+        if vec::sum_sq(t_band) < MIN_ENERGY {
             continue;
         }
-        for (a, c) in acc
-            .iter_mut()
-            .zip(dsp::ncc(t_band, s_band, s_band.len() - t_band.len()))
-        {
+        for (a, c) in acc.iter_mut().zip(
+            corr::ncc(t_band, s_band, s_band.len() - t_band.len())
+                .expect("correlation template/signal shapes must be valid"),
+        ) {
             *a += c;
         }
         bands_used += 1;
@@ -111,22 +111,24 @@ fn band_ncc_curve(
 
 /// `SpectralEnvelope::locate` の hop 疎化曲線を再現した計測用
 /// 曲線。`methods.rs` `SpectralEnvelope::locate` と同一の式
-/// (post-T3 `dsp::corr0`)・同一の hop 規則。
+/// (post-T3 `vec::corr0`)・同一の hop 規則。
 fn spectral_envelope_curve(template: &[f64], signal: &[f64]) -> Vec<f64> {
     let method = SpectralEnvelope::default();
-    let t_env = dsp::spectral_envelope(&normalize_gain(template), method.fft_size, method.bins);
+    let t_env = bands::spectral_envelope(&normalize_gain(template), method.fft_size, method.bins)
+        .expect("envelope parameters must be valid");
     const MAX_WINDOWS: usize = 2048;
     let win = template.len();
     let max_lag = signal.len() - win;
     let hop = (win / 16).max(1).max(max_lag / MAX_WINDOWS);
     let mut corr = vec![0.0; max_lag + 1];
     for lag in (0..=max_lag).step_by(hop) {
-        let s_env = dsp::spectral_envelope(
+        let s_env = bands::spectral_envelope(
             &normalize_gain(&signal[lag..lag + win]),
             method.fft_size,
             method.bins,
-        );
-        corr[lag] = dsp::corr0(&t_env, &s_env);
+        )
+        .expect("envelope parameters must be valid");
+        corr[lag] = vec::corr0(&t_env, &s_env).expect("envelopes share bin count");
     }
     corr
 }
@@ -252,9 +254,11 @@ fn run_fixture(fx: &Fixture, cache: &mut InputCache) -> [(&'static str, Option<M
         ];
     }
     let max_lag = fx.signal.len() - fx.template.len();
-    let full = dsp::ncc(&fx.template, &fx.signal, max_lag);
+    let full = corr::ncc(&fx.template, &fx.signal, max_lag)
+        .expect("correlation template/signal shapes must be valid");
     let band = band_ncc_curve(&fx.template, &fx.signal, fx.rate, cache);
-    let gcc = dsp::gcc_phat(&fx.template, &fx.signal, max_lag);
+    let gcc = corr::gcc_phat(&fx.template, &fx.signal, max_lag)
+        .expect("correlation template/signal shapes must be valid");
     let env = spectral_envelope_curve(&fx.template, &fx.signal);
     [
         ("full_ncc", Some(report(fx.name, "full_ncc", &full))),

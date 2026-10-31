@@ -3,6 +3,15 @@
 
 use std::time::Instant;
 
+/// 単発呼出の計測形状を旧 `dsp::fft` と揃えるためのローカル束線。
+/// plan 生成と transform を同一計時区間に含める。
+fn ruviform_fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
+    let mut fft =
+        ruviform_numeric::fft::Fft::new(re.len()).expect("fft length must be a power of two");
+    fft.transform(re, im, inverse)
+        .expect("fft buffer lengths must match the plan");
+}
+
 // 移行前の演算を同じプロセス・CPU・入力で比較するための参照。
 // 製品の DSP 入口には使用しない。
 fn legacy_fft(re: &mut [f64], im: &mut [f64]) {
@@ -73,7 +82,7 @@ fn main() {
         let mut re = sig.clone();
         re.resize(1 << 22, 0.0);
         let mut im = vec![0.0; 1 << 22];
-        al_locate::dsp::fft(&mut re, &mut im, false);
+        ruviform_fft(&mut re, &mut im, false);
         std::hint::black_box(&re);
     });
 
@@ -111,20 +120,21 @@ fn main() {
         let mut si = vec![0.0; n];
         re[..n_sig].copy_from_slice(&sig);
         sr[..n_tpl].copy_from_slice(&tpl);
-        al_locate::dsp::fft(&mut re, &mut im, false);
-        al_locate::dsp::fft(&mut sr, &mut si, false);
+        ruviform_fft(&mut re, &mut im, false);
+        ruviform_fft(&mut sr, &mut si, false);
         for k in 0..n {
             let pr = re[k] * sr[k] + im[k] * si[k];
             let pi = im[k] * sr[k] - re[k] * si[k];
             re[k] = pr;
             im[k] = pi;
         }
-        al_locate::dsp::fft(&mut re, &mut im, true);
+        ruviform_fft(&mut re, &mut im, true);
         std::hint::black_box(&re);
     });
 
     bench("bandpass 2.4M (spectral mask)", 3, &mut || {
-        let b = al_locate::dsp::bandpass(&sig, 48000, 200.0, 800.0);
+        let b = ruviform_numeric::bands::bandpass(&sig, 48000, 200.0, 800.0)
+            .expect("band settings and input must be valid");
         std::hint::black_box(&b);
     });
 
@@ -139,7 +149,7 @@ fn main() {
         while start + win <= n_sig {
             fr[..win].copy_from_slice(&sig[start..start + win]);
             fi.iter_mut().for_each(|v| *v = 0.0);
-            al_locate::dsp::fft(&mut fr, &mut fi, false);
+            ruviform_fft(&mut fr, &mut fi, false);
             acc += fr[0];
             start += hop;
         }
@@ -147,18 +157,19 @@ fn main() {
     });
 
     bench("gcc_phat 2.4M x 8k", 3, &mut || {
-        let p = al_locate::dsp::gcc_phat(&tpl, &sig, n_sig - n_tpl);
+        let p = ruviform_numeric::corr::gcc_phat(&tpl, &sig, n_sig - n_tpl)
+            .expect("correlation template/signal shapes must be valid");
         std::hint::black_box(&p);
     });
 
     // ==== mechanical-caller-cleanup A15 (TASK-034EO484s25JM8bsb6zUCh) ====
     // deinterleave/interleave の Instant 計時区間 — 既存測定経路に
     // 載っていなかったため追加(plan T1)。A15-opt の対称腕:
-    // `dsp.rs` の現行 element-loop と channel-block strided gather
+    // `decode.rs` の現行 element-loop と channel-block strided gather
     // (`chunks_exact`)、normalize/reference の frame-major push
     // loop と `n*c` 事前確保 indexed write / staged-row
     // `extend_from_slice`。byte/element 完全一致は
-    // `src/dsp.rs`/`tests/locate.rs` の characterization で gate。
+    // `src/decode.rs`/`tests/locate.rs` の characterization で gate。
     let channels = 2usize;
     let frames = 1_000_000usize;
     let interleaved: Vec<f64> = (0..frames * channels).map(|_| rand()).collect();
@@ -167,7 +178,7 @@ fn main() {
         .collect();
 
     bench("deinterleave 2ch x 1M (current)", 5, &mut || {
-        let d = al_locate::dsp::deinterleave(&interleaved, channels as u16);
+        let d = al_locate::deinterleave(&interleaved, channels as u16);
         std::hint::black_box(&d);
     });
     bench(

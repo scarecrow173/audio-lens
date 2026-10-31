@@ -2,8 +2,8 @@
 //! writing `FeatureRecord`s and spectral intermediates into the
 //! Analysis Dataset.
 //!
-//! All DSP is implemented in-tree — spectral primitives reuse
-//! `al_locate::dsp`, decoded input comes from `al_locate::decode`.
+//! All DSP calls `ruviform_numeric` kernels directly; decoded input
+//! comes from `al_locate::decode`.
 
 pub mod avsync;
 mod band_gain;

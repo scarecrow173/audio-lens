@@ -6,9 +6,9 @@
 //! evidence, including their own rejection reasons.
 
 use al_core::Validity;
+use ruviform_numeric::{bands, vec};
 
 use crate::candidate::{LocateCandidate, MethodEvidence};
-use crate::dsp;
 use crate::pool::CorrelationPool;
 use crate::prepared::{PreparedChannel, bands_for_rate};
 
@@ -201,7 +201,7 @@ fn preflight(
             "signal shorter than template",
         ));
     }
-    if dsp::sum_sq(template) < MIN_ENERGY {
+    if vec::sum_sq(template) < MIN_ENERGY {
         return Err(rejected(
             method,
             version,
@@ -209,7 +209,7 @@ fn preflight(
             "template has no usable energy",
         ));
     }
-    if dsp::sum_sq(signal) < MIN_ENERGY {
+    if vec::sum_sq(signal) < MIN_ENERGY {
         return Err(rejected(
             method,
             version,
@@ -422,7 +422,7 @@ impl BandNcc {
         let mut acc = vec![0.0; curve_len];
         let mut bands_used = 0;
         for (t, s) in bands {
-            if dsp::sum_sq(t) < MIN_ENERGY {
+            if vec::sum_sq(t) < MIN_ENERGY {
                 continue;
             }
             for (a, c) in acc.iter_mut().zip(pool.ncc(t, s, s.len() - t.len())) {
@@ -467,16 +467,18 @@ impl LocateMethod for BandNcc {
             return e;
         }
         let bands = bands_for_rate(sample_rate);
-        let templates = dsp::bandpass_many(template, sample_rate, &bands);
+        let templates = bands::bandpass_many(template, sample_rate, &bands)
+            .expect("band settings and input must be valid");
         // 素材に存在する帯域だけキャプチャを処理する。区間と FFT grid は従来と同じ。
         let active: Vec<_> = bands
             .iter()
             .copied()
             .zip(templates)
-            .filter(|(_, t)| dsp::sum_sq(t) >= MIN_ENERGY)
+            .filter(|(_, t)| vec::sum_sq(t) >= MIN_ENERGY)
             .collect();
         let active_bands: Vec<_> = active.iter().map(|(band, _)| *band).collect();
-        let signals = dsp::bandpass_many(signal, sample_rate, &active_bands);
+        let signals = bands::bandpass_many(signal, sample_rate, &active_bands)
+            .expect("band settings and input must be valid");
         self.evidence_from_bands(
             signal.len() - template.len() + 1,
             active
@@ -575,12 +577,12 @@ impl Default for SpectralEnvelope {
 /// Normalize to unit RMS so absolute-scale comparisons are
 /// meaningful across different `sample_format` inputs.
 pub fn normalize_gain(x: &[f64]) -> Vec<f64> {
-    let r = dsp::rms(x);
+    let r = vec::rms(x);
     if r < MIN_ENERGY {
         return x.to_vec();
     }
     let mut out = vec![0.0; x.len()];
-    dsp::scale(x, r.recip(), &mut out);
+    vec::scale(x, r.recip(), &mut out).expect("equal slice lengths");
     out
 }
 
@@ -608,7 +610,8 @@ impl LocateMethod for SpectralEnvelope {
         if let Err(e) = preflight(self.id(), self.version(), template, signal) {
             return e;
         }
-        let t_env = dsp::spectral_envelope(&normalize_gain(template), self.fft_size, self.bins);
+        let t_env = bands::spectral_envelope(&normalize_gain(template), self.fft_size, self.bins)
+            .expect("envelope parameters must be valid");
         // Slide a template-length window over the signal; envelope NCC
         // per position. Hop keeps the scan bounded even for very short
         // templates, where win/16 alone would explode the lag count.
@@ -618,12 +621,13 @@ impl LocateMethod for SpectralEnvelope {
         let hop = (win / 16).max(1).max(max_lag / MAX_WINDOWS);
         let mut corr = vec![0.0; max_lag + 1];
         for lag in (0..=max_lag).step_by(hop) {
-            let s_env = dsp::spectral_envelope(
+            let s_env = bands::spectral_envelope(
                 &normalize_gain(&signal[lag..lag + win]),
                 self.fft_size,
                 self.bins,
-            );
-            corr[lag] = dsp::corr0(&t_env, &s_env);
+            )
+            .expect("envelope parameters must be valid");
+            corr[lag] = vec::corr0(&t_env, &s_env).expect("envelopes share bin count");
         }
         evidence_from_corr(self.id(), self.version(), &corr)
     }

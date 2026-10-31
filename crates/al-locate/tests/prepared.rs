@@ -43,7 +43,8 @@ fn cached_band_response_is_exactly_the_existing_full_interval_filter() {
         for ((lo, hi), band) in prepared.bands() {
             assert_eq!(
                 band.as_ref(),
-                al_locate::dsp::bandpass(&signal, 48000, *lo, *hi)
+                ruviform_numeric::bands::bandpass(&signal, 48000, *lo, *hi)
+                    .expect("band settings and input must be valid")
             );
         }
     }

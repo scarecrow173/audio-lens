@@ -101,15 +101,13 @@ fn ingest_wav_produces_pcm_and_metadata_artifacts() {
     assert_eq!(meta["audio"]["channels"], 2);
     assert_eq!(meta["audio"]["source_hash"].as_str().unwrap().len(), 64);
     // Issue #100: decode provenance records the Ruviform backend and
-    // the pinned backend revision.
+    // the pinned backend revision. Issue #115: revision は解決済み
+    // 依存(Cargo.lock)から導出される al_core::RUVIFORM_REV に一致する。
     assert_eq!(meta["decoder"]["backend"], "ruviform");
-    assert_eq!(
-        meta["decoder"]["version"],
-        "e467ccba8e1cf9d18982387827b61275b4bf3f4c"
-    );
+    assert_eq!(meta["decoder"]["version"], al_core::RUVIFORM_REV);
     assert_eq!(
         meta["decoder"]["settings"]["ruviform"]["rev"],
-        "e467ccba8e1cf9d18982387827b61275b4bf3f4c"
+        al_core::RUVIFORM_REV
     );
     assert_eq!(meta["decoder"]["source_hash"], meta["audio"]["source_hash"]);
     assert_eq!(meta["decoder"]["fallback"], false);

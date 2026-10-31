@@ -3,7 +3,9 @@
 //! 逐次生成する(全帯域同時保持を避ける)。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
-use al_locate::dsp::{BandFilter, CorrelationPlan, CorrelationWorkspace, dot, sum_sq};
+use ruviform_numeric::bands::BandFilter;
+use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
+use ruviform_numeric::vec::{dot, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
 
 const MIN_CORRELATION: f64 = 0.5;
@@ -107,7 +109,7 @@ fn windows(
             let b = &y[start - max + best..start - max + best + window];
             let energy: f64 = sum_sq(a);
             let gain = if energy > 1e-20 {
-                dot(a, b) / energy
+                dot(a, b).expect("equal window lengths") / energy
             } else {
                 f64::NAN
             };
@@ -341,7 +343,7 @@ pub(crate) fn analyze(
 mod tests {
     use super::*;
     use al_dataset::types::Value;
-    use al_locate::dsp::bandpass_many;
+    use ruviform_numeric::bands::bandpass_many;
 
     fn noise(n: usize, mut seed: u64) -> Vec<f64> {
         (0..n)
@@ -381,7 +383,8 @@ mod tests {
         for rate in [8_000, 48_000] {
             let n = rate as usize;
             let components =
-                bandpass_many(&noise(n, 12), rate, &[(300.0, 500.0), (1800.0, 2800.0)]);
+                bandpass_many(&noise(n, 12), rate, &[(300.0, 500.0), (1800.0, 2800.0)])
+                    .expect("band settings and input must be valid");
             let x: Vec<_> = (0..n)
                 .map(|i| components[0][i] + components[1][i])
                 .collect();

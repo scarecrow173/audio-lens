@@ -55,7 +55,8 @@ mod tests {
             .prepare_with_bands("input", 0, 8000, "v1", &samples, &[(100.0, 1000.0)])
             .unwrap();
         assert!(!Arc::ptr_eq(&a, &other));
-        let filtered = crate::dsp::bandpass_many(&samples, 8000, &bands);
+        let filtered = ruviform_numeric::bands::bandpass_many(&samples, 8000, &bands)
+            .expect("band settings and input must be valid");
         for ((_, actual), expected) in a.bands().iter().zip(filtered) {
             assert_eq!(actual.as_ref(), expected);
         }
@@ -223,7 +224,8 @@ impl InputCache {
             return Ok(Arc::clone(prepared));
         }
         self.misses += 1;
-        let filtered = crate::dsp::bandpass_many(samples, rate, bands);
+        let filtered = ruviform_numeric::bands::bandpass_many(samples, rate, bands)
+            .expect("band settings and input must be valid");
         let coarse_rate = rate / 4;
         let (coarse, radius) = if coarse_rate > 0 && samples.len() >= 4 {
             let plan =

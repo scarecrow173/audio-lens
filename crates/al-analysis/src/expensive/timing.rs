@@ -4,7 +4,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Value};
-use al_locate::dsp::{corr0, rms};
+use ruviform_numeric::vec::{corr0, rms};
 
 use crate::cheap::NamedTensor;
 use crate::records::{propagate_confidence, propagate_validity};
@@ -90,7 +90,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
             let n_use = lo.len().min(hi.len());
             if n_use >= 32 {
                 evaluated = true;
-                let c = corr0(&lo[..n_use], &hi[..n_use]);
+                let c = corr0(&lo[..n_use], &hi[..n_use]).expect("equal slice lengths");
                 if c > best_score {
                     best_score = c;
                     best_rate = cand;
@@ -146,7 +146,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 .chunks_exact(block)
                 .collect::<Vec<_>>()
                 .windows(2)
-                .map(|w| corr0(w[0], w[1]))
+                .map(|w| corr0(w[0], w[1]).expect("equal block lengths"))
                 .fold(0.0, f64::max);
             out.records.push(e.push(
                 "exp.repeat_block_score",
@@ -395,7 +395,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                                 if len == 0 {
                                     continue;
                                 }
-                                let cc = corr0(&c[a0..a0 + len], &s[b0..b0 + len]);
+                                let cc =
+                                    corr0(&c[a0..a0 + len], &s[b0..b0 + len]).expect("equal spans");
                                 if cc > best_c {
                                     best_c = cc;
                                     best_l = l;
