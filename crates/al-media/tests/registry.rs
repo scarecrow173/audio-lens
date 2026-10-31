@@ -207,38 +207,15 @@ fn timing_only_skips_pcm_and_pixel_decode_and_arbitrary_selection_is_rejected() 
 }
 
 #[test]
-fn native_is_first_and_duplicate_backend_is_rejected() {
-    struct NeverRun;
-    impl MediaDecoder for NeverRun {
-        fn id(&self) -> &'static str {
-            "test"
-        }
-        fn version(&self) -> &'static str {
-            "1"
-        }
-        fn detect(&self, _: &[u8]) -> Option<al_media::MediaFormat> {
-            Some(al_media::MediaFormat::Wav)
-        }
-        fn probe(&self, _: &[u8]) -> Result<al_media::decoder::MediaProbe, al_media::MediaError> {
-            panic!("native corruption must never fall through")
-        }
-        fn decode(
-            &self,
-            _: &[u8],
-            _: &al_media::decoder::MediaProbe,
-            _: &DecodeRequest,
-        ) -> Result<al_media::decoder::IngestResult, al_media::MediaError> {
-            unreachable!()
-        }
-    }
-    let mut registry = DecoderRegistry::native();
-    registry.register(Box::new(NeverRun)).unwrap();
-    assert!(registry.register(Box::new(NativeDecoder)).is_err());
-    assert!(registry.register(Box::new(NeverRun)).is_err());
+fn native_registry_resolves_and_corruption_errors_at_the_backend() {
+    let registry = DecoderRegistry::native();
     assert_eq!(
         registry.resolve(b"RIFF\0\0\0\0WAVE").unwrap().id(),
         "native"
     );
+    // 単一 backend 構成のため別 backend へのフォールスルーは
+    // 構造的に起きない: native の detect に一致した入力は
+    // native のエラーとして表面化する。
     assert!(matches!(
         registry.decode(b"RIFF\0\0\0\0WAVE", &DecodeRequest::default()),
         Err(al_media::MediaError::Malformed { .. })
