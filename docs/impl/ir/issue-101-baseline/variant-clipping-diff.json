@@ -1,0 +1,368 @@
+[
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "26/params",
+    "kind": "value",
+    "a": "{\"measured\":0.384728131013832,\"segment_scope\":true,\"threshold\":0.5}",
+    "b": "{\"measured\":0.384728131013818,\"segment_scope\":true,\"threshold\":0.5}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "27/params",
+    "kind": "value",
+    "a": "{\"measured\":0.16606334909091375,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.16606334909092374,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "28/params",
+    "kind": "value",
+    "a": "{\"measured\":0.9153432453621854,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.9153432453621814,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "30/params",
+    "kind": "value",
+    "a": "{\"measured\":0.3661154578389656,\"segment_scope\":true,\"threshold\":0.5}",
+    "b": "{\"measured\":0.3661154578389624,\"segment_scope\":true,\"threshold\":0.5}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "31/params",
+    "kind": "value",
+    "a": "{\"measured\":0.1949178711618829,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.19491787116188675,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/analysis/events/candidates.rows.json",
+    "path": "32/params",
+    "kind": "value",
+    "a": "{\"measured\":0.9212064256072378,\"segment_scope\":true,\"threshold\":0.3}",
+    "b": "{\"measured\":0.9212064256072195,\"segment_scope\":true,\"threshold\":0.3}"
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0-ch1/coherence.payload.json",
+    "path": "values/973",
+    "kind": "tolerance",
+    "a": 0.0011176178059365775,
+    "b": 0.0011176178047029985,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0-ch1/coherence.payload.json",
+    "path": "values/3070",
+    "kind": "tolerance",
+    "a": 0.0010312599532576025,
+    "b": 0.0010312599643205122,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0/stft_im.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 1.1937117960769683e-12,
+    "b": 5.7411853049416095e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch0/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -3.709033080667723e-12,
+    "b": -9.50706180447014e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#1/ch1/stft_im.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 5.5848659030743875e-12,
+    "b": 8.640199666842818e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/coherence.payload.json",
+    "path": "values/1951",
+    "kind": "tolerance",
+    "a": 0.0004427653635527499,
+    "b": 0.00044276536476685487,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/coherence.payload.json",
+    "path": "values/6076",
+    "kind": "tolerance",
+    "a": 0.002642278148014516,
+    "b": 0.0026422781433119553,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/coherence.payload.json",
+    "path": "values/6077",
+    "kind": "tolerance",
+    "a": 0.001114929978288719,
+    "b": 0.0011149299771700794,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/coherence.payload.json",
+    "path": "values/6133",
+    "kind": "tolerance",
+    "a": -0.0009945159022848968,
+    "b": -0.0009945158987677675,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/coherence.payload.json",
+    "path": "values/6155",
+    "kind": "tolerance",
+    "a": 0.0009945159022917765,
+    "b": 0.0009945158987388718,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/1951",
+    "kind": "tolerance",
+    "a": 0.9088613236805155,
+    "b": 0.9088613261723298,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/1989",
+    "kind": "tolerance",
+    "a": 0.3535492462833537,
+    "b": 0.35354924699632867,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/2107",
+    "kind": "tolerance",
+    "a": 0.3535492484076771,
+    "b": 0.3535492476063876,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/2145",
+    "kind": "tolerance",
+    "a": 0.9088613267447337,
+    "b": 0.9088613277278116,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/6076",
+    "kind": "tolerance",
+    "a": 7.102337508638624,
+    "b": 7.102337496010844,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/6077",
+    "kind": "tolerance",
+    "a": 2.572703907810223,
+    "b": 2.5727039052301444,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/6133",
+    "kind": "tolerance",
+    "a": -2.211047168010476,
+    "b": -2.2110471601900783,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h.payload.json",
+    "path": "values/6155",
+    "kind": "tolerance",
+    "a": 2.211047168021387,
+    "b": 2.21104716012556,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#1/transfer_h_t.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 3084085977.4487996,
+    "b": 3084086006.3993897,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/2043",
+    "kind": "tolerance",
+    "a": -0.014340589087276626,
+    "b": -0.014340589112019641,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/2106",
+    "kind": "tolerance",
+    "a": -0.0002687190131458473,
+    "b": -0.0002687190118936282,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6126",
+    "kind": "tolerance",
+    "a": -0.0009014031162401205,
+    "b": -0.0009014031181419081,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6140",
+    "kind": "tolerance",
+    "a": 0.00057658498609135,
+    "b": 0.0005765850085642142,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/coherence.payload.json",
+    "path": "values/6157",
+    "kind": "tolerance",
+    "a": -0.006764086191551983,
+    "b": -0.00676408618072036,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2013",
+    "kind": "tolerance",
+    "a": 0.0005339280740829442,
+    "b": 0.000533928080553421,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2043",
+    "kind": "tolerance",
+    "a": -0.5101543512338289,
+    "b": -0.5101543521131809,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2083",
+    "kind": "tolerance",
+    "a": 0.000533927978799193,
+    "b": 0.0005339279686553405,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/2106",
+    "kind": "tolerance",
+    "a": -0.016544272563355902,
+    "b": -0.016544272486265926,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6126",
+    "kind": "tolerance",
+    "a": -0.02983932389554236,
+    "b": -0.029839323958499742,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6140",
+    "kind": "tolerance",
+    "a": 0.020323086519199535,
+    "b": 0.020323087311425472,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h.payload.json",
+    "path": "values/6157",
+    "kind": "tolerance",
+    "a": -0.2906265439721208,
+    "b": -0.29062654350724526,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/intermediate/IN-#3__IN-#2/transfer_h_t.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 268755477.3958464,
+    "b": 268755472.2563588,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/residual/IN-#3__IN-#1/r1/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -1.971045548998518e-11,
+    "b": -1.148947603724082e-11,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/residual/IN-#3__IN-#1/r2/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -3.126388037344441e-13,
+    "b": 3.97193389289896e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/residual/IN-#3__IN-#1/r3/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": -3.126388037344441e-13,
+    "b": 3.97193389289896e-12,
+    "rel": 1e-9,
+    "abs": 1e-12
+  },
+  {
+    "surface": "golden/payloads/analysis/residual/IN-#3__IN-#2/r0/stft_re.payload.json",
+    "path": "fingerprint/sum",
+    "kind": "tolerance",
+    "a": 6.608047442568932e-13,
+    "b": -4.11226608321158e-13,
+    "rel": 1e-9,
+    "abs": 1e-12
+  }
+]
