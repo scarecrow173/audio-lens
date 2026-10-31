@@ -4,6 +4,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
+use ruviform_numeric::spec;
 
 use super::{Emit, ExpensiveResult, RegionCtx};
 
@@ -46,9 +47,8 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let w = 8usize;
         let mut tonal = 0u64;
         for k in w..half.saturating_sub(w) {
-            let mut local: Vec<f64> = mean_power[k - w..k + w].to_vec();
-            local.sort_by(|a, b| a.total_cmp(b));
-            let med = local[w];
+            let med =
+                spec::median(&mean_power[k - w..k + w]).expect("tonal neighborhood is non-empty");
             if med > 0.0 && (mean_power[k] / med).log10() * 10.0 > 15.0 {
                 tonal += 1;
             }

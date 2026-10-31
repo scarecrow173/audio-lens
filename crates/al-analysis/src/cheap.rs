@@ -9,7 +9,8 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Resolution, ResolutionClass, Value};
 use al_locate::decode::DecodedInput;
-use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
+use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace, overlap_ncc_direct};
+use ruviform_numeric::spec;
 use ruviform_numeric::vec::{corr0, rms, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
 
@@ -1261,51 +1262,12 @@ fn measure_spectral(
     let mut prev: Option<Vec<f64>> = None;
     for row in &mag {
         let row = &row[..half];
-        let total: f64 = row.iter().sum();
-        let centroid_hz = if total > 0.0 {
-            row.iter()
-                .enumerate()
-                .map(|(b, &v)| b as f64 * bin_hz * v)
-                .sum::<f64>()
-                / total
-        } else {
-            0.0
-        };
-        centroid.push(centroid_hz);
-        let geo = (row.iter().map(|v| (v + 1e-12).ln()).sum::<f64>() / half as f64).exp();
-        flatness.push(if total > 0.0 {
-            geo / (total / half as f64)
-        } else {
-            0.0
-        });
-        // 85% energy rolloff.
-        let mut acc = 0.0;
-        let target = total * 0.85;
-        let mut ro_bin = 0;
-        for (b, &v) in row.iter().enumerate() {
-            acc += v;
-            if acc >= target {
-                ro_bin = b;
-                break;
-            }
-        }
-        rolloff.push(ro_bin as f64 * bin_hz);
-        if total > 0.0 {
-            let h: f64 = row
-                .iter()
-                .filter(|&&v| v > 0.0)
-                .map(|&v| (v / total) * (v / total).ln())
-                .sum::<f64>();
-            entropy.push(-h / (half as f64).ln());
-        } else {
-            entropy.push(0.0);
-        }
+        centroid.push(spec::centroid(row, bin_hz));
+        flatness.push(spec::flatness(row));
+        rolloff.push(spec::rolloff(row, bin_hz, 0.85));
+        entropy.push(spec::entropy(row));
         flux.push(match &prev {
-            Some(p) => row
-                .iter()
-                .zip(p.iter())
-                .map(|(&a, &b)| (a - b).max(0.0))
-                .sum(),
+            Some(p) => spec::flux(row, p).expect("equal frame widths"),
             // First frame has no predecessor: flux is 0 so every
             // trajectory row shares the frame count.
             None => 0.0,
@@ -1314,28 +1276,7 @@ fn measure_spectral(
     }
     let bandwidth: Vec<f64> = mag
         .iter()
-        .map(|row| {
-            let row = &row[..half];
-            let total: f64 = row.iter().sum();
-            if total <= 0.0 {
-                return 0.0;
-            }
-            let c = row
-                .iter()
-                .enumerate()
-                .map(|(b, &v)| b as f64 * bin_hz * v)
-                .sum::<f64>()
-                / total;
-            (row.iter()
-                .enumerate()
-                .map(|(b, &v)| {
-                    let d = b as f64 * bin_hz - c;
-                    d * d * v
-                })
-                .sum::<f64>()
-                / total)
-                .sqrt()
-        })
+        .map(|row| spec::bandwidth(&row[..half], bin_hz))
         .collect();
     // Spectral slope (linear fit of log-magnitude vs log-freq,
     // first 90% of band). `mean_row` is fused into the A9
@@ -1347,18 +1288,7 @@ fn measure_spectral(
     let ys: Vec<f64> = (1..(half * 9 / 10).max(2))
         .map(|b| (mean_row[b] + 1e-12).ln())
         .collect();
-    let n = xs.len() as f64;
-    let (sx, sy, sxy, sxx) = xs
-        .iter()
-        .zip(&ys)
-        .fold((0.0, 0.0, 0.0, 0.0), |(ax, ay, axy, axx), (&x, &y)| {
-            (ax + x, ay + y, axy + x * y, axx + x * x)
-        });
-    let slope = if sxx * n - sx * sx != 0.0 {
-        (sxy * n - sx * sy) / (sxx * n - sx * sx)
-    } else {
-        0.0
-    };
+    let slope = spec::ols_slope(&xs, &ys).expect("slope inputs share length");
     // Narrowband peaks / notches: bins >6 dB above/below the
     // local neighborhood median.
     let mut narrowband_peaks = 0u64;
@@ -1366,9 +1296,7 @@ fn measure_spectral(
     for (b, &v) in mean_row.iter().enumerate().take(half).skip(4) {
         let lo = b.saturating_sub(4);
         let hi = (b + 5).min(half);
-        let mut nb: Vec<f64> = mean_row[lo..hi].to_vec();
-        nb.sort_by(|a, b2| a.total_cmp(b2));
-        let med = nb[nb.len() / 2];
+        let med = spec::median(&mean_row[lo..hi]).expect("narrowband neighborhood is non-empty");
         if v > med * 4.0 {
             narrowband_peaks += 1;
         }
@@ -1377,13 +1305,8 @@ fn measure_spectral(
         }
     }
     // Tonal peak: strongest narrowband peak frequency + level.
-    let tonal = mean_row
-        .iter()
-        .enumerate()
-        .skip(1)
-        .take(half.saturating_sub(1))
-        .max_by(|a, b| a.1.total_cmp(b.1))
-        .map(|(b, &v)| (b, v))
+    let tonal = spec::argmax(mean_row.get(1..half).unwrap_or(&[]))
+        .map(|(b, v)| (b + 1, v))
         .unwrap_or((0, 0.0));
     // Hum: energy at 50/60Hz fundamentals + first 5 harmonics
     // relative to total.
@@ -1416,13 +1339,14 @@ fn measure_spectral(
             let row = &mmag[0];
             let traj_rate = rate as f64 / level_hop as f64;
             let bin_f = traj_rate / mm.fft_size as f64;
-            let (am_bin, _) = row
+            let span = row
                 .iter()
                 .enumerate()
                 .take_while(|(b, _)| *b as f64 * bin_f <= 20.0)
-                .skip(1)
-                .max_by(|a, b| a.1.total_cmp(b.1))
-                .unwrap_or((0, &0.0));
+                .count();
+            let (am_bin, _) = spec::argmax(row.get(1..span).unwrap_or(&[]))
+                .map(|(b, v)| (b + 1, v))
+                .unwrap_or((0, 0.0));
             let depth = if mean > 0.0 {
                 (rms_traj.iter().fold(0.0f64, |m, &v| m.max(v)) / mean) - 1.0
             } else {
@@ -1513,19 +1437,18 @@ fn measure_stereo(
     // ILD: level difference.
     let ild = db(sy.sqrt() / n.max(1) as f64) - db(sx.sqrt() / n.max(1) as f64);
     // IPD: NCC peak lag within ±ipd_max_lag.
-    let max_lag = (cfg.ipd_max_lag_s * rate as f64).round() as isize;
+    // `curve[i]` は lag `i − max_lag` の overlap `corr0` と bit-exact
+    // (#168 直算 API。AL の lag 符号規約は x/y を入れ替えた呼出で一致)。
+    let max_lag = (cfg.ipd_max_lag_s * rate as f64).round() as usize;
     let mut best_lag = 0isize;
     let mut best_v = f64::MIN;
-    for lag in -max_lag..=max_lag {
-        let (xa, ya) = if lag >= 0 {
-            (&xs[lag as usize..], &ys[..n - lag as usize])
-        } else {
-            (&xs[..n - (-lag) as usize], &ys[(-lag) as usize..])
-        };
-        if xa.is_empty() {
+    let curve = overlap_ncc_direct(ys, xs, max_lag).expect("equal channel lengths");
+    for (i, &c) in curve.iter().enumerate() {
+        let lag = i as isize - max_lag as isize;
+        // |lag| ≥ n の空 overlap 区間は旧 sweep と同じく採用しない。
+        if lag.unsigned_abs() >= n {
             continue;
         }
-        let c = corr0(xa, ya).expect("equal lag spans");
         if c > best_v {
             best_v = c;
             best_lag = lag;
@@ -1622,9 +1545,7 @@ fn measure_transient(
         let d = rms[i] - rms[i - 1];
         let local_med = {
             let lo = i.saturating_sub(8);
-            let mut nb: Vec<f64> = rms[lo..=i.min(rms.len() - 1)].to_vec();
-            nb.sort_by(|a, b| a.total_cmp(b));
-            nb[nb.len() / 2]
+            spec::median(&rms[lo..=i.min(rms.len() - 1)]).expect("onset neighborhood is non-empty")
         };
         if d > local_med * 1.5 && d > 0.01 {
             onsets.push(i);
@@ -1637,13 +1558,9 @@ fn measure_transient(
     // Self-similarity: normalized autocorrelation of the RMS
     // trajectory at lag 2-8 windows (periodicity hint).
     let self_sim = (rms.len() > 16).then(|| {
-        (2..=8)
-            .map(|lag| {
-                let a = &rms[..rms.len() - lag];
-                let b = &rms[lag..];
-                corr0(a, b).expect("equal slice lengths")
-            })
-            .fold(0.0f64, f64::max)
+        // 正 lag の curve 値は旧 `corr0(a, b)` sweep と bit-exact(#168)。
+        let curve = overlap_ncc_direct(&rms, &rms, 8).expect("self-correlation is equal-length");
+        curve[8 + 2..=8 + 8].iter().copied().fold(0.0f64, f64::max)
     });
     // Coarse lag modulation between channels (drift of the IPD
     // estimate over time) — first pair only, per 100ms block.
@@ -1701,11 +1618,9 @@ fn ipd_block_lag(
         .ncc(workspace, template, search, 2 * origin)
         .expect("correlation template/signal shapes must be valid")
         .values;
-    let (index, _) = curve
-        .iter()
-        .enumerate()
-        .max_by(|a, b| a.1.total_cmp(b.1))
-        .expect("IPD search window contains the complete template");
+    let index = spec::argmax(curve)
+        .expect("IPD search window contains the complete template")
+        .0;
     index as f64 - origin as f64
 }
 
@@ -2184,5 +2099,49 @@ mod tests {
             expected.to_bits(),
             "stereo.coherence_mean"
         );
+    }
+
+    /// Pre-migration `corr0` sweep oracle for the IPD curve and the
+    /// self-similarity scan (#168). The direct API must reproduce the
+    /// per-lag values bit-exact, including the signed-lag origin.
+    #[test]
+    fn overlap_ncc_direct_matches_corr0_sweeps_bit_exact() {
+        let n = 192usize;
+        let xs = ipd_noise(n);
+        let ys: Vec<f64> = (0..n)
+            .map(|i| if i >= 5 { xs[i - 5] * 0.7 } else { 0.0 })
+            .collect();
+        let max_lag = 24usize;
+
+        // IPD oracle: the old per-lag `corr0` overlap sweep.
+        let curve = overlap_ncc_direct(&ys, &xs, max_lag).expect("equal lengths");
+        for (i, &c) in curve.iter().enumerate() {
+            let lag = i as isize - max_lag as isize;
+            let expected = if lag.unsigned_abs() < n {
+                let (xa, ya) = if lag >= 0 {
+                    (&xs[lag as usize..], &ys[..n - lag as usize])
+                } else {
+                    (&xs[..n - lag.unsigned_abs()], &ys[lag.unsigned_abs()..])
+                };
+                corr0(xa, ya).expect("equal lag spans")
+            } else {
+                0.0
+            };
+            assert_eq!(c.to_bits(), expected.to_bits(), "ipd curve lag {lag}");
+        }
+
+        // self_sim oracle: corr0 of the rms trajectory at lags 2..=8.
+        let rms: Vec<f64> = ipd_noise(64);
+        let curve = overlap_ncc_direct(&rms, &rms, 8).expect("equal lengths");
+        for lag in 2usize..=8 {
+            let a = &rms[..rms.len() - lag];
+            let b = &rms[lag..];
+            let expected = corr0(a, b).expect("equal slice lengths");
+            assert_eq!(
+                curve[8 + lag].to_bits(),
+                expected.to_bits(),
+                "self_sim lag {lag}"
+            );
+        }
     }
 }

@@ -6,7 +6,7 @@
 //! evidence, including their own rejection reasons.
 
 use al_core::Validity;
-use ruviform_numeric::{bands, vec};
+use ruviform_numeric::{bands, spec, vec};
 
 use crate::candidate::{LocateCandidate, MethodEvidence};
 use crate::pool::CorrelationPool;
@@ -232,9 +232,10 @@ pub fn peaks_from_correlation(corr: &[f64], top: usize) -> Vec<LocateCandidate> 
     if corr.is_empty() {
         return Vec::new();
     }
-    let mut abs: Vec<f64> = corr.iter().map(|v| v.abs()).collect();
-    abs.sort_by(|a, b| a.total_cmp(b));
-    let background = abs[abs.len() / 2].max(1e-12);
+    let abs: Vec<f64> = corr.iter().map(|v| v.abs()).collect();
+    let background = spec::median(&abs)
+        .expect("correlation curve is non-empty")
+        .max(1e-12);
 
     let n = corr.len();
     let is_peak = |i: usize| {

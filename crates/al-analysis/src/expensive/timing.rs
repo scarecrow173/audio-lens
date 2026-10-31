@@ -4,6 +4,8 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Value};
+use ruviform_numeric::corr::overlap_ncc_direct;
+use ruviform_numeric::spec;
 use ruviform_numeric::vec::{corr0, rms};
 
 use crate::cheap::NamedTensor;
@@ -194,21 +196,14 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     // energy floor keeps digital silence's edge steps out.
     {
         let win = ((0.002 * rate as f64) as usize).max(1);
-        let mut sorted: Vec<f64> = seg.windows(2).map(|w| (w[1] - w[0]).abs()).collect();
-        sorted.sort_by(|a, b| a.total_cmp(b));
-        let med = sorted.get(sorted.len() / 2).copied().unwrap_or(0.0);
+        let diffs: Vec<f64> = seg.windows(2).map(|w| (w[1] - w[0]).abs()).collect();
+        let med = spec::median(&diffs).unwrap_or(0.0);
         let thresh = (4.0 * med).max(0.15);
         let refrac = (0.001 * rate as f64) as usize + 1;
         let mut last = 0usize;
         let mut count = 0u64;
         let mut first_s = f64::NAN;
-        for (i, &d) in seg
-            .windows(2)
-            .map(|w| (w[1] - w[0]).abs())
-            .collect::<Vec<_>>()
-            .iter()
-            .enumerate()
-        {
+        for (i, &d) in diffs.iter().enumerate() {
             if d <= thresh {
                 continue;
             }
@@ -382,21 +377,19 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         while w + win <= o1 {
                             let s = &src[w - o0..w - o0 + win];
                             let c = &cap[w..w + win];
+                            // `curve[i]` は lag `i − max_lag`(positive =
+                            // capture delayed)の overlap `corr0` と
+                            // bit-exact(直算 API、#168)。
+                            let curve =
+                                overlap_ncc_direct(s, c, max_lag).expect("equal window lengths");
                             let (mut best_l, mut best_c) = (0isize, f64::NEG_INFINITY);
-                            for l in -(max_lag as isize)..=max_lag as isize {
-                                // Overlapping span for lag `l`
-                                // (positive = capture delayed).
-                                let (a0, b0) = if l >= 0 {
-                                    (l as usize, 0usize)
-                                } else {
-                                    (0usize, (-l) as usize)
-                                };
-                                let len = win - a0.max(b0);
-                                if len == 0 {
+                            for (i, &cc) in curve.iter().enumerate() {
+                                let l = i as isize - max_lag as isize;
+                                // |l| ≥ win の空 overlap は旧 sweep と同じく
+                                // 採用しない。
+                                if l.unsigned_abs() >= win {
                                     continue;
                                 }
-                                let cc =
-                                    corr0(&c[a0..a0 + len], &s[b0..b0 + len]).expect("equal spans");
                                 if cc > best_c {
                                     best_c = cc;
                                     best_l = l;

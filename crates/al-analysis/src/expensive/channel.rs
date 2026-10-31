@@ -6,6 +6,7 @@ use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, FeatureRecord, Range};
 
 use ruviform_numeric::linalg::complex_solve;
+use ruviform_numeric::spec;
 use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::records::{propagate_confidence, propagate_validity};
@@ -191,9 +192,9 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     // evidence only — the energy share at the product positions.
     {
         let supported = ctx.total_power > 0.0;
-        let mut local: Vec<f64> = mean_power[1..half].to_vec();
-        local.sort_by(|a, b| a.total_cmp(b));
-        let med = local[local.len() / 2].max(1e-18);
+        let med = spec::median(&mean_power[1..half])
+            .expect("intermodulation band is non-empty")
+            .max(1e-18);
         // Strong local maxima (10× neighborhood median).
         let mut peaks: Vec<usize> = (8..half.saturating_sub(8))
             .filter(|&k| {
