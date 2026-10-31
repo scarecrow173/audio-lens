@@ -11,6 +11,7 @@ mod calibration;
 pub mod cheap;
 pub mod events;
 pub mod expensive;
+mod pool;
 pub mod records;
 pub mod reference;
 pub mod session;

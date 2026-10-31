@@ -18,8 +18,18 @@ use crate::avsync::{self, AvSyncConfig};
 use crate::cheap::{self, CheapConfig};
 use crate::events::{self, EventConfig};
 use crate::expensive::{self, ExpensiveConfig};
+use crate::pool::run_pool;
 use crate::reference::{self, Aligned, ReferenceConfig};
 use crate::session::open_analysis_dataset;
+
+/// stage 内並列化の外側タスク同時実行上限。入力/pair タスクは
+/// decode 済み PCM(数十〜数百 MB)をタスク内に保持し、reference の
+/// pair タスクは内部で band_gain の pool を起動してコアを占有する
+/// ため、外側の並列度を上げても throughput は頭打ちで band signal
+/// 級のワーキングセットだけが線形に増える。canonical/small の
+/// pair・入力数(≤4)は全並列に収まり、より多い pair/入力を持つ
+/// job では常駐メモリをこの上限で bounded にする。
+const MAX_STAGE_TASKS: usize = 4;
 
 /// Always-on cheap observations over every decoded input.
 #[derive(Debug, Default)]
@@ -64,145 +74,195 @@ impl Stage for CheapAnalysisStage {
         let mut writer = open_analysis_dataset(ctx).map_err(err)?;
         let mut records = Vec::new();
 
-        for input in &ctx.manifest.inputs {
-            let decoded = decode_input(input, ctx)
-                .map_err(|e| StageError::new(StageKind::CheapAnalysis, e.to_string()))?;
-            let feature_path = format!("features/cheap/{}", input.input_id);
-            // A/V sync consumes the ingest-side video_features artifact
-            // independently of audio decode success — missing evidence
-            // becomes an explicit invalid record, never silence.
-            let video = load_video_features(input, ctx)?;
-            let mut lineage: Vec<String> = ctx
-                .manifest
-                .input_artifact(&input.input_id)
-                .iter()
-                .map(|a| a.as_str().to_string())
-                .collect();
-            if let Some((_, artifact_id)) = &video {
-                lineage.push(artifact_id.clone());
-            }
-            let video_features = video.map(|(f, _)| f);
-            av_cfg
-                .validate_video(&input.input_id.to_string(), video_features.as_ref())
-                .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
-            let audio_start_s = if decoded.is_some()
-                && matches!(
-                    video_features,
-                    Some(al_media::VideoFeatureArtifact::Decoded(_))
-                ) {
-                let (origin, metadata_id) = load_audio_origin(input, ctx)?;
-                lineage.push(metadata_id);
-                origin
-            } else {
-                0.0
-            };
-            let video_out = crate::video::roi_records(
-                &input.input_id.to_string(),
-                video_features.as_ref(),
-                lineage.clone(),
-            );
-            for tensor in &video_out.tensors {
-                let mut provenance = prov(input, ctx);
-                provenance.algorithm_id = "video.roi_luminance.v1".into();
-                provenance.parents = lineage.clone();
-                provenance.params = crate::records::with_ruviform_stamp(
-                    video_features
-                        .as_ref()
-                        .and_then(|v| match v {
-                            al_media::video::VideoFeatureArtifact::Decoded(v) => {
-                                serde_json::to_value(&v.params).ok()
-                            }
-                            _ => None,
-                        })
-                        .unwrap_or_else(|| serde_json::json!({})),
-                );
-                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
-            }
-            let Some(dec) = decoded else {
-                // Never ingested: record the failure as an invalid
-                // observation, not a stage error.
-                let rec = FeatureRecord {
-                    feature_id: "input.decode".into(),
-                    value: al_dataset::types::Value::Scalar(f64::NAN),
-                    unit: "none".into(),
-                    time_range: None,
-                    freq_range: None,
-                    channels: None,
-                    resolution: None,
-                    resolution_class: ResolutionClass::Segment,
-                    target: None,
-                    reference: None,
-                    delta: None,
-                    confidence: al_core::Confidence::Low,
-                    validity: Validity::DecodeInputUnavailable,
-                    invalid_reason: Some("no decoded_pcm artifact".into()),
-                    support_count: 0,
-                    algorithm_id: "cheap.v1".into(),
-                    algorithm_version: "1".into(),
-                    params: crate::records::ruviform_params(),
-                    input_id: input.input_id.to_string(),
-                    alignment_id: None,
-                    lineage: Vec::new(),
+        // 入力粒度並列化: decode・video/origin 読込・roi/sync/分析は
+        // 入力ごと独立で共有可変状態を持たないため run_pool で実行し、
+        // ordered slot で入力順に回収する。dataset への書き込みと
+        // artifact 採番は回収後に入力順で逐次行い、manifest/artifact
+        // の記録順と FeatureRecord の発行順を逐次実行と完全一致させる。
+        struct CheapInputOut {
+            decoded: Option<al_locate::decode::DecodedInput>,
+            lineage: Vec<String>,
+            video_params: serde_json::Value,
+            video_tensors: Vec<cheap::NamedTensor>,
+            tensors: Vec<cheap::NamedTensor>,
+            records: Vec<FeatureRecord>,
+        }
+        let outs = run_pool(
+            ctx.manifest.inputs.len(),
+            MAX_STAGE_TASKS,
+            &|| (),
+            &|idx, _| -> Result<CheapInputOut, StageError> {
+                let input = &ctx.manifest.inputs[idx];
+                let decoded = decode_input(input, ctx)
+                    .map_err(|e| StageError::new(StageKind::CheapAnalysis, e.to_string()))?;
+                // A/V sync consumes the ingest-side video_features artifact
+                // independently of audio decode success — missing evidence
+                // becomes an explicit invalid record, never silence.
+                let video = load_video_features(input, ctx)?;
+                let mut lineage: Vec<String> = ctx
+                    .manifest
+                    .input_artifact(&input.input_id)
+                    .iter()
+                    .map(|a| a.as_str().to_string())
+                    .collect();
+                if let Some((_, artifact_id)) = &video {
+                    lineage.push(artifact_id.clone());
+                }
+                let video_features = video.map(|(f, _)| f);
+                av_cfg
+                    .validate_video(&input.input_id.to_string(), video_features.as_ref())
+                    .map_err(|e| StageError::new(StageKind::CheapAnalysis, e))?;
+                let audio_start_s = if decoded.is_some()
+                    && matches!(
+                        video_features,
+                        Some(al_media::VideoFeatureArtifact::Decoded(_))
+                    ) {
+                    let (origin, metadata_id) = load_audio_origin(input, ctx)?;
+                    lineage.push(metadata_id);
+                    origin
+                } else {
+                    0.0
                 };
-                let mut all = vec![rec];
-                all.extend(video_out.records);
-                all.extend(avsync::sync_records(
+                let video_params = video_features
+                    .as_ref()
+                    .and_then(|v| match v {
+                        al_media::video::VideoFeatureArtifact::Decoded(v) => {
+                            serde_json::to_value(&v.params).ok()
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_else(|| serde_json::json!({}));
+                let video_out = crate::video::roi_records(
                     &input.input_id.to_string(),
-                    None,
+                    video_features.as_ref(),
+                    lineage.clone(),
+                );
+                let Some(dec) = decoded else {
+                    // Never ingested: record the failure as an invalid
+                    // observation, not a stage error.
+                    let rec = FeatureRecord {
+                        feature_id: "input.decode".into(),
+                        value: al_dataset::types::Value::Scalar(f64::NAN),
+                        unit: "none".into(),
+                        time_range: None,
+                        freq_range: None,
+                        channels: None,
+                        resolution: None,
+                        resolution_class: ResolutionClass::Segment,
+                        target: None,
+                        reference: None,
+                        delta: None,
+                        confidence: al_core::Confidence::Low,
+                        validity: Validity::DecodeInputUnavailable,
+                        invalid_reason: Some("no decoded_pcm artifact".into()),
+                        support_count: 0,
+                        algorithm_id: "cheap.v1".into(),
+                        algorithm_version: "1".into(),
+                        params: crate::records::ruviform_params(),
+                        input_id: input.input_id.to_string(),
+                        alignment_id: None,
+                        lineage: Vec::new(),
+                    };
+                    let mut all = vec![rec];
+                    all.extend(video_out.records);
+                    all.extend(avsync::sync_records(
+                        &input.input_id.to_string(),
+                        None,
+                        video_features.as_ref(),
+                        audio_start_s,
+                        &av_cfg,
+                        lineage.clone(),
+                    ));
+                    crate::records::stamp_feature_records(&mut all);
+                    return Ok(CheapInputOut {
+                        decoded: None,
+                        lineage,
+                        video_params,
+                        video_tensors: video_out.tensors,
+                        tensors: Vec::new(),
+                        records: all,
+                    });
+                };
+
+                let span = tracing::info_span!(
+                    "analysis::cheap",
+                    input_id = %dec.input_id,
+                    len = dec.channel_samples.first().map_or(0, |c| c.len())
+                );
+                let mut out = span.in_scope(|| cheap::analyze_input(&dec, &cfg));
+                out.records.extend(video_out.records);
+                // A/V sync: the persisted onset_times tensor is the audio
+                // event series; video events come from ingest. Both are
+                // converted to a shared audio PCM origin inside `sync_records`.
+                let onset_times: Vec<f64> = out
+                    .tensors
+                    .iter()
+                    .find(|t| t.path == format!("features/cheap/{}/onset_times", dec.input_id))
+                    .map(|t| t.data.clone())
+                    .unwrap_or_default();
+                out.records.extend(avsync::sync_records(
+                    &dec.input_id,
+                    Some(&onset_times),
                     video_features.as_ref(),
                     audio_start_s,
                     &av_cfg,
-                    lineage,
+                    lineage.clone(),
                 ));
-                crate::records::stamp_feature_records(&mut all);
-                writer
-                    .write_json(
-                        "features/cheap",
-                        &input.input_id.to_string(),
-                        &serde_json::json!({"records": all}),
-                        prov(input, ctx),
-                    )
-                    .map_err(err)?;
-                records.push(artifact(ctx, &feature_path, input));
-                continue;
-            };
+                crate::records::stamp_feature_records(&mut out.records);
+                Ok(CheapInputOut {
+                    decoded: Some(dec),
+                    lineage,
+                    video_params,
+                    video_tensors: video_out.tensors,
+                    tensors: out.tensors,
+                    records: out.records,
+                })
+            },
+        );
 
-            let span = tracing::info_span!(
-                "analysis::cheap",
-                input_id = %dec.input_id,
-                len = dec.channel_samples.first().map_or(0, |c| c.len())
-            );
-            let mut out = span.in_scope(|| cheap::analyze_input(&dec, &cfg));
-            out.records.extend(video_out.records);
-            // A/V sync: the persisted onset_times tensor is the audio
-            // event series; video events come from ingest. Both are
-            // converted to a shared audio PCM origin inside `sync_records`.
-            let onset_times: Vec<f64> = out
-                .tensors
-                .iter()
-                .find(|t| t.path == format!("features/cheap/{}/onset_times", dec.input_id))
-                .map(|t| t.data.clone())
-                .unwrap_or_default();
-            out.records.extend(avsync::sync_records(
-                &dec.input_id,
-                Some(&onset_times),
-                video_features.as_ref(),
-                audio_start_s,
-                &av_cfg,
+        for (input, done) in ctx.manifest.inputs.iter().zip(outs) {
+            let feature_path = format!("features/cheap/{}", input.input_id);
+            let CheapInputOut {
+                decoded,
                 lineage,
-            ));
-            for tensor in &out.tensors {
-                write_tensor(&mut writer, tensor, prov_dec(&dec), chunk_bytes).map_err(err)?;
+                video_params,
+                video_tensors,
+                tensors,
+                records: out_records,
+            } = done?;
+            for tensor in &video_tensors {
+                let mut provenance = prov(input, ctx);
+                provenance.algorithm_id = "video.roi_luminance.v1".into();
+                provenance.parents = lineage.clone();
+                provenance.params = crate::records::with_ruviform_stamp(video_params.clone());
+                write_tensor(&mut writer, tensor, provenance, chunk_bytes).map_err(err)?;
             }
-            crate::records::stamp_feature_records(&mut out.records);
-            writer
-                .write_json(
-                    "features/cheap",
-                    &dec.input_id,
-                    &serde_json::json!({"records": out.records}),
-                    prov_dec(&dec),
-                )
-                .map_err(err)?;
+            match &decoded {
+                None => {
+                    writer
+                        .write_json(
+                            "features/cheap",
+                            &input.input_id.to_string(),
+                            &serde_json::json!({"records": out_records}),
+                            prov(input, ctx),
+                        )
+                        .map_err(err)?;
+                }
+                Some(dec) => {
+                    for tensor in &tensors {
+                        write_tensor(&mut writer, tensor, prov_dec(dec), chunk_bytes)
+                            .map_err(err)?;
+                    }
+                    writer
+                        .write_json(
+                            "features/cheap",
+                            &dec.input_id,
+                            &serde_json::json!({"records": out_records}),
+                            prov_dec(dec),
+                        )
+                        .map_err(err)?;
+                }
+            }
             records.push(artifact(ctx, &feature_path, input));
         }
 
@@ -248,7 +308,22 @@ impl Stage for ReferenceAnalysisStage {
 
         // Every locate_result artifact defines a (source, capture)
         // pair. Pairs without one were already decided as nothing to
-        // do by the locate stage.
+        // do by the locate stage. pair 粒度並列化: PCM 読込・整列・
+        // analyze_pair は pair ごと独立のため run_pool で実行し、
+        // ordered slot で manifest 上の pair 順に回収する。dataset
+        // への書き込みと artifact 採番は回収後に逐次行い、記録順を
+        // 逐次実行と完全一致させる。PCM はタスク内で drop されるため
+        // 常駐メモリは同時実行数(MAX_STAGE_TASKS)に比例する。
+        struct PairUnit<'a> {
+            artifact: &'a ArtifactRecord,
+            result: LocateResult,
+        }
+        struct PairDone {
+            out: reference::ReferenceResult,
+            rate: u32,
+            lineage: Vec<al_core::ArtifactId>,
+        }
+        let mut units = Vec::new();
         for artifact in ctx
             .manifest
             .artifacts
@@ -256,12 +331,20 @@ impl Stage for ReferenceAnalysisStage {
             .filter(|a| a.role == "locate_result")
         {
             let result = read_locate_result(StageKind::ReferenceAnalysis, job_dir, artifact)?;
+            units.push(PairUnit { artifact, result });
+        }
+        let outs = run_pool(units.len(), MAX_STAGE_TASKS, &|| (), &|idx,
+                                                                    _|
+         -> Result<
+            PairDone,
+            StageError,
+        > {
+            let unit = &units[idx];
+            let result = &unit.result;
             let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
-            let feature_path = format!("features/reference/{pair}");
-
-            let pcm = read_alignment_pcm(&result, ctx)
+            let pcm = read_alignment_pcm(result, ctx)
                 .map_err(|e| StageError::new(StageKind::ReferenceAnalysis, e.to_string()))?;
-            let mut lineage = vec![artifact.artifact_id.clone()];
+            let mut lineage = vec![unit.artifact.artifact_id.clone()];
             if let Some((src, cap)) = &pcm {
                 lineage.push(src.record.artifact_id.clone());
                 lineage.push(cap.record.artifact_id.clone());
@@ -310,15 +393,27 @@ impl Stage for ReferenceAnalysisStage {
                     upstream_confidence: result.confidence,
                 }
             };
-
+            let rate = aligned.rate;
             let span = tracing::info_span!(
                 "analysis::reference",
                 input_id = %result.source_input_id,
                 len = aligned.src.first().map_or(0, |c| c.len())
             );
-            let mut out = span.in_scope(|| {
+            let out = span.in_scope(|| {
                 reference::analyze_pair(&pair, &result.alignment_id, &aligned, upstream, &cfg)
             });
+            Ok(PairDone { out, rate, lineage })
+        });
+
+        for (unit, done) in units.iter().zip(outs) {
+            let PairDone {
+                mut out,
+                rate,
+                lineage,
+            } = done?;
+            let result = &unit.result;
+            let pair = format!("{}__{}", result.source_input_id, result.capture_input_id);
+            let feature_path = format!("features/reference/{pair}");
             let tensor_prov = al_dataset::provenance::Provenance {
                 input_id: result.source_input_id.clone(),
                 algorithm_id: "reference.v1".into(),
@@ -337,7 +432,7 @@ impl Stage for ReferenceAnalysisStage {
                 {
                     provenance.algorithm_id = "reference.band_lag_ls.v1".into();
                     provenance.params = crate::records::with_ruviform_stamp(
-                        crate::band_gain::parameters(&cfg, aligned.rate),
+                        crate::band_gain::parameters(&cfg, rate),
                     );
                     provenance.params["capture_input_id"] =
                         serde_json::json!(result.capture_input_id);
@@ -431,13 +526,22 @@ impl Stage for ExpensiveAnalysisStage {
 
         // 0. Decode every input once: candidate extraction needs each
         // input's segment duration and the region analysis reuses the
-        // same decoded channels.
+        // same decoded channels. decode は入力ごと独立のため run_pool
+        // で並列化し、ordered slot で入力順に回収して逐次と同一の
+        // map を組み立てる(結果は全件 map に残るため常駐は不変)。
+        let decs = run_pool(
+            ctx.manifest.inputs.len(),
+            MAX_STAGE_TASKS,
+            &|| (),
+            &|idx, _| {
+                decode_input(&ctx.manifest.inputs[idx], ctx)
+                    .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))
+            },
+        );
         let mut decoded: std::collections::HashMap<String, al_locate::decode::DecodedInput> =
             std::collections::HashMap::new();
-        for input in &ctx.manifest.inputs {
-            if let Some(dec) = decode_input(input, ctx)
-                .map_err(|e| StageError::new(StageKind::ExpensiveAnalysis, e.to_string()))?
-            {
+        for (input, dec) in ctx.manifest.inputs.iter().zip(decs) {
+            if let Some(dec) = dec? {
                 decoded.insert(input.input_id.to_string(), dec);
             }
         }
@@ -728,6 +832,21 @@ impl Stage for ExpensiveAnalysisStage {
             })?),
             None => None,
         };
+        // region 単位の分析は (input, region) ごと独立で共有可変状態を
+        // 持たないため run_pool で並列化する。chans/pair は decode map
+        // と PCM への共有 borrow で、PCM 常駐は増えない。dataset への
+        // 書き込みと artifact 採番は回収後に (input, region) 順で逐次
+        // 行い、記録順を逐次実行と完全一致させる。
+        struct RegionWork<'a> {
+            input_id: String,
+            name: String,
+            chans: Vec<&'a [f64]>,
+            rate: u32,
+            region: expensive::TriggeredRegion,
+            pair: Option<&'a expensive::PairEvidence<'a>>,
+            lineage: Vec<al_core::ArtifactId>,
+        }
+        let mut works: Vec<RegionWork<'_>> = Vec::new();
         for input in &ctx.manifest.inputs {
             let input_id = input.input_id.to_string();
             let Some(dec) = decoded.get(&input_id) else {
@@ -752,55 +871,70 @@ impl Stage for ExpensiveAnalysisStage {
                 .iter()
                 .map(|c| c.as_slice())
                 .collect();
-            for (i, region) in regions.iter().enumerate() {
-                let name = format!("{input_id}__r{i:03}");
-                let mut out = expensive::analyze_region(
-                    &input_id,
-                    &name,
-                    &chans,
-                    dec.sample_rate,
-                    region,
-                    dictionary.as_ref(),
-                    pairs.get(&input_id),
-                    &e_cfg,
-                );
-                crate::records::stamp_feature_records(&mut out.records);
-                let prov = al_dataset::provenance::Provenance {
+            for (i, region) in regions.into_iter().enumerate() {
+                works.push(RegionWork {
                     input_id: input_id.clone(),
-                    algorithm_id: "expensive.v1".into(),
-                    algorithm_version: "1".into(),
-                    params: crate::records::with_ruviform_stamp(serde_json::json!({
-                        "triggers": region.triggers,
-                    })),
-                    alignment_id: None,
-                    parents: lineage.iter().map(|a| a.as_str().to_string()).collect(),
-                };
-                for tensor in &out.tensors {
-                    write_tensor(&mut writer, tensor, prov.clone(), chunk_bytes).map_err(err)?;
-                }
-                writer
-                    .write_json(
-                        "features/expensive",
-                        &name,
-                        &serde_json::json!({
-                            "region_s": [region.start_s, region.end_s],
-                            "triggers": region.triggers,
-                            "records": out.records,
-                        }),
-                        prov,
-                    )
-                    .map_err(err)?;
-                records.push(ArtifactRecord {
-                    artifact_id: ctx.registry.issue(),
-                    role: "expensive_features".into(),
-                    path: PathBuf::from(format!("analysis/features/expensive/{name}.json")),
-                    produced_by: Some(StageKind::ExpensiveAnalysis),
-                    inputs: lineage.clone(),
-                    params: crate::records::with_ruviform_stamp(
-                        serde_json::json!({"triggers": region.triggers}),
-                    ),
+                    name: format!("{input_id}__r{i:03}"),
+                    chans: chans.clone(),
+                    rate: dec.sample_rate,
+                    region,
+                    pair: pairs.get(&input_id),
+                    lineage: lineage.clone(),
                 });
             }
+        }
+        let outs = run_pool(works.len(), usize::MAX, &|| (), &|idx, _| {
+            let w = &works[idx];
+            let mut out = expensive::analyze_region(
+                &w.input_id,
+                &w.name,
+                &w.chans,
+                w.rate,
+                &w.region,
+                dictionary.as_ref(),
+                w.pair,
+                &e_cfg,
+            );
+            crate::records::stamp_feature_records(&mut out.records);
+            out
+        });
+        for (w, out) in works.iter().zip(outs) {
+            let region = &w.region;
+            let prov = al_dataset::provenance::Provenance {
+                input_id: w.input_id.clone(),
+                algorithm_id: "expensive.v1".into(),
+                algorithm_version: "1".into(),
+                params: crate::records::with_ruviform_stamp(serde_json::json!({
+                    "triggers": region.triggers,
+                })),
+                alignment_id: None,
+                parents: w.lineage.iter().map(|a| a.as_str().to_string()).collect(),
+            };
+            for tensor in &out.tensors {
+                write_tensor(&mut writer, tensor, prov.clone(), chunk_bytes).map_err(err)?;
+            }
+            writer
+                .write_json(
+                    "features/expensive",
+                    &w.name,
+                    &serde_json::json!({
+                        "region_s": [region.start_s, region.end_s],
+                        "triggers": region.triggers,
+                        "records": out.records,
+                    }),
+                    prov,
+                )
+                .map_err(err)?;
+            records.push(ArtifactRecord {
+                artifact_id: ctx.registry.issue(),
+                role: "expensive_features".into(),
+                path: PathBuf::from(format!("analysis/features/expensive/{}.json", w.name)),
+                produced_by: Some(StageKind::ExpensiveAnalysis),
+                inputs: w.lineage.clone(),
+                params: crate::records::with_ruviform_stamp(
+                    serde_json::json!({"triggers": region.triggers}),
+                ),
+            });
         }
 
         writer.finish().map_err(err)?;
