@@ -1,0 +1,30 @@
+[package]
+name = "al-gui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+al-core.workspace = true
+al-job.workspace = true
+al-dataset.workspace = true
+al-service.workspace = true
+ruviform-ui.workspace = true
+ruviform-ui-webview = { workspace = true, optional = true }
+ruviform-viz.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+al-testkit.workspace = true
+
+[features]
+# 実窓 host を有効化。デフォルトは headless(lib + op 層のみ)。
+webview = ["dep:ruviform-ui-webview", "ruviform-ui-webview/webview"]
+
+[[bin]]
+name = "al-gui"
+path = "src/bin/al-gui.rs"
+required-features = ["webview"]

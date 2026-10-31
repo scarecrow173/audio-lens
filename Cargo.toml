@@ -9,6 +9,7 @@ members = [
     "crates/al-locate",
     "crates/al-analysis",
     "crates/al-service",
+    "crates/al-gui",
     "crates/al-viz",
     "crates/al-testkit",
     "crates/al-observability",
@@ -31,6 +32,7 @@ al-dataset = { path = "crates/al-dataset" }
 al-locate = { path = "crates/al-locate" }
 al-analysis = { path = "crates/al-analysis" }
 al-service = { path = "crates/al-service" }
+al-gui = { path = "crates/al-gui" }
 al-viz = { path = "crates/al-viz" }
 al-testkit = { path = "crates/al-testkit" }
 al-observability = { path = "crates/al-observability" }
