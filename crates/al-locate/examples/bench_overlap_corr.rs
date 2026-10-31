@@ -60,12 +60,12 @@ fn main() {
         }
         let direct = t.elapsed().as_secs_f64() * 1e6 / reps as f64;
 
-        let plan = OverlapCorrPlan::new(window);
+        let plan = OverlapCorrPlan::new(window).unwrap();
         let mut ws = OverlapCorrWorkspace::new(&plan);
-        black_box(plan.curve(&mut ws, &x, &y, max_lag));
+        black_box(plan.curve(&mut ws, &x, &y, max_lag).unwrap().values);
         let t = Instant::now();
         for _ in 0..reps {
-            black_box(plan.curve(&mut ws, &x, &y, max_lag));
+            black_box(plan.curve(&mut ws, &x, &y, max_lag).unwrap().values);
         }
         let fft = t.elapsed().as_secs_f64() * 1e6 / reps as f64;
         println!(

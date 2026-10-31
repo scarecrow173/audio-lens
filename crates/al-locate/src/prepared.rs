@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use al_math::resample::{ResamplePlan, resample};
+use ruviform_numeric::resample::ResamplePlan;
 
 /// 現行 BandNcc の帯域。Nyquist で切り詰める。
 const BANDS: &[(f64, f64)] = &[
@@ -226,9 +226,13 @@ impl InputCache {
         let filtered = crate::dsp::bandpass_many(samples, rate, bands);
         let coarse_rate = rate / 4;
         let (coarse, radius) = if coarse_rate > 0 && samples.len() >= 4 {
-            let plan = ResamplePlan::new(rate, coarse_rate)?;
+            let plan =
+                ResamplePlan::new(rate, coarse_rate).map_err(|_| "sample rates must be nonzero")?;
             (
-                Some(resample(samples, &plan)?),
+                Some(
+                    plan.resample(samples)
+                        .map_err(|_| "resample input length mismatch")?,
+                ),
                 2 * plan.radius() + (rate as usize).div_ceil(coarse_rate as usize),
             )
         } else {

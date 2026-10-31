@@ -2,7 +2,7 @@
 //! smoke-test。基礎型の構築とリンクのみを検証する
 //! (docs/designs/ruviform-dependency-ci.md §1)。
 use ruviform_audio_core::{AudioBuffer, BufferSpec, ChannelLayout, SampleRate};
-use ruviform_media_core::{MediaTime, TimeBase};
+use ruviform_media_core::{Fact, MediaTime, TimeBase};
 use ruviform_media_io::{CodecDescriptor, CodecFormat, CodecId};
 use ruviform_video_core::{PixelFormat, VideoFrame};
 

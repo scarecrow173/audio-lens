@@ -81,20 +81,22 @@ fn main() {
     let n = 1 << 22;
     let mut real = sig.clone();
     real.resize(n, 0.0);
-    let plan = al_math::fft::Fft::new(n);
+    let mut plan = ruviform_numeric::fft::Fft::new(n).unwrap();
     let mut cre = vec![0.0; n];
     let mut cim = vec![0.0; n];
     bench("complex fft 4M (reused plan)", 7, &mut || {
         cre.copy_from_slice(&real);
         cim.iter_mut().for_each(|v| *v = 0.0);
-        plan.transform(&mut cre, &mut cim, false);
+        plan.transform(&mut cre, &mut cim, false).unwrap();
         std::hint::black_box(&cre);
     });
-    let mut real_plan = al_math::fft::RealFft::new(n);
+    let mut real_plan = ruviform_numeric::fft::RealFft::new(n).unwrap();
     let mut spec_re = vec![0.0; n / 2 + 1];
     let mut spec_im = vec![0.0; n / 2 + 1];
     bench("rfft 4M (reused plan/scratch)", 7, &mut || {
-        real_plan.forward(&real, &mut spec_re, &mut spec_im);
+        real_plan
+            .forward(&real, &mut spec_re, &mut spec_im)
+            .unwrap();
         std::hint::black_box(&spec_re);
     });
     drop((plan, cre, cim, real_plan, real, spec_re, spec_im));

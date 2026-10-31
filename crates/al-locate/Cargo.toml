@@ -6,7 +6,6 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
-al-math.workspace = true
 al-core.workspace = true
 al-job.workspace = true
 al-media.workspace = true
@@ -19,6 +18,8 @@ memmap2 = "0.9.11"
 # docs/designs/ruviform-dependency-ci.md §1)
 ruviform-dsp.workspace = true
 ruviform-math.workspace = true
+# 汎用 f64 数値カーネル(旧 al-math 相当、AL#101 で移行済)
+ruviform-numeric.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true

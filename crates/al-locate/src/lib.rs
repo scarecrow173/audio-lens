@@ -16,12 +16,11 @@ pub mod result;
 pub mod stage;
 pub mod tracking;
 
-pub use al_math::linalg::{condition_number, least_squares};
 pub use candidate::{LocateCandidate, MethodEvidence};
 pub use consensus::{ConsensusConfig, evaluate};
 pub use decode::{DecodedInput, decode_input, format_scale};
 pub use dsp::{
-    Fft, axpy, bandpass, conv, corr0, deinterleave, dot, fft, gcc_phat, mag_sq, ncc, rms, scale,
+    axpy, bandpass, conv, corr0, deinterleave, dot, fft, gcc_phat, mag_sq, ncc, rms, scale,
     spectral_envelope, sub_scaled, sum_sq,
 };
 pub use methods::{BandNcc, FullNcc, GccPhat, LocateMethod, SpectralEnvelope, default_methods};
@@ -31,6 +30,7 @@ pub use residual::{
     subtract_fit,
 };
 pub use result::{LocateResult, SampleRange};
+pub use ruviform_numeric::linalg::{condition_number, least_squares};
 pub use stage::{LocateConfig, LocateStage};
 pub use tracking::{
     Anchor, LoopOccurrence, Segment, SegmentKind, TimeMap, build_time_map,

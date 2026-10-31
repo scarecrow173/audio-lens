@@ -14,7 +14,7 @@
 
 use std::collections::HashMap;
 
-use al_math::correlation::{CorrelationPlan, CorrelationWorkspace};
+use crate::dsp::{CorrelationPlan, CorrelationWorkspace};
 
 /// pool が同時に保持する形状数の上限。帯域フィルタは長さを維持する
 /// ため通常の pair は full-rate と coarse の 2 形状に収束する。
@@ -62,6 +62,8 @@ impl CorrelationPool {
         entry
             .plan
             .ncc(&mut entry.workspace, template, signal, max_lag)
+            .expect("correlation template/signal shapes must be valid")
+            .values
     }
 
     /// 同じ形状キー(Phat mode)の plan で PHAT を実行する。
@@ -75,6 +77,7 @@ impl CorrelationPool {
         entry
             .plan
             .gcc_phat(&mut entry.workspace, template, signal, max_lag)
+            .expect("correlation template/signal shapes must be valid")
     }
 
     /// 現在有効な形状エントリ数。
@@ -99,7 +102,8 @@ impl CorrelationPool {
             let plan = match mode {
                 PoolMode::Ncc => CorrelationPlan::new_ncc(template_len, signal_len),
                 PoolMode::Phat => CorrelationPlan::new(template_len, signal_len),
-            };
+            }
+            .expect("correlation plan shape must be valid");
             let workspace = CorrelationWorkspace::new(&plan);
             self.entries.insert(key, Entry { plan, workspace });
             self.builds += 1;

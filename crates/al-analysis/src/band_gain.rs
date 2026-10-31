@@ -1,8 +1,10 @@
-//! 帯域ラグ補償 LS。算術は al-math の既存 re-export、帯域波形は
-//! `BandFilter` で帯域ごと逐次生成する(全帯域同時保持を避ける)。
+//! 帯域ラグ補償 LS。汎用カーネルは ruviform-numeric(AL#101 で
+//! `al-math` 経由から移行)、帯域波形は `BandFilter` で帯域ごと
+//! 逐次生成する(全帯域同時保持を避ける)。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
 use al_locate::dsp::{BandFilter, CorrelationPlan, CorrelationWorkspace, dot, sum_sq};
+use ruviform_numeric::xspec::CrossSpectrum;
 
 const MIN_CORRELATION: f64 = 0.5;
 // コヒーレントなパワーが半分以上の帯域だけを支持する。
@@ -11,7 +13,7 @@ const MIN_COHERENCE: f64 = 0.5;
 use crate::{
     records::{RecordBuilder, propagate_confidence, robust_summary},
     reference::{Aligned, ReferenceConfig, ReferenceResult, matrix_to_tensor},
-    stft::{complex_coherence, stft, third_octave_bands},
+    stft::{stft, third_octave_bands},
 };
 
 // 偶数標本では中央 2 値を平均する。既存 percentile summary の丸めとは分離する。
@@ -79,18 +81,22 @@ fn windows(
     if n < 2 * margin + window {
         return Vec::new();
     }
-    let plan = CorrelationPlan::new_ncc(window, window + 2 * max);
+    let plan = CorrelationPlan::new_ncc(window, window + 2 * max)
+        .expect("correlation plan shape must be valid");
     let mut workspace = CorrelationWorkspace::new(&plan);
     (margin..=n - margin - window)
         .step_by(hop)
         .map(|start| {
             let a = &x[start..start + window];
-            let curve = plan.ncc(
-                &mut workspace,
-                a,
-                &y[start - max..start + window + max],
-                2 * max,
-            );
+            let curve = plan
+                .ncc(
+                    &mut workspace,
+                    a,
+                    &y[start - max..start + window + max],
+                    2 * max,
+                )
+                .expect("correlation template/signal shapes must be valid")
+                .values;
             let peak = curve.iter().map(|c| c.abs()).fold(0.0, f64::max);
             // FFT の丸め誤差内の同点は、絶対 lag と固定符号順で選ぶ。
             let best = (0..curve.len())
@@ -157,20 +163,19 @@ fn coherence(
     let b = stft(y, cfg.stft_window, cfg.stft_hop, rate);
     let frames = a.frames().min(b.frames());
     let bins = a.fft_size;
-    let mut xx = vec![0.0; bins];
-    let mut yy = xx.clone();
-    let mut xy = vec![(0.0, 0.0); bins];
+    // Welch の累積は `ruviform_numeric::xspec::CrossSpectrum` (AL#101。
+    // 旧インライン loop との bit-exact 等価は #153 比較記録で検証済み)。
+    let mut spectrum = CrossSpectrum::new(bins);
     for f in 0..frames {
-        for k in 0..bins {
-            xx[k] += a.re[f][k].powi(2) + a.im[f][k].powi(2);
-            yy[k] += b.re[f][k].powi(2) + b.im[f][k].powi(2);
-            let (xr, xi) = (a.re[f][k], a.im[f][k]);
-            let (yr, yi) = (b.re[f][k], b.im[f][k]);
-            xy[k].0 += xr * yr + xi * yi;
-            xy[k].1 += xr * yi - xi * yr;
-        }
+        spectrum
+            .accumulate(&a.re[f], &a.im[f], &b.re[f], &b.im[f])
+            .expect("stft frame bin count must match");
     }
-    let c = complex_coherence(&xx, &yy, &xy);
+    let mut coh_re = vec![0.0; bins];
+    let mut coh_im = vec![0.0; bins];
+    spectrum
+        .coherence_into(&mut coh_re, &mut coh_im)
+        .expect("coherence buffers match spectrum bins");
     bands
         .iter()
         .map(|&(lo, hi)| {
@@ -179,9 +184,10 @@ fn coherence(
             if frames < 2 || high <= low {
                 0.0
             } else {
-                c[low..high]
+                coh_re[low..high]
                     .iter()
-                    .map(|&(r, i)| r * r + i * i)
+                    .zip(&coh_im[low..high])
+                    .map(|(&r, &i)| r * r + i * i)
                     .sum::<f64>()
                     / (high - low) as f64
             }
@@ -202,8 +208,8 @@ pub(crate) fn analyze(
     let hop = (cfg.band_hop_s * rate as f64).round().max(1.0) as usize;
     let max = (cfg.band_max_lag_s * rate as f64).round().max(1.0) as usize;
     for (channel, (x, y)) in src.src.iter().zip(&src.cap).enumerate() {
-        let mut src_bands = BandFilter::new(x, rate);
-        let mut cap_bands = BandFilter::new(y, rate);
+        let mut src_bands = BandFilter::new(x, rate).expect("band filter input must be valid");
+        let mut cap_bands = BandFilter::new(y, rate).expect("band filter input must be valid");
         let coh = coherence(x, y, rate, cfg, &bands);
         let all: Vec<_> = bands
             .iter()

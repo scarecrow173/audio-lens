@@ -14,6 +14,7 @@ use al_locate::dsp::{
     bandpass_many, conv, corr0, dot, fft, gcc_phat, mag_sq, rms, spectral_envelope, sum_sq,
 };
 use al_locate::mixer::fit_mix;
+use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::cheap::NamedTensor;
 use crate::records::{RecordBuilder, propagate_confidence, propagate_validity, robust_summary};
@@ -310,12 +311,16 @@ pub fn analyze_pair(
     let mut lag_widths = Vec::new();
     if n >= cfg.lag_window {
         // plan/workspace は窓長だけに依存するため全窓で再利用する。
-        let lag_plan = al_locate::dsp::OverlapCorrPlan::new(cfg.lag_window);
+        let lag_plan = al_locate::dsp::OverlapCorrPlan::new(cfg.lag_window)
+            .expect("overlap correlation window shape must be valid");
         let mut lag_ws = al_locate::dsp::OverlapCorrWorkspace::new(&lag_plan);
         for start in (0..=n - cfg.lag_window).step_by(cfg.lag_hop) {
             let xa = &src_mono[start..start + cfg.lag_window];
             let ya = &cap_mono[start..start + cfg.lag_window];
-            let curve = lag_plan.curve(&mut lag_ws, xa, ya, cfg.lag_max);
+            let curve = lag_plan
+                .curve(&mut lag_ws, xa, ya, cfg.lag_max)
+                .expect("overlap correlation window shapes must match")
+                .values;
             let (lag, score, width) = local_lag(curve, cfg.lag_max);
             lags.push(lag as f64);
             lag_scores.push(score);
@@ -516,52 +521,33 @@ pub fn analyze_pair(
     }
 
     // Welch-averaged CSD/PSD → H(f), coherence.
+    // 累積は `ruviform_numeric::xspec::CrossSpectrum` (AL#101)。旧
+    // インライン loop との bit-exact 等価は #153 比較記録で検証済み。
+    // 旧経路と同じく frames で平均してから coherence/H1 を取る
+    // (平均後除算の丸め順序を維持するため `coherence_into` は使わない)。
     let bins = ms.fft_size;
-    let mut pxx = vec![0.0; bins];
-    let mut pyy = vec![0.0; bins];
-    let mut pxy = vec![(0.0, 0.0); bins];
+    let mut spectrum = CrossSpectrum::new(bins);
     for f in 0..frames {
-        for k in 0..bins {
-            pxx[k] += ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
-            pyy[k] += mc.re[f][k] * mc.re[f][k] + mc.im[f][k] * mc.im[f][k];
-            let (xr, xi) = (ms.re[f][k], ms.im[f][k]);
-            let (yr, yi) = (mc.re[f][k], mc.im[f][k]);
-            pxy[k].0 += xr * yr + xi * yi;
-            pxy[k].1 += xr * yi - xi * yr;
-        }
+        spectrum
+            .accumulate(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f])
+            .expect("stft frame bin count must match");
     }
-    for k in 0..bins {
-        pxx[k] /= frames as f64;
-        pyy[k] /= frames as f64;
-        pxy[k].0 /= frames as f64;
-        pxy[k].1 /= frames as f64;
-    }
-    let coherence = complex_coherence(&pxx, &pyy, &pxy);
-    let h: Vec<(f64, f64)> = pxx
-        .iter()
-        .zip(&pxy)
-        .map(|(&xx, &(pr, pi))| {
-            if xx > 0.0 {
-                (pr / xx, pi / xx)
-            } else {
-                (0.0, 0.0)
-            }
-        })
-        .collect();
+    let nf = frames as f64;
+    let pxx: Vec<f64> = spectrum.sum_xx().iter().map(|v| v / nf).collect();
+    let pyy: Vec<f64> = spectrum.sum_yy().iter().map(|v| v / nf).collect();
+    let pxy_re: Vec<f64> = spectrum.sum_xy_re().iter().map(|v| v / nf).collect();
+    let pxy_im: Vec<f64> = spectrum.sum_xy_im().iter().map(|v| v / nf).collect();
+    let (coh_re, coh_im) = complex_coherence(&pxx, &pyy, &pxy_re, &pxy_im);
+    let (h_re, h_im) = ruviform_numeric::xspec::transfer_h1(&pxx, &pxy_re, &pxy_im)
+        .expect("transfer_h1 slice lengths must be equal");
     let half = bins / 2;
     out.tensors.push(matrix_to_tensor(
         format!("intermediate/{pair}/transfer_h"),
-        &[
-            h.iter().map(|v| v.0).collect::<Vec<_>>(),
-            h.iter().map(|v| v.1).collect::<Vec<_>>(),
-        ],
+        &[h_re.clone(), h_im.clone()],
     ));
     out.tensors.push(matrix_to_tensor(
         format!("intermediate/{pair}/coherence"),
-        &[
-            coherence.iter().map(|v| v.0).collect::<Vec<_>>(),
-            coherence.iter().map(|v| v.1).collect::<Vec<_>>(),
-        ],
+        &[coh_re.clone(), coh_im.clone()],
     ));
     // H(f,t) magnitude tensor (per-frame ratio where supported).
     let hft: Vec<Vec<f64>> = (0..frames)
@@ -587,11 +573,16 @@ pub fn analyze_pair(
         &hft,
     ));
     // Magnitude / unwrapped phase / group delay records.
-    let mag_h: Vec<f64> = h[..half]
+    let mag_h: Vec<f64> = h_re[..half]
         .iter()
-        .map(|(r, i)| (r * r + i * i).sqrt())
+        .zip(&h_im[..half])
+        .map(|(&r, &i)| (r * r + i * i).sqrt())
         .collect();
-    let phase: Vec<f64> = h[..half].iter().map(|(r, i)| i.atan2(*r)).collect();
+    let phase: Vec<f64> = h_re[..half]
+        .iter()
+        .zip(&h_im[..half])
+        .map(|(&r, &i)| i.atan2(r))
+        .collect();
     let mut unwrapped = phase.clone();
     for i in 1..unwrapped.len() {
         let d = unwrapped[i] - unwrapped[i - 1];
@@ -677,9 +668,10 @@ pub fn analyze_pair(
             if b1 <= b0 {
                 return 0.0;
             }
-            coherence[b0..b1]
+            coh_re[b0..b1]
                 .iter()
-                .map(|(r, i)| (r * r + i * i).sqrt())
+                .zip(&coh_im[b0..b1])
+                .map(|(&r, &i)| (r * r + i * i).sqrt())
                 .sum::<f64>()
                 / (b1 - b0) as f64
         })
@@ -866,20 +858,19 @@ pub fn analyze_pair(
         let m1 = stft(src.cap[1], cfg.stft_window, cfg.stft_hop, rate);
         let fr = m0.frames().min(m1.frames());
         if fr > 0 {
-            let mut pa = vec![0.0; bins];
-            let mut pb = vec![0.0; bins];
-            let mut pab = vec![(0.0, 0.0); bins];
+            // Welch 累積は `CrossSpectrum` (AL#101)。
+            let mut spectrum = CrossSpectrum::new(bins);
             for f in 0..fr {
-                for k in 0..bins {
-                    pa[k] += m0.re[f][k].powi(2) + m0.im[f][k].powi(2);
-                    pb[k] += m1.re[f][k].powi(2) + m1.im[f][k].powi(2);
-                    let (xr, xi) = (m0.re[f][k], m0.im[f][k]);
-                    let (yr, yi) = (m1.re[f][k], m1.im[f][k]);
-                    pab[k].0 += xr * yr + xi * yi;
-                    pab[k].1 += xr * yi - xi * yr;
-                }
+                spectrum
+                    .accumulate(&m0.re[f], &m0.im[f], &m1.re[f], &m1.im[f])
+                    .expect("stft frame bin count must match");
             }
-            let coh = complex_coherence(&pa, &pb, &pab);
+            let (coh_re, coh_im) = complex_coherence(
+                spectrum.sum_xx(),
+                spectrum.sum_yy(),
+                spectrum.sum_xy_re(),
+                spectrum.sum_xy_im(),
+            );
             let band_rows: Vec<Vec<f64>> = bands
                 .iter()
                 .map(|&(lo, hi)| {
@@ -888,8 +879,8 @@ pub fn analyze_pair(
                     if b1 <= b0 {
                         return vec![0.0, 0.0];
                     }
-                    let (mut re, mut im) = (0.0, 0.0);
-                    for &(r, i) in &coh[b0..b1] {
+                    let (mut re, mut im) = (0.0f64, 0.0f64);
+                    for (&r, &i) in coh_re[b0..b1].iter().zip(&coh_im[b0..b1]) {
                         re += r;
                         im += i;
                     }
@@ -1252,278 +1243,4 @@ pub fn analyze_pair(
     }
 
     out
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// Deterministic zero-mean pseudo-noise (LCG).
-    fn noise(n: usize, seed: u64) -> Vec<f64> {
-        let mut s = seed;
-        (0..n)
-            .map(|_| {
-                s = s
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1442695040888963407);
-                ((s >> 33) as f64 / (1u64 << 31) as f64) * 2.0 - 1.0
-            })
-            .map(|v| v - 0.5)
-            .collect()
-    }
-
-    fn record<'a>(out: &'a ReferenceResult, id: &str) -> &'a FeatureRecord {
-        out.records
-            .iter()
-            .find(|r| r.feature_id == id)
-            .unwrap_or_else(|| panic!("missing record {id}"))
-    }
-
-    fn scalar(r: &FeatureRecord) -> f64 {
-        match &r.value {
-            al_dataset::types::Value::Scalar(v) => *v,
-            other => panic!("expected scalar, got {other:?}"),
-        }
-    }
-
-    fn aligned<'a>(src: &'a [Vec<f64>], cap: &'a [Vec<f64>], rate: u32) -> Aligned<'a> {
-        Aligned {
-            src: src.iter().map(|c| c.as_slice()).collect(),
-            cap: cap.iter().map(|c| c.as_slice()).collect(),
-            rate,
-            upstream_confidence: Confidence::High,
-        }
-    }
-
-    const N: usize = 1 << 16;
-    const RATE: u32 = 48_000;
-    const ALN: &str = "ALN-0123456789abcdefghijkl";
-
-    fn analyze<'a>(pair: &str, aligned: &Aligned<'a>, validity: Validity) -> ReferenceResult {
-        analyze_pair(
-            pair,
-            &al_core::AlignmentId::parse(ALN).unwrap(),
-            aligned,
-            validity,
-            &ReferenceConfig::default(),
-        )
-    }
-
-    #[test]
-    fn records_carry_the_locate_alignment_id() {
-        let src = vec![noise(N, 0x5eed)];
-        let cap = src.clone();
-        let pair = aligned(&src, &cap, RATE);
-        for validity in [Validity::Valid, Validity::AmbiguousAlignment] {
-            let out = analyze("src__cap", &pair, validity);
-            assert!(!out.records.is_empty());
-            for r in &out.records {
-                assert_eq!(
-                    r.alignment_id.as_deref(),
-                    Some(ALN),
-                    "record {}",
-                    r.feature_id
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn known_gain_is_recovered() {
-        let src = vec![noise(N, 0x5eed)];
-        let cap = vec![src[0].iter().map(|&v| 0.5 * v).collect::<Vec<f64>>()];
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::Valid);
-
-        let gain = scalar(record(&out, "ref.gain_ls"));
-        assert!((gain - 0.5).abs() < 0.02, "gain {gain}");
-        let g400 = scalar(record(&out, "ref.gain_400hz"));
-        assert!((g400 - 0.5).abs() < 0.05, "400 Hz gain {g400}");
-    }
-
-    #[test]
-    fn known_residual_delay_is_recovered() {
-        // Small residual misalignment inside the aligned pair: the
-        // locate stage removes the coarse offset, so `cap` here is a
-        // few samples late relative to `src`.
-        let src = vec![noise(N, 0x5eed)];
-        let delay = 7usize;
-        let cap = vec![
-            src[0]
-                .iter()
-                .enumerate()
-                .map(|(i, _)| if i >= delay { src[0][i - delay] } else { 0.0 })
-                .collect::<Vec<f64>>(),
-        ];
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::Valid);
-
-        let gd = scalar(record(&out, "ref.group_delay_median_s"));
-        let expected = delay as f64 / RATE as f64;
-        assert!(
-            (gd - expected).abs() < expected * 0.2,
-            "group delay {gd} vs {expected}"
-        );
-
-        let lag = scalar(record(&out, "ref.lag_median")).abs();
-        assert!((lag - delay as f64).abs() <= 1.0, "lag {lag}");
-    }
-
-    #[test]
-    fn residual_energy_is_monotonic_across_stages() {
-        let src = vec![noise(N, 0xc0ffee)];
-        let cap = vec![
-            src[0]
-                .iter()
-                .enumerate()
-                .map(|(i, _)| if i >= 11 { 0.4 * src[0][i - 11] } else { 0.0 })
-                .collect::<Vec<f64>>(),
-        ];
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::Valid);
-
-        let mut ratios: Vec<f64> = out
-            .records
-            .iter()
-            .filter(|r| r.feature_id == "ref.residual_rms_ref_ratio")
-            .map(scalar)
-            .collect();
-        assert_eq!(ratios.len(), 4, "expected R0-R3 records: {ratios:?}");
-        for w in ratios.windows(2) {
-            assert!(w[1] <= w[0] + 1e-9, "residual not monotonic: {ratios:?}");
-        }
-        // FIR stage explains a pure delay+gain almost fully.
-        assert!(ratios[3] < 0.2, "r3 ratio {}", ratios[3]);
-        ratios.clear();
-    }
-
-    #[test]
-    fn identical_capture_leaves_no_residual() {
-        let src = vec![noise(N, 0xdead_beef)];
-        let cap = src.clone();
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::Valid);
-
-        let sim = scalar(record(&out, "ref.similarity_fullband"));
-        assert!(sim > 0.99, "similarity {sim}");
-        let r3 = scalar(record(&out, "ref.residual_r3_ratio"));
-        assert!(r3 < 1e-6, "r3 residual {r3}");
-    }
-
-    #[test]
-    fn rejected_alignment_yields_only_invalid_rows() {
-        let src = vec![noise(4096, 1)];
-        let cap = src.clone();
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::AmbiguousAlignment);
-        assert!(!out.records.is_empty());
-        for r in &out.records {
-            assert_ne!(
-                r.validity,
-                Validity::Valid,
-                "record {} must not be valid",
-                r.feature_id
-            );
-            assert_eq!(r.support_count, 0);
-        }
-        assert!(out.residual_audio.is_empty());
-    }
-
-    #[test]
-    fn short_input_does_not_panic() {
-        let src = vec![noise(2048, 2)];
-        let cap = src.clone();
-        let pair = aligned(&src, &cap, RATE);
-        let out = analyze("src__cap", &pair, Validity::Valid);
-        let gain = scalar(record(&out, "ref.gain_ls"));
-        assert!((gain - 1.0).abs() < 1e-9);
-    }
-
-    // ==== A1 characterization (caller-side optimizations,
-    // docs/test-specs/caller-side-optimizations.md Rule C) ====
-
-    /// Direct linear convolution returning the first `x.len()`
-    /// outputs — reference implementation for A/B against the
-    /// `fir_model` convolution path. Verbatim copy shared by hand
-    /// with `dsp.rs` tests and `benches/conv.rs` (not a shared
-    /// public surface). The `x == 0.0` skip of the former
-    /// production loop is dropped on purpose: zero terms
-    /// contribute `±0.0` and are value-equivalent.
-    fn conv_direct(x: &[f64], h: &[f64]) -> Vec<f64> {
-        let mut y = vec![0.0; x.len()];
-        for (i, &xv) in x.iter().enumerate() {
-            let maxk = h.len().min(x.len() - i);
-            for (k, &hv) in h.iter().take(maxk).enumerate() {
-                y[i + k] += xv * hv;
-            }
-        }
-        y
-    }
-
-    /// Recomposition tolerance `|a-b| <= 1e-12*max(1,|a|,|b|)`
-    /// (ADR-034EoHxzsvsHp9BOdCK2Cn).
-    fn assert_close_slice(actual: &[f64], expected: &[f64]) {
-        assert_eq!(
-            actual.len(),
-            expected.len(),
-            "length {} vs {}",
-            actual.len(),
-            expected.len()
-        );
-        for (i, (&a, &b)) in actual.iter().zip(expected).enumerate() {
-            let tol = 1e-12 * 1.0_f64.max(a.abs()).max(b.abs());
-            assert!((a - b).abs() <= tol, "index {i}: {a} vs {b} (tol {tol})");
-        }
-    }
-
-    /// `fir_model` output must equal `fir_ir`'s IR truncated to
-    /// `conv_len = ir.len().min(4096)` passed through `conv_direct`.
-    /// Green both immediately after the function extraction and
-    /// after the `dsp::conv` replacement (A1).
-    #[test]
-    fn fir_model_matches_fir_ir_truncated_conv_direct() {
-        let cases: Vec<(usize, usize, Vec<f64>, Vec<f64>)> = vec![
-            // Empty input → zero-frame path, empty model.
-            (256, 128, vec![], vec![]),
-            // n < conv_len: window 300 → fft_size 512 → conv_len 512
-            // while n = 400 (frames still run).
-            (300, 100, noise(400, 7), noise(400, 8)),
-            // conv_len = 4096 boundary with real truncation:
-            // window 5000 → fft_size 8192 → IR cut to 4096.
-            (5000, 2500, noise(6000, 9), noise(6000, 10)),
-            // All-zero signals: zero energy bins → zero IR.
-            (256, 128, vec![0.0; 1024], vec![0.0; 1024]),
-            // Representative deterministic noise.
-            (256, 128, noise(2048, 11), noise(2048, 12)),
-        ];
-        for (window, hop, from, to) in cases {
-            let cfg = ReferenceConfig {
-                stft_window: window,
-                stft_hop: hop,
-                ..ReferenceConfig::default()
-            };
-            let from_stft = stft(&from, window, hop, RATE);
-            let ir = fir_ir(&from_stft, &to, window, hop, RATE);
-            let expected = conv_direct(&from, &ir[..ir.len().min(4096)]);
-            let actual = fir_model(&from, &to, &from_stft, &cfg, RATE);
-            assert_close_slice(&actual, &expected);
-        }
-    }
-
-    /// `subtract` zero-fills a short or missing model side instead
-    /// of panicking — a structural guard: production inputs share
-    /// the aligned length (`stage.rs` Aligned contract) and never
-    /// go ragged.
-    #[test]
-    fn subtract_zero_fills_short_or_missing_model() {
-        // Model shorter than residual: the tail is `residual - 0.0`.
-        let out = subtract(&[vec![1.0, 2.0, 3.0, 4.0]], &[vec![0.5, 0.25]]);
-        assert_eq!(out, vec![vec![0.5, 1.75, 3.0, 4.0]]);
-        // Missing model channel: the whole channel is zero-filled.
-        let out = subtract(&[vec![1.0], vec![2.0]], &[vec![0.5]]);
-        assert_eq!(out, vec![vec![0.5], vec![2.0]]);
-        // Equal length is exact subtraction.
-        let out = subtract(&[vec![1.0]], &[vec![0.25]]);
-        assert_eq!(out, vec![vec![0.75]]);
-    }
 }

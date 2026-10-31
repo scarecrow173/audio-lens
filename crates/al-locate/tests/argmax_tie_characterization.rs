@@ -392,8 +392,8 @@ fn fixtures() -> Vec<Fixture> {
     // (`stage.rs:578` `prepare_input(s, capture.sample_rate, ..)`)。
     let chirp = |t: f64| (std::f64::consts::TAU * (500.0 * t + 40_000.0 * t * t)).sin() * 0.7;
     let source_44k: Vec<f64> = (0..4_410).map(|i| chirp(i as f64 / 44_100.0)).collect();
-    let plan = al_math::resample::ResamplePlan::new(44_100, 48_000).unwrap();
-    let template = al_math::resample::resample(&source_44k, &plan).unwrap();
+    let plan = ruviform_numeric::resample::ResamplePlan::new(44_100, 48_000).unwrap();
+    let template = plan.resample(&source_44k).unwrap();
     let mut capture = vec![0.0; 9_600];
     for i in 0..4_800 {
         capture[2_400 + i] = chirp(i as f64 / 48_000.0);

@@ -754,29 +754,35 @@ mod mechanical_cleanup {
         let bins = ms.fft_size;
         let mut pxx = vec![0.0; bins];
         let mut pyy = vec![0.0; bins];
-        let mut pxy = vec![(0.0, 0.0); bins];
+        let mut pxy_re = vec![0.0; bins];
+        let mut pxy_im = vec![0.0; bins];
         for f in 0..frames {
-            let c = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
+            let (cr, ci) = csd(&ms.re[f], &ms.im[f], &mc.re[f], &mc.im[f]);
             for k in 0..bins {
                 pxx[k] += ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
                 pyy[k] += mc.re[f][k] * mc.re[f][k] + mc.im[f][k] * mc.im[f][k];
-                pxy[k].0 += c[k].0;
-                pxy[k].1 += c[k].1;
+                pxy_re[k] += cr[k];
+                pxy_im[k] += ci[k];
             }
         }
         for k in 0..bins {
             pxx[k] /= frames as f64;
             pyy[k] /= frames as f64;
-            pxy[k].0 /= frames as f64;
-            pxy[k].1 /= frames as f64;
+            pxy_re[k] /= frames as f64;
+            pxy_im[k] /= frames as f64;
         }
-        let coh = complex_coherence(&pxx, &pyy, &pxy);
+        let (coh_re_v, coh_im_v) = complex_coherence(&pxx, &pyy, &pxy_re, &pxy_im);
+        let coh: Vec<(f64, f64)> = coh_re_v
+            .iter()
+            .zip(&coh_im_v)
+            .map(|(&r, &i)| (r, i))
+            .collect();
         let mut h_re = vec![0.0; bins];
         let mut h_im = vec![0.0; bins];
         for k in 0..bins {
             if pxx[k] > 0.0 {
-                h_re[k] = pxy[k].0 / pxx[k];
-                h_im[k] = pxy[k].1 / pxx[k];
+                h_re[k] = pxy_re[k] / pxx[k];
+                h_im[k] = pxy_im[k] / pxx[k];
             }
         }
         let half = bins / 2;
@@ -786,13 +792,13 @@ mod mechanical_cleanup {
                     .map(|k| {
                         let xs = ms.re[f][k] * ms.re[f][k] + ms.im[f][k] * ms.im[f][k];
                         if xs > 0.0 {
-                            let c = csd(
+                            let (cr, ci) = csd(
                                 &ms.re[f][k..k + 1],
                                 &ms.im[f][k..k + 1],
                                 &mc.re[f][k..k + 1],
                                 &mc.im[f][k..k + 1],
                             );
-                            ((c[0].0 * c[0].0 + c[0].1 * c[0].1).sqrt()) / xs
+                            ((cr[0] * cr[0] + ci[0] * ci[0]).sqrt()) / xs
                         } else {
                             0.0
                         }
@@ -934,17 +940,18 @@ mod mechanical_cleanup {
         let bins = a.fft_size;
         let mut xx = vec![0.0; bins];
         let mut yy = vec![0.0; bins];
-        let mut xy = vec![(0.0, 0.0); bins];
+        let mut xy_re = vec![0.0; bins];
+        let mut xy_im = vec![0.0; bins];
         for f in 0..frames {
-            let cross = csd(&a.re[f], &a.im[f], &b.re[f], &b.im[f]);
+            let (cr, ci) = csd(&a.re[f], &a.im[f], &b.re[f], &b.im[f]);
             for k in 0..bins {
                 xx[k] += a.re[f][k].powi(2) + a.im[f][k].powi(2);
                 yy[k] += b.re[f][k].powi(2) + b.im[f][k].powi(2);
-                xy[k].0 += cross[k].0;
-                xy[k].1 += cross[k].1;
+                xy_re[k] += cr[k];
+                xy_im[k] += ci[k];
             }
         }
-        let c = complex_coherence(&xx, &yy, &xy);
+        let (c_re, c_im) = complex_coherence(&xx, &yy, &xy_re, &xy_im);
         bands
             .iter()
             .map(|&(lo, hi)| {
@@ -953,9 +960,10 @@ mod mechanical_cleanup {
                 if frames < 2 || high <= low {
                     0.0
                 } else {
-                    c[low..high]
+                    c_re[low..high]
                         .iter()
-                        .map(|&(r, i)| r * r + i * i)
+                        .zip(&c_im[low..high])
+                        .map(|(&r, &i)| r * r + i * i)
                         .sum::<f64>()
                         / (high - low) as f64
                 }
@@ -1014,17 +1022,18 @@ mod mechanical_cleanup {
         let bin_hz = rate as f64 / bins as f64;
         let mut pa = vec![0.0f64; bins];
         let mut pb = vec![0.0f64; bins];
-        let mut pab = vec![(0.0f64, 0.0f64); bins];
+        let mut pab_re = vec![0.0f64; bins];
+        let mut pab_im = vec![0.0f64; bins];
         for f in 0..fr {
-            let c = csd(&m0.re[f], &m0.im[f], &m1.re[f], &m1.im[f]);
+            let (cr, ci) = csd(&m0.re[f], &m0.im[f], &m1.re[f], &m1.im[f]);
             for k in 0..bins {
                 pa[k] += m0.re[f][k].powi(2) + m0.im[f][k].powi(2);
                 pb[k] += m1.re[f][k].powi(2) + m1.im[f][k].powi(2);
-                pab[k].0 += c[k].0;
-                pab[k].1 += c[k].1;
+                pab_re[k] += cr[k];
+                pab_im[k] += ci[k];
             }
         }
-        let coh = complex_coherence(&pa, &pb, &pab);
+        let (coh_re, coh_im) = complex_coherence(&pa, &pb, &pab_re, &pab_im);
         let expected_rows: Vec<Vec<f64>> = bands
             .iter()
             .map(|&(lo, hi)| {
@@ -1033,8 +1042,8 @@ mod mechanical_cleanup {
                 if b1 <= b0 {
                     return vec![0.0, 0.0];
                 }
-                let (mut re, mut im) = (0.0, 0.0);
-                for &(r, i) in &coh[b0..b1] {
+                let (mut re, mut im) = (0.0f64, 0.0f64);
+                for (&r, &i) in coh_re[b0..b1].iter().zip(&coh_im[b0..b1]) {
                     re += r;
                     im += i;
                 }

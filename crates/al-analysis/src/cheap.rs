@@ -10,6 +10,7 @@ use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Resolution, ResolutionClass, Value};
 use al_locate::decode::DecodedInput;
 use al_locate::dsp::{CorrelationPlan, CorrelationWorkspace, corr0, rms, sum_sq};
+use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::records::{RecordBuilder, robust_summary};
 use crate::stft::{StftMatrix, band_power, complex_coherence, envelope, stft, third_octave_bands};
@@ -425,7 +426,6 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         );
         lra_rec.channels = ch_sel;
         push(lra_rec);
-
         // --- Digital anomaly family ---
         let clip_thresh = cfg.clip_threshold;
         let mut clip_count = 0u64;
@@ -602,7 +602,6 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         );
         qr.channels = ch_sel;
         push(qr);
-
         // --- Spectral family + intermediates ---
         let m = stft(samples, cfg.stft_window, cfg.stft_hop, rate);
         if m.frames() == 0 {
@@ -885,7 +884,6 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         );
         nr.channels = ch_sel;
         out.records.push(nr);
-
         // --- Noise / modulation family ---
         // Noise floor: p05 of the level trajectory.
         if let Some(s) = robust_summary(&rms_traj) {
@@ -1125,32 +1123,30 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 && ma.fft_size == mb.fft_size
             {
                 let frames = ma.frames().min(64);
-                let mut csd_re = vec![0.0f64; ma.fft_size];
-                let mut csd_im = vec![0.0f64; ma.fft_size];
-                let mut paa = vec![0.0f64; ma.fft_size];
-                let mut pbb = vec![0.0f64; ma.fft_size];
+                // Welch 累積は `ruviform_numeric::xspec::CrossSpectrum`
+                // (AL#101。旧インライン loop との bit-exact 等価は
+                // #153 比較記録で検証済み)。
+                let mut spectrum = CrossSpectrum::new(ma.fft_size);
                 for f in 0..frames {
-                    for k in 0..ma.fft_size {
-                        let (xr, xi) = (ma.re[f][k], ma.im[f][k]);
-                        let (yr, yi) = (mb.re[f][k], mb.im[f][k]);
-                        csd_re[k] += xr * yr + xi * yi;
-                        csd_im[k] += xr * yi - xi * yr;
-                        paa[k] += ma.re[f][k] * ma.re[f][k] + ma.im[f][k] * ma.im[f][k];
-                        pbb[k] += mb.re[f][k] * mb.re[f][k] + mb.im[f][k] * mb.im[f][k];
-                    }
+                    spectrum
+                        .accumulate(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f])
+                        .expect("stft frame bin count must match");
                 }
-                let pxy_avg: Vec<(f64, f64)> = csd_re
-                    .iter()
-                    .zip(&csd_im)
-                    .map(|(&r, &i)| (r / frames as f64, i / frames as f64))
-                    .collect();
+                let csd_re = spectrum.sum_xy_re().to_vec();
+                let csd_im = spectrum.sum_xy_im().to_vec();
+                let paa = spectrum.sum_xx();
+                let pbb = spectrum.sum_yy();
+                let pxy_re_avg: Vec<f64> = csd_re.iter().map(|v| v / frames as f64).collect();
+                let pxy_im_avg: Vec<f64> = csd_im.iter().map(|v| v / frames as f64).collect();
                 let paa_avg: Vec<f64> = paa.iter().map(|v| v / frames as f64).collect();
                 let pbb_avg: Vec<f64> = pbb.iter().map(|v| v / frames as f64).collect();
-                let coh = complex_coherence(&paa_avg, &pbb_avg, &pxy_avg);
+                let (coh_re, coh_im) =
+                    complex_coherence(&paa_avg, &pbb_avg, &pxy_re_avg, &pxy_im_avg);
                 let half = ma.fft_size / 2;
-                let coh_mag_mean = coh[..half]
+                let coh_mag_mean = coh_re[..half]
                     .iter()
-                    .map(|(r, i)| (r * r + i * i).sqrt())
+                    .zip(&coh_im[..half])
+                    .map(|(&r, &i)| (r * r + i * i).sqrt())
                     .sum::<f64>()
                     / half as f64;
                 let mut cr = rb.scalar(
@@ -1177,10 +1173,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 out.records.push(cr);
                 out.tensors.push(matrix_to_tensor(
                     format!("intermediate/{}/ch{a}-ch{b}/coherence", dec.input_id),
-                    &[
-                        coh.iter().map(|c| c.0).collect::<Vec<_>>(),
-                        coh.iter().map(|c| c.1).collect::<Vec<_>>(),
-                    ],
+                    &[coh_re, coh_im],
                 ));
                 out.tensors.push(matrix_to_tensor(
                     format!("intermediate/{}/ch{a}-ch{b}/csd", dec.input_id),
@@ -1306,7 +1299,8 @@ fn ipd_lags(x: &[f64], y: &[f64], block: usize, max_lag: usize) -> Vec<f64> {
     if n < block || max_lag > (n - block) / 2 {
         return Vec::new();
     }
-    let plan = CorrelationPlan::new_ncc(block, block + 2 * max_lag);
+    let plan = CorrelationPlan::new_ncc(block, block + 2 * max_lag)
+        .expect("correlation plan shape must be valid");
     let mut workspace = CorrelationWorkspace::new(&plan);
     (max_lag..=n - block - max_lag)
         .step_by(block)
@@ -1330,7 +1324,10 @@ fn ipd_block_lag(
     search: &[f64],
     origin: usize,
 ) -> f64 {
-    let curve = plan.ncc(workspace, template, search, 2 * origin);
+    let curve = plan
+        .ncc(workspace, template, search, 2 * origin)
+        .expect("correlation template/signal shapes must be valid")
+        .values;
     let (index, _) = curve
         .iter()
         .enumerate()
@@ -1416,7 +1413,8 @@ mod tests {
     fn ipd_lag_search_origin_preserves_signed_offsets_including_edges() {
         let template = ipd_noise(64);
         let origin = 8;
-        let plan = CorrelationPlan::new_ncc(template.len(), template.len() + 2 * origin);
+        let plan = CorrelationPlan::new_ncc(template.len(), template.len() + 2 * origin)
+            .expect("correlation plan shape must be valid");
         let mut workspace = CorrelationWorkspace::new(&plan);
         for lag in [-8_isize, -3, 0, 5, 8] {
             let mut search = vec![0.0; template.len() + 2 * origin];
@@ -1787,26 +1785,24 @@ mod tests {
         let mut paa = vec![0.0f64; ma.fft_size];
         let mut pbb = vec![0.0f64; ma.fft_size];
         for f in 0..frames {
-            let pxy = csd(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f]);
-            for (k, &(pr, pi)) in pxy.iter().enumerate() {
+            let (pxy_re, pxy_im) = csd(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f]);
+            for (k, (&pr, &pi)) in pxy_re.iter().zip(&pxy_im).enumerate() {
                 csd_re[k] += pr;
                 csd_im[k] += pi;
                 paa[k] += ma.re[f][k] * ma.re[f][k] + ma.im[f][k] * ma.im[f][k];
                 pbb[k] += mb.re[f][k] * mb.re[f][k] + mb.im[f][k] * mb.im[f][k];
             }
         }
-        let pxy_avg: Vec<(f64, f64)> = csd_re
-            .iter()
-            .zip(&csd_im)
-            .map(|(&r, &i)| (r / frames as f64, i / frames as f64))
-            .collect();
+        let pxy_re_avg: Vec<f64> = csd_re.iter().map(|v| v / frames as f64).collect();
+        let pxy_im_avg: Vec<f64> = csd_im.iter().map(|v| v / frames as f64).collect();
         let paa_avg: Vec<f64> = paa.iter().map(|v| v / frames as f64).collect();
         let pbb_avg: Vec<f64> = pbb.iter().map(|v| v / frames as f64).collect();
-        let coh = complex_coherence(&paa_avg, &pbb_avg, &pxy_avg);
+        let (coh_re, coh_im) = complex_coherence(&paa_avg, &pbb_avg, &pxy_re_avg, &pxy_im_avg);
         let half = ma.fft_size / 2;
-        let expected = coh[..half]
+        let expected = coh_re[..half]
             .iter()
-            .map(|(r, i)| (r * r + i * i).sqrt())
+            .zip(&coh_im[..half])
+            .map(|(&r, &i)| (r * r + i * i).sqrt())
             .sum::<f64>()
             / half as f64;
         let r = rec(&out, "stereo.coherence_mean");
