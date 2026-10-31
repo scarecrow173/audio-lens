@@ -12,7 +12,7 @@ use al_locate::decode::DecodedInput;
 use al_locate::dsp::{CorrelationPlan, CorrelationWorkspace, corr0, rms, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
 
-use crate::records::{RecordBuilder, robust_summary};
+use crate::records::{RecordBuilder, RobustSummary, robust_summary};
 use crate::stft::{StftMatrix, band_power, complex_coherence, envelope, stft, third_octave_bands};
 
 /// Cheap-stage tunables (`config.analysis.cheap.*` overrides).
@@ -174,20 +174,16 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         }
 
         // --- Level family ---
-        let peak = samples.iter().fold(0.0f64, |m, &v| m.max(v.abs()));
-        let dc = samples.iter().sum::<f64>() / samples.len() as f64;
-        let rms_all = rms(samples);
-        let silent = peak <= 0.0;
-        let level_validity = if silent {
-            Validity::SilenceInsufficientEnergy
-        } else {
-            Validity::Valid
-        };
-        let support = samples.len() as u64;
+        // Signal computation is delegated to `measure_level`; this
+        // block only maps measurements onto records.
+        let level = measure_level(samples, rate, level_window, level_hop);
+        let level_validity = level.validity;
+        let support = level.support;
+        channel_rms.push(level.rms_traj.clone());
 
         push(builder.scalar(
             "level.sample_peak",
-            peak,
+            level.peak,
             "linear",
             None,
             Confidence::High,
@@ -195,17 +191,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             None,
             support,
         ));
-        // True peak estimate: 4x linear interpolation between samples.
-        let mut true_peak = peak;
-        for w in samples.windows(2) {
-            for k in 1..4 {
-                let t = k as f64 / 4.0;
-                true_peak = true_peak.max((w[0] + (w[1] - w[0]) * t).abs());
-            }
-        }
         let mut tp = builder.scalar(
             "level.true_peak_est",
-            true_peak,
+            level.true_peak,
             "linear",
             None,
             Confidence::Medium,
@@ -217,7 +205,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         push(tp);
         push(builder.scalar(
             "level.dc_offset",
-            dc,
+            level.dc,
             "linear",
             None,
             Confidence::High,
@@ -227,7 +215,11 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "level.crest_factor",
-            if rms_all > 0.0 { peak / rms_all } else { 0.0 },
+            if level.rms_all > 0.0 {
+                level.peak / level.rms_all
+            } else {
+                0.0
+            },
             "ratio",
             None,
             Confidence::High,
@@ -237,7 +229,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "level.rms_dbfs",
-            db(rms_all),
+            db(level.rms_all),
             "dbfs",
             None,
             Confidence::High,
@@ -247,28 +239,25 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
 
         // Level trajectory (mid-resolution) + robust summary.
-        let frames = windowed(samples, level_window, level_hop);
-        let rms_traj: Vec<f64> = frames.iter().map(|f| rms(f)).collect();
-        channel_rms.push(rms_traj.clone());
         let traj_tensor = matrix_to_tensor(
             format!("features/cheap/{path}/level_trajectory"),
-            std::slice::from_ref(&rms_traj),
+            std::slice::from_ref(&level.rms_traj),
         );
         let traj_path = traj_tensor.path.clone();
         out.tensors.push(traj_tensor);
         let mut rec = builder.scalar(
             "level.trajectory",
-            rms_all,
+            level.rms_all,
             "linear",
             None,
             Confidence::High,
             level_validity,
             None,
-            rms_traj.len() as u64,
+            level.rms_traj.len() as u64,
         );
         rec.value = Value::Tensor {
             array: traj_path,
-            region: vec![[0, 1], [0, rms_traj.len() as u64]],
+            region: vec![[0, 1], [0, level.rms_traj.len() as u64]],
         };
         rec.resolution = Some(Resolution {
             sample_rate: rate,
@@ -278,7 +267,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         rec.resolution_class = ResolutionClass::Mid20ms;
         push(rec);
 
-        if let Some(s) = robust_summary(&rms_traj) {
+        if let Some(s) = &level.summary {
             let rb = || {
                 RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Mid20ms)
                     .resolution(level_window as u64, level_hop as u64, rate)
@@ -344,138 +333,73 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
 
         // Momentary (400ms) / short-term (3s) / integrated loudness
         // estimates (energy domain, no K-weighting — params record it).
-        for (id, seconds, class) in [
-            ("level.momentary_dbfs", 0.4, ResolutionClass::Wide500ms),
-            ("level.short_term_dbfs", 3.0, ResolutionClass::Seconds),
-        ] {
-            let win = ((seconds * rate as f64).round() as usize).max(1);
-            let tr: Vec<f64> = windowed(samples, win, win / 2)
-                .iter()
-                .map(|f| rms(f))
-                .collect();
-            let mut r = RecordBuilder::new(&dec.input_id, "cheap.v1", class)
-                .resolution(win as u64, (win / 2) as u64, rate)
+        for ((id, class), l) in [
+            ("level.momentary_dbfs", ResolutionClass::Wide500ms),
+            ("level.short_term_dbfs", ResolutionClass::Seconds),
+        ]
+        .iter()
+        .zip(&level.loudness)
+        {
+            let mut r = RecordBuilder::new(&dec.input_id, "cheap.v1", *class)
+                .resolution(l.win as u64, l.hop as u64, rate)
                 .lineage(lineage.iter().cloned())
                 .scalar(
-                    id,
-                    tr.iter().fold(f64::NEG_INFINITY, |m, &v| m.max(db(v))),
+                    *id,
+                    l.value,
                     "dbfs",
                     None,
                     Confidence::Medium,
-                    if tr.is_empty() {
+                    if l.support == 0 {
                         Validity::InsufficientSupport
                     } else {
                         level_validity
                     },
                     None,
-                    tr.len() as u64,
+                    l.support,
                 );
             r.channels = ch_sel;
             r.params = serde_json::json!({"estimate": "energy, no K-weighting"});
             push(r);
         }
         // Integrated: mean energy of momentary blocks.
-        let m_win = ((0.4 * rate as f64).round() as usize).max(1);
-        let mom: Vec<f64> = windowed(samples, m_win, m_win)
-            .iter()
-            .map(|f| sum_sq(f) / f.len() as f64)
-            .collect();
-        let integrated = if mom.is_empty() {
-            f64::NEG_INFINITY
-        } else {
-            db((mom.iter().sum::<f64>() / mom.len() as f64).sqrt())
-        };
         let mut integ = builder.scalar(
             "level.integrated_dbfs",
-            integrated,
+            level.integrated.0,
             "dbfs",
             None,
             Confidence::Medium,
-            if mom.is_empty() {
+            if level.integrated.1 == 0 {
                 Validity::InsufficientSupport
             } else {
                 level_validity
             },
             None,
-            mom.len() as u64,
+            level.integrated.1,
         );
         integ.channels = ch_sel;
         integ.params = serde_json::json!({"estimate": "energy, no gating/K-weighting"});
         push(integ);
         // LRA: p95 - p10 of short-term levels.
-        let st: Vec<f64> = {
-            let w = ((3.0 * rate as f64).round() as usize).max(1);
-            windowed(samples, w, w / 2)
-                .iter()
-                .map(|f| db(rms(f)))
-                .collect()
-        };
-        let lra = robust_summary(&st).map(|s| s.p95 - s.p05);
         let mut lra_rec = builder.scalar(
             "level.loudness_range_db",
-            lra.unwrap_or(f64::NAN),
+            level.lra.0.unwrap_or(f64::NAN),
             "db",
             None,
             Confidence::Medium,
-            match lra {
+            match level.lra.0 {
                 Some(_) => level_validity,
                 None => Validity::InsufficientSupport,
             },
             None,
-            st.len() as u64,
+            level.lra.1,
         );
         lra_rec.channels = ch_sel;
         push(lra_rec);
         // --- Digital anomaly family ---
-        let clip_thresh = cfg.clip_threshold;
-        let mut clip_count = 0u64;
-        let mut clip_run = 0u64;
-        let mut clip_max_run = 0u64;
-        let mut zero_run = 0u64;
-        let mut zero_max_run = 0u64;
-        let mut zero_runs = 0u64;
-        let mut stuck_run = 0u64;
-        let mut stuck_max_run = 0u64;
-        let mut max_step = 0.0f64;
-        let mut clicks = 0u64;
-        let local_rms = rms_all.max(1e-6);
-        for (i, &v) in samples.iter().enumerate() {
-            if v.abs() >= clip_thresh {
-                clip_count += 1;
-                clip_run += 1;
-                clip_max_run = clip_max_run.max(clip_run);
-            } else {
-                clip_run = 0;
-            }
-            if v == 0.0 {
-                if zero_run == 0 {
-                    zero_runs += 1;
-                }
-                zero_run += 1;
-                zero_max_run = zero_max_run.max(zero_run);
-            } else {
-                zero_run = 0;
-            }
-            if i > 0 {
-                if v == samples[i - 1] {
-                    stuck_run += 1;
-                    stuck_max_run = stuck_max_run.max(stuck_run);
-                } else {
-                    stuck_run = 0;
-                }
-                let step = (v - samples[i - 1]).abs();
-                if step > max_step {
-                    max_step = step;
-                }
-                if step > 4.0 * local_rms && step > 0.1 {
-                    clicks += 1;
-                }
-            }
-        }
-        let clip_rate = clip_count as f64 / samples.len() as f64;
+        let dig = measure_digital(samples, cfg.clip_threshold, level.rms_all);
         push(builder.scalar(
             "dig.clipping_rate",
-            clip_rate,
+            dig.clip_rate,
             "fraction",
             None,
             Confidence::High,
@@ -485,7 +409,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.clip_max_run",
-            clip_max_run as f64,
+            dig.clip_max_run as f64,
             "samples",
             None,
             Confidence::High,
@@ -495,7 +419,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.zero_run_count",
-            zero_runs as f64,
+            dig.zero_runs as f64,
             "count",
             None,
             Confidence::High,
@@ -505,7 +429,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.zero_run_max",
-            zero_max_run as f64,
+            dig.zero_max_run as f64,
             "samples",
             None,
             Confidence::High,
@@ -515,7 +439,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.stuck_run_max",
-            stuck_max_run as f64,
+            dig.stuck_max_run as f64,
             "samples",
             None,
             Confidence::High,
@@ -525,7 +449,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.discontinuity_max",
-            max_step,
+            dig.max_step,
             "linear",
             None,
             Confidence::High,
@@ -535,7 +459,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
         push(builder.scalar(
             "dig.click_count",
-            clicks as f64,
+            dig.clicks as f64,
             "count",
             None,
             Confidence::Medium,
@@ -545,66 +469,38 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         ));
 
         // Identical-block candidates: hash 1024-sample blocks.
-        const BLOCK: usize = 1024;
-        let mut block_dup = 0u64;
-        if samples.len() >= BLOCK * 2 {
-            let mut seen = std::collections::HashMap::new();
-            for chunk in samples.as_chunks::<BLOCK>().0 {
-                let mut h: u64 = 1469598103934665603;
-                for v in chunk {
-                    h = h.wrapping_mul(1099511628211) ^ v.to_bits();
-                }
-                if seen.insert(h, ()).is_some() {
-                    block_dup += 1;
-                }
-            }
-        }
         push(builder.scalar(
             "dig.duplicate_block_candidates",
-            block_dup as f64,
+            dig.block_dup as f64,
             "count",
             None,
             Confidence::Medium,
             Validity::Valid,
             None,
-            (samples.len() / BLOCK) as u64,
+            dig.block_support,
         ));
         // Quantization step estimate: smallest positive difference
         // between sorted distinct levels (plausible only when the
         // signal uses a small level set).
-        let mut uniq: Vec<u64> = samples.iter().map(|v| v.to_bits()).collect();
-        uniq.sort_unstable();
-        uniq.dedup();
-        let quant = if uniq.len() >= 2 && uniq.len() <= 1_000_000 {
-            let mut sorted: Vec<f64> = uniq.iter().map(|b| f64::from_bits(*b)).collect();
-            sorted.sort_by(|a, b| a.total_cmp(b));
-            sorted
-                .windows(2)
-                .map(|w| w[1] - w[0])
-                .filter(|d| *d > 0.0)
-                .fold(f64::INFINITY, f64::min)
-        } else {
-            f64::NAN
-        };
         let mut qr = builder.scalar(
             "dig.quant_step_est",
-            quant,
+            dig.quant,
             "linear",
             None,
             Confidence::Low,
-            if quant.is_finite() {
+            if dig.quant.is_finite() {
                 Validity::Valid
             } else {
                 Validity::NotApplicable
             },
             None,
-            uniq.len() as u64,
+            dig.uniq_len,
         );
         qr.channels = ch_sel;
         push(qr);
         // --- Spectral family + intermediates ---
-        let m = stft(samples, cfg.stft_window, cfg.stft_hop, rate);
-        if m.frames() == 0 {
+        let Some(spectral) = measure_spectral(samples, rate, cfg, &level.rms_traj, level_hop)
+        else {
             push(builder.scalar(
                 "spec.centroid_hz",
                 f64::NAN,
@@ -617,169 +513,53 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             ));
             channel_stft.push(None);
             continue;
-        }
+        };
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/stft_re"),
-            &m.re,
+            &spectral.m.re,
         ));
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/stft_im"),
-            &m.im,
+            &spectral.m.im,
         ));
-        // A9: derive every spectral tensor from one `power()` pass.
-        // `magnitude()`/`psd()` each re-run the same `mag_sq` scan,
-        // so `pow` is the only pass and mag/psd/mean_row are caller-
-        // side derivations. All of them — and every `m` field read —
-        // must complete before `m` is moved into `channel_stft`.
-        let pow = m.power();
-        let norm = (0.375 * m.window as f64) * m.sample_rate as f64;
-        let inv = 1.0 / norm;
-        let half = m.fft_size / 2;
-        let mut mean_row = vec![0.0; half];
-        let mag: Vec<Vec<f64>> = pow
-            .iter()
-            .map(|row| {
-                let r: Vec<f64> = row.iter().map(|&v| v.sqrt()).collect();
-                for (k, &v) in r.iter().take(half).enumerate() {
-                    mean_row[k] += v;
-                }
-                r
-            })
-            .collect();
-        for v in &mut mean_row {
-            *v /= mag.len() as f64;
-        }
-        let psd: Vec<Vec<f64>> = pow
-            .iter()
-            .map(|row| row.iter().map(|&v| v * inv).collect())
-            .collect();
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/magnitude"),
-            &mag,
+            &spectral.mag,
         ));
-        out.tensors
-            .push(matrix_to_tensor(format!("intermediate/{path}/power"), &pow));
-        out.tensors
-            .push(matrix_to_tensor(format!("intermediate/{path}/psd"), &psd));
-        let bands: Vec<Vec<f64>> = pow
-            .iter()
-            .map(|row| band_power(row, rate, m.fft_size, &cfg.bands))
-            .collect();
+        out.tensors.push(matrix_to_tensor(
+            format!("intermediate/{path}/power"),
+            &spectral.pow,
+        ));
+        out.tensors.push(matrix_to_tensor(
+            format!("intermediate/{path}/psd"),
+            &spectral.psd,
+        ));
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/band_power"),
-            &bands,
+            &spectral.bands,
         ));
-        let third = third_octave_bands(20.0, (rate as f64 / 2.0).min(20000.0));
-        let third_p: Vec<Vec<f64>> = pow
-            .iter()
-            .map(|row| band_power(row, rate, m.fft_size, &third))
-            .collect();
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/third_octave"),
-            &third_p,
+            &spectral.third_p,
         ));
-        let env: Vec<Vec<f64>> = mag.iter().map(|r| envelope(r, 8)).collect();
         out.tensors.push(matrix_to_tensor(
             format!("intermediate/{path}/envelope"),
-            &env,
+            &spectral.env,
         ));
-        channel_stft.push(Some(m));
+        channel_stft.push(Some(spectral.m));
 
         // Per-frame spectral shape trajectories + summaries.
-        let bin_hz = rate as f64 / (half * 2) as f64;
-        let mut centroid = Vec::with_capacity(mag.len());
-        let mut flatness = Vec::with_capacity(mag.len());
-        let mut rolloff = Vec::with_capacity(mag.len());
-        let mut entropy = Vec::with_capacity(mag.len());
-        let mut flux = Vec::with_capacity(mag.len());
-        let mut prev: Option<Vec<f64>> = None;
-        for row in &mag {
-            let row = &row[..half];
-            let total: f64 = row.iter().sum();
-            let centroid_hz = if total > 0.0 {
-                row.iter()
-                    .enumerate()
-                    .map(|(b, &v)| b as f64 * bin_hz * v)
-                    .sum::<f64>()
-                    / total
-            } else {
-                0.0
-            };
-            centroid.push(centroid_hz);
-            let geo = (row.iter().map(|v| (v + 1e-12).ln()).sum::<f64>() / half as f64).exp();
-            flatness.push(if total > 0.0 {
-                geo / (total / half as f64)
-            } else {
-                0.0
-            });
-            // 85% energy rolloff.
-            let mut acc = 0.0;
-            let target = total * 0.85;
-            let mut ro_bin = 0;
-            for (b, &v) in row.iter().enumerate() {
-                acc += v;
-                if acc >= target {
-                    ro_bin = b;
-                    break;
-                }
-            }
-            rolloff.push(ro_bin as f64 * bin_hz);
-            if total > 0.0 {
-                let h: f64 = row
-                    .iter()
-                    .filter(|&&v| v > 0.0)
-                    .map(|&v| (v / total) * (v / total).ln())
-                    .sum::<f64>();
-                entropy.push(-h / (half as f64).ln());
-            } else {
-                entropy.push(0.0);
-            }
-            flux.push(match &prev {
-                Some(p) => row
-                    .iter()
-                    .zip(p.iter())
-                    .map(|(&a, &b)| (a - b).max(0.0))
-                    .sum(),
-                // First frame has no predecessor: flux is 0 so every
-                // trajectory row shares the frame count.
-                None => 0.0,
-            });
-            prev = Some(row.to_vec());
-        }
-        let bandwidth: Vec<f64> = mag
-            .iter()
-            .map(|row| {
-                let row = &row[..half];
-                let total: f64 = row.iter().sum();
-                if total <= 0.0 {
-                    return 0.0;
-                }
-                let c = row
-                    .iter()
-                    .enumerate()
-                    .map(|(b, &v)| b as f64 * bin_hz * v)
-                    .sum::<f64>()
-                    / total;
-                (row.iter()
-                    .enumerate()
-                    .map(|(b, &v)| {
-                        let d = b as f64 * bin_hz - c;
-                        d * d * v
-                    })
-                    .sum::<f64>()
-                    / total)
-                    .sqrt()
-            })
-            .collect();
+        let bin_hz = spectral.bin_hz;
+        let half = spectral.half;
         out.tensors.push(matrix_to_tensor(
             format!("features/cheap/{path}/spec_trajectories"),
             &[
-                centroid.clone(),
-                bandwidth.clone(),
-                rolloff.clone(),
-                flatness.clone(),
-                entropy.clone(),
-                flux.clone(),
+                spectral.centroid.clone(),
+                spectral.bandwidth.clone(),
+                spectral.rolloff.clone(),
+                spectral.flatness.clone(),
+                spectral.entropy.clone(),
+                spectral.flux.clone(),
             ],
         ));
 
@@ -803,66 +583,27 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 out.records.push(r);
             }
         };
-        spec_rec("spec.centroid_hz", &centroid, "hz");
-        spec_rec("spec.bandwidth_hz", &bandwidth, "hz");
-        spec_rec("spec.rolloff_hz", &rolloff, "hz");
-        spec_rec("spec.flatness", &flatness, "ratio");
-        spec_rec("spec.entropy", &entropy, "norm");
-        spec_rec("spec.flux", &flux, "linear");
-        // Spectral slope (linear fit of log-magnitude vs log-freq,
-        // first 90% of band). `mean_row` is fused into the A9
-        // row-major pass above — same additions in row-ascending
-        // order, same `/ mag.len()` divisor, bit-identical.
-        let xs: Vec<f64> = (1..(half * 9 / 10).max(2))
-            .map(|b| (b as f64 * bin_hz).ln())
-            .collect();
-        let ys: Vec<f64> = (1..(half * 9 / 10).max(2))
-            .map(|b| (mean_row[b] + 1e-12).ln())
-            .collect();
-        let n = xs.len() as f64;
-        let (sx, sy, sxy, sxx) = xs
-            .iter()
-            .zip(&ys)
-            .fold((0.0, 0.0, 0.0, 0.0), |(ax, ay, axy, axx), (&x, &y)| {
-                (ax + x, ay + y, axy + x * y, axx + x * x)
-            });
-        let slope = if sxx * n - sx * sx != 0.0 {
-            (sxy * n - sx * sy) / (sxx * n - sx * sx)
-        } else {
-            0.0
-        };
+        spec_rec("spec.centroid_hz", &spectral.centroid, "hz");
+        spec_rec("spec.bandwidth_hz", &spectral.bandwidth, "hz");
+        spec_rec("spec.rolloff_hz", &spectral.rolloff, "hz");
+        spec_rec("spec.flatness", &spectral.flatness, "ratio");
+        spec_rec("spec.entropy", &spectral.entropy, "norm");
+        spec_rec("spec.flux", &spectral.flux, "linear");
         let mut sr = rb.scalar(
             "spec.slope",
-            slope,
+            spectral.slope,
             "log_log",
             None,
             Confidence::Medium,
             level_validity,
             None,
-            mag.len() as u64,
+            spectral.frames as u64,
         );
         sr.channels = ch_sel;
         out.records.push(sr);
-        // Narrowband peaks / notches: bins >6 dB above/below the
-        // local neighborhood median.
-        let mut peaks = 0u64;
-        let mut notches = 0u64;
-        for (b, &v) in mean_row.iter().enumerate().take(half).skip(4) {
-            let lo = b.saturating_sub(4);
-            let hi = (b + 5).min(half);
-            let mut nb: Vec<f64> = mean_row[lo..hi].to_vec();
-            nb.sort_by(|a, b2| a.total_cmp(b2));
-            let med = nb[nb.len() / 2];
-            if v > med * 4.0 {
-                peaks += 1;
-            }
-            if v < med / 4.0 && med > 0.0 {
-                notches += 1;
-            }
-        }
         let mut pr = rb.scalar(
             "spec.narrowband_peaks",
-            peaks as f64,
+            spectral.narrowband_peaks as f64,
             "count",
             None,
             Confidence::Medium,
@@ -874,7 +615,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         out.records.push(pr);
         let mut nr = rb.scalar(
             "spec.narrowband_notches",
-            notches as f64,
+            spectral.narrowband_notches as f64,
             "count",
             None,
             Confidence::Medium,
@@ -886,7 +627,7 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         out.records.push(nr);
         // --- Noise / modulation family ---
         // Noise floor: p05 of the level trajectory.
-        if let Some(s) = robust_summary(&rms_traj) {
+        if let Some(s) = &level.summary {
             let mut nf = rb.scalar(
                 "noise.floor_dbfs",
                 db(s.p05),
@@ -901,44 +642,22 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             out.records.push(nf);
         }
         // Tonal peak: strongest narrowband peak frequency + level.
-        let (peak_bin, peak_val) = mean_row
-            .iter()
-            .enumerate()
-            .skip(1)
-            .take(half.saturating_sub(1))
-            .max_by(|a, b| a.1.total_cmp(b.1))
-            .map(|(b, &v)| (b, v))
-            .unwrap_or((0, 0.0));
         let mut tn = rb.scalar(
             "noise.tonal_peak_hz",
-            peak_bin as f64 * bin_hz,
+            spectral.tonal.0 as f64 * bin_hz,
             "hz",
             None,
             Confidence::Medium,
             level_validity,
             None,
-            mag.len() as u64,
+            spectral.frames as u64,
         );
         tn.channels = ch_sel;
-        tn.params = serde_json::json!({"peak_mag": peak_val});
+        tn.params = serde_json::json!({"peak_mag": spectral.tonal.1});
         out.records.push(tn);
-        // Hum: energy at 50/60Hz fundamentals + first 5 harmonics
-        // relative to total.
-        let total_e: f64 = sum_sq(&mean_row);
-        let hum_e: f64 = [50.0f64, 60.0]
-            .iter()
-            .flat_map(|&f| (1..=5).map(move |h| f * h as f64))
-            .filter(|&f| f < rate as f64 / 2.0)
-            .map(|f| {
-                let b = (f / bin_hz).round() as usize;
-                let lo = b.saturating_sub(1);
-                let hi = (b + 2).min(half);
-                sum_sq(&mean_row[lo..hi])
-            })
-            .sum();
         let mut hum = rb.scalar(
             "noise.hum_ratio",
-            if total_e > 0.0 { hum_e / total_e } else { 0.0 },
+            spectral.hum_ratio,
             "fraction",
             None,
             Confidence::Medium,
@@ -950,53 +669,31 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
         out.records.push(hum);
         // AM spectrum: dominant modulation frequency of the RMS
         // trajectory below 20 Hz.
-        if rms_traj.len() >= 16 {
-            let traj_rate = rate as f64 / level_hop as f64;
-            let mut tm: Vec<f64> = rms_traj.clone();
-            let mean = tm.iter().sum::<f64>() / tm.len() as f64;
-            tm.iter_mut().for_each(|v| *v -= mean);
-            let mm = crate::stft::stft(&tm, tm.len().min(256), tm.len().min(256), traj_rate as u32);
-            if mm.frames() > 0 {
-                let mmag = mm.magnitude();
-                let row = &mmag[0];
-                let bin_f = traj_rate / mm.fft_size as f64;
-                let (am_bin, _) = row
-                    .iter()
-                    .enumerate()
-                    .take_while(|(b, _)| *b as f64 * bin_f <= 20.0)
-                    .skip(1)
-                    .max_by(|a, b| a.1.total_cmp(b.1))
-                    .unwrap_or((0, &0.0));
-                let mut am = rb.scalar(
-                    "mod.am_freq_hz",
-                    am_bin as f64 * bin_f,
-                    "hz",
-                    None,
-                    Confidence::Low,
-                    Validity::Valid,
-                    None,
-                    rms_traj.len() as u64,
-                );
-                am.channels = ch_sel;
-                out.records.push(am);
-                let depth = if mean > 0.0 {
-                    (rms_traj.iter().fold(0.0f64, |m, &v| m.max(v)) / mean) - 1.0
-                } else {
-                    0.0
-                };
-                let mut ad = rb.scalar(
-                    "mod.am_depth",
-                    depth,
-                    "ratio",
-                    None,
-                    Confidence::Low,
-                    Validity::Valid,
-                    None,
-                    rms_traj.len() as u64,
-                );
-                ad.channels = ch_sel;
-                out.records.push(ad);
-            }
+        if let Some((am_freq, am_depth)) = spectral.am {
+            let mut am = rb.scalar(
+                "mod.am_freq_hz",
+                am_freq,
+                "hz",
+                None,
+                Confidence::Low,
+                Validity::Valid,
+                None,
+                level.rms_traj.len() as u64,
+            );
+            am.channels = ch_sel;
+            out.records.push(am);
+            let mut ad = rb.scalar(
+                "mod.am_depth",
+                am_depth,
+                "ratio",
+                None,
+                Confidence::Low,
+                Validity::Valid,
+                None,
+                level.rms_traj.len() as u64,
+            );
+            ad.channels = ch_sel;
+            out.records.push(ad);
         }
     }
 
@@ -1027,20 +724,21 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 ));
                 continue;
             }
-            let (xs, ys) = (&x[..n], &y[..n]);
-            // Zero-lag normalized correlation. sx/sy are also
-            // consumed by the Validity gate and `stereo.ild_db`
-            // below, so they are computed separately from `corr0`.
-            let corr = corr0(xs, ys);
-            let sx = sum_sq(xs);
-            let sy = sum_sq(ys);
+            let st = measure_stereo(
+                &x[..n],
+                &y[..n],
+                channel_stft[a].as_ref(),
+                channel_stft[b].as_ref(),
+                rate,
+                cfg,
+            );
             push(rb.scalar(
                 "stereo.pair_correlation",
-                corr,
+                st.corr,
                 "corr",
                 None,
                 Confidence::High,
-                if sx > 0.0 && sy > 0.0 {
+                if st.sx > 0.0 && st.sy > 0.0 {
                     Validity::Valid
                 } else {
                     Validity::SilenceInsufficientEnergy
@@ -1049,10 +747,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 n as u64,
             ));
             // ILD: level difference.
-            let ild = db(sy.sqrt() / n.max(1) as f64) - db(sx.sqrt() / n.max(1) as f64);
             push(rb.scalar(
                 "stereo.ild_db",
-                ild,
+                st.ild,
                 "db",
                 None,
                 Confidence::High,
@@ -1061,27 +758,9 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 n as u64,
             ));
             // IPD: NCC peak lag within ±ipd_max_lag.
-            let max_lag = (cfg.ipd_max_lag_s * rate as f64).round() as isize;
-            let mut best_lag = 0isize;
-            let mut best_v = f64::MIN;
-            for lag in -max_lag..=max_lag {
-                let (xa, ya) = if lag >= 0 {
-                    (&xs[lag as usize..], &ys[..n - lag as usize])
-                } else {
-                    (&xs[..n - (-lag) as usize], &ys[(-lag) as usize..])
-                };
-                if xa.is_empty() {
-                    continue;
-                }
-                let c = corr0(xa, ya);
-                if c > best_v {
-                    best_v = c;
-                    best_lag = lag;
-                }
-            }
             let mut ipd = rb.scalar(
                 "stereo.ipd_samples",
-                best_lag as f64,
+                st.ipd.0 as f64,
                 "samples",
                 None,
                 Confidence::Medium,
@@ -1089,26 +768,20 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 None,
                 n as u64,
             );
-            ipd.params = serde_json::json!({"lag_corr": best_v});
+            ipd.params = serde_json::json!({"lag_corr": st.ipd.1});
             push(ipd);
             // M/S power + band M/S.
-            let mid: f64 = xs
-                .iter()
-                .zip(ys)
-                .map(|(&a, &b2)| (a + b2) * (a + b2) / 4.0)
-                .sum();
-            let side: f64 = xs
-                .iter()
-                .zip(ys)
-                .map(|(&a, &b2)| (a - b2) * (a - b2) / 4.0)
-                .sum();
             push(rb.scalar(
                 "stereo.ms_power_ratio",
-                if mid > 0.0 { side / mid } else { f64::NAN },
+                if st.mid > 0.0 {
+                    st.side / st.mid
+                } else {
+                    f64::NAN
+                },
                 "ratio",
                 None,
                 Confidence::High,
-                if mid > 0.0 {
+                if st.mid > 0.0 {
                     Validity::Valid
                 } else {
                     Validity::SilenceInsufficientEnergy
@@ -1118,50 +791,20 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
             ));
             // Complex coherence + CSD intermediates from the two
             // channels' STFTs (same geometry).
-            if let (Some(ma), Some(mb)) = (&channel_stft[a], &channel_stft[b])
-                && ma.frames() == mb.frames()
-                && ma.fft_size == mb.fft_size
-            {
-                let frames = ma.frames().min(64);
-                // Welch 累積は `ruviform_numeric::xspec::CrossSpectrum`
-                // (AL#101。旧インライン loop との bit-exact 等価は
-                // #153 比較記録で検証済み)。
-                let mut spectrum = CrossSpectrum::new(ma.fft_size);
-                for f in 0..frames {
-                    spectrum
-                        .accumulate(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f])
-                        .expect("stft frame bin count must match");
-                }
-                let csd_re = spectrum.sum_xy_re().to_vec();
-                let csd_im = spectrum.sum_xy_im().to_vec();
-                let paa = spectrum.sum_xx();
-                let pbb = spectrum.sum_yy();
-                let pxy_re_avg: Vec<f64> = csd_re.iter().map(|v| v / frames as f64).collect();
-                let pxy_im_avg: Vec<f64> = csd_im.iter().map(|v| v / frames as f64).collect();
-                let paa_avg: Vec<f64> = paa.iter().map(|v| v / frames as f64).collect();
-                let pbb_avg: Vec<f64> = pbb.iter().map(|v| v / frames as f64).collect();
-                let (coh_re, coh_im) =
-                    complex_coherence(&paa_avg, &pbb_avg, &pxy_re_avg, &pxy_im_avg);
-                let half = ma.fft_size / 2;
-                let coh_mag_mean = coh_re[..half]
-                    .iter()
-                    .zip(&coh_im[..half])
-                    .map(|(&r, &i)| (r * r + i * i).sqrt())
-                    .sum::<f64>()
-                    / half as f64;
+            if let Some(coh) = st.coherence {
                 let mut cr = rb.scalar(
                     "stereo.coherence_mean",
-                    coh_mag_mean,
+                    coh.mag_mean,
                     "ratio",
                     None,
                     Confidence::Medium,
-                    if coh_mag_mean > 0.3 {
+                    if coh.mag_mean > 0.3 {
                         Validity::Valid
                     } else {
                         Validity::LowCoherence
                     },
                     None,
-                    frames as u64,
+                    coh.frames as u64,
                 );
                 cr.channels = pair_sel;
                 cr.resolution = Some(Resolution {
@@ -1173,11 +816,11 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 out.records.push(cr);
                 out.tensors.push(matrix_to_tensor(
                     format!("intermediate/{}/ch{a}-ch{b}/coherence", dec.input_id),
-                    &[coh_re, coh_im],
+                    &[coh.re, coh.im],
                 ));
                 out.tensors.push(matrix_to_tensor(
                     format!("intermediate/{}/ch{a}-ch{b}/csd", dec.input_id),
-                    &[csd_re, csd_im],
+                    &[coh.csd_re, coh.csd_im],
                 ));
             }
         }
@@ -1185,68 +828,53 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
 
     // --- Transient / timing family (from mono mix) ---
     if !channel_rms.is_empty() && !channel_rms[0].is_empty() {
-        let rms = &channel_rms[0];
+        let trans = measure_transient(
+            &channel_rms[0],
+            if dec.channel_samples.len() >= 2 {
+                Some((&dec.channel_samples[0], &dec.channel_samples[1]))
+            } else {
+                None
+            },
+            level_hop,
+            rate,
+            cfg,
+        );
         let rb = RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Mid20ms)
             .resolution(level_window as u64, level_hop as u64, rate)
             .lineage(lineage.iter().cloned());
-        // Onset strength: positive RMS-trajectory derivative peaks.
-        let mut onsets = Vec::new();
-        for i in 1..rms.len() {
-            let d = rms[i] - rms[i - 1];
-            let local_med = {
-                let lo = i.saturating_sub(8);
-                let mut nb: Vec<f64> = rms[lo..=i.min(rms.len() - 1)].to_vec();
-                nb.sort_by(|a, b| a.total_cmp(b));
-                nb[nb.len() / 2]
-            };
-            if d > local_med * 1.5 && d > 0.01 {
-                onsets.push(i);
-            }
-        }
         out.records.push(rb.scalar(
             "trans.onset_count",
-            onsets.len() as f64,
+            trans.onsets.len() as f64,
             "count",
             None,
             Confidence::Medium,
             Validity::Valid,
             None,
-            rms.len() as u64,
+            channel_rms[0].len() as u64,
         ));
-        let onset_times: Vec<f64> = onsets
-            .iter()
-            .map(|&i| i as f64 * level_hop as f64 / rate as f64)
-            .collect();
         let ot = matrix_to_tensor(
             format!("features/cheap/{}/onset_times", dec.input_id),
-            &[onset_times],
+            &[trans.onset_times],
         );
         let mut rec = rb.scalar(
             "trans.onset_times",
-            onsets.len() as f64,
+            trans.onsets.len() as f64,
             "seconds",
             None,
             Confidence::Medium,
             Validity::Valid,
             None,
-            onsets.len() as u64,
+            trans.onsets.len() as u64,
         );
         rec.value = Value::Tensor {
             array: ot.path.clone(),
-            region: vec![[0, 1], [0, onsets.len() as u64]],
+            region: vec![[0, 1], [0, trans.onsets.len() as u64]],
         };
         out.tensors.push(ot);
         out.records.push(rec);
         // Self-similarity: normalized autocorrelation of the RMS
         // trajectory at lag 2-8 windows (periodicity hint).
-        if rms.len() > 16 {
-            let best = (2..=8)
-                .map(|lag| {
-                    let a = &rms[..rms.len() - lag];
-                    let b = &rms[lag..];
-                    corr0(a, b)
-                })
-                .fold(0.0f64, f64::max);
+        if let Some(best) = trans.self_sim {
             out.records.push(rb.scalar(
                 "trans.self_similarity",
                 best,
@@ -1255,41 +883,785 @@ pub fn analyze_input(dec: &DecodedInput, cfg: &CheapConfig) -> CheapResult {
                 Confidence::Low,
                 Validity::Valid,
                 None,
-                rms.len() as u64,
+                channel_rms[0].len() as u64,
             ));
         }
         // Coarse lag modulation between channels (drift of the IPD
         // estimate over time) — first pair only, per 100ms block.
-        if dec.channel_samples.len() >= 2 {
-            let x = &dec.channel_samples[0];
-            let y = &dec.channel_samples[1];
-            let block = ((0.1 * rate as f64).round() as usize).max(64);
-            let max_lag = ((cfg.ipd_max_lag_s * 4.0) * rate as f64).round() as usize;
-            let lags = ipd_lags(x, y, block, max_lag);
-            if !lags.is_empty() {
-                let drift = lags.iter().copied().fold(f64::MIN, f64::max)
-                    - lags.iter().copied().fold(f64::MAX, f64::min);
-                let mut lr =
-                    RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Broad100ms)
-                        .resolution(block as u64, block as u64, rate)
-                        .lineage(lineage.iter().cloned())
-                        .scalar(
-                            "mod.lag_drift_samples",
-                            drift,
-                            "samples",
-                            None,
-                            Confidence::Low,
-                            Validity::Valid,
-                            None,
-                            lags.len() as u64,
-                        );
-                lr.channels = Some(al_dataset::types::ChannelSelector::ChannelPair(0, 1));
-                out.records.push(lr);
-            }
+        if let Some((drift, lags_n, block)) = trans.lag_drift {
+            let mut lr = RecordBuilder::new(&dec.input_id, "cheap.v1", ResolutionClass::Broad100ms)
+                .resolution(block as u64, block as u64, rate)
+                .lineage(lineage.iter().cloned())
+                .scalar(
+                    "mod.lag_drift_samples",
+                    drift,
+                    "samples",
+                    None,
+                    Confidence::Low,
+                    Validity::Valid,
+                    None,
+                    lags_n,
+                );
+            lr.channels = Some(al_dataset::types::ChannelSelector::ChannelPair(0, 1));
+            out.records.push(lr);
         }
     }
 
     out
+}
+
+/// One loudness-window measurement (`level.momentary/short_term_dbfs`).
+struct Loudness {
+    /// Maximum block level in dBFS (`NEG_INFINITY` when no block fits).
+    value: f64,
+    /// Analysis window (samples).
+    win: usize,
+    /// Hop between blocks (samples).
+    hop: usize,
+    /// Number of blocks.
+    support: u64,
+}
+
+/// Level-family measurements for one channel — signal computation
+/// only, no `FeatureRecord` construction.
+struct LevelMeasure {
+    /// Sample peak (`max |x|`).
+    peak: f64,
+    /// 4x linear-interpolation true-peak estimate.
+    true_peak: f64,
+    /// Mean (DC offset).
+    dc: f64,
+    /// Whole-signal RMS.
+    rms_all: f64,
+    /// Validity shared by every level record.
+    validity: Validity,
+    /// `samples.len()`.
+    support: u64,
+    /// Per-frame RMS trajectory (`level_window`/`level_hop`).
+    rms_traj: Vec<f64>,
+    /// `robust_summary` of `rms_traj`.
+    summary: Option<RobustSummary>,
+    /// Momentary then short-term loudness, in emission order.
+    loudness: Vec<Loudness>,
+    /// `(integrated_dbfs, block_count)`.
+    integrated: (f64, u64),
+    /// `(lra, support)` — `None` without finite short-term values.
+    lra: (Option<f64>, u64),
+}
+
+fn measure_level(
+    samples: &[f64],
+    rate: u32,
+    level_window: usize,
+    level_hop: usize,
+) -> LevelMeasure {
+    let peak = samples.iter().fold(0.0f64, |m, &v| m.max(v.abs()));
+    let dc = samples.iter().sum::<f64>() / samples.len() as f64;
+    let rms_all = rms(samples);
+    let validity = if peak <= 0.0 {
+        Validity::SilenceInsufficientEnergy
+    } else {
+        Validity::Valid
+    };
+    // True peak estimate: 4x linear interpolation between samples.
+    let mut true_peak = peak;
+    for w in samples.windows(2) {
+        for k in 1..4 {
+            let t = k as f64 / 4.0;
+            true_peak = true_peak.max((w[0] + (w[1] - w[0]) * t).abs());
+        }
+    }
+    // Level trajectory (mid-resolution) + robust summary.
+    let frames = windowed(samples, level_window, level_hop);
+    let rms_traj: Vec<f64> = frames.iter().map(|f| rms(f)).collect();
+    let summary = robust_summary(&rms_traj);
+    // Momentary (400ms) / short-term (3s) loudness estimates
+    // (energy domain, no K-weighting — params record it).
+    let loudness = [0.4f64, 3.0]
+        .iter()
+        .map(|&seconds| {
+            let win = ((seconds * rate as f64).round() as usize).max(1);
+            let tr: Vec<f64> = windowed(samples, win, win / 2)
+                .iter()
+                .map(|f| rms(f))
+                .collect();
+            Loudness {
+                value: tr.iter().fold(f64::NEG_INFINITY, |m, &v| m.max(db(v))),
+                win,
+                hop: win / 2,
+                support: tr.len() as u64,
+            }
+        })
+        .collect();
+    // Integrated: mean energy of momentary blocks.
+    let m_win = ((0.4 * rate as f64).round() as usize).max(1);
+    let mom: Vec<f64> = windowed(samples, m_win, m_win)
+        .iter()
+        .map(|f| sum_sq(f) / f.len() as f64)
+        .collect();
+    let integrated = (
+        if mom.is_empty() {
+            f64::NEG_INFINITY
+        } else {
+            db((mom.iter().sum::<f64>() / mom.len() as f64).sqrt())
+        },
+        mom.len() as u64,
+    );
+    // LRA: p95 - p10 of short-term levels.
+    let st: Vec<f64> = {
+        let w = ((3.0 * rate as f64).round() as usize).max(1);
+        windowed(samples, w, w / 2)
+            .iter()
+            .map(|f| db(rms(f)))
+            .collect()
+    };
+    let lra = (robust_summary(&st).map(|s| s.p95 - s.p05), st.len() as u64);
+    LevelMeasure {
+        peak,
+        true_peak,
+        dc,
+        rms_all,
+        validity,
+        support: samples.len() as u64,
+        rms_traj,
+        summary,
+        loudness,
+        integrated,
+        lra,
+    }
+}
+
+/// Digital-anomaly-family measurements for one channel — signal
+/// computation only.
+struct DigitalMeasure {
+    /// Clipped-sample fraction.
+    clip_rate: f64,
+    /// Longest consecutive clipped run.
+    clip_max_run: u64,
+    /// Number of zero runs.
+    zero_runs: u64,
+    /// Longest zero run.
+    zero_max_run: u64,
+    /// Longest equal-consecutive-sample run.
+    stuck_max_run: u64,
+    /// Largest sample-to-sample step.
+    max_step: f64,
+    /// Steps above `4 * local_rms` and `0.1`.
+    clicks: u64,
+    /// Repeated 1024-sample block hashes.
+    block_dup: u64,
+    /// `samples.len() / 1024`.
+    block_support: u64,
+    /// Smallest positive sorted-level difference (`NaN` outside the
+    /// plausible level-set range, `INFINITY` when no positive diff).
+    quant: f64,
+    /// Distinct sample values.
+    uniq_len: u64,
+}
+
+fn measure_digital(samples: &[f64], clip_thresh: f64, rms_all: f64) -> DigitalMeasure {
+    let mut clip_count = 0u64;
+    let mut clip_run = 0u64;
+    let mut clip_max_run = 0u64;
+    let mut zero_run = 0u64;
+    let mut zero_max_run = 0u64;
+    let mut zero_runs = 0u64;
+    let mut stuck_run = 0u64;
+    let mut stuck_max_run = 0u64;
+    let mut max_step = 0.0f64;
+    let mut clicks = 0u64;
+    let local_rms = rms_all.max(1e-6);
+    for (i, &v) in samples.iter().enumerate() {
+        if v.abs() >= clip_thresh {
+            clip_count += 1;
+            clip_run += 1;
+            clip_max_run = clip_max_run.max(clip_run);
+        } else {
+            clip_run = 0;
+        }
+        if v == 0.0 {
+            if zero_run == 0 {
+                zero_runs += 1;
+            }
+            zero_run += 1;
+            zero_max_run = zero_max_run.max(zero_run);
+        } else {
+            zero_run = 0;
+        }
+        if i > 0 {
+            if v == samples[i - 1] {
+                stuck_run += 1;
+                stuck_max_run = stuck_max_run.max(stuck_run);
+            } else {
+                stuck_run = 0;
+            }
+            let step = (v - samples[i - 1]).abs();
+            if step > max_step {
+                max_step = step;
+            }
+            if step > 4.0 * local_rms && step > 0.1 {
+                clicks += 1;
+            }
+        }
+    }
+    // Identical-block candidates: hash 1024-sample blocks.
+    const BLOCK: usize = 1024;
+    let mut block_dup = 0u64;
+    if samples.len() >= BLOCK * 2 {
+        let mut seen = std::collections::HashMap::new();
+        for chunk in samples.as_chunks::<BLOCK>().0 {
+            let mut h: u64 = 1469598103934665603;
+            for v in chunk {
+                h = h.wrapping_mul(1099511628211) ^ v.to_bits();
+            }
+            if seen.insert(h, ()).is_some() {
+                block_dup += 1;
+            }
+        }
+    }
+    // Quantization step estimate: smallest positive difference
+    // between sorted distinct levels (plausible only when the
+    // signal uses a small level set).
+    let mut uniq: Vec<u64> = samples.iter().map(|v| v.to_bits()).collect();
+    uniq.sort_unstable();
+    uniq.dedup();
+    let quant = if uniq.len() >= 2 && uniq.len() <= 1_000_000 {
+        let mut sorted: Vec<f64> = uniq.iter().map(|b| f64::from_bits(*b)).collect();
+        sorted.sort_by(|a, b| a.total_cmp(b));
+        sorted
+            .windows(2)
+            .map(|w| w[1] - w[0])
+            .filter(|d| *d > 0.0)
+            .fold(f64::INFINITY, f64::min)
+    } else {
+        f64::NAN
+    };
+    DigitalMeasure {
+        clip_rate: clip_count as f64 / samples.len() as f64,
+        clip_max_run,
+        zero_runs,
+        zero_max_run,
+        stuck_max_run,
+        max_step,
+        clicks,
+        block_dup,
+        block_support: (samples.len() / BLOCK) as u64,
+        quant,
+        uniq_len: uniq.len() as u64,
+    }
+}
+
+/// Spectral-family measurements for one channel — STFT, derived
+/// tensors, trajectories and tone/hum/AM metrics. Signal computation
+/// only; `m` is handed back for the caller's `channel_stft` slot.
+struct SpectralMeasure {
+    /// STFT matrix (`intermediate` tensors + stereo coherence input).
+    m: StftMatrix,
+    /// Per-frame magnitude rows.
+    mag: Vec<Vec<f64>>,
+    /// Per-frame power rows.
+    pow: Vec<Vec<f64>>,
+    /// Per-frame PSD rows.
+    psd: Vec<Vec<f64>>,
+    /// Per-frame configured-band powers.
+    bands: Vec<Vec<f64>>,
+    /// Per-frame third-octave powers.
+    third_p: Vec<Vec<f64>>,
+    /// Per-frame spectral envelopes.
+    env: Vec<Vec<f64>>,
+    /// Frame count (`mag.len()`).
+    frames: usize,
+    /// Hz per bin.
+    bin_hz: f64,
+    /// `fft_size / 2` — usable upper bin bound.
+    half: usize,
+    /// Per-frame spectral centroid (Hz).
+    centroid: Vec<f64>,
+    /// Per-frame spectral bandwidth (Hz).
+    bandwidth: Vec<f64>,
+    /// Per-frame 85% rolloff (Hz).
+    rolloff: Vec<f64>,
+    /// Per-frame spectral flatness.
+    flatness: Vec<f64>,
+    /// Per-frame normalized entropy.
+    entropy: Vec<f64>,
+    /// Per-frame positive spectral flux.
+    flux: Vec<f64>,
+    /// Log-log slope over the first 90% of bins.
+    slope: f64,
+    /// Bins >6 dB above the neighborhood median.
+    narrowband_peaks: u64,
+    /// Bins >6 dB below the neighborhood median.
+    narrowband_notches: u64,
+    /// `(peak_bin, peak_magnitude)` of the strongest narrowband peak.
+    tonal: (usize, f64),
+    /// 50/60 Hz harmonic energy fraction.
+    hum_ratio: f64,
+    /// `(am_freq_hz, am_depth)` when the RMS trajectory supports an
+    /// AM estimate.
+    am: Option<(f64, f64)>,
+}
+
+fn measure_spectral(
+    samples: &[f64],
+    rate: u32,
+    cfg: &CheapConfig,
+    rms_traj: &[f64],
+    level_hop: usize,
+) -> Option<SpectralMeasure> {
+    let m = stft(samples, cfg.stft_window, cfg.stft_hop, rate);
+    if m.frames() == 0 {
+        return None;
+    }
+    // A9: derive every spectral tensor from one `power()` pass.
+    // `magnitude()`/`psd()` each re-run the same `mag_sq` scan,
+    // so `pow` is the only pass and mag/psd/mean_row are caller-
+    // side derivations. All of them — and every `m` field read —
+    // must complete before `m` is moved out by the caller.
+    let pow = m.power();
+    let norm = (0.375 * m.window as f64) * m.sample_rate as f64;
+    let inv = 1.0 / norm;
+    let half = m.fft_size / 2;
+    let mut mean_row = vec![0.0; half];
+    let mag: Vec<Vec<f64>> = pow
+        .iter()
+        .map(|row| {
+            let r: Vec<f64> = row.iter().map(|&v| v.sqrt()).collect();
+            for (k, &v) in r.iter().take(half).enumerate() {
+                mean_row[k] += v;
+            }
+            r
+        })
+        .collect();
+    for v in &mut mean_row {
+        *v /= mag.len() as f64;
+    }
+    let psd: Vec<Vec<f64>> = pow
+        .iter()
+        .map(|row| row.iter().map(|&v| v * inv).collect())
+        .collect();
+    let bands: Vec<Vec<f64>> = pow
+        .iter()
+        .map(|row| band_power(row, rate, m.fft_size, &cfg.bands))
+        .collect();
+    let third = third_octave_bands(20.0, (rate as f64 / 2.0).min(20000.0));
+    let third_p: Vec<Vec<f64>> = pow
+        .iter()
+        .map(|row| band_power(row, rate, m.fft_size, &third))
+        .collect();
+    let env: Vec<Vec<f64>> = mag.iter().map(|r| envelope(r, 8)).collect();
+    // Per-frame spectral shape trajectories.
+    let bin_hz = rate as f64 / (half * 2) as f64;
+    let mut centroid = Vec::with_capacity(mag.len());
+    let mut flatness = Vec::with_capacity(mag.len());
+    let mut rolloff = Vec::with_capacity(mag.len());
+    let mut entropy = Vec::with_capacity(mag.len());
+    let mut flux = Vec::with_capacity(mag.len());
+    let mut prev: Option<Vec<f64>> = None;
+    for row in &mag {
+        let row = &row[..half];
+        let total: f64 = row.iter().sum();
+        let centroid_hz = if total > 0.0 {
+            row.iter()
+                .enumerate()
+                .map(|(b, &v)| b as f64 * bin_hz * v)
+                .sum::<f64>()
+                / total
+        } else {
+            0.0
+        };
+        centroid.push(centroid_hz);
+        let geo = (row.iter().map(|v| (v + 1e-12).ln()).sum::<f64>() / half as f64).exp();
+        flatness.push(if total > 0.0 {
+            geo / (total / half as f64)
+        } else {
+            0.0
+        });
+        // 85% energy rolloff.
+        let mut acc = 0.0;
+        let target = total * 0.85;
+        let mut ro_bin = 0;
+        for (b, &v) in row.iter().enumerate() {
+            acc += v;
+            if acc >= target {
+                ro_bin = b;
+                break;
+            }
+        }
+        rolloff.push(ro_bin as f64 * bin_hz);
+        if total > 0.0 {
+            let h: f64 = row
+                .iter()
+                .filter(|&&v| v > 0.0)
+                .map(|&v| (v / total) * (v / total).ln())
+                .sum::<f64>();
+            entropy.push(-h / (half as f64).ln());
+        } else {
+            entropy.push(0.0);
+        }
+        flux.push(match &prev {
+            Some(p) => row
+                .iter()
+                .zip(p.iter())
+                .map(|(&a, &b)| (a - b).max(0.0))
+                .sum(),
+            // First frame has no predecessor: flux is 0 so every
+            // trajectory row shares the frame count.
+            None => 0.0,
+        });
+        prev = Some(row.to_vec());
+    }
+    let bandwidth: Vec<f64> = mag
+        .iter()
+        .map(|row| {
+            let row = &row[..half];
+            let total: f64 = row.iter().sum();
+            if total <= 0.0 {
+                return 0.0;
+            }
+            let c = row
+                .iter()
+                .enumerate()
+                .map(|(b, &v)| b as f64 * bin_hz * v)
+                .sum::<f64>()
+                / total;
+            (row.iter()
+                .enumerate()
+                .map(|(b, &v)| {
+                    let d = b as f64 * bin_hz - c;
+                    d * d * v
+                })
+                .sum::<f64>()
+                / total)
+                .sqrt()
+        })
+        .collect();
+    // Spectral slope (linear fit of log-magnitude vs log-freq,
+    // first 90% of band). `mean_row` is fused into the A9
+    // row-major pass above — same additions in row-ascending
+    // order, same `/ mag.len()` divisor, bit-identical.
+    let xs: Vec<f64> = (1..(half * 9 / 10).max(2))
+        .map(|b| (b as f64 * bin_hz).ln())
+        .collect();
+    let ys: Vec<f64> = (1..(half * 9 / 10).max(2))
+        .map(|b| (mean_row[b] + 1e-12).ln())
+        .collect();
+    let n = xs.len() as f64;
+    let (sx, sy, sxy, sxx) = xs
+        .iter()
+        .zip(&ys)
+        .fold((0.0, 0.0, 0.0, 0.0), |(ax, ay, axy, axx), (&x, &y)| {
+            (ax + x, ay + y, axy + x * y, axx + x * x)
+        });
+    let slope = if sxx * n - sx * sx != 0.0 {
+        (sxy * n - sx * sy) / (sxx * n - sx * sx)
+    } else {
+        0.0
+    };
+    // Narrowband peaks / notches: bins >6 dB above/below the
+    // local neighborhood median.
+    let mut narrowband_peaks = 0u64;
+    let mut narrowband_notches = 0u64;
+    for (b, &v) in mean_row.iter().enumerate().take(half).skip(4) {
+        let lo = b.saturating_sub(4);
+        let hi = (b + 5).min(half);
+        let mut nb: Vec<f64> = mean_row[lo..hi].to_vec();
+        nb.sort_by(|a, b2| a.total_cmp(b2));
+        let med = nb[nb.len() / 2];
+        if v > med * 4.0 {
+            narrowband_peaks += 1;
+        }
+        if v < med / 4.0 && med > 0.0 {
+            narrowband_notches += 1;
+        }
+    }
+    // Tonal peak: strongest narrowband peak frequency + level.
+    let tonal = mean_row
+        .iter()
+        .enumerate()
+        .skip(1)
+        .take(half.saturating_sub(1))
+        .max_by(|a, b| a.1.total_cmp(b.1))
+        .map(|(b, &v)| (b, v))
+        .unwrap_or((0, 0.0));
+    // Hum: energy at 50/60Hz fundamentals + first 5 harmonics
+    // relative to total.
+    let total_e: f64 = sum_sq(&mean_row);
+    let hum_e: f64 = [50.0f64, 60.0]
+        .iter()
+        .flat_map(|&f| (1..=5).map(move |h| f * h as f64))
+        .filter(|&f| f < rate as f64 / 2.0)
+        .map(|f| {
+            let b = (f / bin_hz).round() as usize;
+            let lo = b.saturating_sub(1);
+            let hi = (b + 2).min(half);
+            sum_sq(&mean_row[lo..hi])
+        })
+        .sum();
+    let hum_ratio = if total_e > 0.0 { hum_e / total_e } else { 0.0 };
+    // AM spectrum: dominant modulation frequency of the RMS
+    // trajectory below 20 Hz.
+    let am = (rms_traj.len() >= 16).then(|| {
+        let traj_rate = rate as f64 / level_hop as f64;
+        let mut tm: Vec<f64> = rms_traj.to_vec();
+        let mean = tm.iter().sum::<f64>() / tm.len() as f64;
+        tm.iter_mut().for_each(|v| *v -= mean);
+        let mm = crate::stft::stft(&tm, tm.len().min(256), tm.len().min(256), traj_rate as u32);
+        (mm, mean)
+    });
+    let am = am.and_then(|(mm, mean)| {
+        (mm.frames() > 0).then(|| {
+            let mmag = mm.magnitude();
+            let row = &mmag[0];
+            let traj_rate = rate as f64 / level_hop as f64;
+            let bin_f = traj_rate / mm.fft_size as f64;
+            let (am_bin, _) = row
+                .iter()
+                .enumerate()
+                .take_while(|(b, _)| *b as f64 * bin_f <= 20.0)
+                .skip(1)
+                .max_by(|a, b| a.1.total_cmp(b.1))
+                .unwrap_or((0, &0.0));
+            let depth = if mean > 0.0 {
+                (rms_traj.iter().fold(0.0f64, |m, &v| m.max(v)) / mean) - 1.0
+            } else {
+                0.0
+            };
+            (am_bin as f64 * bin_f, depth)
+        })
+    });
+    Some(SpectralMeasure {
+        frames: mag.len(),
+        bin_hz,
+        half,
+        m,
+        mag,
+        pow,
+        psd,
+        bands,
+        third_p,
+        env,
+        centroid,
+        bandwidth,
+        rolloff,
+        flatness,
+        entropy,
+        flux,
+        slope,
+        narrowband_peaks,
+        narrowband_notches,
+        tonal,
+        hum_ratio,
+        am,
+    })
+}
+
+/// Stereo-pair measurements — zero-lag correlation, ILD, IPD lag,
+/// M/S power and (when both channels' STFTs match) complex coherence
+/// plus the CSD intermediates.
+struct StereoMeasure {
+    /// Zero-lag normalized correlation.
+    corr: f64,
+    /// `sum_sq` of each channel (Validity gate + ILD input).
+    sx: f64,
+    /// See `sx`.
+    sy: f64,
+    /// Inter-channel level difference (dB).
+    ild: f64,
+    /// `(best_lag, lag_corr)` — NCC peak lag within ±`ipd_max_lag`.
+    ipd: (isize, f64),
+    /// Mid-channel power.
+    mid: f64,
+    /// Side-channel power.
+    side: f64,
+    /// Coherence products, when both STFTs share geometry.
+    coherence: Option<CoherenceMeasure>,
+}
+
+/// Products of the pair's `CrossSpectrum` accumulation.
+struct CoherenceMeasure {
+    /// Complex coherence, real part.
+    re: Vec<f64>,
+    /// Complex coherence, imaginary part.
+    im: Vec<f64>,
+    /// Cross-spectral density sums, real part.
+    csd_re: Vec<f64>,
+    /// Cross-spectral density sums, imaginary part.
+    csd_im: Vec<f64>,
+    /// Mean `|coherence|` over the lower half bins.
+    mag_mean: f64,
+    /// Accumulated frame count.
+    frames: usize,
+}
+
+fn measure_stereo(
+    xs: &[f64],
+    ys: &[f64],
+    ma: Option<&StftMatrix>,
+    mb: Option<&StftMatrix>,
+    rate: u32,
+    cfg: &CheapConfig,
+) -> StereoMeasure {
+    let n = xs.len();
+    // Zero-lag normalized correlation. sx/sy are also consumed by the
+    // Validity gate and `stereo.ild_db` below, so they are computed
+    // separately from `corr0`.
+    let corr = corr0(xs, ys);
+    let sx = sum_sq(xs);
+    let sy = sum_sq(ys);
+    // ILD: level difference.
+    let ild = db(sy.sqrt() / n.max(1) as f64) - db(sx.sqrt() / n.max(1) as f64);
+    // IPD: NCC peak lag within ±ipd_max_lag.
+    let max_lag = (cfg.ipd_max_lag_s * rate as f64).round() as isize;
+    let mut best_lag = 0isize;
+    let mut best_v = f64::MIN;
+    for lag in -max_lag..=max_lag {
+        let (xa, ya) = if lag >= 0 {
+            (&xs[lag as usize..], &ys[..n - lag as usize])
+        } else {
+            (&xs[..n - (-lag) as usize], &ys[(-lag) as usize..])
+        };
+        if xa.is_empty() {
+            continue;
+        }
+        let c = corr0(xa, ya);
+        if c > best_v {
+            best_v = c;
+            best_lag = lag;
+        }
+    }
+    // M/S power + band M/S.
+    let mid: f64 = xs
+        .iter()
+        .zip(ys)
+        .map(|(&a, &b2)| (a + b2) * (a + b2) / 4.0)
+        .sum();
+    let side: f64 = xs
+        .iter()
+        .zip(ys)
+        .map(|(&a, &b2)| (a - b2) * (a - b2) / 4.0)
+        .sum();
+    // Complex coherence + CSD intermediates from the two channels'
+    // STFTs (same geometry).
+    let coherence = match (ma, mb) {
+        (Some(ma), Some(mb)) if ma.frames() == mb.frames() && ma.fft_size == mb.fft_size => {
+            let frames = ma.frames().min(64);
+            // Welch 累積は `ruviform_numeric::xspec::CrossSpectrum`
+            // (AL#101。旧インライン loop との bit-exact 等価は
+            // #153 比較記録で検証済み)。
+            let mut spectrum = CrossSpectrum::new(ma.fft_size);
+            for f in 0..frames {
+                spectrum
+                    .accumulate(&ma.re[f], &ma.im[f], &mb.re[f], &mb.im[f])
+                    .expect("stft frame bin count must match");
+            }
+            let csd_re = spectrum.sum_xy_re().to_vec();
+            let csd_im = spectrum.sum_xy_im().to_vec();
+            let paa = spectrum.sum_xx();
+            let pbb = spectrum.sum_yy();
+            let pxy_re_avg: Vec<f64> = csd_re.iter().map(|v| v / frames as f64).collect();
+            let pxy_im_avg: Vec<f64> = csd_im.iter().map(|v| v / frames as f64).collect();
+            let paa_avg: Vec<f64> = paa.iter().map(|v| v / frames as f64).collect();
+            let pbb_avg: Vec<f64> = pbb.iter().map(|v| v / frames as f64).collect();
+            let (coh_re, coh_im) = complex_coherence(&paa_avg, &pbb_avg, &pxy_re_avg, &pxy_im_avg);
+            let half = ma.fft_size / 2;
+            let mag_mean = coh_re[..half]
+                .iter()
+                .zip(&coh_im[..half])
+                .map(|(&r, &i)| (r * r + i * i).sqrt())
+                .sum::<f64>()
+                / half as f64;
+            Some(CoherenceMeasure {
+                re: coh_re,
+                im: coh_im,
+                csd_re,
+                csd_im,
+                mag_mean,
+                frames,
+            })
+        }
+        _ => None,
+    };
+    StereoMeasure {
+        corr,
+        sx,
+        sy,
+        ild,
+        ipd: (best_lag, best_v),
+        mid,
+        side,
+        coherence,
+    }
+}
+
+/// Transient/timing-family measurements over the mono (ch0) RMS
+/// trajectory plus the first channel pair's block-lag drift.
+struct TransientMeasure {
+    /// Onset frame indices.
+    onsets: Vec<usize>,
+    /// Onset times in seconds.
+    onset_times: Vec<f64>,
+    /// Best lag-2..8 RMS-trajectory autocorrelation.
+    self_sim: Option<f64>,
+    /// `(max-min lag, block_lag_count, block_size)` of the first
+    /// channel pair.
+    lag_drift: Option<(f64, u64, usize)>,
+}
+
+fn measure_transient(
+    rms: &[f64],
+    pair: Option<(&[f64], &[f64])>,
+    level_hop: usize,
+    rate: u32,
+    cfg: &CheapConfig,
+) -> TransientMeasure {
+    // Onset strength: positive RMS-trajectory derivative peaks.
+    let mut onsets = Vec::new();
+    for i in 1..rms.len() {
+        let d = rms[i] - rms[i - 1];
+        let local_med = {
+            let lo = i.saturating_sub(8);
+            let mut nb: Vec<f64> = rms[lo..=i.min(rms.len() - 1)].to_vec();
+            nb.sort_by(|a, b| a.total_cmp(b));
+            nb[nb.len() / 2]
+        };
+        if d > local_med * 1.5 && d > 0.01 {
+            onsets.push(i);
+        }
+    }
+    let onset_times: Vec<f64> = onsets
+        .iter()
+        .map(|&i| i as f64 * level_hop as f64 / rate as f64)
+        .collect();
+    // Self-similarity: normalized autocorrelation of the RMS
+    // trajectory at lag 2-8 windows (periodicity hint).
+    let self_sim = (rms.len() > 16).then(|| {
+        (2..=8)
+            .map(|lag| {
+                let a = &rms[..rms.len() - lag];
+                let b = &rms[lag..];
+                corr0(a, b)
+            })
+            .fold(0.0f64, f64::max)
+    });
+    // Coarse lag modulation between channels (drift of the IPD
+    // estimate over time) — first pair only, per 100ms block.
+    let lag_drift = pair.and_then(|(x, y)| {
+        let block = ((0.1 * rate as f64).round() as usize).max(64);
+        let max_lag = ((cfg.ipd_max_lag_s * 4.0) * rate as f64).round() as usize;
+        let lags = ipd_lags(x, y, block, max_lag);
+        (!lags.is_empty()).then(|| {
+            let drift = lags.iter().copied().fold(f64::MIN, f64::max)
+                - lags.iter().copied().fold(f64::MAX, f64::min);
+            (drift, lags.len() as u64, block)
+        })
+    });
+    TransientMeasure {
+        onsets,
+        onset_times,
+        self_sim,
+        lag_drift,
+    }
 }
 
 /// IPD の各 block に左右の探索余白を確保し、符号付き lag を返す。

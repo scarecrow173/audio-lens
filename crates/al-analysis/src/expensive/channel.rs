@@ -5,6 +5,8 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, FeatureRecord, Range};
 
+use ruviform_numeric::xspec::CrossSpectrum;
+
 use crate::records::{propagate_confidence, propagate_validity};
 use crate::stft::{stft, third_octave_bands};
 
@@ -98,32 +100,28 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                 // Magnitude-squared coherence needs cross-frame power
                 // accumulation — a single-frame cross-spectrum is
                 // identically 1 and carries no information.
-                let mut sxy = vec![(0.0f64, 0.0f64); half];
-                let mut sxx = vec![0.0f64; half];
-                let mut syy = vec![0.0f64; half];
+                // The Welch per-bin sums are the meaning-free kernel;
+                // the third-octave band selection and the |coherence|
+                // mean stay AudioLens-side. `CrossSpectrum` accumulates
+                // every bin — values at `band_bins` are identical to the
+                // former band-limited loop (accumulation is per-bin).
                 let band_bins: Vec<usize> = bands
                     .iter()
                     .map(|&(lo, hi)| ((lo / bin_hz) as usize, (hi / bin_hz) as usize))
                     .flat_map(|(a, b)| a..b.min(half))
                     .collect();
+                let mut spectrum = CrossSpectrum::new(bins);
                 for f in 0..fr {
-                    for &k in &band_bins {
-                        let aa = mb.re[f][k].powi(2) + mb.im[f][k].powi(2);
-                        let bb = ob.re[f][k].powi(2) + ob.im[f][k].powi(2);
-                        let (xr, xi) = (mb.re[f][k], mb.im[f][k]);
-                        let (yr, yi) = (ob.re[f][k], ob.im[f][k]);
-                        sxy[k].0 += xr * yr + xi * yi;
-                        sxy[k].1 += xr * yi - xi * yr;
-                        sxx[k] += aa;
-                        syy[k] += bb;
-                    }
+                    spectrum
+                        .accumulate(&mb.re[f], &mb.im[f], &ob.re[f], &ob.im[f])
+                        .expect("stft frame bin count must match");
                 }
                 let mut coh_sum = 0.0;
                 let mut coh_n = 0u64;
                 for &k in &band_bins {
-                    let den = sxx[k] * syy[k];
+                    let den = spectrum.sum_xx()[k] * spectrum.sum_yy()[k];
                     if den > 0.0 {
-                        let num = sxy[k].0 * sxy[k].0 + sxy[k].1 * sxy[k].1;
+                        let num = spectrum.sum_xy_re()[k].powi(2) + spectrum.sum_xy_im()[k].powi(2);
                         coh_sum += (num / den).sqrt();
                         coh_n += 1;
                     }

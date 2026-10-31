@@ -158,23 +158,20 @@ fn fir_ir(from_stft: &StftMatrix, to: &[f64], window: usize, hop: usize, rate: u
     if fr == 0 {
         return vec![0.0; bins];
     }
-    let mut cxx = vec![0.0; bins];
-    let mut cxy = vec![(0.0, 0.0); bins];
+    // Welch accumulation + H1 ratio are the meaning-free kernel:
+    // `CrossSpectrum` keeps the same per-bin sums and the same
+    // `pxx > 0.0` zero guard (bit-exact with the former inline loops).
+    let mut spectrum = CrossSpectrum::new(bins);
     for f in 0..fr {
-        for k in 0..bins {
-            cxx[k] += from_stft.re[f][k].powi(2) + from_stft.im[f][k].powi(2);
-            let (xr, xi) = (from_stft.re[f][k], from_stft.im[f][k]);
-            let (yr, yi) = (mt.re[f][k], mt.im[f][k]);
-            cxy[k].0 += xr * yr + xi * yi;
-            cxy[k].1 += xr * yi - xi * yr;
-        }
+        spectrum
+            .accumulate(&from_stft.re[f], &from_stft.im[f], &mt.re[f], &mt.im[f])
+            .expect("stft frame bin count must match");
     }
-    let mut hre: Vec<f64> = (0..bins)
-        .map(|k| if cxx[k] > 0.0 { cxy[k].0 / cxx[k] } else { 0.0 })
-        .collect();
-    let mut him: Vec<f64> = (0..bins)
-        .map(|k| if cxx[k] > 0.0 { cxy[k].1 / cxx[k] } else { 0.0 })
-        .collect();
+    let mut hre = vec![0.0; bins];
+    let mut him = vec![0.0; bins];
+    spectrum
+        .transfer_h1_into(&mut hre, &mut him)
+        .expect("h1 output length must match bins");
     // irfft (inverse FFT already normalizes by 1/N).
     fft(&mut hre, &mut him, true);
     hre

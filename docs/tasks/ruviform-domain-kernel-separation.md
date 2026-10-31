@@ -1,17 +1,25 @@
 ---
 id: "TASK-034P3OPfg52Iv5UK2zrr4F"
 type: "task"
-status: "todo"
+status: "done"
 title: "固有処理と汎用カーネルの責務分離(AL#102)"
 created: "2026-10-30"
-updated: "2026-10-30"
+updated: "2026-10-31"
 owners: []
 relations:
   source:
     - "https://github.com/scarecrow173/audio-lens/issues/102"
   changes:
-    added: []
-    modified: []
+    added:
+      - "docs/impl/ir/issue-102-domain-separation.md"
+      - "docs/impl/ir/issue-102-baseline/"
+    modified:
+      - "crates/al-analysis/src/cheap.rs"
+      - "crates/al-analysis/src/reference.rs"
+      - "crates/al-analysis/src/expensive/channel.rs"
+      - "crates/al-locate/src/dsp.rs"
+      - "crates/al-media/tests/ruviform_deps.rs"
+      - "docs/designs/ruviform-migration-responsibility-map.md"
     deleted: []
     renamed: []
     moved: []
@@ -82,13 +90,15 @@ AudioLens 固有意味論と、Ruviform に渡すべきでない判断が正し�
 
 ## Done When
 
-- [ ] 責務マップの「残す」行に記載した固有処理がすべて AL に
+- [x] 責務マップの「残す」行に記載した固有処理がすべて AL に
       残り、Ruviform 型へ AudioLens 固有意味が混入していない
-- [ ] #102 の完了条件を満たす
-- [ ] 暫定 adapter/比較フラグに削除条件と関連 Issue が付記
-      されている
+      (`impl/ir/issue-102-domain-separation.md` の監査表)
+- [x] #102 の完了条件を満たす
+- [x] 暫定 adapter/比較フラグに削除条件と関連 Issue が付記
+      されている(`al-locate/dsp.rs` facade → AL#104)
 
 ## Verification
 
-- [ ] 固有意味論の golden が切替前と一致
-- [ ] `mise run test` 相当が通る
+- [x] 固有意味論の golden が切替前と一致(9 ラン全差分が
+      #100/#101 既知クラスに帰属・新規差分 0)
+- [x] `mise run test` 相当が通る(全 workspace test pass)
