@@ -1559,7 +1559,7 @@ fn measure_transient(
     // trajectory at lag 2-8 windows (periodicity hint).
     let self_sim = (rms.len() > 16).then(|| {
         // 正 lag の curve 値は旧 `corr0(a, b)` sweep と bit-exact(#168)。
-        let curve = overlap_ncc_direct(&rms, &rms, 8).expect("self-correlation is equal-length");
+        let curve = overlap_ncc_direct(rms, rms, 8).expect("self-correlation is equal-length");
         curve[8 + 2..=8 + 8].iter().copied().fold(0.0f64, f64::max)
     });
     // Coarse lag modulation between channels (drift of the IPD
@@ -2114,7 +2114,8 @@ mod tests {
         let max_lag = 24usize;
 
         // IPD oracle: the old per-lag `corr0` overlap sweep.
-        let curve = overlap_ncc_direct(&ys, &xs, max_lag).expect("equal lengths");
+        let curve =
+            overlap_ncc_direct(ys.as_slice(), xs.as_slice(), max_lag).expect("equal lengths");
         for (i, &c) in curve.iter().enumerate() {
             let lag = i as isize - max_lag as isize;
             let expected = if lag.unsigned_abs() < n {
@@ -2132,7 +2133,7 @@ mod tests {
 
         // self_sim oracle: corr0 of the rms trajectory at lags 2..=8.
         let rms: Vec<f64> = ipd_noise(64);
-        let curve = overlap_ncc_direct(&rms, &rms, 8).expect("equal lengths");
+        let curve = overlap_ncc_direct(rms.as_slice(), rms.as_slice(), 8).expect("equal lengths");
         for lag in 2usize..=8 {
             let a = &rms[..rms.len() - lag];
             let b = &rms[lag..];

@@ -627,8 +627,11 @@ mod tests {
 
     use super::complex_solve;
 
+    type CMat = Vec<Vec<(f64, f64)>>;
+    type CVec = Vec<(f64, f64)>;
+
     /// Deterministic complex matrix for the oracle comparison.
-    fn mat(n: usize, seed: u64) -> (Vec<Vec<(f64, f64)>>, Vec<(f64, f64)>) {
+    fn mat(n: usize, seed: u64) -> (CMat, CVec) {
         let mut s = seed;
         let mut next = || {
             s = s
