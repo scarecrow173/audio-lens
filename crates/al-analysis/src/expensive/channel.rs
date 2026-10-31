@@ -5,6 +5,7 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, FeatureRecord, Range};
 
+use ruviform_numeric::linalg::complex_solve;
 use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::records::{propagate_confidence, propagate_validity};
@@ -418,7 +419,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         }
                     }
                 }
-                let Some((coef, cond)) = csolve(&a, &b) else {
+                let Some((coef, cond)) = complex_solve(&a, &b) else {
                     continue;
                 };
                 max_cond = max_cond.max(cond);
@@ -564,60 +565,104 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
     }
 }
 
-/// Solve the complex system `A·w = b` by Gaussian elimination with
-/// partial pivoting. Returns the solution and a rough conditioning
-/// proxy (largest/smallest pivot magnitude ratio); `None` when the
-/// system is singular — the caller decides the validity.
-fn csolve(a: &[Vec<(f64, f64)>], b: &[(f64, f64)]) -> Option<(Vec<(f64, f64)>, f64)> {
-    let n = a.len();
-    if n == 0 || b.len() != n || a.iter().any(|r| r.len() != n) {
-        return None;
-    }
-    let mut m: Vec<Vec<(f64, f64)>> = a
-        .iter()
-        .zip(b)
-        .map(|(row, &bi)| row.iter().copied().chain([bi]).collect())
-        .collect();
-    let cabs = |v: (f64, f64)| (v.0 * v.0 + v.1 * v.1).sqrt();
-    let cdiv = |x: (f64, f64), y: (f64, f64)| {
-        let d = y.0 * y.0 + y.1 * y.1;
-        ((x.0 * y.0 + x.1 * y.1) / d, (x.1 * y.0 - x.0 * y.1) / d)
-    };
-    let cmul = |x: (f64, f64), y: (f64, f64)| (x.0 * y.0 - x.1 * y.1, x.0 * y.1 + x.1 * y.0);
-    let (mut piv_max, mut piv_min) = (0.0f64, f64::MAX);
-    for col in 0..n {
-        let pivot = (col..n).max_by(|&i, &j| cabs(m[i][col]).total_cmp(&cabs(m[j][col])))?;
-        let pmag = cabs(m[pivot][col]);
-        if pmag < 1e-30 {
+#[cfg(test)]
+mod tests {
+    /// The pre-migration `csolve` kept verbatim as the equivalence
+    /// oracle for `ruviform_numeric::linalg::complex_solve` (#167).
+    /// Same pivot/elimination order and failure judgment must hold.
+    fn csolve(a: &[Vec<(f64, f64)>], b: &[(f64, f64)]) -> Option<(Vec<(f64, f64)>, f64)> {
+        let n = a.len();
+        if n == 0 || b.len() != n || a.iter().any(|r| r.len() != n) {
             return None;
         }
-        piv_max = piv_max.max(pmag);
-        piv_min = piv_min.min(pmag);
-        m.swap(col, pivot);
-        for row in col + 1..n {
-            let f = cdiv(m[row][col], m[col][col]);
-            let (head, tail) = m.split_at_mut(row);
-            let pivot_row = &head[col];
-            for (c, v) in tail[0].iter_mut().enumerate().take(n + 1).skip(col) {
-                *v = (v.0 - cmul(f, pivot_row[c]).0, v.1 - cmul(f, pivot_row[c]).1);
+        let mut m: Vec<Vec<(f64, f64)>> = a
+            .iter()
+            .zip(b)
+            .map(|(row, &bi)| row.iter().copied().chain([bi]).collect())
+            .collect();
+        let cabs = |v: (f64, f64)| (v.0 * v.0 + v.1 * v.1).sqrt();
+        let cdiv = |x: (f64, f64), y: (f64, f64)| {
+            let d = y.0 * y.0 + y.1 * y.1;
+            ((x.0 * y.0 + x.1 * y.1) / d, (x.1 * y.0 - x.0 * y.1) / d)
+        };
+        let cmul = |x: (f64, f64), y: (f64, f64)| (x.0 * y.0 - x.1 * y.1, x.0 * y.1 + x.1 * y.0);
+        let (mut piv_max, mut piv_min) = (0.0f64, f64::MAX);
+        for col in 0..n {
+            let pivot = (col..n).max_by(|&i, &j| cabs(m[i][col]).total_cmp(&cabs(m[j][col])))?;
+            let pmag = cabs(m[pivot][col]);
+            if pmag < 1e-30 {
+                return None;
+            }
+            piv_max = piv_max.max(pmag);
+            piv_min = piv_min.min(pmag);
+            m.swap(col, pivot);
+            for row in col + 1..n {
+                let f = cdiv(m[row][col], m[col][col]);
+                let (head, tail) = m.split_at_mut(row);
+                let pivot_row = &head[col];
+                for (c, v) in tail[0].iter_mut().enumerate().take(n + 1).skip(col) {
+                    *v = (v.0 - cmul(f, pivot_row[c]).0, v.1 - cmul(f, pivot_row[c]).1);
+                }
             }
         }
-    }
-    let mut w = vec![(0.0, 0.0); n];
-    for row in (0..n).rev() {
-        let mut s = (0.0, 0.0);
-        for c in row + 1..n {
-            let p = cmul(m[row][c], w[c]);
-            s = (s.0 + p.0, s.1 + p.1);
+        let mut w = vec![(0.0, 0.0); n];
+        for row in (0..n).rev() {
+            let mut s = (0.0, 0.0);
+            for c in row + 1..n {
+                let p = cmul(m[row][c], w[c]);
+                s = (s.0 + p.0, s.1 + p.1);
+            }
+            w[row] = cdiv((m[row][n].0 - s.0, m[row][n].1 - s.1), m[row][row]);
         }
-        w[row] = cdiv((m[row][n].0 - s.0, m[row][n].1 - s.1), m[row][row]);
+        Some((
+            w,
+            if piv_min > 0.0 {
+                piv_max / piv_min
+            } else {
+                f64::INFINITY
+            },
+        ))
     }
-    Some((
-        w,
-        if piv_min > 0.0 {
-            piv_max / piv_min
-        } else {
-            f64::INFINITY
-        },
-    ))
+
+    use super::complex_solve;
+
+    /// Deterministic complex matrix for the oracle comparison.
+    fn mat(n: usize, seed: u64) -> (Vec<Vec<(f64, f64)>>, Vec<(f64, f64)>) {
+        let mut s = seed;
+        let mut next = || {
+            s = s
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            ((s >> 11) as f64 / (1u64 << 53) as f64) * 4.0 - 2.0
+        };
+        let a = (0..n)
+            .map(|_| (0..n).map(|_| (next(), next())).collect::<Vec<_>>())
+            .collect();
+        let b = (0..n).map(|_| (next(), next())).collect();
+        (a, b)
+    }
+
+    #[test]
+    fn complex_solve_matches_csolve_bit_exact() {
+        for (n, seed) in [(1usize, 1u64), (2, 7), (3, 13), (5, 99)] {
+            let (a, b) = mat(n, seed);
+            let old = csolve(&a, &b).expect("deterministic systems are non-singular");
+            let new = complex_solve(&a, &b).expect("deterministic systems are non-singular");
+            for (x, y) in old.0.iter().zip(&new.0) {
+                assert_eq!(x.0.to_bits(), y.0.to_bits());
+                assert_eq!(x.1.to_bits(), y.1.to_bits());
+            }
+            assert_eq!(old.1.to_bits(), new.1.to_bits());
+        }
+        // Shape violations and singular systems fail identically.
+        let (a, b) = mat(2, 3);
+        assert_eq!(complex_solve(&a[..1], &b), csolve(&a[..1], &b));
+        assert_eq!(
+            complex_solve(&a, &b[..1]),
+            csolve(&a, &b[..1]),
+            "ragged rhs"
+        );
+        let singular = vec![vec![(0.0, 0.0); 2]; 2];
+        assert_eq!(complex_solve(&singular, &b), csolve(&singular, &b));
+    }
 }
