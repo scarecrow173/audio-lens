@@ -2,6 +2,7 @@
 //! (columnar table, chunked tensor, WAV audio) with provenance.
 
 pub mod audio;
+pub mod export;
 pub mod manifest;
 pub mod provenance;
 pub mod reader;
@@ -12,6 +13,7 @@ pub mod types;
 pub mod writer;
 
 pub use audio::{read_wav, write_wav};
+pub use export::ExportStage;
 pub use manifest::{DatasetArtifact, DatasetManifest, RoleStatus, StoreKind};
 pub use provenance::{InputReference, Provenance};
 pub use reader::DatasetReader;

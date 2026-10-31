@@ -40,4 +40,4 @@ Directory: `docs/designs`
 | DESIGN-034H77LaRZ9cyfPIcdYe0w | Streaming Bandpass 設計 (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | DESIGN-034H5ozhtFnMNl0ZABihBS | Valid FFT NCC plan 設計 (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
-| DESIGN-034yYLceYoIOUbV56hSfsg | 可視化・エクスポート設計 | approved | [visualization-export.md](./visualization-export.md) |
+| DESIGN-034yYLceYoIOUbV56hSfsg | 可視化・エクスポート設計 | superseded | [visualization-export.md](./visualization-export.md) |

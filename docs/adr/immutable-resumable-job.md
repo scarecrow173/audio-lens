@@ -89,7 +89,7 @@ manifest から入力・アルゴリズム・バージョン・パラメータ�
 ## Implementation Plan
 
 * Affected paths: ジョブ定義、ステージ実行器、manifest、
-  dataset / visualization / export の再入り口
+  dataset / export の再入り口
 * Patterns to follow: ジョブ・入力・成果物に安定 id を割り当て、
   ステージ結果を immutable に記録する
 * Patterns to avoid: セッション内での成果物上書き、設定と結果の

@@ -4,7 +4,7 @@ AudioLens は、ゲーム音声デバッグのための解析ツールです。
 
 ゲームのキャプチャ映像と任意の比較用入力を受け取り、robust に
 アラインし、音声に何が起きたかを計測して、詳細な構造化解析
-データと可視化用データを export します。
+データを export します。
 
 AI ベースの診断は、export されたデータの consumer として後から
 追加される可能性はありますが、**コアアナライザの一部では
@@ -73,10 +73,12 @@ Visualization Dataset
 
 ## Visualization principles
 
-可視化出力は screenshot ではなく派生 dataset。visualization
-builder は新しい意味解析を行わず、Analysis Dataset を waveform
-LOD pyramid・spectrogram tile・heatmap・time-map series・
-event marker などの render-ready 形式へ変換するだけとする。
+表示・検査は永続化した Analysis Dataset を直接読む GUI
+(`al-gui` + `ruviform-viz`)が担う。表示のためだけに意味解析を
+再実行しない — waveform は `inputs/<id>.wav` の範囲読み、
+spectrogram は永続化済みの複素 STFT テンソルを tile 単位で読む。
+表示専用の派生 dataset や静的 HTML レポートは持たない
+(Issue #106 で撤去)。
 
 ## Non-goals(コアアナライザ)
 

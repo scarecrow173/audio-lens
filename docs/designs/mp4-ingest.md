@@ -101,7 +101,7 @@ spec `../specs/media-ingest.md` は video capture files を要求するが、
   永続化して完了し、`decoded_pcm` 成果物は省略される
   (分析ステージは `decode_input` → `Ok(None)` →
   `DecodeInputUnavailable` 記録の既存経路で処理する。
-  dataset / visualization / export の metadata-only 通過は
+  dataset / export の metadata-only 通過は
   既存経路に含まれず、`video-av-features` 側の部分 ingest
   タスク(`docs/tasks/video-features-ingest.md`)が追加実装する
   下流伝播に依存する)。

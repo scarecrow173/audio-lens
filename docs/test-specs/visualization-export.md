@@ -1,10 +1,10 @@
 ---
 id: "TSPEC-034z99BMV8hBTVwYrwacBo"
 type: "test-spec"
-status: "proposed"
+status: "superseded"
 title: "可視化・エクスポート検証"
 created: "2026-10-02"
-updated: "2026-10-02"
+updated: "2026-10-31"
 owners: []
 relations:
   source: []
@@ -20,7 +20,8 @@ relations:
   depends-on: []
   blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../impl/ir/issue-106-viz-removal.md"
   related: []
   refines: []
   refined-by: []
@@ -29,13 +30,19 @@ relations:
     - "docs/specs/analysis-export.md"
   derived-by: []
   verifies:
-    - "docs/specs/visualization-dataset.md"
     - "docs/specs/analysis-export.md"
   verified-by: []
   references: []
   defers: []
   deferred-by: []
 ---
+
+> **Superseded (Issue #106)**: 派生可視化・静的レポートの検証項目は
+> 廃止対象とともに消えた。可搬 export の検証(可搬コピー・相対パス
+> 化・manifest/hash・安全性)は `crates/al-dataset/tests/export.rs`
+> へ引き継がれた。記録は
+> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> を参照。以下は歴史的記録として残す。
 
 # 可視化・エクスポート検証
 

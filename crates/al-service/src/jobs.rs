@@ -130,6 +130,21 @@ impl JobService {
             .map_err(|e| Self::map_run_error(e, ctl))
     }
 
+    /// 既存 job の可搬 export パッケージを生成する(`al export` の実体)。
+    /// 実行計画に export stage が無い job(dataset までの plan)では
+    /// manifest に record を追加してから実行する。完了済みの export は
+    /// runner 側で再利用される。依存 stage が未完了なら stage 失敗と
+    /// して伝播し、先に `resume` するよう求める。
+    pub fn export(&self, job_id: &JobId, ctl: &RunControl<'_>) -> Result<Manifest, ServiceError> {
+        let def = self.load_definition(job_id)?;
+        let mut stages =
+            vec![make_stage(StageKind::Export, &def.config).map_err(ServiceError::invalid)?];
+        let runner = StageRunner::new(&self.base_dir);
+        runner
+            .run_stage_with_hooks(job_id, StageKind::Export, &mut stages, &ctl.hooks())
+            .map_err(|e| Self::map_run_error(e, ctl))
+    }
+
     /// job の現状を読む(manifest + dataset 有無)。
     pub fn inspect(&self, job_id: &JobId) -> Result<JobInspection, ServiceError> {
         let job_dir = self.job_dir(job_id);

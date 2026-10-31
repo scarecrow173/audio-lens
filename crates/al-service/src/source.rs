@@ -181,7 +181,7 @@ impl SpectrumSource for DatasetSpectrum {
 }
 
 /// dataset config から STFT の window/hop を取得する
-/// (al-viz `timeline.rs` と同じ解釈: `analysis.cheap.stft_*`)。
+/// (`analysis.cheap.stft_*` の解釈)。
 fn stft_grid(reader: &DatasetReader) -> (u64, u64) {
     let cheap = &reader.manifest().config["analysis"]["cheap"];
     let window = cheap["stft_window"].as_u64().unwrap_or(2048);

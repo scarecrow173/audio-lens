@@ -295,6 +295,69 @@ impl StageRunner {
         self.execute(&mut manifest, &job_dir, def, stages, hooks)
     }
 
+    /// Execute (or reuse) a single stage on an existing job.
+    ///
+    /// When the job's recorded plan does not include the stage, it is
+    /// appended to the manifest — e.g. `export` on a job whose plan
+    /// stopped at `dataset`. A `Completed`/`Skipped` record is reused;
+    /// `Pending`/`Failed` records execute under the same boundary
+    /// semantics as `run`/`resume`, including dependency and artifact-
+    /// integrity checks. The caller supplies the stage implementation
+    /// in `stages`.
+    pub fn run_stage(
+        &self,
+        job_id: &al_core::JobId,
+        stage_kind: StageKind,
+        stages: &mut Vec<Box<dyn Stage>>,
+    ) -> Result<Manifest, StageError> {
+        self.run_stage_with_hooks(job_id, stage_kind, stages, &RunHooks::default())
+    }
+
+    /// [`run_stage`](Self::run_stage) with progress/cancellation
+    /// observers.
+    pub fn run_stage_with_hooks(
+        &self,
+        job_id: &al_core::JobId,
+        stage_kind: StageKind,
+        stages: &mut Vec<Box<dyn Stage>>,
+        hooks: &RunHooks<'_>,
+    ) -> Result<Manifest, StageError> {
+        let _lock = self.lock_job(job_id)?;
+        let job_dir = self.job_dir(job_id);
+        let mut manifest = Manifest::load(&job_dir).map_err(|e| {
+            StageError::new(StageKind::Ingest, format!("cannot load manifest: {e}"))
+        })?;
+        if manifest.job_id != *job_id {
+            return Err(StageError::new(
+                StageKind::Ingest,
+                "manifest job id does not match the requested job",
+            ));
+        }
+        if manifest.stage(stage_kind).is_none() {
+            manifest.stages.push(StageRecord {
+                stage: stage_kind,
+                status: StageStatus::Pending,
+                artifacts: Vec::new(),
+                error: None,
+                duration_ms: None,
+            });
+            manifest
+                .save(&job_dir)
+                .map_err(|e| StageError::new(stage_kind, format!("cannot save manifest: {e}")))?;
+        }
+        self.verify_completed_artifacts(&mut manifest, &job_dir)?;
+        // The definition is rebuilt from the manifest, so it cannot
+        // diverge; the single-kind plan makes `execute` run exactly
+        // this stage and fail when its dependencies are not completed.
+        let def = JobDefinition {
+            job_id: manifest.job_id.clone(),
+            inputs: manifest.inputs.clone(),
+            config: manifest.config.clone(),
+            stages: vec![stage_kind],
+        };
+        self.execute(&mut manifest, &job_dir, &def, stages, hooks)
+    }
+
     /// Verify that artifacts recorded under Completed/Skipped stages
     /// still exist on disk. Relaxed-tier artifact writes skip fsync,
     /// so a power loss can drop a file after the manifest recorded the

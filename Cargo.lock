@@ -149,7 +149,6 @@ dependencies = [
  "al-locate",
  "al-media",
  "al-testkit",
- "al-viz",
  "ruviform-viz",
  "serde",
  "serde_json",
@@ -159,21 +158,6 @@ dependencies = [
 [[package]]
 name = "al-testkit"
 version = "0.1.0"
-
-[[package]]
-name = "al-viz"
-version = "0.1.0"
-dependencies = [
- "al-analysis",
- "al-core",
- "al-dataset",
- "al-job",
- "al-locate",
- "al-media",
- "serde",
- "serde_json",
- "tracing",
-]
 
 [[package]]
 name = "alloca"

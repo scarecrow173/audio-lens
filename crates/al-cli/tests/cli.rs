@@ -609,8 +609,10 @@ fn capture_only_runs_through_cheap_analysis_and_dataset() {
 }
 
 #[test]
-fn full_pipeline_reaches_visualization_and_export() {
-    let dir = temp_dir("viz");
+fn full_pipeline_reaches_export() {
+    // #106: the pipeline ends at dataset + export — no visualization
+    // stage, no display products, no static report.
+    let dir = temp_dir("export");
     let wav = dir.join("cap.wav");
     std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
     let jobs = dir.join("jobs");
@@ -623,7 +625,7 @@ fn full_pipeline_reaches_visualization_and_export() {
             "--input",
             &format!("capture_bug:{}", wav.display()),
             "--stages",
-            "ingest,cheap_analysis,dataset,visualization,export",
+            "ingest,cheap_analysis,dataset,export",
         ])
         .output()
         .unwrap();
@@ -640,13 +642,17 @@ fn full_pipeline_reaches_visualization_and_export() {
     let job_dir = jobs.join(job_id);
 
     for rel in [
-        "analysis/visualization/timeline.json",
-        "analysis/visualization/summary.json",
-        "analysis/visualization/skipped.json",
         "export/analysis/export_manifest.json",
         "export/analysis/golden/snapshot.json",
     ] {
         assert!(job_dir.join(rel).exists(), "missing {rel}");
+    }
+    for rel in [
+        "analysis/visualization",
+        "export/analysis/report.html",
+        "export/analysis/report.data.js",
+    ] {
+        assert!(!job_dir.join(rel).exists(), "unexpected {rel}");
     }
     let manifest: serde_json::Value = serde_json::from_str(
         &std::fs::read_to_string(job_dir.join("export/analysis/export_manifest.json")).unwrap(),
@@ -658,11 +664,90 @@ fn full_pipeline_reaches_visualization_and_export() {
 }
 
 #[test]
+fn export_command_packages_a_job_without_export_in_its_plan() {
+    // `al export` appends the export stage to the manifest and runs it
+    // on its own; the second call reuses the completed record.
+    let dir = temp_dir("export-cmd");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_from_samples(&noise_i16(5, 8192, 12000.0))).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = al_command()
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest,dataset",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let job_id = stdout
+        .lines()
+        .find_map(|l| l.strip_prefix("job_id="))
+        .expect("job_id line")
+        .to_string();
+    let job_dir = jobs.join(&job_id);
+    assert!(
+        !job_dir.join("export").exists(),
+        "export must not run when absent from the plan"
+    );
+
+    for run in ["first", "second"] {
+        let out = al_command()
+            .args([
+                "export",
+                "--base-dir",
+                jobs.to_str().unwrap(),
+                "--job-id",
+                &job_id,
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{run} export failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let stdout = String::from_utf8_lossy(&out.stdout);
+        assert!(
+            stdout.contains("export="),
+            "{run} export must print the package path: {stdout}"
+        );
+    }
+    assert!(
+        job_dir
+            .join("export/analysis/export_manifest.json")
+            .exists()
+    );
+    let manifest: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(job_dir.join("manifest.json")).unwrap())
+            .unwrap();
+    let export_stage = manifest["stages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["stage"] == "export")
+        .expect("export stage record");
+    assert_eq!(export_stage["status"], "completed");
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
     // Partial-ingest contract: an MP4 with no decodable PCM still
     // completes the full default stage plan — the dataset keeps the
-    // metadata store, visualization records the skipped timeline, and
-    // the export package is still produced.
+    // metadata store with the input marked unavailable, and the
+    // export package is still produced.
 
     let dir = temp_dir("mp4-e2e");
     let mp4 = dir.join("cap.mp4");
@@ -678,7 +763,7 @@ fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
             &format!("capture_bug:{}", mp4.display()),
             "--stages",
             "ingest,locate,cheap_analysis,reference_analysis,expensive_analysis,\
-             dataset,visualization,export",
+             dataset,export",
         ])
         .output()
         .unwrap();
@@ -721,17 +806,6 @@ fn compressed_only_mp4_runs_the_default_pipeline_end_to_end() {
             .join(format!("analysis/inputs/{input_id}.wav"))
             .exists(),
         "no audio store may be written for an undecoded input"
-    );
-
-    // The timeline product is skipped with a reason, not a failure.
-    let skipped: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(job_dir.join("analysis/visualization/skipped.json")).unwrap(),
-    )
-    .unwrap();
-    let skipped_text = serde_json::to_string(&skipped).unwrap();
-    assert!(
-        skipped_text.contains("timeline"),
-        "timeline skip must be recorded: {skipped_text}"
     );
 
     assert!(

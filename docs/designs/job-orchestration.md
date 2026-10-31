@@ -65,9 +65,9 @@ ingest・locate・3 ステージ解析・可視化・エクスポートを束ね
 - `job-model` コンポーネント: ジョブ id、入力ロール、設定、
   ステージ計画を保持する不変な定義
 - `stage-runner` コンポーネント: ingest / locate / cheap / reference /
-  expensive / dataset / visualization / export の実行と再開を管理
+  expensive / dataset / export の実行と再開を管理
 - `artifact-registry` コンポーネント: 入力・デコード済み・
-  locate 結果・aligned interval・feature・visualization などの
+  locate 結果・aligned interval・feature などの
   成果物 id を発行・解決
 - `manifest` コンポーネント: ジョブ定義・設定・各成果物の系譜を
   記録する正本

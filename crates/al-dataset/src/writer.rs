@@ -4,7 +4,7 @@
 //!
 //! Roles follow the dataset layout (`inputs`, `locate`,
 //! `intermediate`, `features/cheap`, `features/reference`,
-//! `features/expensive`, `residual`, `events`, `visualization`); an
+//! `features/expensive`, `residual`, `events`); an
 //! artifact named `x` under role `features/cheap` lands at
 //! `features/cheap/x` beneath the dataset root. Declared inputs are
 //! recorded by reference (path + SHA-256) and never copied.

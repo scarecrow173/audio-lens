@@ -88,12 +88,9 @@ Ruviform の各 crate を **検証済みの同一 Git commit** から再現可�
   Ruviform 側は `ci.yml`(workflow_dispatch 限定)を持つ。
 - `al-media` は symphonia `0.5.5` を直接依存に持つ。
   `ruviform-io-symphonia` は symphonia `0.6`(default features)。
-- `al-cli` は `al-viz` に依存し、`al-viz` は `report.html` /
-  `report.data.js` を `include_str!` でバイナリに埋め込む
-  (静的 HTML レポート。GUI framework ではないがフロントエンド
-  アセットではある)。`al-cli` の `al-viz` 依存の撤去は #106 の
-  `StageKind::Export` 再配線スコープであり、本 Issue では
-  記録済みの例外として扱う(§7)。
+- `al-cli` は `al-viz` に依存していたが、#106 で `al-viz` 撤去・
+  `StageKind::Export` の al-dataset 再配線が完了し、この依存と
+  静的 `report.html`/`report.data.js` 埋め込みは解消済み。
 - AudioLens 側も Git LFS を使用(`*.mp4`/`*.png`/`*.jpg`)。
   `al-media` のテストは LFS 管理の MP4 fixture を直接読むため、
   CI checkout で LFS 実体の復元が必須。
@@ -156,7 +153,7 @@ GUI 系(#156/#157 未設計)、`ruviform-rt`(ruviform-exec の推移依存
 | `al-analysis` | `ruviform-audio-analysis`・`ruviform-dsp` | AL#101(STFT・帯域系切替) | `[dependencies]`(同上) |
 | `al-job` | `ruviform-exec` | AL#54(OfflineDriver 適合性の**評価**) | `[dev-dependencies]`(採否未定の評価範囲のため shipped 依存にしない) |
 
-- `al-cli`・`al-core`・`al-dataset`・`al-viz`・`al-testkit`・
+- `al-cli`・`al-core`・`al-dataset`・`al-testkit`・
   `al-observability` には Ruviform 直接依存を追加しない。
 - `#100`/`#101` 向けの dep は将来の消費場所に先行配置する段階導入
   (本 Issue では smoke-test で import のみ検証)。`ruviform-exec`
@@ -326,13 +323,10 @@ GIT_LFS_SKIP_SMUDGE = "1"
   crate を(normal・build 依存として)持たない。将来の Ruviform
   GUI backend(#156/#157 系)やフロントエンド資産は `al-gui`(#105)
   側の optional deps/別 binary に隔離する。
-- **記録済みの例外**: `al-cli` は `al-viz` に依存し、`al-viz` は
-  静的 `report.html`/`report.data.js` をバイナリに埋め込む。
-  これは GUI framework 依存ではないがフロントエンドアセットの
-  同梱であり、#106 の `StageKind::Export` 再配線(`al-viz` 撤去・
-  export を al-dataset 実装へ)で解消される既知の例外とする。
-  本 Issue の guard は外部 GUI/GPU/WebView framework crate の
-  流入を対象とし、この内部例外は対象外として明示記録する。
+- **解消済みの旧例外**: `al-cli` はかつて `al-viz` に依存し、
+  `al-viz` は静的 `report.html`/`report.data.js` をバイナリに
+  埋め込んでいた。#106 の `StageKind::Export` 再配線(`al-viz`
+  撤去・export を al-dataset 実装へ)でこの例外は解消済み。
 - 機械的 guard:`tools/check-headless-deps.mjs` が対象 crate ごとに
   `cargo tree -p <crate> --edges normal,build --prefix none` を実行し、
   出力の crate **名完全一致**で GUI/WebView/GPU 系外部 crate
@@ -492,9 +486,9 @@ workflow_dispatch
 - Ruviform GUI 系 crate(#156/#157)の optional 導入・`al-gui`/
   `al-service` 構成 | crate 未設計・未実装 | AL#105 詳細設計 |
   headless への GUI 依存逆流(§7 guard で検知は可能)。
-- `al-cli` → `al-viz` 依存・静的 report アセットの撤去 | #106 の
-  `StageKind::Export` 再配線スコープ | AL#106 | 「フロントエンド
-  アセット非依存」の完全な自己完結は #106 まで持越し。
+- `al-cli` → `al-viz` 依存・静的 report アセットの撤去 | 解決済み
+  (AL#106 で `al-viz` 撤去・export を al-dataset 実装へ再配線) |
+  AL#106 | 完了。
 - `cargo vendor`/offline build | private access 前提で十分 | 配布・
   オフライン要件の発生時 | private repo 障害時の build 不能。
 - `pull_request`/`push` 自動 CI トリガ | credential 未設定だと全
