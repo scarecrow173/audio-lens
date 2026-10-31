@@ -90,3 +90,4 @@ job-orchestration (不変ジョブ / ステージ計画)
 | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) | #33 確定仕様の文書適用設計(approved) | 今回spec、ADR |
 
 | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) | #52 不変plan/排他workspaceと2site再利用(approved) | NCC reuse spec、ADR |
+| [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) | Ruviform 移行の処理単位責務マップ(approved) | 移行 spec、移行 ADR |

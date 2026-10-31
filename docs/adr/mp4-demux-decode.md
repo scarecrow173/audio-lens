@@ -26,7 +26,8 @@ relations:
   superseded-by: []
   related: []
   refines: []
-  refined-by: []
+  refined-by:
+    - "ruviform-foundation-migration.md"
   derives-from:
     - "../discovery/container-coverage-gaps.md"
     - "../adr/implementation-stack.md"

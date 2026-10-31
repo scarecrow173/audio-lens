@@ -31,6 +31,7 @@ Directory: `docs/adr`
 | ADR-034H5mcOUBGtY1QeJj877L | NCC valid FFT plan と GCC-PHAT plan の分離 | proposed | [ncc-valid-fft-plan-gcc-phat-plan.md](./ncc-valid-fft-plan-gcc-phat-plan.md) |
 | ADR-034EdkF9d9cVHx4NSumGSL | observability を専用 crate に集約する | accepted | [observability-dedicated-crate.md](./observability-dedicated-crate.md) |
 | ADR-034DlyK8LKvSfTztL5Bfu5 | 残存課題を責務境界で修正し仕様判断を分離する | proposed | [residual-issue-boundaries.md](./residual-issue-boundaries.md) |
+| ADR-034P3nB0CZJO83ZX105Cfq | 汎用メディア I/O・DSP 基盤を Ruviform に移し AudioLens は解析意味論とデータ所有に集中する | accepted | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | ADR-035pmRjqxvweesfcw4L90A | 独自 SIMD 算術クレートの基盤に pulp を採用する | accepted | [simd-arithmetic-pulp.md](./simd-arithmetic-pulp.md) |
 | ADR-034EoHxzsvsHp9BOdCK2Cn | SIMD reduction 順序は lane アキュムレートと FMA を許容し等価性を許容誤差で定義する | accepted | [simd-reduction-lane-fma.md](./simd-reduction-lane-fma.md) |
 | ADR-034FP1KCQ5PnMOE20EmIjo | 候補成果物を独立保存し音声出力を WAV に限定する | accepted | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
