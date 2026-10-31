@@ -23,7 +23,8 @@ relations:
   superseded-by: []
   related: []
   refines: []
-  refined-by: []
+  refined-by:
+    - "ruviform-foundation-migration.md"
   derives-from:
     - "../discovery/initial-requirements-consolidation.md"
   derived-by: []
