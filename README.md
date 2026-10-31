@@ -1,5 +1,12 @@
 # audio-lens
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo-light.svg" alt="AudioLens" width="360">
+  </picture>
+</p>
+
 AudioLens は、ゲーム音声デバッグのための解析ツールです。
 
 ゲームのキャプチャ映像と任意の比較用入力を受け取り、robust に

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">AudioLens symbol</title>
+  <desc id="desc">An audio waveform passing through a circular lens, with frequency spectrum bands visible behind it.</desc>
+  <circle cx="64" cy="64" r="51" fill="#112234"/>
+  <circle cx="64" cy="64" r="49" fill="none" stroke="#28C7CC" stroke-width="5"/>
+  <path d="M33 32 A45 45 0 0 1 58 20" fill="none" stroke="#A8F3F3" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+  <defs>
+    <clipPath id="lens-clip"><circle cx="64" cy="64" r="43"/></clipPath>
+  </defs>
+  <g clip-path="url(#lens-clip)">
+    <g fill="none" stroke="#23989F" stroke-linecap="round" stroke-width="5" opacity=".8">
+      <path d="M36 59v10 M46 48v32 M56 56v17 M66 34v59 M76 49v34 M86 55v21 M96 60v11"/>
+    </g>
+    <path d="M28 64 C35 64 35 55 40 55 C46 55 46 74 51 74 C57 74 57 42 64 42 C71 42 71 83 78 83 C85 83 85 59 92 59 C97 59 97 64 101 64" fill="none" stroke="#E7FFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

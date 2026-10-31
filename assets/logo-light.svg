@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="723" height="128" viewBox="0 0 723.26 128" role="img" aria-labelledby="title desc">
+  <title id="title">AudioLens logo</title>
+  <desc id="desc">A circular audio spectrum lens icon followed by the AudioLens wordmark.</desc>
+  <svg x="0" y="0" width="128" height="128" viewBox="0 0 128 128">
+  <circle cx="64" cy="64" r="51" fill="#112234"/>
+  <circle cx="64" cy="64" r="49" fill="none" stroke="#28C7CC" stroke-width="5"/>
+  <path d="M33 32 A45 45 0 0 1 58 20" fill="none" stroke="#A8F3F3" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+  <defs>
+    <clipPath id="lens-clip"><circle cx="64" cy="64" r="43"/></clipPath>
+  </defs>
+  <g clip-path="url(#lens-clip)">
+    <g fill="none" stroke="#23989F" stroke-linecap="round" stroke-width="5" opacity=".8">
+      <path d="M36 59v10 M46 48v32 M56 56v17 M66 34v59 M76 49v34 M86 55v21 M96 60v11"/>
+    </g>
+    <path d="M28 64 C35 64 35 55 40 55 C46 55 46 74 51 74 C57 74 57 42 64 42 C71 42 71 83 78 83 C85 83 85 59 92 59 C97 59 97 64 101 64" fill="none" stroke="#E7FFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  </svg>
+  <g transform="translate(146 94) scale(0.053 -0.053)">
+    <path transform="translate(0 0)" d="M50 0H342L464 369H1021L1148 0H1441L909 1490H570ZM535 584 598 774C639 907 684 1074 737 1282C792 1076 839 911 883 774L948 584Z" fill="#12263A"/>
+    <path transform="translate(1490 0)" d="M521 -14C683 -14 800 64 867 224L869 0H1116V1118H855V463C855 301 755 207 617 207C481 207 398 297 398 447V1118H138V407C138 138 291 -14 521 -14Z" fill="#12263A"/>
+    <path transform="translate(2744 0)" d="M550 -20C743 -20 829 96 870 177H886V0H1141V1490H881V933H870C830 1012 748 1132 549 1132C291 1132 89 929 89 557C89 190 285 -20 550 -20ZM621 194C447 194 355 348 355 558C355 766 445 918 621 918C792 918 886 776 886 558C886 340 790 194 621 194Z" fill="#12263A"/>
+    <path transform="translate(4022 0)" d="M138 0H398V1118H138ZM268 1276C351 1276 420 1340 420 1419C420 1498 351 1561 268 1561C185 1561 117 1498 117 1419C117 1340 185 1276 268 1276Z" fill="#12263A"/>
+    <path transform="translate(4558 0)" d="M623 -23C949 -23 1158 209 1158 553C1158 901 949 1132 623 1132C297 1132 89 901 89 553C89 209 297 -23 623 -23ZM623 188C442 188 354 350 354 554C354 760 442 921 623 921C805 921 894 760 894 554C894 350 805 188 623 188Z" fill="#12263A"/>
+    <path transform="translate(5805 0)" d="M150 0H1075V225H417V1490H150Z" fill="#078B94"/>
+    <path transform="translate(6963 0)" d="M632 -23C881 -23 1055 96 1109 277L870 326C835 231 749 181 635 181C468 181 355 287 348 486H1126V568C1126 960 888 1132 615 1132C295 1132 89 896 89 552C89 202 295 -23 632 -23ZM349 663C361 812 457 928 616 928C771 928 858 823 873 663Z" fill="#078B94"/>
+    <path transform="translate(8174 0)" d="M398 655C398 817 498 911 637 911C773 911 855 821 855 671V0H1115V711C1115 980 963 1132 733 1132C569 1132 453 1052 387 895L384 1118H138V0H398Z" fill="#078B94"/>
+    <path transform="translate(9427 0)" d="M561 -23C843 -23 1041 123 1041 335C1041 492 940 592 728 637L538 677C424 702 379 743 379 808C379 884 463 938 573 938C693 938 757 876 783 798L1015 844C970 1017 823 1132 570 1132C302 1132 119 999 119 792C119 628 222 525 433 479L624 438C726 416 775 375 775 310C775 234 694 176 566 176C439 176 361 229 331 340L88 294C127 91 304 -23 561 -23Z" fill="#078B94"/>
+  </g>
+</svg>
