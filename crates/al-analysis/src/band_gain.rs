@@ -1,9 +1,11 @@
 //! 帯域ラグ補償 LS。汎用カーネルは ruviform-numeric(AL#101 で
-//! `al-math` 経由から移行)、帯域波形は `BandFilter` で帯域ごと
-//! 逐次生成する(全帯域同時保持を避ける)。
+//! `al-math` 経由から移行)、帯域波形は `bandpass` で帯域ごと
+//! 逐次生成する(全帯域同時保持を避ける)。(channel, band) タスクは
+//! 独立のため `run_pool` で並列化し、ordered slot で逐次時と同一の
+//! 収集順を維持する。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
-use ruviform_numeric::bands::BandFilter;
+use ruviform_numeric::bands::bandpass;
 use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
 use ruviform_numeric::vec::{dot, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
@@ -46,6 +48,51 @@ struct Window {
     reason: &'static str,
 }
 
+/// 並列タスクの成果物。収集順はタスク列の順序と同一(slot 方式)。
+enum TaskOutput {
+    /// `coherence` の 1 チャンネル分(帯域数と同じ長さ)。
+    Coherence(Vec<f64>),
+    /// 1 (channel, band) の窓列。
+    Windows(Vec<Window>),
+}
+
+/// Run `n_tasks` independent units of work over a worker pool,
+/// collecting one result per task in input order. Each worker builds
+/// its own context via `make_ctx`, so per-worker resources (e.g.
+/// correlation plans/workspaces) stay exclusively owned by that
+/// thread. al-locate::stage `run_pool` と同じパターン。
+fn run_pool<T: Send, C>(
+    n_tasks: usize,
+    make_ctx: &(dyn Fn() -> C + Sync),
+    work: &(dyn Fn(usize, &mut C) -> T + Sync),
+) -> Vec<T> {
+    let slots: Vec<std::sync::Mutex<Option<T>>> =
+        (0..n_tasks).map(|_| std::sync::Mutex::new(None)).collect();
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let workers = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(n_tasks);
+    std::thread::scope(|scope| {
+        for _ in 0..workers {
+            scope.spawn(|| {
+                let mut ctx = make_ctx();
+                loop {
+                    let idx = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    if idx >= n_tasks {
+                        return;
+                    }
+                    *slots[idx].lock().unwrap() = Some(work(idx, &mut ctx));
+                }
+            });
+        }
+    });
+    slots
+        .into_iter()
+        .map(|s| s.into_inner().unwrap().unwrap())
+        .collect()
+}
+
 pub(crate) fn parameters(cfg: &ReferenceConfig, rate: u32) -> serde_json::Value {
     serde_json::json!({
         "sample_rate": rate,
@@ -70,7 +117,36 @@ pub(crate) fn parameters(cfg: &ReferenceConfig, rate: u32) -> serde_json::Value 
     })
 }
 
+/// 窓相関の計算コンテキスト。shape は全タスクで同一のため、ワーカーが
+/// plan・workspace を構築して使い回す。
+struct Ncc {
+    plan: CorrelationPlan,
+    workspace: CorrelationWorkspace,
+}
+
+impl Ncc {
+    fn new(window: usize, max: usize) -> Self {
+        let plan = CorrelationPlan::new_ncc(window, window + 2 * max)
+            .expect("correlation plan shape must be valid");
+        let workspace = CorrelationWorkspace::new(&plan);
+        Self { plan, workspace }
+    }
+}
+
+#[cfg(test)]
 fn windows(
+    x: &[f64],
+    y: &[f64],
+    window: usize,
+    hop: usize,
+    max: usize,
+    guard: usize,
+) -> Vec<Window> {
+    windows_with(&mut Ncc::new(window, max), x, y, window, hop, max, guard)
+}
+
+fn windows_with(
+    ncc: &mut Ncc,
     x: &[f64],
     y: &[f64],
     window: usize,
@@ -83,16 +159,14 @@ fn windows(
     if n < 2 * margin + window {
         return Vec::new();
     }
-    let plan = CorrelationPlan::new_ncc(window, window + 2 * max)
-        .expect("correlation plan shape must be valid");
-    let mut workspace = CorrelationWorkspace::new(&plan);
     (margin..=n - margin - window)
         .step_by(hop)
         .map(|start| {
             let a = &x[start..start + window];
-            let curve = plan
+            let curve = ncc
+                .plan
                 .ncc(
-                    &mut workspace,
+                    &mut ncc.workspace,
                     a,
                     &y[start - max..start + window + max],
                     2 * max,
@@ -204,22 +278,64 @@ pub(crate) fn analyze(
     cfg: &ReferenceConfig,
     out: &mut ReferenceResult,
 ) {
+    let span = tracing::info_span!(
+        "analysis::band_gain",
+        pair = %pair,
+        len = src.src.first().map_or(0, |c| c.len())
+    );
+    let _enter = span.enter();
     let rate = src.rate;
     let bands = third_octave_bands(40.0, (rate as f64 / 2.0).min(16000.0));
     let window = (cfg.band_window_s * rate as f64).round().max(1.0) as usize;
     let hop = (cfg.band_hop_s * rate as f64).round().max(1.0) as usize;
     let max = (cfg.band_max_lag_s * rate as f64).round().max(1.0) as usize;
-    for (channel, (x, y)) in src.src.iter().zip(&src.cap).enumerate() {
-        let mut src_bands = BandFilter::new(x, rate).expect("band filter input must be valid");
-        let mut cap_bands = BandFilter::new(y, rate).expect("band filter input must be valid");
-        let coh = coherence(x, y, rate, cfg, &bands);
-        let all: Vec<_> = bands
-            .iter()
-            .map(|&(lo, hi)| {
-                let x = src_bands.band(lo, hi);
-                let y = cap_bands.band(lo, hi);
-                windows(&x, &y, window, hop, max, (rate as f64 / lo).ceil() as usize)
-            })
+    let n_chan = src.src.len().min(src.cap.len());
+    let n_bands = bands.len();
+    // (channel, band) の帯域波形生成+窓相関と channel ごとの coherence
+    // は互いに独立の純粋計算で、共有可変状態を持たない。タスク列の先頭
+    // n_chan 件を coherence、続く n_chan*n_bands 件を channel-major の
+    // (channel, band) とし、先に取り出される coherence が帯域仕事と
+    // 重なるようにする。plan/workspace はワーカーごとに構築して使い回す
+    // (shape は全タスクで同一)。
+    let results = run_pool(
+        n_chan + n_chan * n_bands,
+        &|| Ncc::new(window, max),
+        &|idx, ncc| {
+            if idx < n_chan {
+                return TaskOutput::Coherence(coherence(
+                    src.src[idx],
+                    src.cap[idx],
+                    rate,
+                    cfg,
+                    &bands,
+                ));
+            }
+            let task = idx - n_chan;
+            let ch = task / n_bands;
+            let (lo, hi) = bands[task % n_bands];
+            let x = bandpass(src.src[ch], rate, lo, hi).expect("band filter input must be valid");
+            let y = bandpass(src.cap[ch], rate, lo, hi).expect("band filter input must be valid");
+            let guard = (rate as f64 / lo).ceil() as usize;
+            TaskOutput::Windows(windows_with(ncc, &x, &y, window, hop, max, guard))
+        },
+    );
+    let mut results = results.into_iter();
+    let cohs: Vec<Vec<f64>> = (0..n_chan)
+        .map(
+            |_| match results.next().expect("coherence task per channel") {
+                TaskOutput::Coherence(coh) => coh,
+                TaskOutput::Windows(_) => unreachable!("coherence tasks precede band tasks"),
+            },
+        )
+        .collect();
+    for (channel, coh) in cohs.into_iter().enumerate() {
+        let all: Vec<Vec<Window>> = (0..n_bands)
+            .map(
+                |_| match results.next().expect("windows task per (channel, band)") {
+                    TaskOutput::Windows(ws) => ws,
+                    TaskOutput::Coherence(_) => unreachable!("coherence tasks precede band tasks"),
+                },
+            )
             .collect();
         // 400Hz は同じ帯域・同じ極性群の推定値だけを参照する。
         let anchor = bands.iter().position(|&(lo, hi)| lo <= 400.0 && 400.0 < hi);
