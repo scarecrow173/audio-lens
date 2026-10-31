@@ -43,7 +43,9 @@ fn media_io_boundary_types() {
         codec: CodecId::Aac,
         codec_private: Vec::new(),
         format: CodecFormat::Data,
-        native_format: Fact::NotDeclared,
+        // Issue #151 contract: the lossless native format a decoder
+        // would emit — `NotDeclared` for codecs without one (AAC).
+        native_format: ruviform_media_core::Fact::NotDeclared,
     };
     assert_eq!(descriptor.codec.name(), "aac");
     assert!(descriptor.audio_format().is_none());
