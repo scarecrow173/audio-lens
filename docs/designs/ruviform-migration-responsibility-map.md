@@ -273,6 +273,61 @@ al-cli/al-service/al-gui ─> al-observability(init はプロセス入口のみ)
   維持し、新 `al export` サブコマンドは同実装を呼ぶ薄い入口と
   する。
 
+### AL#102 判定(解析意味論と汎用カーネルの責務分離)
+
+#101 切替後に残った「意味を持たない演算」の境界を確定した。
+
+- `al-locate::dsp` facade の存否(§3): **暫定 adapter として維持**。
+  Ruviform の検証 `Result` を旧 `al-math` と同じ panic 契約へ
+  写像する責務を一箇所に集約する。撤去条件は AL#104 — 全呼出側
+  が `ruviform_numeric` を直接呼ぶ構成へ移行し panic 契約の帰属
+  が再評価された時点。`deinterleave` は AL の入力境界処理として
+  恒久残留(`decode.rs::PcmView` の scale 除算 fused 版は decode
+  adapter の責務として別実装を維持 — 取得経路が異なり責務も別)。
+- Welch 蓄積・H1 伝達関数(§4): `reference.rs::fir_ir` と
+  `expensive/channel.rs` の帯域 L/R coherence 蓄積は
+  `ruviform_numeric::xspec::CrossSpectrum` へ寄せた(per-bin 加算
+  規約が同一で bit-exact。`transfer_h1_into` の `pxx > 0.0`
+  ゼロガードも同一)。`channel.rs` は第三オクターブ帯選択と
+  `|coherence|` 平均を AL 側に残し、蓄積のみ全 bin 化
+  (per-bin 独立のため `band_bins` の値は不変)。
+- `expensive/channel.rs::csolve`(§4): 複素 Gaussian 消去法ソルバ。
+  `ruviform-numeric` の公開 API に複素線形ソルバが存在しないため
+  AL に残留(汎用だが委譲先なし)。Ruviform 側への移管は契約提案
+  として IR に記録。
+- `cheap.rs` の IPD lag sweep・`analyze_pair` の `corr0` スキャン
+  (§4): `OverlapCorrPlan` への置換は FFT 分子経路のため直算
+  `corr0` と FP 差分が生じ、#102 の挙動不変条件を満たさない。
+  直算 sweep は AL に残留。Ruviform に scalar 直算 overlap-NCC
+  経路が提供されれば移行可能(契約提案として IR に記録)。
+- スペクトル統計・OLS・argmax/同率・状態機械スキャン
+  (`cheap.rs`/`reference.rs`/`expensive`)(§4):
+  centroid/flatness/rolloff/entropy/flux/bandwidth/slope・
+  true-peak 補間・clip/zero/stuck/discontinuity 走査・median/
+  peak 選択・onset 検出等は「基礎スペクトル統計」としては汎用だ
+  が、Ruviform 側に対応 API がなく AudioLens の観測仕様
+  (端点除外・support 数え・window 分割・閾値)と一体のため AL
+  に残留。`cheap.rs::analyze_input` は measure 系関数
+  (`measure_level`/`measure_digital`/`measure_spectral`/
+  `measure_stereo`/`measure_transient`)へ演算を分離し、
+  `FeatureRecord` 変換(validity/confidence/support 写像・
+  tensor 出力)のみを本体に残す層構造とした。これにより汎用
+  演算の塊が「Ruviform 契約待ちの measure 層」として可視化
+  される。`reference.rs::analyze_pair` ・ `expensive` 各 family
+  `run` は feature 単位の計算+emit ブロック構造を維持 —
+  各ブロックの計算が帯域選択・validity gating・median/argmax
+  選択の意味論集約であり、残る inline 演算は AL 意味論側と
+  判定。同型の measure 分離は AL#104 の監査対象。
+- `residual.rs::rms`(§3): 複数チャンネル合成エネルギー
+  (Σsum_sq/Σlen)は `dsp::rms`(単一チャンネル mean)とは別意味論
+  の AL ローカル helper として残留。
+- `normalize.rs`/`prepared.rs` の Ruviform 型混入(§3):
+  `ResamplePlan` の内部パラメータを `normalized_pcm`
+  永続スキーマ/cache 鍵へ直列化している。永続契約は AL 側の
+  責務(#98 baseline 互換)のため現行維持とし、Ruviform 側の
+  安定 ID/バージョン化されたパラメータ表現があれば移行する
+  契約提案として IR に記録。
+
 ## Verification Notes
 
 - [ ] 本表が棚卸し対象の全 crate・全境界(GUI/CLI/headless/
