@@ -94,7 +94,10 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         let mut re: Vec<f64> = vec![0.0; size];
         re[..half].copy_from_slice(&flat);
         let mut im = vec![0.0; size];
-        al_locate::dsp::fft(&mut re, &mut im, true);
+        ruviform_numeric::fft::Fft::new(size)
+            .expect("fft length must be a power of two")
+            .transform(&mut re, &mut im, true)
+            .expect("fft buffer lengths must match the plan");
         let qmin = (0.0002 * rate as f64) as usize;
         let qmax = ((0.05 * rate as f64) as usize).min(size - 1);
         if qmax > qmin {
@@ -360,7 +363,7 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
         // ブロック境界の生エネルギーと内部の生エネルギーの比を、
         // 一般的な codec frame size ごとに評価する。
         let block_e: Vec<f64> = (0..n / 64)
-            .map(|i| al_locate::dsp::sum_sq(&seg[i * 64..(i + 1) * 64]))
+            .map(|i| ruviform_numeric::vec::sum_sq(&seg[i * 64..(i + 1) * 64]))
             .collect();
         let mut best: Option<(f64, u64)> = None;
         for size in [576usize, 1024, 1152] {

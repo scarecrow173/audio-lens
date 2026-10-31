@@ -10,14 +10,14 @@
 //!   row-ascending addition order, so bit-identical by construction.
 //! - A16b (`dom()`): `magnitude()` full matrix + row-mean argmax vs
 //!   a reused `fft_size` scratch fed by `mag_sq` per frame +
-//!   `scratch[k].sqrt()` accumulation. `mag_sq` goes through the
-//!   `al_locate::dsp` facade (same kernel `magnitude()` calls).
+//!   `scratch[k].sqrt()` accumulation. `mag_sq` is the
+//!   `ruviform_numeric::vec` kernel (same kernel `magnitude()` calls).
 
 use criterion::{Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
 
 use al_analysis::stft::{StftMatrix, stft};
-use al_locate::dsp::mag_sq;
+use ruviform_numeric::vec::mag_sq;
 
 const RATE: u32 = 48_000;
 const WINDOW: usize = 4096;
@@ -128,7 +128,7 @@ fn bench_spectral_pass(c: &mut Criterion) {
             let mut mean = vec![0.0; half];
             let mut scratch = vec![0.0; m.fft_size];
             for f in 0..m.frames() {
-                mag_sq(&m.re[f], &m.im[f], &mut scratch);
+                mag_sq(&m.re[f], &m.im[f], &mut scratch).expect("equal slice lengths");
                 for (k, v) in mean.iter_mut().enumerate() {
                     *v += scratch[k].sqrt();
                 }

@@ -174,9 +174,12 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
 
     let mut re: Vec<f64> = h.iter().map(|v| v.0).collect();
     let mut im: Vec<f64> = h.iter().map(|v| v.1).collect();
-    al_locate::dsp::fft(&mut re, &mut im, true);
+    ruviform_numeric::fft::Fft::new(re.len())
+        .expect("fft length must be a power of two")
+        .transform(&mut re, &mut im, true)
+        .expect("fft buffer lengths must match the plan");
     let mut mag2 = vec![0.0; re.len()];
-    al_locate::dsp::mag_sq(&re, &im, &mut mag2);
+    ruviform_numeric::vec::mag_sq(&re, &im, &mut mag2).expect("equal slice lengths");
     let (peak, _) = mag2
         .iter()
         .enumerate()

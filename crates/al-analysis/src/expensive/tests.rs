@@ -252,7 +252,10 @@ fn ac29_ir_windows_are_invariant_to_circular_peak_position() {
         re[(shift + n - 1) % n] = 0.5;
         re[(shift + 300) % n] = 0.1;
         let mut im = vec![0.0; n];
-        al_locate::dsp::fft(&mut re, &mut im, false);
+        ruviform_numeric::fft::Fft::new(re.len())
+            .expect("fft length must be a power of two")
+            .transform(&mut re, &mut im, false)
+            .expect("fft buffer lengths must match the plan");
         let mut pair = aligned_pair(&[], 0);
         pair.transfer_h = Some(re.into_iter().zip(im).collect());
         let out = ac29_run(&[&sig], 48000, 256, Some(&pair));
@@ -737,7 +740,8 @@ fn freq_lr_coherence_is_high_for_identical_channels() {
 fn manual_trigger_still_estimates_when_merged_with_non_valid_event() {
     let rate = 48_000u32;
     let raw = noise(1 << 16, 0xabc);
-    let sig = al_locate::dsp::bandpass(&raw, rate, 100.0, 8_000.0);
+    let sig = ruviform_numeric::bands::bandpass(&raw, rate, 100.0, 8_000.0)
+        .expect("band settings and input must be valid");
     let chans: Vec<&[f64]> = vec![&sig];
     let region = TriggeredRegion {
         start_s: 0.0,
@@ -807,7 +811,8 @@ fn region_cutoff_and_echo_are_measured() {
     let rate = 48_000u32;
     // Lowpass-ish source: bandpassed noise below ~8 kHz.
     let raw = noise(1 << 16, 0xabc);
-    let sig = al_locate::dsp::bandpass(&raw, rate, 100.0, 8_000.0);
+    let sig = ruviform_numeric::bands::bandpass(&raw, rate, 100.0, 8_000.0)
+        .expect("band settings and input must be valid");
     // Add an echo at 5 ms.
     let mut echoed = sig.clone();
     for i in 240..echoed.len() {
@@ -932,7 +937,10 @@ fn ir_family_recovers_synthetic_decay() {
     let n = 2048usize;
     let mut re: Vec<f64> = (0..n).map(|i| (-0.004 * i as f64).exp()).collect();
     let mut im = vec![0.0; n];
-    al_locate::dsp::fft(&mut re, &mut im, false);
+    ruviform_numeric::fft::Fft::new(re.len())
+        .expect("fft length must be a power of two")
+        .transform(&mut re, &mut im, false)
+        .expect("fft buffer lengths must match the plan");
     let h: Vec<(f64, f64)> = re.iter().copied().zip(im).collect();
     let sig = noise(1 << 16, 0x1e5e);
     let chans: Vec<&[f64]> = vec![&sig];
@@ -961,7 +969,8 @@ fn codec_secondary_echo_is_detected() {
     // below the true 5 ms echo's first-order peak, so the
     // non-harmonic secondary resolves to 5 ms.
     let raw = noise(1 << 16, 0xec10);
-    let sig = al_locate::dsp::bandpass(&raw, rate, 100.0, 8_000.0);
+    let sig = ruviform_numeric::bands::bandpass(&raw, rate, 100.0, 8_000.0)
+        .expect("band settings and input must be valid");
     let mut echoed = sig.clone();
     for i in 960..echoed.len() {
         echoed[i] += 0.25 * sig[i - 240] + 0.6 * sig[i - 960];
@@ -1020,8 +1029,10 @@ fn level_transfer_detects_compression() {
 fn channel_mix_recovers_signed_band_coeffs() {
     let rate = 48_000u32;
     let n = 1 << 16;
-    let s0 = al_locate::dsp::bandpass(&noise(n, 0x11), rate, 100.0, 12_000.0);
-    let s1 = al_locate::dsp::bandpass(&noise(n, 0x22), rate, 100.0, 12_000.0);
+    let s0 = ruviform_numeric::bands::bandpass(&noise(n, 0x11), rate, 100.0, 12_000.0)
+        .expect("band settings and input must be valid");
+    let s1 = ruviform_numeric::bands::bandpass(&noise(n, 0x22), rate, 100.0, 12_000.0)
+        .expect("band settings and input must be valid");
     // Capture ch0: +0.3·s0 − 0.8·s1 — dominant coeff −0.8 →
     // polarity-routing evidence must read negative.
     let c0: Vec<f64> = (0..n).map(|i| 0.3 * s0[i] - 0.8 * s1[i]).collect();
@@ -1088,7 +1099,8 @@ fn splice_and_stuck_buffer_are_detected() {
 fn local_time_map_tracks_constant_residual_delay() {
     let rate = 48_000u32;
     let n = 1 << 16;
-    let src = al_locate::dsp::bandpass(&noise(n, 0x711e), rate, 200.0, 10_000.0);
+    let src = ruviform_numeric::bands::bandpass(&noise(n, 0x711e), rate, 200.0, 10_000.0)
+        .expect("band settings and input must be valid");
     // Capture is locally delayed by +5 samples vs the alignment —
     // the time map should read lag ≈ +5.
     let mut cap = vec![0.0f64; n];

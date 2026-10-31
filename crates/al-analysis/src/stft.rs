@@ -6,7 +6,7 @@
 //! analysis window is not already one. All products are
 //! deterministic and persistable as `intermediate`-role tensors.
 
-use al_locate::dsp::{mag_sq, scale};
+use ruviform_numeric::vec::{mag_sq, scale};
 use ruviform_numeric::{bands, stft as rf_stft, window::Window, xspec};
 
 /// One frame×bin complex matrix produced by [`stft`].
@@ -57,9 +57,9 @@ impl StftMatrix {
                 // Two passes (mag_sq then scale): the primitives do
                 // not allow logical in-place aliasing.
                 let mut power = vec![0.0; re.len()];
-                mag_sq(re, im, &mut power);
+                mag_sq(re, im, &mut power).expect("equal slice lengths");
                 let mut out = vec![0.0; re.len()];
-                scale(&power, 1.0 / norm, &mut out);
+                scale(&power, 1.0 / norm, &mut out).expect("equal slice lengths");
                 out
             })
             .collect()
@@ -72,7 +72,7 @@ impl StftMatrix {
             .zip(&self.im)
             .map(|(re, im)| {
                 let mut m2 = vec![0.0; re.len()];
-                mag_sq(re, im, &mut m2);
+                mag_sq(re, im, &mut m2).expect("equal slice lengths");
                 m2.iter().map(|&v| v.sqrt()).collect()
             })
             .collect()
@@ -85,7 +85,7 @@ impl StftMatrix {
             .zip(&self.im)
             .map(|(re, im)| {
                 let mut out = vec![0.0; re.len()];
-                mag_sq(re, im, &mut out);
+                mag_sq(re, im, &mut out).expect("equal slice lengths");
                 out
             })
             .collect()
@@ -185,8 +185,13 @@ pub fn envelope(magnitude_row: &[f64], bins: usize) -> Vec<f64> {
 mod tests {
     use super::*;
     // The bit-exact oracle below intentionally transforms each frame
-    // through the single-shot `dsp::fft` path (pre-hoist behavior).
-    use al_locate::dsp::fft;
+    // through the single-shot `Fft` path (pre-hoist behavior).
+    fn fft(re: &mut [f64], im: &mut [f64], inverse: bool) {
+        let mut plan =
+            ruviform_numeric::fft::Fft::new(re.len()).expect("fft length must be a power of two");
+        plan.transform(re, im, inverse)
+            .expect("fft buffer lengths must match the plan");
+    }
 
     #[test]
     fn stft_places_sine_in_the_right_bin() {
@@ -250,7 +255,7 @@ mod tests {
     //
     // `stft` output must be bit-exact (`f64::to_bits`) against the
     // reference that windows each frame and transforms it via the
-    // single-shot `dsp::fft` path — the pre-plan-hoist behavior.
+    // single-shot `Fft` path — the pre-plan-hoist behavior.
     // The test stays green after the A3 `Fft` plan hoist.
 
     /// Deterministic fixture: sine mix + LCG noise.
@@ -271,7 +276,7 @@ mod tests {
     }
 
     /// Reference: each frame independently windowed + single-shot
-    /// `dsp::fft`, returning `(re, im)` per frame.
+    /// `Fft`, returning `(re, im)` per frame.
     fn reference_frames(samples: &[f64], window: usize, hop: usize) -> Vec<(Vec<f64>, Vec<f64>)> {
         let fft_size = window.next_power_of_two();
         let win = hann(window);

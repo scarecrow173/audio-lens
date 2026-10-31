@@ -664,7 +664,8 @@ mod mechanical_cleanup {
     };
     use al_core::{Confidence, Validity};
     use al_dataset::types::Value;
-    use al_locate::dsp::{bandpass, corr0};
+    use ruviform_numeric::bands::bandpass;
+    use ruviform_numeric::vec::corr0;
 
     const ALN: &str = "ALN-0123456789abcdefghijkl";
 
@@ -827,9 +828,11 @@ mod mechanical_cleanup {
             .iter()
             .take(8)
             .map(|&(lo, hi)| {
-                let xs = bandpass(src_mono, rate, lo, hi);
-                let ys = bandpass(cap_mono, rate, lo, hi);
-                corr0(&xs, &ys)
+                let xs = bandpass(src_mono, rate, lo, hi)
+                    .expect("band settings and input must be valid");
+                let ys = bandpass(cap_mono, rate, lo, hi)
+                    .expect("band settings and input must be valid");
+                corr0(&xs, &ys).expect("equal lengths")
             })
             .collect();
         let t = tensor(out, "intermediate/src__cap/band_correlation");
@@ -1224,7 +1227,7 @@ mod mechanical_cleanup {
         // deinterleaving must reproduce a channel-0 signal whose
         // STFT equals the persisted `stft_re` companion tensor.
         for res in &out.residual_audio {
-            let chans = al_locate::dsp::deinterleave(&res.samples, res.channels);
+            let chans = al_locate::deinterleave(&res.samples, res.channels);
             assert_eq!(chans.len(), res.channels as usize);
             let rm = stft(&chans[0], cfg.stft_window, cfg.stft_hop, rate);
             let flat_re: Vec<f64> = rm.re.iter().flatten().copied().collect();

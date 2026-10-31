@@ -5,7 +5,7 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::FeatureRecord;
-use al_locate::dsp::rms;
+use ruviform_numeric::vec::rms;
 
 use crate::records::{propagate_confidence, propagate_validity, robust_summary};
 
@@ -188,7 +188,10 @@ pub(crate) fn run(ctx: &RegionCtx<'_>, e: &Emit<'_>, out: &mut ExpensiveResult) 
                         re[i] = l - mean;
                     }
                     let mut im = vec![0.0; nfft];
-                    al_locate::dsp::fft(&mut re, &mut im, false);
+                    ruviform_numeric::fft::Fft::new(nfft)
+                        .expect("fft length is a power of two")
+                        .transform(&mut re, &mut im, false)
+                        .expect("fft buffer lengths must match the plan");
                     let hop_s = hop as f64 / rate as f64;
                     let fs = 1.0 / (hop_s * nfft as f64);
                     let (mut best_k, mut best_a) = (0usize, 0.0f64);

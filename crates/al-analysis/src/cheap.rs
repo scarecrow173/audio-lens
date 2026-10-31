@@ -9,7 +9,8 @@
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, Resolution, ResolutionClass, Value};
 use al_locate::decode::DecodedInput;
-use al_locate::dsp::{CorrelationPlan, CorrelationWorkspace, corr0, rms, sum_sq};
+use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
+use ruviform_numeric::vec::{corr0, rms, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::records::{RecordBuilder, RobustSummary, robust_summary};
@@ -1506,7 +1507,7 @@ fn measure_stereo(
     // Zero-lag normalized correlation. sx/sy are also consumed by the
     // Validity gate and `stereo.ild_db` below, so they are computed
     // separately from `corr0`.
-    let corr = corr0(xs, ys);
+    let corr = corr0(xs, ys).expect("equal channel lengths");
     let sx = sum_sq(xs);
     let sy = sum_sq(ys);
     // ILD: level difference.
@@ -1524,7 +1525,7 @@ fn measure_stereo(
         if xa.is_empty() {
             continue;
         }
-        let c = corr0(xa, ya);
+        let c = corr0(xa, ya).expect("equal lag spans");
         if c > best_v {
             best_v = c;
             best_lag = lag;
@@ -1640,7 +1641,7 @@ fn measure_transient(
             .map(|lag| {
                 let a = &rms[..rms.len() - lag];
                 let b = &rms[lag..];
-                corr0(a, b)
+                corr0(a, b).expect("equal slice lengths")
             })
             .fold(0.0f64, f64::max)
     });

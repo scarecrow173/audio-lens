@@ -10,10 +10,12 @@
 
 use al_core::{Confidence, Validity};
 use al_dataset::types::{FeatureRecord, ResolutionClass};
-use al_locate::dsp::{
-    bandpass_many, conv, corr0, dot, fft, gcc_phat, mag_sq, rms, spectral_envelope, sum_sq,
-};
 use al_locate::mixer::fit_mix;
+use ruviform_numeric::bands::{bandpass_many, spectral_envelope};
+use ruviform_numeric::conv::conv;
+use ruviform_numeric::corr::gcc_phat;
+use ruviform_numeric::fft::Fft;
+use ruviform_numeric::vec::{corr0, dot, mag_sq, rms, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
 
 use crate::cheap::NamedTensor;
@@ -124,7 +126,11 @@ pub struct ReferenceResult {
 /// NaN on a silent `x`.
 fn ls_gain(x: &[f64], y: &[f64]) -> f64 {
     let den = sum_sq(x);
-    if den > 0.0 { dot(x, y) / den } else { 0.0 }
+    if den > 0.0 {
+        dot(x, y).expect("equal lengths") / den
+    } else {
+        0.0
+    }
 }
 
 /// Peak lag + score + half-max width over `[-max_lag, max_lag]`.
@@ -173,7 +179,10 @@ fn fir_ir(from_stft: &StftMatrix, to: &[f64], window: usize, hop: usize, rate: u
         .transfer_h1_into(&mut hre, &mut him)
         .expect("h1 output length must match bins");
     // irfft (inverse FFT already normalizes by 1/N).
-    fft(&mut hre, &mut him, true);
+    Fft::new(hre.len())
+        .expect("fft length must be a power of two")
+        .transform(&mut hre, &mut him, true)
+        .expect("fft buffer lengths must match the plan");
     hre
 }
 
@@ -308,9 +317,9 @@ pub fn analyze_pair(
     let mut lag_widths = Vec::new();
     if n >= cfg.lag_window {
         // plan/workspace は窓長だけに依存するため全窓で再利用する。
-        let lag_plan = al_locate::dsp::OverlapCorrPlan::new(cfg.lag_window)
+        let lag_plan = ruviform_numeric::corr::OverlapCorrPlan::new(cfg.lag_window)
             .expect("overlap correlation window shape must be valid");
-        let mut lag_ws = al_locate::dsp::OverlapCorrWorkspace::new(&lag_plan);
+        let mut lag_ws = ruviform_numeric::corr::OverlapCorrWorkspace::new(&lag_plan);
         for start in (0..=n - cfg.lag_window).step_by(cfg.lag_hop) {
             let xa = &src_mono[start..start + cfg.lag_window];
             let ya = &cap_mono[start..start + cfg.lag_window];
@@ -482,7 +491,7 @@ pub fn analyze_pair(
             format!("intermediate/{pair}/gain_trajectory"),
             std::slice::from_ref(&gains),
         ));
-        let lvl_gain_corr = corr0(&src_levels, &gains);
+        let lvl_gain_corr = corr0(&src_levels, &gains).expect("equal lengths");
         let mut lc = g_rb.scalar(
             "ref.src_level_gain_corr",
             lvl_gain_corr,
@@ -716,7 +725,7 @@ pub fn analyze_pair(
     ));
 
     // ==== Similarity family ====
-    let full_corr = corr0(src_mono, cap_mono);
+    let full_corr = corr0(src_mono, cap_mono).expect("equal lengths");
     let mut sim = rb(ResolutionClass::Segment).scalar(
         "ref.similarity_fullband",
         full_corr,
@@ -732,9 +741,13 @@ pub fn analyze_pair(
     // Band correlation: bandpass each third-octave band, corr per
     // band (first 8 bands to bound cost).
     let capped = &bands[..bands.len().min(8)];
-    let xs = bandpass_many(src_mono, rate, capped);
-    let ys = bandpass_many(cap_mono, rate, capped);
-    let band_corrs: Vec<f64> = xs.iter().zip(&ys).map(|(x, y)| corr0(x, y)).collect();
+    let xs = bandpass_many(src_mono, rate, capped).expect("band settings and input must be valid");
+    let ys = bandpass_many(cap_mono, rate, capped).expect("band settings and input must be valid");
+    let band_corrs: Vec<f64> = xs
+        .iter()
+        .zip(&ys)
+        .map(|(x, y)| corr0(x, y).expect("equal lengths"))
+        .collect();
     out.tensors.push(matrix_to_tensor(
         format!("intermediate/{pair}/band_correlation"),
         std::slice::from_ref(&band_corrs),
@@ -756,7 +769,8 @@ pub fn analyze_pair(
     // PHAT evidence: whiten the cross-spectrum of a source template
     // inside the capture and take the peak correlation.
     let tpl_len = n.min(8192);
-    let phat = gcc_phat(&src_mono[..tpl_len], cap_mono, n - tpl_len);
+    let phat = gcc_phat(&src_mono[..tpl_len], cap_mono, n - tpl_len)
+        .expect("correlation template/signal shapes must be valid");
     let phat_peak = phat.iter().copied().fold(f64::MIN, f64::max);
     let mut ph = rb(ResolutionClass::Segment).scalar(
         "ref.phat_peak",
@@ -771,13 +785,15 @@ pub fn analyze_pair(
     ph.alignment_id = Some(alignment_id.to_string());
     out.records.push(ph);
     // Envelope similarity: corr of spectral envelopes.
-    let env_s = spectral_envelope(src_mono, cfg.stft_window, 64);
-    let env_c = spectral_envelope(cap_mono, cfg.stft_window, 64);
+    let env_s = spectral_envelope(src_mono, cfg.stft_window, 64)
+        .expect("envelope parameters must be valid");
+    let env_c = spectral_envelope(cap_mono, cfg.stft_window, 64)
+        .expect("envelope parameters must be valid");
     let env_n = env_s.len().min(env_c.len());
     let mut es = rb(ResolutionClass::Segment).scalar(
         "ref.envelope_similarity",
         if env_n > 0 {
-            corr0(&env_s[..env_n], &env_c[..env_n])
+            corr0(&env_s[..env_n], &env_c[..env_n]).expect("equal lengths")
         } else {
             f64::NAN
         },
@@ -1035,7 +1051,7 @@ pub fn analyze_pair(
         let lo = (rate as f64 / 1000.0) as usize;
         let hi = (rate as f64 / 40.0) as usize;
         for lag in lo..hi.min(len / 2) {
-            let c = corr0(&x[..len - lag], &x[lag..]);
+            let c = corr0(&x[..len - lag], &x[lag..]).expect("equal lengths");
             if c > best.1 {
                 best = (lag, c);
             }
@@ -1068,7 +1084,7 @@ pub fn analyze_pair(
         let mut mean = vec![0.0; half];
         let mut scratch = vec![0.0; m.fft_size];
         for f in 0..m.frames() {
-            mag_sq(&m.re[f], &m.im[f], &mut scratch);
+            mag_sq(&m.re[f], &m.im[f], &mut scratch).expect("equal slice lengths");
             for (k, v) in mean.iter_mut().enumerate() {
                 *v += scratch[k].sqrt();
             }
@@ -1172,7 +1188,7 @@ pub fn analyze_pair(
         let rname = format!("{pair}/{name}");
         let res_rms = rms(&interleaved);
         residual_levels.push(res_rms);
-        let res_corr = corr0(&residual[0], src_mono);
+        let res_corr = corr0(&residual[0], src_mono).expect("equal lengths");
         out.residual_audio.push(ResidualAudio {
             name: rname.clone(),
             samples: interleaved,

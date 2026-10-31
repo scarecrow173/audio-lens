@@ -13,7 +13,8 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
 
 use al_analysis::stft::third_octave_bands;
-use al_locate::dsp::{bandpass, bandpass_many, corr0};
+use ruviform_numeric::bands::{bandpass, bandpass_many};
+use ruviform_numeric::vec::corr0;
 
 const RATE: u32 = 48_000;
 /// ~2 s @48 kHz — same pair scale as `examples/bench_reference.rs`.
@@ -45,9 +46,11 @@ fn bench_band_correlation(c: &mut Criterion) {
         b.iter(|| {
             let mut corrs = Vec::with_capacity(8);
             for &(lo, hi) in bands.iter().take(8) {
-                let xs = bandpass(black_box(&src), RATE, lo, hi);
-                let ys = bandpass(black_box(&cap), RATE, lo, hi);
-                corrs.push(corr0(&xs, &ys));
+                let xs = bandpass(black_box(&src), RATE, lo, hi)
+                    .expect("band settings and input must be valid");
+                let ys = bandpass(black_box(&cap), RATE, lo, hi)
+                    .expect("band settings and input must be valid");
+                corrs.push(corr0(&xs, &ys).expect("equal slice lengths"));
             }
             black_box(corrs)
         })
@@ -57,12 +60,14 @@ fn bench_band_correlation(c: &mut Criterion) {
     group.bench_function("batched_bandpass_many", |b| {
         b.iter(|| {
             let capped = &bands[..bands.len().min(8)];
-            let xs = bandpass_many(black_box(&src), RATE, capped);
-            let ys = bandpass_many(black_box(&cap), RATE, capped);
+            let xs = bandpass_many(black_box(&src), RATE, capped)
+                .expect("band settings and input must be valid");
+            let ys = bandpass_many(black_box(&cap), RATE, capped)
+                .expect("band settings and input must be valid");
             black_box(
                 xs.iter()
                     .zip(&ys)
-                    .map(|(x, y)| corr0(x, y))
+                    .map(|(x, y)| corr0(x, y).expect("equal slice lengths"))
                     .collect::<Vec<f64>>(),
             )
         })
