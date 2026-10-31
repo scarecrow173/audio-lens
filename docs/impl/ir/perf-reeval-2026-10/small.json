@@ -1,103 +1,72 @@
 {
   "run": "small",
-  "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
-  "e2e_wall_ms": 126861,
+  "stages_filter": null,
+  "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
+  "e2e_wall_ms": 85264,
   "environment": {
-    "recorded_at": "2026-10-31T14:51:41.434Z",
-    "commit": "bc2846e000de1a51d8cb60b4099ee61664272d82",
+    "recorded_at": "2026-10-31T17:53:03.269Z",
+    "commit": "430d06be09527a962e95da621d147d30865caefb",
     "worktree_dirty": true,
     "note": "instrumented build: window_anchors_in/method_tasks/prepare_*/band_gain_phase/ref_phase"
   },
   "stages": {
     "ingest": {
       "status": "completed",
-      "duration_ms": 786
+      "duration_ms": 791
     },
     "locate": {
       "status": "completed",
-      "duration_ms": 111751
+      "duration_ms": 71083
     },
     "cheap_analysis": {
       "status": "completed",
-      "duration_ms": 2701
+      "duration_ms": 2537
     },
     "reference_analysis": {
       "status": "completed",
-      "duration_ms": 3708
+      "duration_ms": 3546
     },
     "expensive_analysis": {
       "status": "completed",
-      "duration_ms": 1645
+      "duration_ms": 1563
     },
     "dataset": {
       "status": "completed",
-      "duration_ms": 169
+      "duration_ms": 162
     },
     "export": {
       "status": "completed",
-      "duration_ms": 5891
+      "duration_ms": 5366
     }
   },
   "span_busy": {
     "stage": {
       "calls": 7,
-      "busy_ms": 126921
-    },
-    "locate::prepare_input": {
-      "calls": 6,
-      "busy_ms": 91
-    },
-    "locate::prepare_channels": {
-      "calls": 12,
-      "busy_ms": 1617
-    },
-    "locate::full_ncc": {
-      "calls": 40,
-      "busy_ms": 94750
+      "busy_ms": 85077
     },
     "locate::gcc_phat": {
       "calls": 40,
-      "busy_ms": 90655
+      "busy_ms": 88686
+    },
+    "locate::full_ncc": {
+      "calls": 40,
+      "busy_ms": 87945
     },
     "locate::band_ncc": {
       "calls": 40,
-      "busy_ms": 258836
+      "busy_ms": 252097
     },
     "locate::spectral_envelope": {
       "calls": 40,
-      "busy_ms": 208205
-    },
-    "locate::method_tasks": {
-      "calls": 7,
-      "busy_ms": 54230
-    },
-    "locate::locate_channels": {
-      "calls": 4,
-      "busy_ms": 18790
-    },
-    "locate::verify_occurrences": {
-      "calls": 3,
-      "busy_ms": 3
-    },
-    "locate::prepare_residual": {
-      "calls": 3,
-      "busy_ms": 472
-    },
-    "locate::residual_iter": {
-      "calls": 3,
-      "busy_ms": 39320
+      "busy_ms": 203129
     },
     "analysis::cheap": {
       "calls": 4,
-      "busy_ms": 1283
-    },
-    "analysis::band_gain": {
-      "calls": 3,
-      "busy_ms": 2170
+      "busy_ms": 1287
     },
     "analysis::reference": {
       "calls": 4,
-      "busy_ms": 2900
+      "busy_ms": 2849
     },
     "analysis::transfer": {
       "calls": 4,
@@ -105,482 +74,76 @@
     },
     "analysis::codec": {
       "calls": 4,
-      "busy_ms": 265
+      "busy_ms": 240
     },
     "analysis::dynamics": {
       "calls": 4,
-      "busy_ms": 17
+      "busy_ms": 15
     },
     "analysis::noise": {
       "calls": 4,
-      "busy_ms": 172
+      "busy_ms": 173
     },
     "analysis::channel": {
       "calls": 4,
-      "busy_ms": 526
+      "busy_ms": 512
     },
     "analysis::ir": {
       "calls": 4,
-      "busy_ms": 1
+      "busy_ms": 0
     },
     "analysis::timing": {
       "calls": 4,
-      "busy_ms": 153
+      "busy_ms": 154
     },
     "analysis::region": {
       "calls": 4,
-      "busy_ms": 1402
+      "busy_ms": 1366
     }
   },
   "span_instances": {
     "stage": [
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "ingest",
         "name": "stage",
-        "busy_ms": 789
+        "busy_ms": 793
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "locate",
         "name": "stage",
-        "busy_ms": 112000
+        "busy_ms": 71100
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "cheap_analysis",
         "name": "stage",
-        "busy_ms": 2710
+        "busy_ms": 2540
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "reference_analysis",
         "name": "stage",
-        "busy_ms": 3710
+        "busy_ms": 3550
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "expensive_analysis",
         "name": "stage",
-        "busy_ms": 1650
+        "busy_ms": 1560
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "dataset",
         "name": "stage",
-        "busy_ms": 172
+        "busy_ms": 164
       },
       {
-        "job_id": "JOB-BhAoxwiXl6Hed5xpnUOpUB",
+        "job_id": "JOB-9mMrs2EhgeOgL3jH6S4pVP",
         "stage": "export",
         "name": "stage",
-        "busy_ms": 5890
-      }
-    ],
-    "locate::prepare_input": [
-      {
-        "frames": 480240,
-        "input_id": "IN-0000000000000000000061",
-        "rate": 48000,
-        "src_rate": 48000,
-        "name": "locate::prepare_input",
-        "busy_ms": 7.71
-      },
-      {
-        "frames": 39690,
-        "input_id": "IN-0000000000000000000063",
-        "rate": 48000,
-        "src_rate": 44100,
-        "name": "locate::prepare_input",
-        "busy_ms": 7.17
-      },
-      {
-        "frames": 120686,
-        "input_id": "IN-0000000000000000000064",
-        "rate": 48000,
-        "src_rate": 44100,
-        "name": "locate::prepare_input",
-        "busy_ms": 20.4
-      },
-      {
-        "frames": 2400240,
-        "input_id": "IN-0000000000000000000062",
-        "rate": 48000,
-        "src_rate": 48000,
-        "name": "locate::prepare_input",
-        "busy_ms": 52.3
-      },
-      {
-        "frames": 39690,
-        "input_id": "IN-0000000000000000000063",
-        "rate": 48000,
-        "src_rate": 44100,
-        "name": "locate::prepare_input",
-        "busy_ms": 1.5
-      },
-      {
-        "frames": 120686,
-        "input_id": "IN-0000000000000000000064",
-        "rate": 48000,
-        "src_rate": 44100,
-        "name": "locate::prepare_input",
-        "busy_ms": 2.08
-      }
-    ],
-    "locate::prepare_channels": [
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000061",
-        "name": "locate::prepare_channels",
-        "busy_ms": 151
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000063",
-        "name": "locate::prepare_channels",
-        "busy_ms": 14.9
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000064",
-        "name": "locate::prepare_channels",
-        "busy_ms": 61
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000063",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0047
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000064",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0023
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000062",
-        "name": "locate::prepare_channels",
-        "busy_ms": 1390
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000063",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0050999999999999995
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000064",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.005
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000063",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0055
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000064",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0032
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000063",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0055
-      },
-      {
-        "channels": 2,
-        "input_id": "IN-0000000000000000000064",
-        "name": "locate::prepare_channels",
-        "busy_ms": 0.0022
-      }
-    ],
-    "locate::full_ncc": [
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 330
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 337
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 349
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 355
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 355
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 356
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 453
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 454
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 310
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 358
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 361
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 362
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 404
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 365
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 378
-      },
-      {
-        "len_a": 131359,
-        "len_b": 480240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 433
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 2810
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 2980
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3170
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3430
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3350
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3920
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 4550
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 4600
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 2670
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 2720
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3040
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3400
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3630
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3810
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 4000
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 4660
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3310
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3430
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3560
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3780
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3680
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 3750
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 5110
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "full_ncc",
-        "name": "locate::full_ncc",
-        "busy_ms": 5430
+        "busy_ms": 5370
       }
     ],
     "locate::gcc_phat": [
@@ -589,105 +152,105 @@
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 347
+        "busy_ms": 350
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 348
+        "busy_ms": 370
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 355
+        "busy_ms": 376
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 374
+        "busy_ms": 379
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 540
+        "busy_ms": 551
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 550
+        "busy_ms": 645
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 556
+        "busy_ms": 666
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 561
+        "busy_ms": 667
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 369
+        "busy_ms": 321
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 380
+        "busy_ms": 344
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 392
+        "busy_ms": 366
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 400
+        "busy_ms": 417
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 599
+        "busy_ms": 593
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 623
+        "busy_ms": 594
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 674
+        "busy_ms": 580
       },
       {
         "len_a": 131359,
@@ -701,35 +264,91 @@
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 2920
+        "busy_ms": 2880
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 3410
+        "busy_ms": 2940
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 3470
+        "busy_ms": 3330
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 3490
+        "busy_ms": 3420
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 2890
+        "busy_ms": 2790
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3030
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 4360
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 4480
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3980
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 4270
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 4350
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2940
       },
       {
         "len_a": 131359,
@@ -743,126 +362,352 @@
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 3350
+        "busy_ms": 2850
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
-        "busy_ms": 3640
+        "busy_ms": 3020
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "gcc_phat",
         "name": "locate::gcc_phat",
+        "busy_ms": 2850
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2900
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3470
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3470
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3380
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3420
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3420
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3560
+      }
+    ],
+    "locate::full_ncc": [
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 363
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 368
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 376
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 385
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 380
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 383
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 387
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 388
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 335
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 357
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 414
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 445
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 357
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 378
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 422
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 537
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
         "busy_ms": 2890
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3320
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2960
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3370
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3030
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3830
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3120
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3230
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3440
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3190
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3450
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3520
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3470
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3410
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4800
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3100
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2560
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2720
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2910
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3150
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3360
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3300
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3680
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4510
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3020
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3130
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
         "busy_ms": 3250
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3820
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 4820
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3540
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3650
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3510
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3940
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3580
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 3060
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4050
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
-        "method": "gcc_phat",
-        "name": "locate::gcc_phat",
-        "busy_ms": 4460
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4240
       }
     ],
     "locate::band_ncc": [
@@ -871,56 +716,63 @@
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 714
+        "busy_ms": 839
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 730
+        "busy_ms": 885
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 736
+        "busy_ms": 893
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 749
+        "busy_ms": 896
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 864
+        "busy_ms": 994
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 905
+        "busy_ms": 1020
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 916
+        "busy_ms": 1020
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 922
+        "busy_ms": 1030
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1210
       },
       {
         "len_a": 43200,
@@ -934,119 +786,112 @@
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1260
+        "busy_ms": 1280
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1300
-      },
-      {
-        "len_a": 43200,
-        "len_b": 480240,
-        "method": "band_ncc",
-        "name": "locate::band_ncc",
-        "busy_ms": 1330
+        "busy_ms": 1400
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1110
+        "busy_ms": 1130
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1210
+        "busy_ms": 1130
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1210
+        "busy_ms": 1310
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 1210
+        "busy_ms": 1320
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7110
+        "busy_ms": 6730
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7120
+        "busy_ms": 6770
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7150
+        "busy_ms": 6810
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7190
+        "busy_ms": 6810
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7800
+        "busy_ms": 8100
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 7970
+        "busy_ms": 8220
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 8280
+        "busy_ms": 8320
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 8340
+        "busy_ms": 8850
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 11300
+        "busy_ms": 10700
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 11700
+        "busy_ms": 11200
       },
       {
         "len_a": 43200,
@@ -1060,42 +905,49 @@
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 12400
+        "busy_ms": 12100
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 9970
+        "busy_ms": 9250
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 9720
+        "busy_ms": 9290
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10200
+        "busy_ms": 10700
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10400
+        "busy_ms": 10100
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 11900
+        "busy_ms": 11200
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 11700
       },
       {
         "len_a": 43200,
@@ -1109,42 +961,35 @@
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 13500
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "band_ncc",
-        "name": "locate::band_ncc",
-        "busy_ms": 13600
+        "busy_ms": 12900
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10600
+        "busy_ms": 9920
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10900
+        "busy_ms": 10200
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10800
+        "busy_ms": 9950
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "band_ncc",
         "name": "locate::band_ncc",
-        "busy_ms": 10100
+        "busy_ms": 10300
       }
     ],
     "locate::spectral_envelope": [
@@ -1153,252 +998,203 @@
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 991
+        "busy_ms": 1090
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 992
+        "busy_ms": 1100
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 993
+        "busy_ms": 1100
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 996
+        "busy_ms": 1100
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1130
+        "busy_ms": 1320
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1130
+        "busy_ms": 1330
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1140
+        "busy_ms": 1330
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1150
+        "busy_ms": 1340
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1440
+        "busy_ms": 1290
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1470
+        "busy_ms": 1370
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1470
+        "busy_ms": 1380
       },
       {
         "len_a": 43200,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 1580
+        "busy_ms": 1560
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 734
+        "busy_ms": 963
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 696
+        "busy_ms": 1040
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 780
+        "busy_ms": 986
       },
       {
         "len_a": 131359,
         "len_b": 480240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 683
+        "busy_ms": 1050
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 5750
+        "busy_ms": 5530
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 5780
+        "busy_ms": 5530
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 5840
+        "busy_ms": 5550
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 5860
+        "busy_ms": 5570
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9140
+        "busy_ms": 9410
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9160
+        "busy_ms": 9410
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9180
+        "busy_ms": 9440
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9190
+        "busy_ms": 9460
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 8750
+        "busy_ms": 6740
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 8780
+        "busy_ms": 6900
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9040
+        "busy_ms": 7690
       },
       {
         "len_a": 43200,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 9170
+        "busy_ms": 7840
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 7200
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 7220
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 6970
-      },
-      {
-        "len_a": 131359,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 6850
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 8230
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 8400
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 9830
-      },
-      {
-        "len_a": 43200,
-        "len_b": 2400240,
-        "method": "spectral_envelope",
-        "name": "locate::spectral_envelope",
-        "busy_ms": 9960
+        "busy_ms": 8810
       },
       {
         "len_a": 131359,
@@ -1412,131 +1208,70 @@
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 8039.999999999999
+        "busy_ms": 8200
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 7130
+        "busy_ms": 8650
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6220
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6280
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7340
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7460
       },
       {
         "len_a": 131359,
         "len_b": 2400240,
         "method": "spectral_envelope",
         "name": "locate::spectral_envelope",
-        "busy_ms": 7020
-      }
-    ],
-    "locate::method_tasks": [
-      {
-        "tasks": 16,
-        "name": "locate::method_tasks",
-        "busy_ms": 1010
+        "busy_ms": 8340
       },
       {
-        "tasks": 16,
-        "name": "locate::method_tasks",
-        "busy_ms": 1180
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 8180
       },
       {
-        "tasks": 32,
-        "name": "locate::method_tasks",
-        "busy_ms": 2040
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 8320
       },
       {
-        "tasks": 16,
-        "name": "locate::method_tasks",
-        "busy_ms": 7290
-      },
-      {
-        "tasks": 16,
-        "name": "locate::method_tasks",
-        "busy_ms": 9310
-      },
-      {
-        "tasks": 32,
-        "name": "locate::method_tasks",
-        "busy_ms": 16200
-      },
-      {
-        "tasks": 32,
-        "name": "locate::method_tasks",
-        "busy_ms": 17200
-      }
-    ],
-    "locate::locate_channels": [
-      {
-        "tasks": 16,
-        "name": "locate::locate_channels",
-        "busy_ms": 1010
-      },
-      {
-        "tasks": 16,
-        "name": "locate::locate_channels",
-        "busy_ms": 1180
-      },
-      {
-        "tasks": 16,
-        "name": "locate::locate_channels",
-        "busy_ms": 7290
-      },
-      {
-        "tasks": 16,
-        "name": "locate::locate_channels",
-        "busy_ms": 9310
-      }
-    ],
-    "locate::verify_occurrences": [
-      {
-        "candidates": 14,
-        "name": "locate::verify_occurrences",
-        "busy_ms": 1.33
-      },
-      {
-        "candidates": 17,
-        "name": "locate::verify_occurrences",
-        "busy_ms": 1.69
-      },
-      {
-        "candidates": 17,
-        "name": "locate::verify_occurrences",
-        "busy_ms": 0.154
-      }
-    ],
-    "locate::prepare_residual": [
-      {
-        "len": 480240,
-        "name": "locate::prepare_residual",
-        "busy_ms": 93.1
-      },
-      {
-        "len": 2400240,
-        "name": "locate::prepare_residual",
-        "busy_ms": 179
-      },
-      {
-        "len": 2400240,
-        "name": "locate::prepare_residual",
-        "busy_ms": 200
-      }
-    ],
-    "locate::residual_iter": [
-      {
-        "parent": 0,
-        "name": "locate::residual_iter",
-        "busy_ms": 2320
-      },
-      {
-        "parent": 0,
-        "name": "locate::residual_iter",
-        "busy_ms": 18000
-      },
-      {
-        "parent": 1,
-        "name": "locate::residual_iter",
-        "busy_ms": 19000
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 8570
       }
     ],
     "analysis::cheap": [
@@ -1544,7 +1279,7 @@
         "input_id": "IN-0000000000000000000061",
         "len": 480240,
         "name": "analysis::cheap",
-        "busy_ms": 176
+        "busy_ms": 183
       },
       {
         "input_id": "IN-0000000000000000000062",
@@ -1556,30 +1291,13 @@
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "name": "analysis::cheap",
-        "busy_ms": 14.8
+        "busy_ms": 13.8
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "name": "analysis::cheap",
-        "busy_ms": 42.2
-      }
-    ],
-    "analysis::band_gain": [
-      {
-        "pair": "IN-0000000000000000000063__IN-0000000000000000000061",
-        "name": "analysis::band_gain",
-        "busy_ms": 410
-      },
-      {
-        "pair": "IN-0000000000000000000063__IN-0000000000000000000062",
-        "name": "analysis::band_gain",
-        "busy_ms": 360
-      },
-      {
-        "pair": "IN-0000000000000000000064__IN-0000000000000000000062",
-        "name": "analysis::band_gain",
-        "busy_ms": 1400
+        "busy_ms": 40.1
       }
     ],
     "analysis::reference": [
@@ -1587,7 +1305,7 @@
         "input_id": "IN-0000000000000000000063",
         "len": 43200,
         "name": "analysis::reference",
-        "busy_ms": 603
+        "busy_ms": 553
       },
       {
         "input_id": "IN-0000000000000000000064",
@@ -1599,13 +1317,13 @@
         "input_id": "IN-0000000000000000000063",
         "len": 43200,
         "name": "analysis::reference",
-        "busy_ms": 537
+        "busy_ms": 546
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 131359,
         "name": "analysis::reference",
-        "busy_ms": 1760
+        "busy_ms": 1750
       }
     ],
     "analysis::transfer": [
@@ -1614,28 +1332,28 @@
         "len": 480240,
         "method": "transfer",
         "name": "analysis::transfer",
-        "busy_ms": 0.088
+        "busy_ms": 0.08070000000000001
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "transfer",
         "name": "analysis::transfer",
-        "busy_ms": 0.08320000000000001
+        "busy_ms": 0.0828
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "transfer",
         "name": "analysis::transfer",
-        "busy_ms": 0.07579999999999999
+        "busy_ms": 0.07629999999999999
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "transfer",
         "name": "analysis::transfer",
-        "busy_ms": 0.0766
+        "busy_ms": 0.0793
       }
     ],
     "analysis::codec": [
@@ -1644,28 +1362,28 @@
         "len": 480240,
         "method": "codec",
         "name": "analysis::codec",
-        "busy_ms": 44.2
+        "busy_ms": 36.2
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "codec",
         "name": "analysis::codec",
-        "busy_ms": 210
+        "busy_ms": 195
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "codec",
         "name": "analysis::codec",
-        "busy_ms": 2.82
+        "busy_ms": 2.2
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "codec",
         "name": "analysis::codec",
-        "busy_ms": 8.46
+        "busy_ms": 6.47
       }
     ],
     "analysis::dynamics": [
@@ -1674,28 +1392,28 @@
         "len": 480240,
         "method": "dynamics",
         "name": "analysis::dynamics",
-        "busy_ms": 3.07
+        "busy_ms": 2.31
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "dynamics",
         "name": "analysis::dynamics",
-        "busy_ms": 12.7
+        "busy_ms": 12.2
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "dynamics",
         "name": "analysis::dynamics",
-        "busy_ms": 0.215
+        "busy_ms": 0.2
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "dynamics",
         "name": "analysis::dynamics",
-        "busy_ms": 0.5720000000000001
+        "busy_ms": 0.597
       }
     ],
     "analysis::noise": [
@@ -1704,28 +1422,28 @@
         "len": 480240,
         "method": "noise",
         "name": "analysis::noise",
-        "busy_ms": 24.1
+        "busy_ms": 21.5
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "noise",
         "name": "analysis::noise",
-        "busy_ms": 140
+        "busy_ms": 144
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "noise",
         "name": "analysis::noise",
-        "busy_ms": 2.53
+        "busy_ms": 1.8
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "noise",
         "name": "analysis::noise",
-        "busy_ms": 4.92
+        "busy_ms": 5.75
       }
     ],
     "analysis::channel": [
@@ -1734,28 +1452,28 @@
         "len": 480240,
         "method": "channel",
         "name": "analysis::channel",
-        "busy_ms": 98.4
+        "busy_ms": 75.4
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "channel",
         "name": "analysis::channel",
-        "busy_ms": 408
+        "busy_ms": 419
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "channel",
         "name": "analysis::channel",
-        "busy_ms": 5.39
+        "busy_ms": 4.15
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "channel",
         "name": "analysis::channel",
-        "busy_ms": 14.6
+        "busy_ms": 13.5
       }
     ],
     "analysis::ir": [
@@ -1764,28 +1482,28 @@
         "len": 480240,
         "method": "ir",
         "name": "analysis::ir",
-        "busy_ms": 0.338
+        "busy_ms": 0.17
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "ir",
         "name": "analysis::ir",
-        "busy_ms": 0.203
+        "busy_ms": 0.162
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "ir",
         "name": "analysis::ir",
-        "busy_ms": 0.0033
+        "busy_ms": 0.0031000000000000003
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "ir",
         "name": "analysis::ir",
-        "busy_ms": 0.003
+        "busy_ms": 0.0025
       }
     ],
     "analysis::timing": [
@@ -1794,28 +1512,28 @@
         "len": 480240,
         "method": "timing",
         "name": "analysis::timing",
-        "busy_ms": 52
+        "busy_ms": 42.3
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "method": "timing",
         "name": "analysis::timing",
-        "busy_ms": 96.6
+        "busy_ms": 108
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "method": "timing",
         "name": "analysis::timing",
-        "busy_ms": 0.8160000000000001
+        "busy_ms": 0.715
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "method": "timing",
         "name": "analysis::timing",
-        "busy_ms": 3.48
+        "busy_ms": 2.75
       }
     ],
     "analysis::region": [
@@ -1823,56 +1541,56 @@
         "input_id": "IN-0000000000000000000061",
         "len": 480240,
         "name": "analysis::region",
-        "busy_ms": 256
+        "busy_ms": 218
       },
       {
         "input_id": "IN-0000000000000000000062",
         "len": 2400240,
         "name": "analysis::region",
-        "busy_ms": 1090
+        "busy_ms": 1100
       },
       {
         "input_id": "IN-0000000000000000000063",
         "len": 39690,
         "name": "analysis::region",
-        "busy_ms": 14.9
+        "busy_ms": 11.5
       },
       {
         "input_id": "IN-0000000000000000000064",
         "len": 120686,
         "name": "analysis::region",
-        "busy_ms": 41
+        "busy_ms": 36.3
       }
     ]
   },
   "stage_events": [
     {
       "stage": "ingest",
-      "duration_ms": 786
+      "duration_ms": 791
     },
     {
       "stage": "locate",
-      "duration_ms": 111751
+      "duration_ms": 71083
     },
     {
       "stage": "cheap_analysis",
-      "duration_ms": 2701
+      "duration_ms": 2537
     },
     {
       "stage": "reference_analysis",
-      "duration_ms": 3708
+      "duration_ms": 3546
     },
     {
       "stage": "expensive_analysis",
-      "duration_ms": 1645
+      "duration_ms": 1563
     },
     {
       "stage": "dataset",
-      "duration_ms": 169
+      "duration_ms": 162
     },
     {
       "stage": "export",
-      "duration_ms": 5891
+      "duration_ms": 5366
     }
   ],
   "window_anchors_in": [
@@ -1883,10 +1601,19 @@
       "ncc_narrow": 85,
       "ncc_widen": 85,
       "ncc_full": 80,
-      "pool_builds": 83,
-      "pool_hits": 509,
+      "pool_builds": 421,
+      "pool_hits": 82091,
+      "hier_calls": 320,
+      "exact_fallbacks": 0,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 0,
       "anchors": 50,
-      "elapsed_ms": 6211.2835000000005
+      "elapsed_ms": 876.985
     },
     {
       "message": "window_anchors_in",
@@ -1895,10 +1622,19 @@
       "ncc_narrow": 85,
       "ncc_widen": 59,
       "ncc_full": 31,
-      "pool_builds": 167,
-      "pool_hits": 533,
+      "pool_builds": 168,
+      "pool_hits": 532,
+      "hier_calls": 320,
+      "exact_fallbacks": 0,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 0,
       "anchors": 66,
-      "elapsed_ms": 259.4992
+      "elapsed_ms": 265.84639999999996
     },
     {
       "message": "window_anchors_in",
@@ -1907,10 +1643,19 @@
       "ncc_narrow": 85,
       "ncc_widen": 66,
       "ncc_full": 27,
-      "pool_builds": 135,
-      "pool_hits": 437,
+      "pool_builds": 158,
+      "pool_hits": 28066,
+      "hier_calls": 108,
+      "exact_fallbacks": 4,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 4,
       "anchors": 78,
-      "elapsed_ms": 9800.5486
+      "elapsed_ms": 1476.3077
     },
     {
       "message": "window_anchors_in",
@@ -1919,10 +1664,19 @@
       "ncc_narrow": 85,
       "ncc_widen": 43,
       "ncc_full": 24,
-      "pool_builds": 147,
-      "pool_hits": 461,
+      "pool_builds": 211,
+      "pool_hits": 24977,
+      "hier_calls": 204,
+      "exact_fallbacks": 8,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 8,
       "anchors": 73,
-      "elapsed_ms": 1052.2796999999998
+      "elapsed_ms": 350.6034
     },
     {
       "message": "window_anchors_in",
@@ -1931,10 +1685,19 @@
       "ncc_narrow": 85,
       "ncc_widen": 54,
       "ncc_full": 37,
-      "pool_builds": 159,
-      "pool_hits": 545,
+      "pool_builds": 179,
+      "pool_hits": 38413,
+      "hier_calls": 352,
+      "exact_fallbacks": 8,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 8,
       "anchors": 72,
-      "elapsed_ms": 6747.1436
+      "elapsed_ms": 735.5034
     },
     {
       "message": "window_anchors_in",
@@ -1943,291 +1706,22 @@
       "ncc_narrow": 257,
       "ncc_widen": 75,
       "ncc_full": 37,
-      "pool_builds": 356,
-      "pool_hits": 1120,
+      "pool_builds": 418,
+      "pool_hits": 37951,
+      "hier_calls": 148,
+      "exact_fallbacks": 29,
+      "fb_shape": 0,
+      "fb_coarse_tie": 4,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 4,
+      "fb_background": 0,
+      "fb_near_gate": 21,
       "anchors": 247,
-      "elapsed_ms": 27413.9693
+      "elapsed_ms": 8067.2354
     }
   ],
-  "method_tasks_pool": [
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 12,
-      "pool_hits": 16
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 16,
-      "pool_hits": 16
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 28,
-      "pool_hits": 32
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 12,
-      "pool_hits": 16
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 16,
-      "pool_hits": 16
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 28,
-      "pool_hits": 32
-    },
-    {
-      "message": "method_tasks_pool",
-      "pool_builds": 28,
-      "pool_hits": 32
-    }
-  ],
-  "ref_phase": [
-    {
-      "message": "ref_phase",
-      "phase": "lag",
-      "elapsed_ms": 3.5084999999999997
-    },
-    {
-      "message": "ref_phase",
-      "phase": "gain",
-      "elapsed_ms": 0.27809999999999996
-    },
-    {
-      "message": "ref_phase",
-      "phase": "spectral",
-      "elapsed_ms": 3.0728999999999997
-    },
-    {
-      "message": "ref_phase",
-      "phase": "band_family",
-      "elapsed_ms": 410.7932
-    },
-    {
-      "message": "ref_phase",
-      "phase": "similarity",
-      "elapsed_ms": 16.475
-    },
-    {
-      "message": "ref_phase",
-      "phase": "channel",
-      "elapsed_ms": 6.7985
-    },
-    {
-      "message": "ref_phase",
-      "phase": "dynamics",
-      "elapsed_ms": 146.9666
-    },
-    {
-      "message": "ref_phase",
-      "phase": "residuals",
-      "elapsed_ms": 14.6024
-    },
-    {
-      "message": "ref_phase",
-      "phase": "lag",
-      "elapsed_ms": 3.335
-    },
-    {
-      "message": "ref_phase",
-      "phase": "gain",
-      "elapsed_ms": 0.2784
-    },
-    {
-      "message": "ref_phase",
-      "phase": "spectral",
-      "elapsed_ms": 2.4213
-    },
-    {
-      "message": "ref_phase",
-      "phase": "band_family",
-      "elapsed_ms": 360.22409999999996
-    },
-    {
-      "message": "ref_phase",
-      "phase": "similarity",
-      "elapsed_ms": 13.960500000000001
-    },
-    {
-      "message": "ref_phase",
-      "phase": "channel",
-      "elapsed_ms": 6.3581
-    },
-    {
-      "message": "ref_phase",
-      "phase": "dynamics",
-      "elapsed_ms": 135.11249999999998
-    },
-    {
-      "message": "ref_phase",
-      "phase": "residuals",
-      "elapsed_ms": 14.6659
-    },
-    {
-      "message": "ref_phase",
-      "phase": "lag",
-      "elapsed_ms": 11.207099999999999
-    },
-    {
-      "message": "ref_phase",
-      "phase": "gain",
-      "elapsed_ms": 0.8262
-    },
-    {
-      "message": "ref_phase",
-      "phase": "spectral",
-      "elapsed_ms": 7.7568
-    },
-    {
-      "message": "ref_phase",
-      "phase": "band_family",
-      "elapsed_ms": 1399.6299
-    },
-    {
-      "message": "ref_phase",
-      "phase": "similarity",
-      "elapsed_ms": 110.46079999999999
-    },
-    {
-      "message": "ref_phase",
-      "phase": "channel",
-      "elapsed_ms": 26.9798
-    },
-    {
-      "message": "ref_phase",
-      "phase": "dynamics",
-      "elapsed_ms": 140.82659999999998
-    },
-    {
-      "message": "ref_phase",
-      "phase": "residuals",
-      "elapsed_ms": 58.9325
-    }
-  ],
-  "band_gain_phase": [
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 0,
-      "elapsed_ms": 4.8447000000000005
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 0,
-      "bands": 26,
-      "elapsed_ms": 52.3806
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 0,
-      "total_windows": 385,
-      "elapsed_ms": 158.5138
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 1,
-      "elapsed_ms": 4.3014
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 1,
-      "bands": 26,
-      "elapsed_ms": 29.250999999999998
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 1,
-      "total_windows": 385,
-      "elapsed_ms": 158.8549
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 0,
-      "elapsed_ms": 3.7996000000000003
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 0,
-      "bands": 26,
-      "elapsed_ms": 31.3642
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 0,
-      "total_windows": 385,
-      "elapsed_ms": 147.1307
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 1,
-      "elapsed_ms": 3.6583
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 1,
-      "bands": 26,
-      "elapsed_ms": 28.9217
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 1,
-      "total_windows": 385,
-      "elapsed_ms": 143.29729999999998
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 0,
-      "elapsed_ms": 19.8709
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 0,
-      "bands": 26,
-      "elapsed_ms": 163.5009
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 0,
-      "total_windows": 1341,
-      "elapsed_ms": 508.7973
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "filter_new_coherence",
-      "channel": 1,
-      "elapsed_ms": 17.861800000000002
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "band_signals",
-      "channel": 1,
-      "bands": 26,
-      "elapsed_ms": 173.4459
-    },
-    {
-      "message": "band_gain_phase",
-      "phase": "windows",
-      "channel": 1,
-      "total_windows": 1341,
-      "elapsed_ms": 504.9264
-    }
-  ]
+  "method_tasks_pool": [],
+  "ref_phase": [],
+  "band_gain_phase": []
 }
