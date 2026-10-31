@@ -446,8 +446,12 @@ impl Stage for ExportStage {
         StageKind::Export
     }
 
+    /// The package reads only the materialized analysis dataset:
+    /// visualization products are optional contents, not a
+    /// precondition (#103 — export must not require the old
+    /// Visualization stage).
     fn depends_on(&self) -> Vec<StageKind> {
-        vec![StageKind::Dataset, StageKind::Visualization]
+        vec![StageKind::Dataset]
     }
 
     fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {

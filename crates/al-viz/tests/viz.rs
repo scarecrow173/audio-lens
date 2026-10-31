@@ -386,6 +386,17 @@ fn produced_role_without_expected_store_fails_explicitly() {
 }
 
 #[test]
+fn export_stage_does_not_require_visualization() {
+    // #103: the export package reads the materialized analysis
+    // dataset only; visualization products are optional contents,
+    // so the stage must not declare a Visualization dependency.
+    assert_eq!(
+        al_viz::stage::ExportStage::new().depends_on(),
+        vec![StageKind::Dataset]
+    );
+}
+
+#[test]
 fn export_package_is_portable_deterministic_and_manifested() {
     let fx = fixture();
     let registry = ArtifactRegistry::new(&fx.dir);
