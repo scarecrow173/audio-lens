@@ -3,6 +3,7 @@ name = "al-media"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 
 [dependencies]
 al-core.workspace = true
@@ -11,6 +12,12 @@ serde.workspace = true
 serde_json.workspace = true
 symphonia = { version = "0.5.5", default-features = false, features = ["aac", "isomp4"] }
 tracing.workspace = true
+# Ruviform メディア I/O 境界の段階導入(AL#100 で消費。
+# docs/designs/ruviform-dependency-ci.md §1)
+ruviform-media-core.workspace = true
+ruviform-audio-core.workspace = true
+ruviform-video-core.workspace = true
+ruviform-media-io.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true

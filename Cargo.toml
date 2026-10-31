@@ -18,6 +18,10 @@ members = [
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
+# git 依存(private repo)を含むため crates.io 公開は不可。
+# 公開方針確定前の暫定として ruviform と同じ publish = false に
+# 揃える(docs/designs/ruviform-dependency-ci.md §8)。
+publish = false
 
 [workspace.dependencies]
 al-core = { path = "crates/al-core" }
@@ -41,8 +45,32 @@ tracing-subscriber = { version = "0.3.23", features = [
 ] }
 tracing-appender = "0.2.5"
 
+# Ruviform(private repo)の Git 依存。全 entry で同一の検証済み commit
+# SHA(`rev`)を使うこと。更新時は一括で揃え、Cargo.lock の
+# `git+...?rev=<sha>#<sha>` で再現性を確認する。
+# 根拠: docs/designs/ruviform-dependency-ci.md §1-§2。
+ruviform-media-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-audio-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-video-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-media-io = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-math = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-dsp = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git", rev = "73190d7d26b3197b1da36749798b5952499d1b70" }
+
 # Keep full debug info in release builds so external CPU samplers
 # (samply — see docs/guides/profiling-samply.md) resolve symbols.
 # Cost is artifact size only; codegen and optimization are unchanged.
 [profile.release]
 debug = true
+
+# CI 用 profile(ruviform と同一 convention)。CI 成果物は
+# `target/ci/` に分離され、dev の `target/debug/` を汚さない。
+[profile.ci]
+inherits = "dev"
+debug = "line-tables-only"
+incremental = false
+
+# CI: dependencies outside the workspace do not need debug symbols.
+[profile.ci.package."*"]
+debug = "none"

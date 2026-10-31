@@ -98,3 +98,5 @@ Directory: `docs/impl/ir`
 | fsutil-atomic-write-primitives | [add-atomic-write-primitives-to-fsutil.md](./add-atomic-write-primitives-to-fsutil.md) |
 | resume-artifact-verification | [verify-recorded-artifacts-before-skipping-completed-stages.md](./verify-recorded-artifacts-before-skipping-completed-stages.md) |
 | relaxed-tier-callsite-migration | [migrate-relaxed-tier-call-sites-to-atomic-writes.md](./migrate-relaxed-tier-call-sites-to-atomic-writes.md) |
+
+| ruviform-dependency-ci | [ruviform-git-sha-toolchain-private-repo-ci.md](./ruviform-git-sha-toolchain-private-repo-ci.md) |

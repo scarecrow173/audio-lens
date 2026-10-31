@@ -3,6 +3,7 @@ name = "al-math"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 
 [dependencies]
 pulp = { version = "=0.22.3", default-features = false, features = ["std", "x86-v3"] }

@@ -39,6 +39,9 @@ prek = "0.5.7"
 biome = "2.6.2"
 # aqua:git-lfs/git-lfs。LFS objects の materialize は setup task が担う
 git-lfs = "3.8.0"
+# GitHub Actions workflow の静的検証(prek hook と CI で使用。
+# ruviform と同一バージョン)
+actionlint = "1.7.12"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
 # canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
@@ -70,6 +73,54 @@ run = [
 [tasks.fmt]
 description = "cargo fmt --all -- --check"
 run = "cargo fmt --all -- --check"
+
+[tasks.check]
+description = "cargo check --workspace --all-targets(dev profile)"
+run = "cargo check --workspace --all-targets"
+
+# CI-only tasks: 同一の検査を `--profile ci` + CARGO_INCREMENTAL=0 で
+# 実行する。成果物は dev の target/debug/ と分離され target/ci/ に
+# 出る(ruviform と同一 convention。ローカル常用はしない)。
+[tasks.check-ci]
+description = "CI profile type-check: cargo check --workspace --all-targets --profile ci"
+run = "cargo check --workspace --all-targets --profile ci"
+env = { CARGO_INCREMENTAL = "0" }
+
+[tasks.lint-ci]
+description = "CI profile lint: biome check + cargo clippy --workspace --all-targets --profile ci -- -D warnings"
+run = [
+  "biome check",
+  "cargo clippy --workspace --all-targets --profile ci -- -D warnings",
+]
+env = { CARGO_INCREMENTAL = "0" }
+
+[tasks.test-ci]
+description = "CI profile tests: cargo test --workspace --profile ci"
+run = "cargo test --workspace --profile ci"
+env = { CARGO_INCREMENTAL = "0" }
+
+[tasks.build-ci]
+description = "CI profile build: cargo build --workspace --profile ci"
+run = "cargo build --workspace --profile ci"
+env = { CARGO_INCREMENTAL = "0" }
+
+[tasks.verify-toolchain]
+description = "rustc/cargo/rustfmt/clippy が mise pin に解決されることを検証(node、3 OS 共通)"
+run = "node tools/verify-toolchain.mjs"
+
+[tasks.check-cli-headless]
+description = "al-cli 等 headless crate の依存木に GUI/GPU/WebView framework crate が無いことを検証(node、3 OS 共通)"
+run = "node tools/check-headless-deps.mjs"
+
+[tasks.verify-ci]
+description = "Run the CI-equivalent verification sequence: fmt -> check-ci -> lint-ci -> test-ci"
+run = [
+  "mise run fmt",
+  "mise run check-ci",
+  "mise run lint-ci",
+  "mise run test-ci",
+]
+env = { CARGO_INCREMENTAL = "0" }
 
 [tasks.baseline]
 description = "Issue #98 pre-migration baseline の計測・収集(tools/baseline)"

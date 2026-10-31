@@ -1,14 +1,13 @@
 ---
-id: "TASK-034P3OFAlhyz4NNpeFYtTc"
+id: "TASK-034P6lzwtU7fjoiE2fyPus"
 type: "task"
-status: "todo"
-title: "Ruviform 依存固定と CI 整備(AL#99)"
+status: "done"
+title: "Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99)"
 created: "2026-10-30"
 updated: "2026-10-30"
 owners: []
 relations:
-  source:
-    - "https://github.com/scarecrow173/audio-lens/issues/99"
+  source: []
   changes:
     added: []
     modified: []
@@ -17,17 +16,22 @@ relations:
     moved: []
     generated: []
   implements:
-    - "docs/plans/ruviform-foundation-migration.md"
-  implemented-by: []
+    - "../designs/ruviform-dependency-ci.md"
+  implemented-by:
+    - "docs/impl/ir/ruviform-git-sha-toolchain-private-repo-ci.md"
   depends-on:
-    - "docs/plans/ruviform-foundation-migration.md"
+    - "../designs/ruviform-dependency-ci.md"
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "https://github.com/scarecrow173/audio-lens/issues/99"
+    - "https://github.com/scarecrow173/audio-lens/issues/95"
+    - "../guides/ruviform-private-access-ci.md"
   refines: []
   refined-by: []
-  derives-from: []
+  derives-from:
+    - "../plans/ruviform-foundation-migration.md"
   derived-by: []
   verifies: []
   verified-by: []
@@ -36,20 +40,32 @@ relations:
   deferred-by: []
 ---
 
-# Ruviform 依存固定と CI 整備(AL#99)
+# Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99)
 
 ## Work
 
-Ruviform crate を AudioLens workspace へ導入するための依存・
-toolchain・CI 基盤を整える。Issue
-[#99](https://github.com/scarecrow173/audio-lens/issues/99) を正本とし、
-検証済み同一 Git SHA の git 依存・private repository アクセス・
-再現可能ビルド・GUI/headless の依存分離を確立する。
+AL#95 移行の依存基盤のみを構築する。解析・メディア実装の差替は
+しない(AL#100/#101 のスコープ)。実施内容は
+`docs/designs/ruviform-dependency-ci.md` の詳細設計どおり:
 
-- Ruviform crate の git 依存を固定 SHA で導入し lockfile で再現
-- private repository への最小権限 credential と CI アクセスを整備
-- GUI backend 依存を al-gui 側 optional deps に隔離し、CLI/headless
-  と GUI の個別ビルド・テストを CI に入れる
+- `[workspace.dependencies]` に 8 crate(ruviform-media-core /
+  audio-core / video-core / media-io / math / dsp / audio-analysis /
+  exec)を `git + rev=73190d7d26b3197b1da36749798b5952499d1b70`
+  で固定し、`Cargo.lock` で再現可能にする
+- `.cargo/config.toml` の `net.git-fetch-with-cli` で private
+  fetch を system git 経由にする
+- `mise.toml` を Ruviform pin(Rust 1.99.0 + rustfmt/clippy、
+  uv 0.13.5、Node 26.12.1、actionlint 1.7.12)に揃え、
+  `verify-toolchain` task で解決バージョンを明示検証する
+- `check-cli-headless` task で al-cli / 解析・Job・Dataset 系
+  crate の依存木に GUI/WebView/GPU framework crate が無いことを
+  検証する(Ruviform #155/#156/#157 と連携する境界)
+- `.github/workflows/ci.yml`(workflow_dispatch 限定、3 OS、
+  `permissions: contents: read`、read-only Deploy Key +
+  url.insteadOf + known_hosts 照合)を新設し、手順は
+  `docs/guides/ruviform-private-access-ci.md` に記録する
+- 各消費 crate(al-media / al-locate / al-analysis / al-job)に
+  基礎型 import の smoke-test を追加する
 
 ## Classification
 
@@ -57,29 +73,50 @@ toolchain・CI 基盤を整える。Issue
 
 ## Upstream Documents
 
-- `docs/plans/ruviform-foundation-migration.md`
-- `docs/specs/ruviform-foundation-migration.md`
-- Issue [#99](https://github.com/scarecrow173/audio-lens/issues/99)
+- `docs/designs/ruviform-dependency-ci.md`(approved、本タスクの
+  詳細設計)
+- `docs/plans/ruviform-foundation-migration.md`(AL#97、別
+  worktree・未マージ)
+- `docs/adr/ruviform-foundation-migration.md`(AL#97、同上)
 
 ## Dependencies
 
-- `docs/plans/ruviform-foundation-migration.md`(段1 前提)
+- Ruviform commit `73190d7d26b3197b1da36749798b5952499d1b70`
+  (scarecrow173/ruviform main HEAD、検証済み)
+- ローカルの Git Credential Manager(HTTPS)による private fetch
+- CI の `RUVIFORM_DEPLOY_KEY` secret(未設定時は workflow が
+  認証 step で明示失敗する設計。登録は運用手順ガイド参照)
 
 ## Affected Files
 
-- `Cargo.toml` / `Cargo.lock`(workspace 依存)
-- `crates/*/Cargo.toml`(利用 crate の依存)
-- CI 設定(#99 で確定するファイル)
+- `Cargo.toml` / `Cargo.lock` / `.cargo/config.toml`
+- `crates/al-*/Cargo.toml`(publish 継承 + 消費 crate の依存宣言)
+- `mise.toml` / `mise.lock`(actionlint 追加、CI/検証 task)
+- `.pre-commit-config.yaml`(actionlint hook)
+- `.github/workflows/ci.yml`(新設)
+- `tools/verify-toolchain.mjs` / `tools/check-headless-deps.mjs`
+- `crates/al-{media,locate,analysis,job}/tests/ruviform_deps.rs`
+- `docs/guides/ruviform-private-access-ci.md`
 
 ## Done When
 
-- [ ] 固定 SHA からの再現可能ビルドが確立
-- [ ] private repository アクセスが最小権限で CI 動作
-- [ ] GUI/CLI/headless の依存分離がビルド・テストで検証できる
-- [ ] #99 の完了条件を満たす
+- [x] 8 crate が同一 `rev` の git 依存として宣言され、
+      `Cargo.lock` に `git+...?rev=<sha>` source が記録される
+- [x] `publish = false` が workspace と全 member crate に揃う
+- [x] `mise run verify-toolchain` / `mise run check-cli-headless`
+      が新設・動作する
+- [x] 4 crate の ruviform import smoke-test が通る
+- [x] `.github/workflows/ci.yml` + 手順ガイドが揃い、秘密情報を
+      含まない
 
 ## Verification
 
-- [ ] `mise run build` が固定依存で通る
-- [ ] GUI 依存なしの headless ビルドが通る
-- [ ] クリーン環境で lockfile から同一 SHA が復元される
+- [x] `mise run fmt` / `mise run check` / `mise run lint` /
+      `mise run test` / `mise run build`(dev profile 既存契約)
+- [x] `mise run check-ci` / `lint-ci` / `test-ci` / `build-ci`
+      (`--profile ci` + `CARGO_INCREMENTAL=0`)
+- [x] `mise run verify-toolchain` / `mise run check-cli-headless`
+- [x] `mise exec -- prek run --all-files`(actionlint による
+      workflow 静的検証を含む)
+- [x] `git ls-remote` による private repo 到達確認(ローカル
+      credential 経由)
