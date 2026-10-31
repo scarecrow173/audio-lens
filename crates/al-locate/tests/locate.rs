@@ -652,7 +652,10 @@ fn normalized_pcm_reuse_layout_coordinates_and_fail_closed_loading() {
         match variant {
             0 => record.role = "decoded_pcm".into(),
             1 => record.params["frames"] = serde_json::json!(3),
-            2 => record.params["transform"]["cutoff"] = serde_json::json!(0.5),
+            2 => {
+                record.params["transform"]["stable_id"] =
+                    serde_json::json!("rvf-resample/1/48000/96000/2/1/32/3fee147ae147ae14");
+            }
             3 => record.inputs.clear(),
             _ => record.path = PathBuf::from("../escape.f64le"),
         }

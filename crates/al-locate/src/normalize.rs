@@ -3,15 +3,12 @@
 use std::{fs, io, path::PathBuf};
 
 use al_job::{manifest::ArtifactRecord, stage::StageContext};
-use ruviform_numeric::resample::ResamplePlan;
+use ruviform_numeric::resample::{ResampleParams, ResamplePlan};
 use serde::{Deserialize, Serialize};
 
-/// Provenance 記録上のアルゴリズム識別子。実装は Ruviform の
-/// `polyphase-blackman-sinc` へ移譲済み(AL#101)で、契約上の
-/// アルゴリズム同一性・バージョンは旧 `al-math` と同じ値を維持する
-/// (旧値と同一アルゴリズムであることは #150 比較記録で bit-exact
-/// 検証済み)。
-const RESAMPLE_ALGORITHM: &str = "polyphase-blackman-sinc";
+/// `transform` 記録のアルゴリズムバージョン。アルゴリズム同一性は
+/// [`ResampleParams::ALGORITHM_ID`] が正本(旧 `al-math` と同一値で、
+/// #150 比較記録で bit-exact 検証済み)。
 const RESAMPLE_VERSION: &str = "1";
 
 use crate::{
@@ -46,21 +43,15 @@ pub struct NormalizedParams {
     pub byte_len: u64,
 }
 
+/// `normalized_pcm` の provenance 記録。plan 内部表現を個別フィールドへ
+/// 写さず、#170 の正準表現(`stable_id`)で変換を一意に識別する
+/// (AL#102 で残留と判断した逆結合の解消)。
 fn transform(plan: &ResamplePlan) -> serde_json::Value {
     let identity = plan.source_rate() == plan.target_rate();
     serde_json::json!({
-        "algorithm_id": if identity { "identity" } else { RESAMPLE_ALGORITHM },
+        "algorithm_id": if identity { "identity" } else { ResampleParams::ALGORITHM_ID },
         "algorithm_version": RESAMPLE_VERSION,
-        "source_rate": plan.source_rate(), "target_rate": plan.target_rate(),
-        "up": plan.up(), "down": plan.down(),
-        "radius": if identity { 0 } else { plan.radius() },
-        "cutoff": if identity { 1.0 } else { plan.cutoff() },
-        "window": if identity { "none" } else { "blackman" },
-        "antialias": !identity, "endpoint_extension": "zero",
-        "output_length_rounding": "ceil",
-        "delay_source_frames": if identity { 0 } else { plan.radius() },
-        "compensation_source_frames": if identity { 0 } else { plan.radius() },
-        "phase_normalization": "unit-dc", "clip": false,
+        "stable_id": plan.stable_id(),
     })
 }
 
