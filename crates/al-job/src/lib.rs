@@ -10,5 +10,5 @@ pub mod stage;
 pub use job::{JobDefinition, JobInput, input};
 pub use manifest::{ArtifactRecord, Manifest, StageRecord};
 pub use registry::ArtifactRegistry;
-pub use runner::StageRunner;
+pub use runner::{RunHooks, StageEvent, StageEventKind, StageRunner};
 pub use stage::{Stage, StageContext, StageError};

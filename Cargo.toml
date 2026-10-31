@@ -8,6 +8,8 @@ members = [
     "crates/al-dataset",
     "crates/al-locate",
     "crates/al-analysis",
+    "crates/al-service",
+    "crates/al-gui",
     "crates/al-viz",
     "crates/al-testkit",
     "crates/al-observability",
@@ -29,6 +31,8 @@ al-media = { path = "crates/al-media" }
 al-dataset = { path = "crates/al-dataset" }
 al-locate = { path = "crates/al-locate" }
 al-analysis = { path = "crates/al-analysis" }
+al-service = { path = "crates/al-service" }
+al-gui = { path = "crates/al-gui" }
 al-viz = { path = "crates/al-viz" }
 al-testkit = { path = "crates/al-testkit" }
 al-observability = { path = "crates/al-observability" }
@@ -58,6 +62,9 @@ ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f
 ruviform-numeric = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6" }
 ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6" }
 ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6", features = ["mp4", "aac"] }
+ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6" }
+ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6" }
+ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git", rev = "f3f474b1734af05ca2435a322f935805010ba8b6" }
 
 # Keep full debug info in release builds so external CPU samplers
 # (samply — see docs/guides/profiling-samply.md) resolve symbols.
