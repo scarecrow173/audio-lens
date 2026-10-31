@@ -1,0 +1,1967 @@
+{
+  "records": [
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.cutoff_hz",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 39690,
+      "target": 150.732421875,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 150.732421875
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.dictionary_cutoff_delta_khz",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "dictionary_version": "1",
+        "expected": "{\"expected_khz\":[15.0,20.0],\"kind\":\"expected_high_frequency_cutoff\",\"note\":\"AAC エンコーダは設定次第で高域をローパスする。観測されたカットオフがこの範囲内なら録画アーティファクトと一致する可能性が高い\"}",
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 39690,
+      "target": 14.849267578125,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "khz",
+      "validity": "valid",
+      "value": {
+        "scalar": 14.849267578125
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.narrowband_peak_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 13,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 13
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.narrowband_notch_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 277,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 277
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.thd_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.00038122512550342136,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.00038122512550342136
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.echo_delay_s",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.039002267573696146,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.039002267573696146
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.cepstrum_prominence",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 50.82892168038671,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 50.82892168038671
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.echo2_delay_s",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.013900226757369615,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.013900226757369615
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.echo2_level_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.6620276004755938,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.6620276004755938
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.pre_echo_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 152,
+      "target": 0.00010270250122925612,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.00010270250122925612
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.transient_smear_ms",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 152,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ms",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.spectral_hole_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 1,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.codec_block_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 620,
+      "target": 1.1062683019690474,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 1.1062683019690474
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.codec_block_size",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 620,
+      "target": 1024,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "samples",
+      "validity": "valid",
+      "value": {
+        "scalar": 1024
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.polarity_asymmetry",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 39690,
+      "target": 0.013849491560162611,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.013849491560162611
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.dynamic_range_db",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 45,
+      "target": 20.665106050574494,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 20.665106050574494
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.attack_db_per_20ms",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 45,
+      "target": 11.73108464359472,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 11.73108464359472
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.release_db_per_20ms",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 45,
+      "target": 6.207030650626471,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 6.207030650626471
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.transfer_knee_db",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 89,
+      "target": -4.261351401525524,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "dbfs",
+      "validity": "valid",
+      "value": {
+        "scalar": -4.261351401525524
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.transfer_slope_above_knee",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 89,
+      "target": 0.06065545918129348,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.06065545918129348
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.pumping_mod_hz",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 89,
+      "target": 0.78125,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.78125
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.pumping_mod_depth_db",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 89,
+      "target": 15.293524816154518,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db",
+      "validity": "valid",
+      "value": {
+        "scalar": 15.293524816154518
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.level_transfer_slope",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db_per_db",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.level_transfer_corr",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.tonal_peak_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.hum_harmonic_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 3,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 3
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.noise_stationary_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.noise_tonal_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.9997341949197006,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9997341949197006
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.noise_modulated_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.6656176082914087,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "score",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.6656176082914087
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.noise_class",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "classes": [
+          "stationary",
+          "tonal",
+          "modulated",
+          "unclassified"
+        ],
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 1,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "class",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel_pair": [
+          0,
+          1
+        ]
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.freq_lr_coherence",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3320,
+      "target": 1,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "coherence",
+      "validity": "valid",
+      "value": {
+        "scalar": 1
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.intermod_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 0.00022914219612517455,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.00022914219612517455
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.intermod_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 3,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 3
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.mix_band_coeff",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.mix_fit_quality",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.mix_polarity",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "sign",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.mix_condition",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.ir_early_late_ratio",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ratio",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.ir_decay_db_per_s",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "db_per_s",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.src_image_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 0.7470674874194435,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.7470674874194435
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "exp.src_candidate_rate",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": {
+        "hop": 2048,
+        "sample_rate": 44100,
+        "window": 8192
+      },
+      "resolution_class": "segment",
+      "support_count": 16,
+      "target": 24000,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "hz",
+      "validity": "valid",
+      "value": {
+        "scalar": 24000
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.repeat_block_score",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 38,
+      "target": 0.9890768338626945,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "corr",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.9890768338626945
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.gap_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 180,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.splice_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 3,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 3
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.splice_first_s",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 3,
+      "target": 0.000022675736961451248,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "seconds",
+      "validity": "valid",
+      "value": {
+        "scalar": 0.000022675736961451248
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.stuck_block_count",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 38,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "count",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": {
+        "channel": 0
+      },
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.stuck_max_ms",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": null,
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 38,
+      "target": 0,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "ms",
+      "validity": "valid",
+      "value": {
+        "scalar": 0
+      }
+    },
+    {
+      "algorithm_id": "expensive.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "medium",
+      "delta": null,
+      "feature_id": "exp.local_time_map",
+      "freq_range": null,
+      "input_id": "IN-#3",
+      "invalid_reason": "pair evidence unavailable",
+      "lineage": [],
+      "params": {
+        "region_s": [
+          0,
+          0.9
+        ],
+        "triggers": [
+          "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+          "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+        ]
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": {
+        "end": 0.9,
+        "start": 0
+      },
+      "unit": "tensor_ref",
+      "validity": "insufficient_support",
+      "value": {
+        "scalar": null
+      }
+    }
+  ],
+  "region_s": [
+    0,
+    0.9
+  ],
+  "triggers": [
+    "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
+    "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
+  ]
+}

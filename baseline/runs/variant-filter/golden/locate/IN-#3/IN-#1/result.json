@@ -1,0 +1,253 @@
+{
+  "derived": {
+    "mixer": {
+      "condition_number": 2.9135342199114374,
+      "fit_quality": 0.931243504416816,
+      "matrix": [
+        [
+          0.580340220565989,
+          0.044382421993404655
+        ],
+        [
+          -0.04296524247367796,
+          0.5572861903304126
+        ]
+      ],
+      "ridge": 0.001
+    },
+    "occurrences": [],
+    "resampled": true
+  },
+  "result": {
+    "accepted": true,
+    "agreeing_methods": 3,
+    "algorithm_id": "locate-consensus",
+    "algorithm_version": "2",
+    "alignment_id": "ALN-#1",
+    "capture_input_id": "IN-#1",
+    "capture_pcm": {
+      "artifact_id": "ART-#11",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "capture_range": {
+      "end": 2400003,
+      "start": 3
+    },
+    "confidence": "high",
+    "evidence": [
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.305434755964258,
+            "peak_width": 112,
+            "position": 20,
+            "score": 0.37963046040799237
+          }
+        ],
+        "method": "full_ncc",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 1.174255715677098,
+            "peak_to_background": 6.335573182945189,
+            "peak_width": 7,
+            "position": 3,
+            "score": 0.937808822951185
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 5.395394800605231,
+            "peak_width": 45,
+            "position": 12,
+            "score": 0.7986410544405369
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 5.061417660683335,
+            "peak_width": 48,
+            "position": 14,
+            "score": 0.7492048472594911
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 5.061165494580206,
+            "peak_width": 7,
+            "position": 6,
+            "score": 0.7491675209451175
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 4.831614629177465,
+            "peak_width": 55,
+            "position": 9,
+            "score": 0.7151887757432988
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 4.349374750964159,
+            "peak_width": 58,
+            "position": 17,
+            "score": 0.6438063136505623
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 4.014118743055656,
+            "peak_width": 61,
+            "position": 20,
+            "score": 0.5941808049419989
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.837206639983368,
+            "peak_width": 64,
+            "position": 23,
+            "score": 0.5679937929136862
+          }
+        ],
+        "method": "band_ncc",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 3.571930703437464,
+            "peak_to_background": 79.8097709790379,
+            "peak_width": 2,
+            "position": 1,
+            "score": 0.10037990790521682
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 22.34359443262228,
+            "peak_width": 4,
+            "position": 3,
+            "score": 0.028102423098134505
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 7.803828740579508,
+            "peak_width": 10,
+            "position": 9,
+            "score": 0.009815184289818374
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 7.437497513165417,
+            "peak_width": 3,
+            "position": 12,
+            "score": 0.009354435005369359
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 6.837010195673798,
+            "peak_width": 2,
+            "position": 14,
+            "score": 0.008599178338314254
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 6.1936506466686945,
+            "peak_width": 2,
+            "position": 25,
+            "score": 0.007789999568761886
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 5.632529338258484,
+            "peak_width": 3,
+            "position": 17,
+            "score": 0.007084255089471681
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 4.568842628299711,
+            "peak_width": 2,
+            "position": 22,
+            "score": 0.005746414212648357
+          }
+        ],
+        "method": "gcc_phat",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 350945116178.6973,
+            "peak_width": 1,
+            "position": 0,
+            "score": 0.35094511617869734
+          }
+        ],
+        "method": "spectral_envelope",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      }
+    ],
+    "normalized_source_range": {
+      "end": 2400000,
+      "start": 0
+    },
+    "params": {
+      "min_agreeing_methods": 2,
+      "min_peak_to_background": 2,
+      "min_score": 0.3,
+      "normalization": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38400000,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400000,
+        "input_id": "IN-#3",
+        "original_frames": 2205000,
+        "original_sample_rate": 44100,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "polyphase-blackman-sinc",
+          "algorithm_version": "1",
+          "antialias": true,
+          "clip": false,
+          "compensation_source_frames": 32,
+          "cutoff": 0.94,
+          "delay_source_frames": 32,
+          "down": 147,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 32,
+          "source_rate": 44100,
+          "target_rate": 48000,
+          "up": 160,
+          "window": "blackman"
+        }
+      },
+      "position_tolerance": 256
+    },
+    "position_spread": 20,
+    "reject_reason": null,
+    "source_input_id": "IN-#3",
+    "source_pcm": {
+      "artifact_id": "ART-#12",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "source_range": {
+      "end": 2205000,
+      "start": 0
+    },
+    "validity": "valid"
+  }
+}

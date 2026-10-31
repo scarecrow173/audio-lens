@@ -1,0 +1,358 @@
+{
+  "channel_transform": [
+    [
+      0.2626886410007956,
+      0.045806522262814696
+    ],
+    [
+      -0.06487977996668068,
+      0.23813506393666375
+    ]
+  ],
+  "child": {
+    "accepted": false,
+    "agreeing_methods": 1,
+    "algorithm_id": "locate-consensus",
+    "algorithm_version": "2",
+    "alignment_id": "ALN-#3",
+    "capture_input_id": "IN-#1",
+    "capture_pcm": {
+      "artifact_id": "ART-#16",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "capture_range": {
+      "end": 2400000,
+      "start": 0
+    },
+    "confidence": "low",
+    "evidence": [
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 1.0004074061923127,
+            "peak_to_background": 1.1084670975583861,
+            "peak_width": 186,
+            "position": 147,
+            "score": 0.06221354738118589
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.108015685107094,
+            "peak_width": 186,
+            "position": 150,
+            "score": 0.06218821151872431
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.1034954881405223,
+            "peak_width": 186,
+            "position": 160,
+            "score": 0.061934512073092106
+          }
+        ],
+        "method": "full_ncc",
+        "method_version": "2",
+        "reject_reason": "peak-to-background below threshold",
+        "validity": "low_correlation"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 2.5627563031642273,
+            "peak_to_background": 4.749610527779359,
+            "peak_width": 1,
+            "position": 0,
+            "score": 0.2795916696766997
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.8533211768575224,
+            "peak_width": 4,
+            "position": 4,
+            "score": -0.10909803219739961
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.7992050085631741,
+            "peak_width": 80,
+            "position": 225,
+            "score": -0.10591241734299675
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.76057038423955,
+            "peak_width": 80,
+            "position": 222,
+            "score": -0.10363814262956578
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.7277674275286568,
+            "peak_width": 80,
+            "position": 220,
+            "score": -0.10170715620794456
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.664421823702532,
+            "peak_width": 80,
+            "position": 182,
+            "score": -0.09797823927110563
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.648786158716515,
+            "peak_width": 80,
+            "position": 230,
+            "score": -0.09705782660687189
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.5995211302672785,
+            "peak_width": 80,
+            "position": 217,
+            "score": -0.09415778007037576
+          }
+        ],
+        "method": "band_ncc",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 6.791687174065475,
+            "peak_to_background": 88.26930155334391,
+            "peak_width": 1,
+            "position": 0,
+            "score": 0.09021712922162567
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 12.996667733815288,
+            "peak_width": 5,
+            "position": 4,
+            "score": -0.013283463579731113
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 9.120207685685362,
+            "peak_width": 5,
+            "position": 6,
+            "score": -0.009321462171197725
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 6.5579978009201305,
+            "peak_width": 7,
+            "position": 9,
+            "score": 0.006702712320468511
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.9960263181753652,
+            "peak_width": 3,
+            "position": 24,
+            "score": 0.004084206132547412
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.65964189580729,
+            "peak_width": 3,
+            "position": 185,
+            "score": -0.0037403987570853716
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.6002641715286043,
+            "peak_width": 2,
+            "position": 20,
+            "score": 0.0036797107519707184
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.5288587035137216,
+            "peak_width": 3,
+            "position": 37,
+            "score": 0.0036067295883989614
+          }
+        ],
+        "method": "gcc_phat",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 980760229083.9967,
+            "peak_width": 1,
+            "position": 0,
+            "score": 0.9807602290839966
+          }
+        ],
+        "method": "spectral_envelope",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      }
+    ],
+    "normalized_source_range": {
+      "end": 2400000,
+      "start": 0
+    },
+    "params": {
+      "coarse_search": [
+        {
+          "capture_channel": 0,
+          "search": {
+            "coarse_positions": [
+              148
+            ],
+            "coarse_rate": 12000,
+            "fallback_reason": "boundary-candidate",
+            "full_search_required": true,
+            "neighborhood_radius": 260,
+            "original_rate": 48000,
+            "refined_positions": [
+              147
+            ],
+            "search_range": [
+              0,
+              240
+            ]
+          },
+          "source_channel": 0
+        },
+        {
+          "capture_channel": 1,
+          "search": {
+            "coarse_positions": [
+              164
+            ],
+            "coarse_rate": 12000,
+            "fallback_reason": "boundary-candidate",
+            "full_search_required": true,
+            "neighborhood_radius": 260,
+            "original_rate": 48000,
+            "refined_positions": [
+              164
+            ],
+            "search_range": [
+              0,
+              240
+            ]
+          },
+          "source_channel": 0
+        },
+        {
+          "capture_channel": 0,
+          "search": {
+            "coarse_positions": [
+              208
+            ],
+            "coarse_rate": 12000,
+            "fallback_reason": "boundary-candidate",
+            "full_search_required": true,
+            "neighborhood_radius": 260,
+            "original_rate": 48000,
+            "refined_positions": [
+              209
+            ],
+            "search_range": [
+              0,
+              240
+            ]
+          },
+          "source_channel": 1
+        },
+        {
+          "capture_channel": 1,
+          "search": {
+            "coarse_positions": [
+              240
+            ],
+            "coarse_rate": 12000,
+            "fallback_reason": "boundary-candidate",
+            "full_search_required": true,
+            "neighborhood_radius": 260,
+            "original_rate": 48000,
+            "refined_positions": [
+              240
+            ],
+            "search_range": [
+              0,
+              240
+            ]
+          },
+          "source_channel": 1
+        }
+      ],
+      "min_agreeing_methods": 2,
+      "min_peak_to_background": 2,
+      "min_score": 0.3,
+      "normalization": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38400000,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400000,
+        "input_id": "IN-#3",
+        "original_frames": 2205000,
+        "original_sample_rate": 44100,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "polyphase-blackman-sinc",
+          "algorithm_version": "1",
+          "antialias": true,
+          "clip": false,
+          "compensation_source_frames": 32,
+          "cutoff": 0.94,
+          "delay_source_frames": 32,
+          "down": 147,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 32,
+          "source_rate": 44100,
+          "target_rate": 48000,
+          "up": 160,
+          "window": "blackman"
+        }
+      },
+      "position_tolerance": 256,
+      "residual_parent_alignment": "ALN-#1"
+    },
+    "position_spread": 0,
+    "reject_reason": "only 1 method(s) agree (need 2)",
+    "source_input_id": "IN-#3",
+    "source_pcm": {
+      "artifact_id": "ART-#12",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "source_range": {
+      "end": 2205000,
+      "start": 0
+    },
+    "validity": "ambiguous_alignment"
+  },
+  "confidence": 0.009901779220950313,
+  "energy": {
+    "after": 0.11479817886565706,
+    "before": 0.11711752256841121
+  },
+  "estimated_gain": 0.3633472913306255,
+  "parent_alignment": "ALN-#1",
+  "parent_source": "IN-#3",
+  "residual_pcm": {
+    "artifact_id": "ART-#16",
+    "channels": 2,
+    "sample_rate": 48000
+  }
+}

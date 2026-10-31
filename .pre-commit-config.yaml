@@ -32,7 +32,7 @@ repos:
         entry: mise exec -- biome check --write
         language: system
         files: '\.(js|mjs|cjs|ts|mts|cts|jsx|tsx|json|jsonc)$'
-        exclude: '(^|/)package-lock\.json$|(^|/)(dist|node_modules)/'
+        exclude: '(^|/)package-lock\.json$|(^|/)(dist|node_modules)/|^baseline/(runs|bench)/'
       # workspace 全体を整形するため file list は渡さない
       # (staged .rs があれば発火する)。
       - id: cargo-fmt

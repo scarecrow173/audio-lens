@@ -1,0 +1,245 @@
+{
+  "derived": {
+    "occurrences": [],
+    "resampled": true
+  },
+  "result": {
+    "accepted": false,
+    "agreeing_methods": 1,
+    "algorithm_id": "locate-consensus",
+    "algorithm_version": "2",
+    "alignment_id": "ALN-#1",
+    "capture_input_id": "IN-#1",
+    "capture_pcm": {
+      "artifact_id": "ART-#11",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "capture_range": {
+      "end": 2400000,
+      "start": 0
+    },
+    "confidence": "low",
+    "evidence": [
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 1.0000551370369286,
+            "peak_to_background": 1.304979020757662,
+            "peak_width": 166,
+            "position": 177,
+            "score": 0.15490611419050448
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 1.304907072048242,
+            "peak_width": 166,
+            "position": 175,
+            "score": 0.15489757359726888
+          }
+        ],
+        "method": "full_ncc",
+        "method_version": "2",
+        "reject_reason": "peak-to-background below threshold",
+        "validity": "low_correlation"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 1.0996934858193277,
+            "peak_to_background": 2.663326525345416,
+            "peak_width": 85,
+            "position": 167,
+            "score": 0.26296545956572387
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.421880787409687,
+            "peak_width": 98,
+            "position": 174,
+            "score": 0.23912614101719556
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.285402055059103,
+            "peak_width": 103,
+            "position": 177,
+            "score": 0.22565081524246197
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.276111466862297,
+            "peak_width": 103,
+            "position": 180,
+            "score": 0.22473350233638031
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.2400029328360844,
+            "peak_width": 104,
+            "position": 214,
+            "score": 0.22116830026517875
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.1922562101727165,
+            "peak_width": 104,
+            "position": 206,
+            "score": 0.2164539932703572
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.179763752845816,
+            "peak_width": 104,
+            "position": 212,
+            "score": 0.2152205415133866
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.167934572748176,
+            "peak_width": 109,
+            "position": 183,
+            "score": 0.2140525789105818
+          }
+        ],
+        "method": "band_ncc",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": 1.0127233873010315,
+            "peak_to_background": 3.5757251435251463,
+            "peak_width": 2,
+            "position": 15,
+            "score": -0.0029908728137187195
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.530801389957693,
+            "peak_width": 4,
+            "position": 131,
+            "score": -0.0029532968737787067
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.4404383997365726,
+            "peak_width": 3,
+            "position": 118,
+            "score": -0.002877713824195584
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 3.18894696440422,
+            "peak_width": 2,
+            "position": 187,
+            "score": -0.0026673568010388508
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.993411492894678,
+            "peak_width": 3,
+            "position": 21,
+            "score": 0.0025038034790184085
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.8841834049359862,
+            "peak_width": 2,
+            "position": 176,
+            "score": 0.002412440942565715
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.7887845169425782,
+            "peak_width": 2,
+            "position": 90,
+            "score": -0.0023326456761216083
+          },
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 2.780747167149333,
+            "peak_width": 3,
+            "position": 209,
+            "score": 0.0023259229303774355
+          }
+        ],
+        "method": "gcc_phat",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      },
+      {
+        "candidates": [
+          {
+            "peak_ratio_12": null,
+            "peak_to_background": 913334422685.0336,
+            "peak_width": 1,
+            "position": 0,
+            "score": 0.9133344226850336
+          }
+        ],
+        "method": "spectral_envelope",
+        "method_version": "2",
+        "reject_reason": null,
+        "validity": "valid"
+      }
+    ],
+    "normalized_source_range": {
+      "end": 2400000,
+      "start": 0
+    },
+    "params": {
+      "min_agreeing_methods": 2,
+      "min_peak_to_background": 2,
+      "min_score": 0.3,
+      "normalization": {
+        "amplitude_scale": "decoded-float-normalized",
+        "byte_len": 38400000,
+        "channels": 2,
+        "format": "interleaved-f64le",
+        "frames": 2400000,
+        "input_id": "IN-#3",
+        "original_frames": 2205000,
+        "original_sample_rate": 44100,
+        "sample_rate": 48000,
+        "time_origin_denominator": 1,
+        "time_origin_numerator": 0,
+        "transform": {
+          "algorithm_id": "polyphase-blackman-sinc",
+          "algorithm_version": "1",
+          "antialias": true,
+          "clip": false,
+          "compensation_source_frames": 32,
+          "cutoff": 0.94,
+          "delay_source_frames": 32,
+          "down": 147,
+          "endpoint_extension": "zero",
+          "output_length_rounding": "ceil",
+          "phase_normalization": "unit-dc",
+          "radius": 32,
+          "source_rate": 44100,
+          "target_rate": 48000,
+          "up": 160,
+          "window": "blackman"
+        }
+      },
+      "position_tolerance": 256
+    },
+    "position_spread": 0,
+    "reject_reason": "only 1 method(s) agree (need 2)",
+    "source_input_id": "IN-#3",
+    "source_pcm": {
+      "artifact_id": "ART-#12",
+      "channels": 2,
+      "sample_rate": 48000
+    },
+    "source_range": {
+      "end": 2205000,
+      "start": 0
+    },
+    "validity": "ambiguous_alignment"
+  }
+}

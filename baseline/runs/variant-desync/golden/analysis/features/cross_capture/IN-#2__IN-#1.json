@@ -1,0 +1,51 @@
+{
+  "common_source_ids": [],
+  "records": [
+    {
+      "algorithm_id": "cross_capture.path_gain.v1",
+      "algorithm_version": "1",
+      "alignment_id": null,
+      "channels": null,
+      "confidence": "low",
+      "delta": null,
+      "feature_id": "cross_capture.path_gain",
+      "freq_range": null,
+      "input_id": "job",
+      "invalid_reason": "no common accepted source",
+      "lineage": [],
+      "params": {
+        "aggregation": "per_bin_median_magnitude_ratio",
+        "bin_frequency": "k * sample_rate / fft_size",
+        "fft_size": null,
+        "minimum_magnitude_squared_coherence": 0.5,
+        "reference_capture_id": "IN-#2",
+        "row_units": [
+          "ratio",
+          "db",
+          "count"
+        ],
+        "rows": [
+          "magnitude_ratio",
+          "gain_difference_db",
+          "source_support"
+        ],
+        "sample_rate": null,
+        "target_capture_id": "IN-#1",
+        "usable_source_count": 0
+      },
+      "reference": null,
+      "resolution": null,
+      "resolution_class": "segment",
+      "support_count": 0,
+      "target": null,
+      "time_range": null,
+      "unit": "ratio",
+      "validity": "unsupported",
+      "value": {
+        "scalar": null
+      }
+    }
+  ],
+  "reference_capture_id": "IN-#2",
+  "target_capture_id": "IN-#1"
+}

@@ -8,7 +8,6 @@ updated: "2026-10-14"
 owners: []
 relations:
   source:
-    - "../../target/audio-lens-issue-atlas.html"
     - "https://github.com/scarecrow173/audio-lens/issues"
   changes:
     added: []

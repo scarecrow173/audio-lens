@@ -1,0 +1,36 @@
+[
+  {
+    "source_input_id": "IN-#3",
+    "capture_input_id": "IN-#1",
+    "alignment_id": "ALN-#1",
+    "status": "accepted",
+    "validity": "valid",
+    "confidence": "medium",
+    "agreeing_methods": {
+      "$i64": "2"
+    },
+    "capture_start": {
+      "$i64": "0"
+    },
+    "capture_end": {
+      "$i64": "2400000"
+    }
+  },
+  {
+    "source_input_id": "IN-#3",
+    "capture_input_id": "IN-#2",
+    "alignment_id": "ALN-#2",
+    "status": "accepted",
+    "validity": "valid",
+    "confidence": "high",
+    "agreeing_methods": {
+      "$i64": "3"
+    },
+    "capture_start": {
+      "$i64": "0"
+    },
+    "capture_end": {
+      "$i64": "2400000"
+    }
+  }
+]

@@ -121,3 +121,7 @@ run = [
   "mise run test-ci",
 ]
 env = { CARGO_INCREMENTAL = "0" }
+
+[tasks.baseline]
+description = "Issue #98 pre-migration baseline の計測・収集(tools/baseline)"
+run = "node tools/baseline/capture.mjs"

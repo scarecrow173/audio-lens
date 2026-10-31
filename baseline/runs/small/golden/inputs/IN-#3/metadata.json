@@ -1,0 +1,120 @@
+{
+  "annotations": [
+    {
+      "annotation": {
+        "kind": "expected_sample_rate_route",
+        "note": "OS/キャプチャソフトは 44.1↔48kHz の SRC を挟むことがある。観測された SRC 痕跡(高域フィルタ特性・位相シフト)はこの経路と照合できる"
+      },
+      "dictionary_version": "1",
+      "reference": null,
+      "topic": "src_route"
+    }
+  ],
+  "audio": {
+    "channels": 2,
+    "codec": "pcm_s16le",
+    "duration_secs": 0.9,
+    "frames": 39690,
+    "history": [],
+    "sample_format": "pcm_s16",
+    "sample_rate": 44100,
+    "source_hash": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16"
+  },
+  "av_timing": [],
+  "container": "wav",
+  "decoder": {
+    "attempts": [
+      {
+        "backend": "native",
+        "executed": true,
+        "outcome": "decoded",
+        "reason": {
+          "kind": "capability",
+          "reason": "video decode unavailable"
+        },
+        "version": "0.1.0"
+      }
+    ],
+    "backend": "native",
+    "fallback": false,
+    "request": {
+      "audio": true,
+      "audio_stream": null,
+      "timing": true,
+      "video": true,
+      "video_config": {
+        "luminance_step_threshold": 32,
+        "motion_min_run": 2,
+        "motion_threshold": 4,
+        "rois": [],
+        "scene_change_threshold": 40
+      },
+      "video_stream": null
+    },
+    "settings": {
+      "channel_layout": "unknown",
+      "pcm": "unscaled_interleaved_f64le",
+      "selection": "first_auds_first_vids_or_first_pcm_mp4",
+      "transforms": []
+    },
+    "source_hash": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16",
+    "streams": [
+      {
+        "decoded": true,
+        "kind": "audio",
+        "stream": 0,
+        "unavailable": null
+      },
+      {
+        "decoded": false,
+        "kind": "video",
+        "stream": null,
+        "unavailable": {
+          "kind": "capability",
+          "reason": "video decode unavailable"
+        }
+      }
+    ],
+    "version": "0.1.0"
+  },
+  "dictionary": {
+    "entries": 6,
+    "sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
+    "version": "1"
+  },
+  "input_id": "IN-#3",
+  "integrity": [
+    {
+      "detail": {
+        "codec": null,
+        "kind": "capability",
+        "media_kind": "video",
+        "reason": "video decode unavailable",
+        "track_index": null
+      },
+      "kind": "decode_unavailable"
+    }
+  ],
+  "mp4": null,
+  "role": "source_asset",
+  "source_hash": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16",
+  "source_path": "<WT>/samples/reference/source-impact_heavy.wav",
+  "streams": [
+    {
+      "bits_per_sample": 16,
+      "channel_layout": "unknown",
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "decode": {
+        "Ok": null
+      },
+      "kind": "audio",
+      "packet_lengths": [],
+      "sample_rate": 44100,
+      "stream": 0,
+      "timebase_hz": 44100
+    }
+  ],
+  "video": null,
+  "video_features": null
+}
