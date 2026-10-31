@@ -3,29 +3,17 @@
 //! (旧 `al-cli::main.rs` の `resolve_config`/`make_stage`/`parse_stage`
 //! /`parse_input` を移設)
 
-use std::path::PathBuf;
-
 use al_core::{InputRole, StageKind};
-use al_dataset::DatasetStage;
+use al_dataset::{DatasetStage, ExportStage};
 use al_job::job::{JobInput, input};
-use al_job::manifest::ArtifactRecord;
-use al_job::stage::{Stage, StageContext, StageError};
+use al_job::stage::Stage;
 use al_locate::LocateStage;
 use al_media::IngestStage;
 
 /// `--stages` 未指定時の既定 stage 集合(pipeline order)。
 /// CLI の既定値と同一: 全実装済み stage。
 pub fn default_stage_kinds() -> Vec<StageKind> {
-    vec![
-        StageKind::Ingest,
-        StageKind::Locate,
-        StageKind::CheapAnalysis,
-        StageKind::ReferenceAnalysis,
-        StageKind::ExpensiveAnalysis,
-        StageKind::Dataset,
-        StageKind::Visualization,
-        StageKind::Export,
-    ]
+    StageKind::PIPELINE_ORDER.to_vec()
 }
 
 /// stage 名(serde snake_case)を `StageKind` に変換する。
@@ -73,77 +61,32 @@ pub fn resolve_config(config: &mut serde_json::Value) -> Result<(), String> {
     Ok(())
 }
 
-/// Build the stage implementation for `kind`. Stages without a real
-/// implementation fall back to the foundation stub.
+/// Build the stage implementation for `kind`. Every stage kind has a
+/// real implementation.
 pub fn make_stage(kind: StageKind, config: &serde_json::Value) -> Result<Box<dyn Stage>, String> {
-    if kind == StageKind::Ingest {
-        // `dictionary_text` (the run-time snapshot) pins the dictionary
-        // content; `dictionary` remains usable for configs that never went
-        // through `resolve_config`. Default is the bundled dictionary, so
-        // results never depend on the working directory.
-        let stage = if let Some(text) = config.get("dictionary_text").and_then(|v| v.as_str()) {
-            let dictionary = al_media::Dictionary::from_json(text)
-                .map_err(|e| format!("invalid snapshotted dictionary: {e}"))?;
-            IngestStage::with_dictionary(dictionary)
-        } else if let Some(path) = config.get("dictionary").and_then(|v| v.as_str()) {
-            IngestStage::with_dictionary_file(path).map_err(|e| e.to_string())?
-        } else {
-            IngestStage::with_dictionary(al_media::Dictionary::embedded())
-        };
-        return Ok(Box::new(stage));
-    }
-    if kind == StageKind::Locate {
-        return Ok(Box::new(LocateStage::new()));
-    }
-    if kind == StageKind::CheapAnalysis {
-        return Ok(Box::new(al_analysis::stage::CheapAnalysisStage::new()));
-    }
-    if kind == StageKind::ReferenceAnalysis {
-        return Ok(Box::new(al_analysis::stage::ReferenceAnalysisStage::new()));
-    }
-    if kind == StageKind::ExpensiveAnalysis {
-        return Ok(Box::new(al_analysis::stage::ExpensiveAnalysisStage::new()));
-    }
-    if kind == StageKind::Dataset {
-        return Ok(Box::new(DatasetStage::new()));
-    }
-    if kind == StageKind::Visualization {
-        return Ok(Box::new(al_viz::stage::VisualizationStage::new()));
-    }
-    if kind == StageKind::Export {
-        return Ok(Box::new(al_viz::stage::ExportStage::new()));
-    }
-    Ok(Box::new(StubStage { kind }))
-}
-
-/// Foundation stub stage: emits one marker artifact per run so the runner,
-/// manifest, and registry can be exercised end to end.
-struct StubStage {
-    kind: StageKind,
-}
-
-impl Stage for StubStage {
-    fn kind(&self) -> StageKind {
-        self.kind
-    }
-
-    fn run(&mut self, ctx: &StageContext<'_>) -> Result<Vec<ArtifactRecord>, StageError> {
-        let id = ctx.registry.issue();
-        let rel = format!(
-            "intermediate/{}_{}.json",
-            serde_json::to_value(self.kind)
-                .ok()
-                .and_then(|v| v.as_str().map(str::to_owned))
-                .unwrap_or_else(|| format!("{:?}", self.kind)),
-            id.as_str()
-        );
-        Ok(vec![ArtifactRecord {
-            artifact_id: id,
-            role: "stub_marker".into(),
-            path: PathBuf::from(rel),
-            produced_by: Some(self.kind),
-            inputs: vec![],
-            params: serde_json::json!({"stub": true}),
-        }])
-    }
+    Ok(match kind {
+        StageKind::Ingest => {
+            // `dictionary_text` (the run-time snapshot) pins the
+            // dictionary content; `dictionary` remains usable for
+            // configs that never went through `resolve_config`. Default
+            // is the bundled dictionary, so results never depend on the
+            // working directory.
+            let stage = if let Some(text) = config.get("dictionary_text").and_then(|v| v.as_str()) {
+                let dictionary = al_media::Dictionary::from_json(text)
+                    .map_err(|e| format!("invalid snapshotted dictionary: {e}"))?;
+                IngestStage::with_dictionary(dictionary)
+            } else if let Some(path) = config.get("dictionary").and_then(|v| v.as_str()) {
+                IngestStage::with_dictionary_file(path).map_err(|e| e.to_string())?
+            } else {
+                IngestStage::with_dictionary(al_media::Dictionary::embedded())
+            };
+            Box::new(stage)
+        }
+        StageKind::Locate => Box::new(LocateStage::new()),
+        StageKind::CheapAnalysis => Box::new(al_analysis::stage::CheapAnalysisStage::new()),
+        StageKind::ReferenceAnalysis => Box::new(al_analysis::stage::ReferenceAnalysisStage::new()),
+        StageKind::ExpensiveAnalysis => Box::new(al_analysis::stage::ExpensiveAnalysisStage::new()),
+        StageKind::Dataset => Box::new(DatasetStage::new()),
+        StageKind::Export => Box::new(ExportStage::new()),
+    })
 }

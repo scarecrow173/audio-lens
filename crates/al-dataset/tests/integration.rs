@@ -296,7 +296,6 @@ fn unimplemented_roles_marked_not_produced() {
         "features/expensive",
         "residual",
         "events",
-        "visualization",
     ] {
         assert_eq!(
             manifest.roles[role].status,

@@ -4,16 +4,16 @@
 // Windows/macOS/Linux (no POSIX text tools).
 import { execFileSync } from "node:child_process";
 
-// Crates that must stay free of GUI framework dependencies. `al-viz` is
-// intentionally absent: it is the deprecated display crate whose
-// embedded report assets are tracked for removal by AL#106 (see design
-// §7 recorded exception). `al-math` was removed in AL#101 (its kernels
-// moved to the ruviform-numeric dependency, checked transitively via
-// the remaining crates' dep trees).
+// Crates that must stay free of GUI framework dependencies. `al-viz`
+// was removed by AL#106 (portable export moved to al-dataset; the
+// static report and display products were deleted). `al-math` was
+// removed in AL#101 (its kernels moved to the ruviform-numeric
+// dependency, checked transitively via the remaining crates' dep
+// trees).
 // `al-service` is the shared headless service layer consumed by both
-// `al-cli` and `al-gui` (AL#105); it must stay GUI-free. `al-gui` is the
-// GUI crate itself and is intentionally absent (same rationale as
-// `al-viz`: presentation crates own the GUI deps).
+// `al-cli` and `al-gui` (AL#105); it must stay GUI-free. `al-gui` is
+// the GUI crate itself and is intentionally absent — presentation
+// crates own the GUI deps.
 const HEADLESS_CRATES = [
   "al-cli",
   "al-core",

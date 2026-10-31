@@ -14,7 +14,7 @@ use al_job::manifest::Manifest;
 /// migrated).
 pub const PACKAGE_SCHEMA_VERSION: u32 = 1;
 /// Generator identity recorded in the package manifest.
-pub const GENERATOR_ID: &str = "al-viz";
+pub const GENERATOR_ID: &str = "al-dataset";
 
 /// Export configuration (`config.export.*`).
 #[derive(Debug, Clone)]
@@ -134,7 +134,7 @@ pub fn build(
     manifest: &Manifest,
     cfg: &ExportConfig,
 ) -> io::Result<(PathBuf, Vec<String>)> {
-    let span = tracing::info_span!("viz::package", len = tracing::field::Empty);
+    let span = tracing::info_span!("export::package", len = tracing::field::Empty);
     let _enter = span.enter();
     validate_package_name(&cfg.name)?;
     let analysis = job_dir.join("analysis");
@@ -231,12 +231,7 @@ pub fn build(
         serde_json::to_string_pretty(&export_manifest)?,
     )?;
 
-    // 5. Self-contained HTML report: report.html + report.data.js at
-    //    the package root. Data is read back from the copied analysis
-    //    so the report embeds only shrunk, package-local references.
-    crate::report::generate(&dest)?;
-
-    // 6. Portability gate: no declared absolute path may survive in
+    // 5. Portability gate: no declared absolute path may survive in
     //    any text file inside the package.
     let forbidden: Vec<String> = manifest
         .inputs
@@ -256,8 +251,6 @@ pub fn build(
         let path = dest.join(rel);
         // Binary chunk files cannot hold stray text paths; scan text
         // outputs only.
-        // Text outputs include the report pair: report.data.js embeds
-        // JSON bodies wholesale, so it must pass the same scan.
         let text_ok = path
             .extension()
             .is_some_and(|e| matches!(e.to_str(), Some("json" | "txt" | "js" | "html")));

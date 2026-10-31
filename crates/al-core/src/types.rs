@@ -30,9 +30,7 @@ pub enum StageKind {
     ExpensiveAnalysis,
     /// Analysis dataset materialization.
     Dataset,
-    /// Visualization dataset build.
-    Visualization,
-    /// Human-readable export.
+    /// Relocatable export package.
     Export,
 }
 
@@ -45,7 +43,6 @@ impl StageKind {
         StageKind::ReferenceAnalysis,
         StageKind::ExpensiveAnalysis,
         StageKind::Dataset,
-        StageKind::Visualization,
         StageKind::Export,
     ];
 

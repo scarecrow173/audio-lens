@@ -218,9 +218,53 @@ fn dataset_open_failures_are_classified() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+/// `JobService::export` の単独 export 経路(`al export` の実体):
+/// plan に export が無い job へ record を追加して実行し、完了済み
+/// なら再利用、依存 stage 未完了なら失敗する。
+#[test]
+fn export_runs_export_stage_on_an_existing_job() {
+    let dir = temp_dir("export");
+    let wav = wav_path(&dir, "cap.wav", 960);
+    let service = JobService::new(dir.join("jobs"));
+
+    // dataset までの plan — export record は無い。
+    let (job_id, _) = service
+        .run(
+            run_spec(&wav, Some(vec![StageKind::Ingest, StageKind::Dataset])),
+            &RunControl::default(),
+        )
+        .unwrap();
+
+    let manifest = service.export(&job_id, &RunControl::default()).unwrap();
+    let record = manifest.stage(StageKind::Export).expect("export record");
+    assert_eq!(record.status, StageStatus::Completed);
+    assert!(
+        service
+            .job_dir(&job_id)
+            .join("export/analysis/export_manifest.json")
+            .is_file()
+    );
+    // 2 度目は completed record の再利用 — エラーにならない。
+    service.export(&job_id, &RunControl::default()).unwrap();
+
+    // ingest のみの job では Dataset 依存が未完了 → stage 失敗。
+    let (partial_id, _) = service
+        .run(
+            run_spec(&wav, Some(vec![StageKind::Ingest])),
+            &RunControl::default(),
+        )
+        .unwrap();
+    assert!(service.export(&partial_id, &RunControl::default()).is_err());
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 #[test]
 fn parse_stage_and_input_spec_round_trip() {
     assert_eq!(parse_stage("ingest").unwrap(), StageKind::Ingest);
+    assert_eq!(parse_stage("export").unwrap(), StageKind::Export);
+    // #106: the visualization stage is gone.
+    assert!(parse_stage("visualization").is_err());
     assert!(parse_stage("nope").is_err());
     let input = parse_input_spec("capture_bug:/tmp/x.wav").unwrap();
     assert_eq!(input.role, al_core::InputRole::CaptureBug);

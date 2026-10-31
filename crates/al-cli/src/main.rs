@@ -12,11 +12,12 @@ USAGE:
   al run --base-dir <dir> --input <role>:<path>[,<role>:<path>...] \\
         [--stages <stage>[,<stage>...]] [--config <file>] [--input-ids <IN-...>[,<IN-...>...]]
   al resume --base-dir <dir> --job-id <JOB-...>
+  al export --base-dir <dir> --job-id <JOB-...>
   al inspect --base-dir <dir> --job-id <JOB-...>
 
 STAGES:
   ingest, locate, cheap_analysis, reference_analysis, expensive_analysis,
-  dataset, visualization, export
+  dataset, export
 
 CONFIG:
   A JSON file passed via --config. Keys:
@@ -47,12 +48,16 @@ NOTE:
   video — see docs for container scope), locate (source
   localization), cheap analysis (always-on observations), reference
   analysis (aligned comparison), expensive analysis (candidate-
-  driven deep dive), dataset (analysis manifest), visualization
-  (dataset-derived display products), and export (relocatable
-  package under export/<name>/ with golden snapshot).
+  driven deep dive), dataset (analysis manifest), and export
+  (relocatable package under export/<name>/ with golden snapshot).
 
-  run/resume/inspect は `al-service` の JobService を経由する —
-  GUI (al-gui) と同一の Job サービス層。
+  `al export` は job の plan に export が無い場合でも単独で export
+  stage を実行し、可搬パッケージを生成する(dataset stage 完了が
+  前提)。表示・検査は persisted Analysis Dataset を読む GUI
+  (al-gui) が担う。
+
+  run/resume/export/inspect は `al-service` の JobService を経由する
+  — GUI (al-gui) と同一の Job サービス層。
 ";
 
 fn fail(message: impl std::fmt::Display) -> ExitCode {
@@ -228,6 +233,47 @@ fn cmd_resume(args: &[String]) -> ExitCode {
     }
 }
 
+fn cmd_export(args: &[String]) -> ExitCode {
+    let Some(base_dir) = parse_flag(args, "--base-dir").map(PathBuf::from) else {
+        return fail("--base-dir is required");
+    };
+    let _log_guard = match init_logging(args, &base_dir, true) {
+        Ok(guard) => guard,
+        Err(e) => return fail(e),
+    };
+    let span = tracing::info_span!("cli::export", job_id = tracing::field::Empty);
+    let _entered = span.enter();
+    let Some(job_id) = parse_flag(args, "--job-id") else {
+        return fail("--job-id is required");
+    };
+    let job_id = match JobId::parse(job_id) {
+        Ok(id) => id,
+        Err(e) => return fail(e),
+    };
+    span.record("job_id", job_id.as_str());
+    let service = JobService::new(&base_dir);
+    match service.export(&job_id, &RunControl::default()) {
+        Ok(manifest) => {
+            println!("job_id={}", manifest.job_id);
+            for record in &manifest.stages {
+                if record.stage == al_core::StageKind::Export {
+                    println!("{:?}: {:?}", record.stage, record.status);
+                }
+            }
+            for artifact in &manifest.artifacts {
+                if artifact.role == "export_package" {
+                    println!(
+                        "export={}",
+                        service.job_dir(&job_id).join(&artifact.path).display()
+                    );
+                }
+            }
+            ExitCode::SUCCESS
+        }
+        Err(e) => fail(e),
+    }
+}
+
 fn cmd_inspect(args: &[String]) -> ExitCode {
     let Some(base_dir) = parse_flag(args, "--base-dir").map(PathBuf::from) else {
         return fail("--base-dir is required");
@@ -270,6 +316,7 @@ fn main() -> ExitCode {
     match args[0].as_str() {
         "run" => cmd_run(&args[1..]),
         "resume" => cmd_resume(&args[1..]),
+        "export" => cmd_export(&args[1..]),
         "inspect" => cmd_inspect(&args[1..]),
         other => fail(format!("unknown subcommand {other:?}\n{USAGE}")),
     }

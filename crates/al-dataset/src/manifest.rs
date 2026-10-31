@@ -58,7 +58,7 @@ pub enum StoreKind {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatasetArtifact {
     /// Role this artifact belongs to (`inputs`, `locate`, `features`,
-    /// `residual`, `events`, `intermediate`, `visualization`).
+    /// `residual`, `events`, `intermediate`).
     pub role: String,
     /// Dataset-relative path of the store root.
     pub path: String,
@@ -98,7 +98,6 @@ impl DatasetManifest {
             "features/expensive",
             "residual",
             "events",
-            "visualization",
         ] {
             roles.insert(
                 role.to_string(),
