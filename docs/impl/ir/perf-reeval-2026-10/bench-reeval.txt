@@ -1,0 +1,11 @@
+=== window_anchors_in shapes (template=512) ===
+narrow_lo      tpl=   512 sig=   64000 fft=   65536 lags=   63489 build=    0.39ms ws=    0.46ms ncc=    1.67ms
+narrow_hi      tpl=   512 sig=  132000 fft=  262144 lags=  131489 build=    1.99ms ws=    0.02ms ncc=    7.33ms
+widen_mid      tpl=   512 sig=  580000 fft= 1048576 lags=  579489 build=    7.36ms ws=    0.02ms ncc=   42.00ms
+widen_hi       tpl=   512 sig= 1050000 fft= 2097152 lags= 1049489 build=   15.36ms ws=    0.02ms ncc=  105.56ms
+full           tpl=   512 sig= 2400240 fft= 4194304 lags= 2399729 build=   30.30ms ws=    0.02ms ncc=  207.93ms
+=== band_gain windows shape ===
+band_win       tpl=  4800 sig=    8640 fft=   16384 lags=    3841 build=    0.11ms ws=    0.13ms ncc=    0.35ms
+band_win       tpl=  4800 sig=    8640 ncc_direct lags=3841 run=   15.78ms
+=== full-rate method shapes ===
+method         tpl=2400000 sig= 2400240 fft=       0 lags=     241 build=    0.00ms ws=    0.00ms ncc=  133.90ms
