@@ -140,20 +140,23 @@ fn long_source_persists_coarse_proposals_and_global_evidence() {
             .contains(&serde_json::json!(3001))
     );
     use al_locate::LocateMethod;
-    assert_eq!(
-        full["candidates"],
-        serde_json::to_value(
-            al_locate::FullNcc
+    // serde_json の既定パーサは浮動小数を厳密に丸めず 1-ULP ずれ得るため、
+    // 生値との比較ではなく永続化と同じテキスト経路(serialize→parse)で揃える。
+    let expected: serde_json::Value = serde_json::from_str(
+        &serde_json::to_string(
+            &al_locate::FullNcc
                 .locate(
                     &source,
                     &capture,
                     512,
-                    &mut al_locate::pool::CorrelationPool::new()
+                    &mut al_locate::pool::CorrelationPool::new(),
                 )
                 .candidates,
         )
-        .unwrap()
-    );
+        .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(full["candidates"], expected);
     fs::remove_dir_all(&fx.dir).ok();
 }
 
