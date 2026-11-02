@@ -622,7 +622,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a"
 dependencies = [
  "quote",
- "syn 2.0.119",
+ "syn 3.0.9",
 ]
 
 [[package]]
@@ -2319,7 +2319,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 [[package]]
 name = "ruviform-audio-analysis"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-dsp",
@@ -2329,7 +2329,7 @@ dependencies = [
 [[package]]
 name = "ruviform-audio-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -2337,7 +2337,7 @@ dependencies = [
 [[package]]
 name = "ruviform-dsp"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-math",
@@ -2347,7 +2347,7 @@ dependencies = [
 [[package]]
 name = "ruviform-exec"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "audio_thread_priority",
  "ruviform-rt",
@@ -2356,7 +2356,7 @@ dependencies = [
 [[package]]
 name = "ruviform-io-avi"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -2367,7 +2367,7 @@ dependencies = [
 [[package]]
 name = "ruviform-io-symphonia"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -2378,7 +2378,7 @@ dependencies = [
 [[package]]
 name = "ruviform-math"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "fearless_simd",
  "fearless_simd_macros",
@@ -2387,12 +2387,12 @@ dependencies = [
 [[package]]
 name = "ruviform-media-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 
 [[package]]
 name = "ruviform-media-io"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -2402,12 +2402,12 @@ dependencies = [
 [[package]]
 name = "ruviform-numeric"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 
 [[package]]
 name = "ruviform-rt"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "arc-swap",
  "rtrb",
@@ -2416,7 +2416,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-exec",
  "ruviform-rt",
@@ -2427,7 +2427,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui-webview"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "dpi",
  "http",
@@ -2440,7 +2440,7 @@ dependencies = [
 [[package]]
 name = "ruviform-video-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -2448,7 +2448,7 @@ dependencies = [
 [[package]]
 name = "ruviform-viz"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git?rev=080c228d197ebc645b8f81cd0082be442abaf10c#080c228d197ebc645b8f81cd0082be442abaf10c"
+source = "git+https://github.com/scarecrow173/ruviform.git?rev=7c430212efe4c14612968e107cdb5f9233c88952#7c430212efe4c14612968e107cdb5f9233c88952"
 dependencies = [
  "ruviform-exec",
  "ruviform-media-core",
