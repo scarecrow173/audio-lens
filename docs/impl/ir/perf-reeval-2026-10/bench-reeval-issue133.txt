@@ -1,0 +1,26 @@
+bench_reeval before/after — ruviform pin 9d267fd(pre) → 258df5a(post)
+同一セッション・同一 worktree で `cargo run --release -p al-locate --example bench_reeval` を
+pre/post 両 pin で実行。ncc 値は min-of-N。
+
+=== window_anchors_in shapes (template=512) ===
+narrow_lo      tpl=   512 sig=   64000 fft=   65536 ->    64000 (-2.3%)  ncc= 1.68ms ->   1.95ms (+16%)
+narrow_hi      tpl=   512 sig=  132000 fft=  262144 ->   135000 (-48.5%) ncc= 7.40ms ->   5.69ms (-23%)
+widen_mid      tpl=   512 sig=  580000 fft= 1048576 ->   583200 (-44.4%) ncc=45.51ms ->  32.07ms (-30%)
+widen_hi       tpl=   512 sig= 1050000 fft= 2097152 ->  1062882 (-49.3%) ncc=101.49ms -> 76.19ms (-25%)
+full           tpl=   512 sig= 2400240 fft= 4194304 ->  2430000 (-42.1%) ncc=231.97ms -> 223.76ms (-3.5%)
+
+=== band_gain windows shape ===
+band_win       tpl=  4800 sig=    8640 fft=   16384 ->     8640 (-47.3%) ncc= 0.35ms ->   0.22ms (-37%)
+band_win(direct)                                              ncc_direct=15.84ms ->  15.77ms
+
+=== full-rate method shapes ===
+method         tpl=2400000 sig= 2400240 fft=0(direct) -> 2430000 (FFT)   ncc=134.38ms -> 218.61ms (+63%)
+
+注記:
+- method 形状 (template_len≈signal_len, k=241) は旧実装で NccDirect
+  を選んでいたが、新実装では smooth 変換長の縮小に伴い prefers_direct
+  のコスト閾値 (8·n·log2 n) を下回らず NccValid(FFT) へ反転。
+  実測では direct の方が 1.63x 速いため、コストモデルの誤判定。
+- gcc_phat が使う Full mode (CorrelationPlan::new(2400000,2400240)) は
+  旧 n = nextpow2(S+L-1) = 8388608 → 新 n = smooth(S+2L-2) = 7290000
+  (-13.1% のみ)。

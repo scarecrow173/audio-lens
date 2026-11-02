@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-30T20:59:15.640Z",
-  "commit": "f6a8037b2ada0aa7eb769e8c4821054855a6e409",
-  "branch": "scarecrow173/geoduck",
+  "recorded_at": "2026-11-02T19:20:46.295Z",
+  "commit": "d05bf10ece4d3c5e2139a78875592c0f4594262b",
+  "branch": "scarecrow173/hawkfish",
   "worktree_dirty": true,
   "rust": {
     "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
@@ -27,6 +27,5 @@
   },
   "build_profile": "release (debug=true)",
   "node": "v26.12.1",
-  "baseline_commit": "f346e5d84ba2933fab17dde4b11f8d77022bc52c",
-  "commit_note": "計測実行時点は f6a8037 + 未コミットの baseline tooling(dirty)。f6a8037..baseline_commit 間の差分は docs/tools/tests/baseline 出力のみで製品コード(al 実行バイナリのソース)に変更なし"
+  "commit_note": "issue #133 ruviform pin 更新(9d267fd→258df5a、mixed-radix FFT 採用)に伴う baseline 再生成。canonical/small/aa/resume/variant-desync を post-pin で再 capture。差分は変換長・計算経路由来の浮動小数・整数候補差と rev スタンプ更新に限定され、構造差・最終決定差は 0(詳細: docs/impl/ir/ruviform-mixed-radix-pin-golden-regen-issue-133.md)"
 }

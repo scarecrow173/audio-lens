@@ -49,7 +49,7 @@
         "ART-#12"
       ],
       "error": null,
-      "duration_ms": 664
+      "duration_ms": 852
     },
     {
       "stage": "locate",
@@ -81,7 +81,7 @@
         "ART-#36"
       ],
       "error": null,
-      "duration_ms": 122415
+      "duration_ms": 81356
     },
     {
       "stage": "cheap_analysis",
@@ -93,7 +93,7 @@
         "ART-#40"
       ],
       "error": null,
-      "duration_ms": 2249
+      "duration_ms": 6824
     },
     {
       "stage": "reference_analysis",
@@ -105,7 +105,7 @@
         "ART-#44"
       ],
       "error": null,
-      "duration_ms": 2619
+      "duration_ms": 2987
     },
     {
       "stage": "expensive_analysis",
@@ -119,7 +119,7 @@
         "ART-#50"
       ],
       "error": null,
-      "duration_ms": 1280
+      "duration_ms": 1513
     },
     {
       "stage": "dataset",
@@ -138,32 +138,23 @@
         "ART-#61"
       ],
       "error": null,
-      "duration_ms": 179
-    },
-    {
-      "stage": "visualization",
-      "status": "completed",
-      "artifacts": [
-        "ART-#62"
-      ],
-      "error": null,
-      "duration_ms": 1267
+      "duration_ms": 180
     },
     {
       "stage": "export",
       "status": "completed",
       "artifacts": [
+        "ART-#62",
         "ART-#63",
-        "ART-#64",
-        "ART-#65"
+        "ART-#64"
       ],
       "error": null,
-      "duration_ms": 9468
+      "duration_ms": 9265
     }
   ],
   "artifacts": [
     {
-      "artifact_id": "ART-#66",
+      "artifact_id": "ART-#65",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -177,7 +168,7 @@
       }
     },
     {
-      "artifact_id": "ART-#67",
+      "artifact_id": "ART-#66",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -191,7 +182,7 @@
       }
     },
     {
-      "artifact_id": "ART-#68",
+      "artifact_id": "ART-#67",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -205,7 +196,7 @@
       }
     },
     {
-      "artifact_id": "ART-#69",
+      "artifact_id": "ART-#68",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -224,7 +215,7 @@
       "path": "inputs/IN-#1/decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#66"
+        "ART-#65"
       ],
       "params": {
         "byte_len": 7683840,
@@ -233,14 +224,14 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -259,6 +250,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -277,7 +276,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 48000
       }
@@ -288,21 +287,21 @@
       "path": "inputs/IN-#1/video_features.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#66"
+        "ART-#65"
       ],
       "params": {
         "codec": "rawvideo",
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -321,6 +320,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -339,7 +346,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "events": 7,
         "frames": 102,
@@ -353,20 +360,20 @@
       "path": "inputs/IN-#1/video_thumbs.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#66"
+        "ART-#65"
       ],
       "params": {
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -385,6 +392,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -403,7 +418,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "frames": 51,
         "height": 90,
@@ -416,21 +431,21 @@
       "path": "inputs/IN-#1/metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#66"
+        "ART-#65"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -449,6 +464,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -467,7 +490,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -480,7 +503,7 @@
       "path": "inputs/IN-#2/decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#67"
+        "ART-#66"
       ],
       "params": {
         "byte_len": 38403840,
@@ -489,14 +512,14 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -515,6 +538,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -533,7 +564,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 48000
       }
@@ -544,21 +575,21 @@
       "path": "inputs/IN-#2/video_features.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#67"
+        "ART-#66"
       ],
       "params": {
         "codec": "rawvideo",
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -577,6 +608,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -595,7 +634,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "events": 29,
         "frames": 502,
@@ -609,20 +648,20 @@
       "path": "inputs/IN-#2/video_thumbs.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#67"
+        "ART-#66"
       ],
       "params": {
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -641,6 +680,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -659,7 +706,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "frames": 84,
         "height": 90,
@@ -672,21 +719,21 @@
       "path": "inputs/IN-#2/metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#67"
+        "ART-#66"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -705,6 +752,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -723,7 +778,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -736,7 +791,7 @@
       "path": "inputs/IN-#3/decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#68"
+        "ART-#67"
       ],
       "params": {
         "byte_len": 635040,
@@ -745,17 +800,17 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -774,6 +829,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -795,7 +857,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 44100
       }
@@ -806,24 +868,24 @@
       "path": "inputs/IN-#3/metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#68"
+        "ART-#67"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -842,6 +904,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -863,7 +932,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -876,7 +945,7 @@
       "path": "inputs/IN-#4/decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#69"
+        "ART-#68"
       ],
       "params": {
         "byte_len": 1930976,
@@ -885,17 +954,17 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -914,6 +983,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -935,7 +1011,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 44100
       }
@@ -946,24 +1022,24 @@
       "path": "inputs/IN-#4/metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-#69"
+        "ART-#68"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -982,6 +1058,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -1003,7 +1086,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -1034,20 +1117,7 @@
         "transform": {
           "algorithm_id": "identity",
           "algorithm_version": "1",
-          "antialias": false,
-          "clip": false,
-          "compensation_source_frames": 0,
-          "cutoff": 1,
-          "delay_source_frames": 0,
-          "down": 1,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 0,
-          "source_rate": 48000,
-          "target_rate": 48000,
-          "up": 1,
-          "window": "none"
+          "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
         }
       }
     },
@@ -1075,20 +1145,7 @@
         "transform": {
           "algorithm_id": "polyphase-blackman-sinc",
           "algorithm_version": "1",
-          "antialias": true,
-          "clip": false,
-          "compensation_source_frames": 32,
-          "cutoff": 0.94,
-          "delay_source_frames": 32,
-          "down": 147,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 32,
-          "source_rate": 44100,
-          "target_rate": 48000,
-          "up": 160,
-          "window": "blackman"
+          "stable_id": "rvf-resample/1/44100/48000/160/147/32/3fee147ae147ae14"
         }
       }
     },
@@ -1116,20 +1173,7 @@
         "transform": {
           "algorithm_id": "polyphase-blackman-sinc",
           "algorithm_version": "1",
-          "antialias": true,
-          "clip": false,
-          "compensation_source_frames": 32,
-          "cutoff": 0.94,
-          "delay_source_frames": 32,
-          "down": 147,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 32,
-          "source_rate": 44100,
-          "target_rate": 48000,
-          "up": 160,
-          "window": "blackman"
+          "stable_id": "rvf-resample/1/44100/48000/160/147/32/3fee147ae147ae14"
         }
       }
     },
@@ -1224,17 +1268,17 @@
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.09872142195677945,
+          "after": 0.09872142195677934,
           "before": 0.12515901249928865
         },
         "original_capture_pcm": {
@@ -1260,20 +1304,7 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
@@ -1298,17 +1329,17 @@
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-#3",
-        "confidence": 0.10561600804680149,
+        "confidence": 0.10561600804680193,
         "parent_alignment": "ALN-#1",
         "parent_source": "IN-#3",
         "residual_pcm": {
@@ -1333,17 +1364,17 @@
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-#4",
-        "confidence": 0.10561600804680149,
+        "confidence": 0.10561600804680193,
         "parent_alignment": "ALN-#1",
         "parent_source": "IN-#3",
         "residual_pcm": {
@@ -1377,20 +1408,7 @@
         "transform": {
           "algorithm_id": "identity",
           "algorithm_version": "1",
-          "antialias": false,
-          "clip": false,
-          "compensation_source_frames": 0,
-          "cutoff": 1,
-          "delay_source_frames": 0,
-          "down": 1,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 0,
-          "source_rate": 48000,
-          "target_rate": 48000,
-          "up": 1,
-          "window": "none"
+          "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
         }
       }
     },
@@ -1499,17 +1517,17 @@
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.1445032270037693,
+          "after": 0.14450322700376914,
           "before": 0.14952066431154026
         },
         "original_capture_pcm": {
@@ -1535,20 +1553,7 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
@@ -1573,17 +1578,17 @@
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-#3",
-        "confidence": 0.01677840762303151,
+        "confidence": 0.016778407623032066,
         "parent_alignment": "ALN-#3",
         "parent_source": "IN-#3",
         "residual_pcm": {
@@ -1608,17 +1613,17 @@
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "child_accepted": true,
         "child_source": "IN-#4",
-        "confidence": 0.5167784076230315,
+        "confidence": 0.5167784076230321,
         "parent_alignment": "ALN-#3",
         "parent_source": "IN-#3",
         "residual_pcm": {
@@ -1641,17 +1646,17 @@
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.0231465964350261
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.14792296287755272,
+          "after": 0.14792296287755263,
           "before": 0.14952066431154026
         },
         "original_capture_pcm": {
@@ -1677,20 +1682,7 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
@@ -1715,17 +1707,17 @@
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.0231465964350261
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "child_accepted": true,
         "child_source": "IN-#3",
-        "confidence": 0.5053427445675956,
+        "confidence": 0.505342744567596,
         "parent_alignment": "ALN-#4",
         "parent_source": "IN-#4",
         "residual_pcm": {
@@ -1750,17 +1742,17 @@
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.0231465964350261
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-#4",
-        "confidence": 0.0053427445675956475,
+        "confidence": 0.005342744567595925,
         "parent_alignment": "ALN-#4",
         "parent_source": "IN-#4",
         "residual_pcm": {
@@ -1776,9 +1768,19 @@
       "path": "analysis/features/cheap/IN-#1.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-#66"
+        "ART-#65"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#38",
@@ -1786,9 +1788,19 @@
       "path": "analysis/features/cheap/IN-#2.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-#67"
+        "ART-#66"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#39",
@@ -1796,9 +1808,19 @@
       "path": "analysis/features/cheap/IN-#3.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-#68"
+        "ART-#67"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#40",
@@ -1806,9 +1828,19 @@
       "path": "analysis/features/cheap/IN-#4.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-#69"
+        "ART-#68"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#41",
@@ -1820,7 +1852,17 @@
         "ART-#14",
         "ART-#13"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#42",
@@ -1832,7 +1874,17 @@
         "ART-#15",
         "ART-#13"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#43",
@@ -1844,7 +1896,17 @@
         "ART-#14",
         "ART-#24"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#44",
@@ -1856,7 +1918,17 @@
         "ART-#15",
         "ART-#24"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
       "artifact_id": "ART-#45",
@@ -1865,7 +1937,16 @@
       "produced_by": "expensive_analysis",
       "inputs": [],
       "params": {
-        "event_count": 27
+        "event_count": 27,
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
       }
     },
     {
@@ -1881,6 +1962,15 @@
       ],
       "params": {
         "reference_capture_id": "IN-#2",
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "target_capture_id": "IN-#1"
       }
     },
@@ -1897,6 +1987,15 @@
         "ART-#13"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#1-0ms-50f5b3536462",
           "candidate:EVT-events.v1-IN-#1-0ms-ff6599b1dae9",
@@ -1926,6 +2025,15 @@
         "ART-#24"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1957,6 +2065,15 @@
         "ART-#10"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#3-0ms-4276993a9562",
           "candidate:EVT-events.v1-IN-#3-0ms-c1f1b5adb0f8"
@@ -1973,6 +2090,15 @@
         "ART-#12"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#4-0ms-9b366c417c0a",
           "candidate:EVT-events.v1-IN-#4-0ms-022072a121f4"
@@ -1985,20 +2111,20 @@
       "path": "analysis",
       "produced_by": "dataset",
       "inputs": [
+        "ART-#65",
         "ART-#66",
         "ART-#67",
         "ART-#68",
-        "ART-#69",
-        "ART-#66",
+        "ART-#65",
         "ART-#4",
         "ART-#1",
-        "ART-#67",
+        "ART-#66",
         "ART-#8",
         "ART-#5",
-        "ART-#68",
+        "ART-#67",
         "ART-#10",
         "ART-#9",
-        "ART-#69",
+        "ART-#68",
         "ART-#12",
         "ART-#11",
         "ART-#2",
@@ -2595,20 +2721,20 @@
       "path": "analysis/manifest.json",
       "produced_by": "dataset",
       "inputs": [
+        "ART-#65",
         "ART-#66",
         "ART-#67",
         "ART-#68",
-        "ART-#69",
-        "ART-#66",
+        "ART-#65",
         "ART-#4",
         "ART-#1",
-        "ART-#67",
+        "ART-#66",
         "ART-#8",
         "ART-#5",
-        "ART-#68",
+        "ART-#67",
         "ART-#10",
         "ART-#9",
-        "ART-#69",
+        "ART-#68",
         "ART-#12",
         "ART-#11",
         "ART-#2",
@@ -2630,10 +2756,10 @@
       "path": "analysis/inputs/declared.json",
       "produced_by": "dataset",
       "inputs": [
+        "ART-#65",
         "ART-#66",
         "ART-#67",
-        "ART-#68",
-        "ART-#69"
+        "ART-#68"
       ],
       "params": {
         "by_reference": true,
@@ -2661,7 +2787,7 @@
       "path": "analysis/inputs/IN-#1.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-#66",
+        "ART-#65",
         "ART-#4"
       ],
       "params": {
@@ -2690,7 +2816,7 @@
       "path": "analysis/inputs/IN-#2.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-#67",
+        "ART-#66",
         "ART-#8"
       ],
       "params": {
@@ -2719,7 +2845,7 @@
       "path": "analysis/inputs/IN-#3.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-#68",
+        "ART-#67",
         "ART-#10"
       ],
       "params": {
@@ -2748,7 +2874,7 @@
       "path": "analysis/inputs/IN-#4.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-#69",
+        "ART-#68",
         "ART-#12"
       ],
       "params": {
@@ -2758,17 +2884,6 @@
     },
     {
       "artifact_id": "ART-#62",
-      "role": "visualization",
-      "path": "analysis/visualization/summary.json",
-      "produced_by": "visualization",
-      "inputs": [],
-      "params": {
-        "products": 110,
-        "skipped": 1
-      }
-    },
-    {
-      "artifact_id": "ART-#63",
       "role": "export_manifest",
       "path": "export/analysis/export_manifest.json",
       "produced_by": "export",
@@ -2776,7 +2891,7 @@
       "params": {}
     },
     {
-      "artifact_id": "ART-#64",
+      "artifact_id": "ART-#63",
       "role": "export_golden",
       "path": "export/analysis/golden/snapshot.json",
       "produced_by": "export",
@@ -2784,14 +2899,14 @@
       "params": {}
     },
     {
-      "artifact_id": "ART-#65",
+      "artifact_id": "ART-#64",
       "role": "export_package",
       "path": "export/analysis",
       "produced_by": "export",
       "inputs": [],
       "params": {
         "copy_media": false,
-        "files": 867,
+        "files": 573,
         "package": "analysis"
       }
     }

@@ -19,6 +19,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -79,6 +88,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -137,6 +155,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -195,6 +222,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -253,6 +289,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -281,7 +326,7 @@
       },
       "resolution_class": "segment",
       "support_count": 1168,
-      "target": 0.08576057666458885,
+      "target": 0.08576057666458886,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -289,7 +334,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 0.08576057666458885
+        "scalar": 0.08576057666458886
       }
     },
     {
@@ -311,6 +356,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -369,6 +423,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -397,7 +460,7 @@
       },
       "resolution_class": "segment",
       "support_count": 1168,
-      "target": 36.44998671244626,
+      "target": 36.449986712446,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -405,7 +468,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 36.44998671244626
+        "scalar": 36.449986712446
       }
     },
     {
@@ -427,6 +490,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -485,6 +557,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -513,7 +594,7 @@
       },
       "resolution_class": "segment",
       "support_count": 1168,
-      "target": 0.9291454624238853,
+      "target": 0.9291454624239035,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -521,7 +602,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 0.9291454624238853
+        "scalar": 0.9291454624239035
       }
     },
     {
@@ -543,6 +624,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -567,7 +657,7 @@
       "resolution": null,
       "resolution_class": "segment",
       "support_count": 9372,
-      "target": 0.00014080275057543369,
+      "target": 0.0001408027505754336,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -575,7 +665,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 0.00014080275057543369
+        "scalar": 0.0001408027505754336
       }
     },
     {
@@ -597,6 +687,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -651,6 +750,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -709,6 +817,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -763,6 +880,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -817,6 +943,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -871,6 +1006,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -925,6 +1069,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -979,6 +1132,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1033,6 +1195,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1087,6 +1258,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1141,6 +1321,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1195,6 +1384,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1249,6 +1447,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "source_channel": 0,
         "src_level_spread_db": 20.66435515852843,
         "triggers": [
@@ -1305,6 +1512,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "source_channel": 0,
         "src_level_spread_db": 20.66435515852843,
         "triggers": [
@@ -1331,7 +1547,7 @@
       "resolution": null,
       "resolution_class": "segment",
       "support_count": 45,
-      "target": -0.49219281465528514,
+      "target": -0.4921928146552852,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -1339,7 +1555,7 @@
       "unit": "corr",
       "validity": "valid",
       "value": {
-        "scalar": -0.49219281465528514
+        "scalar": -0.4921928146552852
       }
     },
     {
@@ -1361,6 +1577,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1419,6 +1644,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1477,6 +1711,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1535,6 +1778,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1593,6 +1845,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1621,7 +1882,7 @@
       },
       "resolution_class": "segment",
       "support_count": 1168,
-      "target": 0.03727477581947665,
+      "target": 0.037274775819476656,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -1629,7 +1890,7 @@
       "unit": "score",
       "validity": "valid",
       "value": {
-        "scalar": 0.03727477581947665
+        "scalar": 0.037274775819476656
       }
     },
     {
@@ -1657,6 +1918,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1718,6 +1988,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1776,6 +2055,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1804,7 +2092,7 @@
       },
       "resolution_class": "segment",
       "support_count": 3,
-      "target": 0.025742167353221792,
+      "target": 0.02574216735322179,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -1812,7 +2100,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 0.025742167353221792
+        "scalar": 0.02574216735322179
       }
     },
     {
@@ -1834,6 +2122,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1895,6 +2192,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -1952,6 +2258,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2009,6 +2324,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2064,6 +2388,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "supported_bin_fraction": 0.83740234375,
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
@@ -2089,7 +2422,7 @@
       "resolution": null,
       "resolution_class": "segment",
       "support_count": 1715,
-      "target": 0.08688392891630428,
+      "target": 0.0868839289143448,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -2097,7 +2430,7 @@
       "unit": "ratio",
       "validity": "valid",
       "value": {
-        "scalar": 0.08688392891630428
+        "scalar": 0.0868839289143448
       }
     },
     {
@@ -2124,6 +2457,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "supported_bin_fraction": 0.83740234375,
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
@@ -2149,7 +2491,7 @@
       "resolution": null,
       "resolution_class": "segment",
       "support_count": 2216,
-      "target": -233.72983955875245,
+      "target": -233.72983955438826,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -2157,7 +2499,7 @@
       "unit": "db_per_s",
       "validity": "valid",
       "value": {
-        "scalar": -233.72983955875245
+        "scalar": -233.72983955438826
       }
     },
     {
@@ -2179,6 +2521,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2207,7 +2558,7 @@
       },
       "resolution_class": "segment",
       "support_count": 1168,
-      "target": 0.9488487455004604,
+      "target": 0.9488487455004608,
       "time_range": {
         "end": 50.005,
         "start": 0
@@ -2215,7 +2566,7 @@
       "unit": "corr",
       "validity": "valid",
       "value": {
-        "scalar": 0.9488487455004604
+        "scalar": 0.9488487455004608
       }
     },
     {
@@ -2237,6 +2588,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2295,6 +2655,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2349,6 +2718,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2403,6 +2781,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2457,6 +2844,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2511,6 +2907,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2565,6 +2970,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-#2-0ms-28c908f54a3b",
@@ -2619,6 +3033,15 @@
           0,
           50.005
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "source_channel": 0,
         "triggers": [
           "candidate:EVT-events.v1-IN-#2-0ms-804d2775139a",

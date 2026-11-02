@@ -25,17 +25,17 @@
   "decoder": {
     "attempts": [
       {
-        "backend": "native",
+        "backend": "ruviform",
         "executed": true,
         "outcome": "decoded",
         "reason": {
           "kind": "capability",
           "reason": "video decode unavailable"
         },
-        "version": "0.1.0"
+        "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
       }
     ],
-    "backend": "native",
+    "backend": "ruviform",
     "fallback": false,
     "request": {
       "audio": true,
@@ -54,6 +54,13 @@
     "settings": {
       "channel_layout": "unknown",
       "pcm": "unscaled_interleaved_f64le",
+      "ruviform": {
+        "io": [
+          "ruviform-io-symphonia",
+          "ruviform-io-avi"
+        ],
+        "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+      },
       "selection": "first_auds_first_vids_or_first_pcm_mp4",
       "transforms": []
     },
@@ -75,7 +82,7 @@
         }
       }
     ],
-    "version": "0.1.0"
+    "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
   },
   "dictionary": {
     "entries": 6,

@@ -12,7 +12,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -37,7 +47,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -62,7 +82,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -87,7 +117,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -112,7 +152,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -137,7 +187,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",
@@ -162,7 +222,17 @@
       "input_id": "IN-#3",
       "invalid_reason": "upstream validity AmbiguousAlignment",
       "lineage": [],
-      "params": {},
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      },
       "reference": null,
       "resolution": null,
       "resolution_class": "segment",

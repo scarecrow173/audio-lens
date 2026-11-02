@@ -1,28 +1,28 @@
 {
-  "job_id": "JOB-kAZUPN9D7g9L6LbJZXxsbq",
+  "job_id": "JOB-H8Qt2JXCQ3dNVVsLPS7Xow",
   "inputs": [
     {
       "input_id": "IN-0000000000000000000061",
       "role": "capture_bug",
-      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\test.avi",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\test.avi",
       "source_sha256": "a91d17b5a93dfee3580744c544941d88c861541c89a0a951bdbfbc2c25b31d61"
     },
     {
       "input_id": "IN-0000000000000000000062",
       "role": "capture_reference",
-      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\normal.avi",
       "source_sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
     },
     {
       "input_id": "IN-0000000000000000000063",
       "role": "source_asset",
-      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-impact_heavy.wav",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-impact_heavy.wav",
       "source_sha256": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16"
     },
     {
       "input_id": "IN-0000000000000000000064",
       "role": "source_asset",
-      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-kael_01.wav",
+      "path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-kael_01.wav",
       "source_sha256": "d5162bd0ea4543904510e3cccd4cb7d5ecfde33a56990327bf8696e8716febf8"
     }
   ],
@@ -35,135 +35,126 @@
       "stage": "ingest",
       "status": "completed",
       "artifacts": [
-        "ART-IhhzmT5VXOWPy7FcZNKhms",
-        "ART-4XIdqZKSkPDxHAh5wMaLUp",
-        "ART-TL9tCyrqKrFzfUjuB1KOEn",
-        "ART-oHNbIAlCNhF342mnwGxl1V",
-        "ART-tjQWd71hVdwfbJkjigRIXf",
-        "ART-6IjVBzRdExaZvPcgJXd9Nj",
-        "ART-1lkI4PzFtKGtO1DdirWbI5",
-        "ART-evuTuT9zaTfwCLP4X9mLUn",
-        "ART-D7XszJ2Vrh1feDu9CvUbYS",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r",
-        "ART-holNZMXigvLdnaPJJF2grU",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt"
+        "ART-rKKRmSFMLBGWcxUP9F3P03",
+        "ART-VPf9Xwn7H18gqPGKKv7anZ",
+        "ART-8KkKUfptzpbAN0LoK8q0bP",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw",
+        "ART-2GmV8bBYu5bCmQC8ttYYw8",
+        "ART-svGt3MDqDbDYWsZuNUcqnI",
+        "ART-2qMOnZ1BLwYXMFk8NvpeAj",
+        "ART-lswix7xHublQe1oOCcDcs1",
+        "ART-QbHhFQdpVSrw4eNb3EjO6w",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS",
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj"
       ],
       "error": null,
-      "duration_ms": 664
+      "duration_ms": 852
     },
     {
       "stage": "locate",
       "status": "completed",
       "artifacts": [
-        "ART-MdwdApSaWdFg2jtirkpi0W",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-Ak2WAZwE0yG075gZSFAnIG",
-        "ART-mF7YFbp5TcXvqQ4u9pwTrD",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-Zm9xEgVY0lKC8YKiNbOefK",
-        "ART-3GzSvIEqo09QCgUoFSVq5A",
-        "ART-ZX3nBLzqCTvW9vS7Kn7os9",
-        "ART-xbwONEkr0OVan4hVhwSbub",
-        "ART-BSk8RJxbFKbG7I78GGp59L",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-fvgnKWiksklJe6xy0xTePw",
-        "ART-QMR0jE7OJTSy5VoBWZA2ND",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-uFjj1JRehNjVbRs8WENhzt",
-        "ART-HGruqr12qNfDtTixefFmQv",
-        "ART-kR1TM1UraSiuqsDrUeI2dA",
-        "ART-dkSzwcAphtVaXq0XGLJVT6",
-        "ART-tkNFqlNjR5ZQn74nL87KEU",
-        "ART-IXzk4OULMZYpkojD0x7PwA",
-        "ART-kUUAArvZmClP5NeVj9ivnt",
-        "ART-d4zniGga4cFiEkPaxWJdFM",
-        "ART-qiQquBcL8glp0WXhIMXVV2"
+        "ART-q1Z1wnxQg5keu7C77mKUqn",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-bYPw6zymVUg95AXhXh6gjI",
+        "ART-HTIbeDd3XD2yi1WJ7e7poS",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-dTJl2s9s1iOM2WsDy2Fjf0",
+        "ART-1ARwfvAJvY9y13A6BBVLWB",
+        "ART-1zivOgzDLpJNyopZPnYeT2",
+        "ART-je3s0ghgAl3DKE5nhvflgb",
+        "ART-KSW4uherPrw1WjE5E175I3",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-T5lsz3bFgXmxXgfBATuBbe",
+        "ART-bG8wa05VgN1QTEMTC1u5Bx",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-wxWH27fcI7QVj3eUOWqYHT",
+        "ART-73myFglzprT2wwWEsiL5dO",
+        "ART-gHSEYi3zgXN9RqY28cdzZY",
+        "ART-Jvhceef5xw9FBB4MwhKDu7",
+        "ART-R2HKHbLozRmDdZ96cyoSpd",
+        "ART-LearwXX8OgzFslKtSVCQEo",
+        "ART-qUMkGxIFqf8WbKsjCE1UJt",
+        "ART-tlAkRaVygd88oqr3667hi3",
+        "ART-ka8SAIKspaaKF9kvV6WwHP"
       ],
       "error": null,
-      "duration_ms": 122415
+      "duration_ms": 81356
     },
     {
       "stage": "cheap_analysis",
       "status": "completed",
       "artifacts": [
-        "ART-5lQTICxLHMcZHwH56CrkWm",
-        "ART-zYXRx2voUEF9jHC2jitJfu",
-        "ART-KxZkGAQ5WpcE6OaLtPpgy2",
-        "ART-ZevHkGiGdV92SBnRzwMyum"
+        "ART-IEauud4P55xpIc3FCki0m3",
+        "ART-NxlWOjQ2UJ7rmLvKoNmzZF",
+        "ART-UyaJD0Hc4uccTGxaCahcRg",
+        "ART-Z8d3vLL1IdpyXvNhsd6jYt"
       ],
       "error": null,
-      "duration_ms": 2249
+      "duration_ms": 6824
     },
     {
       "stage": "reference_analysis",
       "status": "completed",
       "artifacts": [
-        "ART-HYNW4I4opwZhgP9M0mU0DM",
-        "ART-uEpvkIxLfoHOpv8Ct05WhH",
-        "ART-Yv1VkznfQwKUH6GMjjomQW",
-        "ART-Zdq9nvoU6ogoUGOvuynXBR"
+        "ART-ABpWLu5MBwQa3yuEx4e93u",
+        "ART-VWWDQkTuIeqpDqtSjEi7Uj",
+        "ART-AbSGSwoCPSa5j9oNGtnI8t",
+        "ART-UeWYYcdgov4A9O6ao7fsyD"
       ],
       "error": null,
-      "duration_ms": 2619
+      "duration_ms": 2987
     },
     {
       "stage": "expensive_analysis",
       "status": "completed",
       "artifacts": [
-        "ART-mNMXc9Ux0wHbgKZT7eF1xR",
-        "ART-a65jXt1vcaORlHB31SLZgq",
-        "ART-4aAzcqETtfS3teLODXlQMq",
-        "ART-YQ4ObaCKblRvaKXW94lB8d",
-        "ART-eEkWlld12Zz7Qx0USSLdXn",
-        "ART-CGz2vmdVhy6IEMWAvQUo7s"
+        "ART-HkMHaeoOR0GMVxnuplnNFY",
+        "ART-ThAY2VnKktJvOjV5rfeUSf",
+        "ART-SsBhsVCWYfBa6GpyQNBWLi",
+        "ART-aWFrwkemke1uFtN7UIhVpy",
+        "ART-EAFsdZEDmsZ2G5VUVHQKQi",
+        "ART-QZRbh7dBnQuhKBJx9kmZWT"
       ],
       "error": null,
-      "duration_ms": 1280
+      "duration_ms": 1513
     },
     {
       "stage": "dataset",
       "status": "completed",
       "artifacts": [
-        "ART-Qy9Qz0GBJUDgx8QfceWvqr",
-        "ART-8X58wnWSGVqFBseevaCc0z",
-        "ART-MiO197062GgP6ChtFxqBwa",
-        "ART-dnsQX2UnmA7DAqnT9zuC5M",
-        "ART-vW3PfY7BylzDPhhD1AlRQQ",
-        "ART-PIIcGUwaYh0kPSFyj7UEC3",
-        "ART-SJ41aw8RrNSb2ucN3BTLKG",
-        "ART-ACMulvtvCEqdhz1ntE5z5K",
-        "ART-DJ3qThlQXdpfwArh07UOwR",
-        "ART-iurGW639wGJiFPPLHWgjPF",
-        "ART-zrTcFJDTLp9JfQBftM4QEX"
+        "ART-SVn8x3ECLkJQFnCxafpHgF",
+        "ART-Nir95siGZDMICxr2unu5OC",
+        "ART-A2iBLwAgNDd3ss2tNSxTGO",
+        "ART-PqaPJQINMvtbowziZcLd9C",
+        "ART-YZEKEblUfgA5XbhogFvsAP",
+        "ART-cyQsJ6sWVPgh9EZxNnSGbt",
+        "ART-uhAkhlJ0uIpk3j0IvD9bp6",
+        "ART-Zb6BLv3zADJ3VUxC5xKgF1",
+        "ART-SgVoGlkEZVrjGvs7PgOWfH",
+        "ART-VFIXOLkCTFLPOhopYUIesi",
+        "ART-Bm4ExCVlLehfD0LZlUyagJ"
       ],
       "error": null,
-      "duration_ms": 179
-    },
-    {
-      "stage": "visualization",
-      "status": "completed",
-      "artifacts": [
-        "ART-0yMe8MoXQTXFNbffiP0Doc"
-      ],
-      "error": null,
-      "duration_ms": 1267
+      "duration_ms": 180
     },
     {
       "stage": "export",
       "status": "completed",
       "artifacts": [
-        "ART-OsiHZCs38kih2U9suWikmD",
-        "ART-K12ZB3HdQwB4zsRQzzwsFz",
-        "ART-l3sEGAfLuRR0hX6OnqIBJn"
+        "ART-noKfgQbeS3nKVyvtIb43o3",
+        "ART-BzRE0idOcG0NuyGVfpniVZ",
+        "ART-GC0DKm7dJVOmhkNbzp38f2"
       ],
       "error": null,
-      "duration_ms": 9468
+      "duration_ms": 9265
     }
   ],
   "artifacts": [
     {
-      "artifact_id": "ART-qAMA8MbxeAowRuIUpcVOHy",
+      "artifact_id": "ART-p8GShGctQNfrViWYH1JCKW",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -171,13 +162,13 @@
       "params": {
         "input_id": "IN-0000000000000000000061",
         "input_role": "capture_bug",
-        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\test.avi",
-        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\test.avi",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\test.avi",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\test.avi",
         "source_sha256": "a91d17b5a93dfee3580744c544941d88c861541c89a0a951bdbfbc2c25b31d61"
       }
     },
     {
-      "artifact_id": "ART-YmYvdQtHWzfTjS1S2U2GM2",
+      "artifact_id": "ART-mNjNaOCq8NM5qzVHfVQZM0",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -185,13 +176,13 @@
       "params": {
         "input_id": "IN-0000000000000000000062",
         "input_role": "capture_reference",
-        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
-        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\_runs\\decoded\\normal.avi",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\normal.avi",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\_runs\\decoded\\normal.avi",
         "source_sha256": "590d8954b93fd6cd50a1c573f6527896ef53376ffbc38556a0a5a5020bcd0237"
       }
     },
     {
-      "artifact_id": "ART-VC0bgakwqCkVAzaMVonkIN",
+      "artifact_id": "ART-04J1Mt1BQT9euLArRD8dR0",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -199,13 +190,13 @@
       "params": {
         "input_id": "IN-0000000000000000000063",
         "input_role": "source_asset",
-        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-impact_heavy.wav",
-        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-impact_heavy.wav",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-impact_heavy.wav",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-impact_heavy.wav",
         "source_sha256": "ceff2f715cf6627f1980cf9381c01199f5c7236192e354f5cf817accc96bab16"
       }
     },
     {
-      "artifact_id": "ART-5fp3jRIlNMjIssOjKfkdRW",
+      "artifact_id": "ART-KKxFJvAVZqLaxMM21abxyl",
       "role": "declared_input",
       "path": "",
       "produced_by": null,
@@ -213,18 +204,18 @@
       "params": {
         "input_id": "IN-0000000000000000000064",
         "input_role": "source_asset",
-        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-kael_01.wav",
-        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\al98-baseline\\samples\\reference\\source-kael_01.wav",
+        "source_path": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-kael_01.wav",
+        "source_path_abs": "C:\\Users\\akiyoshi\\orca\\workspaces\\audio-lens\\hawkfish\\samples\\reference\\source-kael_01.wav",
         "source_sha256": "d5162bd0ea4543904510e3cccd4cb7d5ecfde33a56990327bf8696e8716febf8"
       }
     },
     {
-      "artifact_id": "ART-IhhzmT5VXOWPy7FcZNKhms",
+      "artifact_id": "ART-rKKRmSFMLBGWcxUP9F3P03",
       "role": "decoded_pcm",
       "path": "inputs\\IN-0000000000000000000061\\decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy"
+        "ART-p8GShGctQNfrViWYH1JCKW"
       ],
       "params": {
         "byte_len": 7683840,
@@ -233,14 +224,14 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -259,6 +250,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -277,32 +276,32 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 48000
       }
     },
     {
-      "artifact_id": "ART-4XIdqZKSkPDxHAh5wMaLUp",
+      "artifact_id": "ART-VPf9Xwn7H18gqPGKKv7anZ",
       "role": "video_features",
       "path": "inputs\\IN-0000000000000000000061\\video_features.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy"
+        "ART-p8GShGctQNfrViWYH1JCKW"
       ],
       "params": {
         "codec": "rawvideo",
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -321,6 +320,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -339,7 +346,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "events": 7,
         "frames": 102,
@@ -348,25 +355,25 @@
       }
     },
     {
-      "artifact_id": "ART-TL9tCyrqKrFzfUjuB1KOEn",
+      "artifact_id": "ART-8KkKUfptzpbAN0LoK8q0bP",
       "role": "video_thumbs",
       "path": "inputs\\IN-0000000000000000000061\\video_thumbs.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy"
+        "ART-p8GShGctQNfrViWYH1JCKW"
       ],
       "params": {
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -385,6 +392,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -403,7 +418,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "frames": 51,
         "height": 90,
@@ -411,26 +426,26 @@
       }
     },
     {
-      "artifact_id": "ART-oHNbIAlCNhF342mnwGxl1V",
+      "artifact_id": "ART-C1bRWn1IXW0m3FoGRtcNgw",
       "role": "ingest_metadata",
       "path": "inputs\\IN-0000000000000000000061\\metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy"
+        "ART-p8GShGctQNfrViWYH1JCKW"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -449,6 +464,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -467,7 +490,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -475,12 +498,12 @@
       }
     },
     {
-      "artifact_id": "ART-tjQWd71hVdwfbJkjigRIXf",
+      "artifact_id": "ART-2GmV8bBYu5bCmQC8ttYYw8",
       "role": "decoded_pcm",
       "path": "inputs\\IN-0000000000000000000062\\decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0"
       ],
       "params": {
         "byte_len": 38403840,
@@ -489,14 +512,14 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -515,6 +538,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -533,32 +564,32 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 48000
       }
     },
     {
-      "artifact_id": "ART-6IjVBzRdExaZvPcgJXd9Nj",
+      "artifact_id": "ART-svGt3MDqDbDYWsZuNUcqnI",
       "role": "video_features",
       "path": "inputs\\IN-0000000000000000000062\\video_features.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0"
       ],
       "params": {
         "codec": "rawvideo",
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -577,6 +608,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -595,7 +634,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "events": 29,
         "frames": 502,
@@ -604,25 +643,25 @@
       }
     },
     {
-      "artifact_id": "ART-1lkI4PzFtKGtO1DdirWbI5",
+      "artifact_id": "ART-2qMOnZ1BLwYXMFk8NvpeAj",
       "role": "video_thumbs",
       "path": "inputs\\IN-0000000000000000000062\\video_thumbs.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0"
       ],
       "params": {
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -641,6 +680,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -659,7 +706,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "frames": 84,
         "height": 90,
@@ -667,26 +714,26 @@
       }
     },
     {
-      "artifact_id": "ART-evuTuT9zaTfwCLP4X9mLUn",
+      "artifact_id": "ART-lswix7xHublQe1oOCcDcs1",
       "role": "ingest_metadata",
       "path": "inputs\\IN-0000000000000000000062\\metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": null,
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -705,6 +752,14 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d",
+              "video_path": "native_dib"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -723,7 +778,7 @@
               "unavailable": null
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -731,12 +786,12 @@
       }
     },
     {
-      "artifact_id": "ART-D7XszJ2Vrh1feDu9CvUbYS",
+      "artifact_id": "ART-QbHhFQdpVSrw4eNb3EjO6w",
       "role": "decoded_pcm",
       "path": "inputs\\IN-0000000000000000000063\\decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-VC0bgakwqCkVAzaMVonkIN"
+        "ART-04J1Mt1BQT9euLArRD8dR0"
       ],
       "params": {
         "byte_len": 635040,
@@ -745,17 +800,17 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -774,6 +829,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -795,35 +857,35 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 44100
       }
     },
     {
-      "artifact_id": "ART-NXe0mVVMHHZ5qqVBPCf73r",
+      "artifact_id": "ART-F78Dyes4dmT1Z6pJRfkTWS",
       "role": "ingest_metadata",
       "path": "inputs\\IN-0000000000000000000063\\metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-VC0bgakwqCkVAzaMVonkIN"
+        "ART-04J1Mt1BQT9euLArRD8dR0"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -842,6 +904,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -863,7 +932,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -871,12 +940,12 @@
       }
     },
     {
-      "artifact_id": "ART-holNZMXigvLdnaPJJF2grU",
+      "artifact_id": "ART-WTnUWzHKxDdc3Dsn6Uhoig",
       "role": "decoded_pcm",
       "path": "inputs\\IN-0000000000000000000064\\decoded.f64le",
       "produced_by": "ingest",
       "inputs": [
-        "ART-5fp3jRIlNMjIssOjKfkdRW"
+        "ART-KKxFJvAVZqLaxMM21abxyl"
       ],
       "params": {
         "byte_len": 1930976,
@@ -885,17 +954,17 @@
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -914,6 +983,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -935,35 +1011,35 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "sample_rate": 44100
       }
     },
     {
-      "artifact_id": "ART-1ZeejA1yvMPOJIfYBMoZtt",
+      "artifact_id": "ART-IUxtjB9FuQ8YxBkdpHGgLj",
       "role": "ingest_metadata",
       "path": "inputs\\IN-0000000000000000000064\\metadata.json",
       "produced_by": "ingest",
       "inputs": [
-        "ART-5fp3jRIlNMjIssOjKfkdRW"
+        "ART-KKxFJvAVZqLaxMM21abxyl"
       ],
       "params": {
         "annotation_count": 1,
         "decoder": {
           "attempts": [
             {
-              "backend": "native",
+              "backend": "ruviform",
               "executed": true,
               "outcome": "decoded",
               "reason": {
                 "kind": "capability",
                 "reason": "video decode unavailable"
               },
-              "version": "0.1.0"
+              "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
             }
           ],
-          "backend": "native",
+          "backend": "ruviform",
           "fallback": false,
           "request": {
             "audio": true,
@@ -982,6 +1058,13 @@
           "settings": {
             "channel_layout": "unknown",
             "pcm": "unscaled_interleaved_f64le",
+            "ruviform": {
+              "io": [
+                "ruviform-io-symphonia",
+                "ruviform-io-avi"
+              ],
+              "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+            },
             "selection": "first_auds_first_vids_or_first_pcm_mp4",
             "transforms": []
           },
@@ -1003,7 +1086,7 @@
               }
             }
           ],
-          "version": "0.1.0"
+          "version": "258df5ae255f812f54461eb1aef30fce608e8c6d"
         },
         "dictionary_sha256": "25d2d137a9607040c8d3e4b21882c5c6b15753b7bb8b449096da0ecee578d819",
         "dictionary_version": "1",
@@ -1011,13 +1094,13 @@
       }
     },
     {
-      "artifact_id": "ART-MdwdApSaWdFg2jtirkpi0W",
+      "artifact_id": "ART-q1Z1wnxQg5keu7C77mKUqn",
       "role": "normalized_pcm",
-      "path": "locate/normalized/ART-MdwdApSaWdFg2jtirkpi0W.f64le",
+      "path": "locate/normalized/ART-q1Z1wnxQg5keu7C77mKUqn.f64le",
       "produced_by": "locate",
       "inputs": [
-        "ART-IhhzmT5VXOWPy7FcZNKhms",
-        "ART-oHNbIAlCNhF342mnwGxl1V"
+        "ART-rKKRmSFMLBGWcxUP9F3P03",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw"
       ],
       "params": {
         "amplitude_scale": "decoded-float-normalized",
@@ -1034,31 +1117,18 @@
         "transform": {
           "algorithm_id": "identity",
           "algorithm_version": "1",
-          "antialias": false,
-          "clip": false,
-          "compensation_source_frames": 0,
-          "cutoff": 1.0,
-          "delay_source_frames": 0,
-          "down": 1,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 0,
-          "source_rate": 48000,
-          "target_rate": 48000,
-          "up": 1,
-          "window": "none"
+          "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
         }
       }
     },
     {
-      "artifact_id": "ART-MEj0DSEwNFuoaFHjMmFu68",
+      "artifact_id": "ART-eOJezrY68PbCB9UftzifVj",
       "role": "normalized_pcm",
-      "path": "locate/normalized/ART-MEj0DSEwNFuoaFHjMmFu68.f64le",
+      "path": "locate/normalized/ART-eOJezrY68PbCB9UftzifVj.f64le",
       "produced_by": "locate",
       "inputs": [
-        "ART-D7XszJ2Vrh1feDu9CvUbYS",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r"
+        "ART-QbHhFQdpVSrw4eNb3EjO6w",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS"
       ],
       "params": {
         "amplitude_scale": "decoded-float-normalized",
@@ -1075,31 +1145,18 @@
         "transform": {
           "algorithm_id": "polyphase-blackman-sinc",
           "algorithm_version": "1",
-          "antialias": true,
-          "clip": false,
-          "compensation_source_frames": 32,
-          "cutoff": 0.94,
-          "delay_source_frames": 32,
-          "down": 147,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 32,
-          "source_rate": 44100,
-          "target_rate": 48000,
-          "up": 160,
-          "window": "blackman"
+          "stable_id": "rvf-resample/1/44100/48000/160/147/32/3fee147ae147ae14"
         }
       }
     },
     {
-      "artifact_id": "ART-4x99WYzk5mTvQmzGcPy1x8",
+      "artifact_id": "ART-kdpBAWJyXOBhk1DzpWNQg5",
       "role": "normalized_pcm",
-      "path": "locate/normalized/ART-4x99WYzk5mTvQmzGcPy1x8.f64le",
+      "path": "locate/normalized/ART-kdpBAWJyXOBhk1DzpWNQg5.f64le",
       "produced_by": "locate",
       "inputs": [
-        "ART-holNZMXigvLdnaPJJF2grU",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt"
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj"
       ],
       "params": {
         "amplitude_scale": "decoded-float-normalized",
@@ -1116,31 +1173,18 @@
         "transform": {
           "algorithm_id": "polyphase-blackman-sinc",
           "algorithm_version": "1",
-          "antialias": true,
-          "clip": false,
-          "compensation_source_frames": 32,
-          "cutoff": 0.94,
-          "delay_source_frames": 32,
-          "down": 147,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 32,
-          "source_rate": 44100,
-          "target_rate": 48000,
-          "up": 160,
-          "window": "blackman"
+          "stable_id": "rvf-resample/1/44100/48000/160/147/32/3fee147ae147ae14"
         }
       }
     },
     {
-      "artifact_id": "ART-Ak2WAZwE0yG075gZSFAnIG",
+      "artifact_id": "ART-bYPw6zymVUg95AXhXh6gjI",
       "role": "locate_evidence",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000061\\evidence.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000061",
@@ -1149,13 +1193,13 @@
       }
     },
     {
-      "artifact_id": "ART-mF7YFbp5TcXvqQ4u9pwTrD",
+      "artifact_id": "ART-HTIbeDd3XD2yi1WJ7e7poS",
       "role": "time_map",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000061\\time_map.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000061",
@@ -1163,30 +1207,30 @@
       }
     },
     {
-      "artifact_id": "ART-nlwZQTdmKSbQNpyFPqCjqP",
+      "artifact_id": "ART-WS62rFi1Ws5YD63JQLxRUE",
       "role": "locate_result",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000061\\result.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
         "accepted": true,
-        "alignment_id": "ALN-v4G7eV6vmKo2gd8hoEeBO7",
+        "alignment_id": "ALN-ygqi91ebEe5BnsKYazwGuF",
         "capture_input_id": "IN-0000000000000000000061",
         "source_input_id": "IN-0000000000000000000063",
         "validity": "valid"
       }
     },
     {
-      "artifact_id": "ART-Zm9xEgVY0lKC8YKiNbOefK",
+      "artifact_id": "ART-dTJl2s9s1iOM2WsDy2Fjf0",
       "role": "locate_evidence",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000061\\evidence.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000061",
@@ -1195,55 +1239,55 @@
       }
     },
     {
-      "artifact_id": "ART-3GzSvIEqo09QCgUoFSVq5A",
+      "artifact_id": "ART-1ARwfvAJvY9y13A6BBVLWB",
       "role": "locate_result",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000061\\result.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
         "accepted": false,
-        "alignment_id": "ALN-QDyq9cUw4dm92MJESDdadT",
+        "alignment_id": "ALN-eYMhSFhTKU0Ow2syb13NE0",
         "capture_input_id": "IN-0000000000000000000061",
         "source_input_id": "IN-0000000000000000000064",
         "validity": "ambiguous_alignment"
       }
     },
     {
-      "artifact_id": "ART-ZX3nBLzqCTvW9vS7Kn7os9",
+      "artifact_id": "ART-1zivOgzDLpJNyopZPnYeT2",
       "role": "residual",
-      "path": "locate/residual/IN-0000000000000000000063_ART-ZX3nBLzqCTvW9vS7Kn7os9.wav",
+      "path": "locate/residual/IN-0000000000000000000063_ART-1zivOgzDLpJNyopZPnYeT2.wav",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn",
+        "ART-WS62rFi1Ws5YD63JQLxRUE"
       ],
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.09872142195677944,
+          "after": 0.09872142195677934,
           "before": 0.12515901249928865
         },
         "original_capture_pcm": {
-          "artifact_id": "ART-MdwdApSaWdFg2jtirkpi0W",
+          "artifact_id": "ART-q1Z1wnxQg5keu7C77mKUqn",
           "channels": 2,
           "sample_rate": 48000
         },
-        "parent_alignment": "ALN-v4G7eV6vmKo2gd8hoEeBO7",
-        "parent_artifact": "ART-nlwZQTdmKSbQNpyFPqCjqP",
+        "parent_alignment": "ALN-ygqi91ebEe5BnsKYazwGuF",
+        "parent_artifact": "ART-WS62rFi1Ws5YD63JQLxRUE",
         "parent_source": "IN-0000000000000000000063",
         "pcm": {
           "amplitude_scale": "decoded-float-normalized",
@@ -1260,107 +1304,94 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1.0,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
-          "artifact_id": "ART-MEj0DSEwNFuoaFHjMmFu68",
+          "artifact_id": "ART-eOJezrY68PbCB9UftzifVj",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-xbwONEkr0OVan4hVhwSbub",
+      "artifact_id": "ART-je3s0ghgAl3DKE5nhvflgb",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000061\\residual_IN-0000000000000000000063.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-ZX3nBLzqCTvW9vS7Kn7os9"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-1zivOgzDLpJNyopZPnYeT2"
       ],
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-0000000000000000000063",
-        "confidence": 0.10561600804680148,
-        "parent_alignment": "ALN-v4G7eV6vmKo2gd8hoEeBO7",
+        "confidence": 0.10561600804680192,
+        "parent_alignment": "ALN-ygqi91ebEe5BnsKYazwGuF",
         "parent_source": "IN-0000000000000000000063",
         "residual_pcm": {
-          "artifact_id": "ART-ZX3nBLzqCTvW9vS7Kn7os9",
+          "artifact_id": "ART-1zivOgzDLpJNyopZPnYeT2",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-BSk8RJxbFKbG7I78GGp59L",
+      "artifact_id": "ART-KSW4uherPrw1WjE5E175I3",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000061\\residual_IN-0000000000000000000063.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-ZX3nBLzqCTvW9vS7Kn7os9"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-1zivOgzDLpJNyopZPnYeT2"
       ],
       "params": {
         "channel_transform": [
           [
-            0.4499624949510529,
-            0.4499624949509591
+            0.4499624949501933,
+            0.4499624949517977
           ],
           [
-            0.4498303284527597,
-            0.4498303284529613
+            0.4498303284526219,
+            0.4498303284531106
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-0000000000000000000064",
-        "confidence": 0.10561600804680148,
-        "parent_alignment": "ALN-v4G7eV6vmKo2gd8hoEeBO7",
+        "confidence": 0.10561600804680192,
+        "parent_alignment": "ALN-ygqi91ebEe5BnsKYazwGuF",
         "parent_source": "IN-0000000000000000000063",
         "residual_pcm": {
-          "artifact_id": "ART-ZX3nBLzqCTvW9vS7Kn7os9",
+          "artifact_id": "ART-1zivOgzDLpJNyopZPnYeT2",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-F0rBq4oFaRnFuKlWi1q5Lp",
+      "artifact_id": "ART-uPGeOkPmNMb636Tw3VD65c",
       "role": "normalized_pcm",
-      "path": "locate/normalized/ART-F0rBq4oFaRnFuKlWi1q5Lp.f64le",
+      "path": "locate/normalized/ART-uPGeOkPmNMb636Tw3VD65c.f64le",
       "produced_by": "locate",
       "inputs": [
-        "ART-tjQWd71hVdwfbJkjigRIXf",
-        "ART-evuTuT9zaTfwCLP4X9mLUn"
+        "ART-2GmV8bBYu5bCmQC8ttYYw8",
+        "ART-lswix7xHublQe1oOCcDcs1"
       ],
       "params": {
         "amplitude_scale": "decoded-float-normalized",
@@ -1377,31 +1408,18 @@
         "transform": {
           "algorithm_id": "identity",
           "algorithm_version": "1",
-          "antialias": false,
-          "clip": false,
-          "compensation_source_frames": 0,
-          "cutoff": 1.0,
-          "delay_source_frames": 0,
-          "down": 1,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 0,
-          "source_rate": 48000,
-          "target_rate": 48000,
-          "up": 1,
-          "window": "none"
+          "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
         }
       }
     },
     {
-      "artifact_id": "ART-fvgnKWiksklJe6xy0xTePw",
+      "artifact_id": "ART-T5lsz3bFgXmxXgfBATuBbe",
       "role": "locate_evidence",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000062\\evidence.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000062",
@@ -1410,13 +1428,13 @@
       }
     },
     {
-      "artifact_id": "ART-QMR0jE7OJTSy5VoBWZA2ND",
+      "artifact_id": "ART-bG8wa05VgN1QTEMTC1u5Bx",
       "role": "time_map",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000062\\time_map.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000062",
@@ -1424,30 +1442,30 @@
       }
     },
     {
-      "artifact_id": "ART-MntMNCSkiK8fxMHAMGk8P3",
+      "artifact_id": "ART-8OaaFIOFec2POGXkJu9Lc9",
       "role": "locate_result",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000062\\result.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "accepted": true,
-        "alignment_id": "ALN-zgls2qJuyM2rFQJLePOu03",
+        "alignment_id": "ALN-WYLYqryJoaW0chf0nHov3z",
         "capture_input_id": "IN-0000000000000000000062",
         "source_input_id": "IN-0000000000000000000063",
         "validity": "valid"
       }
     },
     {
-      "artifact_id": "ART-uFjj1JRehNjVbRs8WENhzt",
+      "artifact_id": "ART-wxWH27fcI7QVj3eUOWqYHT",
       "role": "locate_evidence",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000062\\evidence.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000062",
@@ -1456,13 +1474,13 @@
       }
     },
     {
-      "artifact_id": "ART-HGruqr12qNfDtTixefFmQv",
+      "artifact_id": "ART-73myFglzprT2wwWEsiL5dO",
       "role": "time_map",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000062\\time_map.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "capture_input_id": "IN-0000000000000000000062",
@@ -1470,55 +1488,55 @@
       }
     },
     {
-      "artifact_id": "ART-kR1TM1UraSiuqsDrUeI2dA",
+      "artifact_id": "ART-gHSEYi3zgXN9RqY28cdzZY",
       "role": "locate_result",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000062\\result.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
         "accepted": true,
-        "alignment_id": "ALN-JbXL1YGmxctSqb2c2tmNtB",
+        "alignment_id": "ALN-t10KhVmzPSBd2r7xoHnPUZ",
         "capture_input_id": "IN-0000000000000000000062",
         "source_input_id": "IN-0000000000000000000064",
         "validity": "valid"
       }
     },
     {
-      "artifact_id": "ART-dkSzwcAphtVaXq0XGLJVT6",
+      "artifact_id": "ART-Jvhceef5xw9FBB4MwhKDu7",
       "role": "residual",
-      "path": "locate/residual/IN-0000000000000000000063_ART-dkSzwcAphtVaXq0XGLJVT6.wav",
+      "path": "locate/residual/IN-0000000000000000000063_ART-Jvhceef5xw9FBB4MwhKDu7.wav",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-MntMNCSkiK8fxMHAMGk8P3"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-8OaaFIOFec2POGXkJu9Lc9"
       ],
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.1445032270037693,
+          "after": 0.14450322700376914,
           "before": 0.14952066431154026
         },
         "original_capture_pcm": {
-          "artifact_id": "ART-F0rBq4oFaRnFuKlWi1q5Lp",
+          "artifact_id": "ART-uPGeOkPmNMb636Tw3VD65c",
           "channels": 2,
           "sample_rate": 48000
         },
-        "parent_alignment": "ALN-zgls2qJuyM2rFQJLePOu03",
-        "parent_artifact": "ART-MntMNCSkiK8fxMHAMGk8P3",
+        "parent_alignment": "ALN-WYLYqryJoaW0chf0nHov3z",
+        "parent_artifact": "ART-8OaaFIOFec2POGXkJu9Lc9",
         "parent_source": "IN-0000000000000000000063",
         "pcm": {
           "amplitude_scale": "decoded-float-normalized",
@@ -1535,132 +1553,119 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1.0,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
-          "artifact_id": "ART-MEj0DSEwNFuoaFHjMmFu68",
+          "artifact_id": "ART-eOJezrY68PbCB9UftzifVj",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-tkNFqlNjR5ZQn74nL87KEU",
+      "artifact_id": "ART-R2HKHbLozRmDdZ96cyoSpd",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000062\\residual_IN-0000000000000000000063.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-dkSzwcAphtVaXq0XGLJVT6"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-Jvhceef5xw9FBB4MwhKDu7"
       ],
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-0000000000000000000063",
-        "confidence": 0.01677840762303151,
-        "parent_alignment": "ALN-zgls2qJuyM2rFQJLePOu03",
+        "confidence": 0.016778407623032066,
+        "parent_alignment": "ALN-WYLYqryJoaW0chf0nHov3z",
         "parent_source": "IN-0000000000000000000063",
         "residual_pcm": {
-          "artifact_id": "ART-dkSzwcAphtVaXq0XGLJVT6",
+          "artifact_id": "ART-Jvhceef5xw9FBB4MwhKDu7",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-IXzk4OULMZYpkojD0x7PwA",
+      "artifact_id": "ART-LearwXX8OgzFslKtSVCQEo",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000062\\residual_IN-0000000000000000000063.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-dkSzwcAphtVaXq0XGLJVT6"
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-Jvhceef5xw9FBB4MwhKDu7"
       ],
       "params": {
         "channel_transform": [
           [
-            0.5047933490975948,
-            0.504793349097648
+            0.5047933490969283,
+            0.5047933490983135
           ],
           [
-            0.4994706178267894,
-            0.4994706178271723
+            0.4994706178268619,
+            0.4994706178270801
           ]
         ],
         "child_accepted": true,
         "child_source": "IN-0000000000000000000064",
-        "confidence": 0.5167784076230315,
-        "parent_alignment": "ALN-zgls2qJuyM2rFQJLePOu03",
+        "confidence": 0.5167784076230321,
+        "parent_alignment": "ALN-WYLYqryJoaW0chf0nHov3z",
         "parent_source": "IN-0000000000000000000063",
         "residual_pcm": {
-          "artifact_id": "ART-dkSzwcAphtVaXq0XGLJVT6",
+          "artifact_id": "ART-Jvhceef5xw9FBB4MwhKDu7",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-kUUAArvZmClP5NeVj9ivnt",
+      "artifact_id": "ART-qUMkGxIFqf8WbKsjCE1UJt",
       "role": "residual",
-      "path": "locate/residual/IN-0000000000000000000064_ART-kUUAArvZmClP5NeVj9ivnt.wav",
+      "path": "locate/residual/IN-0000000000000000000064_ART-qUMkGxIFqf8WbKsjCE1UJt.wav",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-kR1TM1UraSiuqsDrUeI2dA"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-gHSEYi3zgXN9RqY28cdzZY"
       ],
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.023146596435026
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "encoding": "wav-f64le",
         "energy": {
-          "after": 0.14792296287755272,
+          "after": 0.14792296287755263,
           "before": 0.14952066431154026
         },
         "original_capture_pcm": {
-          "artifact_id": "ART-F0rBq4oFaRnFuKlWi1q5Lp",
+          "artifact_id": "ART-uPGeOkPmNMb636Tw3VD65c",
           "channels": 2,
           "sample_rate": 48000
         },
-        "parent_alignment": "ALN-JbXL1YGmxctSqb2c2tmNtB",
-        "parent_artifact": "ART-kR1TM1UraSiuqsDrUeI2dA",
+        "parent_alignment": "ALN-t10KhVmzPSBd2r7xoHnPUZ",
+        "parent_artifact": "ART-gHSEYi3zgXN9RqY28cdzZY",
         "parent_source": "IN-0000000000000000000064",
         "pcm": {
           "amplitude_scale": "decoded-float-normalized",
@@ -1677,226 +1682,320 @@
           "transform": {
             "algorithm_id": "identity",
             "algorithm_version": "1",
-            "antialias": false,
-            "clip": false,
-            "compensation_source_frames": 0,
-            "cutoff": 1.0,
-            "delay_source_frames": 0,
-            "down": 1,
-            "endpoint_extension": "zero",
-            "output_length_rounding": "ceil",
-            "phase_normalization": "unit-dc",
-            "radius": 0,
-            "source_rate": 48000,
-            "target_rate": 48000,
-            "up": 1,
-            "window": "none"
+            "stable_id": "rvf-resample/1/48000/48000/1/1/32/3fee147ae147ae14"
           }
         },
         "source_pcm": {
-          "artifact_id": "ART-4x99WYzk5mTvQmzGcPy1x8",
+          "artifact_id": "ART-kdpBAWJyXOBhk1DzpWNQg5",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-d4zniGga4cFiEkPaxWJdFM",
+      "artifact_id": "ART-tlAkRaVygd88oqr3667hi3",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000063\\IN-0000000000000000000062\\residual_IN-0000000000000000000064.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-kR1TM1UraSiuqsDrUeI2dA",
-        "ART-kUUAArvZmClP5NeVj9ivnt"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-gHSEYi3zgXN9RqY28cdzZY",
+        "ART-qUMkGxIFqf8WbKsjCE1UJt"
       ],
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.023146596435026
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "child_accepted": true,
         "child_source": "IN-0000000000000000000063",
-        "confidence": 0.5053427445675956,
-        "parent_alignment": "ALN-JbXL1YGmxctSqb2c2tmNtB",
+        "confidence": 0.505342744567596,
+        "parent_alignment": "ALN-t10KhVmzPSBd2r7xoHnPUZ",
         "parent_source": "IN-0000000000000000000064",
         "residual_pcm": {
-          "artifact_id": "ART-kUUAArvZmClP5NeVj9ivnt",
+          "artifact_id": "ART-qUMkGxIFqf8WbKsjCE1UJt",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-qiQquBcL8glp0WXhIMXVV2",
+      "artifact_id": "ART-ka8SAIKspaaKF9kvV6WwHP",
       "role": "residual",
       "path": "locate\\IN-0000000000000000000064\\IN-0000000000000000000062\\residual_IN-0000000000000000000064.json",
       "produced_by": "locate",
       "inputs": [
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-kR1TM1UraSiuqsDrUeI2dA",
-        "ART-kUUAArvZmClP5NeVj9ivnt"
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-gHSEYi3zgXN9RqY28cdzZY",
+        "ART-qUMkGxIFqf8WbKsjCE1UJt"
       ],
       "params": {
         "channel_transform": [
           [
-            1.0031896393884705,
-            0.025893513560169393
+            1.0031896393884767,
+            0.0258935135601695
           ],
           [
-            -0.003398550203924285,
-            1.023146596435026
+            -0.003398550203922538,
+            1.02314659643502
           ]
         ],
         "child_accepted": false,
         "child_source": "IN-0000000000000000000064",
-        "confidence": 0.0053427445675956475,
-        "parent_alignment": "ALN-JbXL1YGmxctSqb2c2tmNtB",
+        "confidence": 0.005342744567595925,
+        "parent_alignment": "ALN-t10KhVmzPSBd2r7xoHnPUZ",
         "parent_source": "IN-0000000000000000000064",
         "residual_pcm": {
-          "artifact_id": "ART-kUUAArvZmClP5NeVj9ivnt",
+          "artifact_id": "ART-qUMkGxIFqf8WbKsjCE1UJt",
           "channels": 2,
           "sample_rate": 48000
         }
       }
     },
     {
-      "artifact_id": "ART-5lQTICxLHMcZHwH56CrkWm",
+      "artifact_id": "ART-IEauud4P55xpIc3FCki0m3",
       "role": "cheap_features",
       "path": "analysis/features/cheap/IN-0000000000000000000061.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy"
+        "ART-p8GShGctQNfrViWYH1JCKW"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-zYXRx2voUEF9jHC2jitJfu",
+      "artifact_id": "ART-NxlWOjQ2UJ7rmLvKoNmzZF",
       "role": "cheap_features",
       "path": "analysis/features/cheap/IN-0000000000000000000062.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-KxZkGAQ5WpcE6OaLtPpgy2",
+      "artifact_id": "ART-UyaJD0Hc4uccTGxaCahcRg",
       "role": "cheap_features",
       "path": "analysis/features/cheap/IN-0000000000000000000063.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-VC0bgakwqCkVAzaMVonkIN"
+        "ART-04J1Mt1BQT9euLArRD8dR0"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-ZevHkGiGdV92SBnRzwMyum",
+      "artifact_id": "ART-Z8d3vLL1IdpyXvNhsd6jYt",
       "role": "cheap_features",
       "path": "analysis/features/cheap/IN-0000000000000000000064.json",
       "produced_by": "cheap_analysis",
       "inputs": [
-        "ART-5fp3jRIlNMjIssOjKfkdRW"
+        "ART-KKxFJvAVZqLaxMM21abxyl"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-HYNW4I4opwZhgP9M0mU0DM",
+      "artifact_id": "ART-ABpWLu5MBwQa3yuEx4e93u",
       "role": "reference_features",
       "path": "analysis/features/reference/IN-0000000000000000000063__IN-0000000000000000000061.json",
       "produced_by": "reference_analysis",
       "inputs": [
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-uEpvkIxLfoHOpv8Ct05WhH",
+      "artifact_id": "ART-VWWDQkTuIeqpDqtSjEi7Uj",
       "role": "reference_features",
       "path": "analysis/features/reference/IN-0000000000000000000064__IN-0000000000000000000061.json",
       "produced_by": "reference_analysis",
       "inputs": [
-        "ART-3GzSvIEqo09QCgUoFSVq5A",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-1ARwfvAJvY9y13A6BBVLWB",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-Yv1VkznfQwKUH6GMjjomQW",
+      "artifact_id": "ART-AbSGSwoCPSa5j9oNGtnI8t",
       "role": "reference_features",
       "path": "analysis/features/reference/IN-0000000000000000000063__IN-0000000000000000000062.json",
       "produced_by": "reference_analysis",
       "inputs": [
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-Zdq9nvoU6ogoUGOvuynXBR",
+      "artifact_id": "ART-UeWYYcdgov4A9O6ao7fsyD",
       "role": "reference_features",
       "path": "analysis/features/reference/IN-0000000000000000000064__IN-0000000000000000000062.json",
       "produced_by": "reference_analysis",
       "inputs": [
-        "ART-kR1TM1UraSiuqsDrUeI2dA",
-        "ART-4x99WYzk5mTvQmzGcPy1x8",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-gHSEYi3zgXN9RqY28cdzZY",
+        "ART-kdpBAWJyXOBhk1DzpWNQg5",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
-      "params": {}
+      "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
+      }
     },
     {
-      "artifact_id": "ART-mNMXc9Ux0wHbgKZT7eF1xR",
+      "artifact_id": "ART-HkMHaeoOR0GMVxnuplnNFY",
       "role": "candidate_events",
       "path": "analysis/events/candidates",
       "produced_by": "expensive_analysis",
       "inputs": [],
       "params": {
-        "event_count": 27
+        "event_count": 27,
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        }
       }
     },
     {
-      "artifact_id": "ART-a65jXt1vcaORlHB31SLZgq",
+      "artifact_id": "ART-ThAY2VnKktJvOjV5rfeUSf",
       "role": "cross_capture_features",
       "path": "analysis/features/cross_capture/IN-0000000000000000000062__IN-0000000000000000000061.json",
       "produced_by": "expensive_analysis",
       "inputs": [
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-3GzSvIEqo09QCgUoFSVq5A",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-kR1TM1UraSiuqsDrUeI2dA"
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-1ARwfvAJvY9y13A6BBVLWB",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-gHSEYi3zgXN9RqY28cdzZY"
       ],
       "params": {
         "reference_capture_id": "IN-0000000000000000000062",
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "target_capture_id": "IN-0000000000000000000061"
       }
     },
     {
-      "artifact_id": "ART-4aAzcqETtfS3teLODXlQMq",
+      "artifact_id": "ART-SsBhsVCWYfBa6GpyQNBWLi",
       "role": "expensive_features",
       "path": "analysis/features/expensive/IN-0000000000000000000061__r000.json",
       "produced_by": "expensive_analysis",
       "inputs": [
-        "ART-IhhzmT5VXOWPy7FcZNKhms",
-        "ART-oHNbIAlCNhF342mnwGxl1V",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-MdwdApSaWdFg2jtirkpi0W"
+        "ART-rKKRmSFMLBGWcxUP9F3P03",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-q1Z1wnxQg5keu7C77mKUqn"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-0000000000000000000061-0ms-50f5b3536462",
           "candidate:EVT-events.v1-IN-0000000000000000000061-0ms-ff6599b1dae9",
@@ -1914,18 +2013,27 @@
       }
     },
     {
-      "artifact_id": "ART-YQ4ObaCKblRvaKXW94lB8d",
+      "artifact_id": "ART-aWFrwkemke1uFtN7UIhVpy",
       "role": "expensive_features",
       "path": "analysis/features/expensive/IN-0000000000000000000062__r000.json",
       "produced_by": "expensive_analysis",
       "inputs": [
-        "ART-tjQWd71hVdwfbJkjigRIXf",
-        "ART-evuTuT9zaTfwCLP4X9mLUn",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-MEj0DSEwNFuoaFHjMmFu68",
-        "ART-F0rBq4oFaRnFuKlWi1q5Lp"
+        "ART-2GmV8bBYu5bCmQC8ttYYw8",
+        "ART-lswix7xHublQe1oOCcDcs1",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-eOJezrY68PbCB9UftzifVj",
+        "ART-uPGeOkPmNMb636Tw3VD65c"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-0000000000000000000062-0ms-804d2775139a",
           "candidate:EVT-events.v1-IN-0000000000000000000062-0ms-28c908f54a3b",
@@ -1948,15 +2056,24 @@
       }
     },
     {
-      "artifact_id": "ART-eEkWlld12Zz7Qx0USSLdXn",
+      "artifact_id": "ART-EAFsdZEDmsZ2G5VUVHQKQi",
       "role": "expensive_features",
       "path": "analysis/features/expensive/IN-0000000000000000000063__r000.json",
       "produced_by": "expensive_analysis",
       "inputs": [
-        "ART-D7XszJ2Vrh1feDu9CvUbYS",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r"
+        "ART-QbHhFQdpVSrw4eNb3EjO6w",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-0000000000000000000063-0ms-4276993a9562",
           "candidate:EVT-events.v1-IN-0000000000000000000063-0ms-c1f1b5adb0f8"
@@ -1964,15 +2081,24 @@
       }
     },
     {
-      "artifact_id": "ART-CGz2vmdVhy6IEMWAvQUo7s",
+      "artifact_id": "ART-QZRbh7dBnQuhKBJx9kmZWT",
       "role": "expensive_features",
       "path": "analysis/features/expensive/IN-0000000000000000000064__r000.json",
       "produced_by": "expensive_analysis",
       "inputs": [
-        "ART-holNZMXigvLdnaPJJF2grU",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt"
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj"
       ],
       "params": {
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "triggers": [
           "candidate:EVT-events.v1-IN-0000000000000000000064-0ms-9b366c417c0a",
           "candidate:EVT-events.v1-IN-0000000000000000000064-0ms-022072a121f4"
@@ -1980,35 +2106,35 @@
       }
     },
     {
-      "artifact_id": "ART-Qy9Qz0GBJUDgx8QfceWvqr",
+      "artifact_id": "ART-SVn8x3ECLkJQFnCxafpHgF",
       "role": "analysis_dataset",
       "path": "analysis",
       "produced_by": "dataset",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-5fp3jRIlNMjIssOjKfkdRW",
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-oHNbIAlCNhF342mnwGxl1V",
-        "ART-IhhzmT5VXOWPy7FcZNKhms",
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-evuTuT9zaTfwCLP4X9mLUn",
-        "ART-tjQWd71hVdwfbJkjigRIXf",
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r",
-        "ART-D7XszJ2Vrh1feDu9CvUbYS",
-        "ART-5fp3jRIlNMjIssOjKfkdRW",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt",
-        "ART-holNZMXigvLdnaPJJF2grU",
-        "ART-4XIdqZKSkPDxHAh5wMaLUp",
-        "ART-TL9tCyrqKrFzfUjuB1KOEn",
-        "ART-6IjVBzRdExaZvPcgJXd9Nj",
-        "ART-1lkI4PzFtKGtO1DdirWbI5",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-3GzSvIEqo09QCgUoFSVq5A",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-kR1TM1UraSiuqsDrUeI2dA"
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-KKxFJvAVZqLaxMM21abxyl",
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw",
+        "ART-rKKRmSFMLBGWcxUP9F3P03",
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-lswix7xHublQe1oOCcDcs1",
+        "ART-2GmV8bBYu5bCmQC8ttYYw8",
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS",
+        "ART-QbHhFQdpVSrw4eNb3EjO6w",
+        "ART-KKxFJvAVZqLaxMM21abxyl",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj",
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig",
+        "ART-VPf9Xwn7H18gqPGKKv7anZ",
+        "ART-8KkKUfptzpbAN0LoK8q0bP",
+        "ART-svGt3MDqDbDYWsZuNUcqnI",
+        "ART-2qMOnZ1BLwYXMFk8NvpeAj",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-1ARwfvAJvY9y13A6BBVLWB",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-gHSEYi3zgXN9RqY28cdzZY"
       ],
       "params": {
         "artifact_count": 234,
@@ -2590,50 +2716,50 @@
       }
     },
     {
-      "artifact_id": "ART-8X58wnWSGVqFBseevaCc0z",
+      "artifact_id": "ART-Nir95siGZDMICxr2unu5OC",
       "role": "dataset_manifest",
       "path": "analysis/manifest.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-5fp3jRIlNMjIssOjKfkdRW",
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-oHNbIAlCNhF342mnwGxl1V",
-        "ART-IhhzmT5VXOWPy7FcZNKhms",
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-evuTuT9zaTfwCLP4X9mLUn",
-        "ART-tjQWd71hVdwfbJkjigRIXf",
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r",
-        "ART-D7XszJ2Vrh1feDu9CvUbYS",
-        "ART-5fp3jRIlNMjIssOjKfkdRW",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt",
-        "ART-holNZMXigvLdnaPJJF2grU",
-        "ART-4XIdqZKSkPDxHAh5wMaLUp",
-        "ART-TL9tCyrqKrFzfUjuB1KOEn",
-        "ART-6IjVBzRdExaZvPcgJXd9Nj",
-        "ART-1lkI4PzFtKGtO1DdirWbI5",
-        "ART-nlwZQTdmKSbQNpyFPqCjqP",
-        "ART-3GzSvIEqo09QCgUoFSVq5A",
-        "ART-MntMNCSkiK8fxMHAMGk8P3",
-        "ART-kR1TM1UraSiuqsDrUeI2dA"
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-KKxFJvAVZqLaxMM21abxyl",
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw",
+        "ART-rKKRmSFMLBGWcxUP9F3P03",
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-lswix7xHublQe1oOCcDcs1",
+        "ART-2GmV8bBYu5bCmQC8ttYYw8",
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS",
+        "ART-QbHhFQdpVSrw4eNb3EjO6w",
+        "ART-KKxFJvAVZqLaxMM21abxyl",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj",
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig",
+        "ART-VPf9Xwn7H18gqPGKKv7anZ",
+        "ART-8KkKUfptzpbAN0LoK8q0bP",
+        "ART-svGt3MDqDbDYWsZuNUcqnI",
+        "ART-2qMOnZ1BLwYXMFk8NvpeAj",
+        "ART-WS62rFi1Ws5YD63JQLxRUE",
+        "ART-1ARwfvAJvY9y13A6BBVLWB",
+        "ART-8OaaFIOFec2POGXkJu9Lc9",
+        "ART-gHSEYi3zgXN9RqY28cdzZY"
       ],
       "params": {
         "schema_version": 1
       }
     },
     {
-      "artifact_id": "ART-MiO197062GgP6ChtFxqBwa",
+      "artifact_id": "ART-A2iBLwAgNDd3ss2tNSxTGO",
       "role": "dataset_inputs",
       "path": "analysis/inputs/declared.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-5fp3jRIlNMjIssOjKfkdRW"
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-KKxFJvAVZqLaxMM21abxyl"
       ],
       "params": {
         "by_reference": true,
@@ -2641,12 +2767,12 @@
       }
     },
     {
-      "artifact_id": "ART-dnsQX2UnmA7DAqnT9zuC5M",
+      "artifact_id": "ART-PqaPJQINMvtbowziZcLd9C",
       "role": "dataset_input_audio",
       "path": "analysis/inputs\\IN-0000000000000000000061.wav",
       "produced_by": "dataset",
       "inputs": [
-        "ART-IhhzmT5VXOWPy7FcZNKhms"
+        "ART-rKKRmSFMLBGWcxUP9F3P03"
       ],
       "params": {
         "channels": 2,
@@ -2656,13 +2782,13 @@
       }
     },
     {
-      "artifact_id": "ART-vW3PfY7BylzDPhhD1AlRQQ",
+      "artifact_id": "ART-YZEKEblUfgA5XbhogFvsAP",
       "role": "dataset_input_metadata",
       "path": "analysis/inputs\\IN-0000000000000000000061.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-qAMA8MbxeAowRuIUpcVOHy",
-        "ART-oHNbIAlCNhF342mnwGxl1V"
+        "ART-p8GShGctQNfrViWYH1JCKW",
+        "ART-C1bRWn1IXW0m3FoGRtcNgw"
       ],
       "params": {
         "audio_available": true,
@@ -2670,12 +2796,12 @@
       }
     },
     {
-      "artifact_id": "ART-PIIcGUwaYh0kPSFyj7UEC3",
+      "artifact_id": "ART-cyQsJ6sWVPgh9EZxNnSGbt",
       "role": "dataset_input_audio",
       "path": "analysis/inputs\\IN-0000000000000000000062.wav",
       "produced_by": "dataset",
       "inputs": [
-        "ART-tjQWd71hVdwfbJkjigRIXf"
+        "ART-2GmV8bBYu5bCmQC8ttYYw8"
       ],
       "params": {
         "channels": 2,
@@ -2685,13 +2811,13 @@
       }
     },
     {
-      "artifact_id": "ART-SJ41aw8RrNSb2ucN3BTLKG",
+      "artifact_id": "ART-uhAkhlJ0uIpk3j0IvD9bp6",
       "role": "dataset_input_metadata",
       "path": "analysis/inputs\\IN-0000000000000000000062.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-YmYvdQtHWzfTjS1S2U2GM2",
-        "ART-evuTuT9zaTfwCLP4X9mLUn"
+        "ART-mNjNaOCq8NM5qzVHfVQZM0",
+        "ART-lswix7xHublQe1oOCcDcs1"
       ],
       "params": {
         "audio_available": true,
@@ -2699,12 +2825,12 @@
       }
     },
     {
-      "artifact_id": "ART-ACMulvtvCEqdhz1ntE5z5K",
+      "artifact_id": "ART-Zb6BLv3zADJ3VUxC5xKgF1",
       "role": "dataset_input_audio",
       "path": "analysis/inputs\\IN-0000000000000000000063.wav",
       "produced_by": "dataset",
       "inputs": [
-        "ART-D7XszJ2Vrh1feDu9CvUbYS"
+        "ART-QbHhFQdpVSrw4eNb3EjO6w"
       ],
       "params": {
         "channels": 2,
@@ -2714,13 +2840,13 @@
       }
     },
     {
-      "artifact_id": "ART-DJ3qThlQXdpfwArh07UOwR",
+      "artifact_id": "ART-SgVoGlkEZVrjGvs7PgOWfH",
       "role": "dataset_input_metadata",
       "path": "analysis/inputs\\IN-0000000000000000000063.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-VC0bgakwqCkVAzaMVonkIN",
-        "ART-NXe0mVVMHHZ5qqVBPCf73r"
+        "ART-04J1Mt1BQT9euLArRD8dR0",
+        "ART-F78Dyes4dmT1Z6pJRfkTWS"
       ],
       "params": {
         "audio_available": true,
@@ -2728,12 +2854,12 @@
       }
     },
     {
-      "artifact_id": "ART-iurGW639wGJiFPPLHWgjPF",
+      "artifact_id": "ART-VFIXOLkCTFLPOhopYUIesi",
       "role": "dataset_input_audio",
       "path": "analysis/inputs\\IN-0000000000000000000064.wav",
       "produced_by": "dataset",
       "inputs": [
-        "ART-holNZMXigvLdnaPJJF2grU"
+        "ART-WTnUWzHKxDdc3Dsn6Uhoig"
       ],
       "params": {
         "channels": 2,
@@ -2743,13 +2869,13 @@
       }
     },
     {
-      "artifact_id": "ART-zrTcFJDTLp9JfQBftM4QEX",
+      "artifact_id": "ART-Bm4ExCVlLehfD0LZlUyagJ",
       "role": "dataset_input_metadata",
       "path": "analysis/inputs\\IN-0000000000000000000064.metadata.json",
       "produced_by": "dataset",
       "inputs": [
-        "ART-5fp3jRIlNMjIssOjKfkdRW",
-        "ART-1ZeejA1yvMPOJIfYBMoZtt"
+        "ART-KKxFJvAVZqLaxMM21abxyl",
+        "ART-IUxtjB9FuQ8YxBkdpHGgLj"
       ],
       "params": {
         "audio_available": true,
@@ -2757,18 +2883,7 @@
       }
     },
     {
-      "artifact_id": "ART-0yMe8MoXQTXFNbffiP0Doc",
-      "role": "visualization",
-      "path": "analysis/visualization/summary.json",
-      "produced_by": "visualization",
-      "inputs": [],
-      "params": {
-        "products": 110,
-        "skipped": 1
-      }
-    },
-    {
-      "artifact_id": "ART-OsiHZCs38kih2U9suWikmD",
+      "artifact_id": "ART-noKfgQbeS3nKVyvtIb43o3",
       "role": "export_manifest",
       "path": "export/analysis/export_manifest.json",
       "produced_by": "export",
@@ -2776,7 +2891,7 @@
       "params": {}
     },
     {
-      "artifact_id": "ART-K12ZB3HdQwB4zsRQzzwsFz",
+      "artifact_id": "ART-BzRE0idOcG0NuyGVfpniVZ",
       "role": "export_golden",
       "path": "export/analysis/golden/snapshot.json",
       "produced_by": "export",
@@ -2784,14 +2899,14 @@
       "params": {}
     },
     {
-      "artifact_id": "ART-l3sEGAfLuRR0hX6OnqIBJn",
+      "artifact_id": "ART-GC0DKm7dJVOmhkNbzp38f2",
       "role": "export_package",
       "path": "export/analysis",
       "produced_by": "export",
       "inputs": [],
       "params": {
         "copy_media": false,
-        "files": 867,
+        "files": 573,
         "package": "analysis"
       }
     }
