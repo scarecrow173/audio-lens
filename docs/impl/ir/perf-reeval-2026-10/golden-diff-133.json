@@ -1,0 +1,99 @@
+{
+  "note": "Issue #133 golden 比較: 同一 session pre-pin(9d267fd) capture vs post-pin(258df5a) capture の compare.mjs 結果要約",
+  "runs": {
+    "canonical": {
+      "total_diffs": 1257,
+      "rev_stamp_diffs": 998,
+      "numeric_diffs": 259,
+      "by_kind": {
+        "tolerance": 242,
+        "int": 17
+      },
+      "tolerance_by_field": {
+        "target": 2,
+        "scalar": 2,
+        "peak_ratio_12": 14,
+        "peak_to_background": 112,
+        "score": 112
+      },
+      "decision_path_diffs": 0,
+      "structural_diffs": 0
+    },
+    "small": {
+      "total_diffs": 1741,
+      "rev_stamp_diffs": 1205,
+      "numeric_diffs": 536,
+      "by_kind": {
+        "tolerance": 516,
+        "int": 20
+      },
+      "tolerance_by_field": {
+        "target": 3,
+        "scalar": 3,
+        "peak_ratio_12": 30,
+        "peak_to_background": 240,
+        "score": 240
+      },
+      "decision_path_diffs": 0,
+      "structural_diffs": 0
+    },
+    "aa": {
+      "total_diffs": 1257,
+      "rev_stamp_diffs": 998,
+      "numeric_diffs": 259,
+      "by_kind": {
+        "tolerance": 242,
+        "int": 17
+      },
+      "tolerance_by_field": {
+        "target": 2,
+        "scalar": 2,
+        "peak_ratio_12": 14,
+        "peak_to_background": 112,
+        "score": 112
+      },
+      "decision_path_diffs": 0,
+      "structural_diffs": 0
+    },
+    "resume": {
+      "total_diffs": 1257,
+      "rev_stamp_diffs": 998,
+      "numeric_diffs": 259,
+      "by_kind": {
+        "tolerance": 242,
+        "int": 17
+      },
+      "tolerance_by_field": {
+        "target": 2,
+        "scalar": 2,
+        "peak_ratio_12": 14,
+        "peak_to_background": 112,
+        "score": 112
+      },
+      "decision_path_diffs": 0,
+      "structural_diffs": 0
+    },
+    "variant-desync": {
+      "total_diffs": 1050,
+      "rev_stamp_diffs": 786,
+      "numeric_diffs": 264,
+      "by_kind": {
+        "tolerance": 223,
+        "int": 41
+      },
+      "tolerance_by_field": {
+        "target": 1,
+        "scalar": 1,
+        "peak_ratio_12": 13,
+        "peak_to_background": 104,
+        "score": 104
+      },
+      "decision_path_diffs": 0,
+      "structural_diffs": 0
+    }
+  },
+  "determinism": {
+    "aa_vs_canonical": 0,
+    "canonical_vs_resume": 0
+  }
+}

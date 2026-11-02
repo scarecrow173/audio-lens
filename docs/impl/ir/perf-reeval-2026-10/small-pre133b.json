@@ -1,0 +1,1827 @@
+{
+  "run": "small",
+  "stages_filter": null,
+  "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+  "e2e_wall_ms": 79951,
+  "environment": {
+    "recorded_at": "2026-11-02T19:47:36.608Z",
+    "commit": "d05bf10ece4d3c5e2139a78875592c0f4594262b",
+    "worktree_dirty": true,
+    "note": "instrumented build: window_anchors_in/method_tasks/prepare_*/band_gain_phase/ref_phase"
+  },
+  "stages": {
+    "ingest": {
+      "status": "completed",
+      "duration_ms": 793
+    },
+    "locate": {
+      "status": "completed",
+      "duration_ms": 69792
+    },
+    "cheap_analysis": {
+      "status": "completed",
+      "duration_ms": 2492
+    },
+    "reference_analysis": {
+      "status": "completed",
+      "duration_ms": 1648
+    },
+    "expensive_analysis": {
+      "status": "completed",
+      "duration_ms": 1305
+    },
+    "dataset": {
+      "status": "completed",
+      "duration_ms": 154
+    },
+    "export": {
+      "status": "completed",
+      "duration_ms": 3550
+    }
+  },
+  "span_busy": {
+    "stage": {
+      "calls": 7,
+      "busy_ms": 79772
+    },
+    "locate::prepare_channels": {
+      "calls": 14,
+      "busy_ms": 3006
+    },
+    "locate::full_ncc": {
+      "calls": 40,
+      "busy_ms": 85266
+    },
+    "locate::gcc_phat": {
+      "calls": 40,
+      "busy_ms": 81907
+    },
+    "locate::band_ncc": {
+      "calls": 40,
+      "busy_ms": 248175
+    },
+    "locate::spectral_envelope": {
+      "calls": 40,
+      "busy_ms": 223982
+    },
+    "analysis::cheap": {
+      "calls": 4,
+      "busy_ms": 1495
+    },
+    "analysis::reference": {
+      "calls": 4,
+      "busy_ms": 2079
+    },
+    "analysis::band_gain": {
+      "calls": 3,
+      "busy_ms": 710
+    },
+    "analysis::transfer": {
+      "calls": 4,
+      "busy_ms": 0
+    },
+    "analysis::codec": {
+      "calls": 4,
+      "busy_ms": 277
+    },
+    "analysis::dynamics": {
+      "calls": 4,
+      "busy_ms": 19
+    },
+    "analysis::noise": {
+      "calls": 4,
+      "busy_ms": 153
+    },
+    "analysis::channel": {
+      "calls": 4,
+      "busy_ms": 521
+    },
+    "analysis::ir": {
+      "calls": 4,
+      "busy_ms": 0
+    },
+    "analysis::timing": {
+      "calls": 4,
+      "busy_ms": 140
+    },
+    "analysis::region": {
+      "calls": 4,
+      "busy_ms": 1417
+    }
+  },
+  "span_instances": {
+    "stage": [
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "ingest",
+        "name": "stage",
+        "busy_ms": 796
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "locate",
+        "name": "stage",
+        "busy_ms": 69800
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "cheap_analysis",
+        "name": "stage",
+        "busy_ms": 2500
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "reference_analysis",
+        "name": "stage",
+        "busy_ms": 1650
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "expensive_analysis",
+        "name": "stage",
+        "busy_ms": 1310
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "dataset",
+        "name": "stage",
+        "busy_ms": 156
+      },
+      {
+        "job_id": "JOB-fba0yq8abEajXQKtQQ5ptb",
+        "stage": "export",
+        "name": "stage",
+        "busy_ms": 3560
+      }
+    ],
+    "locate::prepare_channels": [
+      {
+        "specs": 6,
+        "name": "locate::prepare_channels",
+        "busy_ms": 121
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.01
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.0036000000000000003
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.016800000000000002
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 106
+      },
+      {
+        "specs": 4,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.0106
+      },
+      {
+        "specs": 6,
+        "name": "locate::prepare_channels",
+        "busy_ms": 883
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.008
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.0032
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.010199999999999999
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 957
+      },
+      {
+        "specs": 4,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.025500000000000002
+      },
+      {
+        "specs": 2,
+        "name": "locate::prepare_channels",
+        "busy_ms": 939
+      },
+      {
+        "specs": 4,
+        "name": "locate::prepare_channels",
+        "busy_ms": 0.0126
+      }
+    ],
+    "locate::full_ncc": [
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 300
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 328
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 344
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 369
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 347
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 349
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 352
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 355
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 331
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 350
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 352
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 363
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 355
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 356
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 490
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 525
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2650
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2650
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3270
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3320
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3590
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3840
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3850
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4640
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2600
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2760
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3060
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3060
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3690
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3260
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 4030.0000000000005
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 6040
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2410
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2450
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2520
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3490
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 2900
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3100
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3150
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 3070
+      }
+    ],
+    "locate::gcc_phat": [
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 311
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 333
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 341
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 374
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 539
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 539
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 576
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 612
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 357
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 370
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 373
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 378
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 571
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 565
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 610
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 678
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2840
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2910
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3130
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3300
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3250
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3320
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3340
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 4270
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3280
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3330
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3350
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3360
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3050
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3370
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3030
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 3020
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2660
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2670
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2690
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2770
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2820
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2870
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2900
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2850
+      }
+    ],
+    "locate::band_ncc": [
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 806
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 810
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 811
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 830
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 879
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 936
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 966
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 977
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1190
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1270
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1370
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1400
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1210
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1230
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1280
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1280
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 6540
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 6650
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 6660
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 6690
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 7770
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 8220
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 8390
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 8650
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 10800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 10800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 11000
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 11100
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 9480
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 9520
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 9660
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 9660
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 8850
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 8780
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 9010
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 12800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 12900
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 13000
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 13400
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 10600
+      }
+    ],
+    "locate::spectral_envelope": [
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1030
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1040
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1040
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1040
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1260
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1270
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1270
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1280
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1430
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1440
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1470
+      },
+      {
+        "len_a": 43200,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1470
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 928
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 865
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 875
+      },
+      {
+        "len_a": 131359,
+        "len_b": 480240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 884
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 5220
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 5290
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 5350
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 5370
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9340
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9370
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9560
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9560
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6870
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 12800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 12800
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 12900
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6710
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6420
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 6240
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7390
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9850
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 9940
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 11600
+      },
+      {
+        "len_a": 43200,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 11600
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 8039.999999999999
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7800
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7680
+      },
+      {
+        "len_a": 131359,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 7690
+      }
+    ],
+    "analysis::cheap": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "name": "analysis::cheap",
+        "busy_ms": 29
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "name": "analysis::cheap",
+        "busy_ms": 85.2
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "name": "analysis::cheap",
+        "busy_ms": 251
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "name": "analysis::cheap",
+        "busy_ms": 1130
+      }
+    ],
+    "analysis::reference": [
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 0,
+        "name": "analysis::reference",
+        "busy_ms": 0.0369
+      },
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 43200,
+        "name": "analysis::reference",
+        "busy_ms": 650
+      },
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 43200,
+        "name": "analysis::reference",
+        "busy_ms": 580
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 131359,
+        "name": "analysis::reference",
+        "busy_ms": 849
+      }
+    ],
+    "analysis::band_gain": [
+      {
+        "len": 43200,
+        "pair": "IN-0000000000000000000063__IN-0000000000000000000061",
+        "name": "analysis::band_gain",
+        "busy_ms": 96.7
+      },
+      {
+        "len": 43200,
+        "pair": "IN-0000000000000000000063__IN-0000000000000000000062",
+        "name": "analysis::band_gain",
+        "busy_ms": 164
+      },
+      {
+        "len": 131359,
+        "pair": "IN-0000000000000000000064__IN-0000000000000000000062",
+        "name": "analysis::band_gain",
+        "busy_ms": 449
+      }
+    ],
+    "analysis::transfer": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.0973
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.0782
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.114
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.08140000000000001
+      }
+    ],
+    "analysis::codec": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 3.23
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 9.91
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 40.2
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 224
+      }
+    ],
+    "analysis::dynamics": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 0.227
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 0.603
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 2.38
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 15.5
+      }
+    ],
+    "analysis::noise": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 2.48
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 5.05
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 22.6
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 123
+      }
+    ],
+    "analysis::channel": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 6.25
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 19.4
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 86.8
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 409
+      }
+    ],
+    "analysis::ir": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.0046
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.0038
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.202
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.182
+      }
+    ],
+    "analysis::timing": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 1.23
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 3.17
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 42.9
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 92.3
+      }
+    ],
+    "analysis::region": [
+      {
+        "input_id": "IN-0000000000000000000063",
+        "len": 39690,
+        "name": "analysis::region",
+        "busy_ms": 17
+      },
+      {
+        "input_id": "IN-0000000000000000000064",
+        "len": 120686,
+        "name": "analysis::region",
+        "busy_ms": 49.4
+      },
+      {
+        "input_id": "IN-0000000000000000000061",
+        "len": 480240,
+        "name": "analysis::region",
+        "busy_ms": 241
+      },
+      {
+        "input_id": "IN-0000000000000000000062",
+        "len": 2400240,
+        "name": "analysis::region",
+        "busy_ms": 1110
+      }
+    ]
+  },
+  "stage_events": [
+    {
+      "stage": "ingest",
+      "duration_ms": 793
+    },
+    {
+      "stage": "locate",
+      "duration_ms": 69792
+    },
+    {
+      "stage": "cheap_analysis",
+      "duration_ms": 2492
+    },
+    {
+      "stage": "reference_analysis",
+      "duration_ms": 1648
+    },
+    {
+      "stage": "expensive_analysis",
+      "duration_ms": 1305
+    },
+    {
+      "stage": "dataset",
+      "duration_ms": 154
+    },
+    {
+      "stage": "export",
+      "duration_ms": 3550
+    }
+  ],
+  "window_anchors_in": [
+    {
+      "message": "window_anchors_in",
+      "windows": 85,
+      "range": 421608,
+      "ncc_narrow": 85,
+      "ncc_widen": 85,
+      "ncc_full": 80,
+      "pool_builds": 413,
+      "pool_hits": 82099,
+      "hier_calls": 320,
+      "exact_fallbacks": 0,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 0,
+      "anchors": 50,
+      "elapsed_ms": 837.3309
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 85,
+      "range": 58632,
+      "ncc_narrow": 85,
+      "ncc_widen": 59,
+      "ncc_full": 31,
+      "pool_builds": 167,
+      "pool_hits": 533,
+      "hier_calls": 320,
+      "exact_fallbacks": 0,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 0,
+      "anchors": 66,
+      "elapsed_ms": 256.9883
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 85,
+      "range": 1306800,
+      "ncc_narrow": 85,
+      "ncc_widen": 66,
+      "ncc_full": 27,
+      "pool_builds": 159,
+      "pool_hits": 28065,
+      "hier_calls": 108,
+      "exact_fallbacks": 4,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 4,
+      "anchors": 78,
+      "elapsed_ms": 1624.1957
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 85,
+      "range": 197958,
+      "ncc_narrow": 85,
+      "ncc_widen": 43,
+      "ncc_full": 24,
+      "pool_builds": 210,
+      "pool_hits": 24978,
+      "hier_calls": 204,
+      "exact_fallbacks": 8,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 8,
+      "anchors": 73,
+      "elapsed_ms": 377.78000000000003
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 85,
+      "range": 895482,
+      "ncc_narrow": 85,
+      "ncc_widen": 54,
+      "ncc_full": 37,
+      "pool_builds": 181,
+      "pool_hits": 38411,
+      "hier_calls": 352,
+      "exact_fallbacks": 8,
+      "fb_shape": 0,
+      "fb_coarse_tie": 0,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 8,
+      "anchors": 72,
+      "elapsed_ms": 755.3902
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 257,
+      "range": 2400240,
+      "ncc_narrow": 257,
+      "ncc_widen": 75,
+      "ncc_full": 37,
+      "pool_builds": 422,
+      "pool_hits": 37947,
+      "hier_calls": 148,
+      "exact_fallbacks": 29,
+      "fb_shape": 0,
+      "fb_coarse_tie": 4,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 4,
+      "fb_background": 0,
+      "fb_near_gate": 21,
+      "anchors": 247,
+      "elapsed_ms": 7963.7515
+    }
+  ],
+  "method_tasks_pool": [],
+  "ref_phase": [],
+  "band_gain_phase": []
+}
