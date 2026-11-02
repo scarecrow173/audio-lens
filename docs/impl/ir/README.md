@@ -101,3 +101,6 @@ Directory: `docs/impl/ir`
 
 | ruviform-dependency-ci | [ruviform-git-sha-toolchain-private-repo-ci.md](./ruviform-git-sha-toolchain-private-repo-ci.md) |
 | issue-127-ruviform-consumer-tracking | [ruviform-rev-bump-consumer-regression-verification-issue-127.md](./ruviform-rev-bump-consumer-regression-verification-issue-127.md) |
+| issue-71-band-gain-pair-al-analysis | [issue-71-band-gain-pair-al-analysis.md](./issue-71-band-gain-pair-al-analysis.md) |
+| issue-71-band-gain-shared-spectrum | [issue-71-band-gain-shared-spectrum.md](./issue-71-band-gain-shared-spectrum.md) |
+| issue-71-residual-band-eval-prepare-parallel | [issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md](./issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md) |
