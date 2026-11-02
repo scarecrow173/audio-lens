@@ -29,8 +29,8 @@ use crate::methods::{
 };
 use crate::mixer::fit_mix;
 use crate::normalize::prepare_input;
-use crate::pool::CorrelationPool;
-use crate::prepared::{InputCache, PreparedChannel};
+use crate::pool::{CorrelationPool, run_pool};
+use crate::prepared::{InputCache, PrepareSpec, PreparedChannel};
 use crate::residual::{assemble_residual_search, persist_residual, prepare_residual};
 use crate::result::{LocateResult, SampleRange};
 use crate::tracking::{Anchor, build_time_map, identify_loop_occurrences};
@@ -133,20 +133,19 @@ fn prepare_channels(
     input: &DecodedInput,
     version: &str,
 ) -> Result<Vec<std::sync::Arc<PreparedChannel>>, &'static str> {
-    input
+    let specs: Vec<_> = input
         .channel_samples
         .iter()
         .enumerate()
-        .map(|(channel, samples)| {
-            cache.prepare(
-                &input.input_id,
-                channel,
-                input.sample_rate,
-                version,
-                samples,
-            )
+        .map(|(channel, samples)| PrepareSpec {
+            id: &input.input_id,
+            channel,
+            rate: input.sample_rate,
+            version,
+            samples,
         })
-        .collect()
+        .collect();
+    cache.prepare_many(&specs)
 }
 
 /// フォールバック探索の間引き比。粗探索は ~1/8 レートの
@@ -751,42 +750,6 @@ struct MethodOutput {
     coarse_search: Option<CoarseSearch>,
 }
 
-/// Run `n_tasks` independent units of work over a worker pool,
-/// collecting one result per task in input order. Each worker builds
-/// its own context via `make_ctx`, so per-worker resources (e.g.
-/// [`CorrelationPool`]) stay exclusively owned by that thread.
-fn run_pool<T: Send, C>(
-    n_tasks: usize,
-    make_ctx: &(dyn Fn() -> C + Sync),
-    work: &(dyn Fn(usize, &mut C) -> T + Sync),
-) -> Vec<T> {
-    let slots: Vec<std::sync::Mutex<Option<T>>> =
-        (0..n_tasks).map(|_| std::sync::Mutex::new(None)).collect();
-    let next = std::sync::atomic::AtomicUsize::new(0);
-    let workers = std::thread::available_parallelism()
-        .map(|n| n.get())
-        .unwrap_or(1)
-        .min(n_tasks);
-    std::thread::scope(|scope| {
-        for _ in 0..workers {
-            scope.spawn(|| {
-                let mut ctx = make_ctx();
-                loop {
-                    let idx = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                    if idx >= n_tasks {
-                        return;
-                    }
-                    *slots[idx].lock().unwrap() = Some(work(idx, &mut ctx));
-                }
-            });
-        }
-    });
-    slots
-        .into_iter()
-        .map(|s| s.into_inner().unwrap().unwrap())
-        .collect()
-}
-
 /// Run `(method_index, template, signal, sample_rate)` tasks over a
 /// worker pool, returning one [`MethodEvidence`] per task in input
 /// order. Locate methods are pure but not `Send`, so each worker
@@ -957,8 +920,6 @@ impl Stage for LocateStage {
             )
             .map_err(err)?;
             let capture = &prepared_capture.decoded;
-            let capture_dsp =
-                prepare_channels(&mut dsp_inputs, capture, "original").map_err(err)?;
             let prepared_sources = decoded_sources
                 .iter()
                 .map(|s| {
@@ -972,6 +933,46 @@ impl Stage for LocateStage {
                 .iter()
                 .map(|s| s.as_ref().map(|p| &p.decoded))
                 .collect();
+            // キャプチャと有効 source の全チャンネル準備を一括で並列化する。
+            // 下流の prepare_channels 呼出はキャッシュ hit で解決する。
+            // mark で弾かれる source(チャンネル無し/全空)は従来どおり
+            // 準備対象から外す。
+            let specs: Vec<PrepareSpec> = capture
+                .channel_samples
+                .iter()
+                .enumerate()
+                .map(|(channel, samples)| PrepareSpec {
+                    id: &capture.input_id,
+                    channel,
+                    rate: capture.sample_rate,
+                    version: "original",
+                    samples,
+                })
+                .chain(
+                    decoded_sources
+                        .iter()
+                        .flatten()
+                        .filter(|s| {
+                            !s.channel_samples.is_empty()
+                                && !s.channel_samples.iter().all(|c| c.is_empty())
+                        })
+                        .flat_map(|s| {
+                            s.channel_samples
+                                .iter()
+                                .enumerate()
+                                .map(|(channel, samples)| PrepareSpec {
+                                    id: &s.input_id,
+                                    channel,
+                                    rate: s.sample_rate,
+                                    version: "original",
+                                    samples,
+                                })
+                        }),
+                )
+                .collect();
+            dsp_inputs.prepare_many(&specs).map_err(err)?;
+            let capture_dsp =
+                prepare_channels(&mut dsp_inputs, capture, "original").map_err(err)?;
             let capture_len = capture.channel_samples[0].len() as u64;
             let tolerance = self.config.consensus.position_tolerance;
             // Per-source results kept alive for the residual pass;
@@ -1376,26 +1377,47 @@ impl Stage for LocateStage {
                 // 親ごとに版を分離し、この残差の全 child が完了した時点で解放する。
                 let version = format!("residual:{}", parent_result.alignment_id);
                 let mut residual_cache = InputCache::default();
-                let residual_dsp = prepared
+                let residual_specs: Vec<_> = prepared
                     .channels
                     .iter()
                     .enumerate()
-                    .map(|(channel, samples)| {
-                        residual_cache.prepare(
-                            &capture.input_id,
-                            channel,
-                            capture.sample_rate,
-                            &version,
-                            samples,
-                        )
+                    .map(|(channel, samples)| PrepareSpec {
+                        id: &capture.input_id,
+                        channel,
+                        rate: capture.sample_rate,
+                        version: &version,
+                        samples,
                     })
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(err)?;
-                let child_dsp = children
+                    .collect();
+                let residual_dsp = residual_cache.prepare_many(&residual_specs).map_err(err)?;
+                // 全 child のチャンネル準備を一括で並列化し、結果は
+                // spec と同じ (child, channel) 順で返る。
+                let child_specs: Vec<_> = children
                     .iter()
-                    .map(|child| prepare_channels(&mut dsp_inputs, child, "original"))
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(err)?;
+                    .flat_map(|child| {
+                        child
+                            .channel_samples
+                            .iter()
+                            .enumerate()
+                            .map(|(channel, samples)| PrepareSpec {
+                                id: &child.input_id,
+                                channel,
+                                rate: child.sample_rate,
+                                version: "original",
+                                samples,
+                            })
+                    })
+                    .collect();
+                let child_flat = dsp_inputs.prepare_many(&child_specs).map_err(err)?;
+                let mut child_flat = child_flat.into_iter();
+                let child_dsp: Vec<_> = children
+                    .iter()
+                    .map(|child| {
+                        (0..child.channel_samples.len())
+                            .map(|_| child_flat.next().expect("one spec per channel"))
+                            .collect::<Vec<_>>()
+                    })
+                    .collect();
                 let mut tasks = Vec::new();
                 for (child, prepared_child) in children.iter().zip(&child_dsp) {
                     for m in 0..n_methods {
