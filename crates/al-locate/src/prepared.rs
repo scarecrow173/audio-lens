@@ -1,8 +1,10 @@
 //! ジョブ内で共有する不変 DSP 入力。窓のフィルタには流用しない。
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use ruviform_numeric::resample::ResamplePlan;
+
+use crate::pool::run_pool;
 
 /// 現行 BandNcc の帯域。Nyquist で切り詰める。
 const BANDS: &[(f64, f64)] = &[
@@ -63,6 +65,69 @@ mod tests {
     }
 
     #[test]
+    fn prepare_many_matches_sequential_prepare_and_dedups_in_batch() {
+        let a = noise(7, 4097);
+        let b = noise(11, 4097);
+        let specs = [
+            PrepareSpec {
+                id: "capture",
+                channel: 0,
+                rate: 48000,
+                version: "original",
+                samples: &a,
+            },
+            PrepareSpec {
+                id: "capture",
+                channel: 1,
+                rate: 48000,
+                version: "original",
+                samples: &b,
+            },
+            PrepareSpec {
+                id: "source",
+                channel: 0,
+                rate: 48000,
+                version: "original",
+                samples: &a,
+            },
+            // バッチ内重複: 先の miss 挿入を再利用する。
+            PrepareSpec {
+                id: "capture",
+                channel: 0,
+                rate: 48000,
+                version: "original",
+                samples: &a,
+            },
+        ];
+        let mut cache = InputCache::default();
+        let batch = cache.prepare_many(&specs).unwrap();
+        assert!(Arc::ptr_eq(&batch[0], &batch[3]));
+
+        let mut seq = InputCache::default();
+        let expected: Vec<_> = specs
+            .iter()
+            .map(|s| {
+                seq.prepare(s.id, s.channel, s.rate, s.version, s.samples)
+                    .unwrap()
+            })
+            .collect();
+        assert_eq!(cache.stats(), seq.stats());
+        for (got, want) in batch.iter().zip(&expected) {
+            assert_eq!(got.bands().len(), want.bands().len());
+            for ((band_a, actual), (band_b, expected)) in got.bands().iter().zip(want.bands()) {
+                assert_eq!(band_a, band_b);
+                assert_eq!(actual.as_ref(), expected.as_ref());
+            }
+            assert_eq!(got.coarse_samples(), want.coarse_samples());
+        }
+
+        let again = cache.prepare_many(&specs[..3]).unwrap();
+        assert!(Arc::ptr_eq(&again[0], &batch[0]));
+        assert_eq!(cache.stats().misses, 3);
+        assert_eq!(cache.stats().hits, 4);
+    }
+
+    #[test]
     fn hit_and_miss_counts_distinguish_reuse_from_recompute() {
         let samples = noise(3, 1025);
         let mut cache = InputCache::default();
@@ -79,6 +144,47 @@ mod tests {
         assert_eq!(stats.misses, 2);
         assert_eq!(stats.hits, 1);
         assert_eq!(cache.len(), 2);
+    }
+
+    /// `cargo test --release -p al-locate bench_prepare_many -- --ignored --nocapture`
+    /// で逐次 `prepare` と `prepare_many` の壁時計を比較する手動計測用。
+    #[test]
+    #[ignore]
+    fn bench_prepare_many_parallel_vs_sequential() {
+        use std::time::Instant;
+        let n = 2_000_000usize;
+        let data: Vec<Vec<f64>> = (0..6).map(|i| noise(i + 1, n)).collect();
+        let specs: Vec<PrepareSpec<'_>> = data
+            .iter()
+            .enumerate()
+            .map(|(channel, samples)| PrepareSpec {
+                id: "capture",
+                channel,
+                rate: 48000,
+                version: "original",
+                samples,
+            })
+            .collect();
+        let t = Instant::now();
+        let mut seq = InputCache::default();
+        for s in &specs {
+            seq.prepare(s.id, s.channel, s.rate, s.version, s.samples)
+                .unwrap();
+        }
+        let seq_ms = t.elapsed().as_secs_f64() * 1e3;
+
+        let t = Instant::now();
+        let mut par = InputCache::default();
+        let out = par.prepare_many(&specs).unwrap();
+        let par_ms = t.elapsed().as_secs_f64() * 1e3;
+
+        assert_eq!(out.len(), specs.len());
+        assert_eq!(seq.stats(), par.stats());
+        eprintln!(
+            "specs={} sequential={seq_ms:.0}ms prepare_many={par_ms:.0}ms speedup={:.2}x",
+            specs.len(),
+            seq_ms / par_ms
+        );
     }
 
     #[test]
@@ -127,8 +233,79 @@ struct InputKey {
     filter: FilterKey,
 }
 
+/// `prepare_many` の 1 件分の指定。帯域は `bands_for_rate(rate)` で
+/// 導き、`prepare` と同じキー・計算規則を共有する。
+pub(crate) struct PrepareSpec<'a> {
+    pub id: &'a str,
+    pub channel: usize,
+    pub rate: u32,
+    pub version: &'a str,
+    pub samples: &'a [f64],
+}
+
 /// 半開帯域 (Hz) と、その全レート信号。
 pub type BandSignal = ((f64, f64), Arc<[f64]>);
+
+/// `prepare`/`prepare_with_bands` 共通のキャッシュキー。
+fn input_key(
+    id: &str,
+    channel: usize,
+    rate: u32,
+    version: &str,
+    samples: &[f64],
+    bands: &[(f64, f64)],
+) -> InputKey {
+    InputKey {
+        id: id.into(),
+        channel,
+        rate,
+        version: version.into(),
+        filter: FilterKey {
+            frames: samples.len(),
+            fft_len: samples.len().max(1).next_power_of_two(),
+            bands: bands
+                .iter()
+                .map(|(lo, hi)| (lo.to_bits(), hi.to_bits()))
+                .collect(),
+            algorithm: "spectral-mask-half-open-zero-pad-truncate-v1",
+        },
+    }
+}
+
+/// 1 チャンネルのフィルタ・間引き計算。純粋関数であり、呼出順序や
+/// ワーカースレッドに依存しない。
+fn filter_channel(
+    samples: &[f64],
+    rate: u32,
+    bands: &[(f64, f64)],
+) -> Result<PreparedChannel, &'static str> {
+    let filtered = ruviform_numeric::bands::bandpass_many(samples, rate, bands)
+        .expect("band settings and input must be valid");
+    let coarse_rate = rate / 4;
+    let (coarse, radius) = if coarse_rate > 0 && samples.len() >= 4 {
+        let plan =
+            ResamplePlan::new(rate, coarse_rate).map_err(|_| "sample rates must be nonzero")?;
+        (
+            Some(
+                plan.resample(samples)
+                    .map_err(|_| "resample input length mismatch")?,
+            ),
+            2 * plan.radius() + (rate as usize).div_ceil(coarse_rate as usize),
+        )
+    } else {
+        (None, 0)
+    };
+    Ok(PreparedChannel {
+        bands: bands
+            .iter()
+            .copied()
+            .zip(filtered.into_iter().map(Arc::from))
+            .collect(),
+        coarse,
+        coarse_rate,
+        radius,
+    })
+}
 
 /// 入力 1 チャンネルのフィルタ済み全区間とアンチエイリアス付き間引き信号。
 /// 原信号は呼び出し元の正規化 PCM を参照し、複製しない。
@@ -204,54 +381,72 @@ impl InputCache {
         if rate == 0 {
             return Err("sample rates must be nonzero");
         }
-        let key = InputKey {
-            id: id.into(),
-            channel,
-            rate,
-            version: version.into(),
-            filter: FilterKey {
-                frames: samples.len(),
-                fft_len: samples.len().max(1).next_power_of_two(),
-                bands: bands
-                    .iter()
-                    .map(|(lo, hi)| (lo.to_bits(), hi.to_bits()))
-                    .collect(),
-                algorithm: "spectral-mask-half-open-zero-pad-truncate-v1",
-            },
-        };
+        let key = input_key(id, channel, rate, version, samples, bands);
         if let Some(prepared) = self.channels.get(&key) {
             self.hits += 1;
             return Ok(Arc::clone(prepared));
         }
         self.misses += 1;
-        let filtered = ruviform_numeric::bands::bandpass_many(samples, rate, bands)
-            .expect("band settings and input must be valid");
-        let coarse_rate = rate / 4;
-        let (coarse, radius) = if coarse_rate > 0 && samples.len() >= 4 {
-            let plan =
-                ResamplePlan::new(rate, coarse_rate).map_err(|_| "sample rates must be nonzero")?;
-            (
-                Some(
-                    plan.resample(samples)
-                        .map_err(|_| "resample input length mismatch")?,
-                ),
-                2 * plan.radius() + (rate as usize).div_ceil(coarse_rate as usize),
-            )
-        } else {
-            (None, 0)
-        };
-        let prepared = Arc::new(PreparedChannel {
-            bands: bands
-                .iter()
-                .copied()
-                .zip(filtered.into_iter().map(Arc::from))
-                .collect(),
-            coarse,
-            coarse_rate,
-            radius,
-        });
+        let prepared = Arc::new(filter_channel(samples, rate, bands)?);
         self.channels.insert(key, Arc::clone(&prepared));
         Ok(prepared)
+    }
+
+    /// `prepare` と同じ帯域・計算規則で複数 (id, channel) を一括準備する。
+    /// フィルタ・間引きは純粋な計算のためワーカープールで並列化し、
+    /// キャッシュへの登録と hit/miss の計上は spec 順に逐次 `prepare`
+    /// した場合と同じ規則で行う。同一キーの重複 spec は、先の計算
+    /// 結果を挿入したエントリを再利用する。
+    pub(crate) fn prepare_many(
+        &mut self,
+        specs: &[PrepareSpec<'_>],
+    ) -> Result<Vec<Arc<PreparedChannel>>, &'static str> {
+        let _span = tracing::info_span!("locate::prepare_channels", specs = specs.len()).entered();
+        // キーを確定し、計算が必要な miss を集める。重複キーは pending
+        // に残り、先の miss の挿入結果を共有する。
+        let mut keys = Vec::with_capacity(specs.len());
+        let mut spec_bands = Vec::with_capacity(specs.len());
+        let mut miss_specs: Vec<usize> = Vec::new();
+        let mut pending: HashSet<InputKey> = HashSet::new();
+        for spec in specs {
+            if spec.rate == 0 {
+                return Err("sample rates must be nonzero");
+            }
+            let bands = bands_for_rate(spec.rate);
+            let key = input_key(
+                spec.id,
+                spec.channel,
+                spec.rate,
+                spec.version,
+                spec.samples,
+                &bands,
+            );
+            if !self.channels.contains_key(&key) && pending.insert(key.clone()) {
+                miss_specs.push(keys.len());
+            }
+            keys.push(key);
+            spec_bands.push(bands);
+        }
+        let computed = run_pool(miss_specs.len(), &|| (), &|j, _| {
+            let i = miss_specs[j];
+            filter_channel(specs[i].samples, specs[i].rate, &spec_bands[i])
+        });
+        // spec 順に逐次呼出と同じ規則で処理する。既存エントリは hit、
+        // miss は spec 順に計算結果を消費して挿入する。
+        let mut computed = computed.into_iter();
+        let mut out = Vec::with_capacity(specs.len());
+        for key in &keys {
+            if let Some(prepared) = self.channels.get(key) {
+                self.hits += 1;
+                out.push(Arc::clone(prepared));
+                continue;
+            }
+            self.misses += 1;
+            let prepared = Arc::new(computed.next().expect("one compute per miss")?);
+            self.channels.insert(key.clone(), Arc::clone(&prepared));
+            out.push(prepared);
+        }
+        Ok(out)
     }
 
     /// hit/miss の計測値。診断用で永続成果物には出力しない。

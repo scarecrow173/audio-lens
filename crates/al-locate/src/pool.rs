@@ -16,6 +16,42 @@ use std::collections::HashMap;
 
 use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
 
+/// Run `n_tasks` independent units of work over a worker pool,
+/// collecting one result per task in input order. Each worker builds
+/// its own context via `make_ctx`, so per-worker resources (e.g.
+/// [`CorrelationPool`]) stay exclusively owned by that thread.
+pub(crate) fn run_pool<T: Send, C>(
+    n_tasks: usize,
+    make_ctx: &(dyn Fn() -> C + Sync),
+    work: &(dyn Fn(usize, &mut C) -> T + Sync),
+) -> Vec<T> {
+    let slots: Vec<std::sync::Mutex<Option<T>>> =
+        (0..n_tasks).map(|_| std::sync::Mutex::new(None)).collect();
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let workers = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(n_tasks);
+    std::thread::scope(|scope| {
+        for _ in 0..workers {
+            scope.spawn(|| {
+                let mut ctx = make_ctx();
+                loop {
+                    let idx = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    if idx >= n_tasks {
+                        return;
+                    }
+                    *slots[idx].lock().unwrap() = Some(work(idx, &mut ctx));
+                }
+            });
+        }
+    });
+    slots
+        .into_iter()
+        .map(|s| s.into_inner().unwrap().unwrap())
+        .collect()
+}
+
 /// pool が同時に保持する形状数の上限。帯域フィルタは長さを維持する
 /// ため通常の pair は full-rate と coarse の 2 形状に収束する。
 const MAX_SHAPES: usize = 8;
