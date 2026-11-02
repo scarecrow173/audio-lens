@@ -100,3 +100,4 @@ Directory: `docs/impl/ir`
 | relaxed-tier-callsite-migration | [migrate-relaxed-tier-call-sites-to-atomic-writes.md](./migrate-relaxed-tier-call-sites-to-atomic-writes.md) |
 
 | ruviform-dependency-ci | [ruviform-git-sha-toolchain-private-repo-ci.md](./ruviform-git-sha-toolchain-private-repo-ci.md) |
+| issue-127-ruviform-consumer-tracking | [ruviform-rev-bump-consumer-regression-verification-issue-127.md](./ruviform-rev-bump-consumer-regression-verification-issue-127.md) |
