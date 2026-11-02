@@ -1,0 +1,916 @@
+{
+  "run": "canonical",
+  "stages_filter": null,
+  "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+  "e2e_wall_ms": 175011,
+  "environment": {
+    "recorded_at": "2026-11-02T12:38:27.244Z",
+    "commit": "987f236104c94cbd253ddb786c732e8e1d0b28ef",
+    "worktree_dirty": true,
+    "note": "instrumented build: window_anchors_in/method_tasks/prepare_*/band_gain_phase/ref_phase"
+  },
+  "stages": {
+    "ingest": {
+      "status": "completed",
+      "duration_ms": 2299
+    },
+    "locate": {
+      "status": "completed",
+      "duration_ms": 101613
+    },
+    "cheap_analysis": {
+      "status": "completed",
+      "duration_ms": 6638
+    },
+    "reference_analysis": {
+      "status": "completed",
+      "duration_ms": 31671
+    },
+    "expensive_analysis": {
+      "status": "completed",
+      "duration_ms": 8958
+    },
+    "dataset": {
+      "status": "completed",
+      "duration_ms": 403
+    },
+    "export": {
+      "status": "completed",
+      "duration_ms": 22630
+    }
+  },
+  "span_busy": {
+    "stage": {
+      "calls": 7,
+      "busy_ms": 174606
+    },
+    "locate::full_ncc": {
+      "calls": 16,
+      "busy_ms": 6679
+    },
+    "locate::spectral_envelope": {
+      "calls": 16,
+      "busy_ms": 22490
+    },
+    "locate::band_ncc": {
+      "calls": 16,
+      "busy_ms": 24320
+    },
+    "locate::gcc_phat": {
+      "calls": 16,
+      "busy_ms": 39580
+    },
+    "analysis::cheap": {
+      "calls": 3,
+      "busy_ms": 8480
+    },
+    "analysis::band_gain": {
+      "calls": 2,
+      "busy_ms": 33700
+    },
+    "analysis::reference": {
+      "calls": 2,
+      "busy_ms": 57300
+    },
+    "analysis::transfer": {
+      "calls": 3,
+      "busy_ms": 0
+    },
+    "analysis::codec": {
+      "calls": 3,
+      "busy_ms": 1258
+    },
+    "analysis::dynamics": {
+      "calls": 3,
+      "busy_ms": 127
+    },
+    "analysis::noise": {
+      "calls": 3,
+      "busy_ms": 915
+    },
+    "analysis::channel": {
+      "calls": 3,
+      "busy_ms": 9361
+    },
+    "analysis::ir": {
+      "calls": 3,
+      "busy_ms": 69
+    },
+    "analysis::timing": {
+      "calls": 3,
+      "busy_ms": 5000
+    },
+    "analysis::region": {
+      "calls": 3,
+      "busy_ms": 19310
+    }
+  },
+  "span_instances": {
+    "stage": [
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "ingest",
+        "name": "stage",
+        "busy_ms": 2300
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "locate",
+        "name": "stage",
+        "busy_ms": 102000
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "cheap_analysis",
+        "name": "stage",
+        "busy_ms": 6640
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "reference_analysis",
+        "name": "stage",
+        "busy_ms": 31700
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "expensive_analysis",
+        "name": "stage",
+        "busy_ms": 8960
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "dataset",
+        "name": "stage",
+        "busy_ms": 406
+      },
+      {
+        "job_id": "JOB-0G1OqXyAUFRGY6t9HW8mK0",
+        "stage": "export",
+        "name": "stage",
+        "busy_ms": 22600
+      }
+    ],
+    "locate::full_ncc": [
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 281
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 355
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 537
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 540
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 272
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 367
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 371
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 530
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 303
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 314
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 314
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 316
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 307
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 601
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 611
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "full_ncc",
+        "name": "locate::full_ncc",
+        "busy_ms": 660
+      }
+    ],
+    "locate::spectral_envelope": [
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1220
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1220
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1240
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1250
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1410
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1840
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1870
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1870
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1130
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1130
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1800
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1890
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1070
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1080
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1230
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "spectral_envelope",
+        "name": "locate::spectral_envelope",
+        "busy_ms": 1240
+      }
+    ],
+    "locate::band_ncc": [
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1270
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1330
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1780
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1930
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1290
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1320
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1390
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1410
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1320
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1350
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 2040
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 2050
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1230
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1410
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1420
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "band_ncc",
+        "name": "locate::band_ncc",
+        "busy_ms": 1780
+      }
+    ],
+    "locate::gcc_phat": [
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2290
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2320
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2620
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2690
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2350
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2350
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2360
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2360
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2340
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2380
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2470
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2550
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2380
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2460
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2820
+      },
+      {
+        "len_a": 2400000,
+        "len_b": 2400240,
+        "method": "gcc_phat",
+        "name": "locate::gcc_phat",
+        "busy_ms": 2840
+      }
+    ],
+    "analysis::cheap": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "name": "analysis::cheap",
+        "busy_ms": 2560
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "name": "analysis::cheap",
+        "busy_ms": 2910
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "name": "analysis::cheap",
+        "busy_ms": 3010
+      }
+    ],
+    "analysis::band_gain": [
+      {
+        "len": 2400000,
+        "pair": "IN-0000000000000000000003__IN-0000000000000000000002",
+        "name": "analysis::band_gain",
+        "busy_ms": 16800
+      },
+      {
+        "len": 2400000,
+        "pair": "IN-0000000000000000000003__IN-0000000000000000000001",
+        "name": "analysis::band_gain",
+        "busy_ms": 16900
+      }
+    ],
+    "analysis::reference": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2400000,
+        "name": "analysis::reference",
+        "busy_ms": 28300
+      },
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2400000,
+        "name": "analysis::reference",
+        "busy_ms": 29000
+      }
+    ],
+    "analysis::transfer": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.17300000000000001
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.101
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "transfer",
+        "name": "analysis::transfer",
+        "busy_ms": 0.138
+      }
+    ],
+    "analysis::codec": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 350
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 452
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "codec",
+        "name": "analysis::codec",
+        "busy_ms": 456
+      }
+    ],
+    "analysis::dynamics": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 41.6
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 41.7
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "dynamics",
+        "name": "analysis::dynamics",
+        "busy_ms": 44
+      }
+    ],
+    "analysis::noise": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 311
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 306
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "noise",
+        "name": "analysis::noise",
+        "busy_ms": 298
+      }
+    ],
+    "analysis::channel": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 741
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 4230
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "channel",
+        "name": "analysis::channel",
+        "busy_ms": 4390
+      }
+    ],
+    "analysis::ir": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.009300000000000001
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 68.6
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "ir",
+        "name": "analysis::ir",
+        "busy_ms": 0.516
+      }
+    ],
+    "analysis::timing": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 140
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 2440
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "method": "timing",
+        "name": "analysis::timing",
+        "busy_ms": 2420
+      }
+    ],
+    "analysis::region": [
+      {
+        "input_id": "IN-0000000000000000000003",
+        "len": 2205000,
+        "name": "analysis::region",
+        "busy_ms": 2430
+      },
+      {
+        "input_id": "IN-0000000000000000000002",
+        "len": 2400240,
+        "name": "analysis::region",
+        "busy_ms": 8440
+      },
+      {
+        "input_id": "IN-0000000000000000000001",
+        "len": 2400240,
+        "name": "analysis::region",
+        "busy_ms": 8440
+      }
+    ]
+  },
+  "stage_events": [
+    {
+      "stage": "ingest",
+      "duration_ms": 2299
+    },
+    {
+      "stage": "locate",
+      "duration_ms": 101613
+    },
+    {
+      "stage": "cheap_analysis",
+      "duration_ms": 6638
+    },
+    {
+      "stage": "reference_analysis",
+      "duration_ms": 31671
+    },
+    {
+      "stage": "expensive_analysis",
+      "duration_ms": 8958
+    },
+    {
+      "stage": "dataset",
+      "duration_ms": 403
+    },
+    {
+      "stage": "export",
+      "duration_ms": 22630
+    }
+  ],
+  "window_anchors_in": [
+    {
+      "message": "window_anchors_in",
+      "windows": 514,
+      "range": 2400240,
+      "ncc_narrow": 514,
+      "ncc_widen": 227,
+      "ncc_full": 93,
+      "pool_builds": 1598,
+      "pool_hits": 303914,
+      "hier_calls": 1196,
+      "exact_fallbacks": 96,
+      "fb_shape": 0,
+      "fb_coarse_tie": 16,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 80,
+      "anchors": 468,
+      "elapsed_ms": 34707.1404
+    },
+    {
+      "message": "window_anchors_in",
+      "windows": 514,
+      "range": 2400240,
+      "ncc_narrow": 514,
+      "ncc_widen": 221,
+      "ncc_full": 94,
+      "pool_builds": 1609,
+      "pool_hits": 298783,
+      "hier_calls": 1176,
+      "exact_fallbacks": 116,
+      "fb_shape": 0,
+      "fb_coarse_tie": 16,
+      "fb_coarse_empty": 0,
+      "fb_refined_empty": 0,
+      "fb_refined_tie": 0,
+      "fb_background": 0,
+      "fb_near_gate": 100,
+      "anchors": 468,
+      "elapsed_ms": 37763.6273
+    }
+  ],
+  "method_tasks_pool": [],
+  "ref_phase": [],
+  "band_gain_phase": []
+}

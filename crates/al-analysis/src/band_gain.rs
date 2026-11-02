@@ -1,11 +1,12 @@
 //! 帯域ラグ補償 LS。汎用カーネルは ruviform-numeric(AL#101 で
-//! `al-math` 経由から移行)、帯域波形は `bandpass` で帯域ごと
-//! 逐次生成する(全帯域同時保持を避ける)。(channel, band) タスクは
-//! 独立のため `run_pool` で並列化し、ordered slot で逐次時と同一の
-//! 収集順を維持する。
+//! `al-math` 経由から移行)。帯域波形は入力ごとに 1 回の forward FFT
+//! を保持する共有スペクトル(`BandSpectrum`)から、タスクがワーカー
+//! 専有の `BandScratch` で帯域ごと抽出する(ruviform #183。全帯域同時
+//! 保持を避ける)。(channel, band) タスクは独立のため `run_pool` で
+//! 並列化し、ordered slot で逐次時と同一の収集順を維持する。
 use al_core::{Confidence, Validity};
 use al_dataset::types::{ChannelSelector, Delta, Range, ResolutionClass};
-use ruviform_numeric::bands::bandpass;
+use ruviform_numeric::bands::{BandScratch, BandSpectrum};
 use ruviform_numeric::corr::{CorrelationPlan, CorrelationWorkspace};
 use ruviform_numeric::vec::{dot, sum_sq};
 use ruviform_numeric::xspec::CrossSpectrum;
@@ -81,11 +82,14 @@ pub(crate) fn parameters(cfg: &ReferenceConfig, rate: u32) -> serde_json::Value 
     })
 }
 
-/// 窓相関の計算コンテキスト。shape は全タスクで同一のため、ワーカーが
-/// plan・workspace を構築して使い回す。
+/// 窓相関 + 帯域抽出の計算コンテキスト。shape は全タスクで同一のため、
+/// ワーカーが plan・workspace を構築して使い回す。`scratch` は共有
+/// スペクトルへの帯域抽出の排他領域で、変換長が同じ限り全
+/// `BandSpectrum` に使い回せる。
 struct Ncc {
     plan: CorrelationPlan,
     workspace: CorrelationWorkspace,
+    scratch: Option<(usize, BandScratch)>,
 }
 
 impl Ncc {
@@ -93,7 +97,23 @@ impl Ncc {
         let plan = CorrelationPlan::new_ncc(window, window + 2 * max)
             .expect("correlation plan shape must be valid");
         let workspace = CorrelationWorkspace::new(&plan);
-        Self { plan, workspace }
+        Self {
+            plan,
+            workspace,
+            scratch: None,
+        }
+    }
+
+    /// `spectrum` の `(lo, hi)` 帯域波形を `out` に書き込む。
+    /// `bandpass` と同一の出力規則(bit-exact)を共有スペクトルから生成する。
+    fn band(&mut self, spectrum: &BandSpectrum, lo: f64, hi: f64, out: &mut [f64]) {
+        let n = spectrum.fft_size();
+        if self.scratch.as_ref().is_none_or(|&(k, _)| k != n) {
+            self.scratch = Some((n, BandScratch::new(spectrum)));
+        }
+        spectrum
+            .band_into(&mut self.scratch.as_mut().unwrap().1, lo, hi, out)
+            .expect("band filter input must be valid");
     }
 }
 
@@ -255,6 +275,21 @@ pub(crate) fn analyze(
     let max = (cfg.band_max_lag_s * rate as f64).round().max(1.0) as usize;
     let n_chan = src.src.len().min(src.cap.len());
     let n_bands = bands.len();
+    // (input, band) タスクが帯域ごとに全長 forward FFT を再計算しない
+    // よう、入力ごとに 1 回の forward を保持する共有スペクトルを先に
+    // 構築する。BandSpectrum は不変・Send + Sync で、複数スレッドからの
+    // 帯域抽出は呼出側が分離した BandScratch を `&mut` で排他所有する
+    // (ruviform #183)。src 側を [0, n_chan)、cap 側を [n_chan, 2*n_chan)
+    // に並べ、帯域波形の生成順・内容は逐次版と同一規則を維持する。
+    let inputs: Vec<&[f64]> = src.src[..n_chan]
+        .iter()
+        .chain(&src.cap[..n_chan])
+        .copied()
+        .collect();
+    let spectra = run_pool(inputs.len(), usize::MAX, &|| (), &|i, _| {
+        BandSpectrum::new(inputs[i], rate).expect("band filter input must be valid")
+    });
+    let (src_spectra, cap_spectra) = spectra.split_at(n_chan);
     // (channel, band) の帯域波形生成+窓相関と channel ごとの coherence
     // は互いに独立の純粋計算で、共有可変状態を持たない。タスク列の先頭
     // n_chan 件を coherence、続く n_chan*n_bands 件を channel-major の
@@ -278,8 +313,12 @@ pub(crate) fn analyze(
             let task = idx - n_chan;
             let ch = task / n_bands;
             let (lo, hi) = bands[task % n_bands];
-            let x = bandpass(src.src[ch], rate, lo, hi).expect("band filter input must be valid");
-            let y = bandpass(src.cap[ch], rate, lo, hi).expect("band filter input must be valid");
+            let xs = &src_spectra[ch];
+            let ys = &cap_spectra[ch];
+            let mut x = vec![0.0; xs.len()];
+            let mut y = vec![0.0; ys.len()];
+            ncc.band(xs, lo, hi, &mut x);
+            ncc.band(ys, lo, hi, &mut y);
             let guard = (rate as f64 / lo).ceil() as usize;
             TaskOutput::Windows(windows_with(ncc, &x, &y, window, hop, max, guard))
         },
@@ -424,7 +463,7 @@ pub(crate) fn analyze(
 mod tests {
     use super::*;
     use al_dataset::types::Value;
-    use ruviform_numeric::bands::bandpass_many;
+    use ruviform_numeric::bands::{bandpass, bandpass_many};
 
     fn noise(n: usize, mut seed: u64) -> Vec<f64> {
         (0..n)
@@ -575,6 +614,27 @@ mod tests {
         assert!(select(&edge, false).is_empty());
         let tied = windows(&vec![1.0; 2000], &vec![1.0; 2000], 800, 400, 320, 20);
         assert!(tied.iter().all(|w| w.lag == 0));
+    }
+
+    #[test]
+    fn shared_spectrum_band_extraction_is_bit_exact_with_bandpass() {
+        // 本番は 1 つの `Ncc` scratch で複数の `BandSpectrum` へ帯域抽出
+        // する。帯域波形が `bandpass`(従来の帯域ごと forward FFT 経路)
+        // と一致することを直接固定する。
+        let rate = 8000;
+        let x = noise(9000, 11);
+        let y = noise(9000, 13);
+        let sx = BandSpectrum::new(&x, rate).unwrap();
+        let sy = BandSpectrum::new(&y, rate).unwrap();
+        let mut ncc = Ncc::new(800, 320);
+        for (lo, hi) in [(250.0, 500.0), (1000.0, 3000.0)] {
+            let mut ax = vec![0.0; x.len()];
+            let mut ay = vec![0.0; y.len()];
+            ncc.band(&sx, lo, hi, &mut ax);
+            ncc.band(&sy, lo, hi, &mut ay);
+            assert_eq!(ax, bandpass(&x, rate, lo, hi).unwrap());
+            assert_eq!(ay, bandpass(&y, rate, lo, hi).unwrap());
+        }
     }
 
     #[test]
