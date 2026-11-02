@@ -24,60 +24,60 @@
       {
         "candidates": [
           {
-            "peak_ratio_12": 1.0064304001967093,
-            "peak_to_background": 4.770368856597201,
+            "peak_ratio_12": 1.006430400196715,
+            "peak_to_background": 4.770368856597234,
             "peak_width": 192,
             "position": 69804,
-            "score": -0.07599405770532158
+            "score": -0.07599405770532082
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 4.739889470414268,
+            "peak_to_background": 4.739889470414274,
             "peak_width": 193,
             "position": 69815,
-            "score": -0.0755085077820268
+            "score": -0.07550850778202563
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 4.494636973817607,
+            "peak_to_background": 4.494636973817638,
             "peak_width": 212,
             "position": 649,
-            "score": -0.0716015284814711
+            "score": -0.07160152848147038
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 4.247747849123387,
+            "peak_to_background": 4.2477478491234315,
             "peak_width": 209,
             "position": 35722,
-            "score": 0.06766847698108623
+            "score": 0.06766847698108579
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 4.031753904228473,
+            "peak_to_background": 4.031753904228568,
             "peak_width": 223,
             "position": 54917,
-            "score": 0.06422759917775997
+            "score": 0.06422759917776039
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 4.016489777946005,
+            "peak_to_background": 4.016489777946018,
             "peak_width": 212,
             "position": 16513,
-            "score": 0.06398443498471713
+            "score": 0.06398443498471625
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 3.932770256629964,
+            "peak_to_background": 3.9327702566300244,
             "peak_width": 230,
             "position": 11226,
-            "score": -0.06265074647441367
+            "score": -0.06265074647441357
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 3.929389722516354,
+            "peak_to_background": 3.92938972251642,
             "peak_width": 141,
             "position": 289680,
-            "score": -0.06259689309069698
+            "score": -0.06259689309069696
           }
         ],
         "method": "full_ncc",
@@ -88,60 +88,60 @@
       {
         "candidates": [
           {
-            "peak_ratio_12": 1.0475006753419411,
-            "peak_to_background": 7.059705476124571,
+            "peak_ratio_12": 1.0475006753419396,
+            "peak_to_background": 7.0597054761243365,
             "peak_width": 9,
             "position": 69627,
-            "score": -0.17551669814866555
+            "score": -0.1755166981486634
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.739571288409942,
+            "peak_to_background": 6.739571288409729,
             "peak_width": 20,
             "position": 69618,
-            "score": -0.1675575990357913
+            "score": -0.16755759903578948
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.71696244428707,
+            "peak_to_background": 6.716962444286755,
             "peak_width": 9,
             "position": 69624,
-            "score": -0.16699550339556596
+            "score": -0.16699550339556163
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.6852967818823865,
+            "peak_to_background": 6.68529678188213,
             "peak_width": 29,
             "position": 69615,
-            "score": -0.16620823931935816
+            "score": -0.16620823931935527
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.654255712097911,
+            "peak_to_background": 6.6542557120976555,
             "peak_width": 29,
             "position": 69612,
-            "score": -0.16543650371452326
+            "score": -0.16543650371452034
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.5256517791779105,
+            "peak_to_background": 6.525651779177719,
             "peak_width": 29,
             "position": 69609,
-            "score": -0.16223918369155793
+            "score": -0.16223918369155654
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 6.364913109448727,
+            "peak_to_background": 6.364913109448489,
             "peak_width": 29,
             "position": 69629,
-            "score": -0.15824293757745483
+            "score": -0.15824293757745223
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 5.916630104103798,
+            "peak_to_background": 5.916630104103483,
             "peak_width": 32,
             "position": 69621,
-            "score": -0.1470978334083933
+            "score": -0.14709783340838853
           }
         ],
         "method": "band_ncc",
@@ -152,60 +152,60 @@
       {
         "candidates": [
           {
-            "peak_ratio_12": 1.0984375726920288,
-            "peak_to_background": 47.212079110875266,
+            "peak_ratio_12": 1.1022778197799603,
+            "peak_to_background": 46.55577279098336,
             "peak_width": 10,
             "position": 232093,
-            "score": 0.0319864698735878
+            "score": 0.031923784439968454
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 42.98112180846914,
+            "peak_to_background": 42.23596987579497,
             "peak_width": 10,
             "position": 232096,
-            "score": -0.029119970646302642
+            "score": -0.02896165001881392
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 40.167559669413556,
+            "peak_to_background": 39.45557882572215,
             "peak_width": 13,
             "position": 232091,
-            "score": 0.02721376523672901
+            "score": 0.027055106550190996
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 37.21359641137363,
+            "peak_to_background": 37.079809172814315,
             "peak_width": 3,
             "position": 240326,
-            "score": 0.02521243721770486
+            "score": 0.02542601624126292
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 36.91339190494243,
+            "peak_to_background": 36.33938066442484,
             "peak_width": 12,
             "position": 137373,
-            "score": -0.025009046844272548
+            "score": -0.024918296603546778
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 34.3313534085818,
+            "peak_to_background": 34.09194931613368,
             "peak_width": 9,
             "position": 231837,
-            "score": -0.023259700106495463
+            "score": -0.02337720922371555
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 32.5196447136724,
+            "peak_to_background": 32.07373691329849,
             "peak_width": 13,
             "position": 232098,
-            "score": -0.022032256480186536
+            "score": -0.02199329969242194
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 28.298657898318314,
+            "peak_to_background": 28.171395778728495,
             "peak_width": 2,
             "position": 240774,
-            "score": 0.01917251231833635
+            "score": 0.019317423217327497
           }
         ],
         "method": "gcc_phat",
@@ -216,60 +216,60 @@
       {
         "candidates": [
           {
-            "peak_ratio_12": 1.0109083204029776,
-            "peak_to_background": 906759732213.7057,
+            "peak_ratio_12": 1.010908320402978,
+            "peak_to_background": 906759732213.7043,
             "peak_width": 2,
             "position": 24627,
-            "score": 0.9067597322137056
+            "score": 0.9067597322137043
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 896975238914.0934,
+            "peak_to_background": 896975238914.0917,
             "peak_width": 2,
             "position": 82090,
-            "score": 0.8969752389140934
+            "score": 0.8969752389140917
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 896694567953.7444,
+            "peak_to_background": 896694567953.7427,
             "peak_width": 2,
             "position": 98508,
-            "score": 0.8966945679537444
+            "score": 0.8966945679537427
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 891538790125.4745,
+            "peak_to_background": 891538790125.472,
             "peak_width": 2,
             "position": 114926,
-            "score": 0.8915387901254744
+            "score": 0.891538790125472
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 886474759165.8174,
+            "peak_to_background": 886474759165.8152,
             "peak_width": 2,
             "position": 41045,
-            "score": 0.8864747591658173
+            "score": 0.8864747591658152
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 886088076546.3928,
+            "peak_to_background": 886088076546.3906,
             "peak_width": 2,
             "position": 65672,
-            "score": 0.8860880765463928
+            "score": 0.8860880765463905
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 885701977686.108,
+            "peak_to_background": 885701977686.1061,
             "peak_width": 2,
             "position": 106717,
-            "score": 0.885701977686108
+            "score": 0.885701977686106
           },
           {
             "peak_ratio_12": null,
-            "peak_to_background": 882981233626.4518,
+            "peak_to_background": 882981233626.4493,
             "peak_width": 2,
             "position": 32836,
-            "score": 0.8829812336264518
+            "score": 0.8829812336264493
           }
         ],
         "method": "spectral_envelope",
@@ -301,20 +301,7 @@
         "transform": {
           "algorithm_id": "polyphase-blackman-sinc",
           "algorithm_version": "1",
-          "antialias": true,
-          "clip": false,
-          "compensation_source_frames": 32,
-          "cutoff": 0.94,
-          "delay_source_frames": 32,
-          "down": 147,
-          "endpoint_extension": "zero",
-          "output_length_rounding": "ceil",
-          "phase_normalization": "unit-dc",
-          "radius": 32,
-          "source_rate": 44100,
-          "target_rate": 48000,
-          "up": 160,
-          "window": "blackman"
+          "stable_id": "rvf-resample/1/44100/48000/160/147/32/3fee147ae147ae14"
         }
       },
       "position_tolerance": 256

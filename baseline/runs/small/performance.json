@@ -1,50 +1,46 @@
 {
-  "e2e_wall_ms": 140363,
+  "e2e_wall_ms": 103185,
   "stages": {
     "ingest": {
       "status": "completed",
-      "duration_ms": 664
+      "duration_ms": 852
     },
     "locate": {
       "status": "completed",
-      "duration_ms": 122415
+      "duration_ms": 81356
     },
     "cheap_analysis": {
       "status": "completed",
-      "duration_ms": 2249
+      "duration_ms": 6824
     },
     "reference_analysis": {
       "status": "completed",
-      "duration_ms": 2619
+      "duration_ms": 2987
     },
     "expensive_analysis": {
       "status": "completed",
-      "duration_ms": 1280
+      "duration_ms": 1513
     },
     "dataset": {
       "status": "completed",
-      "duration_ms": 179
-    },
-    "visualization": {
-      "status": "completed",
-      "duration_ms": 1267
+      "duration_ms": 180
     },
     "export": {
       "status": "completed",
-      "duration_ms": 9468
+      "duration_ms": 9265
     }
   },
   "process": {
     "method": "windows:Get-Process",
     "interval_ms": 1000,
-    "sample_count": 137,
-    "cpu_sec_last_sample": 1078.265625,
-    "peak_rss_bytes": 7390265344,
+    "sample_count": 94,
+    "cpu_sec_last_sample": 604.84375,
+    "peak_rss_bytes": 5455101952,
     "note": "poll 標本値。peak RSS は真のピークを下回り得る下限推定"
   },
   "io_estimate": {
     "input_bytes": 38358372,
-    "output_bytes": 1741152703,
+    "output_bytes": 1480001200,
     "note": "近似値: 読み=入力総サイズ、書き=成果物総サイズ。stage 間の中間再読込は含まない"
   },
   "not_measured": [
@@ -52,10 +48,10 @@
     "alloc(bench_alloc.rs 側で別途計測)"
   ],
   "artifact_size_by_area": {
-    "analysis": 766874044,
-    "export": 783493663,
-    "inputs": 56646389,
-    "locate": 134017038,
-    "manifest.json": 121569
+    "analysis": 644562331,
+    "export": 644652313,
+    "inputs": 56647445,
+    "locate": 134013241,
+    "manifest.json": 125870
   }
 }

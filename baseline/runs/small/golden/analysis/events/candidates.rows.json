@@ -329,7 +329,7 @@
     "input_id": "IN-#1",
     "start_s": 0,
     "end_s": 10.005,
-    "strength": 0.4368299312316183,
+    "strength": 0.4368299312316237,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.band_correlation_min",
@@ -339,7 +339,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#3__IN-#1.json\",\"rows\":[147]}]",
-    "params": "{\"measured\":0.1689510206305145,\"segment_scope\":true,\"threshold\":0.3}"
+    "params": "{\"measured\":0.16895102063051287,\"segment_scope\":true,\"threshold\":0.3}"
   },
   {
     "event_id": "EVT-events.v1-IN-#1-0ms-030c4aa78d88",
@@ -347,7 +347,7 @@
     "input_id": "IN-#1",
     "start_s": 0,
     "end_s": 10.005,
-    "strength": 9.999999995000008,
+    "strength": 9.999999994891274,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.crosstalk_ratio",
@@ -357,7 +357,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#3__IN-#1.json\",\"rows\":[154]}]",
-    "params": "{\"measured\":0.9999999995000008,\"segment_scope\":true,\"threshold\":0.1}"
+    "params": "{\"measured\":0.9999999994891275,\"segment_scope\":true,\"threshold\":0.1}"
   },
   {
     "event_id": "EVT-events.v1-IN-#2-0ms-1f56161003a3",
@@ -383,7 +383,7 @@
     "input_id": "IN-#2",
     "start_s": 0,
     "end_s": 50.005,
-    "strength": 0.206638862130036,
+    "strength": 0.20663886213003155,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.band_correlation_min",
@@ -393,7 +393,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#3__IN-#2.json\",\"rows\":[147]}]",
-    "params": "{\"measured\":0.2380083413609892,\"segment_scope\":true,\"threshold\":0.3}"
+    "params": "{\"measured\":0.23800834136099053,\"segment_scope\":true,\"threshold\":0.3}"
   },
   {
     "event_id": "EVT-events.v1-IN-#2-0ms-ed6463369253",
@@ -401,7 +401,7 @@
     "input_id": "IN-#2",
     "start_s": 0,
     "end_s": 50.005,
-    "strength": 9.999999902206683,
+    "strength": 9.999999853616163,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.crosstalk_ratio",
@@ -411,7 +411,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#3__IN-#2.json\",\"rows\":[154]}]",
-    "params": "{\"measured\":0.9999999902206684,\"segment_scope\":true,\"threshold\":0.1}"
+    "params": "{\"measured\":0.9999999853616164,\"segment_scope\":true,\"threshold\":0.1}"
   },
   {
     "event_id": "EVT-events.v1-IN-#2-0ms-8c5a6f6c7e3c",
@@ -419,7 +419,7 @@
     "input_id": "IN-#2",
     "start_s": 0,
     "end_s": 50.005,
-    "strength": 1.2842601637294513,
+    "strength": 1.284260163729443,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.residual_r3_ratio",
@@ -429,7 +429,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#3__IN-#2.json\",\"rows\":[165]}]",
-    "params": "{\"measured\":0.38527804911883534,\"segment_scope\":true,\"threshold\":0.3}"
+    "params": "{\"measured\":0.3852780491188329,\"segment_scope\":true,\"threshold\":0.3}"
   },
   {
     "event_id": "EVT-events.v1-IN-#2-0ms-7893eeed1e2c",
@@ -455,7 +455,7 @@
     "input_id": "IN-#2",
     "start_s": 0,
     "end_s": 50.005,
-    "strength": 0.009747518813964889,
+    "strength": 0.00974751881397747,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.band_correlation_min",
@@ -465,7 +465,7 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#4__IN-#2.json\",\"rows\":[147]}]",
-    "params": "{\"measured\":0.2970757443558105,\"segment_scope\":true,\"threshold\":0.3}"
+    "params": "{\"measured\":0.29707574435580675,\"segment_scope\":true,\"threshold\":0.3}"
   },
   {
     "event_id": "EVT-events.v1-IN-#2-0ms-b6a4a133c9d0",
@@ -473,7 +473,7 @@
     "input_id": "IN-#2",
     "start_s": 0,
     "end_s": 50.005,
-    "strength": 2.2493222101617825,
+    "strength": 2.2493222101617727,
     "confidence": "medium",
     "validity": "valid",
     "source_feature": "ref.residual_r3_ratio",
@@ -483,6 +483,6 @@
     "algorithm_id": "events.v1",
     "algorithm_version": "1",
     "evidence": "[{\"artifact\":\"features/reference/IN-#4__IN-#2.json\",\"rows\":[164]}]",
-    "params": "{\"measured\":0.6747966630485347,\"segment_scope\":true,\"threshold\":0.3}"
+    "params": "{\"measured\":0.6747966630485318,\"segment_scope\":true,\"threshold\":0.3}"
   }
 ]

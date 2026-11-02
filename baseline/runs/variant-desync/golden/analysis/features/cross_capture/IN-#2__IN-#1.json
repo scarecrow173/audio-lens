@@ -29,6 +29,15 @@
           "gain_difference_db",
           "source_support"
         ],
+        "ruviform": {
+          "crates": [
+            "ruviform-audio-analysis",
+            "ruviform-dsp",
+            "ruviform-numeric"
+          ],
+          "precision": "f64",
+          "rev": "258df5ae255f812f54461eb1aef30fce608e8c6d"
+        },
         "sample_rate": null,
         "target_capture_id": "IN-#1",
         "usable_source_count": 0
