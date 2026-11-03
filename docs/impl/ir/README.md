@@ -105,3 +105,4 @@ Directory: `docs/impl/ir`
 | issue-71-band-gain-pair-al-analysis | [issue-71-band-gain-pair-al-analysis.md](./issue-71-band-gain-pair-al-analysis.md) |
 | issue-71-band-gain-shared-spectrum | [issue-71-band-gain-shared-spectrum.md](./issue-71-band-gain-shared-spectrum.md) |
 | issue-71-residual-band-eval-prepare-parallel | [issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md](./issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md) |
+| issue-131-gui-ruviform-controls | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |

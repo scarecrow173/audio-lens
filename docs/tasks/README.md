@@ -6,8 +6,6 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
-| TASK-034P51k4FtjAZkVTMWcZPl | pre-migration baseline の実装と実測 | todo | [pre-migration-baseline.md](./pre-migration-baseline.md) |
-| TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | todo | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
 | TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
@@ -15,7 +13,6 @@ Directory: `docs/tasks`
 | TASK-034P3OZ5AfOy7hwO4pHUHy | Job・Dataset・Provenance 回帰(AL#103) | todo | [ruviform-job-dataset-regression.md](./ruviform-job-dataset-regression.md) |
 | TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
 | TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
-| TASK-034P3P0cd1tJUcKKBnEB7b | 旧可視化廃止と可搬 export 分離(AL#106) | todo | [ruviform-viz-retirement.md](./ruviform-viz-retirement.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
@@ -84,6 +81,7 @@ Directory: `docs/tasks`
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
+| TASK-deJYGXM5AEKotdnNNLUHMn | Ruviform Controls・Gesture・Binding の GUI 統合(AL#131) | done | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
@@ -137,11 +135,14 @@ Directory: `docs/tasks`
 | TASK-034GNyDJKV8WtTW1TbBP06 | OverlapCorrPlan/OverlapCorrWorkspace を al-math に追加 | done | [overlapcorr-plan-workspace.md](./overlapcorr-plan-workspace.md) |
 | TASK-034G5V4oS9KJDKepLo5oND | PcmView 基盤(mmap/fallback + 融合 deinterleave) | done | [pcm-view-foundation.md](./pcm-view-foundation.md) |
 | TASK-034G5V5nHwcNPj19b1UpuN | PCM view 計測と job cache 導入判定 | done | [pcm-view-measurement-cache-decision.md](./pcm-view-measurement-cache-decision.md) |
+| TASK-034P51k4FtjAZkVTMWcZPl | pre-migration baseline の実装と実測 | done | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TASK-034GsRN1DDq3D5ZJHgcq6d | relaxed-tier-callsite-migration | done | [relaxed-tier-callsite-migration.md](./relaxed-tier-callsite-migration.md) |
 | TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | done | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
+| TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
+| TASK-034P3P0cd1tJUcKKBnEB7b | 旧可視化廃止と可搬 export 分離(AL#106) | done | [ruviform-viz-retirement.md](./ruviform-viz-retirement.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |
 | TASK-034yZBFMasR7zBTzyrlevq | ステージ trait と stage-runner の実装 | done | [stage-runner.md](./stage-runner.md) |
