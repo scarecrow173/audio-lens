@@ -112,6 +112,33 @@ run = "node tools/verify-toolchain.mjs"
 description = "al-cli 等 headless crate の依存木に GUI/GPU/WebView framework crate が無いことを検証(node、3 OS 共通)"
 run = "node tools/check-headless-deps.mjs"
 
+# Issue #131: ruviform ui/*(TS)lane の vendored 同期 + headless 検証。
+# vendor は gitignore 済み生成物 — Cargo.toml の rev pin から
+# tools/sync-ruviform-ui.mjs が再生成する(.worktreeinclude で継承)。
+# check/test の先頭の --check は vendor が pin と一致していることの
+# 照合(未同期なら sync-ui-deps を促して失敗)。
+[tasks.sync-ui-deps]
+description = "ruviform ui/*(TS)を Cargo ピンと同一 SHA で ui/vendor/ へ再生成"
+run = "node tools/sync-ruviform-ui.mjs"
+
+[tasks.setup-ui]
+description = "ui/ の npm devDependencies を package-lock から復元"
+run = "npm ci --prefix ui --no-audit --no-fund"
+
+[tasks.check-ui]
+description = "ui/ headless GUI 統合層の型チェック(tsc --noEmit)+ vendor 同期照合"
+run = [
+  "node tools/sync-ruviform-ui.mjs --check",
+  "npm --prefix ui run typecheck",
+]
+
+[tasks.test-ui]
+description = "ui/ headless GUI 統合層の node:test スイート(happy-dom)"
+run = [
+  "node tools/sync-ruviform-ui.mjs --check",
+  "npm --prefix ui test",
+]
+
 # Issue #105: al-gui `webview` feature lane。既定 check/lint/test は
 # headless(lib + Service op 層)のまま、実窓 host 依存ターゲットは
 # ここで分離検証する(ruviform-ui-webview 側の同名 task と同一形)。

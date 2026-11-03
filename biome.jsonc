@@ -52,6 +52,7 @@
       "!**/node_modules",
       "!**/dist",
       "!tools/cinematic-sword-cutscene/package-lock.json",
+      "!ui/package-lock.json",
       // baseline の計測・収集ツールが生成する成果物(決定論的な機械生成物)
       "!baseline/runs",
       "!baseline/bench"
