@@ -1,0 +1,19 @@
+{
+  "name": "@audiolens/gui-headless",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AudioLens #131: headless-verifiable GUI integration layer — product theme, screen compositions built on vendored @ruviform ui/{core,components,binding} controls, and the BindingPort gateway that translates control gestures/commands/queries into AlGuiService ops. Test-only deps; the layer itself is plain TS + DOM-standard APIs, framework-neutral.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test --import=./test/env.ts test/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "~24.10.2",
+    "happy-dom": "~21.0.4",
+    "typescript": "~5.9.3"
+  }
+}
