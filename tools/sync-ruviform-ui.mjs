@@ -1,6 +1,6 @@
 // Sync the ruviform `ui/*` TypeScript packages (ui/core, ui/components,
-// ui/binding — Issues #258/#259/#261) into `ui/vendor/ruviform/` at the
-// same commit SHA the Cargo workspace pins.
+// ui/binding, ui/viz — Issues #258/#259/#260/#261) into `ui/vendor/ruviform/`
+// at the same commit SHA the Cargo workspace pins.
 //
 // Ruviform is consumed via git pin (docs/designs/ruviform-dependency-ci.md):
 // the `ui/*` packages are `private` npm packages that ship as TS source, so
@@ -27,7 +27,7 @@ import { join, resolve } from "node:path";
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 const VENDOR_DIR = join(REPO_ROOT, "ui", "vendor", "ruviform");
 const REV_FILE = join(VENDOR_DIR, "REV");
-const PACKAGES = ["ui/core", "ui/components", "ui/binding"];
+const PACKAGES = ["ui/core", "ui/components", "ui/binding", "ui/viz"];
 
 /** Read the shared ruviform git revision + url from workspace Cargo.toml. */
 function readPin() {

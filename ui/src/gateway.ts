@@ -86,6 +86,8 @@ export interface SourceHandle {
   readonly session: number;
   readonly inputId?: string;
   readonly channel?: number;
+  /** `spectrogram` source の frequency 軸解像度(rows)。 */
+  readonly rows?: number;
   readonly role?: string;
   readonly name?: string;
 }
@@ -721,23 +723,48 @@ export class AlGuiGateway implements BindingPort {
   // ── query 内処理 ─────────────────────────────────────────────────
 
   /** sourceId 文法:
-   *  `waveform|spectrogram/<session>/<inputId>/<channel>`
+   *  `waveform/<session>/<inputId>/<channel>`
+   *  `spectrogram/<session>/<inputId>/<channel>[/<rows>]`
    *  `events|overview/<session>`、`features/<session>/<role>` */
   private parseSourceId(sourceId: string): SourceHandle | undefined {
     const parts = sourceId.split("/");
     if (parts.length < 2) return undefined;
     const [kind, sessionStr, a, b] = parts;
-    const session = Number(sessionStr);
-    if (!Number.isInteger(session) || session < 0) return undefined;
+    // 数値 segment は canonical な 10 進のみ受ける — `Number()` は
+    // `""`→0・`"0x1"`→1・`"3.0"`→3・`" 3 "`→3 を許し、文法の外から
+    // 実在する session/channel を指せてしまうため。
+    const digits = (s: string | undefined): number | undefined =>
+      s !== undefined && /^\d+$/.test(s) ? Number(s) : undefined;
+    const session = digits(sessionStr);
+    if (session === undefined) return undefined;
     if (kind === "waveform" || kind === "spectrogram") {
       if (a === undefined || a === "") return undefined;
-      const channel = Number(b ?? 0);
-      // 負数・非整数は service が `as_u64` 失敗で 0 へ黙って落とす
-      // — 別 channel の truth を返させないためここで落とす。
-      if (!Number.isInteger(channel) || channel < 0) return undefined;
-      return { kind, session, inputId: a, channel };
+      // channel segment は省略可(=0)だが、存在するなら canonical な
+      // 10 進に限る。負数・非整数・別記法は service が `as_u64` 失敗で
+      // 0 へ黙って落とす — 別 channel の truth を返させないためここで
+      // 落とす。余分な末尾 segment も文法外として拒否する。
+      const channel = b === undefined ? 0 : digits(b);
+      if (channel === undefined) return undefined;
+      const maxSegs = kind === "waveform" ? 4 : 5;
+      if (parts.length > maxSegs) return undefined;
+      // spectrogram は第4セグメント `<rows>` で frequency 軸解像度を
+      // view 側から固定指定できる(時間軸解像度 cols は query 側の
+      // LOD budget)。正整数以外は解釈せず id 全体を malformed とする。
+      const rowsSeg = parts[4];
+      let rows: number | undefined;
+      if (kind === "spectrogram" && rowsSeg !== undefined && rowsSeg !== "") {
+        const r = digits(rowsSeg);
+        if (r === undefined || r <= 0) return undefined;
+        rows = r;
+      }
+      return rows === undefined
+        ? { kind, session, inputId: a, channel }
+        : { kind, session, inputId: a, channel, rows };
     }
-    if (kind === "events" || kind === "overview") return { kind, session };
+    if (kind === "events" || kind === "overview") {
+      if (parts.length !== 2) return undefined;
+      return { kind, session };
+    }
     if (kind === "features") {
       const role = parts.slice(2).join("/");
       return role === "" ? { kind, session } : { kind, session, role };
@@ -789,6 +816,11 @@ export class AlGuiGateway implements BindingPort {
             channel: src.channel ?? 0,
             start_s: q.start,
             end_s: q.end,
+            // cols は時間軸の LOD budget(query 側 `buckets`)、
+            // rows は sourceId 固定の frequency 軸解像度 — 未指定は
+            // service の既定(256)に委ねるため param を載せない。
+            cols: q.buckets ?? 1024,
+            ...(src.rows !== undefined ? { rows: src.rows } : {}),
           },
         };
       case "events":
