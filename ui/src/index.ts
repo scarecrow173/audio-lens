@@ -11,3 +11,4 @@ export * from "./port.ts";
 export * from "./screens/index.ts";
 export * from "./theme.ts";
 export * from "./view-state.ts";
+export * from "./viz/index.ts";

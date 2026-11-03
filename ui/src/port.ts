@@ -55,6 +55,14 @@ export interface AlServicePort {
   call(op: string, params?: Record<string, unknown>): Promise<unknown>;
   /** 長時間 job op の起動。 */
   job(op: "al.job.run" | "al.job.resume", params: Record<string, unknown>): AlJobHandle;
+  /**
+   * `rvf://data` 相当の範囲 pull(#132)。`al.view.*` op が返す
+   * `{source, bytes, meta}` の `source` 名を指定し、`offset` から最大
+   * `limit` バイトを返す — 実 WebView 経路では `rvf://data` の
+   * range GET(`DataSource::read`)に対応する。short read(EOF)を許し、
+   * `limit` を超える応答は契約違反として扱う。
+   */
+  pull(source: string, offset: number, limit: number): Promise<Uint8Array>;
   /** query 用の明示キャンセル経路(ホストが持つ場合のみ)。 */
   cancelQuery?(queryId: string): void;
 }
