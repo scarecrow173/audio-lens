@@ -10,12 +10,13 @@ Directory: `docs/plans`
 | PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | PLAN-034GsQ4Xf3tqGpUXx6bUK2 | Implement artifact durability tiers and resume verification | approved | [implement-artifact-durability-tiers.md](./implement-artifact-durability-tiers.md) |
 | PLAN-034G5TxZGhHh39SQ8S5su4 | decoded/normalized PCM read-only view の実装 | approved | [implement-decoded-pcm-artifact-view.md](./implement-decoded-pcm-artifact-view.md) |
-| PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | draft | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
+| PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
+| PLAN-4ifedHAkxHtbglJWu8ESIL | Ruviform Git 依存を Cargo.lock 正本へ移行する実装計画 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 

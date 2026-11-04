@@ -18,6 +18,7 @@ Directory: `docs/designs`
 | DESIGN-034G5QmSv6Yzg756IThZZi | decoded/normalized PCM read-only view 設計 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | DESIGN-034AaszqnyPGmacvhSzO83 | Expensive 追加解析ファミリ設計 | approved | [expensive-families.md](./expensive-families.md) |
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
+| DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
 | DESIGN-034GNsEgwjRPsPqegmSEWU | local_lag FFT 化の設計 | approved | [local-lag-fft.md](./local-lag-fft.md) |
@@ -29,10 +30,11 @@ Directory: `docs/designs`
 | DESIGN-034AasAnWroBLn28EPuQ5Y | MP4 demux とタイミング観測設計 | approved | [mp4-ingest.md](./mp4-ingest.md) |
 | DESIGN-034FPWNHT7czdzzGSNBU2Q | NCC plan/workspace 分離と2サイト再利用設計 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |
-| DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | draft | [pre-migration-baseline.md](./pre-migration-baseline.md) |
+| DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | approved | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | DESIGN-034DlyKvtWhb8oy1WLAsPV | 残存課題の責務境界と検証設計 | approved | [residual-fixes.md](./residual-fixes.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
+| DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | DESIGN-034FPeXgGtwiUXHI98tTsU | Issue 33 確定仕様の文書適用設計 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
@@ -40,4 +42,9 @@ Directory: `docs/designs`
 | DESIGN-034H77LaRZ9cyfPIcdYe0w | Streaming Bandpass 設計 (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | DESIGN-034H5ozhtFnMNl0ZABihBS | Valid FFT NCC plan 設計 (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
 | DESIGN-034yYLceYoIOUbV56hSfsg | 可視化・エクスポート設計 | superseded | [visualization-export.md](./visualization-export.md) |

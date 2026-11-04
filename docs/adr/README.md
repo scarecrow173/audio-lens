@@ -15,7 +15,6 @@ Directory: `docs/adr`
 | ADR-034AapHIAOqZfyrLPIa14w | 映像フレームデコードは非圧縮 AVI に限定する | accepted | [avi.md](./avi.md) |
 | ADR-034H775tTm4fDkJtwoGDwL | BandFilter 型による帯域逐次生成と InputCache バイパス | proposed | [bandfilter-inputcache.md](./bandfilter-inputcache.md) |
 | ADR-034EHHl9H4TTHHr0OQEa39 | caller 側最適化の構造決定: LeastSquares 列指向 API・FIR 畳み込みの FFT 化・STFT plan 所有境界 | accepted | [caller-side-optimizations-structure.md](./caller-side-optimizations-structure.md) |
-| ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | superseded | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |
 | ADR-034yYyq7wrVYD7X3NvjeX0 | 不変ジョブと再開可能なステージ実行を採用する | proposed | [immutable-resumable-job.md](./immutable-resumable-job.md) |
 | ADR-034yZb7m1ru4R4k7m8jLme | 実装言語に Rust を採用しコア処理を自前モジュールで実装する | accepted | [implementation-stack.md](./implementation-stack.md) |
 | ADR-034GNsM3Pltk8Ax6HdXuHe | 等長窓 lag 相関を al-math の専用 plan として提供 | accepted | [lag-al-math-plan.md](./lag-al-math-plan.md) |
@@ -38,3 +37,9 @@ Directory: `docs/adr`
 | ADR-034FP1KCQ5PnMOE20EmIjo | 候補成果物を独立保存し音声出力を WAV に限定する | accepted | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | ADR-z2U7XfOoFCqimI9EpcPc8B | spectral_envelope の fft_size を入口 assert で非ゼロ 2 冪必須とし底上げ規則を維持する | accepted | [spectral-envelope-fft-size-assert.md](./spectral-envelope-fft-size-assert.md) |
 | ADR-034EdkLSef7miMOT11Ca50 | stage 計時を manifest に永続化する | accepted | [stage-timing-manifest-persistence.md](./stage-timing-manifest-persistence.md) |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
+| ADR-034yYyqyqy2CzywC1zpHME | 可視化を派生データセットとして分離する | superseded | [derived-visualization-dataset.md](./derived-visualization-dataset.md) |

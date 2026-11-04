@@ -15,7 +15,7 @@ Directory: `docs/discovery`
 | DISC-034EMosQizFcChc9KKeaWS | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・アロケーション削減 (A6-A16) | active | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | DISC-034FnccPlanWsReuse0001 | Issue 52 NCC plan/workspace 再利用の適用境界 | active | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DISC-034EdbeKlegRxkqHB283iU | observability foundation: tracing 基盤と stage 計時 | active | [observability-foundation-logging-and-profiling.md](./observability-foundation-logging-and-profiling.md) |
-| DISC-034P3FNUUdDoTj34qYS35D | pre-migration baseline: Issue #98 の現行固定対象と環境調査 | draft | [pre-migration-baseline-issue-98.md](./pre-migration-baseline-issue-98.md) |
+| DISC-034P3FNUUdDoTj34qYS35D | pre-migration baseline: Issue #98 の現行固定対象と環境調査 | active | [pre-migration-baseline-issue-98.md](./pre-migration-baseline-issue-98.md) |
 | DISC-034GZnKJkvCGFXedK2VVUe | reference_analysis analyze_pair 内訳計測: band_gain が支配的 | active | [reference-analysis-analyze-pair-band-gain.md](./reference-analysis-analyze-pair-band-gain.md) |
 | DISC-034FcymLiMavdGUpbV1oTT | 残余 issue ロードマップ分析: 13 open issue の優先度・依存順序・フェーズ構造 | active | [remaining-issues-roadmap.md](./remaining-issues-roadmap.md) |
 | DISC-034FPdDmmo6fGWovNellpV | Issue 33 確定仕様の適用境界 | active | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

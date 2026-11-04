@@ -30,12 +30,18 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
-| TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | draft | [pre-migration-baseline.md](./pre-migration-baseline.md) |
+| TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
+| TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-034FPu2UHR9IyKz1LxreDD | Issue 33 正式保存仕様と維持契約 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TSPEC-brMJfBQXA6vJ3f4Vm4UKjR | spectral_envelope の fft_size 契約検証 | proposed | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
 | TSPEC-034Gs7WHAxB3WpFCH8fHIQ | symphonia AAC-LC audio decode fallback | draft | [symphonia-aac-lc-audio-decode-fallback.md](./symphonia-aac-lc-audio-decode-fallback.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
 | TSPEC-034z99BMV8hBTVwYrwacBo | 可視化・エクスポート検証 | superseded | [visualization-export.md](./visualization-export.md) |

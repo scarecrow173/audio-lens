@@ -11,6 +11,7 @@ Directory: `docs/tasks`
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
 | TASK-034P3OZEY2OrqNMPwTpQnL | Ruviform GUI アプリケーション構築(AL#105) | todo | [ruviform-gui-app.md](./ruviform-gui-app.md) |
 | TASK-034P3OZ5AfOy7hwO4pHUHy | Job・Dataset・Provenance 回帰(AL#103) | todo | [ruviform-job-dataset-regression.md](./ruviform-job-dataset-regression.md) |
+| TASK-bU0xiGWOFmFF7eVry1T2OZ | Ruviform Git 依存を Cargo.lock 正本へ移行(AL#140) | in-progress | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
 | TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
 
@@ -82,6 +83,7 @@ Directory: `docs/tasks`
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
 | TASK-deJYGXM5AEKotdnNNLUHMn | Ruviform Controls・Gesture・Binding の GUI 統合(AL#131) | done | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
+| TASK-2ZeVHW4ux9HuAQOf46bGt | Ruviform 可視化部品で Analysis Dataset・同期 Timeline・Feature 閲覧を構築(AL#132) | done | [gui-ruviform-viz-issue-132.md](./gui-ruviform-viz-issue-132.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
