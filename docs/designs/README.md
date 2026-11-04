@@ -21,6 +21,7 @@ Directory: `docs/designs`
 | DESIGN-034Rp43HK02Vpr5d3rbv2b | Export 可搬投影と staging publish | approved | [export-portable-projection.md](./export-portable-projection.md) |
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
+| DESIGN-034RNl7ph9ojvXsoInYjLx | Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行 | approved | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
 | DESIGN-034GNsEgwjRPsPqegmSEWU | local_lag FFT 化の設計 | approved | [local-lag-fft.md](./local-lag-fft.md) |
@@ -39,7 +40,7 @@ Directory: `docs/designs`
 | DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
 | DESIGN-uCvLq1YDJau0qmwrQqB52k | al-observability logging の ruviform-observability 委譲設計 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
-| DESIGN-034RIK5GkdCeUVI4sbrxPb | Issue #148 sccache コンパイルキャッシュ採用設計 — lane 選定・namespace・kill switch・計測 | draft | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
+| DESIGN-034RIK5GkdCeUVI4sbrxPb | Issue #148 sccache コンパイルキャッシュ採用設計 — lane 選定・namespace・kill switch・計測 | approved | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | DESIGN-034FPeXgGtwiUXHI98tTsU | Issue 33 確定仕様の文書適用設計 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | DESIGN-UuNFjPBJ3weQkbJMWWpkh0 | spectral_envelope の fft_size 入口 assert と底上げ契約の明文化 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
