@@ -227,6 +227,238 @@ fn inspect_logs_to_stderr_only_and_keeps_stdout_json() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+/// Retention: `max_log_files(7)` prunes at appender build, keeping
+/// `max - 1` pre-existing files plus the newly created daily file —
+/// at most 7 `al.*.log` files remain under `<base_dir>/logs`.
+#[test]
+fn file_sink_retention_keeps_max_seven_files() {
+    let dir = temp_dir("retention");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+    let logs = jobs.join("logs");
+    std::fs::create_dir_all(&logs).unwrap();
+    for i in 1..=9 {
+        std::fs::write(logs.join(format!("al.2020-01-{i:02}.log")), b"stale\n").unwrap();
+    }
+
+    let out = run_ingest(&jobs, &wav, &["--log", "info"]);
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let files = log_files(&jobs);
+    assert_eq!(
+        files.len(),
+        7,
+        "retention must cap al.*.log at 7 files: {files:?}"
+    );
+    let fresh = files.iter().any(|p| {
+        p.file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| !n.starts_with("al.2020-"))
+    });
+    assert!(
+        fresh,
+        "today's rotated file must survive pruning: {files:?}"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// The file sink must never break the job: when `<base_dir>/logs`
+/// cannot be created (a regular file occupies the path), the build
+/// degrades to stderr-only with an explicit `warn:` line and the
+/// run still succeeds.
+#[test]
+fn file_sink_init_failure_degrades_to_stderr() {
+    let dir = temp_dir("degrade");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+    std::fs::create_dir_all(&jobs).unwrap();
+    // `<base_dir>/logs` exists as a regular file — `create_dir_all`
+    // and the appender build both fail on it.
+    std::fs::write(jobs.join("logs"), b"not a directory").unwrap();
+
+    let out = run_ingest(&jobs, &wav, &["--log", "info"]);
+    assert!(
+        out.status.success(),
+        "run must succeed with a degraded file sink: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("warn: cannot initialize file log sink"),
+        "expected an explicit degrade warning: {stderr}"
+    );
+    assert!(
+        stderr.contains("stage completed"),
+        "stderr sink must keep working after file sink degradation: {stderr}"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Per-sink format switching end-to-end: `stderr=json` turns stderr
+/// tracing lines into JSON-lines while the file sink keeps its
+/// JSON-lines default.
+#[test]
+fn stderr_json_format_switch() {
+    let dir = temp_dir("stderr-json");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = run_ingest(
+        &jobs,
+        &wav,
+        &["--log", "info", "--log-format", "stderr=json"],
+    );
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    let mut json_lines = 0;
+    for line in stderr.lines().filter(|l| !l.trim().is_empty()) {
+        serde_json::from_str::<serde_json::Value>(line)
+            .unwrap_or_else(|_| panic!("stderr line must be JSON-lines: {line:?}\nfull: {stderr}"));
+        json_lines += 1;
+    }
+    assert!(json_lines > 0, "stderr must carry JSON-lines events");
+    assert_eq!(log_files(&jobs).len(), 1, "file sink must still write");
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Per-sink format switching: `file=text` switches the file sink to
+/// human text while stderr keeps its text default.
+#[test]
+fn file_text_format_switch() {
+    let dir = temp_dir("file-text");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = run_ingest(&jobs, &wav, &["--log", "info", "--log-format", "file=text"]);
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let files = log_files(&jobs);
+    assert_eq!(files.len(), 1);
+    let body = std::fs::read_to_string(&files[0]).unwrap();
+    let first = body.lines().next().expect("file sink must emit lines");
+    assert!(
+        !first.trim_start().starts_with('{'),
+        "file=text must not produce JSON-lines: {first:?}"
+    );
+    assert!(
+        body.contains("stage completed"),
+        "text file sink must carry stage events: {body}"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Flags replace their env vars wholesale per concern: a broken
+/// `AL_LOG`/`AL_LOG_FORMAT` must not be evaluated when `--log`/
+/// `--log-format` are given, and `AL_LOG=""` is unspecified (OFF).
+#[test]
+fn flag_overrides_env_and_empty_env_is_off() {
+    let dir = temp_dir("priority");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    // Broken env values are never parsed because the flags win.
+    let out = al_command()
+        .env("AL_LOG", "=broken")
+        .env("AL_LOG_FORMAT", "stderr=json")
+        .args([
+            "run",
+            "--base-dir",
+            jobs.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest",
+            "--log",
+            "info",
+            "--log-format",
+            "file=text",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "flag must override broken env wholesale: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let files = log_files(&jobs);
+    assert_eq!(files.len(), 1, "flag activation must build the file sink");
+    let body = std::fs::read_to_string(&files[0]).unwrap();
+    let first = body.lines().next().expect("file sink must emit lines");
+    assert!(
+        !first.trim_start().starts_with('{'),
+        "--log-format file=text must replace AL_LOG_FORMAT: {first:?}"
+    );
+
+    // `AL_LOG=""` counts as unspecified — logging stays OFF.
+    let jobs_off = dir.join("jobs-off");
+    let out = al_command()
+        .env("AL_LOG", "")
+        .args([
+            "run",
+            "--base-dir",
+            jobs_off.to_str().unwrap(),
+            "--input",
+            &format!("capture_bug:{}", wav.display()),
+            "--stages",
+            "ingest",
+        ])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    assert!(
+        !jobs_off.join("logs").exists(),
+        "AL_LOG=\"\" must keep logging OFF"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Leaf-span observability: the file JSON-lines sink emits
+/// `FmtSpan::CLOSE` lifecycle events (with `time.busy`/`time.idle`
+/// fields) so spans with no inner events still leave a trace.
+#[test]
+fn file_sink_emits_span_close_events() {
+    let dir = temp_dir("span-close");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = run_ingest(&jobs, &wav, &["--log", "info"]);
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let files = log_files(&jobs);
+    assert_eq!(files.len(), 1);
+    let body = std::fs::read_to_string(&files[0]).unwrap();
+    assert!(
+        body.contains("\"time.busy\""),
+        "file sink must carry span close events: {body}"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 #[test]
 fn malformed_log_options_fail_fast() {
     let dir = temp_dir("malformed");
