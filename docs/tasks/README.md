@@ -76,12 +76,14 @@ Directory: `docs/tasks`
 | TASK-034AaFCh7tNIivN73GA2cF | expensive: サブモジュール分割(振る舞い不変) | done | [expensive-module-split.md](./expensive-module-split.md) |
 | TASK-034dLdqYk3HXx4PdtOgnVz | al-analysis: expensive ファミリの残存精度/一貫性(PR #26 レビュー LOW) | done | [expensive-review-consistency.md](./expensive-review-consistency.md) |
 | TASK-034z9oICJD1cJoadJNGUhu | ExportStage: 再配置可能パッケージ | done | [export-package.md](./export-package.md) |
+| TASK-034Rp5Mtq7VNi310OoekT0 | Export 可搬投影と staging publish (AL#141) | done | [export-portable-projection-issue-141.md](./export-portable-projection-issue-141.md) |
 | TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | done | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
 | TASK-034GsRM5JI2xVj38GXTd9s | fsutil-atomic-write-primitives | done | [fsutil-atomic-write-primitives.md](./fsutil-atomic-write-primitives.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
 | TASK-deJYGXM5AEKotdnNNLUHMn | Ruviform Controls・Gesture・Binding の GUI 統合(AL#131) | done | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
+| TASK-2ZeVHW4ux9HuAQOf46bGt | Ruviform 可視化部品で Analysis Dataset・同期 Timeline・Feature 閲覧を構築(AL#132) | done | [gui-ruviform-viz-issue-132.md](./gui-ruviform-viz-issue-132.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
