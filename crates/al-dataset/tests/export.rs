@@ -73,6 +73,56 @@ fn analysis_root(fx: &Fixture) -> PathBuf {
     fx.dir.join("analysis")
 }
 
+/// The input-role JSON stores a real dataset carries: `declared.json`
+/// (input declaration) and `<id>.metadata.json` (ingest metadata).
+/// Both record the producing host's absolute source path — the
+/// projection under test. `metadata` additionally embeds
+/// foreign-convention absolute paths (POSIX drive / UNC) to prove the
+/// projection does not depend on the exporting host.
+fn seed_input_records(fx: &Fixture, config: &serde_json::Value) {
+    let mut w = open_writer(fx, config);
+    let refs = provenance::input_references(&fx.manifest).unwrap();
+    w.write_json(
+        "inputs",
+        "declared",
+        &serde_json::json!({ "inputs": refs }),
+        prov("job"),
+    )
+    .unwrap();
+    let source = fx.manifest.inputs[0].path.to_string_lossy().to_string();
+    w.write_json(
+        "inputs",
+        &format!("{}.metadata", fx.input_id),
+        &serde_json::json!({
+            "input_id": fx.input_id,
+            "role": "capture_bug",
+            "source_path": source,
+            "source_hash": "cc".repeat(32),
+            "container": "wav",
+            "streams": [{"stream": 0, "kind": "audio"}],
+            "audio": {
+                "codec": "pcm_s16le", "sample_rate": 48000, "channels": 1,
+                "sample_format": "pcm_s16", "frames": 8192,
+                "duration_secs": 0.1707,
+                "source_hash": "cc".repeat(32), "history": []
+            },
+            "integrity": [],
+            "decoder": {"backend": "test", "version": "0"},
+            "foreign": {
+                "posix": "/var/tmp/foreign dir/cap.wav",
+                "windows": "C:\\foreign\\cap.wav",
+                "unc": "\\\\server\\share\\cap.wav",
+                "unicode": "D:\\media\\カラオケ.wav",
+                "relative": "rel/dir/keep.wav",
+                "plain": "cap.wav"
+            }
+        }),
+        prov(&fx.input_id),
+    )
+    .unwrap();
+    w.finish().unwrap();
+}
+
 fn open_writer(fx: &Fixture, config: &serde_json::Value) -> DatasetWriter {
     DatasetWriter::open_or_create(
         &analysis_root(fx),
@@ -356,6 +406,169 @@ fn export_shrinks_absolute_paths_inside_config() {
     let dir_fwd = fx.dir.to_string_lossy().replace('\\', "/");
     let dir_back = fx.dir.to_string_lossy().replace('/', "\\");
     assert!(!body.contains(&dir_fwd) && !body.contains(&dir_back));
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+/// Every separator / escape spelling a private path can take inside
+/// package text: `/`-normalized, raw `\`, and the JSON-escaped
+/// doubled-`\` form a serialized string literal produces.
+fn path_spellings(path: &Path) -> [String; 3] {
+    let fwd = path.to_string_lossy().replace('\\', "/");
+    let back = fwd.replace('/', "\\");
+    let esc = back.replace('\\', "\\\\");
+    [fwd, back, esc]
+}
+
+fn assert_no_private_path(pkg: &Path, private: &[String]) {
+    for (rel, _) in snapshot(pkg) {
+        if rel.ends_with(".json") || rel.ends_with(".txt") {
+            let body = fs::read_to_string(pkg.join(&rel)).unwrap();
+            for pat in private {
+                assert!(
+                    !body.contains(pat.as_str()),
+                    "{rel} still embeds private path spelling {pat:?}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn export_sanitizes_dataset_json_artifacts() {
+    let fx = fixture();
+    let registry = ArtifactRegistry::new(&fx.dir);
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+    seed_input_records(&fx, &config);
+
+    ExportStage::new()
+        .run(&ctx(&fx, &registry, &config))
+        .expect("export stage");
+
+    let pkg = fx.dir.join("export/analysis");
+
+    // metadata projection: host path becomes the media file name;
+    // identity, digests, and stream/timing facts are preserved.
+    let meta: serde_json::Value = serde_json::from_slice(
+        &fs::read(pkg.join(format!("analysis/inputs/{}.metadata.json", fx.input_id))).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(meta["source_path"], "cap.wav");
+    assert_eq!(meta["input_id"].as_str().unwrap(), fx.input_id);
+    assert_eq!(meta["role"], "capture_bug");
+    assert_eq!(meta["source_hash"], "cc".repeat(32));
+    assert_eq!(meta["container"], "wav");
+    assert_eq!(meta["audio"]["codec"], "pcm_s16le");
+    assert_eq!(meta["audio"]["sample_rate"], 48000);
+    assert_eq!(meta["audio"]["source_hash"], "cc".repeat(32));
+    // Foreign-convention absolute paths shrink on every host; a
+    // relative or plain-name string is not a path and stays intact.
+    assert_eq!(meta["foreign"]["posix"], "cap.wav");
+    assert_eq!(meta["foreign"]["windows"], "cap.wav");
+    assert_eq!(meta["foreign"]["unc"], "cap.wav");
+    assert_eq!(meta["foreign"]["unicode"], "カラオケ.wav");
+    assert_eq!(meta["foreign"]["relative"], "rel/dir/keep.wav");
+    assert_eq!(meta["foreign"]["plain"], "cap.wav");
+
+    // The input declaration keeps id/role/digest and loses the host
+    // path the same way.
+    let declared: serde_json::Value =
+        serde_json::from_slice(&fs::read(pkg.join("analysis/inputs/declared.json")).unwrap())
+            .unwrap();
+    assert_eq!(declared["inputs"][0]["source_path"], "cap.wav");
+    assert_eq!(
+        declared["inputs"][0]["input_id"].as_str().unwrap(),
+        fx.input_id
+    );
+    assert_eq!(declared["inputs"][0]["source_sha256"], "cc".repeat(32));
+    assert_eq!(declared["inputs"][0]["role"], "capture_bug");
+
+    // The dataset manifest projection is unchanged: inputs and config
+    // still travel as file-name references.
+    let ds_manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(pkg.join("analysis/manifest.json")).unwrap()).unwrap();
+    assert_eq!(ds_manifest["inputs"][0]["source_path"], "cap.wav");
+
+    // No separator or escape spelling of the private paths survives
+    // in any package text file.
+    let mut private: Vec<String> = path_spellings(&fx.manifest.inputs[0].path)
+        .into_iter()
+        .collect();
+    private.extend(path_spellings(&fx.dir));
+    assert_no_private_path(&pkg, &private);
+
+    // The source dataset keeps its original provenance — the
+    // projection applies to the export copy only.
+    let src_meta = fs::read_to_string(
+        analysis_root(&fx).join(format!("inputs/{}.metadata.json", fx.input_id)),
+    )
+    .unwrap();
+    let [fwd, _back, esc] = path_spellings(&fx.manifest.inputs[0].path);
+    assert!(
+        src_meta.contains(&fwd) || src_meta.contains(&esc),
+        "source metadata lost its original path"
+    );
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn export_fails_closed_when_a_text_artifact_cannot_be_sanitized() {
+    let fx = fixture();
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+    // Non-JSON text cannot be projected structurally. One that still
+    // names a private path must stop the publish — in whichever
+    // separator spelling it was written.
+    let leak = fx.manifest.inputs[0].path.to_string_lossy().to_string();
+    fs::write(
+        analysis_root(&fx).join("notes.txt"),
+        format!("source: {leak}"),
+    )
+    .unwrap();
+
+    let cfg = package::ExportConfig {
+        copy_media: false,
+        name: "analysis".into(),
+    };
+    let err = package::build(&fx.dir, &fx.manifest, &cfg)
+        .expect_err("a leaking text artifact must fail the export");
+    assert_eq!(err.kind(), std::io::ErrorKind::InvalidData);
+
+    // No finished package, no partial staging leftovers, and the
+    // source dataset keeps its original bytes.
+    assert!(!fx.dir.join("export/analysis").exists());
+    assert!(!fx.dir.join("export/.analysis.partial").exists());
+    assert!(analysis_root(&fx).join("notes.txt").exists());
+
+    fs::remove_dir_all(&fx.dir).ok();
+}
+
+#[test]
+fn export_rerun_failure_keeps_the_last_verified_package() {
+    let fx = fixture();
+    let config = serde_json::json!({});
+    seed_dataset(&fx, &config);
+    let cfg = package::ExportConfig {
+        copy_media: false,
+        name: "analysis".into(),
+    };
+    package::build(&fx.dir, &fx.manifest, &cfg).expect("first export");
+    let manifest_path = fx.dir.join("export/analysis/export_manifest.json");
+    assert!(manifest_path.exists());
+    let published = fs::read(&manifest_path).unwrap();
+
+    // A rerun that fails mid-build must not replace or corrupt the
+    // previously published package.
+    fs::write(
+        analysis_root(&fx).join("notes.txt"),
+        format!("src {}", fx.manifest.inputs[0].path.display()),
+    )
+    .unwrap();
+    package::build(&fx.dir, &fx.manifest, &cfg).expect_err("rerun must fail");
+    assert_eq!(fs::read(&manifest_path).unwrap(), published);
+    assert!(!fx.dir.join("export/.analysis.partial").exists());
 
     fs::remove_dir_all(&fx.dir).ok();
 }
