@@ -38,6 +38,8 @@ Directory: `docs/designs`
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
 | DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
+| DESIGN-uCvLq1YDJau0qmwrQqB52k | al-observability logging の ruviform-observability 委譲設計 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
+| DESIGN-034RIK5GkdCeUVI4sbrxPb | Issue #148 sccache コンパイルキャッシュ採用設計 — lane 選定・namespace・kill switch・計測 | draft | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | DESIGN-034Dlsvf9IuZSuybyJHn8w | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | DESIGN-034FPeXgGtwiUXHI98tTsU | Issue 33 確定仕様の文書適用設計 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | DESIGN-UuNFjPBJ3weQkbJMWWpkh0 | spectral_envelope の fft_size 入口 assert と底上げ契約の明文化 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
