@@ -18,6 +18,17 @@ name: ci
 #
 # mise ツールは CI 実行に必要なものだけを --locked で scope する
 # (開発ツールの apm/pipx:serena-agent は activate しない)。
+#
+# 変更影響ベース選択実行(Issue #149 / AL-CI-OPT-02):
+# impact job が PR diff を AudioLens 分類規約(tools/classify-impact.mjs)
+# で分類し、verify/ui-verify/webview-verify の期待集合(required /
+# not_applicable)を出力する。pull_request 以外(main push /
+# workflow_dispatch)は常に Full CI。分類不能・共有基盤変更も安全側で
+# Full CI。Shadow Mode(repo variable CI_IMPACT_SELECTIVE 未設定)では
+# 分類は記録のみで全 lane 実行される。summary(required context)が
+# 期待集合を fail-closed で再検査し、skipped/NotRun を Pass にしない。
+# prek hygiene は hygiene job(常時実行)に分離済み — verify の skip
+# 可能化でも doc-only 変更の hygiene が欠落しない。
 
 on:
   pull_request:
@@ -65,9 +76,110 @@ jobs:
             echo "::warning::no access path to scarecrow173/ruviform — anonymous HTTPS unreachable and RUVIFORM_DEPLOY_KEY unset"
           fi
 
+  # 変更影響分類(Issue #149)。PR diff を分類規約(tools/
+  # classify-impact.mjs)で lane 期待集合に変換する。Shadow Mode では
+  # `<lane>` output は全て required(分類は `<lane>_class` に記録)。
+  # 分類失敗・分類不能・非 PR event は Full CI に倒れる。
+  impact:
+    name: impact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+      classes: ${{ steps.classify.outputs.classes }}
+      verify: ${{ steps.classify.outputs.verify }}
+      ui_verify: ${{ steps.classify.outputs.ui_verify }}
+      webview_verify: ${{ steps.classify.outputs.webview_verify }}
+      verify_class: ${{ steps.classify.outputs.verify_class }}
+      ui_verify_class: ${{ steps.classify.outputs.ui_verify_class }}
+      webview_verify_class: ${{ steps.classify.outputs.webview_verify_class }}
+      verify_reason: ${{ steps.classify.outputs.verify_reason }}
+      ui_verify_reason: ${{ steps.classify.outputs.ui_verify_reason }}
+      webview_verify_reason: ${{ steps.classify.outputs.webview_verify_reason }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.0
+        with:
+          install: false
+
+      - name: Restore CI-scoped tools from mise.lock
+        run: |
+          mise trust
+          mise install --locked node
+
+      - name: Resolve changed file set (pull_request)
+        id: files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          out="${RUNNER_TEMP:-/tmp}/changed-files.txt"
+          : > "$out"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            if ! gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+              --paginate --jq '.[].filename' > "$out"; then
+              echo "::warning::PR file list fetch failed — classification falls back to Full CI"
+              echo "fallback=1" >> "$GITHUB_OUTPUT"
+            fi
+            wc -l < "$out" | xargs echo "changed files:"
+          fi
+
+      - name: Classify change impact
+        id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SELECTIVE: ${{ vars.CI_IMPACT_SELECTIVE }}
+          FALLBACK: ${{ steps.files.outputs.fallback }}
+        run: |
+          set -euo pipefail
+          args=(
+            --event "$EVENT_NAME"
+            --files "${RUNNER_TEMP:-/tmp}/changed-files.txt"
+            --selective "${SELECTIVE:-0}"
+          )
+          if [ "${FALLBACK:-}" = "1" ]; then
+            args+=(--fallback)
+          fi
+          mise exec -- node tools/classify-impact.mjs "${args[@]}"
+
+  # Repo hygiene lane(Issue #149): `prek run --all-files` を verify
+  # から分離した常時実行 lane。audiolens-independent-ci §1 の不変条件
+  # (paths filter を置かず doc 変更を含む全ファイルを hygiene 検査
+  # する)を、verify が skip 可能になった後も維持する。expected set
+  # では常に required。
+  hygiene:
+    name: hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.0
+        with:
+          install: false
+
+      - name: Restore CI-scoped tools from mise.lock
+        run: |
+          mise trust
+          mise install --locked rust prek uv biome actionlint
+
+      - name: Check config files with prek
+        run: mise exec -- prek run --all-files
+
   verify:
     name: verify (${{ matrix.os }})
-    needs: [ruviform-access]
+    needs: [ruviform-access, impact]
+    # impact 分類で required、または分類自体が失敗/欠落した安全側の
+    # ときのみ実行。Shadow Mode では impact が全 lane required を返す
+    # ため常に実行される。ruviform-access 失敗時は依存解決不能のため
+    # skip(summary が access 失敗で fail する)。
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.verify == 'required') }}
     runs-on: ${{ matrix.os }}
     strategy:
       # 片 OS の失敗で他 OS の結果を消さない。
@@ -95,10 +207,11 @@ jobs:
         with:
           install: false
 
+      # prek/uv/actionlint は hygiene job へ移管(Issue #149)。
       - name: Restore CI-scoped tools from mise.lock
         run: |
           mise trust
-          mise install --locked rust git-lfs node prek uv biome actionlint
+          mise install --locked rust git-lfs node biome
 
       - name: Restore cargo registry/git index cache
         uses: actions/cache@v6.1.0
@@ -208,10 +321,6 @@ jobs:
       - name: Verify single ruviform resolved revision
         run: mise run check-ruviform-lock
 
-      - name: Check config files with prek
-        id: prek
-        run: mise exec -- prek run --all-files
-
       - name: Check formatting (mise run fmt)
         id: fmt
         run: mise run fmt
@@ -274,7 +383,6 @@ jobs:
             echo "|---|---|---|---|---|"
             echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
             echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
-            echo "| prek run --all-files | $os | repo hygiene | $sha | ${{ steps.prek.outcome }} |"
             echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
             echo "| mise run check-ci | $os | workspace | $sha | ${{ steps.check.outcome }} |"
             echo "| mise run lint-ci | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
@@ -284,7 +392,8 @@ jobs:
 
   ui-verify:
     name: ui-verify (${{ matrix.os }})
-    needs: [ruviform-access]
+    needs: [ruviform-access, impact]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.ui_verify == 'required') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -404,7 +513,8 @@ jobs:
   # ui-verify と同一構成)。
   webview-verify:
     name: webview-verify (${{ matrix.os }})
-    needs: [ruviform-access]
+    needs: [ruviform-access, impact]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.webview_verify == 'required') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -595,7 +705,7 @@ jobs:
 
   summary:
     name: summary
-    needs: [ruviform-access, verify, ui-verify, webview-verify, gui-real]
+    needs: [ruviform-access, impact, hygiene, verify, ui-verify, webview-verify, gui-real]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -607,47 +717,99 @@ jobs:
             echo "# CI evidence — ${{ github.ref_name }} @ ${{ github.sha }}"
             echo ""
             echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
+            echo "- impact mode: ${{ needs.impact.outputs.mode || 'unresolved' }} (classes: ${{ needs.impact.outputs.classes || 'n/a' }})"
             echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || 'unresolved' }}"
             echo "- 実 GUI/Window 自動試験: not run(Ruviform #312/#313 未接続。実機未検証)"
             echo ""
-            echo "| lane | 結果 | 備考 |"
-            echo "|---|---|---|"
-            echo "| verify (ubuntu/windows/macos) | ${{ needs.verify.result }} | Rust fmt/check/lint/test + Golden/LFS + al-cli headless。OS・step 別の証拠は各 leg の summary |"
-            echo "| ui-verify (ubuntu/windows/macos) | ${{ needs.ui-verify.result }} | vendor sync + REV 整合 + tsc/happy-dom |"
-            echo "| webview-verify (ubuntu/windows/macos) | ${{ needs.webview-verify.result }} | al-gui webview feature surface |"
-            echo "| gui-real | ${{ needs.gui-real.outputs.status || 'not_run' }} | 実 Window/OS 自動試験は別 Gate(常時 not_run で記録) |"
+            echo "| lane | classified | expected | 結果 | 備考 |"
+            echo "|---|---|---|---|---|"
+            echo "| impact | - | - | ${{ needs.impact.result }} | mode=${{ needs.impact.outputs.mode || 'n/a' }} classes=${{ needs.impact.outputs.classes || 'n/a' }} |"
+            echo "| ruviform-access | required | required | ${{ needs.ruviform-access.result }} | dep access preflight |"
+            echo "| hygiene | required | required | ${{ needs.hygiene.result }} | prek --all-files(全変更に必須) |"
+            echo "| verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.verify_class || 'n/a' }} | ${{ needs.impact.outputs.verify || 'n/a' }} | ${{ needs.verify.result }} | ${{ needs.impact.outputs.verify_reason }} |"
+            echo "| ui-verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.ui_verify_class || 'n/a' }} | ${{ needs.impact.outputs.ui_verify || 'n/a' }} | ${{ needs.ui-verify.result }} | ${{ needs.impact.outputs.ui_verify_reason }} |"
+            echo "| webview-verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.webview_verify_class || 'n/a' }} | ${{ needs.impact.outputs.webview_verify || 'n/a' }} | ${{ needs.webview-verify.result }} | ${{ needs.impact.outputs.webview_verify_reason }} |"
+            echo "| gui-real | - | - | ${{ needs.gui-real.outputs.status || 'not_run' }} | 実 Window/OS 自動試験は別 Gate(常時 not_run で記録) |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # 失敗時の Owner 切り分け指針(レポート形式の固定部)。
       - name: Owner triage guidance
-        if: needs.ruviform-access.result != 'success' || needs.verify.result != 'success' || needs.ui-verify.result != 'success' || needs.webview-verify.result != 'success'
+        if: needs.ruviform-access.result != 'success' || needs.impact.result != 'success' || needs.hygiene.result != 'success' || needs.verify.result != 'success' || needs.ui-verify.result != 'success' || needs.webview-verify.result != 'success'
         shell: bash
         run: |
           {
             echo "## Owner 切り分け"
             echo ""
+            echo "- impact 失敗(分類不能/api 障害を含む)→ 期待集合を決定できないため fail-closed。分類規約は tools/classify-impact.mjs + docs/designs/impact-based-ci-issue-149.md"
             echo "- Rust check/lint/test/Golden/Export 失敗 → まず Consumer(AudioLens)側の回帰として切り分ける。Ruviform pin 更新直後のみの失敗は Ruviform 側の可能性として cross-consumer 再実測を [ruviform #294](https://github.com/scarecrow173/ruviform/issues/294) へ報告"
             echo "- al-cli Export 系の失敗 → 既知 Issue [#141](https://github.com/scarecrow173/audio-lens/issues/141) を参照(本 CI は修正を担わない)"
             echo "- dep access/fetch 失敗 → repo visibility / Deploy Key 登録を [guide](https://github.com/scarecrow173/audio-lens/blob/main/docs/guides/ruviform-private-access-ci.md) に従い確認"
             echo "- ui-verify で REV 不一致 → sync-ui-deps 未実行または pin ずれ(Consumer 側)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # verify/ui-verify/webview-verify は成功した場合のみ証拠を
-      # 出す lane。success 以外(failure/cancelled/skipped)は run を
-      # 失敗にし、not-run やゼロ件を pass にしない。
-      - name: Enforce not-run-is-not-pass
+      # 期待集合の fail-closed 検査(Issue #149): ruviform-access と
+      # hygiene は常時 required。verify/ui-verify/webview-verify は
+      # impact の期待値と実結果を照合し、required の failure/cancelled/
+      # skipped/NotRun は run を失敗にする(Pass 偽装禁止)。classified
+      # = not_applicable で skipped なら根拠付き NotApplicable として
+      # 記録し、実行済みの failure/cancelled は失敗にする。
+      - name: Enforce expected-set gate
         shell: bash
         run: |
           set -uo pipefail
           fail=0
-          for pair in "verify:${{ needs.verify.result }}" "ui-verify:${{ needs.ui-verify.result }}" "webview-verify:${{ needs.webview-verify.result }}" "ruviform-access:${{ needs.ruviform-access.result }}"; do
+          impact_res="${{ needs.impact.result }}"
+          if [ "$impact_res" != "success" ]; then
+            echo "::error::impact result=$impact_res — 分類結果を信用できないため fail-closed"
+            fail=1
+          fi
+          for pair in "ruviform-access:${{ needs.ruviform-access.result }}" "hygiene:${{ needs.hygiene.result }}" "gui-real:${{ needs.gui-real.result }}"; do
             lane="${pair%%:*}"; res="${pair##*:}"
             if [ "$res" != "success" ]; then
-              echo "::error::lane $lane result=$res — failure/cancelled/skipped/not-run は pass とみなさない"
+              echo "::error::lane $lane result=$res — 常時必須 lane の failure/cancelled/skipped/NotRun は pass とみなさない"
               fail=1
+            fi
+          done
+          check_lane() {
+            lane="$1"; res="$2"; req="$3"
+            case "$req" in
+              required)
+                if [ "$res" != "success" ]; then
+                  echo "::error::lane $lane expected=required but result=$res — failure/cancelled/skipped/NotRun は pass とみなさない"
+                  fail=1
+                fi
+                ;;
+              not_applicable)
+                case "$res" in
+                  skipped) echo "lane $lane: NotApplicable(impact 根拠付き)の skipped を記録" ;;
+                  success) echo "lane $lane: NotApplicable 分類だが実行済み(Shadow/手動)— success を記録" ;;
+                  *) echo "::error::lane $lane expected=not_applicable but result=$res"; fail=1 ;;
+                esac
+                ;;
+              *)
+                echo "::error::lane $lane expected='$req' は不正値 — 分類出力を信用できないため fail-closed"
+                fail=1
+                ;;
+            esac
+          }
+          check_lane "verify" "${{ needs.verify.result }}" "${{ needs.impact.outputs.verify }}"
+          check_lane "ui-verify" "${{ needs.ui-verify.result }}" "${{ needs.impact.outputs.ui_verify }}"
+          check_lane "webview-verify" "${{ needs.webview-verify.result }}" "${{ needs.impact.outputs.webview_verify }}"
+
+          # Shadow Mode 偽陰性検知: classified=not_applicable の lane
+          # が実実行で失敗した場合は分類規約の誤り。gate は lane 失敗で
+          # 既に落ちるが、分類表の見直し対象として明示注記する。
+          for pair in \
+            "verify:${{ needs.impact.outputs.verify_class }}:${{ needs.verify.result }}" \
+            "ui-verify:${{ needs.impact.outputs.ui_verify_class }}:${{ needs.ui-verify.result }}" \
+            "webview-verify:${{ needs.impact.outputs.webview_verify_class }}:${{ needs.webview-verify.result }}"; do
+            lane="${pair%%:*}"; rest="${pair#*:}"
+            cls="${rest%%:*}"; res="${rest##*:}"
+            if [ "$cls" = "not_applicable" ] && [ "$res" = "failure" ]; then
+              echo "::warning::SHADOW FALSE-NEGATIVE: lane $lane classified not_applicable but full run failed — 分類表を見直すこと"
             fi
           done
           if [ "$fail" = "1" ]; then
             exit 1
           fi
-          echo "all verifiable lanes executed and passed; not-run lanes (gui-real) are recorded, not counted"
+          echo "expected set satisfied: required lanes succeeded; NotApplicable lanes recorded with impact justification; gui-real remains not_run evidence"
