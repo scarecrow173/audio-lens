@@ -242,20 +242,37 @@ required context `summary` は名称・常時実行(`if: always()`)を
 
 ### 6. Shadow Mode → 選択実行の移行
 
-- `CI_IMPACT_SELECTIVE` repo variable が選択実行の武装スイッチ
-  (kill switch と同じ `CI_*` variable convention)
-- **Shadow(既定、未設定)**: 分類は実行・記録されるが effective
-  は全 lane required。分類表と Full CI 実結果を PR 上で突合し、
+- `CI_IMPACT_SELECTIVE` が選択実行の制御スイッチ(kill switch と
+  同じ `CI_*` variable convention)。二層で解決される:
+  - **repo variable** `CI_IMPACT_SELECTIVE`: ops 側の優先
+    override。設定されていれば workflow env 既定値を上回る
+  - **workflow env**(`ci.yml` トップレベル `env:`): repo
+    variable 未設定時の既定値。#152 導入時は事実上 `0`(Shadow)、
+    #153 で `"1"` に引き上げて選択実行を既定化した
+- **Shadow(=0)**: 分類は実行・記録されるが effective は全 lane
+  required。分類表と Full CI 実結果を PR 上で突合し、
   「NotApplicable と分類された lane が実際は失敗する」偽陰性が
-  無いことを確認する期間。偽陰性検知は §4 の warning が担う
-- **有効化**: Shadow で偽陰性なし(目安: 複数 PR・各主要 class を
-  網羅)を確認後、Settings → Variables に `CI_IMPACT_SELECTIVE=1`
-  を設定。以後の PR run から NotApplicable lane が skip される
-- **Rollback**: variable 削除/`0` で即座に Full CI へ戻る
-  (merge・deploy 不要)。恒久 rollback は `git revert`
-- 本 PR 自身は ci/ci-scripts/docs class を含むため Shadow でも
-  selective でも全 lane required = Full CI として走る(分類表の
-  自己防御性: 分類器・workflow 変更は常に全検証)
+  無いことを確認する期間。偽陰性検知は §4 の warning が担う。
+  有効化後も repo variable `CI_IMPACT_SELECTIVE=0` で任意時点に
+  Shadow 相当へ復帰できるため監視経路は残る
+- **有効化(#153 で実施)**: 当初は Shadow で偽陰性なし(目安:
+  複数 PR・各主要 class を網羅)を確認後、Settings → Variables に
+  `CI_IMPACT_SELECTIVE=1` を設定する ops 有効化を予定していた。
+  macOS runner 逼迫による required lane の queue→cancel 実害を受け
+  owner 判断で前倒しし、PR で有効化できる workflow env 経路を採用
+  (有効化 PR は `.github/` = ci class で必然的に Full CI 検証
+  され、`git revert` で恒久復帰できる)。以後の PR run から
+  NotApplicable lane が skip される
+- **Rollback**:
+  - 即時(merge 不要): repo variable `CI_IMPACT_SELECTIVE=0` を
+    設定 → 次回 run から Shadow 相当(分類記録のみ全 lane 実行)
+    に復帰
+  - 恒久: workflow env の `CI_IMPACT_SELECTIVE` 行を削除
+    (`git revert`)→ 既定値が Shadow に戻る
+- 有効化 PR 自身は ci/ci-scripts/docs class を含むため Shadow
+  でも selective でも全 lane required = Full CI として走る
+  (分類表の自己防御性: 分類器・workflow 変更は常に全検証)。
+  実 lane skip(selective の実動作)は merge 後の後続 PR で確認する
 
 ### 7. 分類器の自己防御
 
@@ -287,9 +304,9 @@ required context `summary` は名称・常時実行(`if: always()`)を
 
 | 失敗モード | 検知 | 無効化/復旧 |
 |---|---|---|
-| 分類規約の偽陰性(N/A が実は失敗) | Shadow warning・Full CI 失敗 | `CI_IMPACT_SELECTIVE` 削除/0 → Full CI。分類表を修正して再 Shadow |
-| 分類 job 失敗(api 障害等) | impact result≠success、summary fail | lane は fallback で全実行。rerun/恒久なら variable 未設定のまま運用可 |
-| 選択実行の誤動作 | summary 期待集合表 | variable 削除で即時 Full CI。`git revert` で完全除去 |
+| 分類規約の偽陰性(N/A が実は失敗) | Shadow warning・Full CI 失敗 | repo variable `CI_IMPACT_SELECTIVE=0` → 即時 Full CI(Shadow 相当)。env 行削除で恒久復帰。分類表を修正して再有効化 |
+| 分類 job 失敗(api 障害等) | impact result≠success、summary fail | lane は fallback で全実行。rerun/恒久なら repo variable `=0` のまま運用可 |
+| 選択実行の誤動作 | summary 期待集合表 | repo variable `CI_IMPACT_SELECTIVE=0` で即時 Full CI。env 行削除/`git revert` で完全除去 |
 | hygiene lane 失敗 | summary fail(常時 required) | prek 違反を修正。分類とは独立 |
 
 ## Deferred Design Concerns
@@ -314,5 +331,7 @@ required context `summary` は名称・常時実行(`if: always()`)を
       (required-skipped=fail・N/A-skipped=pass・
       N/A-failure=fail・impact 失敗=fail・偽陰性 warning)
 - [ ] 本 PR の CI run で全 job green + impact 証跡出力を確認
-- [ ] Shadow 期間中の複数 PR で偽陰性なしを確認後に
-      `CI_IMPACT_SELECTIVE=1` 設定(追跡は IR の Follow-ups)
+- [x] 選択実行の有効化 — #153 で workflow env 既定値を `"1"` に変更
+      (Shadow 初期実績を受けた owner 判断による前倒し。
+      repo variable `=0` の即時復帰を維持し、偽陰性監視は継続。
+      selective 実動作の確認は merge 後の後続 PR)
