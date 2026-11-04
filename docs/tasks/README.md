@@ -14,6 +14,8 @@ Directory: `docs/tasks`
 | TASK-bU0xiGWOFmFF7eVry1T2OZ | Ruviform Git 依存を Cargo.lock 正本へ移行(AL#140) | in-progress | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
 | TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
+| TASK-kcnk4zndetw2GNXXC8OfrL | al-observability logging を ruviform-observability::logging へ委譲 (AL#138) | in-progress | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
+| TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | in-progress | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
