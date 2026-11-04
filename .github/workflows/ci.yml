@@ -93,6 +93,12 @@ jobs:
         env:
           GIT_LFS_SKIP_SMUDGE: "1"
 
+      # Cargo.lock is the source of truth for the ruviform resolved
+      # revision (issue #140): verify every ruviform crate shares one
+      # 40-hex SHA and record it in the log for provenance.
+      - name: Verify single ruviform resolved revision
+        run: mise run check-ruviform-lock
+
       - name: Check config files with prek
         run: mise exec -- prek run --all-files
 
@@ -116,3 +122,20 @@ jobs:
 
       - name: Verify headless dependency boundary
         run: mise run check-cli-headless
+
+      # UI lane: materialize the vendored ruviform ui/* TypeScript
+      # sources from the lockfile SHA and prove the fetched revision
+      # matches the cargo-resolved revision (issue #140). `check-ui`
+      # re-runs the vendor REV check plus tsc; `test-ui` runs the
+      # headless node:test suite.
+      - name: Restore ui npm dependencies
+        run: mise run setup-ui
+
+      - name: Materialize vendored ruviform ui/* at lockfile SHA
+        run: mise run sync-ui-deps
+
+      - name: Check ui integration layer (vendor REV + typecheck)
+        run: mise run check-ui
+
+      - name: Test ui integration layer (headless suite)
+        run: mise run test-ui

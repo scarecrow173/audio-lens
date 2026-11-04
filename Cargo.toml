@@ -45,24 +45,29 @@ tracing-subscriber = { version = "0.3.23", features = [
 ] }
 tracing-appender = "0.2.5"
 
-# Ruviform(private repo)の Git 依存。全 entry で同一の検証済み commit
-# SHA(`rev`)を使うこと。更新時は一括で揃え、Cargo.lock の
-# `git+...?rev=<sha>#<sha>` で再現性を確認する。
-# 根拠: docs/designs/ruviform-dependency-ci.md §1-§2。
-ruviform-media-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-audio-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-video-core = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-media-io = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-math = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-dsp = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-numeric = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058", features = ["mp4", "aac"] }
-ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
-ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git", rev = "073a3ff698c5bf9002fe21c7547b04917601e058" }
+# Ruviform(private repo)の Git 依存。manifest には `rev`/`branch`/
+# `tag` を書かない — 解決された commit SHA の正本は `Cargo.lock` の
+# `source = "git+...#<sha>"` fragment。全 ruviform crate が同一 SHA に
+# 解決されることは `node tools/ruviform-lock-rev.mjs`
+# (`mise run check-ruviform-lock`)が fail-closed で検証する。
+# 追従更新は `node tools/update-ruviform-rev.mjs <sha>` で lockfile を
+# 明示更新する。
+# 根拠: docs/designs/ruviform-dependency-ci.md §2、
+# docs/designs/ruviform-lockfile-source-of-truth.md。
+ruviform-media-core = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-audio-core = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-video-core = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-media-io = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-math = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-dsp = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-numeric = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", features = ["mp4", "aac"] }
+ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git" }
+ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git" }
 
 # Keep full debug info in release builds so external CPU samplers
 # (samply — see docs/guides/profiling-samply.md) resolve symbols.

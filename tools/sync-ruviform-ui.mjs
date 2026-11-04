@@ -1,17 +1,18 @@
 // Sync the ruviform `ui/*` TypeScript packages (ui/core, ui/components,
 // ui/binding, ui/viz — Issues #258/#259/#260/#261) into `ui/vendor/ruviform/`
-// at the same commit SHA the Cargo workspace pins.
+// at the same commit SHA the Cargo workspace resolved.
 //
-// Ruviform is consumed via git pin (docs/designs/ruviform-dependency-ci.md):
-// the `ui/*` packages are `private` npm packages that ship as TS source, so
-// there is no registry/git-subdir npm dependency mechanism. Materializing
-// them here mirrors cargo's git checkout: the pinned rev is the single
-// source of truth (`Cargo.toml`), the vendored tree is a gitignored
-// generated artifact restored by `mise run setup`/the `*-ui` tasks, and
-// `.worktreeinclude` propagates it to new worktrees.
+// Ruviform is consumed via git dependencies
+// (docs/designs/ruviform-lockfile-source-of-truth.md): the `ui/*` packages
+// are `private` npm packages that ship as TS source, so there is no
+// registry/git-subdir npm dependency mechanism. Materializing them here
+// mirrors cargo's git checkout: the resolved SHA in `Cargo.lock` is the
+// single source of truth (tools/ruviform-lock-rev.mjs), the vendored tree
+// is a gitignored generated artifact restored by `mise run sync-ui-deps`/
+// the `*-ui` tasks, and `.worktreeinclude` propagates it to new worktrees.
 //
 // Usage:
-//   node tools/sync-ruviform-ui.mjs           ensure the vendor tree matches the pin
+//   node tools/sync-ruviform-ui.mjs           ensure the vendor tree matches the lockfile SHA
 //   node tools/sync-ruviform-ui.mjs --check   fail unless it already matches
 //
 // Fetch uses system git (same credential path as `cargo` with
@@ -23,33 +24,20 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { resolveRuviformRev } from "./ruviform-lock-rev.mjs";
 
 const REPO_ROOT = resolve(import.meta.dirname, "..");
 const VENDOR_DIR = join(REPO_ROOT, "ui", "vendor", "ruviform");
 const REV_FILE = join(VENDOR_DIR, "REV");
 const PACKAGES = ["ui/core", "ui/components", "ui/binding", "ui/viz"];
 
-/** Read the shared ruviform git revision + url from workspace Cargo.toml. */
+/**
+ * Read the shared ruviform git revision + canonical url from the
+ * Cargo.lock contract (single SHA, fail-closed on divergence).
+ */
 function readPin() {
-  const toml = readFileSync(join(REPO_ROOT, "Cargo.toml"), "utf8");
-  const revs = new Set();
-  let url;
-  for (const line of toml.split("\n")) {
-    if (!line.trimStart().startsWith("ruviform-")) continue;
-    const rev = line.match(/rev = "([0-9a-f]{40})"/)?.[1];
-    const git = line.match(/git = "([^"]+)"/)?.[1];
-    if (rev === undefined) {
-      throw new Error(`ruviform dep without rev pin: ${line.trim()}`);
-    }
-    revs.add(rev);
-    url ??= git;
-  }
-  if (revs.size !== 1 || url === undefined) {
-    throw new Error(
-      `ruviform revs diverged (${[...revs].join(", ")}); Cargo.toml requires one shared rev`,
-    );
-  }
-  return { rev: [...revs][0], url };
+  const { rev, url } = resolveRuviformRev(REPO_ROOT);
+  return { rev, url };
 }
 
 function syncedRev() {
@@ -100,7 +88,9 @@ if (current === pin.rev && vendorComplete()) {
   process.exit(0);
 }
 if (checkOnly) {
-  console.error(`ruviform ui/* vendor out of sync: vendored=${current ?? "<none>"} pin=${pin.rev}`);
+  console.error(
+    `ruviform ui/* vendor out of sync: vendored=${current ?? "<none>"} lockfile=${pin.rev}`,
+  );
   console.error("run `node tools/sync-ruviform-ui.mjs` (or `mise run sync-ui-deps`)");
   process.exit(1);
 }
