@@ -99,8 +99,9 @@ impl PcmView {
   `fs::read` による `Owned` fallback を返す。I/O エラー自体は
   現行どおり `io::Error` で伝播する。
 - mmap は `memmap2::Mmap::map` の unsafe を `open` 内部に局所化する。
-  安全性条件: 「`write_durable` の rename 完了後の artifact ファイルは
-  不変」という artifact store の既存不変条件。manifest が参照を記録
+  安全性条件: 「staged publish(StagedFile `seal` → `publish`)が
+  完了した artifact ファイルは不変」という artifact store の既存
+  不変条件。manifest が参照を記録
   した artifact は変更・削除されない(同時に別 writer が同じ job を
   書き換える運用は現行でも壊れる既存前提)。
 - `sample(i)` は 8byte 境界の LE parse とし、`&[f64]` への cast は

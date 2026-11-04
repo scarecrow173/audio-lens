@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "Artifact durability tiers and resume verification"
 created: "2026-10-15"
-updated: "2026-10-15"
+updated: "2026-11-04"
 owners: []
 relations:
   source:
@@ -42,27 +42,41 @@ relations:
 
 ## Overview
 
-`al_job::fsutil` に耐久性のない原子書き込み `write_atomic` /
-`rename_atomic` を追加し、bulk データ書き込みを切り替える。
-`StageRunner::resume` に Completed/Skipped stage の artifact 実在
-検証を追加し、欠落を検出した stage を Pending へ降格して再生成
-する。検証メタデータ(`params.byte_len` / `params.files`)は
-producer が ArtifactRecord に記録する。
+`al_job::fsutil` は `ruviform-io-file` の StagedFile type-state 契約
+(`StagedFile` → `SealedFile::publish`)を介して全 artifact 書込を
+処理し、等級は呼出側が `PublishOptions` で明示する: bulk データは
+`Durability::BestEffort`、記録系は `Durability::FileAndDirectorySync`。
+`StageRunner::resume` は Completed/Skipped stage の artifact 実在を
+検証し、欠落を検出した stage を Pending へ降格して再生成する。
+検証メタデータ(`params.byte_len` / `params.files`)は producer が
+ArtifactRecord に記録する。
+
+当初は fsutil 内の自前プリミティブ(`write_durable`/`write_atomic`/
+`rename_atomic`)として実装されたが、AL-IO-02([#143](https://github.com/scarecrow173/audio-lens/issues/143)、
+PR #154)で汎用 staging/publish が `ruviform-io-file` へ移管され、
+等級割当と resume 検証の設計意図は本書のとおり維持された。
+移行一覧と差異の記録は [ruviform-io-migration-issue-139.md](./ruviform-io-migration-issue-139.md)
+を参照。
 
 ## Structure
 
-### `al_job::fsutil`(等級プリミティブ)
+### `al_job::fsutil`(StagedFile adapter)
 
 ```
-write_durable(path, bytes)  # tmp+write+sync_all+rename+dir sync (現行)
-rename_durable(tmp, path)   # rename + dir sync (現行)
-write_atomic(path, bytes)   # tmp+write+rename、fsync なし (新規)
-rename_atomic(tmp, path)    # fs::rename のみ (新規)
+stage_file(path)                      # parent mkdir + StagedFile::create
+publish_bytes(path, bytes, options)   # stage → write_all → seal → publish_sealed
+publish_sealed(sealed, options)       # SealedFile::publish + temp recovery
 ```
 
-`write_atomic` は `write_durable` と同じ tmp パス・エラー時
-cleanup 規律を共有する。fsync を外すだけで読み手への原子性
-(完成ファイルか旧ファイルかのどちらか)は維持される。
+`options` は `PublishOptions::new(PublishMode::Replace, Durability::*)`
+を呼出点が用途ごとに明示する。`Replace` は既存 destination を
+原子的に置き換える。`Durability::BestEffort` は fsync/dir sync を
+要求しない relaxed 経路、`Durability::FileAndDirectorySync` は
+file sync + dir sync の durable 経路であり、読み手への原子性
+(完成ファイルか旧ファイルかのどちらか)は両等級で維持される。
+失敗は `PublishError` が `PublishFailure` の kind/phase/effect/
+durability/temp state を構造化して保持し、`Indeterminate` の temp は
+削除せず診断へ報告する。
 
 ### `al_job::runner`(resume 検証)
 
@@ -115,7 +129,7 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 | relaxed | al-locate/src/normalize.rs | normalized PCM f64le |
 | relaxed | al-dataset/src/table.rs | chunk `NNNNNN.bin` |
 | relaxed | al-dataset/src/tensor.rs | chunk ファイル |
-| relaxed | al-dataset/src/audio.rs | WAV streaming(sync_all→除去、rename_atomic) |
+| relaxed | al-dataset/src/audio.rs | WAV streaming(`stage_file` → `publish_sealed`、BestEffort) |
 | durable | al-job/src/manifest.rs | job manifest.json |
 | durable | al-dataset/src/manifest.rs | dataset manifest.json |
 | durable | al-dataset/src/table.rs | schema.json, index.json |
@@ -126,11 +140,11 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 
 ## Data / Control Flow
 
-1. stage が bulk artifact を `write_atomic`/`rename_atomic` で書く
-   (tmp→rename、fsync なし)。params に検証メタを記録。
-2. stage 完了時、runner が manifest を `write_durable` で commit
-   (現行どおり) — manifest の durable 記録が artifact 書込に
-   先行しない順序規約。
+1. stage が bulk artifact を `Durability::BestEffort` の publish で書く
+   (staged temp→publish、fsync 非要求)。params に検証メタを記録。
+2. stage 完了時、runner が manifest を `FileAndDirectorySync` の
+   publish で commit(現行どおり) — manifest の durable 記録が
+   artifact 書込に先行しない順序規約。
 3. 電源断: manifest が Completed を記録した relaxed artifact が
    欠落/切り詰められ得る。
 4. resume: 検証が欠落を検出 → stage を Pending 降格 → execute が
@@ -139,10 +153,14 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 
 ## Interface Contracts
 
-- `write_atomic(path, bytes) -> io::Result<()>`: `write_durable` と
-  同じシグネチャ・同じエラー時 tmp cleanup。契約は「原子だが
-  非耐久」— 電源断でファイル全体が欠落または切り詰められ得る。
-- `rename_atomic(tmp, path) -> io::Result<()>`: `fs::rename` のみ。
+- `publish_bytes(path, bytes, options) -> Result<PublishReceipt,
+  PublishError>`: staged temp → seal → publish。`PublishReceipt` の
+  `DurabilityEvidence` が要求保証の達成を示す。
+- `Durability::BestEffort` の契約は「原子だが非耐久」— 電源断で
+  ファイル全体が欠落または切り詰められ得る。
+- `stage_file` は `Write + Seek` sink を返し、streaming producer は
+  `seal()` 後 `publish_sealed` で完了する。未 seal で drop された
+  staged file の temp は除去される。
 - resume 検証の失敗は stage エラーではなく降格である
   (修復可能な状態であり、ユーザーの再実行要求は要らない)。
 - `ArtifactRecord.params.byte_len`: 記録されていれば必ず正しい
@@ -160,24 +178,28 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 
 ## Testing Strategy
 
-- fsutil 単体: `write_atomic` が内容を正しく書き tmp を残さない、
-  既存ファイルを置き換える。
+- fsutil 単体: `publish_bytes` が内容を正しく書き staged temp を
+  残さない、既存ファイルを置き換える(`Replace`)。`CreateNew` は
+  `DestinationExists` を分類して報告し、失敗後の temp は recovery
+  policy が処理する。
 - resume 統合(`crates/al-job/tests/resume.rs`):
   - Completed stage の artifact 削除 → resume で当該 stage のみ
     再実行(他の Completed はスキップ)。
   - `byte_len` 記録 artifact の切り詰め → resume で再実行。
   - dir artifact の `files` 内ファイル削除 → resume で再実行。
-  - 既存テストの StubStage は path 登録のみでファイルを書かない
-    → 検証に抵触するため、stub を実ファイル書込に修正する。
-- 構造確認: relaxed 経路の呼出点が `write_atomic`/`rename_atomic`
-  を使い、記録系が `write_durable` を維持することをレビューで確認。
+- 構造確認: relaxed 経路の呼出点が `Durability::BestEffort` の
+  publish を使い、記録系が `FileAndDirectorySync` を維持することを
+  レビューで確認。
 
 ## Risks / Non-goals
 
 - 「存在するが内容未フラッシュ」(サイズ一致・内容ゼロ化)は
   検出しない — store reader の既存検証が残存リスクとして発火
   (spec の deferred concern)。
-- `.tmp` 孤児の掃除は行わない(inert、再書込で再利用される)。
+- `.rvf-tmp-*` 孤児の定期掃除は行わない — 分類済み失敗・成功時の
+  temp は adapter の recovery policy が除去し、`Indeterminate` は
+  診断のため保持する。プロセス kill 直後の残存 temp は次回 run で
+  無害(読み手は publish 済み destination のみを見る)。
 - fsync 削減量の定量計測は行わない(環境依存)。
 
 ## Sources and Relations
@@ -185,3 +207,5 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 - `docs/specs/durability-tiered-artifact-writes.md`(要求)
 - `docs/adr/artifact-durability-tiers-relaxed-bulk-writes.md`(決定)
 - `docs/discovery/durability-tiers-artifact-fsync.md`(調査)
+- `docs/designs/ruviform-io-migration-issue-139.md`(StagedFile 移行
+  記録・残存分類)

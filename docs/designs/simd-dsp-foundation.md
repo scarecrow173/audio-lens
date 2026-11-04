@@ -185,7 +185,8 @@ A の条件数へ暗黙に変えず、求解はこの診断行列から独立さ
 
 - locate 入力準備層は、新設 role `normalized_pcm` の `ArtifactRecord` を
   `StageContext` の manifest に登録する。保存先は job 相対の
-  `locate/normalized/<artifact_id>.f64le` とし、`write_durable` で保存する。
+  `locate/normalized/<artifact_id>.f64le` とし、`fsutil::publish_bytes`
+  (relaxed 等級、`Durability::BestEffort`)で保存する。
   形式はフレーム順・チャンネル順のインターリーブ済み little-endian f64。
   `decode_input` のスケール正規化後の値を保存し、再読込で再度 scale を
   適用しない。リサンプルによる振幅の overshoot はクリップしない。
