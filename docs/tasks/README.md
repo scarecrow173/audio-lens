@@ -11,6 +11,7 @@ Directory: `docs/tasks`
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
 | TASK-034P3OZEY2OrqNMPwTpQnL | Ruviform GUI アプリケーション構築(AL#105) | todo | [ruviform-gui-app.md](./ruviform-gui-app.md) |
 | TASK-034P3OZ5AfOy7hwO4pHUHy | Job・Dataset・Provenance 回帰(AL#103) | todo | [ruviform-job-dataset-regression.md](./ruviform-job-dataset-regression.md) |
+| TASK-bU0xiGWOFmFF7eVry1T2OZ | Ruviform Git 依存を Cargo.lock 正本へ移行(AL#140) | in-progress | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
 | TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
 
