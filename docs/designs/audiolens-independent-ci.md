@@ -109,8 +109,10 @@ concurrency:
 - paths filter は設けない。prek hygiene gate が doc 変更を含む
   全ファイルを検査するため、doc-only PR を skip すると既存違反が
   潜伏し後続 PR を阻害する。変更対象ごとの lane 分岐は job 構成で
-  実現する(verify / ui-verify / webview-verify / gui-real は常時
-  起動し、実行不能環境は not-run で記録)
+  実現する。Issue #149 で `impact` 分類 + selective `if:` 導入後も、
+  hygiene(prek)は常時実行の独立 lane として維持し、分類依存 lane
+  の skip は summary の期待集合照合が fail-closed で管理する
+  (詳細は impact-based-ci-issue-149.md)
 - `permissions: contents: read` のみ。secret 参照は Deploy Key の
   みで job env 経由・ファイル化して渡し、ログへ出さない
 
@@ -160,21 +162,29 @@ provenance)。`pipx:serena-agent` は backend 上 platform entry を
 ### 4. lane 構成(job 分割)
 
 ```
-ruviform-access (ubuntu)            # access mode 解決
-  ├─ verify (ubuntu/windows/macos)  # Rust 本体 + Golden + CLI
-  ├─ ui-verify (ubuntu/windows/macos) # ui/ TS + vendor 整合
-  ├─ webview-verify (ubuntu/windows/macos) # al-gui webview feature
-  ├─ gui-real (ubuntu)              # 実 GUI: not-run 記録 placeholder
-  └─ summary (ubuntu)               # 証拠集約 + not-run≠pass 強制
+ruviform-access (ubuntu)            # access mode 解決(常時)
+impact (ubuntu)                     # Issue #149: PR diff → 分類→期待集合(常時)
+hygiene (ubuntu)                    # Issue #149: prek --all-files(常時)
+  ├─ verify (ubuntu/windows/macos)  # Rust 本体 + Golden + CLI(selective)
+  ├─ ui-verify (ubuntu/windows/macos) # ui/ TS + vendor 整合(selective)
+  ├─ webview-verify (ubuntu/windows/macos) # al-gui webview feature(selective)
+  ├─ gui-real (ubuntu)              # 実 GUI: not-run 記録 placeholder(常時)
+  └─ summary (ubuntu)               # 証拠集約 + 期待集合 fail-closed(常時)
 ```
+
+Issue #149 以降、`verify`/`ui-verify`/`webview-verify` は PR で
+`impact` 分類が required のときのみ実行され得る(Shadow Mode 中は
+全 lane 実行)。選択条件と分類表は
+[impact-based-ci-issue-149](./impact-based-ci-issue-149.md) を参照。
 
 **verify**(3 OS): checkout(`lfs: true`)→ scoped mise install →
 `verify-toolchain` → dep access 設定 + probe →
 `cargo fetch --locked` → `check-ruviform-rev` →
-`prek run --all-files` → `fmt` → `check-ci` → `lint-ci` →
+`fmt` → `check-ci` → `lint-ci` →
 `test-ci`(Golden/f64/Raw timing/Stream provenance/Stage resume/
 Job/Dataset/Export の全回帰を含む、LFS fixture 使用)→
 `cargo build -p al-cli --profile ci` → `check-cli-headless`。
+(`prek run --all-files` は Issue #149 で `hygiene` job へ移管)
 
 **ui-verify**(3 OS): checkout(LFS 不要)→ `mise install --locked
 node` → dep access 設定 + probe → `mise run sync-ui-deps`
@@ -198,12 +208,16 @@ Window/OS 自動試験は本 run の検証範囲外であることを証拠と�
 残す。`status=not_run` を output し、summary が pass と誤認しない
 よう明示する。#312/#313 接続時に opt-in lane へ置換する拡張点。
 
-**summary**: `needs: [ruviform-access, verify, ui-verify,
-webview-verify, gui-real]` + `if: always()`。job ごとの
+**summary**: `needs: [ruviform-access, impact, hygiene, verify,
+ui-verify, webview-verify, gui-real]` + `if: always()`。job ごとの
 `status`(pass/fail/not_run)・access mode・resolved SHA・OS・
 feature を集約した証拠テーブルを `$GITHUB_STEP_SUMMARY` に出力し、
 失敗の Owner 切り分け指針を表示する(§5)。全 lane not-run や
 cancelled は run を失敗にし、unknown を pass に見せない。
+Issue #149 以降は verify/ui-verify/webview-verify について
+`impact` の期待値(required/not_applicable)と実 result を
+fail-closed で照合する(required の skipped/failure/cancelled は
+fail、根拠付き NotApplicable の skipped のみ許容)。
 
 ### 5. 証拠レポート形式と Owner 切り分け
 
@@ -263,7 +277,11 @@ check-ruviform-rev` task を新設し、CI とローカルで同一入口にす�
 ```text
 pull_request / push(main) / workflow_dispatch
   -> ruviform-access: mode = deploy_key | anonymous | unavailable
-  -> verify / ui-verify / webview-verify (3 OS, 並列)
+  -> impact: PR diff を分類 -> 期待集合(required/not_applicable)
+     非 PR・分類不能・fetch 失敗 -> mode=full(全 required)
+  -> hygiene: prek run --all-files(常時)
+  -> verify / ui-verify / webview-verify (3 OS, 並列,
+     PR かつ分類 required のときのみ実行。Shadow Mode は全実行)
        unavailable -> gate step ::error:: (明示 fail)
        deploy_key  -> SSH credential + probe
        anonymous   -> HTTPS probe
@@ -271,7 +289,7 @@ pull_request / push(main) / workflow_dispatch
        -> lane steps (mise run ...)
        -> evidence step (if: always()) -> GITHUB_STEP_SUMMARY
   -> gui-real: not_run を記録
-  -> summary: lane 表 + Owner 切り分け + all-not-run/cancelled を fail
+  -> summary: lane 表 + Owner 切り分け + 期待集合照合で fail
 ```
 
 ## Non-Functional Constraints
@@ -297,7 +315,9 @@ pull_request / push(main) / workflow_dispatch
   結果を残す価値に見合う。apt 依存は ruviform 側と同一構成で
   上流実績あり
 - doc-only PR も全 lane が走る(paths filter 不採用の対価)。
-  concurrency cancel で実害は限定的
+  concurrency cancel で実害は限定的。Issue #149 で hygiene を
+  独立常時 lane 化し、分類依存 lane は期待集合ベースで選択実行
+  可能となった(Shadow 検証後に有効化)
 
 ## Deferred Design Concerns
 

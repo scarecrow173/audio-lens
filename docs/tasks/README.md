@@ -6,6 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034R69Ws8M7aodbL3V761y | 変更影響ベース CI・Fail-Closed summary 整合(AL#149) | in_progress | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
 | TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
@@ -15,7 +16,7 @@ Directory: `docs/tasks`
 | TASK-034P3OO5I3ZctV72lHagYB | Media I/O の Ruviform 切替(AL#100) | todo | [ruviform-media-io-switch.md](./ruviform-media-io-switch.md) |
 | TASK-034P3ObdxjvpOfn9scXk0D | 移行 baseline の確定(AL#98) | todo | [ruviform-migration-baseline.md](./ruviform-migration-baseline.md) |
 | TASK-kcnk4zndetw2GNXXC8OfrL | al-observability logging を ruviform-observability::logging へ委譲 (AL#138) | in-progress | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
-| TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | in-progress | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
+| TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | completed | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
