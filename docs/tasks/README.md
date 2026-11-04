@@ -44,6 +44,7 @@ Directory: `docs/tasks`
 | TASK-034z9nDLirh4B1Howag5Y1 | analysis パイプライン合成結合テスト | done | [analysis-integration-tests.md](./analysis-integration-tests.md) |
 | TASK-034z9nvusj4lsGXWZBzU0k | ReferenceAnalysisStage: リファレンス比較特徴 + R0-R3 | done | [analysis-reference-stage.md](./analysis-reference-stage.md) |
 | TASK-034z0J7BD4f6wbRbKvnycr | キャプチャアーティファクト辞書 | done | [artifact-dictionary.md](./artifact-dictionary.md) |
+| TASK-lfTPHtxfqyQTx3piqn0UgP | AudioLens 独立 PR/Push CI・dual-mode 依存アクセス・UI/Golden 回帰 Gate(AL#142) | done | [audiolens-independent-ci-issue-142.md](./audiolens-independent-ci-issue-142.md) |
 | TASK-034AaFAJYK7iYyxVUmUpoL | avsync: 音声イベント↔映像イベント照合 | done | [avsync-analysis.md](./avsync-analysis.md) |
 | TASK-034dLdqYq4GSy3E3kSqOzG | [Video] ユーザー指定 visual marker の取り込み経路(issue #11 の残存) | done | [avsync-marker-ingestion.md](./avsync-marker-ingestion.md) |
 | TASK-036dv4ZVW9bSvsugi4x7VA | reference: 帯域別ラグ補償ゲイン推定(#38) | done | [band-lag-gain.md](./band-lag-gain.md) |

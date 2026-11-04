@@ -34,17 +34,26 @@ links:
 
 # Ruviform private 依存への CI read-only アクセス設定手順
 
-AudioLens の `Cargo.toml` は private リポジトリ
-`scarecrow173/ruviform` の crate を git 依存として参照し、
-解決される commit SHA の正本は `Cargo.lock`
-(`docs/designs/ruviform-dependency-ci.md` §2、AL#140 で
-manifest `rev` 列挙から lockfile 正本へ移行)。
+AudioLens の `Cargo.toml` は `scarecrow173/ruviform` の crate を
+git 依存として参照し、解決される commit SHA の正本は
+`Cargo.lock`(`docs/designs/ruviform-dependency-ci.md` §2、
+AL#140 で manifest `rev` 列挙から lockfile 正本へ移行)。
 `.cargo/config.toml` の `net.git-fetch-with-cli = true` により
 cargo の fetch は system git 経由になるため、ローカルは Git
 Credential Manager の既存 HTTPS credential がそのまま使える。
-CI(GitHub Actions)では credential helper が存在しないため、
-**ruviform 側の read-only Deploy Key** を使って SSH アクセスを
-構成する。本書はその一次設定・ローカル検証・運用手順をまとめる。
+
+CI(`.github/workflows/ci.yml`)は Issue #142 で dual-mode 化され、
+`ruviform-access` job が run ごとにアクセス経路を解決する:
+
+- repo が **public** の間は**匿名 HTTPS** が主経路
+  (最小権限 = 秘密を持たない。credential 設定は不要)
+- repo が **private** に戻った場合は、本書の **read-only
+  Deploy Key** が fallback 経路になる(`RUVIFORM_DEPLOY_KEY`
+  secret が設定済みなら自動で SSH 経路を使う)
+- 両方不可なら lane は明示失敗する(緑扱いしない)
+
+本書は private 時の Deploy Key 一次設定・ローカル検証・運用
+手順をまとめる。
 
 ## 前提
 
@@ -93,17 +102,23 @@ gh secret set RUVIFORM_DEPLOY_KEY \
 
 ### 4. 動作確認
 
-`.github/workflows/ci.yml` が default branch に merge された後、
-Actions tab から `ci` workflow を `workflow_dispatch` で実行し、
+`.github/workflows/ci.yml` は Issue #142 で `pull_request` /
+main `push` / `workflow_dispatch` の自動起動済み。Deploy Key を
+設定した場合は、次回の run の `ruviform-access` job が
+`mode=deploy_key` を出力し、各 lane の
 `Configure read-only access` → `Probe private ruviform access` →
-`Fetch locked dependencies` の各 step が 3 OS で通ることを確認する。
+`Fetch locked dependencies` が SSH 経路で通ることを確認する。
 
-Deploy Key が未登録の間は workflow の認証設定 step が
-`::error::RUVIFORM_DEPLOY_KEY secret is not set` で失敗する。
-自動トリガ(`pull_request` 等)への拡張は credential 設定完了後に
-判断する(設計書 Deferred 参照)。
+secret 未設定かつ ruviform が public の間は `mode=anonymous` で
+認証なしの HTTPS fetch になる。ruviform が private で secret も
+未設定なら、各 lane の gate step が `::error::` で明示失敗する
+(not-run 扱いの緑にはしない)。
 
 ## workflow 側の仕組み(`.github/workflows/ci.yml`)
+
+以下は `mode=deploy_key` 時の経路。`mode=anonymous` では認証
+設定自体を skip し、cargo の git fetch は匿名 HTTPS で行う
+(追加 credential なし)。
 
 third-party の SSH/鍵管理 action は使わない。秘密情報を外部
 action に渡す供給網上の信頼辺を増やさないため。

@@ -9,6 +9,7 @@ Directory: `docs/plans`
 | PLAN-034DXViZtHIbCiHSxsn1O0 | al-math 公開 API 中立化と split re/im FFT 境界 | approved | [al-math-api-boundary.md](./al-math-api-boundary.md) |
 | PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | PLAN-034GsQ4Xf3tqGpUXx6bUK2 | Implement artifact durability tiers and resume verification | approved | [implement-artifact-durability-tiers.md](./implement-artifact-durability-tiers.md) |
+| PLAN-dmszyxRb1oaST3thMlruEm | AudioLens 独立 CI(#142)の実装計画 | approved | [implement-audiolens-independent-ci.md](./implement-audiolens-independent-ci.md) |
 | PLAN-034G5TxZGhHh39SQ8S5su4 | decoded/normalized PCM read-only view の実装 | approved | [implement-decoded-pcm-artifact-view.md](./implement-decoded-pcm-artifact-view.md) |
 | PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |

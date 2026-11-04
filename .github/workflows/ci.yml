@@ -1,32 +1,90 @@
 name: ci
 
-# Manual verification workflow. Intentionally dispatch-only: run it from the
-# Actions tab after this file is merged into the default branch.
-# Private ruviform git dependencies require the RUVIFORM_DEPLOY_KEY
-# repository secret (read-only Deploy Key) — setup and local verification:
-# docs/guides/ruviform-private-access-ci.md
+# AudioLens 独立 CI(Issue #142)。pull_request / main push /
+# workflow_dispatch で起動し、Ruviform 依存の Consumer 回帰を
+# AudioLens 自身の PR/Push で継続検証する。Ruviform 側
+# consumer-verify(#294)の candidate-SHA Gate とは役割を分ける
+# (こちらは pin 済み resolved SHA の回帰 Gate)。
+#
+# Ruviform Git 依存のアクセス経路(ruviform-access job が解決):
+# - deploy_key: secret RUVIFORM_DEPLOY_KEY 設定済み → read-only
+#   Deploy Key + known_hosts 照合 + url.insteadOf 書換の SSH 経路。
+#   private repo 復帰時の canonical 経路。
+# - anonymous: secret 未設定かつ匿名 HTTPS で read 可能(public) →
+#   秘密を一切使わない(最小権限 = 秘密を持たない)。
+# - unavailable: 両方不可 → 下流 job の gate step が ::error:: で明示
+#   失敗する。not-run を pass と偽らない(全 lane not-run や
+#   cancelled は summary job が run を失敗にする)。
+#
+# mise ツールは CI 実行に必要なものだけを --locked で scope する
+# (開発ツールの apm/pipx:serena-agent は activate しない)。
 
 on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# 同一 ref の重複実行は PR で cancel(最新 commit のみ検証)。
+# main push は cancel しない(merge ごとの検証履歴を保全する)。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  MISE_ENABLE_TOOLS: rust,git-lfs,node,prek,uv,biome,actionlint
+  CARGO_INCREMENTAL: "0"
+
 jobs:
+  # secret は job `if:` で参照できないため、preflight job で access
+  # mode を解決して output 経由で下流へ渡す(consumer-verify と同型)。
+  ruviform-access:
+    name: ruviform-access
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.probe.outputs.mode }}
+    steps:
+      - name: Resolve ruviform dependency access mode
+        id: probe
+        env:
+          KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+        run: |
+          set -uo pipefail
+          if [ -n "${KEY:-}" ]; then
+            echo "mode=deploy_key" >> "$GITHUB_OUTPUT"
+            echo "ruviform access: deploy_key (RUVIFORM_DEPLOY_KEY configured)"
+          elif git ls-remote https://github.com/scarecrow173/ruviform.git HEAD >/dev/null 2>&1; then
+            echo "mode=anonymous" >> "$GITHUB_OUTPUT"
+            echo "ruviform access: anonymous HTTPS (repo is public)"
+          else
+            echo "mode=unavailable" >> "$GITHUB_OUTPUT"
+            echo "::warning::no access path to scarecrow173/ruviform — anonymous HTTPS unreachable and RUVIFORM_DEPLOY_KEY unset"
+          fi
+
   verify:
     name: verify (${{ matrix.os }})
+    needs: [ruviform-access]
     runs-on: ${{ matrix.os }}
     strategy:
-      # Keep sibling OS jobs running so a manual verification run reports
-      # the result for every platform even if one of them fails.
+      # 片 OS の失敗で他 OS の結果を消さない。
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    env:
-      CARGO_INCREMENTAL: "0"
+    outputs:
+      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
     steps:
-      # `lfs: true` restores the LFS-backed media fixtures the workspace
-      # tests consume.
+      - name: Gate on ruviform access mode
+        if: needs.ruviform-access.outputs.mode == 'unavailable'
+        run: |
+          echo "::error::ruviform dependency is unreachable (anonymous HTTPS failed and RUVIFORM_DEPLOY_KEY unset) — see docs/guides/ruviform-private-access-ci.md"
+          exit 1
+
+      # `lfs: true` で実メディア fixture(Golden/Export 回帰が使用)を
+      # 復元する。
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
         with:
@@ -34,11 +92,13 @@ jobs:
 
       - name: Set up mise
         uses: jdx/mise-action@v5.2.0
+        with:
+          install: false
 
-      - name: Restore tools from mise.lock
+      - name: Restore CI-scoped tools from mise.lock
         run: |
           mise trust
-          mise install --locked
+          mise install --locked rust git-lfs node prek uv biome actionlint
 
       - name: Restore cargo registry/git index cache
         uses: actions/cache@v6.1.0
@@ -53,20 +113,19 @@ jobs:
       - name: Verify pinned toolchain resolution
         run: mise run verify-toolchain
 
-      # Read-only Deploy Key for the private ruviform repository.
-      # The key material is written to a RUNNER_TEMP file (never echoed),
-      # GitHub's published SSH host keys are pinned via known_hosts, and
-      # url.insteadOf rewrites only the ruviform HTTPS URL to SSH.
+      # Read-only Deploy Key(private 復帰時の経路)。秘密は
+      # RUNNER_TEMP 配下の mode 600 鍵ファイルにのみ展開し、
+      # api.github.com/meta の公開 SSH host key で
+      # StrictHostKeyChecking=yes 照合、ruviform URL のみ insteadOf
+      # で SSH へ書き換える(third-party action に秘密を渡さない)。
       - name: Configure read-only access to private ruviform dependency
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
+        id: ssh_cred
         shell: bash
         env:
           RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
         run: |
           set -euo pipefail
-          if [ -z "${RUVIFORM_DEPLOY_KEY:-}" ]; then
-            echo "::error::RUVIFORM_DEPLOY_KEY secret is not set; see docs/guides/ruviform-private-access-ci.md"
-            exit 1
-          fi
           # Forward slashes keep the path usable by both msys and
           # Win32-OpenSSH on Windows runners.
           key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
@@ -79,19 +138,28 @@ jobs:
           echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
           git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
 
-      # Probe auth before cargo fetch so a credential failure is
-      # distinguishable from a manifest/lock problem.
+      # probe は認証失敗と manifest/lock 失敗を切り分ける。
       - name: Probe private ruviform access
+        id: probe_key
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
         shell: bash
         run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
 
-      # GIT_LFS_SKIP_SMUDGE: ruviform's LFS payloads (fixtures) are not
-      # needed to compile its crates; skipping smudge keeps the git
-      # checkout independent of LFS auth on the private repo.
-      - name: Fetch locked dependencies (including private git deps)
+      - name: Probe anonymous ruviform access
+        id: probe_anon
+        if: needs.ruviform-access.outputs.mode == 'anonymous'
+        shell: bash
+        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+      # GIT_LFS_SKIP_SMUDGE(.cargo/config.toml): 依存 repo の LFS
+      # 実体は crate コンパイルに不要。
+      - name: Fetch locked dependencies
+        id: fetch
         run: mise exec -- cargo fetch --locked
-        env:
-          GIT_LFS_SKIP_SMUDGE: "1"
+
+      - name: Verify ruviform resolved SHA (lockfile single-source)
+        id: guard
+        run: mise run check-ruviform-rev
 
       # Cargo.lock is the source of truth for the ruviform resolved
       # revision (issue #140): verify every ruviform crate shares one
@@ -100,42 +168,397 @@ jobs:
         run: mise run check-ruviform-lock
 
       - name: Check config files with prek
+        id: prek
         run: mise exec -- prek run --all-files
 
       - name: Check formatting (mise run fmt)
+        id: fmt
         run: mise run fmt
 
       - name: Type-check workspace (mise run check-ci)
+        id: check
         run: mise run check-ci
 
       - name: Lint workspace (mise run lint-ci)
+        id: lint
         run: mise run lint-ci
 
       - name: Test workspace (mise run test-ci)
+        id: test
         run: mise run test-ci
 
-      # Headless artifact lane: al-cli must stay free of GUI/WebView/GPU
-      # deps (ruviform #155/#156/#157 boundary). The guard below fails
-      # the job if any such crate enters its dependency tree.
+      # headless artifact lane: al-cli の依存木に GUI/WebView/GPU
+      # crate が入らないことを境界検証する。
       - name: Build headless CLI artifact
+        id: cli_build
         run: mise exec -- cargo build -p al-cli --profile ci
 
       - name: Verify headless dependency boundary
+        id: headless
         run: mise run check-cli-headless
 
-      # UI lane: materialize the vendored ruviform ui/* TypeScript
-      # sources from the lockfile SHA and prove the fetched revision
-      # matches the cargo-resolved revision (issue #140). `check-ui`
-      # re-runs the vendor REV check plus tsc; `test-ui` runs the
-      # headless node:test suite.
-      - name: Restore ui npm dependencies
-        run: mise run setup-ui
+      - name: Cleanup credential
+        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
+        shell: bash
+        run: |
+          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+          # 注: 本 step 以降に git/ssh を使う step を追加しないこと
 
-      - name: Materialize vendored ruviform ui/* at lockfile SHA
+      # lane ごとの証拠行(not-run/skipped もそのまま記録し、
+      # pass と偽らない)。matrix leg ごとの job summary が OS 単位の
+      # 記録になる(matrix 経由の job outputs は後勝ちで不安定な
+      # ため per-OS status は job result + 本表で追跡する)。
+      - name: Record lane evidence
+        if: always()
+        shell: bash
+        env:
+          MODE: ${{ needs.ruviform-access.outputs.mode }}
+        run: |
+          set -uo pipefail
+          os="${{ matrix.os }}"
+          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+          probe="${{ steps.probe_anon.outcome }}"
+          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+          [ "${MODE:-}" = "unavailable" ] && probe="not run"
+          {
+            echo "## verify — $os (access: ${MODE:-unknown})"
+            echo ""
+            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+            echo "|---|---|---|---|---|"
+            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+            echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
+            echo "| prek run --all-files | $os | repo hygiene | $sha | ${{ steps.prek.outcome }} |"
+            echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
+            echo "| mise run check-ci | $os | workspace | $sha | ${{ steps.check.outcome }} |"
+            echo "| mise run lint-ci | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
+            echo "| mise run test-ci (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
+            echo "| al-cli --profile ci build / check-cli-headless | $os | al-cli headless | $sha | ${{ steps.cli_build.outcome }} / ${{ steps.headless.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ui-verify:
+    name: ui-verify (${{ matrix.os }})
+    needs: [ruviform-access]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    outputs:
+      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
+    steps:
+      - name: Gate on ruviform access mode
+        if: needs.ruviform-access.outputs.mode == 'unavailable'
+        run: |
+          echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
+          exit 1
+
+      # ui/ の headless TS lane。vendor tree は gitignore 済み生成物
+      # のため、sync-ui-deps が Cargo pin と同一 SHA で materialize
+      # する(Ruviform #310/#311/#314 の利用可能部品が増えた場合の
+      # UI integration smoke の受け皿でもある)。
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.0
+        with:
+          install: false
+
+      - name: Restore CI-scoped tools from mise.lock
+        run: |
+          mise trust
+          mise install --locked node
+
+      - name: Configure read-only access to private ruviform dependency
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
+        id: ssh_cred
+        shell: bash
+        env:
+          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+          chmod 600 "$key"
+          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+          curl -fsSL https://api.github.com/meta \
+            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+          test -s "$known_hosts"
+          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+      - name: Probe private ruviform access
+        id: probe_key
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
+        shell: bash
+        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+      - name: Probe anonymous ruviform access
+        id: probe_anon
+        if: needs.ruviform-access.outputs.mode == 'anonymous'
+        shell: bash
+        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+      - name: Sync vendored ruviform ui/* at pinned SHA (mise run sync-ui-deps)
+        id: sync
         run: mise run sync-ui-deps
 
-      - name: Check ui integration layer (vendor REV + typecheck)
+      - name: Install ui/ npm devDependencies (mise run setup-ui)
+        id: setup
+        run: mise run setup-ui
+
+      - name: Verify vendor REV == lockfile resolved SHA
+        id: guard
+        run: mise exec -- node tools/check-ruviform-rev.mjs --require-vendor
+
+      - name: Type-check ui headless layer (mise run check-ui)
+        id: check
         run: mise run check-ui
 
-      - name: Test ui integration layer (headless suite)
+      - name: Test ui headless layer (mise run test-ui)
+        id: test
         run: mise run test-ui
+
+      - name: Cleanup credential
+        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
+        shell: bash
+        run: |
+          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+
+      - name: Record lane evidence
+        if: always()
+        shell: bash
+        env:
+          MODE: ${{ needs.ruviform-access.outputs.mode }}
+        run: |
+          set -uo pipefail
+          os="${{ matrix.os }}"
+          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+          probe="${{ steps.probe_anon.outcome }}"
+          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+          [ "${MODE:-}" = "unavailable" ] && probe="not run"
+          {
+            echo "## ui-verify — $os (access: ${MODE:-unknown})"
+            echo ""
+            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+            echo "|---|---|---|---|---|"
+            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+            echo "| sync-ui-deps (vendor @ pin SHA) | $os | ui/ vendor | $sha | ${{ steps.sync.outcome }} |"
+            echo "| npm ci (setup-ui) | $os | ui/ | $sha | ${{ steps.setup.outcome }} |"
+            echo "| check-ruviform-rev --require-vendor | $os | ui/ vendor | $sha | ${{ steps.guard.outcome }} |"
+            echo "| mise run check-ui (tsc + sync --check) | $os | ui/ headless | $sha | ${{ steps.check.outcome }} |"
+            echo "| mise run test-ui (happy-dom) | $os | ui/ headless | $sha | ${{ steps.test.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # al-gui `webview` feature lane(実窓 host 依存ターゲットの分離
+  # 検証。実 Window/OS 自動試験は含まない — gui-real が not-run を
+  # 記録する)。ubuntu は WebKitGTK dev headers が必要(ruviform
+  # ui-verify と同一構成)。
+  webview-verify:
+    name: webview-verify (${{ matrix.os }})
+    needs: [ruviform-access]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    outputs:
+      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
+    steps:
+      - name: Gate on ruviform access mode
+        if: needs.ruviform-access.outputs.mode == 'unavailable'
+        run: |
+          echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up mise
+        uses: jdx/mise-action@v5.2.0
+        with:
+          install: false
+
+      - name: Restore CI-scoped tools from mise.lock
+        run: |
+          mise trust
+          mise install --locked rust node
+
+      - name: Install WebKitGTK development headers (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
+
+      - name: Restore cargo registry/git index cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-ui-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-ui-
+
+      - name: Configure read-only access to private ruviform dependency
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
+        id: ssh_cred
+        shell: bash
+        env:
+          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+          chmod 600 "$key"
+          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+          curl -fsSL https://api.github.com/meta \
+            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+          test -s "$known_hosts"
+          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+      - name: Probe private ruviform access
+        id: probe_key
+        if: needs.ruviform-access.outputs.mode == 'deploy_key'
+        shell: bash
+        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+      - name: Probe anonymous ruviform access
+        id: probe_anon
+        if: needs.ruviform-access.outputs.mode == 'anonymous'
+        shell: bash
+        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+      - name: Fetch locked dependencies
+        id: fetch
+        run: mise exec -- cargo fetch --locked
+
+      - name: Verify ruviform resolved SHA (lockfile single-source)
+        id: guard
+        run: mise run check-ruviform-rev
+
+      - name: Type-check UI webview feature (mise run check-ui-webview)
+        id: check
+        run: mise run check-ui-webview
+
+      - name: Lint UI webview feature (mise run lint-ui-webview)
+        id: lint
+        run: mise run lint-ui-webview
+
+      - name: Test UI webview feature (mise run test-ui-webview)
+        id: test
+        run: mise run test-ui-webview
+
+      - name: Cleanup credential
+        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
+        shell: bash
+        run: |
+          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+
+      - name: Record lane evidence
+        if: always()
+        shell: bash
+        env:
+          MODE: ${{ needs.ruviform-access.outputs.mode }}
+        run: |
+          set -uo pipefail
+          os="${{ matrix.os }}"
+          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+          probe="${{ steps.probe_anon.outcome }}"
+          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+          [ "${MODE:-}" = "unavailable" ] && probe="not run"
+          {
+            echo "## webview-verify — $os (access: ${MODE:-unknown})"
+            echo ""
+            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+            echo "|---|---|---|---|---|"
+            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+            echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
+            echo "| check-ui-webview | $os | al-gui webview | $sha | ${{ steps.check.outcome }} |"
+            echo "| lint-ui-webview | $os | al-gui webview | $sha | ${{ steps.lint.outcome }} |"
+            echo "| test-ui-webview | $os | al-gui webview | $sha | ${{ steps.test.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # 実 Window/OS 自動試験の placeholder。Ruviform #312(test host)/
+  # #313(OS driver)が未接続のため、本 run では検証範囲外であること
+  # を not-run の証拠として常時記録する(headless/ui-verify を実
+  # GUI 検証の代用としない)。接続時は opt-in lane へ置き換える。
+  gui-real:
+    name: gui-real
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - name: Record real-GUI gate as not run
+        id: result
+        run: |
+          set -uo pipefail
+          {
+            echo "## gui-real — 実 GUI 回帰 gate: not run"
+            echo ""
+            echo "| lane | OS | feature | ruviform resolved SHA | 結果 | 備考 |"
+            echo "|---|---|---|---|---|---|"
+            echo "| gui-real | - | 実 Window/OS 自動試験 | - | not run | Ruviform #312/#313 未接続。opt-in/専用 Runner で別 Gate |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "status=not_run" >> "$GITHUB_OUTPUT"
+
+  summary:
+    name: summary
+    needs: [ruviform-access, verify, ui-verify, webview-verify, gui-real]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate lane evidence
+        shell: bash
+        run: |
+          set -uo pipefail
+          {
+            echo "# CI evidence — ${{ github.ref_name }} @ ${{ github.sha }}"
+            echo ""
+            echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
+            echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || 'unresolved' }}"
+            echo "- 実 GUI/Window 自動試験: not run(Ruviform #312/#313 未接続。実機未検証)"
+            echo ""
+            echo "| lane | 結果 | 備考 |"
+            echo "|---|---|---|"
+            echo "| verify (ubuntu/windows/macos) | ${{ needs.verify.result }} | Rust fmt/check/lint/test + Golden/LFS + al-cli headless。OS・step 別の証拠は各 leg の summary |"
+            echo "| ui-verify (ubuntu/windows/macos) | ${{ needs.ui-verify.result }} | vendor sync + REV 整合 + tsc/happy-dom |"
+            echo "| webview-verify (ubuntu/windows/macos) | ${{ needs.webview-verify.result }} | al-gui webview feature surface |"
+            echo "| gui-real | ${{ needs.gui-real.outputs.status || 'not_run' }} | 実 Window/OS 自動試験は別 Gate(常時 not_run で記録) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # 失敗時の Owner 切り分け指針(レポート形式の固定部)。
+      - name: Owner triage guidance
+        if: needs.ruviform-access.result != 'success' || needs.verify.result != 'success' || needs.ui-verify.result != 'success' || needs.webview-verify.result != 'success'
+        shell: bash
+        run: |
+          {
+            echo "## Owner 切り分け"
+            echo ""
+            echo "- Rust check/lint/test/Golden/Export 失敗 → まず Consumer(AudioLens)側の回帰として切り分ける。Ruviform pin 更新直後のみの失敗は Ruviform 側の可能性として cross-consumer 再実測を [ruviform #294](https://github.com/scarecrow173/ruviform/issues/294) へ報告"
+            echo "- al-cli Export 系の失敗 → 既知 Issue [#141](https://github.com/scarecrow173/audio-lens/issues/141) を参照(本 CI は修正を担わない)"
+            echo "- dep access/fetch 失敗 → repo visibility / Deploy Key 登録を [guide](https://github.com/scarecrow173/audio-lens/blob/main/docs/guides/ruviform-private-access-ci.md) に従い確認"
+            echo "- ui-verify で REV 不一致 → sync-ui-deps 未実行または pin ずれ(Consumer 側)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # verify/ui-verify/webview-verify は成功した場合のみ証拠を
+      # 出す lane。success 以外(failure/cancelled/skipped)は run を
+      # 失敗にし、not-run やゼロ件を pass にしない。
+      - name: Enforce not-run-is-not-pass
+        shell: bash
+        run: |
+          set -uo pipefail
+          fail=0
+          for pair in "verify:${{ needs.verify.result }}" "ui-verify:${{ needs.ui-verify.result }}" "webview-verify:${{ needs.webview-verify.result }}" "ruviform-access:${{ needs.ruviform-access.result }}"; do
+            lane="${pair%%:*}"; res="${pair##*:}"
+            if [ "$res" != "success" ]; then
+              echo "::error::lane $lane result=$res — failure/cancelled/skipped/not-run は pass とみなさない"
+              fail=1
+            fi
+          done
+          if [ "$fail" = "1" ]; then
+            exit 1
+          fi
+          echo "all verifiable lanes executed and passed; not-run lanes (gui-real) are recorded, not counted"

@@ -390,6 +390,14 @@ GIT_LFS_SKIP_SMUDGE = "1"
 
 ### 10. CI workflow(`.github/workflows/ci.yml`)
 
+> **更新 (2026-11-04, Issue #142)**: 本節の dispatch-only 設計は
+> `docs/designs/audiolens-independent-ci.md` により
+> PR/Push/dispatch 起動・dual-mode アクセス(public 匿名 HTTPS
+> / private Deploy Key)・lane 分割(verify/ui-verify/
+> webview-verify/gui-real/summary)・scoped mise install へ拡張
+> された。Deploy Key 前提の認証設計(§4)は private 復帰時の
+> fallback 経路として維持される。
+
 - Ruviform `ci.yml` と同一 convention で新設。トリガは当面
   **`workflow_dispatch` 限定**(Ruviform と同一方針: merge 後に
   Actions tab から手動検証する運用)。Deploy Key が未設定の状態で
@@ -517,6 +525,9 @@ workflow_dispatch
 - `pull_request`/`push` 自動 CI トリガ | credential 未設定だと全
   PR が manifest 解決で失敗する | Deploy Key 設定完了後 | PR 上の
   自動 gate が無い期間は手動 dispatch で代替。
+  → **解決済み (#142)**: public 時の匿名 HTTPS 経路追加により
+  credential 前提が外れ、`docs/designs/audiolens-independent-ci.md`
+  で PR/push/dispatch 起動へ拡張。
 - fine-grained PAT/GitHub App への credential 移行 | Deploy Key で
   現要件を満たす | 監査・期限管理要件の変化時 | 長期の key 管理負債。
 - AL の MSRV(`rust-version`)宣言 | pre-release で未検証の floor

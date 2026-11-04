@@ -12,6 +12,7 @@ Directory: `docs/specs`
 | SPEC-034yYltIfR72sgyFIMvsdh | 分析データセットスキーマ | proposed | [analysis-dataset.md](./analysis-dataset.md) |
 | SPEC-034yYlGGF9K5h2tGmQTOvS | 解析結果エクスポート | proposed | [analysis-export.md](./analysis-export.md) |
 | SPEC-034yYlrZw66KVKNEHErIn4 | 分析ジョブモデルとオーケストレーション | proposed | [analysis-job-model.md](./analysis-job-model.md) |
+| SPEC-TW82peIZOd6TntYAFQf8Vw | AudioLens 独立 PR/Push CI: 公開/非公開 Git 依存対応と回帰 Gate | approved | [audiolens-independent-ci.md](./audiolens-independent-ci.md) |
 | SPEC-034yYlrxDrz2YSF7QQQ2AK | AudioLens 全体仕様 | proposed | [audiolens-overview.md](./audiolens-overview.md) |
 | SPEC-034EHH6AJBK8GJ2H9EUzjE | caller 側最適化チェーン: fir_model 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | SPEC-034yYlFacHOsi95HzKHN7M | 候補イベントモデルと確度伝播 | proposed | [candidate-event-model.md](./candidate-event-model.md) |

@@ -28,13 +28,13 @@ async function pull(name) {
   // rvf://data は len cap あり — X-Rvf-Total までページングする。
   const CHUNK = 4 * 1024 * 1024;
   const first = await fetch(__rvf.dataUrl(name, 0, CHUNK));
-  if (!first.ok) throw new Error("pull failed: " + first.status);
+  if (!first.ok) throw new Error(`pull failed: ${first.status}`);
   const total = Number(first.headers.get("X-Rvf-Total") || 0);
   const buf = new Uint8Array(total);
   buf.set(new Uint8Array(await first.arrayBuffer()), 0);
   for (let off = CHUNK; off < total; off += CHUNK) {
     const r = await fetch(__rvf.dataUrl(name, off, CHUNK));
-    if (!r.ok) throw new Error("pull failed: " + r.status);
+    if (!r.ok) throw new Error(`pull failed: ${r.status}`);
     buf.set(new Uint8Array(await r.arrayBuffer()), off);
   }
   return buf;
@@ -134,22 +134,22 @@ function drawWave(bins, meta) {
   for (const b of bins) {
     const x0 = ((b.start - s0) / span) * w;
     const x1 = Math.max(x0 + 1, ((b.end - s0) / span) * w);
-    if (!isFinite(b.min) || !isFinite(b.max)) continue;
+    if (!Number.isFinite(b.min) || !Number.isFinite(b.max)) continue;
     g.fillRect(x0, mid - b.max * amp, x1 - x0, Math.max(1, (b.max - b.min) * amp));
   }
   // イベント marker
   drawEventMarkers(g, w, h, rate, s0, span, "#e0a86c");
 }
 
-function drawSpec(tile, meta) {
+function drawSpec(tile, _meta) {
   const { g, w, h } = fitCanvas($("#spec"));
   const img = g.createImageData(tile.cols, tile.rows);
   for (let r = 0; r < tile.rows; r++) {
     for (let c = 0; c < tile.cols; c++) {
       const v = tile.values[r * tile.cols + c];
-      const i = r * tile.cols + c;
+      const _i = r * tile.cols + c;
       const off = ((tile.rows - 1 - r) * tile.cols + c) * 4;
-      if (!isFinite(v)) {
+      if (!Number.isFinite(v)) {
         img.data[off + 3] = 0;
         continue;
       }
@@ -252,7 +252,7 @@ async function redraw() {
     }
     drawTimeline();
   } catch (e) {
-    log("view: " + e.message, true);
+    log(`view: ${e.message}`, true);
   }
 }
 
@@ -278,7 +278,7 @@ function showRecords(records, truncated) {
       `<td>${r.unit || ""}</td><td class="${r.validity === "valid" ? "valid" : "invalid"}">${r.validity || ""}</td>` +
       `<td>${r.confidence || ""}</td><td>${r.support_count ?? ""}</td><td>${r._artifact || ""}</td></tr>`;
   }
-  el.innerHTML = html + "</table>";
+  el.innerHTML = `${html}</table>`;
   for (const [i, tr] of [...el.querySelectorAll("tr")].entries()) {
     if (i === 0) continue;
     tr.style.cursor = "pointer";
@@ -303,7 +303,7 @@ async function refreshJobs() {
     }
     $("#status").textContent = `${r.jobs.length} job(s)`;
   } catch (e) {
-    log("job.list: " + e.message, true);
+    log(`job.list: ${e.message}`, true);
   }
 }
 
@@ -314,13 +314,13 @@ async function inspectJob(jobId) {
     $("#jobStageList").innerHTML = stages
       .map(
         (s) =>
-          `<div class="${s.status}">${s.stage}: ${s.status}${s.error ? " — " + s.error : ""}${s.duration_ms != null ? ` (${s.duration_ms}ms)` : ""}</div>`,
+          `<div class="${s.status}">${s.stage}: ${s.status}${s.error ? ` — ${s.error}` : ""}${s.duration_ms != null ? ` (${s.duration_ms}ms)` : ""}</div>`,
       )
       .join("");
     if (r.dataset_ready) openDataset({ job_id: jobId });
-    else showDetail("inspect " + jobId, r.manifest);
+    else showDetail(`inspect ${jobId}`, r.manifest);
   } catch (e) {
-    log("job.inspect: " + e.message, true);
+    log(`job.inspect: ${e.message}`, true);
   }
 }
 
@@ -366,7 +366,7 @@ async function openDataset(params) {
         try {
           showDetail(a.path, await call("al.ds.artifact", { session: r.session, path: a.path }));
         } catch (e) {
-          log("ds.artifact: " + e.message, true);
+          log(`ds.artifact: ${e.message}`, true);
         }
       };
       ul.appendChild(li);
@@ -379,10 +379,10 @@ async function openDataset(params) {
       /* features 未生成なら空のまま */
     }
     $("#tlControls").hidden = false;
-    $("#status").textContent = "dataset: " + r.root;
+    $("#status").textContent = `dataset: ${r.root}`;
     redraw();
   } catch (e) {
-    log("ds.open: " + e.message, true);
+    log(`ds.open: ${e.message}`, true);
   }
 }
 
@@ -425,7 +425,7 @@ async function runJob() {
     $("#bCancel").disabled = false;
     log(`job started: ${r.job}`);
   } catch (e) {
-    log("job.run: " + e.message, true);
+    log(`job.run: ${e.message}`, true);
   }
 }
 
@@ -439,8 +439,8 @@ __rvf.onEvent((m) => {
       $("#jobBar").style.width = "100%";
       state.runningJob = null;
       $("#bCancel").disabled = true;
-      log(`job ${m.job} finished: ${(m.data && m.data.job_id) || ""}`);
-      if (m.data && m.data.job_id) {
+      log(`job ${m.job} finished: ${m.data?.job_id || ""}`);
+      if (m.data?.job_id) {
         refreshJobs();
         inspectJob(m.data.job_id);
       }
@@ -450,7 +450,7 @@ __rvf.onEvent((m) => {
       log(`job ${m.job} ${m.state}: ${m.error ? m.error.message : ""}`, true);
     }
   } else if (m.kind === "lifecycle") {
-    log("lifecycle: " + m.state);
+    log(`lifecycle: ${m.state}`);
   }
 });
 
@@ -459,7 +459,7 @@ $("#bSetBase").onclick = async () => {
     await call("al.app.configure", { base_dir: $("#baseDir").value });
     log("base_dir 設定");
   } catch (e) {
-    log("configure: " + e.message, true);
+    log(`configure: ${e.message}`, true);
   }
 };
 $("#bJobs").onclick = refreshJobs;
@@ -471,7 +471,7 @@ $("#bCancel").onclick = async () => {
     await call("job.cancel", { job: state.runningJob });
     log("cancel requested");
   } catch (e) {
-    log("cancel: " + e.message, true);
+    log(`cancel: ${e.message}`, true);
   }
 };
 $("#bOpenJobDs").onclick = () => {
@@ -545,12 +545,12 @@ $("#jobList").addEventListener("click", (e) => {
   try {
     const info = await call("al.app.info");
     $("#status").textContent =
-      `${info.name} ${info.version}${info.base_dir ? " — " + info.base_dir : ""}`;
+      `${info.name} ${info.version}${info.base_dir ? ` — ${info.base_dir}` : ""}`;
     if (info.base_dir) {
       $("#baseDir").value = info.base_dir;
       refreshJobs();
     }
   } catch (e) {
-    log("app.info: " + e.message, true);
+    log(`app.info: ${e.message}`, true);
   }
 })();
