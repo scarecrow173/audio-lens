@@ -112,33 +112,38 @@ Issue [#138](https://github.com/scarecrow173/audio-lens/issues/138)
 
 - `Cargo.toml` / `Cargo.lock`
 - `crates/al-observability/Cargo.toml` / `src/lib.rs`
-- `crates/al-cli/tests/observability.rs`
+- `crates/al-cli/src/main.rs` / `tests/observability.rs`
 - `docs/specs|designs|plans|test-specs|tasks/ruviform-observability-logging-migration.md`
-- `docs/impl/ir/`(Implementation Record)
+- `docs/impl/ir/ruviform-observability-logging-al-138.md`
 
 ## Done When
 
-- [ ] `al-observability` の stderr sink 構築が ruviform
+- [x] `al-observability` の stderr sink 構築が ruviform
       `build_logging_layers` へ委譲され、file sink が暫定
       local 構築(#334)と併せて単一 global subscriber に登録
       される
-- [ ] 拡充した golden test 群が現行実装・移行後実装の双方で
+- [x] 拡充した golden test 群が現行実装・移行後実装の双方で
       PASS する(ただし stderr span close は既知 regression)
-- [ ] `resolve_activation`/`LogConfig` の公開形と al-cli の
-      呼出しが変わっていない(error 文字列・exit code 含む)
-- [ ] `cargo tree` で tracing-subscriber/tracing-appender が
+- [x] `resolve_activation`/`LogConfig` の公開契約(error
+      文字列・exit code・有効化 semantics)が変わっていない。
+      注: lint 抑制禁止規約に従い `#[allow(large_enum_
+      variant)]` を撤去するため `Enabled` payload を
+      `Box<LogConfig>` 化し、al-cli 側の呼出しは
+      `init(*config)` に追随(観測される挙動は不変)
+- [x] `cargo tree` で tracing-subscriber/tracing-appender が
       al-observability 経由のみで現れる
-- [ ] `mise run verify-ci` と `check-ruviform-lock`/
+- [x] `mise run verify-ci` と `check-ruviform-lock`/
       `check-ruviform-rev` が green
-- [ ] 暫定回避策(file sink local・stderr CLOSE 欠落)が
+- [x] 暫定回避策(file sink local・stderr CLOSE 欠落)が
       理由・解消条件・追跡 Issue 付きで設計書/コードに明記
       され、IR に検証結果と対象外判断(c)が記録される
 
 ## Verification
 
-- [ ] `mise run fmt` / `check` / `lint` / `test` /
+- [x] `mise run fmt` / `check` / `lint` / `test` /
       `verify-ci`
-- [ ] `mise run check-ruviform-lock` / `check-ruviform-rev` /
+- [x] `mise run check-ruviform-lock` / `check-ruviform-rev` /
       `check-cli-headless` / `verify-toolchain`
-- [ ] `cargo tree` による依存境界の確認
-- [ ] `run` の manifest/artifact が logging ON/OFF で同一
+- [x] `cargo tree` による依存境界の確認
+- [x] `run` の manifest/artifact が logging ON/OFF で同一
+      (生成 ID・timestamp を除き一致を実測。補助検証)
