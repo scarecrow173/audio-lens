@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計"
 created: "2026-10-31"
-updated: "2026-10-31"
+updated: "2026-11-04"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -31,9 +31,12 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related: []
+  related:
+    - "https://github.com/scarecrow173/audio-lens/issues/140"
+    - "./ruviform-lockfile-source-of-truth.md"
   refines: []
-  refined-by: []
+  refined-by:
+    - "./ruviform-lockfile-source-of-truth.md"
   derives-from:
     - "../specs/ruviform-foundation-migration.md"
     - "../adr/ruviform-foundation-migration.md"
@@ -176,25 +179,34 @@ GUI 系(#156/#157 未設計)、`ruviform-rt`(ruviform-exec の推移依存
 ### 2. SHA 固定と再現性
 
 - 全 Ruviform 依存はルート `Cargo.toml` の `[workspace.dependencies]`
-  に集約し、`git = "https://github.com/scarecrow173/ruviform.git"` +
-  `rev = "73190d7d26b3197b1da36749798b5952499d1b70"` で参照する。
-  各 crate の `rev` は全て同一値とし、更新時は一括で揃える
-  (entry 先頭のコメントで規約を明記)。
+  に集約し、`git = "https://github.com/scarecrow173/ruviform.git"`
+  (+ 必要な `features`)で参照する。**AL#140 以降、manifest は
+  `rev`/`branch`/`tag` を持たない** — 解決された commit SHA の
+  正本は `Cargo.lock` であり、manifest は取得先の宣言のみを担う
+  (移行の詳細設計: `./ruviform-lockfile-source-of-truth.md`)。
 - member crate 側は `<name>.workspace = true` で消費するため、
   feature/SHA が crate 間で分岐しない。
 - Cargo.lock は commit 対象(現行どおり)。git 依存は
-  `source = "git+...?rev=<sha>#<sha>"` で記録され、`--locked` で
+  `source = "git+...#<sha>"` で記録され、`--locked` で
   lockfile に記録された同一 commit が取得・検証される(取得には
   ネットワークと private repo 認証が必要。`--locked` は取得自体を
   オフライン化しない)。
-- SHA の更新は移行の節目で意図的に行い、本設計・変更履歴で
-  追跡可能にする(dependabot 等による自動 bump は行わない)。
+- 全 ruviform crate の単一 resolved SHA の検証・取得は
+  `tools/ruviform-lock-rev.mjs`(`mise run check-ruviform-lock`)
+  を唯一の契約とする。`cargo metadata`/`cargo tree` は人手での
+  併用確認手段。
+- SHA の更新は candidate SHA で
+  `node tools/update-ruviform-rev.mjs <sha>` を実行する明示操作
+  (更新 PR)として行い、本設計・変更履歴で追跡可能にする
+  (dependabot 等による自動 bump は行わない)。cargo は同一 git
+  URL を単一 source id で解決するため、`--precise` による更新は
+  source 単位で原子的に適用され、部分的な SHA 分裂を生じない。
 - pin した SHA は ruviform `main` 上で到達可能に保つ運用を
-  手順書に明記する(force-push/rebase で pin が unreachable に
-  なった場合は rev の一括更新で対応する)。
+  手順書に明記する。rollback は `git checkout -- Cargo.lock` で
+  lockfile の fragment を旧 SHA に戻すだけで即時可能。
 - `cargo vendor` は採用しない。ruviform ソースを AL リポジトリへ
   複製すると二重管理となり、MIT ライセンス表記の保持・更新追従の
-  責務も発生する。再現性は lockfile + rev 固定 + private access
+  責務も発生する。再現性は lockfile 正本 + private access
   credential で担保する。
 
 ### 3. cargo の private Git 取得
@@ -406,12 +418,18 @@ GIT_LFS_SKIP_SMUDGE = "1"
   4. private dep 認証設定(§4 の鍵ファイル + known_hosts +
      GIT_SSH_COMMAND + insteadOf)と `git ls-remote` probe
   5. `mise exec -- cargo fetch --locked`
-  6. `mise exec -- prek run --all-files`
-  7. `mise run fmt` / `check-ci` / `lint-ci` / `test-ci`
-  8. `cargo build -p al-cli --profile ci` を `mise exec` 経由で
+  6. `mise run check-ruviform-lock`(lockfile 正本の単一 resolved
+     SHA を検証し step log に記録。AL#140 で追加)
+  7. `mise exec -- prek run --all-files`
+  8. `mise run fmt` / `check-ci` / `lint-ci` / `test-ci`
+  9. `cargo build -p al-cli --profile ci` を `mise exec` 経由で
      実行する headless artifact ビルド step(GUI 側 lane は
      GUI 依存が存在しないため未設置。§7 guard で逆流を検知)
-  9. `mise run check-cli-headless`
+  10. `mise run check-cli-headless`
+  11. UI lane(AL#140 で追加): `mise run setup-ui` →
+      `mise run sync-ui-deps` → `mise run check-ui` →
+      `mise run test-ui`。vendored ui/* の取得 revision が
+      lockfile resolved SHA と一致することを検証する
 - 利用 action は GitHub 公式 `actions/checkout`/`actions/cache` と
   `jdx/mise-action` のみで、ruviform と同じ semver tag pin 規約に
   従う(秘密情報を扱う third-party action は使わない)。
@@ -421,12 +439,14 @@ GIT_LFS_SKIP_SMUDGE = "1"
 依存解決(ローカル/CI 共通):
 
 ```text
-Cargo.toml [workspace.dependencies] (git + rev 固定)
+Cargo.toml [workspace.dependencies] (git URL + features、rev 無し)
   -> cargo fetch (net.git-fetch-with-cli → system git、
      GIT_LFS_SKIP_SMUDGE=1)
        ローカル: Git Credential Manager (GitHub HTTPS)
        CI:       Deploy Key + url.insteadOf 書換え + known_hosts 照合
-  -> Cargo.lock ("git+...?rev=<sha>#<sha>")
+  -> Cargo.lock ("git+...#<sha>") ★ resolved SHA の正本(AL#140)
+       -> tools/ruviform-lock-rev.mjs (単一 SHA の取得・検証契約)
+       -> tools/sync-ruviform-ui.mjs (ui/vendor REV 整合)
   -> build / check / lint / test (mise task 経由)
 ```
 
@@ -437,8 +457,11 @@ workflow_dispatch
   -> checkout(lfs) -> mise install --locked -> verify-toolchain
   -> private-dep 認証設定(Deploy Key + known_hosts + insteadOf)
   -> git ls-remote probe -> cargo fetch --locked(mise exec)
+  -> check-ruviform-lock(単一 resolved SHA)
   -> prek -> fmt -> check-ci -> lint-ci -> test-ci
   -> al-cli headless build -> check-cli-headless
+  -> UI lane: setup-ui -> sync-ui-deps -> check-ui -> test-ui
+     (vendor REV == lockfile resolved SHA を検証)
 ```
 
 ## Non-Functional Constraints
@@ -458,17 +481,17 @@ workflow_dispatch
 
 ## Risks and Trade-offs
 
-- **同一 SHA の複数 entry 管理**: Cargo.toml に変数共有は無いため
-  `rev` は 8 entry に重複する。全 entry 同一値の規約をコメントで
-  明記し、更新は一括置換・lockfile で検証する。機械的検証は
-  `cargo metadata`/`cargo tree` で source が単一 git+rev である
-  ことを確認可能。
+- **resolved SHA の分裂(lockfile 手編集・途中更新)**: AL#140 で
+  manifest `rev` 列挙は撤去され、同一 SHA の重複管理というリスク
+  自体は解消された。残る分裂経路は lockfile の手編集か更新の
+  途中失敗であり、`tools/ruviform-lock-rev.mjs` が全 ruviform
+  crate の fragment SHA を照合して fail-closed で検出する。
 - **pin SHA の陳腐化と到達可能性**: Ruviform #150〜#157 の API
   追加で古い pin が必要機能を欠く。SHA 更新は各切替 Issue の判断で
-  一括更新する規約とする。また pin 対象 SHA が ruviform 側の
-  force-push で unreachable になった場合は fetch 不能になるため、
-  手順書に「pin 済み commit を main 上で到達可能に保つ」運用を
-  明記する。
+  `tools/update-ruviform-rev.mjs` による lockfile 明示更新とする
+  規約とする。また pin 対象 SHA が ruviform 側の force-push で
+  unreachable になった場合は fetch 不能になるため、手順書に
+  「pin 済み commit を main 上で到達可能に保つ」運用を明記する。
 - **Deploy Key 発行には ruviform 側 admin 権限が必要**: 同一 owner
   のため手順化可能だが、credential 未設定の間は CI の cargo fetch
   が失敗する。設計・手順書を先行し、設定完了まで dispatch 検証は
@@ -516,12 +539,14 @@ workflow_dispatch
 
 ## Verification Notes
 
-- [ ] 全 Ruviform dep が同一 `rev` で `[workspace.dependencies]` に
-      集約され、`Cargo.lock` に `git+...?rev=<sha>#<sha>` が記録される。
+- [ ] 全 Ruviform dep が `git` URL(+必要な `features`)のみで
+      `[workspace.dependencies]` に集約され(manifest に `rev`
+      無し、AL#140)、`Cargo.lock` に `git+...#<sha>` が記録される。
 - [ ] `cargo fetch --locked` が lockfile に記録された同一 commit を
       取得できる(ローカルで実測)。
-- [ ] `cargo metadata`/`cargo tree` で Ruviform source が単一
-      git+rev に統一され、symphonia が 0.5.5 のみであることを確認。
+- [ ] `mise run check-ruviform-lock` で Ruviform 全 crate が単一
+      resolved SHA に解決されることを検証し、`cargo metadata`/
+      `cargo tree` で併用確認する(symphonia は 0.5.5 のみ)。
 - [ ] `mise run verify-toolchain` が rustc/cargo/rustfmt/clippy の
       pin 解決を検証する。
 - [ ] `mise run check/lint/test/build/fmt` が全て成功する(新設

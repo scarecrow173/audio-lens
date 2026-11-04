@@ -112,6 +112,15 @@ run = "node tools/verify-toolchain.mjs"
 description = "al-cli 等 headless crate の依存木に GUI/GPU/WebView framework crate が無いことを検証(node、3 OS 共通)"
 run = "node tools/check-headless-deps.mjs"
 
+# Issue #140: Ruviform resolved revision の正本は Cargo.lock。
+# manifest には rev を書かず、lockfile `[[package]].source` の
+# `git+<url>#<sha>` fragment を唯一の取得・検証契約として
+# tools/ruviform-lock-rev.mjs が fail-closed で照合する(3 OS 共通、
+# cargo 不要で lockfile のみを読む)。
+[tasks.check-ruviform-lock]
+description = "Cargo.lock 正本から Ruviform 全 crate の単一 resolved SHA を検証(node、3 OS 共通)"
+run = "node tools/ruviform-lock-rev.mjs"
+
 # Issue #142: `cargo fetch --locked` 後に Ruviform Git 依存の
 # resolved SHA 単一性 + manifest rev(存在時)+ ui vendor REV 整合を
 # 検証する。manifest rev 有り/無し(#140 lockfile 主体)の両方式で
@@ -122,12 +131,12 @@ description = "Ruviform Git 依存の resolved SHA 単一性 + UI vendor REV 整
 run = "node tools/check-ruviform-rev.mjs"
 
 # Issue #131: ruviform ui/*(TS)lane の vendored 同期 + headless 検証。
-# vendor は gitignore 済み生成物 — Cargo.toml の rev pin から
+# vendor は gitignore 済み生成物 — Cargo.lock の resolved SHA から
 # tools/sync-ruviform-ui.mjs が再生成する(.worktreeinclude で継承)。
-# check/test の先頭の --check は vendor が pin と一致していることの
-# 照合(未同期なら sync-ui-deps を促して失敗)。
+# check/test の先頭の --check は vendor が lockfile SHA と一致して
+# いることの照合(未同期なら sync-ui-deps を促して失敗)。
 [tasks.sync-ui-deps]
-description = "ruviform ui/*(TS)を Cargo ピンと同一 SHA で ui/vendor/ へ再生成"
+description = "ruviform ui/*(TS)を Cargo.lock と同一 SHA で ui/vendor/ へ再生成"
 run = "node tools/sync-ruviform-ui.mjs"
 
 [tasks.setup-ui]

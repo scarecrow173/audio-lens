@@ -4,7 +4,7 @@ type: "guide"
 status: "active"
 title: "Ruviform private 依存への CI read-only アクセス設定手順"
 created: "2026-10-21"
-updated: "2026-10-21"
+updated: "2026-11-04"
 owners: []
 relations:
   source: []
@@ -35,7 +35,9 @@ links:
 # Ruviform private 依存への CI read-only アクセス設定手順
 
 AudioLens の `Cargo.toml` は `scarecrow173/ruviform` の crate を
-git 依存で参照する(`docs/designs/ruviform-dependency-ci.md` §4)。
+git 依存として参照し、解決される commit SHA の正本は
+`Cargo.lock`(`docs/designs/ruviform-dependency-ci.md` §2、
+AL#140 で manifest `rev` 列挙から lockfile 正本へ移行)。
 `.cargo/config.toml` の `net.git-fetch-with-cli = true` により
 cargo の fetch は system git 経由になるため、ローカルは Git
 Credential Manager の既存 HTTPS credential がそのまま使える。
@@ -166,8 +168,13 @@ GIT_SSH_COMMAND="ssh -i \"$key\" -o IdentitiesOnly=yes \
   git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
 ```
 
-HEAD の SHA が `Cargo.toml` に pin した rev と一致することを
-確認する。
+HEAD の SHA が `Cargo.lock` に記録された resolved SHA と一致する
+ことを `node tools/ruviform-lock-rev.mjs`
+(`mise run check-ruviform-lock`)の出力と突き合わせて確認する。
+lockfile の追従更新は `node tools/update-ruviform-rev.mjs <sha>`、
+rollback は `git checkout -- Cargo.lock`
+(`docs/designs/ruviform-dependency-ci.md` §2、
+`docs/designs/ruviform-lockfile-source-of-truth.md` §5-§6)。
 
 ## 認証情報のローテーション / 失効
 

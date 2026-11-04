@@ -161,6 +161,12 @@ jobs:
         id: guard
         run: mise run check-ruviform-rev
 
+      # Cargo.lock is the source of truth for the ruviform resolved
+      # revision (issue #140): verify every ruviform crate shares one
+      # 40-hex SHA and record it in the log for provenance.
+      - name: Verify single ruviform resolved revision
+        run: mise run check-ruviform-lock
+
       - name: Check config files with prek
         id: prek
         run: mise exec -- prek run --all-files
