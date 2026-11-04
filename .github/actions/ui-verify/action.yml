@@ -1,0 +1,135 @@
+# ui-verify lane 本体(ci.yml の ui-verify/ui-verify-macos job が
+# 共有する composite action)。Issue #149 追加合意の macOS leg
+# 物理分離に伴う単一定義(verify action と同構造)。
+# 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
+name: ui-verify lane
+description: "ui/ headless TS + vendored ruviform ui/* 整合 lane (shared by PR-required ubuntu/windows legs and the non-blocking macOS leg)"
+
+inputs:
+  os:
+    description: "runner label recorded in lane evidence (e.g. ubuntu-latest, macos-latest)"
+    required: true
+  access_mode:
+    description: "ruviform-access job が解決した mode (deploy_key | anonymous | unavailable)"
+    required: true
+  deploy_key:
+    description: "RUVIFORM_DEPLOY_KEY secret (deploy_key mode 時のみ使用)"
+    required: false
+    default: ""
+
+outputs:
+  resolved_sha:
+    description: "check-ruviform-rev --require-vendor が記録した ruviform resolved SHA"
+    value: ${{ steps.guard.outputs.resolved_sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Gate on ruviform access mode
+      if: inputs.access_mode == 'unavailable'
+      shell: bash
+      run: |
+        echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
+        exit 1
+
+    # ui/ の headless TS lane。vendor tree は gitignore 済み生成物
+    # のため、sync-ui-deps が Cargo pin と同一 SHA で materialize
+    # する(Ruviform #310/#311/#314 の利用可能部品が増えた場合の
+    # UI integration smoke の受け皿でもある)。
+    - name: Set up mise
+      uses: jdx/mise-action@v5.2.0
+      with:
+        install: false
+
+    - name: Restore CI-scoped tools from mise.lock
+      shell: bash
+      run: |
+        mise trust
+        mise install --locked node
+
+    - name: Configure read-only access to private ruviform dependency
+      if: inputs.access_mode == 'deploy_key'
+      id: ssh_cred
+      shell: bash
+      env:
+        RUVIFORM_DEPLOY_KEY: ${{ inputs.deploy_key }}
+      run: |
+        set -euo pipefail
+        key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+        printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+        chmod 600 "$key"
+        known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+        curl -fsSL https://api.github.com/meta \
+          | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+        test -s "$known_hosts"
+        echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+        git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+    - name: Probe private ruviform access
+      id: probe_key
+      if: inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+    - name: Probe anonymous ruviform access
+      id: probe_anon
+      if: inputs.access_mode == 'anonymous'
+      shell: bash
+      run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+    - name: Sync vendored ruviform ui/* at pinned SHA (mise run sync-ui-deps)
+      id: sync
+      shell: bash
+      run: mise run sync-ui-deps
+
+    - name: Install ui/ npm devDependencies (mise run setup-ui)
+      id: setup
+      shell: bash
+      run: mise run setup-ui
+
+    - name: Verify vendor REV == lockfile resolved SHA
+      id: guard
+      shell: bash
+      run: mise exec -- node tools/check-ruviform-rev.mjs --require-vendor
+
+    - name: Type-check ui headless layer (mise run check-ui)
+      id: check
+      shell: bash
+      run: mise run check-ui
+
+    - name: Test ui headless layer (mise run test-ui)
+      id: test
+      shell: bash
+      run: mise run test-ui
+
+    - name: Cleanup credential
+      if: always() && inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: |
+        git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+        rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+
+    - name: Record lane evidence
+      if: always()
+      shell: bash
+      env:
+        MODE: ${{ inputs.access_mode }}
+      run: |
+        set -uo pipefail
+        os="${{ inputs.os }}"
+        sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+        probe="${{ steps.probe_anon.outcome }}"
+        [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+        [ "${MODE:-}" = "unavailable" ] && probe="not run"
+        {
+          echo "## ui-verify — $os (access: ${MODE:-unknown})"
+          echo ""
+          echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+          echo "|---|---|---|---|---|"
+          echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+          echo "| sync-ui-deps (vendor @ pin SHA) | $os | ui/ vendor | $sha | ${{ steps.sync.outcome }} |"
+          echo "| npm ci (setup-ui) | $os | ui/ | $sha | ${{ steps.setup.outcome }} |"
+          echo "| check-ruviform-rev --require-vendor | $os | ui/ vendor | $sha | ${{ steps.guard.outcome }} |"
+          echo "| mise run check-ui (tsc + sync --check) | $os | ui/ headless | $sha | ${{ steps.check.outcome }} |"
+          echo "| mise run test-ui (happy-dom) | $os | ui/ headless | $sha | ${{ steps.test.outcome }} |"
+        } >> "$GITHUB_STEP_SUMMARY"

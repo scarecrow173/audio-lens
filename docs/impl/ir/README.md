@@ -40,6 +40,7 @@ Directory: `docs/impl/ir`
 | ingest-integration-tests | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | ingest-stage-and-cli-wiring | [ingest-stage-and-cli-wiring.md](./ingest-stage-and-cli-wiring.md) |
 | impact-based-ci-issue-149 | [impact-based-ci-al-149.md](./impact-based-ci-al-149.md) |
+| impact-based-ci-issue-149 | [impact-based-ci-macos-separation-al-149.md](./impact-based-ci-macos-separation-al-149.md) |
 | init-rust-workspace | [init-rust-workspace.md](./init-rust-workspace.md) |
 | job-manifest-registry | [job-manifest-registry.md](./job-manifest-registry.md) |
 | locate-argmax-ambiguity-closeout | [locate-argmax-ambiguity-closeout.md](./locate-argmax-ambiguity-closeout.md) |
