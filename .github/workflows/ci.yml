@@ -431,7 +431,7 @@ jobs:
             echo "# macOS lane evidence (non-blocking) — ${{ github.ref_name }} @ ${{ github.sha }}"
             echo ""
             echo "- impact mode: ${{ needs.impact.outputs.mode || 'unresolved' }} (classes: ${{ needs.impact.outputs.classes || 'n/a' }})"
-            echo "- 本 check は Required ではない — `summary` gate の判定対象外"
+            echo "- 本 check は Required ではない — \`summary\` gate の判定対象外"
             echo "- leg が runner 待ちで未完了の間は本 check も Pending のまま残る(未実行を NotApplicable へ変換しない)"
             echo "- ruviform resolved SHA: ${{ needs.verify-macos.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || 'unresolved' }}"
             echo ""
