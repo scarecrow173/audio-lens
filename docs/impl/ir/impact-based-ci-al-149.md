@@ -186,7 +186,10 @@ Shadow→Selective 移行契約を定義。ruviform #333 の汎用 Impact 契約
 ## Follow-ups
 
 - 複数 PR の Shadow 観測で偽陰性なしを確認後、`CI_IMPACT_SELECTIVE=1`
-  を設定し selective 化(設計書の移行契約どおり)
+  を設定し selective 化(設計書の移行契約どおり)→ **#153 で実施済み**。
+  Shadow 初期実績を受け owner 判断で前倒しし、workflow env 既定値を
+  `"1"` に変更する形で有効化。repo variable `=0` による即時 Shadow
+  復帰経路を維持(実 lane skip の確認は merge 後の後続 PR)
 - ruviform #333 契約が main 着地したら class 定義・用語の整合確認
 - selective 化後の実測 Before/After を exp に追記(docs-only PR 等で
   lane skip 削減量を計測)

@@ -24,9 +24,12 @@ name: ci
 # で分類し、verify/ui-verify/webview-verify の期待集合(required /
 # not_applicable)を出力する。pull_request 以外(main push /
 # workflow_dispatch)は常に Full CI。分類不能・共有基盤変更も安全側で
-# Full CI。Shadow Mode(repo variable CI_IMPACT_SELECTIVE 未設定)では
-# 分類は記録のみで全 lane 実行される。summary(required context)が
-# 期待集合を fail-closed で再検査し、skipped/NotRun を Pass にしない。
+# Full CI。Issue #153 で選択実行を有効化(下記 env
+# CI_IMPACT_SELECTIVE が既定値 "1")。repo variable
+# CI_IMPACT_SELECTIVE=0 の設定で変数側が優先され、次回 run から即時
+# Shadow 相当(分類は記録のみで全 lane 実行)に復帰する。
+# summary(required context)が期待集合を fail-closed で再検査し、
+# skipped/NotRun を Pass にしない。
 # prek hygiene は hygiene job(常時実行)に分離済み — verify の skip
 # 可能化でも doc-only 変更の hygiene が欠落しない。
 
@@ -49,6 +52,12 @@ concurrency:
 env:
   MISE_ENABLE_TOOLS: rust,git-lfs,node,prek,uv,biome,actionlint
   CARGO_INCREMENTAL: "0"
+  # Issue #153: 選択実行(変更影響ベース lane skip)の既定値。
+  # repo variable CI_IMPACT_SELECTIVE が設定されていれば変数側が
+  # 優先され、=0 で次回 run から即時 Shadow 相当(分類記録のみ
+  # 全 lane 実行 = Full CI)へ復帰する instant rollback。
+  # 恒久復帰は本行の削除(git revert)で既定値が Shadow に戻る。
+  CI_IMPACT_SELECTIVE: "1"
 
 jobs:
   # secret は job `if:` で参照できないため、preflight job で access
@@ -77,9 +86,11 @@ jobs:
           fi
 
   # 変更影響分類(Issue #149)。PR diff を分類規約(tools/
-  # classify-impact.mjs)で lane 期待集合に変換する。Shadow Mode では
-  # `<lane>` output は全て required(分類は `<lane>_class` に記録)。
-  # 分類失敗・分類不能・非 PR event は Full CI に倒れる。
+  # classify-impact.mjs)で lane 期待集合に変換する。#153 で選択実行が
+  # 既定(repo variable CI_IMPACT_SELECTIVE=0 で Shadow 復帰)。
+  # Shadow Mode では `<lane>` output は全て required(分類は
+  # `<lane>_class` に記録)。分類失敗・分類不能・非 PR event は
+  # Full CI に倒れる。
   impact:
     name: impact
     runs-on: ubuntu-latest
@@ -133,6 +144,8 @@ jobs:
         id: classify
         env:
           EVENT_NAME: ${{ github.event_name }}
+          # repo variable が設定されていれば変数側が優先(=0 は即時
+          # Full CI 復帰)。未設定時は workflow env の既定値が効く。
           SELECTIVE: ${{ vars.CI_IMPACT_SELECTIVE }}
           FALLBACK: ${{ steps.files.outputs.fallback }}
         run: |
@@ -140,7 +153,7 @@ jobs:
           args=(
             --event "$EVENT_NAME"
             --files "${RUNNER_TEMP:-/tmp}/changed-files.txt"
-            --selective "${SELECTIVE:-0}"
+            --selective "${SELECTIVE:-${CI_IMPACT_SELECTIVE:-0}}"
           )
           if [ "${FALLBACK:-}" = "1" ]; then
             args+=(--fallback)

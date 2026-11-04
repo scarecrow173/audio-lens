@@ -7,9 +7,11 @@
 //   - a lane is `required` or `not_applicable`; NotApplicable is emitted
 //     only with a recorded justification. `summary` re-checks these
 //     outputs fail-closed — skipped/NotRun/Unsupported never count as Pass.
-//   - selective skip is armed by repo variable CI_IMPACT_SELECTIVE=1
-//     (Shadow Mode default: classification is recorded but every lane
-//     still runs until shadow evidence shows no false negatives).
+//   - selective skip is armed when --selective=1. Since #153 the
+//     workflow env default is armed; repo variable
+//     CI_IMPACT_SELECTIVE=0 takes precedence and returns the run to
+//     Shadow Mode instantly (classification recorded, every lane
+//     runs — the false-negative monitoring path stays available).
 //
 // The rule table below is the single source of truth for class → lane
 // mapping; docs/designs/impact-based-ci-issue-149.md mirrors it for review.
@@ -18,7 +20,7 @@
 //   node tools/classify-impact.mjs --event pull_request --files changed.txt
 //   gh api repos/:owner/:repo/pulls/N/files --jq '.[].filename' \
 //     | node tools/classify-impact.mjs --event pull_request --files - \
-//         --selective "${CI_IMPACT_SELECTIVE:-0}"
+//         --selective "${SELECTIVE:-${CI_IMPACT_SELECTIVE:-0}}"
 //   node tools/classify-impact.mjs --event pull_request --fallback
 //
 // Emits `mode`, `classes`, `<lane>` (effective), `<lane>_class` (raw
@@ -233,7 +235,7 @@ const modeReason =
       ? "変更ファイル取得失敗 — 安全側 Full CI"
       : selective
         ? "selective armed (CI_IMPACT_SELECTIVE=1)"
-        : "Shadow Mode — 分類のみ記録、全 lane 実行(CI_IMPACT_SELECTIVE 未設定)";
+        : "Shadow Mode — 分類のみ記録、全 lane 実行(--selective!=1: CI_IMPACT_SELECTIVE=0 または未武装)";
 
 const classified = {};
 const reasons = {};
