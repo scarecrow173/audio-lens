@@ -10,7 +10,7 @@ Directory: `docs/plans`
 | PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
 | PLAN-034GsQ4Xf3tqGpUXx6bUK2 | Implement artifact durability tiers and resume verification | approved | [implement-artifact-durability-tiers.md](./implement-artifact-durability-tiers.md) |
 | PLAN-034G5TxZGhHh39SQ8S5su4 | decoded/normalized PCM read-only view の実装 | approved | [implement-decoded-pcm-artifact-view.md](./implement-decoded-pcm-artifact-view.md) |
-| PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | draft | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
+| PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
@@ -27,6 +27,7 @@ Directory: `docs/plans`
 | PLAN-034z8FkpJb4ejhkehZ3pgc | analysis-stages | completed | [analysis-stages.md](./analysis-stages.md) |
 | PLAN-034EJg701ux76Ga7UWPP0j | caller 側最適化チェーン: 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | completed | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | PLAN-034AaBrYBgbeSTDlZzbaGl | Expensive 追加解析ファミリの実装 | completed | [expensive-families.md](./expensive-families.md) |
+| PLAN-034Rp5hEUjbyXqjbKwlxDA | Export 可搬投影の実装 | completed | [export-portable-projection.md](./export-portable-projection.md) |
 | PLAN-034AaBtyLhpTxk9Vb4eftR | ゴールデン fixture マトリクスの実装 | completed | [golden-validation.md](./golden-validation.md) |
 | PLAN-034z0yzgmf43IGEQwzG9gE | インジェストとAVタイミングの実装 | completed | [implement-ingest-av.md](./implement-ingest-av.md) |
 | PLAN-034yZp5w0ziN8jQO61t3nW | ジョブオーケストレーション基盤の実装 | completed | [implement-job-orchestration-foundation.md](./implement-job-orchestration-foundation.md) |

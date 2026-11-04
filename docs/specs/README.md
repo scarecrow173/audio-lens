@@ -19,6 +19,8 @@ Directory: `docs/specs`
 | SPEC-034G5M6Djv4xJOZKHXQniH | decoded/normalized PCM read-only view | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | SPEC-034GsJJVWBOQmxiKManOlL | Artifact durability tiers and resume verification (issue #55) | approved | [durability-tiered-artifact-writes.md](./durability-tiered-artifact-writes.md) |
 | SPEC-034yYlEMw8LnaoJcOc4v9z | 高コスト詳細解析 | proposed | [expensive-analysis.md](./expensive-analysis.md) |
+| SPEC-034Rp2PraZGXQhVUwhn5KL | エクスポートパッケージのテキスト成果物可搬投影 | approved | [export-artifact-portability.md](./export-artifact-portability.md) |
+| SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
 | SPEC-034GNsDtc88g3RPbhoW9RS | local_lag オーバーラップ正規化相関の FFT 化 | draft | [local-lag-overlap-corr-fft.md](./local-lag-overlap-corr-fft.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
 | SPEC-034GMyXJaIeUXOZB86GpDC | locate 相関 plan ワーカープールと共有 cache 監査 | approved | [locate-plan-cache.md](./locate-plan-cache.md) |
@@ -27,7 +29,7 @@ Directory: `docs/specs`
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
-| SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | draft | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |
+| SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | proposed | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
@@ -39,4 +41,9 @@ Directory: `docs/specs`
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
+
+## Settled <!-- doc-suite:settled-index -->
+
+| ID | Title | Status | File |
+| --- | --- | --- | --- |
 | SPEC-034yYlFXqQaDagzQr4eXWW | 可視化データセット | superseded | [visualization-dataset.md](./visualization-dataset.md) |
