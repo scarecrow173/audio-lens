@@ -1,28 +1,55 @@
 //! AudioLens observability foundation。
 //!
-//! logging の sink init・format 配線・routing・activation 解釈を
-//! 所有する。公開 API は薄い2段構成:
+//! logging の sink init は `ruviform-observability::logging`
+//! (feature `logging`。Ruviform #276 の汎用 adapter)へ委譲し、
+//! 本 crate は製品固有の設定面だけを保持する薄い Config
+//! Adapter とする。公開 API は薄い2段構成:
 //!
 //! - `resolve_activation`: `AL_LOG`/`AL_LOG_FORMAT`・
 //!   `--log`/`--log-format` の生値を引数で受けて [`Activation`] を
-//!   返す純粋関数(env は内部で読まない)
+//!   返す純粋関数(env は内部で読まない)。製品固有の優先順位・
+//!   sink/format 閉集合語彙・エラー文字列は製品契約として保持
 //! - `init`: 解釈済みの [`LogConfig`] を受けて global subscriber
-//!   を構築し、file writer の flush を保証する [`LogGuard`] を返す
+//!   を構築し、writer の flush/drain を保証する [`LogGuard`] を
+//!   返す。stderr sink は ruviform `build_logging_layers` の
+//!   bounded writer、file sink は暫定 local 構築(後述)
 //!
 //! leaf crate は本 crate に依存せず、`tracing` 標準 API で emit のみ
 //! を行う。既定は OFF(subscriber 未設定)で、activation 未指定では
 //! `init` は呼ばれない。
+//!
+//! # 暫定 file sink(ruviform#334 解消条件付き)
+//!
+//! file sink の命名契約 `al.YYYY-MM-DD.log` は
+//! `tracing_appender` の `filename_suffix` が必要だが、ruviform
+//! `SinkDestination::RollingFile` が suffix を公開していない
+//! ([ruviform#334](https://github.com/scarecrow173/ruviform/issues/334))。
+//! そのため file sink は従来どおり `RollingFileAppender` を直接
+//! 構築する local 実装を維持する。#334 解消後は
+//! `SinkDestination::RollingFile` へ移して本ブロックを撤去する。
+//!
+//! # 既知の一時 regression(ruviform#335)
+//!
+//! ruviform adapter の `fmt` layer は `FmtSpan` を設定しない
+//! ([ruviform#335](https://github.com/scarecrow173/ruviform/issues/335))
+//! ため、stderr sink は span lifecycle event(CLOSE)を出力しない。
+//! file JSONL sink は local layer で `FmtSpan::CLOSE` を維持し、
+//! 集計用途の leaf span 観測を保持する。#335 解消後に stderr
+//! sink へも適用する。
 
 use std::fmt;
-use std::path::PathBuf;
+use std::io;
+use std::path::{Path, PathBuf};
 
-use tracing::Subscriber;
+use ruviform_observability::logging::{
+    LoggingBuildError, LoggingConfig, SinkConfig, SinkDestination, SinkFailureMode,
+};
 use tracing_appender::non_blocking::WorkerGuard;
-use tracing_appender::rolling::{self, RollingFileAppender, Rotation};
+use tracing_appender::rolling::{self, Rotation};
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::{Layer, SubscriberExt};
-use tracing_subscriber::registry::{LookupSpan, Registry};
+use tracing_subscriber::registry::Registry;
 use tracing_subscriber::util::SubscriberInitExt;
 
 /// logging の出力先。sink 語彙は `{stderr, file}` の閉集合で、
@@ -59,18 +86,15 @@ pub struct LogConfig {
     pub file_dir: Option<PathBuf>,
 }
 
-/// activation 解釈の結果。既定 OFF。
-// `EnvFilter` 内包の `LogConfig` が大きいが、activation 解釈結果の
-// 公開 API 形態として `Enabled(LogConfig)` を維持する(design
-// 規定)。`init` へ受け渡す1回きりの値であり、サイズ差は問題に
-// ならない。
-#[allow(clippy::large_enum_variant)]
+/// activation 解釈の結果。既定 OFF。`EnvFilter` 内包の
+/// [`LogConfig`] が大きいため `Box` に包んで enum サイズを
+/// 抑える。
 #[derive(Debug)]
 pub enum Activation {
     /// `AL_LOG`/`--log` が未指定(env の空文字も未指定扱い)。
     Disabled,
     /// logging 有効。解釈済みの [`LogConfig`] を保持する。
-    Enabled(LogConfig),
+    Enabled(Box<LogConfig>),
 }
 
 /// `AL_LOG`/`--log`/`AL_LOG_FORMAT`/`--log-format` の解釈エラー。
@@ -123,6 +147,11 @@ impl std::error::Error for LogConfigError {}
 pub enum InitError {
     /// global subscriber が既に設定済み。設計上到達しない内部エラー。
     AlreadyInitialized,
+    /// ruviform logging adapter の sink 構築に失敗した
+    /// (`Required` 指定の stderr sink の init 失敗、または
+    /// filter の再解釈失敗 — 後者は `resolve_activation` で
+    /// 検証済みのため通常到達しない)。
+    Build(LoggingBuildError),
 }
 
 impl fmt::Display for InitError {
@@ -131,17 +160,30 @@ impl fmt::Display for InitError {
             Self::AlreadyInitialized => {
                 write!(f, "log subscriber is already initialized")
             }
+            Self::Build(source) => {
+                write!(f, "cannot initialize log sinks: {source}")
+            }
         }
     }
 }
 
-impl std::error::Error for InitError {}
+impl std::error::Error for InitError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::AlreadyInitialized => None,
+            Self::Build(source) => Some(source),
+        }
+    }
+}
 
-/// 返却 guard。file sink の `WorkerGuard` を保持し、Drop で flush
-/// を保証する。呼出し側は `cmd_*` のスコープ終了まで保持する。
+/// 返却 guard。ruviform `WriterGuard` と file sink の
+/// `WorkerGuard` を保持し、Drop で drain/flush を保証する。
+/// 呼出し側は `cmd_*` のスコープ終了まで保持する。
 #[derive(Debug)]
 pub struct LogGuard {
-    // 保持のみで読み取らない。Drop 時に worker が flush される。
+    // 保持のみで読み取らない。Drop 時に各 worker が drain+flush
+    // される(ruviform WriterGuard は bounded timeout 付き join)。
+    _guards: Vec<ruviform_observability::logging::WriterGuard>,
     _file_guard: Option<WorkerGuard>,
 }
 
@@ -192,43 +234,52 @@ pub fn resolve_activation(
         None => (LogFormat::Text, LogFormat::Json),
     };
 
-    Ok(Activation::Enabled(LogConfig {
+    Ok(Activation::Enabled(Box::new(LogConfig {
         filter,
         stderr_format,
         file_format,
         // file sink の集約先は呼出し側(run/resume は
         // `<base_dir>/logs`、inspect は `None`)が設定する。
         file_dir: None,
-    }))
+    })))
 }
 
 /// [`LogConfig`] から global subscriber を構築し [`LogGuard`] を
 /// 返す。プロセス内で1回だけ呼ぶ(2回目は
 /// [`InitError::AlreadyInitialized`])。
 ///
-/// `file_dir` が `Some` で file sink の構築(`rolling::Builder::build`)
-/// に失敗した場合、stderr に warn 行を出して stderr-only に
-/// degrade し `Ok` を返す — 「log 機構は job を壊さない」不変条件。
+/// stderr sink は ruviform `build_logging_layers` が生成する
+/// bounded-writer layer(bounded queue + drain guard、per-sink
+/// `EnvFilter`)を使う。file sink は `filename_suffix("log")` の
+/// 命名契約を維持するため暫定で local 構築する(module doc 参照)。
+/// 両 sink に同一 directive を per-sink filter として適用する
+/// (従来の global filter と等価)。
+///
+/// `file_dir` が `Some` で file sink の構築に失敗した場合、
+/// stderr に warn 行を出して stderr-only に degrade し `Ok` を
+/// 返す — 「log 機構は job を壊さない」不変条件。
 pub fn init(config: LogConfig) -> Result<LogGuard, InitError> {
-    let mut layers: Vec<Box<dyn Layer<Registry> + Send + Sync>> =
-        vec![stderr_layer(config.stderr_format)];
+    // stderr sink は ruviform logging adapter に委譲する。
+    let built = ruviform_observability::logging::build_logging_layers(&LoggingConfig {
+        sinks: vec![SinkConfig {
+            destination: SinkDestination::Stderr,
+            format: map_log_format(config.stderr_format),
+            // `resolve_activation` で parse 済みの directive と同じ
+            // ものを per-sink filter として適用する。
+            filter: config.filter.to_string(),
+            // stderr は常に利用可能な sink であり、init 失敗時は
+            // 明示エラーで呼出し側の `fail()` に委ねる。
+            failure_mode: SinkFailureMode::Required,
+        }],
+    })
+    .map_err(InitError::Build)?;
+    let mut layers = built.layers;
+    let guards = built.guards;
+
     let mut file_guard = None;
     if let Some(dir) = &config.file_dir {
-        // `RollingFileAppender` runs `prune_old_logs` before creating
-        // the log directory and prints a stray stderr error when the
-        // read fails; create the directory up front so a fresh
-        // `<base_dir>/logs` stays quiet. If creation fails, `build`
-        // fails too and degrades to stderr-only below.
-        let _ = std::fs::create_dir_all(dir);
-        match rolling::Builder::new()
-            .rotation(Rotation::DAILY)
-            .filename_prefix("al")
-            .filename_suffix("log")
-            .max_log_files(7)
-            .build(dir)
-        {
-            Ok(appender) => {
-                let (layer, guard) = file_layer(config.file_format, appender);
+        match build_file_sink(dir, config.file_format, config.filter.clone()) {
+            Ok((layer, guard)) => {
                 layers.push(layer);
                 file_guard = Some(guard);
             }
@@ -244,12 +295,59 @@ pub fn init(config: LogConfig) -> Result<LogGuard, InitError> {
     }
     tracing_subscriber::registry()
         .with(layers)
-        .with(config.filter) // EnvFilter は末尾に global filter として
         .try_init()
         .map_err(|_| InitError::AlreadyInitialized)?;
     Ok(LogGuard {
+        _guards: guards,
         _file_guard: file_guard,
     })
+}
+
+/// 製品語彙の [`LogFormat`] を ruviform `LogFormat` へ写像する
+/// (写像はこの1箇所に集約する)。
+fn map_log_format(format: LogFormat) -> ruviform_observability::logging::LogFormat {
+    match format {
+        LogFormat::Text => ruviform_observability::logging::LogFormat::Text,
+        LogFormat::Json => ruviform_observability::logging::LogFormat::JsonLines,
+    }
+}
+
+/// 暫定 local file sink(ruviform#334 解消条件付き)。
+///
+/// `filename_prefix("al")` + `filename_suffix("log")` +
+/// `Rotation::DAILY` + `max_log_files(7)` の rolling file を
+/// `non_blocking` writer に包み、`FmtSpan::CLOSE` + per-sink
+/// `EnvFilter` を設定した fmt layer と `WorkerGuard` を返す。
+///
+/// `RollingFileAppender` runs `prune_old_logs` before creating
+/// the log directory and prints a stray stderr error when the
+/// read fails; create the directory up front so a fresh
+/// `<base_dir>/logs` stays quiet. If creation fails, `build`
+/// fails too and the caller degrades to stderr-only.
+fn build_file_sink(
+    dir: &Path,
+    format: LogFormat,
+    filter: EnvFilter,
+) -> io::Result<(Box<dyn Layer<Registry> + Send + Sync>, WorkerGuard)> {
+    let _ = std::fs::create_dir_all(dir);
+    let appender = rolling::Builder::new()
+        .rotation(Rotation::DAILY)
+        .filename_prefix("al")
+        .filename_suffix("log")
+        .max_log_files(7)
+        .build(dir)
+        .map_err(io::Error::other)?;
+    let (writer, guard) = tracing_appender::non_blocking(appender);
+    let layer = tracing_subscriber::fmt::Layer::default()
+        .with_writer(writer)
+        .with_ansi(false)
+        .with_span_events(FmtSpan::CLOSE);
+    let layer = match format {
+        LogFormat::Text => layer.boxed(),
+        LogFormat::Json => layer.json().boxed(),
+    };
+    // per-sink EnvFilter(ruviform stderr sink と同じ directive)。
+    Ok((layer.with_filter(filter).boxed(), guard))
 }
 
 /// env 値の正規化: unset または空文字は未指定(`None`)扱い。
@@ -290,53 +388,13 @@ fn parse_format_directives(raw: &str) -> Result<(LogFormat, LogFormat), LogConfi
     Ok((stderr_format, file_format))
 }
 
-/// stderr sink の fmt layer を構築する。text/json の分岐で具象型が
-/// 変わるため boxed layer を返す。
-fn stderr_layer<S>(format: LogFormat) -> Box<dyn Layer<S> + Send + Sync>
-where
-    S: Subscriber + for<'span> LookupSpan<'span>,
-{
-    // CLOSE span events make leaf-crate `info_span!` instrumentation
-    // observable (`AL_LOG=al_locate=debug` shows `locate::*` close
-    // events with elapsed time); without them a span with no inner
-    // events would leave no trace in either sink.
-    let layer = tracing_subscriber::fmt::Layer::default()
-        .with_writer(std::io::stderr)
-        .with_span_events(FmtSpan::CLOSE);
-    match format {
-        LogFormat::Text => layer.boxed(),
-        LogFormat::Json => layer.json().boxed(),
-    }
-}
-
-/// file sink の fmt layer を構築する。`non_blocking` writer に包み、
-/// flush 保証の `WorkerGuard` を layer とともに返す。
-fn file_layer<S>(
-    format: LogFormat,
-    appender: RollingFileAppender,
-) -> (Box<dyn Layer<S> + Send + Sync>, WorkerGuard)
-where
-    S: Subscriber + for<'span> LookupSpan<'span>,
-{
-    let (writer, guard) = tracing_appender::non_blocking(appender);
-    let layer = tracing_subscriber::fmt::Layer::default()
-        .with_writer(writer)
-        .with_ansi(false)
-        .with_span_events(FmtSpan::CLOSE);
-    let layer = match format {
-        LogFormat::Text => layer.boxed(),
-        LogFormat::Json => layer.json().boxed(),
-    };
-    (layer, guard)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn enabled(result: Result<Activation, LogConfigError>) -> LogConfig {
         match result {
-            Ok(Activation::Enabled(config)) => config,
+            Ok(Activation::Enabled(config)) => *config,
             other => panic!("expected Enabled, got {other:?}"),
         }
     }

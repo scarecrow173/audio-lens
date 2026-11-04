@@ -105,7 +105,7 @@ fn init_logging(
             if file_sink {
                 config.file_dir = Some(base_dir.join("logs"));
             }
-            al_observability::init(config)
+            al_observability::init(*config)
                 .map(Some)
                 .map_err(|e| e.to_string())
         }

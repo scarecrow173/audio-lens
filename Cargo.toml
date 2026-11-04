@@ -65,6 +65,10 @@ ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-numeric = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", features = ["mp4", "aac"] }
+# OBS-01 (Ruviform #276) の汎用 logging adapter。sink 構築・bounded
+# writer・health の正本。AudioLens 固有の有効化ポリシー・file 命名
+# 契約は al-observability が adapter として保持する(AL#138)。
+ruviform-observability = { git = "https://github.com/scarecrow173/ruviform.git", features = ["logging"] }
 ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git" }
