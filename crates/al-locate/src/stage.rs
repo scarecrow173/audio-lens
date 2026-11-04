@@ -708,9 +708,13 @@ impl LocateStage {
         let job_dir = ctx.registry.job_dir();
         fs::create_dir_all(job_dir.join(dir)).map_err(err)?;
         let rel = dir.join(name);
-        al_job::fsutil::write_durable(
+        al_job::fsutil::publish_bytes(
             &job_dir.join(&rel),
             serde_json::to_string_pretty(body).map_err(err)?.as_bytes(),
+            al_job::fsutil::PublishOptions::new(
+                al_job::fsutil::PublishMode::Replace,
+                al_job::fsutil::Durability::FileAndDirectorySync,
+            ),
         )
         .map_err(err)?;
         Ok(ArtifactRecord {

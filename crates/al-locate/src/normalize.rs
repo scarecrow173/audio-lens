@@ -185,9 +185,16 @@ pub fn prepare_input(
         bytes.extend_from_slice(&row);
     }
     // Relaxed tier: normalized PCM is regenerable from the decoded
-    // input, so the fsync is skipped and resume's artifact
+    // input, so the syncs are skipped and resume's artifact
     // verification re-runs the stage if power loss dropped it.
-    al_job::fsutil::write_atomic(&absolute, &bytes)?;
+    al_job::fsutil::publish_bytes(
+        &absolute,
+        &bytes,
+        al_job::fsutil::PublishOptions::new(
+            al_job::fsutil::PublishMode::Replace,
+            al_job::fsutil::Durability::BestEffort,
+        ),
+    )?;
     let record = ArtifactRecord {
         artifact_id: artifact_id.clone(),
         role: "normalized_pcm".into(),

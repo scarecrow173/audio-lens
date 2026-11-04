@@ -1,15 +1,15 @@
-//! Dataset audio store: WAV files written durably via the shared
-//! temp-file + fsync + rename discipline.
+//! Dataset audio store: WAV files staged and published through the
+//! shared `ruviform-io-file` StagedFile contract.
 
-use std::fs::{self, File};
+use std::fs;
 use std::io;
 use std::path::Path;
 
-use al_job::fsutil::{rename_atomic, tmp_path_for};
+use al_job::fsutil::{Durability, PublishMode, PublishOptions};
 use al_media::wav::{DecodedAudio, WavEncoding, WavWriter, decode_wav};
 
 /// Write `samples` (interleaved f64 in `encoding`'s native scale) to
-/// `path` as a RIFF/WAVE file, atomically but without fsyncs
+/// `path` as a RIFF/WAVE file, atomically but without syncs
 /// (relaxed tier — regenerable bulk data).
 pub fn write_wav(
     path: &Path,
@@ -18,33 +18,27 @@ pub fn write_wav(
     sample_rate: u32,
     samples: &[f64],
 ) -> io::Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)?;
+    let staged = al_job::fsutil::stage_file(path)?;
+    let mut writer = WavWriter::new(staged, encoding, channels, sample_rate)?;
+    // Encode in bounded blocks: the streaming encoder exists so a
+    // large file never needs a second full-size buffer. Blocks must
+    // hold whole frames — `write_samples` rejects a count that is
+    // not a multiple of `channels`, so a fixed power-of-two block
+    // would split mid-frame for e.g. 3ch/6ch audio.
+    let channels_per_frame = usize::from(channels).max(1);
+    let block_frames = ((1 << 20) / channels_per_frame).max(1);
+    for block in samples.chunks(block_frames * channels_per_frame) {
+        writer.write_samples(block)?;
     }
-    let tmp = tmp_path_for(path);
-    let result = (|| {
-        let file = File::create(&tmp)?;
-        let mut writer = WavWriter::new(file, encoding, channels, sample_rate)?;
-        // Encode in bounded blocks: the streaming encoder exists so a
-        // large file never needs a second full-size buffer. Blocks must
-        // hold whole frames — `write_samples` rejects a count that is
-        // not a multiple of `channels`, so a fixed power-of-two block
-        // would split mid-frame for e.g. 3ch/6ch audio.
-        let channels_per_frame = usize::from(channels).max(1);
-        let block_frames = ((1 << 20) / channels_per_frame).max(1);
-        for block in samples.chunks(block_frames * channels_per_frame) {
-            writer.write_samples(block)?;
-        }
-        let file = writer.finish()?;
-        // Relaxed tier: WAV payloads are regenerable bulk data —
-        // skip fsync; resume verification regenerates on loss.
-        drop(file);
-        rename_atomic(&tmp, path)
-    })();
-    if result.is_err() {
-        let _ = fs::remove_file(&tmp);
-    }
-    result
+    let staged = writer.finish()?;
+    // Relaxed tier: WAV payloads are regenerable bulk data — atomic
+    // visibility only, no sync; resume verification regenerates on
+    // loss.
+    al_job::fsutil::publish_sealed(
+        staged.seal(),
+        PublishOptions::new(PublishMode::Replace, Durability::BestEffort),
+    )?;
+    Ok(())
 }
 
 /// Decode a WAV file from the dataset.
@@ -66,7 +60,13 @@ mod tests {
         let samples = vec![0.5_f64, -0.5, 0.25, -0.25];
         write_wav(&path, WavEncoding::Float32, 2, 48000, &samples).unwrap();
         assert!(path.exists());
-        assert!(!tmp_path_for(&path).exists());
+        // The staged temp sibling must not survive the publish.
+        assert!(
+            !fs::read_dir(path.parent().unwrap())
+                .unwrap()
+                .filter_map(|e| e.ok())
+                .any(|e| e.file_name().to_string_lossy().contains(".rvf-tmp-"))
+        );
         let audio = read_wav(&path).unwrap();
         assert_eq!(audio.sample_format, SampleFormat::Float32);
         assert_eq!(audio.channels, 2);

@@ -6,7 +6,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use al_job::fsutil::write_durable;
+use al_job::fsutil::{Durability, PublishMode, PublishOptions, publish_bytes};
 
 use crate::provenance::{InputReference, Provenance};
 
@@ -153,7 +153,12 @@ impl DatasetManifest {
     pub fn save(&self, dataset_root: &Path) -> std::io::Result<()> {
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-        write_durable(&dataset_root.join(MANIFEST_FILE), json.as_bytes())
+        publish_bytes(
+            &dataset_root.join(MANIFEST_FILE),
+            json.as_bytes(),
+            PublishOptions::new(PublishMode::Replace, Durability::FileAndDirectorySync),
+        )?;
+        Ok(())
     }
 }
 
