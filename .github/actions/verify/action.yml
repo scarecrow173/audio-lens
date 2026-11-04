@@ -1,0 +1,240 @@
+# verify lane 本体(ci.yml の verify/verify-macos job が共有する
+# composite action)。Issue #149 追加合意で macOS leg を Required
+# summary の needs から物理分離するにあたり、同一 lane を
+# PR 必須 legs(ubuntu/windows)と非ブロッキング macOS leg の
+# 両 job から重複なく呼び出すための単一定義(表現ドリフト防止)。
+#
+# 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
+# secrets/needs/vars/matrix context は composite 内で参照できない
+# ため inputs 経由で受け取る。
+name: verify lane
+description: "Rust workspace + Golden/LFS/Export/CLI headless lane (shared by PR-required ubuntu/windows legs and the non-blocking macOS leg)"
+
+inputs:
+  os:
+    description: "runner label recorded in lane evidence (e.g. ubuntu-latest, macos-latest)"
+    required: true
+  access_mode:
+    description: "ruviform-access job が解決した mode (deploy_key | anonymous | unavailable)"
+    required: true
+  deploy_key:
+    description: "RUVIFORM_DEPLOY_KEY secret (deploy_key mode 時のみ使用)"
+    required: false
+    default: ""
+  sccache_disable:
+    description: "repo variable CI_SCCACHE_DISABLE (=1 で sccache step を全 skip)"
+    required: false
+    default: "0"
+
+outputs:
+  resolved_sha:
+    description: "check-ruviform-rev が記録した ruviform resolved SHA"
+    value: ${{ steps.guard.outputs.resolved_sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Gate on ruviform access mode
+      if: inputs.access_mode == 'unavailable'
+      shell: bash
+      run: |
+        echo "::error::ruviform dependency is unreachable (anonymous HTTPS failed and RUVIFORM_DEPLOY_KEY unset) — see docs/guides/ruviform-private-access-ci.md"
+        exit 1
+
+    - name: Set up mise
+      uses: jdx/mise-action@v5.2.0
+      with:
+        install: false
+
+    # prek/uv/actionlint は hygiene job へ移管(Issue #149)。
+    - name: Restore CI-scoped tools from mise.lock
+      shell: bash
+      run: |
+        mise trust
+        mise install --locked rust git-lfs node biome
+
+    - name: Restore cargo registry/git index cache
+      uses: actions/cache@v6.1.0
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-
+
+    # Issue #148 (AL-CI-OPT-01): sccache content-addressed compile cache
+    # (GitHub Actions cache backend、ruviform #329 と同型)。cache service
+    # credential(ACTIONS_RESULTS_URL/ACTIONS_RUNTIME_TOKEN)は JS action
+    # にのみ注入されるため、github-script で RUSTC_WRAPPER/SCCACHE_* と
+    # ともに GITHUB_ENV へ再 export する。kill switch: repo variable
+    # CI_SCCACHE_DISABLE=1 で全 sccache step が skip され素の rustc が
+    # 走る(RUSTC_WRAPPER は GITHUB_ENV 経由なので未生成=未設定になる)。
+    - name: Set up sccache
+      if: inputs.sccache_disable != '1'
+      uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+      with:
+        version: "v0.19.0"
+
+    - name: Export sccache GHA backend env
+      if: inputs.sccache_disable != '1'
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      with:
+        script: |
+          const token = process.env.ACTIONS_RUNTIME_TOKEN || '';
+          const url = process.env.ACTIONS_RESULTS_URL || '';
+          const gha = token !== '' && url !== '';
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', token);
+          core.exportVariable('ACTIONS_RESULTS_URL', url);
+          core.exportVariable('SCCACHE_GHA_ENABLED', gha ? 'true' : 'false');
+          core.exportVariable('SCCACHE_GHA_VERSION', `audiolens-v1-${process.env.RUNNER_OS || 'unknown'}`);
+          core.exportVariable('RUSTC_WRAPPER', 'sccache');
+          core.info(`sccache GHA backend: ${gha ? 'enabled' : 'disabled (cache credentials absent)'}`);
+
+    - name: Verify sccache environment
+      if: inputs.sccache_disable != '1'
+      shell: bash
+      run: |
+        set -euo pipefail
+        command -v sccache
+        sccache --version
+        echo "RUSTC_WRAPPER=$RUSTC_WRAPPER"
+        echo "SCCACHE_GHA_ENABLED=$SCCACHE_GHA_ENABLED"
+        echo "SCCACHE_GHA_VERSION=$SCCACHE_GHA_VERSION"
+        if [ -n "${ACTIONS_RESULTS_URL:-}" ]; then echo "ACTIONS_RESULTS_URL: set"; else echo "::warning::ACTIONS_RESULTS_URL missing — sccache GHA backend disabled (local disk fallback)"; fi
+        if [ -n "${ACTIONS_RUNTIME_TOKEN:-}" ]; then echo "ACTIONS_RUNTIME_TOKEN: set"; else echo "::warning::ACTIONS_RUNTIME_TOKEN missing — sccache GHA backend disabled (local disk fallback)"; fi
+
+    - name: Verify pinned toolchain resolution
+      shell: bash
+      run: mise run verify-toolchain
+
+    # Read-only Deploy Key(private 復帰時の経路)。秘密は
+    # RUNNER_TEMP 配下の mode 600 鍵ファイルにのみ展開し、
+    # api.github.com/meta の公開 SSH host key で
+    # StrictHostKeyChecking=yes 照合、ruviform URL のみ insteadOf
+    # で SSH へ書き換える(third-party action に秘密を渡さない)。
+    - name: Configure read-only access to private ruviform dependency
+      if: inputs.access_mode == 'deploy_key'
+      id: ssh_cred
+      shell: bash
+      env:
+        RUVIFORM_DEPLOY_KEY: ${{ inputs.deploy_key }}
+      run: |
+        set -euo pipefail
+        # Forward slashes keep the path usable by both msys and
+        # Win32-OpenSSH on Windows runners.
+        key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+        printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+        chmod 600 "$key"
+        known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+        curl -fsSL https://api.github.com/meta \
+          | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+        test -s "$known_hosts"
+        echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+        git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+    # probe は認証失敗と manifest/lock 失敗を切り分ける。
+    - name: Probe private ruviform access
+      id: probe_key
+      if: inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+    - name: Probe anonymous ruviform access
+      id: probe_anon
+      if: inputs.access_mode == 'anonymous'
+      shell: bash
+      run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+    # GIT_LFS_SKIP_SMUDGE(.cargo/config.toml): 依存 repo の LFS
+    # 実体は crate コンパイルに不要。
+    - name: Fetch locked dependencies
+      id: fetch
+      shell: bash
+      run: mise exec -- cargo fetch --locked
+
+    - name: Verify ruviform resolved SHA (lockfile single-source)
+      id: guard
+      shell: bash
+      run: mise run check-ruviform-rev
+
+    # Cargo.lock is the source of truth for the ruviform resolved
+    # revision (issue #140): verify every ruviform crate shares one
+    # 40-hex SHA and record it in the log for provenance.
+    - name: Verify single ruviform resolved revision
+      shell: bash
+      run: mise run check-ruviform-lock
+
+    - name: Check formatting (mise run fmt)
+      id: fmt
+      shell: bash
+      run: mise run fmt
+
+    - name: Type-check workspace (mise run check-ci)
+      id: check
+      shell: bash
+      run: mise run check-ci
+
+    - name: Lint workspace (mise run lint-ci)
+      id: lint
+      shell: bash
+      run: mise run lint-ci
+
+    - name: Test workspace (mise run test-ci)
+      id: test
+      shell: bash
+      run: mise run test-ci
+
+    # headless artifact lane: al-cli の依存木に GUI/WebView/GPU
+    # crate が入らないことを境界検証する。
+    - name: Build headless CLI artifact
+      id: cli_build
+      shell: bash
+      run: mise exec -- cargo build -p al-cli --profile ci
+
+    - name: Verify headless dependency boundary
+      id: headless
+      shell: bash
+      run: mise run check-cli-headless
+
+    - name: sccache statistics
+      if: inputs.sccache_disable != '1'
+      shell: bash
+      run: sccache --show-stats || true
+
+    - name: Cleanup credential
+      if: always() && inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: |
+        git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+        rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+        # 注: 本 step 以降に git/ssh を使う step を追加しないこと
+
+    # lane ごとの証拠行(not-run/skipped もそのまま記録し、
+    # pass と偽らない)。OS 単位の記録はこの表 + job result で
+    # 追跡する(macOS leg は macos-summary job が別途集約)。
+    - name: Record lane evidence
+      if: always()
+      shell: bash
+      env:
+        MODE: ${{ inputs.access_mode }}
+      run: |
+        set -uo pipefail
+        os="${{ inputs.os }}"
+        sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+        probe="${{ steps.probe_anon.outcome }}"
+        [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+        [ "${MODE:-}" = "unavailable" ] && probe="not run"
+        {
+          echo "## verify — $os (access: ${MODE:-unknown})"
+          echo ""
+          echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+          echo "|---|---|---|---|---|"
+          echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+          echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
+          echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
+          echo "| mise run check-ci | $os | workspace | $sha | ${{ steps.check.outcome }} |"
+          echo "| mise run lint-ci | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
+          echo "| mise run test-ci (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
+          echo "| al-cli --profile ci build / check-cli-headless | $os | al-cli headless | $sha | ${{ steps.cli_build.outcome }} / ${{ steps.headless.outcome }} |"
+        } >> "$GITHUB_STEP_SUMMARY"

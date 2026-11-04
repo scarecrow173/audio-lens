@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行"
 created: "2026-11-04"
-updated: "2026-11-04"
+updated: "2026-11-05"
 owners: []
 relations:
   source:
@@ -13,6 +13,14 @@ relations:
     added:
       - type: "file"
         path: "tools/classify-impact.mjs"
+      - type: "file"
+        path: ".github/actions/verify/action.yml"
+      - type: "file"
+        path: ".github/actions/ui-verify/action.yml"
+      - type: "file"
+        path: ".github/actions/webview-verify/action.yml"
+      - type: "file"
+        path: "docs/guides/release-macos-verification.md"
     modified:
       - type: "file"
         path: ".github/workflows/ci.yml"
@@ -84,18 +92,31 @@ Owner となる)。
   実行化(audiolens-independent-ci §1 の不変条件を skip 可能化後も
   維持する)
 - `verify`/`ui-verify`/`webview-verify` の selective `if:` と
-  `needs: [ruviform-access, impact]`
+  `needs: [ruviform-access, impact]`(2026-11-05 合意以降は
+  ubuntu/windows legs のみ — macOS leg は `*-macos` job へ分離)
+- `verify-macos`/`ui-verify-macos`/`webview-verify-macos`:
+  PR/main で継続実行される非ブロッキング macOS leg。step 本体は
+  `.github/actions/<lane>` composite action で必須 legs と単一
+  定義を共有(表現ドリフト防止)
+- `macos-summary` job: macOS legs の結果を lane 別に
+  Pass/Fail/NotRun/Unsupported/Pending で記録する非ブロッキング
+  check(§8)
 - `summary` job の期待集合 fail-closed 再検査
   (required→success 必須、NotApplicable→skipped または実行済み
   のみ許容、分類出力欠落・impact 失敗は fail)
 - Shadow Mode → 選択実行の移行機構
   (repo variable `CI_IMPACT_SELECTIVE=1`)、Shadow 偽陰性注記、
   Before/After 計測と Rollback
+- リリース Gate の macOS 実測必須条件の runbook 化
+  (`docs/guides/release-macos-verification.md`)
 
 ### Out of Scope
 
-- OS leg 単位の選択実行(matrix leg 分割)。分類表は lane×3OS を
-  1 単位として扱う。細粒度化は Shadow 実績後の Deferred
+- OS leg 単位の**分類粒度**選択実行(lane 判定を OS 別に変える
+  細粒度化)。macOS leg の物理分離は 2026-11-05 合意で実施済み
+  だが、分類表自体は lane 単位のまま — macOS leg の期待値は
+  lane の required/not_applicable に追従する(observe)。
+  per-OS 分類の細粒度化は Shadow 実績後の Deferred
 - 実 Window/OS GUI 自動試験(gui-real は従来どおり not_run 記録。
   Browser/headless の成功を実機 PASS とみなさない契約は不変)
 - `Cargo.lock` 以外の依存 freeze/更新方針、Ruviform candidate SHA
@@ -112,12 +133,24 @@ Owner となる)。
 ruviform-access ─┐                        (常時)
 impact ──────────┤   分類→期待集合出力      (常時)
 hygiene ─────────┤   prek --all-files     (常時)
-  ├─ verify (3 OS)        if: impact.required or 分類失敗時
-  ├─ ui-verify (3 OS)     同上
-  ├─ webview-verify (3 OS)同上
-  ├─ gui-real             not_run 記録(常時)
-  └─ summary              期待集合 fail-closed 検査(常時, if: always())
+  ├─ verify (ubuntu/windows)        if: impact.required or 分類失敗時
+  ├─ ui-verify (ubuntu/windows)     同上
+  ├─ webview-verify (ubuntu/windows)同上
+  ├─ gui-real                       not_run 記録(常時)
+  └─ summary                        期待集合 fail-closed 検査(常時, if: always())
+
+verify-macos / ui-verify-macos / webview-verify-macos  (非ブロッキング)
+  └─ macos-summary                  macOS lane 別 Pass/Fail/NotRun 記録
+                                    (常時, if: always()。summary 非依存)
 ```
+
+期待集合は 3 tier で分離される(2026-11-05 合意):
+
+| tier | 対象 | gate |
+|---|---|---|
+| PR 必須 | lane × {ubuntu, windows} | Required `summary` が fail-closed 判定 |
+| 非ブロッキング macOS | lane × {macos} | `macos-summary` check が記録(merge 阻害しない) |
+| Full・リリース Gate | 全 lane × 全 OS + gui-real | main push/dispatch・リリース受入(runbook) |
 
 - `pull_request`: `impact` が `gh api .../pulls/N/files` で diff を
   取得し分類。`CI_IMPACT_SELECTIVE=1` のみ NotApplicable lane を
@@ -132,6 +165,14 @@ hygiene ─────────┤   prek --all-files     (常時)
   妨げないよう `!cancelled()` を併記する
 - `ruviform-access` 失敗時は依存解決不能のため lane は skip
   (summary が access 失敗で fail するので gate 結果は不変)
+- macOS leg(`*-macos` job)の `if:` は同形で
+  `needs.impact.outputs.<lane>_macos == 'observe'` を判定する。
+  `<lane>_macos` は分類器が `<lane>` と同じ applicability から
+  導出する別 output — lane required ⟺ macOS leg observe。
+  macOS leg の失敗・滞留は Required `summary` に影響しない
+  (needs 分離)。job 単位の独立のため、macOS job の queue 滞留や
+  rerun/cancel が他 queued job を殺すことはない
+  (matrix の fail-fast: false も維持)
 
 ### 2. AudioLens 変更分類表(唯一の正本は `tools/classify-impact.mjs`)
 
@@ -220,6 +261,13 @@ required context `summary` は名称・常時実行(`if: always()`)を
     impact 証跡)または実行済み `success` を記録。実行済みの
     failure/cancelled は fail
   - 期待値の欠落・不正値(impact 失敗・output 欠落)→ fail-closed
+- **macOS legs は needs に含めない**(2026-11-05 合意):
+  `verify` 等の lane job は ubuntu/windows legs のみを含む
+  matrix に縮小され、`*-macos` job は `summary` の needs に
+  加えない別 job。`needs.<job>` の解決は job 粒度のため、
+  OS 混在 matrix では leg 単位の切り離しができない — 分離は
+  job 分割でのみ実現できる(物理分離要件)。`continue-on-error`
+  や result 無視による隠蔽は要件違反として採用しない
 - **Shadow 偽陰性注記**: classified=not_applicable の lane が実
   実行で failure なら `::warning::SHADOW FALSE-NEGATIVE` を出す
   (gate は lane 失敗で既に落ちる。分類表の見直し対象として明示)
@@ -239,6 +287,11 @@ required context `summary` は名称・常時実行(`if: always()`)を
 - `impact`/`hygiene` は新規 check 名だが required context では
   ないため ruleset 更新は不要。summary が両者を期待集合に含めて
   検査する(impact 失敗・hygiene 失敗は fail)
+- `verify (macos-latest)` / `ui-verify (macos-latest)` /
+  `webview-verify (macos-latest)` / `macos-summary` の check
+  context は Ruleset Required に**登録しない**(2026-11-05 合意)。
+  `main-checkstatus` の Admin PR 限定 bypass と `main-protection`
+  の bypass 無し運用は Issue #147/#326 合意どおり維持する
 
 ### 6. Shadow Mode → 選択実行の移行
 
@@ -276,9 +329,9 @@ required context `summary` は名称・常時実行(`if: always()`)を
 
 ### 7. 分類器の自己防御
 
-- `tools/classify-impact.mjs`・`.github/**` の変更はそれぞれ
-  ci-scripts/ci class → 全 lane required。分類規約の改変は必ず
-  Full CI で検証される
+- `tools/classify-impact.mjs`・`.github/**`(workflows + actions)
+  の変更はそれぞれ ci-scripts/ci class → 全 lane required。
+  分類規約・lane 定義の改変は必ず Full CI で検証される
 - `gh api` 失敗・空 fetch → `--fallback` → mode=full。分類不能
   ファイル → unclassified → 全 lane required。二重の安全側倒れ
 - 空 diff(0 ファイル)は正しく「全 lane NotApplicable」(変更が
@@ -309,10 +362,54 @@ required context `summary` は名称・常時実行(`if: always()`)を
 | 選択実行の誤動作 | summary 期待集合表 | repo variable `CI_IMPACT_SELECTIVE=0` で即時 Full CI。env 行削除/`git revert` で完全除去 |
 | hygiene lane 失敗 | summary fail(常時 required) | prek 違反を修正。分類とは独立 |
 
+### 8. macOS leg の物理分離(2026-11-05 追加合意)
+
+合意: macOS runner 逼迫時に Required `summary` が macOS leg の
+完了を待機する構造的問題を解消する。GitHub Actions の `needs`
+は job 粒度のため OS 混在 matrix の leg 単位切り離しは不可能 —
+**macOS leg を別 job とすることのみが物理分離を満たす**。
+
+- `verify`/`ui-verify`/`webview-verify` の matrix を
+  `[ubuntu-latest, windows-latest]` に縮小 → Required `summary`
+  の needs が待つのは PR 必須集合のみ
+- `verify-macos`/`ui-verify-macos`/`webview-verify-macos` を新設
+  (`runs-on: macos-latest`、単一 leg)。`if:` は
+  `needs.impact.outputs.<lane>_macos == 'observe'` —
+  分類器が lane と同じ applicability を `observe`/`not_applicable`
+  で導出し、docs-only 等の正当 skip は macOS leg でも
+  NotApplicable として記録される(runner 逼迫とは区別される)
+- **step 本体の単一定義**: lane の steps を
+  `.github/actions/{verify,ui-verify,webview-verify}/action.yml`
+  の composite action に抽出し、必須 legs と macOS leg が共有する
+  (重複 = 表現ドリフトのため不可。composite 内では
+  secrets/needs/vars/matrix context が参照できないため
+  `os`/`access_mode`/`deploy_key`/`sccache_disable` を input 経由
+  で受け取る。check context 名は `verify (macos-latest)` 等、
+  従来と同一を維持)
+- **`macos-summary` job**(非ブロッキング check):
+  `needs: [impact, verify-macos, ui-verify-macos,
+  webview-verify-macos]` + `if: always()`。lane 別に
+  Pass/Fail/NotRun/Unsupported/Cancelled/NotApplicable を記録し、
+  leg の queue 滞留中は本 check 自身が Pending のまま残る
+  (未実行を NotApplicable に変換しない)。実行済みの
+  failure/cancelled・`observe` 期待の NotRun は check を失敗に
+  する(merge は阻害されないが Fail を隠さない)
+- **rerun/cancel の安全性**: `*-macos` は他 job の needs に
+  無関係の独立 job で、`macos-summary` のみが依存 — macOS job を
+  rerun/cancel しても他 queued job を殺さない。必須 lane matrix
+  の `fail-fast: false` も維持
+- **リリース条件**: PR `summary` の緑は macOS PASS を意味しない。
+  macOS 対応を表明する配布/リリース候補・正式互換受入では、
+  候補 SHA での macOS 実測合格(該当範囲の Golden/f64/CLI/UI/
+  WebView)を別途必須とする — 手順は
+  `docs/guides/release-macos-verification.md` を参照
+
 ## Deferred Design Concerns
 
-- OS leg 単位の選択実行(matrix leg 分割、ruviform #333 の lane/OS
-  粒度に追従するか)— Shadow 実績と #333 着後に再評価
+- OS leg 単位の**分類粒度**選択実行(ruviform #333 の lane/OS
+  粒度に追従するか)— macOS leg の物理分離は §8 で実施済み。
+  残る細粒度化(lane 判定の per-OS 分化)は Shadow 実績と
+  #333 着後に再評価
 - `unclassified` の細分化(新規 top-level dir を都度 class 化)
 - `gui-real` の opt-in lane 化(ruviform #312/#313 接続時。本設計
   では従来どおり not_run 証拠を維持)

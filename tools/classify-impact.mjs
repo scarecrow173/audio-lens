@@ -1,6 +1,6 @@
 // Classify a pull_request file diff into AudioLens change classes and
 // derive the required CI lane set (verify / ui-verify / webview-verify,
-// each lane = 3 OS legs). Implements the AudioLens side of the generic
+// each lane = per-OS legs). Implements the AudioLens side of the generic
 // Impact contract (ruviform #333; AudioLens #149):
 //   - pull_request only. push:main / workflow_dispatch always run Full CI.
 //   - unclassifiable or shared-infrastructure changes fall back to Full CI.
@@ -13,6 +13,18 @@
 //     Shadow Mode instantly (classification recorded, every lane
 //     runs — the false-negative monitoring path stays available).
 //
+// Expected lane sets are emitted in three explicit tiers
+// (Issue #149 2026-11-05 追加合意):
+//   - `<lane>`:      PR 必須集合 = lane の ubuntu/windows legs。
+//                    `required` | `not_applicable` — Required `summary`
+//                    が fail-closed で判定する。
+//   - `<lane>_macos`: 非ブロッキング macOS leg の期待値。
+//                    `observe` | `not_applicable` — `summary` の
+//                    needs/判定対象外。非ブロッキング check
+//                    `macos-summary` が Pass/Fail/NotRun 等で記録。
+//   - mode=full:     全 lane required + observe = Full/リリース Gate
+//                    期待集合(main push/dispatch/分類不能の安全側)。
+//
 // The rule table below is the single source of truth for class → lane
 // mapping; docs/designs/impact-based-ci-issue-149.md mirrors it for review.
 //
@@ -23,7 +35,8 @@
 //         --selective "${SELECTIVE:-${CI_IMPACT_SELECTIVE:-0}}"
 //   node tools/classify-impact.mjs --event pull_request --fallback
 //
-// Emits `mode`, `classes`, `<lane>` (effective), `<lane>_class` (raw
+// Emits `mode`, `classes`, `<lane>` (effective PR-required),
+// `<lane>_macos` (non-blocking macOS), `<lane>_class` (raw
 // classification) and `<lane>_reason` to GITHUB_OUTPUT, plus a
 // classification evidence table to GITHUB_STEP_SUMMARY. Exit 0 on
 // success — classification failures degrade to Full CI (safe side),
@@ -254,6 +267,15 @@ const effective = {};
 for (const lane of LANES) {
   effective[lane] = mode === "selective" ? classified[lane] : "required";
 }
+// 非ブロッキング macOS leg の期待値。applicability は lane と同一
+// (required なら macOS leg も走る)が、ブロッキング階層だけが異なる
+// — `summary` の needs/判定対象から物理分離された `verify-macos`
+// 等の `if:` と `macos-summary` の記録が参照する(Issue #149
+// 2026-11-05 追加合意)。
+const macos = {};
+for (const lane of LANES) {
+  macos[lane] = effective[lane] === "required" ? "observe" : "not_applicable";
+}
 
 // Evidence table → step summary (auditable on the PR Checks page).
 const disp = (lane) => lane.replaceAll("_", "-");
@@ -284,13 +306,21 @@ const disp = (lane) => lane.replaceAll("_", "-");
     lines.push("| (変更なし) | 0 | (hygiene のみ) | 空の diff |");
   }
   lines.push("");
-  lines.push("| lane | classified | effective | reason |");
-  lines.push("|---|---|---|---|");
+  lines.push(
+    "| lane | classified | PR required (ubuntu/windows) | macOS leg (non-blocking) | reason |",
+  );
+  lines.push("|---|---|---|---|---|");
   for (const lane of LANES) {
     lines.push(
-      `| ${disp(lane)} (3 OS) | ${classified[lane]} | ${effective[lane]} | ${reasons[lane]} |`,
+      `| ${disp(lane)} | ${classified[lane]} | ${effective[lane]} | ${macos[lane]} | ${reasons[lane]} |`,
     );
   }
+  lines.push("");
+  lines.push(
+    "tier: `required` = Required `summary` の判定対象(ubuntu/windows legs) · " +
+      "`observe` = 非ブロッキング macOS leg(`macos-summary` が記録) · " +
+      "mode=full では全 lane required+observe = Full/リリース Gate 集合",
+  );
   const table = `${lines.join("\n")}\n`;
   process.stdout.write(table);
   if (process.env.GITHUB_STEP_SUMMARY) {
@@ -303,6 +333,7 @@ if (process.env.GITHUB_OUTPUT) {
     `mode=${mode}`,
     `classes=${[...hits.keys()].join(",") || "(none)"}`,
     ...LANES.map((l) => `${l}=${effective[l]}`),
+    ...LANES.map((l) => `${l}_macos=${macos[l]}`),
     ...LANES.map((l) => `${l}_class=${classified[l]}`),
     ...LANES.map((l) => `${l}_reason=${reasons[l]}`),
   ];

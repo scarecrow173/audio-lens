@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "AudioLens 独立 CI: 3 OS lane・依存 dual-mode アクセス・証拠レポート設計"
 created: "2026-11-04"
-updated: "2026-11-04"
+updated: "2026-11-05"
 owners: []
 relations:
   source:
@@ -165,11 +165,15 @@ provenance)。`pipx:serena-agent` は backend 上 platform entry を
 ruviform-access (ubuntu)            # access mode 解決(常時)
 impact (ubuntu)                     # Issue #149: PR diff → 分類→期待集合(常時)
 hygiene (ubuntu)                    # Issue #149: prek --all-files(常時)
-  ├─ verify (ubuntu/windows/macos)  # Rust 本体 + Golden + CLI(selective)
-  ├─ ui-verify (ubuntu/windows/macos) # ui/ TS + vendor 整合(selective)
-  ├─ webview-verify (ubuntu/windows/macos) # al-gui webview feature(selective)
+  ├─ verify (ubuntu/windows)        # Rust 本体 + Golden + CLI(selective)
+  ├─ ui-verify (ubuntu/windows)     # ui/ TS + vendor 整合(selective)
+  ├─ webview-verify (ubuntu/windows) # al-gui webview feature(selective)
   ├─ gui-real (ubuntu)              # 実 GUI: not-run 記録 placeholder(常時)
   └─ summary (ubuntu)               # 証拠集約 + 期待集合 fail-closed(常時)
+
+verify-macos / ui-verify-macos / webview-verify-macos (macos)
+                                    # 非ブロッキング macOS 観察 leg
+  └─ macos-summary (ubuntu)         # macOS lane 別 Pass/Fail/NotRun 記録
 ```
 
 Issue #149 以降、`verify`/`ui-verify`/`webview-verify` は PR で
@@ -177,7 +181,19 @@ Issue #149 以降、`verify`/`ui-verify`/`webview-verify` は PR で
 全 lane 実行)。選択条件と分類表は
 [impact-based-ci-issue-149](./impact-based-ci-issue-149.md) を参照。
 
-**verify**(3 OS): checkout(`lfs: true`)→ scoped mise install →
+**macOS leg の物理分離(Issue #149 2026-11-05 追加合意)**:
+macOS runner 逼迫で Required `summary` が待機しないよう、各 lane
+の macOS leg は `*-macos` job へ分離され `summary` の needs・判定
+対象から外れる。PR/main では lane と同じ applicability で継続実行
+され、結果は非ブロッキング check `macos-summary` が lane 別に
+Pass/Fail/NotRun/Unsupported/Pending で記録する。step 本体は
+`.github/actions/<lane>` composite action が必須 legs と共有する
+単一定義。macOS legs を Ruleset Required context に登録しない。
+macOS 対応を表明するリリース/互換受入では候補 SHA の macOS 実測を
+別途必須とする(§4 末尾・guides/release-macos-verification.md)。
+
+**verify**(ubuntu/windows matrix + `verify-macos`、同一定義は
+`.github/actions/verify`): checkout(`lfs: true`)→ scoped mise install →
 `verify-toolchain` → dep access 設定 + probe →
 `cargo fetch --locked` → `check-ruviform-rev` →
 `fmt` → `check-ci` → `lint-ci` →
@@ -186,7 +202,8 @@ Job/Dataset/Export の全回帰を含む、LFS fixture 使用)→
 `cargo build -p al-cli --profile ci` → `check-cli-headless`。
 (`prek run --all-files` は Issue #149 で `hygiene` job へ移管)
 
-**ui-verify**(3 OS): checkout(LFS 不要)→ `mise install --locked
+**ui-verify**(ubuntu/windows + `ui-verify-macos`、同一定義は
+`.github/actions/ui-verify`): checkout(LFS 不要)→ `mise install --locked
 node` → dep access 設定 + probe → `mise run sync-ui-deps`
 (vendor を pin SHA で materialize)→ `mise run setup-ui`
 (`npm ci`)→ `check-ruviform-rev --require-vendor`(vendor `REV`
@@ -195,7 +212,8 @@ tsc)→ `mise run test-ui`(happy-dom suite)。Ruviform #310/#311/
 #314 の利用可能部品が増えた場合の UI integration smoke の受け皿を
 兼ねる lane で、現行は AudioLens 側 headless 層が smoke 本体。
 
-**webview-verify**(3 OS): Rust lane のみ。ubuntu のみ
+**webview-verify**(ubuntu/windows + `webview-verify-macos`、
+同一定義は `.github/actions/webview-verify`): Rust lane のみ。ubuntu のみ
 `libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev
 libjavascriptcoregtk-4.1-dev` を apt install(ruviform `ui-verify`
 と同一構成)→ `check-ui-webview` / `lint-ui-webview` /
@@ -208,6 +226,15 @@ Window/OS 自動試験は本 run の検証範囲外であることを証拠と�
 残す。`status=not_run` を output し、summary が pass と誤認しない
 よう明示する。#312/#313 接続時に opt-in lane へ置換する拡張点。
 
+**macos-summary**: `needs: [impact, verify-macos, ui-verify-macos,
+webview-verify-macos]` + `if: always()`(Issue #149 追加合意)。
+macOS legs の結果を lane 別に集約する非ブロッキング check —
+`summary` の needs に含まれないため成否・待機が merge gate を
+阻害しない。leg が queue 滞留の間は check 自身が Pending のまま
+残り(未実行を NotApplicable に変換しない)、実行済みの
+failure/cancelled・`observe` 期待の NotRun は check を失敗にする
+(Fail を隠さない)。
+
 **summary**: `needs: [ruviform-access, impact, hygiene, verify,
 ui-verify, webview-verify, gui-real]` + `if: always()`。job ごとの
 `status`(pass/fail/not_run)・access mode・resolved SHA・OS・
@@ -218,6 +245,9 @@ Issue #149 以降は verify/ui-verify/webview-verify について
 `impact` の期待値(required/not_applicable)と実 result を
 fail-closed で照合する(required の skipped/failure/cancelled は
 fail、根拠付き NotApplicable の skipped のみ許容)。
+2026-11-05 合意以降、各 lane job は ubuntu/windows legs のみの
+matrix — macOS legs(`*-macos` job)は needs に含まれず、
+summary の緑は macOS PASS を意味しない。
 
 ### 5. 証拠レポート形式と Owner 切り分け
 
@@ -280,8 +310,11 @@ pull_request / push(main) / workflow_dispatch
   -> impact: PR diff を分類 -> 期待集合(required/not_applicable)
      非 PR・分類不能・fetch 失敗 -> mode=full(全 required)
   -> hygiene: prek run --all-files(常時)
-  -> verify / ui-verify / webview-verify (3 OS, 並列,
+  -> verify / ui-verify / webview-verify (ubuntu/windows, 並列,
      PR かつ分類 required のときのみ実行。Shadow Mode は全実行)
+  -> verify-macos / ui-verify-macos / webview-verify-macos
+     (分類 observe のとき実行。summary 非依存)
+  -> macos-summary: macOS lane 別 Pass/Fail/NotRun 記録(非ブロッキング)
        unavailable -> gate step ::error:: (明示 fail)
        deploy_key  -> SSH credential + probe
        anonymous   -> HTTPS probe
@@ -311,9 +344,14 @@ pull_request / push(main) / workflow_dispatch
   `--locked` 本来の挙動と同一
 - fork PR が private repo で fail するのは意図した fail-closed。
   運用上の摩擦は public 維持で回避される
-- webview-verify は wry/webkit2gtk ビルドで重いが、3 OS で独立に
-  結果を残す価値に見合う。apt 依存は ruviform 側と同一構成で
+- webview-verify は wry/webkit2gtk ビルドで重いが、macOS leg を
+  含め独立に結果を残す価値に見合う。apt 依存は ruviform 側と同一構成で
   上流実績あり
+- macOS leg の分離は Required gate を 2OS に限定する代わりに、
+  macOS の formal 互換判定をリリース Gate の実測(runbook)へ
+  移す。PR 上で macOS の regressive 失敗は macos-summary check の
+  失敗として可視だが merge は阻害しない — 見逃しリスクを受容
+  しつつ runner 逼迫耐性を得るトレードオフ(2026-11-05 合意)
 - doc-only PR も全 lane が走る(paths filter 不採用の対価)。
   concurrency cancel で実害は限定的。Issue #149 で hygiene を
   独立常時 lane 化し、分類依存 lane は期待集合ベースで選択実行

@@ -32,6 +32,21 @@ name: ci
 # skipped/NotRun を Pass にしない。
 # prek hygiene は hygiene job(常時実行)に分離済み — verify の skip
 # 可能化でも doc-only 変更の hygiene が欠落しない。
+#
+# 2026-11-05 追加合意(Issue #149): macOS legs(verify-macos /
+# ui-verify-macos / webview-verify-macos)は Required `summary` の
+# needs・判定対象から物理分離 — macOS runner 逼迫時も Required
+# gate は macOS leg の完了を待たない。macOS legs は PR/main で
+# 継続実行され、結果は非ブロッキング check `macos-summary` が
+# OS 別に Pass/Fail/NotRun/Unsupported/Pending で記録する。
+# (queue 中は macos-summary が Pending のまま残り、未実行を
+# NotApplicable に変換しない)。PR の summary 緑は macOS PASS を
+# 意味しない — macOS 対応を表明するリリース/互換受入では候補
+# SHA の macOS 実測を別途必須とする
+# (docs/guides/release-macos-verification.md)。
+# lane の step 本体は .github/actions/{verify,ui-verify,
+# webview-verify} の composite action が単一定義を持ち、
+# PR 必須 legs(ubuntu/windows)と macOS leg が共有する。
 
 on:
   pull_request:
@@ -100,9 +115,19 @@ jobs:
     outputs:
       mode: ${{ steps.classify.outputs.mode }}
       classes: ${{ steps.classify.outputs.classes }}
+      # <lane>: PR 必須集合(ubuntu/windows legs)の期待値
+      #   required | not_applicable — Required `summary` が判定に使う。
+      # <lane>_macos: 非ブロッキング macOS leg の期待値
+      #   observe | not_applicable — verify-macos 等の `if:` と
+      #   macos-summary の記録が使う。`summary` の needs/判定対象外。
+      # mode=full(main push/dispatch/fallback)では全 lane が
+      # required + observe = Full/リリース Gate 期待集合。
       verify: ${{ steps.classify.outputs.verify }}
       ui_verify: ${{ steps.classify.outputs.ui_verify }}
       webview_verify: ${{ steps.classify.outputs.webview_verify }}
+      verify_macos: ${{ steps.classify.outputs.verify_macos }}
+      ui_verify_macos: ${{ steps.classify.outputs.ui_verify_macos }}
+      webview_verify_macos: ${{ steps.classify.outputs.webview_verify_macos }}
       verify_class: ${{ steps.classify.outputs.verify_class }}
       ui_verify_class: ${{ steps.classify.outputs.ui_verify_class }}
       webview_verify_class: ${{ steps.classify.outputs.webview_verify_class }}
@@ -185,6 +210,10 @@ jobs:
       - name: Check config files with prek
         run: mise exec -- prek run --all-files
 
+  # PR 必須 legs は ubuntu/windows のみ(Issue #149 追加合意)。
+  # macOS leg は verify-macos job へ物理分離 — Required `summary`
+  # は本 job の legs のみ待つ。step 本体は .github/actions/verify
+  # (composite)が単一定義として両 job から共有される。
   verify:
     name: verify (${{ matrix.os }})
     needs: [ruviform-access, impact]
@@ -198,16 +227,10 @@ jobs:
       # 片 OS の失敗で他 OS の結果を消さない。
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
     outputs:
-      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
     steps:
-      - name: Gate on ruviform access mode
-        if: needs.ruviform-access.outputs.mode == 'unavailable'
-        run: |
-          echo "::error::ruviform dependency is unreachable (anonymous HTTPS failed and RUVIFORM_DEPLOY_KEY unset) — see docs/guides/ruviform-private-access-ci.md"
-          exit 1
-
       # `lfs: true` で実メディア fixture(Golden/Export 回帰が使用)を
       # 復元する。
       - name: Checkout repository
@@ -215,194 +238,50 @@ jobs:
         with:
           lfs: true
 
-      - name: Set up mise
-        uses: jdx/mise-action@v5.2.0
+      - name: verify lane
+        id: lane
+        uses: ./.github/actions/verify
         with:
-          install: false
+          os: ${{ matrix.os }}
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
-      # prek/uv/actionlint は hygiene job へ移管(Issue #149)。
-      - name: Restore CI-scoped tools from mise.lock
-        run: |
-          mise trust
-          mise install --locked rust git-lfs node biome
-
-      - name: Restore cargo registry/git index cache
-        uses: actions/cache@v6.1.0
+  # 非ブロッキング macOS 観察 leg(Issue #149 2026-11-05 追加合意)。
+  # verify と同一 step 本体(composite action)を macos-latest で実行
+  # するが、Required `summary` の needs に含まれない — macOS runner
+  # 逼迫時も Required gate は本 job を待たない。結果は非ブロッキング
+  # check `macos-summary` が記録する(本 job の失敗は merge を
+  # 阻害しないが、実行済みの失敗は証跡として隠さない)。
+  verify-macos:
+    name: verify (macos-latest)
+    needs: [ruviform-access, impact]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.verify_macos == 'observe') }}
+    runs-on: macos-latest
+    outputs:
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
         with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+          lfs: true
 
-      # Issue #148 (AL-CI-OPT-01): sccache content-addressed compile cache
-      # (GitHub Actions cache backend、ruviform #329 と同型)。cache service
-      # credential(ACTIONS_RESULTS_URL/ACTIONS_RUNTIME_TOKEN)は JS action
-      # にのみ注入されるため、github-script で RUSTC_WRAPPER/SCCACHE_* と
-      # ともに GITHUB_ENV へ再 export する。kill switch: repo variable
-      # CI_SCCACHE_DISABLE=1 で全 sccache step が skip され素の rustc が
-      # 走る(RUSTC_WRAPPER は GITHUB_ENV 経由なので未生成=未設定になる)。
-      - name: Set up sccache
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+      - name: verify lane
+        id: lane
+        uses: ./.github/actions/verify
         with:
-          version: "v0.19.0"
+          os: macos-latest
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
-      - name: Export sccache GHA backend env
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const token = process.env.ACTIONS_RUNTIME_TOKEN || '';
-            const url = process.env.ACTIONS_RESULTS_URL || '';
-            const gha = token !== '' && url !== '';
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', token);
-            core.exportVariable('ACTIONS_RESULTS_URL', url);
-            core.exportVariable('SCCACHE_GHA_ENABLED', gha ? 'true' : 'false');
-            core.exportVariable('SCCACHE_GHA_VERSION', `audiolens-v1-${process.env.RUNNER_OS || 'unknown'}`);
-            core.exportVariable('RUSTC_WRAPPER', 'sccache');
-            core.info(`sccache GHA backend: ${gha ? 'enabled' : 'disabled (cache credentials absent)'}`);
-
-      - name: Verify sccache environment
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          command -v sccache
-          sccache --version
-          echo "RUSTC_WRAPPER=$RUSTC_WRAPPER"
-          echo "SCCACHE_GHA_ENABLED=$SCCACHE_GHA_ENABLED"
-          echo "SCCACHE_GHA_VERSION=$SCCACHE_GHA_VERSION"
-          if [ -n "${ACTIONS_RESULTS_URL:-}" ]; then echo "ACTIONS_RESULTS_URL: set"; else echo "::warning::ACTIONS_RESULTS_URL missing — sccache GHA backend disabled (local disk fallback)"; fi
-          if [ -n "${ACTIONS_RUNTIME_TOKEN:-}" ]; then echo "ACTIONS_RUNTIME_TOKEN: set"; else echo "::warning::ACTIONS_RUNTIME_TOKEN missing — sccache GHA backend disabled (local disk fallback)"; fi
-
-      - name: Verify pinned toolchain resolution
-        run: mise run verify-toolchain
-
-      # Read-only Deploy Key(private 復帰時の経路)。秘密は
-      # RUNNER_TEMP 配下の mode 600 鍵ファイルにのみ展開し、
-      # api.github.com/meta の公開 SSH host key で
-      # StrictHostKeyChecking=yes 照合、ruviform URL のみ insteadOf
-      # で SSH へ書き換える(third-party action に秘密を渡さない)。
-      - name: Configure read-only access to private ruviform dependency
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        id: ssh_cred
-        shell: bash
-        env:
-          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
-        run: |
-          set -euo pipefail
-          # Forward slashes keep the path usable by both msys and
-          # Win32-OpenSSH on Windows runners.
-          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
-          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
-          chmod 600 "$key"
-          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
-          curl -fsSL https://api.github.com/meta \
-            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
-          test -s "$known_hosts"
-          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
-          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
-
-      # probe は認証失敗と manifest/lock 失敗を切り分ける。
-      - name: Probe private ruviform access
-        id: probe_key
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
-
-      - name: Probe anonymous ruviform access
-        id: probe_anon
-        if: needs.ruviform-access.outputs.mode == 'anonymous'
-        shell: bash
-        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
-
-      # GIT_LFS_SKIP_SMUDGE(.cargo/config.toml): 依存 repo の LFS
-      # 実体は crate コンパイルに不要。
-      - name: Fetch locked dependencies
-        id: fetch
-        run: mise exec -- cargo fetch --locked
-
-      - name: Verify ruviform resolved SHA (lockfile single-source)
-        id: guard
-        run: mise run check-ruviform-rev
-
-      # Cargo.lock is the source of truth for the ruviform resolved
-      # revision (issue #140): verify every ruviform crate shares one
-      # 40-hex SHA and record it in the log for provenance.
-      - name: Verify single ruviform resolved revision
-        run: mise run check-ruviform-lock
-
-      - name: Check formatting (mise run fmt)
-        id: fmt
-        run: mise run fmt
-
-      - name: Type-check workspace (mise run check-ci)
-        id: check
-        run: mise run check-ci
-
-      - name: Lint workspace (mise run lint-ci)
-        id: lint
-        run: mise run lint-ci
-
-      - name: Test workspace (mise run test-ci)
-        id: test
-        run: mise run test-ci
-
-      # headless artifact lane: al-cli の依存木に GUI/WebView/GPU
-      # crate が入らないことを境界検証する。
-      - name: Build headless CLI artifact
-        id: cli_build
-        run: mise exec -- cargo build -p al-cli --profile ci
-
-      - name: Verify headless dependency boundary
-        id: headless
-        run: mise run check-cli-headless
-
-      - name: sccache statistics
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        shell: bash
-        run: sccache --show-stats || true
-
-      - name: Cleanup credential
-        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: |
-          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
-          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
-          # 注: 本 step 以降に git/ssh を使う step を追加しないこと
-
-      # lane ごとの証拠行(not-run/skipped もそのまま記録し、
-      # pass と偽らない)。matrix leg ごとの job summary が OS 単位の
-      # 記録になる(matrix 経由の job outputs は後勝ちで不安定な
-      # ため per-OS status は job result + 本表で追跡する)。
-      - name: Record lane evidence
-        if: always()
-        shell: bash
-        env:
-          MODE: ${{ needs.ruviform-access.outputs.mode }}
-        run: |
-          set -uo pipefail
-          os="${{ matrix.os }}"
-          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
-          probe="${{ steps.probe_anon.outcome }}"
-          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
-          [ "${MODE:-}" = "unavailable" ] && probe="not run"
-          {
-            echo "## verify — $os (access: ${MODE:-unknown})"
-            echo ""
-            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
-            echo "|---|---|---|---|---|"
-            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
-            echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
-            echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
-            echo "| mise run check-ci | $os | workspace | $sha | ${{ steps.check.outcome }} |"
-            echo "| mise run lint-ci | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
-            echo "| mise run test-ci (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
-            echo "| al-cli --profile ci build / check-cli-headless | $os | al-cli headless | $sha | ${{ steps.cli_build.outcome }} / ${{ steps.headless.outcome }} |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
+  # ui/ の headless TS lane。vendor tree は gitignore 済み生成物
+  # のため、sync-ui-deps が Cargo pin と同一 SHA で materialize
+  # する(Ruviform #310/#311/#314 の利用可能部品が増えた場合の
+  # UI integration smoke の受け皿でもある)。
+  # PR 必須 legs は ubuntu/windows のみ — macOS leg は
+  # ui-verify-macos へ物理分離(Issue #149 追加合意。step 本体は
+  # .github/actions/ui-verify が単一定義)。
   ui-verify:
     name: ui-verify (${{ matrix.os }})
     needs: [ruviform-access, impact]
@@ -411,119 +290,49 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
     outputs:
-      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
     steps:
-      - name: Gate on ruviform access mode
-        if: needs.ruviform-access.outputs.mode == 'unavailable'
-        run: |
-          echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
-          exit 1
-
-      # ui/ の headless TS lane。vendor tree は gitignore 済み生成物
-      # のため、sync-ui-deps が Cargo pin と同一 SHA で materialize
-      # する(Ruviform #310/#311/#314 の利用可能部品が増えた場合の
-      # UI integration smoke の受け皿でもある)。
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
 
-      - name: Set up mise
-        uses: jdx/mise-action@v5.2.0
+      - name: ui-verify lane
+        id: lane
+        uses: ./.github/actions/ui-verify
         with:
-          install: false
+          os: ${{ matrix.os }}
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
 
-      - name: Restore CI-scoped tools from mise.lock
-        run: |
-          mise trust
-          mise install --locked node
+  # 非ブロッキング macOS 観察 leg(verify-macos と同構造 — Required
+  # `summary` の needs に含まれない。結果は macos-summary が記録)。
+  ui-verify-macos:
+    name: ui-verify (macos-latest)
+    needs: [ruviform-access, impact]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.ui_verify_macos == 'observe') }}
+    runs-on: macos-latest
+    outputs:
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
 
-      - name: Configure read-only access to private ruviform dependency
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        id: ssh_cred
-        shell: bash
-        env:
-          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
-        run: |
-          set -euo pipefail
-          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
-          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
-          chmod 600 "$key"
-          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
-          curl -fsSL https://api.github.com/meta \
-            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
-          test -s "$known_hosts"
-          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
-          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
-
-      - name: Probe private ruviform access
-        id: probe_key
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
-
-      - name: Probe anonymous ruviform access
-        id: probe_anon
-        if: needs.ruviform-access.outputs.mode == 'anonymous'
-        shell: bash
-        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
-
-      - name: Sync vendored ruviform ui/* at pinned SHA (mise run sync-ui-deps)
-        id: sync
-        run: mise run sync-ui-deps
-
-      - name: Install ui/ npm devDependencies (mise run setup-ui)
-        id: setup
-        run: mise run setup-ui
-
-      - name: Verify vendor REV == lockfile resolved SHA
-        id: guard
-        run: mise exec -- node tools/check-ruviform-rev.mjs --require-vendor
-
-      - name: Type-check ui headless layer (mise run check-ui)
-        id: check
-        run: mise run check-ui
-
-      - name: Test ui headless layer (mise run test-ui)
-        id: test
-        run: mise run test-ui
-
-      - name: Cleanup credential
-        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: |
-          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
-          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
-
-      - name: Record lane evidence
-        if: always()
-        shell: bash
-        env:
-          MODE: ${{ needs.ruviform-access.outputs.mode }}
-        run: |
-          set -uo pipefail
-          os="${{ matrix.os }}"
-          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
-          probe="${{ steps.probe_anon.outcome }}"
-          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
-          [ "${MODE:-}" = "unavailable" ] && probe="not run"
-          {
-            echo "## ui-verify — $os (access: ${MODE:-unknown})"
-            echo ""
-            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
-            echo "|---|---|---|---|---|"
-            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
-            echo "| sync-ui-deps (vendor @ pin SHA) | $os | ui/ vendor | $sha | ${{ steps.sync.outcome }} |"
-            echo "| npm ci (setup-ui) | $os | ui/ | $sha | ${{ steps.setup.outcome }} |"
-            echo "| check-ruviform-rev --require-vendor | $os | ui/ vendor | $sha | ${{ steps.guard.outcome }} |"
-            echo "| mise run check-ui (tsc + sync --check) | $os | ui/ headless | $sha | ${{ steps.check.outcome }} |"
-            echo "| mise run test-ui (happy-dom) | $os | ui/ headless | $sha | ${{ steps.test.outcome }} |"
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: ui-verify lane
+        id: lane
+        uses: ./.github/actions/ui-verify
+        with:
+          os: macos-latest
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
 
   # al-gui `webview` feature lane(実窓 host 依存ターゲットの分離
   # 検証。実 Window/OS 自動試験は含まない — gui-real が not-run を
   # 記録する)。ubuntu は WebKitGTK dev headers が必要(ruviform
   # ui-verify と同一構成)。
+  # PR 必須 legs は ubuntu/windows のみ — macOS leg は
+  # webview-verify-macos へ物理分離(Issue #149 追加合意。step 本体は
+  # .github/actions/webview-verify が単一定義)。
   webview-verify:
     name: webview-verify (${{ matrix.os }})
     needs: [ruviform-access, impact]
@@ -532,166 +341,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
     outputs:
-      resolved_sha: ${{ steps.guard.outputs.resolved_sha }}
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
     steps:
-      - name: Gate on ruviform access mode
-        if: needs.ruviform-access.outputs.mode == 'unavailable'
-        run: |
-          echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
-          exit 1
-
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
 
-      - name: Set up mise
-        uses: jdx/mise-action@v5.2.0
+      - name: webview-verify lane
+        id: lane
+        uses: ./.github/actions/webview-verify
         with:
-          install: false
+          os: ${{ matrix.os }}
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
-      - name: Restore CI-scoped tools from mise.lock
-        run: |
-          mise trust
-          mise install --locked rust node
+  # 非ブロッキング macOS 観察 leg(verify-macos と同構造 — Required
+  # `summary` の needs に含まれない。結果は macos-summary が記録)。
+  webview-verify-macos:
+    name: webview-verify (macos-latest)
+    needs: [ruviform-access, impact]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && (needs.impact.result != 'success' || needs.impact.outputs.webview_verify_macos == 'observe') }}
+    runs-on: macos-latest
+    outputs:
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
 
-      - name: Install WebKitGTK development headers (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
-
-      - name: Restore cargo registry/git index cache
-        uses: actions/cache@v6.1.0
+      - name: webview-verify lane
+        id: lane
+        uses: ./.github/actions/webview-verify
         with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-ui-${{ hashFiles('Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-ui-
-
-      # Issue #148 (AL-CI-OPT-01): verify job と同一の sccache 構成。
-      # `webview` feature + dev profile は verify(既定 feature・ci profile)
-      # と compile fingerprint が異なり同一 OS namespace でも誤共有しない。
-      # kill switch も同一(CI_SCCACHE_DISABLE=1 で全 step skip)。
-      - name: Set up sccache
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
-        with:
-          version: "v0.19.0"
-
-      - name: Export sccache GHA backend env
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const token = process.env.ACTIONS_RUNTIME_TOKEN || '';
-            const url = process.env.ACTIONS_RESULTS_URL || '';
-            const gha = token !== '' && url !== '';
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', token);
-            core.exportVariable('ACTIONS_RESULTS_URL', url);
-            core.exportVariable('SCCACHE_GHA_ENABLED', gha ? 'true' : 'false');
-            core.exportVariable('SCCACHE_GHA_VERSION', `audiolens-v1-${process.env.RUNNER_OS || 'unknown'}`);
-            core.exportVariable('RUSTC_WRAPPER', 'sccache');
-            core.info(`sccache GHA backend: ${gha ? 'enabled' : 'disabled (cache credentials absent)'}`);
-
-      - name: Verify sccache environment
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          command -v sccache
-          sccache --version
-          echo "RUSTC_WRAPPER=$RUSTC_WRAPPER"
-          echo "SCCACHE_GHA_ENABLED=$SCCACHE_GHA_ENABLED"
-          echo "SCCACHE_GHA_VERSION=$SCCACHE_GHA_VERSION"
-          if [ -n "${ACTIONS_RESULTS_URL:-}" ]; then echo "ACTIONS_RESULTS_URL: set"; else echo "::warning::ACTIONS_RESULTS_URL missing — sccache GHA backend disabled (local disk fallback)"; fi
-          if [ -n "${ACTIONS_RUNTIME_TOKEN:-}" ]; then echo "ACTIONS_RUNTIME_TOKEN: set"; else echo "::warning::ACTIONS_RUNTIME_TOKEN missing — sccache GHA backend disabled (local disk fallback)"; fi
-
-      - name: Configure read-only access to private ruviform dependency
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        id: ssh_cred
-        shell: bash
-        env:
-          RUVIFORM_DEPLOY_KEY: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
-        run: |
-          set -euo pipefail
-          key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
-          printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
-          chmod 600 "$key"
-          known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
-          curl -fsSL https://api.github.com/meta \
-            | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
-          test -s "$known_hosts"
-          echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
-          git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
-
-      - name: Probe private ruviform access
-        id: probe_key
-        if: needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
-
-      - name: Probe anonymous ruviform access
-        id: probe_anon
-        if: needs.ruviform-access.outputs.mode == 'anonymous'
-        shell: bash
-        run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
-
-      - name: Fetch locked dependencies
-        id: fetch
-        run: mise exec -- cargo fetch --locked
-
-      - name: Verify ruviform resolved SHA (lockfile single-source)
-        id: guard
-        run: mise run check-ruviform-rev
-
-      - name: Type-check UI webview feature (mise run check-ui-webview)
-        id: check
-        run: mise run check-ui-webview
-
-      - name: Lint UI webview feature (mise run lint-ui-webview)
-        id: lint
-        run: mise run lint-ui-webview
-
-      - name: Test UI webview feature (mise run test-ui-webview)
-        id: test
-        run: mise run test-ui-webview
-
-      - name: sccache statistics
-        if: vars.CI_SCCACHE_DISABLE != '1'
-        shell: bash
-        run: sccache --show-stats || true
-
-      - name: Cleanup credential
-        if: always() && needs.ruviform-access.outputs.mode == 'deploy_key'
-        shell: bash
-        run: |
-          git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
-          rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
-
-      - name: Record lane evidence
-        if: always()
-        shell: bash
-        env:
-          MODE: ${{ needs.ruviform-access.outputs.mode }}
-        run: |
-          set -uo pipefail
-          os="${{ matrix.os }}"
-          sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
-          probe="${{ steps.probe_anon.outcome }}"
-          [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
-          [ "${MODE:-}" = "unavailable" ] && probe="not run"
-          {
-            echo "## webview-verify — $os (access: ${MODE:-unknown})"
-            echo ""
-            echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
-            echo "|---|---|---|---|---|"
-            echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
-            echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
-            echo "| check-ui-webview | $os | al-gui webview | $sha | ${{ steps.check.outcome }} |"
-            echo "| lint-ui-webview | $os | al-gui webview | $sha | ${{ steps.lint.outcome }} |"
-            echo "| test-ui-webview | $os | al-gui webview | $sha | ${{ steps.test.outcome }} |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          os: macos-latest
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
   # 実 Window/OS 自動試験の placeholder。Ruviform #312(test host)/
   # #313(OS driver)が未接続のため、本 run では検証範囲外であること
@@ -716,8 +402,98 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "status=not_run" >> "$GITHUB_OUTPUT"
 
+  # macOS 観察 lane の集約(Issue #149 2026-11-05 追加合意)。
+  # verify-macos / ui-verify-macos / webview-verify-macos の結果を
+  # lane 別に Pass/Fail/NotRun/Unsupported/Cancelled で記録する
+  # 非ブロッキング check — Required `summary` の needs に含まれない
+  # ため本 check の成否・待機は merge gate を阻害しない:
+  # - leg が runner 待ちで未完了の間、本 check は Pending のまま
+  #   残る(未実行を NotApplicable へ変換しない)
+  # - 分類上 not_applicable で skip された leg は NotApplicable
+  #   (根拠は impact の証跡)
+  # - 実行済みの failure/cancelled・期待 observe の NotRun は
+  #   本 check を失敗にする(実行済み失敗・証拠欠落を隠さない。
+  #   Required でないため merge は阻害されない)
+  # push to main でも同様に実行され、macOS 失敗は CI 結果で継続
+  # 追跡する。リリース/互換受入の macOS 実測必須条件は
+  # docs/guides/release-macos-verification.md を参照。
+  macos-summary:
+    name: macos-summary
+    needs: [impact, verify-macos, ui-verify-macos, webview-verify-macos]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate macOS lane evidence
+        shell: bash
+        run: |
+          set -uo pipefail
+          {
+            echo "# macOS lane evidence (non-blocking) — ${{ github.ref_name }} @ ${{ github.sha }}"
+            echo ""
+            echo "- impact mode: ${{ needs.impact.outputs.mode || 'unresolved' }} (classes: ${{ needs.impact.outputs.classes || 'n/a' }})"
+            echo "- 本 check は Required ではない — \`summary\` gate の判定対象外"
+            echo "- leg が runner 待ちで未完了の間は本 check も Pending のまま残る(未実行を NotApplicable へ変換しない)"
+            echo "- ruviform resolved SHA: ${{ needs.verify-macos.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || 'unresolved' }}"
+            echo ""
+            echo "| lane | expected (macOS) | result | 記録 status |"
+            echo "|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # expected=observe の leg は実 result を Pass/Fail/Cancelled/
+      # NotRun で記録する。NotRun(observe なのに未実行、例: 上流
+      # access 失敗で skip)は証拠欠落として失敗扱い(Pass にしない)。
+      # 期待値未解決(impact 失敗等)は leg の実結果を誠実に記録し、
+      # 実行済みでなければ失敗にする。
+      - name: Evaluate macOS lane results
+        shell: bash
+        run: |
+          set -uo pipefail
+          fail=0
+          record() {
+            lane="$1"; res="$2"; exp="$3"
+            case "$exp" in
+              observe)
+                case "$res" in
+                  success) st="Pass" ;;
+                  failure) st="Fail"; fail=1 ;;
+                  cancelled) st="Cancelled"; fail=1 ;;
+                  skipped) st="NotRun"; fail=1 ;;
+                  *) st="Unknown($res)"; fail=1 ;;
+                esac ;;
+              not_applicable)
+                case "$res" in
+                  skipped) st="NotApplicable" ;;
+                  success) st="Pass(実行済み)" ;;
+                  failure) st="Fail(実行済み)"; fail=1 ;;
+                  cancelled) st="Cancelled(実行済み)"; fail=1 ;;
+                  *) st="Unknown($res)"; fail=1 ;;
+                esac ;;
+              *)
+                case "$res" in
+                  success) st="Pass(期待値未解決)" ;;
+                  failure) st="Fail"; fail=1 ;;
+                  cancelled) st="Cancelled"; fail=1 ;;
+                  skipped) st="NotRun"; fail=1 ;;
+                  *) st="Unknown($res)"; fail=1 ;;
+                esac ;;
+            esac
+            echo "| $lane | ${exp:-unresolved} | $res | $st |" >> "$GITHUB_STEP_SUMMARY"
+            echo "macOS lane $lane: expected=${exp:-unresolved} result=$res -> $st"
+          }
+          record "verify-macos" "${{ needs.verify-macos.result }}" "${{ needs.impact.outputs.verify_macos }}"
+          record "ui-verify-macos" "${{ needs.ui-verify-macos.result }}" "${{ needs.impact.outputs.ui_verify_macos }}"
+          record "webview-verify-macos" "${{ needs.webview-verify-macos.result }}" "${{ needs.impact.outputs.webview_verify_macos }}"
+          if [ "$fail" = "1" ]; then
+            echo "::error::macOS observation lanes に失敗/未実行の leg あり — 非ブロッキングだが Fail を隠さない"
+            exit 1
+          fi
+          echo "macOS observation lanes recorded: expected legs passed or legitimately NotApplicable"
+
   summary:
     name: summary
+    # needs は PR 必須集合のみ — verify/ui-verify/webview-verify は
+    # ubuntu/windows legs の job(macOS legs の verify-macos 等は
+    # needs に含めず、完了を待たない。Issue #149 2026-11-05 追加合意)。
     needs: [ruviform-access, impact, hygiene, verify, ui-verify, webview-verify, gui-real]
     if: always()
     runs-on: ubuntu-latest
@@ -739,9 +515,10 @@ jobs:
             echo "| impact | - | - | ${{ needs.impact.result }} | mode=${{ needs.impact.outputs.mode || 'n/a' }} classes=${{ needs.impact.outputs.classes || 'n/a' }} |"
             echo "| ruviform-access | required | required | ${{ needs.ruviform-access.result }} | dep access preflight |"
             echo "| hygiene | required | required | ${{ needs.hygiene.result }} | prek --all-files(全変更に必須) |"
-            echo "| verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.verify_class || 'n/a' }} | ${{ needs.impact.outputs.verify || 'n/a' }} | ${{ needs.verify.result }} | ${{ needs.impact.outputs.verify_reason }} |"
-            echo "| ui-verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.ui_verify_class || 'n/a' }} | ${{ needs.impact.outputs.ui_verify || 'n/a' }} | ${{ needs.ui-verify.result }} | ${{ needs.impact.outputs.ui_verify_reason }} |"
-            echo "| webview-verify (ubuntu/windows/macos) | ${{ needs.impact.outputs.webview_verify_class || 'n/a' }} | ${{ needs.impact.outputs.webview_verify || 'n/a' }} | ${{ needs.webview-verify.result }} | ${{ needs.impact.outputs.webview_verify_reason }} |"
+            echo "| verify (ubuntu/windows) | ${{ needs.impact.outputs.verify_class || 'n/a' }} | ${{ needs.impact.outputs.verify || 'n/a' }} | ${{ needs.verify.result }} | ${{ needs.impact.outputs.verify_reason }} |"
+            echo "| ui-verify (ubuntu/windows) | ${{ needs.impact.outputs.ui_verify_class || 'n/a' }} | ${{ needs.impact.outputs.ui_verify || 'n/a' }} | ${{ needs.ui-verify.result }} | ${{ needs.impact.outputs.ui_verify_reason }} |"
+            echo "| webview-verify (ubuntu/windows) | ${{ needs.impact.outputs.webview_verify_class || 'n/a' }} | ${{ needs.impact.outputs.webview_verify || 'n/a' }} | ${{ needs.webview-verify.result }} | ${{ needs.impact.outputs.webview_verify_reason }} |"
+            echo "| verify / ui-verify / webview-verify (macos-latest) | - | ${{ needs.impact.outputs.verify_macos || 'n/a' }}/${{ needs.impact.outputs.ui_verify_macos || 'n/a' }}/${{ needs.impact.outputs.webview_verify_macos || 'n/a' }} | non-blocking | 別 check \`macos-summary\` が記録 — 本 gate の判定対象外(Issue #149 追加合意) |"
             echo "| gui-real | - | - | ${{ needs.gui-real.outputs.status || 'not_run' }} | 実 Window/OS 自動試験は別 Gate(常時 not_run で記録) |"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -766,6 +543,10 @@ jobs:
       # skipped/NotRun は run を失敗にする(Pass 偽装禁止)。classified
       # = not_applicable で skipped なら根拠付き NotApplicable として
       # 記録し、実行済みの failure/cancelled は失敗にする。
+      # 各 lane job は 2026-11-05 追加合意以降 ubuntu/windows legs のみ
+      # (macOS legs は verify-macos 等の別 job で、needs に含まれない
+      # ため本 gate の判定対象外 — 非ブロッキングの macos-summary が
+      # 別途記録する)。
       - name: Enforce expected-set gate
         shell: bash
         run: |
