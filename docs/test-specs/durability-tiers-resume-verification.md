@@ -4,7 +4,7 @@ type: "test-spec"
 status: "approved"
 title: "durability-tiers-resume-verification"
 created: "2026-10-15"
-updated: "2026-10-15"
+updated: "2026-11-04"
 owners: []
 relations:
   source: []
@@ -45,20 +45,24 @@ Issue #55 の耐久性等級(relaxed bulk 書込 + resume 検証)が
 
 ## Feature
 
-Artifact durability tiers: bulk データは fsync なしの原子書込、
-記録系は durable 書込、resume は Completed stage の artifact
-実在を検証して欠落 stage を再生成する。
+Artifact durability tiers: bulk データは fsync 非要求の原子
+publish(`Durability::BestEffort`)、記録系は durable publish
+(`Durability::FileAndDirectorySync`)、resume は Completed stage の
+artifact 実在を検証して欠落 stage を再生成する。書込経路は
+`ruviform-io-file` の StagedFile 契約(`fsutil::stage_file` /
+`publish_bytes` / `publish_sealed`)。
 
 ## Rules
 
-- Rule: `write_atomic`/`rename_atomic` は tmp→rename の原子性を
-  持ち fsync を呼ばない。エラー時に tmp を残さない。
+- Rule: publish は staged temp→destination の原子性を持ち、
+  `BestEffort` は fsync/dir sync を要求しない。失敗時に分類済み
+  temp を残さない(`Indeterminate` は診断のため保持する)。
 - Rule: relaxed tier の呼出点(decoded.f64le、normalized PCM、
-  table/tensor chunk、WAV payload)は `write_atomic`/
-  `rename_atomic` を使う。
+  table/tensor chunk、WAV payload)は `PublishOptions::new(
+  PublishMode::Replace, Durability::BestEffort)` を使う。
 - Rule: 記録系(manifest.json、schema.json、index.json、
-  array.json、metadata/provenance JSON)は `write_durable`/
-  `rename_durable` を維持する。
+  array.json、metadata/provenance JSON)は `Durability::
+  FileAndDirectorySync` の publish を維持する。
 - Rule: resume は Completed/Skipped stage の `stage.artifacts`
   列挙 artifact を検証する。ファイルは実在(+`params.byte_len`
   があればサイズ一致)、ディレクトリは `params.files` 列挙の
@@ -86,12 +90,13 @@ Artifact durability tiers: bulk データは fsync なしの原子書込、
   現行と同一。
 - resume 検証通過後、「stage.artifacts に列挙された artifact は
   存在し完全」が成り立つ。
-- relaxed 書込の失敗時に tmp ファイルが残らない。
+- relaxed 書込の分類済み失敗時に staged temp が残らない。
 
 ## Non-goals
 
 - 存在するが内容が未フラッシュ(サイズ一致・内容破損)の検出。
-- `.tmp` 孤児の掃除。
+- `.rvf-tmp-*` 孤児の定期掃除(`Indeterminate` 保持を含む方針は
+  設計書のとおり)。
 - fsync 削減量の定量計測。
 
 ## Risk

@@ -37,6 +37,7 @@ Directory: `docs/designs`
 | DESIGN-034DlyKvtWhb8oy1WLAsPV | 残存課題の責務境界と検証設計 | approved | [residual-fixes.md](./residual-fixes.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
+| DESIGN-034RN2eWIExEejH7mYYOyj | Issue #139 Ruviform 共通 I/O 移行の残存分類 — StagedFile 移行記録・回帰契約・Structured/Archive 採否 | draft | [ruviform-io-migration-issue-139.md](./ruviform-io-migration-issue-139.md) |
 | DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
 | DESIGN-uCvLq1YDJau0qmwrQqB52k | al-observability logging の ruviform-observability 委譲設計 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
