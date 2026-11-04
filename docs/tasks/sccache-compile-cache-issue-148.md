@@ -1,7 +1,7 @@
 ---
 id: "TASK-034RIK6H6kFmyRQnMiiikj"
 type: "task"
-status: "in-progress"
+status: "completed"
 title: "sccache コンパイルキャッシュ導入評価と採用(AL#148)"
 created: "2026-11-04"
 updated: "2026-11-04"
@@ -96,20 +96,21 @@ sccache(GHA cache backend)を、AL の Rust compile lane である
 
 ## Done When
 
-- [ ] `verify`/`webview-verify` 3 OS に sccache step が kill switch 付きで
+- [x] `verify`/`webview-verify` 3 OS に sccache step が kill switch 付きで
       定義される
-- [ ] Cold/Warm run と `sccache --show-stats` で hit/write error を
+- [x] Cold/Warm run と `sccache --show-stats` で hit/write error を
       実測・記録する
-- [ ] Before/After で job 時間・総 Runner 時間を比較し採否根拠を記録
-- [ ] `CI_SCCACHE_DISABLE=1` で sccache step 全 skip + job success を検証
-- [ ] Golden/f64/LFS/Export/headless/WebView lane・`summary` required
+- [x] Before/After で job 時間・総 Runner 時間を比較し採否根拠を記録
+- [x] `CI_SCCACHE_DISABLE=1` で sccache step 全 skip + job success を検証
+- [x] Golden/f64/LFS/Export/headless/WebView lane・`summary` required
       gate・cargo cache/`cargo fetch --locked`/ruviform SHA guard が非変更
-- [ ] Rollback(kill switch / git revert)が文書化される
+- [x] Rollback(kill switch / git revert)が文書化される
 
 ## Verification
 
-- [ ] `mise exec -- actionlint .github/workflows/ci.yml`
-- [ ] `mise exec -- prek run --all-files`
-- [ ] PR run で 3 OS verify/webview-verify + ui-verify + summary が成功
-- [ ] 計測ツールで Before/After run metrics を収集
-- [ ] kill switch の repo variable で sccache step skip を確認(検証後削除)
+- [x] `mise exec -- actionlint .github/workflows/ci.yml`
+- [x] `mise exec -- prek run --all-files`
+- [x] PR run で 3 OS verify/webview-verify + ui-verify + summary が成功
+      (run 41822779052・41823749051・41824903670、全 green)
+- [x] 計測ツールで Before/After run metrics を収集
+- [x] kill switch の repo variable で sccache step skip を確認(検証後削除)

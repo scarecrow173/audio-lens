@@ -1,7 +1,7 @@
 ---
 id: "DESIGN-034RIK5GkdCeUVI4sbrxPb"
 type: "design"
-status: "draft"
+status: "approved"
 title: "Issue #148 sccache コンパイルキャッシュ採用設計 — lane 選定・namespace・kill switch・計測"
 created: "2026-11-04"
 updated: "2026-11-04"
@@ -182,9 +182,20 @@ headless 境界の検出 lane(steps)は一切変更しない。
 
 ## Verification Notes
 
-- [ ] `mise exec -- actionlint .github/workflows/ci.yml`
-- [ ] warm run で verify/webview-verify の hit 率と job 時間改善を
-      `sccache --show-stats` + 計測ツールで確認
-- [ ] `CI_SCCACHE_DISABLE=1` で sccache step 全 skip + job success
-- [ ] `summary` required gate・全 lane の実行条件が非変更であること
+- [x] `mise exec -- actionlint .github/workflows/ci.yml`
+- [x] warm run で verify/webview-verify の hit 率と job 時間改善を
+      `sccache --show-stats` + 計測ツールで確認(run 41824903670:
+      hit 54-95%、verify lane -21%・total runner -14%)
+- [x] `CI_SCCACHE_DISABLE=1` で sccache step 全 skip + job success
+- [x] `summary` required gate・全 lane の実行条件が非変更であること
       (diff で lane step 追加以外の差分がないこと)
+
+## 採否結果(実測後追記)
+
+**採用**。Before(run 41793241364)→ After warm(run 41824903670)で
+verify lane 760s→603s(-21%)、rust step lane 845s→667s(-21%)、
+total runner 1410s→1216s(-14%)。warm hit 率は verify 54-95%・
+webview-verify 60-67%、cache errors 0。write errors は GHAC rate
+limit 由来で fail-open(想定内)。詳細は
+`docs/impl/ir/sccache-al-148.md` と
+`docs/impl/exp/issue-148-sccache-before-after.jsonl` を参照。

@@ -1,7 +1,7 @@
 ---
 id: "IMPL-034RIKarT1xed13n8pfaNy"
 type: "impl"
-status: "in-progress"
+status: "completed"
 title: "sccache コンパイルキャッシュ導入評価(AL#148)"
 created: "2026-11-04"
 updated: "2026-11-04"
@@ -59,7 +59,8 @@ relations:
   deferred-by: []
 metadata:
   experiments:
-    adopted: []
+    adopted:
+      - "docs/impl/exp/issue-148-sccache-before-after.jsonl"
     rejected: []
 ---
 
@@ -108,9 +109,21 @@ ruviform 側 `docs/designs/issue-329-sccache-compile-cache.md` と同型。
 
 ## Related Experiments
 
-`docs/impl/exp/issue-148-sccache-before-after.jsonl` — Before baseline
-収集済み(run 41793241364 他: rust-verify 760s・webview-verify 491s・
-wall 253-345s)。Cold/Warm・kill switch の After 実測は PR run で採取予定。
+`docs/impl/exp/issue-148-sccache-before-after.jsonl` — Before/After 実測
+完備。採用判断(decision)まで記録済み:
+
+- Before (run 41793241364 他): wall 253-345s・total runner ~1266-1410s・
+  rust-verify 760s・webview-verify 491s・rust step lane 845s
+- Cold (run 41822779052): hits ~0%・write errors 117-312/job(GHAC rate
+  limit・fail-open)・全 12 job success・時間は Before 同等〜微増
+- Warm (run 41824903670、cache populate 後): hits verify 54-95% /
+  webview 60-67%・write errors 0-71/job・cache errors 0。
+  verify 603s(-21%)・webview 457s(-7%)・rust step 667s(-21%)・
+  total runner 1216s(-14%)・critical path 312s(-8%)
+- kill switch: `CI_SCCACHE_DISABLE=1` で re-run し全 sccache step
+  skipped・plain rustc で job success を確認(検証後 variable 削除)
+
+**採用**。ui-verify は cargo 非使用のため適用除外(NotApplicable)。
 
 ## Validation
 
@@ -120,9 +133,23 @@ wall 253-345s)。Cold/Warm・kill switch の After 実測は PR run で採取予
 - [x] `mise exec -- prek run --all-files` — 全 hook pass
 - [x] ci.yml diff が sccache step 追加のみであることを確認
       (削除行 0)
-- [ ] PR run: verify/webview-verify 3 OS + ui-verify + summary 成功
-- [ ] After 実測: Cold/Warm・`sccache --show-stats` hit 率・総 Runner 時間
-- [ ] kill switch `CI_SCCACHE_DISABLE=1` で sccache step 全 skip 検証
+
+実施済み(PR CI / run 41822779052・41823749051・41824903670):
+
+- [x] verify/webview-verify 3 OS + ui-verify 3 OS + ruviform-access +
+      gui-real(NotRun placeholder)+ summary — 3 run とも全 green
+- [x] Cold/Warm 実測・`sccache --show-stats` hit 率・総 Runner 時間
+      (上記 Related Experiments の数値)
+- [x] kill switch `CI_SCCACHE_DISABLE=1` で verify (ubuntu-latest)
+      re-run — sccache 4 step 全 skipped・plain rustc で success
+- [x] 保護対象の維持 — `cargo fetch --locked`・LFS・ruviform SHA/
+      vendor guard・Golden/Export/CLI・`summary` required gate は
+      全 lane 構成非変更のまま全 green
+
+未実施(NotRun/Unsupported、対象外):
+
+- RT テスト・実機 lane への展開 — CI lane 未存在(Follow-ups)
+- `gui-real` — ruviform #312/#313 未接続のため従来どおり placeholder
 
 ## Risks
 
