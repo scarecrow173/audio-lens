@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use al_job::fsutil::{write_atomic, write_durable};
+use al_job::fsutil::{Durability, PublishMode, PublishOptions, publish_bytes};
 
 /// Serialized array metadata (`array.json`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -166,7 +166,12 @@ impl TensorWriter {
         // Relaxed tier: chunk payloads are regenerable bulk data;
         // array.json (durable, committed flag) is the completion
         // record.
-        write_atomic(&path, &bytes)
+        publish_bytes(
+            &path,
+            &bytes,
+            PublishOptions::new(PublishMode::Replace, Durability::BestEffort),
+        )?;
+        Ok(())
     }
 
     /// Mark the array committed and re-write `array.json`. Call after
@@ -179,7 +184,12 @@ impl TensorWriter {
     fn flush_meta(&self) -> io::Result<()> {
         let json = serde_json::to_vec_pretty(&self.meta)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        write_durable(&self.root.join("array.json"), &json)
+        publish_bytes(
+            &self.root.join("array.json"),
+            &json,
+            PublishOptions::new(PublishMode::Replace, Durability::FileAndDirectorySync),
+        )?;
+        Ok(())
     }
 }
 

@@ -295,7 +295,14 @@ impl DatasetWriter {
         }
         let bytes = serde_json::to_vec_pretty(value)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        al_job::fsutil::write_durable(&path, &bytes)?;
+        al_job::fsutil::publish_bytes(
+            &path,
+            &bytes,
+            al_job::fsutil::PublishOptions::new(
+                al_job::fsutil::PublishMode::Replace,
+                al_job::fsutil::Durability::FileAndDirectorySync,
+            ),
+        )?;
         self.register(role, format!("{role}/{name}"), StoreKind::Json, provenance);
         Ok(())
     }

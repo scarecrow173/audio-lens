@@ -64,6 +64,10 @@ ruviform-audio-analysis = { git = "https://github.com/scarecrow173/ruviform.git"
 ruviform-exec = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-numeric = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-io-avi = { git = "https://github.com/scarecrow173/ruviform.git" }
+# IO-01 (Ruviform #283) の staged file publish 契約。al-job の
+# fsutil 経由でのみ使い、generic staging/publish の正本とする
+# (AL#143)。resolved SHA は IO-IMP-02 実 OS backend 以降を要求する。
+ruviform-io-file = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", features = ["mp4", "aac"] }
 # OBS-01 (Ruviform #276) の汎用 logging adapter。sink 構築・bounded
 # writer・health の正本。AudioLens 固有の有効化ポリシー・file 命名

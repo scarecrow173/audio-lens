@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use al_job::fsutil::{write_atomic, write_durable};
+use al_job::fsutil::{Durability, PublishMode, PublishOptions, publish_bytes};
 
 /// Default rows per column chunk.
 pub const DEFAULT_CHUNK_ROWS: u64 = 65_536;
@@ -109,7 +109,11 @@ impl TableWriter {
         // instead of reading as an empty-but-valid table.
         let schema_json = serde_json::to_vec_pretty(&w.schema)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        write_durable(&w.root.join("schema.json"), &schema_json)?;
+        publish_bytes(
+            &w.root.join("schema.json"),
+            &schema_json,
+            PublishOptions::new(PublishMode::Replace, Durability::FileAndDirectorySync),
+        )?;
         Ok(w)
     }
 
@@ -158,7 +162,12 @@ impl TableWriter {
         };
         let index_json = serde_json::to_vec_pretty(&index)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        write_durable(&self.root.join("index.json"), &index_json)
+        publish_bytes(
+            &self.root.join("index.json"),
+            &index_json,
+            PublishOptions::new(PublishMode::Replace, Durability::FileAndDirectorySync),
+        )?;
+        Ok(())
     }
 
     fn flush_chunk(&mut self) -> io::Result<()> {
@@ -194,7 +203,11 @@ impl TableWriter {
             // Relaxed tier: chunks are bulk data regenerable by
             // re-running the pipeline; index.json (durable) is the
             // store's completion record.
-            write_atomic(&dir.join(format!("{chunk_idx:06}.bin")), &bytes)?;
+            publish_bytes(
+                &dir.join(format!("{chunk_idx:06}.bin")),
+                &bytes,
+                PublishOptions::new(PublishMode::Replace, Durability::BestEffort),
+            )?;
         }
         self.row_count += n as u64;
         self.buffered.clear();

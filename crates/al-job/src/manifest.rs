@@ -127,14 +127,22 @@ impl Manifest {
 
     /// Persist the manifest under `job_dir`.
     ///
-    /// The write is atomic and durable (temp file, fsync, rename): a
-    /// crash or power loss leaves either the previous or the new manifest
-    /// fully intact — never a truncated canonical record that would make
-    /// the job unresumable.
+    /// The publish is atomic and durable (temp sibling, file + directory
+    /// sync, atomic rename): a crash or power loss leaves either the
+    /// previous or the new manifest fully intact — never a truncated
+    /// canonical record that would make the job unresumable.
     pub fn save(&self, job_dir: &Path) -> io::Result<()> {
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        crate::fsutil::write_durable(&job_dir.join(Self::FILE_NAME), json.as_bytes())
+        crate::fsutil::publish_bytes(
+            &job_dir.join(Self::FILE_NAME),
+            json.as_bytes(),
+            crate::fsutil::PublishOptions::new(
+                crate::fsutil::PublishMode::Replace,
+                crate::fsutil::Durability::FileAndDirectorySync,
+            ),
+        )?;
+        Ok(())
     }
 
     /// Load a manifest from `job_dir`.

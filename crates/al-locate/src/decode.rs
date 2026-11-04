@@ -318,10 +318,10 @@ impl PcmView {
         let file = fs::File::open(path)?;
         let meta = file.metadata()?;
         if meta.is_file() && meta.len() > 0 {
-            // SAFETY: artifact files are immutable once `write_durable`
-            // publishes them via rename, and the manifest only records an
-            // artifact after that point — no writer mutates or truncates
-            // the file while this mapping is alive.
+            // SAFETY: artifact files are immutable once the staged
+            // publish lands them via atomic rename, and the manifest
+            // only records an artifact after that point — no writer
+            // mutates or truncates the file while this mapping is alive.
             if let Ok(mmap) = unsafe { memmap2::Mmap::map(&file) } {
                 return Ok(Self {
                     backing: PcmBacking::Mapped(mmap),

@@ -394,8 +394,9 @@ impl WavEncoding {
 ///
 /// The header is written up front with placeholder sizes and patched
 /// on [`WavWriter::finish`], so arbitrarily long streams never need a
-/// full-size output buffer in memory. Durability (fsync + rename) is
-/// the caller's job — see `al_job::fsutil::rename_durable`.
+/// full-size output buffer in memory. Durability is the caller's job —
+/// stage and publish through `al_job::fsutil` (`stage_file` writes into
+/// `StagedFile`, `publish_sealed` applies the chosen `Durability`).
 pub struct WavWriter<W: Write + Seek> {
     out: W,
     encoding: WavEncoding,
@@ -486,8 +487,9 @@ impl<W: Write + Seek> WavWriter<W> {
     /// Patch the RIFF and `data` size fields and return the writer.
     /// Chunks are word-aligned, so an odd `data` size is followed by a
     /// pad byte that counts toward the RIFF size. The stream is *not*
-    /// flushed beyond what `out` does; the caller must still
-    /// `sync_all`/rename for durability.
+    /// synced beyond what `out` does; the caller must still seal and
+    /// publish with the desired `Durability` for the bytes to reach
+    /// the destination.
     pub fn finish(mut self) -> io::Result<W> {
         if self.data_len > u64::from(u32::MAX - 37) {
             return Err(io::Error::new(

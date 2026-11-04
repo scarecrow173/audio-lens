@@ -179,11 +179,11 @@ impl IngestStage {
             StageError::new(StageKind::Ingest, format!("cannot create inputs dir: {e}"))
         })?;
 
-        // Small record files go through write_durable (tmp+fsync+
-        // rename). The large decoded PCM payload uses write_atomic
-        // instead: it is regenerable from the source input, so its
-        // fsync is skipped and resume's artifact verification re-runs
-        // the stage if power loss dropped it after the manifest had
+        // Small record files publish with file + directory sync. The
+        // large decoded PCM payload uses the relaxed tier instead: it
+        // is regenerable from the source input, so its syncs are
+        // skipped and resume's artifact verification re-runs the
+        // stage if power loss dropped it after the manifest had
         // already recorded the stage Completed.
 
         // Link produced artifacts to the declared-input artifact so the
@@ -203,9 +203,15 @@ impl IngestStage {
                 .join(input.input_id.as_str())
                 .join("decoded.f64le");
             let pcm_bytes: Vec<u8> = a.samples.iter().flat_map(|v| v.to_le_bytes()).collect();
-            al_job::fsutil::write_atomic(&job_dir.join(&pcm_rel), &pcm_bytes).map_err(|e| {
-                StageError::new(StageKind::Ingest, format!("cannot write PCM: {e}"))
-            })?;
+            al_job::fsutil::publish_bytes(
+                &job_dir.join(&pcm_rel),
+                &pcm_bytes,
+                al_job::fsutil::PublishOptions::new(
+                    al_job::fsutil::PublishMode::Replace,
+                    al_job::fsutil::Durability::BestEffort,
+                ),
+            )
+            .map_err(|e| StageError::new(StageKind::Ingest, format!("cannot write PCM: {e}")))?;
             records.push(ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
                 role: "decoded_pcm".into(),
@@ -244,9 +250,15 @@ impl IngestStage {
         let meta_text = serde_json::to_string_pretty(&meta_json).map_err(|e| {
             StageError::new(StageKind::Ingest, format!("cannot serialize metadata: {e}"))
         })?;
-        al_job::fsutil::write_durable(&job_dir.join(&meta_rel), meta_text.as_bytes()).map_err(
-            |e| StageError::new(StageKind::Ingest, format!("cannot write metadata: {e}")),
-        )?;
+        al_job::fsutil::publish_bytes(
+            &job_dir.join(&meta_rel),
+            meta_text.as_bytes(),
+            al_job::fsutil::PublishOptions::new(
+                al_job::fsutil::PublishMode::Replace,
+                al_job::fsutil::Durability::FileAndDirectorySync,
+            ),
+        )
+        .map_err(|e| StageError::new(StageKind::Ingest, format!("cannot write metadata: {e}")))?;
 
         if let Some(features) = &mux.video_features {
             // Standalone `video_features.json` — cheap analysis reads
@@ -265,14 +277,20 @@ impl IngestStage {
                     format!("cannot serialize video features: {e}"),
                 )
             })?;
-            al_job::fsutil::write_durable(&job_dir.join(&vf_rel), vf_text.as_bytes()).map_err(
-                |e| {
-                    StageError::new(
-                        StageKind::Ingest,
-                        format!("cannot write video features: {e}"),
-                    )
-                },
-            )?;
+            al_job::fsutil::publish_bytes(
+                &job_dir.join(&vf_rel),
+                vf_text.as_bytes(),
+                al_job::fsutil::PublishOptions::new(
+                    al_job::fsutil::PublishMode::Replace,
+                    al_job::fsutil::Durability::FileAndDirectorySync,
+                ),
+            )
+            .map_err(|e| {
+                StageError::new(
+                    StageKind::Ingest,
+                    format!("cannot write video features: {e}"),
+                )
+            })?;
             records.push(ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
                 role: "video_features".into(),
@@ -300,9 +318,17 @@ impl IngestStage {
                     format!("cannot serialize video thumbs: {e}"),
                 )
             })?;
-            al_job::fsutil::write_durable(&job_dir.join(&vt_rel), vt_text.as_bytes()).map_err(
-                |e| StageError::new(StageKind::Ingest, format!("cannot write video thumbs: {e}")),
-            )?;
+            al_job::fsutil::publish_bytes(
+                &job_dir.join(&vt_rel),
+                vt_text.as_bytes(),
+                al_job::fsutil::PublishOptions::new(
+                    al_job::fsutil::PublishMode::Replace,
+                    al_job::fsutil::Durability::FileAndDirectorySync,
+                ),
+            )
+            .map_err(|e| {
+                StageError::new(StageKind::Ingest, format!("cannot write video thumbs: {e}"))
+            })?;
             records.push(ArtifactRecord {
                 artifact_id: ctx.registry.issue(),
                 role: "video_thumbs".into(),
