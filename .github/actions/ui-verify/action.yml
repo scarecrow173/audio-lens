@@ -1,9 +1,10 @@
 # ui-verify lane 本体(ci.yml の ui-verify/ui-verify-macos job が
-# 共有する composite action)。Issue #149 追加合意の macOS leg
-# 物理分離に伴う単一定義(verify action と同構造)。
+# 共有する composite action)。Issue #158 Full CI 化以降、
+# ubuntu/windows legs と macOS leg は全イベントで常時実行
+# (verify action と同構造、結果は ci-summary が集約)。
 # 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
 name: ui-verify lane
-description: "ui/ headless TS + vendored ruviform ui/* 整合 lane (shared by PR-required ubuntu/windows legs and the non-blocking macOS leg)"
+description: "ui/ headless TS + vendored ruviform ui/* 整合 lane (shared by ubuntu/windows legs and the macOS leg — full CI on every event)"
 
 inputs:
   os:

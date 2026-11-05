@@ -19,9 +19,9 @@ Directory: `docs/designs`
 | DESIGN-034G5QmSv6Yzg756IThZZi | decoded/normalized PCM read-only view 設計 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | DESIGN-034AaszqnyPGmacvhSzO83 | Expensive 追加解析ファミリ設計 | approved | [expensive-families.md](./expensive-families.md) |
 | DESIGN-034Rp43HK02Vpr5d3rbv2b | Export 可搬投影と staging publish | approved | [export-portable-projection.md](./export-portable-projection.md) |
+| DESIGN-034Smu60yQfTlBNu23J8PP | Issue #158 Full CI 統一(安全な第一段階): 全実行化・共通 ci-summary・expected_sha 契約 | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
-| DESIGN-034RNl7ph9ojvXsoInYjLx | Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行 | approved | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
 | DESIGN-034GNsEgwjRPsPqegmSEWU | local_lag FFT 化の設計 | approved | [local-lag-fft.md](./local-lag-fft.md) |
@@ -53,4 +53,5 @@ Directory: `docs/designs`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| DESIGN-034RNl7ph9ojvXsoInYjLx | Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行 | superseded | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
 | DESIGN-034yYLceYoIOUbV56hSfsg | 可視化・エクスポート設計 | superseded | [visualization-export.md](./visualization-export.md) |

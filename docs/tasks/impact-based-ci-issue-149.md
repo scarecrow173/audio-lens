@@ -1,7 +1,7 @@
 ---
 id: "TASK-034R69Ws8M7aodbL3V761y"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "変更影響ベース CI・Fail-Closed summary 整合(AL#149)"
 created: "2026-11-04"
 updated: "2026-11-04"
@@ -24,7 +24,8 @@ relations:
     - "../designs/audiolens-independent-ci.md"
   blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../tasks/full-ci-ci-summary-issue-158.md"
   related:
     - "https://github.com/scarecrow173/ruviform/issues/333"
     - "https://github.com/scarecrow173/ruviform/issues/327"
@@ -44,6 +45,13 @@ relations:
 ---
 
 # 変更影響ベース CI・Fail-Closed summary 整合(AL#149)
+
+> **退役注記 (2026-11-05)**: 選択実行機構は Issue #158 で撤去
+> (後継 task: [full-ci-ci-summary-issue-158](./full-ci-ci-summary-issue-158.md))。
+> 実装作業は #152/#156/#157 で完了したため status=done とする。
+> 末尾の未チェック項目(PR run の impact 証跡・IR の
+> Before/After 記録)は機構退役により対象外 — 実測証跡は
+> docs/impl/exp/issue-*-impact-ci-*.jsonl に残る。
 
 ## Work
 

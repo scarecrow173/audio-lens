@@ -1,9 +1,10 @@
 # webview-verify lane 本体(ci.yml の webview-verify/
 # webview-verify-macos job が共有する composite action)。
-# Issue #149 追加合意の macOS leg 物理分離に伴う単一定義。
+# Issue #158 Full CI 化以降、ubuntu/windows legs と macOS leg は
+# 全イベントで常時実行(結果は ci-summary が集約)。
 # 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
 name: webview-verify lane
-description: "al-gui `webview` feature lane (shared by PR-required ubuntu/windows legs and the non-blocking macOS leg)"
+description: "al-gui `webview` feature lane (shared by ubuntu/windows legs and the macOS leg — full CI on every event)"
 
 inputs:
   os:

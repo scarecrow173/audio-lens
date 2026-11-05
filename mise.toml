@@ -108,6 +108,14 @@ env = { CARGO_INCREMENTAL = "0" }
 description = "rustc/cargo/rustfmt/clippy が mise pin に解決されることを検証(node、3 OS 共通)"
 run = "node tools/verify-toolchain.mjs"
 
+# Issue #158: ci.yml の Full CI 構造契約(trigger・expected_sha・
+# job 集合・needs・ci-summary/summary 分離・選択実行機構の不在)を
+# fail-closed で検査する。prek hook 経由で hygiene job が全 run で
+# 実施する(actionlint は文法、こちらは構造契約)。
+[tasks.check-ci-workflow]
+description = "ci.yml Full CI 構造契約の fail-closed 検査(node、CI/ローカル共通)"
+run = "node tools/check-ci-workflow.mjs"
+
 [tasks.check-cli-headless]
 description = "al-cli 等 headless crate の依存木に GUI/GPU/WebView framework crate が無いことを検証(node、3 OS 共通)"
 run = "node tools/check-headless-deps.mjs"

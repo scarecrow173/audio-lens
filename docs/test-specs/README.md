@@ -16,6 +16,7 @@ Directory: `docs/test-specs`
 | TSPEC-034G5V3XG7NaO7sBJ1UFew | decoded/normalized PCM read-only view の契約 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | TSPEC-034GsRevKRO1s5QbTzJ7c8 | durability-tiers-resume-verification | approved | [durability-tiers-resume-verification.md](./durability-tiers-resume-verification.md) |
 | TSPEC-034AaE4Ihkxe6GMzxNwRog | Expensive 追加ファミリの検証 | proposed | [expensive-families.md](./expensive-families.md) |
+| TSPEC-034SmNbPOS3xJ9KpmCgL4o | Full CI 構造契約(ci.yml): 全実行・ci-summary・expected_sha | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
@@ -33,6 +34,7 @@ Directory: `docs/test-specs`
 | TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
+| TSPEC-YLw9YwXZe7FPiRD7fbuVwg | ruviform-observability logging 委譲の検証 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-034FPu2UHR9IyKz1LxreDD | Issue 33 正式保存仕様と維持契約 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TSPEC-brMJfBQXA6vJ3f4Vm4UKjR | spectral_envelope の fft_size 契約検証 | proposed | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
