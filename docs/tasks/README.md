@@ -6,7 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
-| TASK-034R69Ws8M7aodbL3V761y | 変更影響ベース CI・Fail-Closed summary 整合(AL#149) | in-progress | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
+| TASK-034Smu7rL1jyWzIfwIzmyV | Full CI 統一 安全な第一段階(AL#158): 全実行化・ci-summary・expected_sha | in-progress | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
 | TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
@@ -89,6 +89,7 @@ Directory: `docs/tasks`
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
 | TASK-deJYGXM5AEKotdnNNLUHMn | Ruviform Controls・Gesture・Binding の GUI 統合(AL#131) | done | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
 | TASK-2ZeVHW4ux9HuAQOf46bGt | Ruviform 可視化部品で Analysis Dataset・同期 Timeline・Feature 閲覧を構築(AL#132) | done | [gui-ruviform-viz-issue-132.md](./gui-ruviform-viz-issue-132.md) |
+| TASK-034R69Ws8M7aodbL3V761y | 変更影響ベース CI・Fail-Closed summary 整合(AL#149) | done | [impact-based-ci-issue-149.md](./impact-based-ci-issue-149.md) |
 | TASK-034z0J8zzSGVEuhTR3yHOM | 合成 fixture による ingest 結合テスト | done | [ingest-integration-tests.md](./ingest-integration-tests.md) |
 | TASK-034z0J84S1ChoUOODLF67z | IngestStage 実装と CLI 接続 | done | [ingest-stage.md](./ingest-stage.md) |
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |

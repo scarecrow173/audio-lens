@@ -21,6 +21,7 @@ Directory: `docs/specs`
 | SPEC-034GsJJVWBOQmxiKManOlL | Artifact durability tiers and resume verification (issue #55) | approved | [durability-tiered-artifact-writes.md](./durability-tiered-artifact-writes.md) |
 | SPEC-034yYlEMw8LnaoJcOc4v9z | 高コスト詳細解析 | proposed | [expensive-analysis.md](./expensive-analysis.md) |
 | SPEC-034Rp2PraZGXQhVUwhn5KL | エクスポートパッケージのテキスト成果物可搬投影 | approved | [export-artifact-portability.md](./export-artifact-portability.md) |
+| SPEC-034SmqnKZslN3lFq9I7ahH | Issue #158 Full CI 統一: 全実行化・共通 ci-summary Fail-Closed 集約・expected_sha 契約(安全な第一段階) | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
 | SPEC-034GNsDtc88g3RPbhoW9RS | local_lag オーバーラップ正規化相関の FFT 化 | draft | [local-lag-overlap-corr-fft.md](./local-lag-overlap-corr-fft.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
@@ -35,6 +36,7 @@ Directory: `docs/specs`
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | SPEC-o0wlzeWCSUPIniAFtwqSCc | Ruviform Git 依存の Cargo.lock 正本化 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
+| SPEC-PJaIgGwP5EbiX0UvyC7aZ9 | al-observability の ruviform-observability::logging 委譲移行 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | SPEC-034yYlsZHRt4b5fTzZS7Qr | マルチメソッドソース定位 | proposed | [source-localization.md](./source-localization.md) |
 | SPEC-034FP1KsTCa0WviopfvrnQ | Issue 33 保存仕様と候補成果物の確定 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | SPEC-24roIb4kfGhLAuK7OKg933 | spectral_envelope の fft_size 契約: 非ゼロ 2 冪必須と底上げ規則 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |

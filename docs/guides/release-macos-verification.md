@@ -23,7 +23,7 @@ relations:
   supersedes: []
   superseded-by: []
   related:
-    - "../designs/impact-based-ci-issue-149.md"
+    - "../designs/full-ci-ci-summary-issue-158.md"
     - "../designs/audiolens-independent-ci.md"
   refines: []
   refined-by: []
@@ -46,11 +46,13 @@ macOS 対応を表明する次のイベントすべてに適用する:
 - 正式な macOS 互換性の受入れ・互換性表明
 
 **PR の Required check `summary` が緑であることは macOS PASS を
-意味しない。** Issue #149(2026-11-05 追加合意)により、macOS
-leg は `summary` の needs・判定対象から物理分離され、非ブロッ
-キング check `macos-summary` に記録される。PR 緑 + macOS 赤の
-状態は merge 可能であり得るため、リリース判断は必ず本手順の
-実測結果で行う。
+意味しない。** macOS leg は `summary` の needs・判定対象から
+物理分離されている(#157/#158 で維持)。Issue #158 以降、
+`*-macos` legs は全イベントで常時実行され、結果は Full CI
+verdict `ci-summary` が fail-closed で集約する — macOS 失敗/
+未完了は `ci-summary` 失敗となるが、`summary` は Required の
+ため PR 緑 + macOS 赤の状態は merge 可能であり得る。リリース
+判断は必ず本手順の実測結果で行う。
 
 ## 必須証拠(候補 SHA ごと)
 
@@ -67,12 +69,12 @@ leg は `summary` の needs・判定対象から物理分離され、非ブロ�
 - 上記 lanes の実行は対象 SHA で完了した CI run の
   `verify-macos`/`ui-verify-macos`/`webview-verify-macos` job が
   `success` であることで確認する
-- `macos-summary` check が `Pass`(全 lane)であることを確認する。
-  `Pending`/`NotRun`/`Fail`/`Cancelled`/`Unsupported` が 1 つでも
-  残る状態では macOS 対応を表明してはならない
-- leg が分類上 `NotApplicable`(正当 skip)の場合、その範囲は
-  変更が存在しないため実測不要と扱えるが、根拠(分類証跡)を
-  記録に残す
+- `ci-summary` job が `success` であることを確認する
+  (macOS legs を含む全必要 job の fail-closed verdict)。
+  leg が queue 滞留・未実行・失敗のままの状態では macOS 対応を
+  表明してはならない(選択実行の `NotApplicable` 分類は #158 で
+  廃止 — 全 leg が常時実行されるため「変更なし = 実測不要」の
+  根拠は存在しない)
 
 ## 手順
 
@@ -82,9 +84,10 @@ leg は `summary` の needs・判定対象から物理分離され、非ブロ�
    が**実行済みで success**であることを確認する:
    `gh run list --branch main --commit <SHA>` →
    `gh run view <run-id> --log` または Checks タブ
-3. `macos-summary` check の集約表を確認し、全 lane `Pass` を
-   確認する。`Pending`/`NotRun` があれば完了を待つか rerun する
-   (runner 逼迫で未実行のまま PASS 扱いにしない)
+3. `ci-summary` job の集約表を確認し、全 lane `success` を
+   確認する。macOS leg が queue 滞留・skipped・失敗なら完了を
+   待つか rerun する(runner 逼迫で未実行のまま PASS 扱いに
+   しない — `ci-summary` 自身が Pending/failure のまま残る)
 4. いずれかが `Fail`/`Unsupported` の場合、macOS 対応表明は
    保留とし、失敗の修正をリリースブロッカーとして扱う
 5. 実測結果(SHA・run URL・各 lane 結果)をリリース記録に
@@ -92,11 +95,11 @@ leg は `summary` の needs・判定対象から物理分離され、非ブロ�
 
 ## 注意
 
-- `macos-summary` は非ブロッキング check のため、失敗していても
-  merge は可能。リリース判断は check の機械的な緑ではなく
-  本手順の確認による
+- `ci-summary` は Required context ではないため、失敗していても
+  merge は可能(Required は macOS 非含有 scope の `summary`)。
+  リリース判断は check の機械的な緑ではなく本手順の確認による
 - PR `summary` の緑 + macOS leg 未実行(queue 滞留)のまま
-  リリースしない — `macos-summary` が `Pending` のままなら
+  リリースしない — `ci-summary` が `Pending`/失敗のままなら
   実測未完了である
 - gui-real(実 GUI 自動試験)は従来どおり not_run placeholder
   であり、本手順の必須範囲には含まれない。実 GUI 検証が必要な

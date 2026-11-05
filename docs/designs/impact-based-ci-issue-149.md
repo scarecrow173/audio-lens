@@ -1,7 +1,7 @@
 ---
 id: "DESIGN-034RNl7ph9ojvXsoInYjLx"
 type: "design"
-status: "approved"
+status: "superseded"
 title: "Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行"
 created: "2026-11-04"
 updated: "2026-11-05"
@@ -37,7 +37,8 @@ relations:
     - "../designs/sccache-compile-cache-issue-148.md"
   blocks: []
   supersedes: []
-  superseded-by: []
+  superseded-by:
+    - "../designs/full-ci-ci-summary-issue-158.md"
   related:
     - "https://github.com/scarecrow173/ruviform/issues/333"
     - "https://github.com/scarecrow173/ruviform/issues/327"
@@ -59,6 +60,12 @@ relations:
 ---
 
 # Issue #149 変更影響ベース CI — AudioLens 分類規約・期待集合 Fail-Closed Gate・Shadow Mode 移行
+
+> **SUPERSEDED (2026-11-05)**: 本設計が規定した選択実行機構は
+> Issue #158(Ruviform #365 横断決定)により撤去された。後継は
+> [full-ci-ci-summary-issue-158](./full-ci-ci-summary-issue-158.md)
+> (全実行 Full CI・共通 `ci-summary`・`expected_sha` 契約)。
+> 本文書は実装経緯の記録として残し、新方式の根拠としない。
 
 ## Context
 

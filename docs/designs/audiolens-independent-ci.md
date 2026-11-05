@@ -31,7 +31,9 @@ relations:
     - "https://github.com/scarecrow173/ruviform/issues/294"
   refines:
     - "../designs/ruviform-dependency-ci.md"
-  refined-by: []
+  refined-by:
+    - "../designs/impact-based-ci-issue-149.md"
+    - "../designs/full-ci-ci-summary-issue-158.md"
   derives-from:
     - "../specs/audiolens-independent-ci.md"
     - "../designs/ruviform-dependency-ci.md"
@@ -44,6 +46,13 @@ relations:
 ---
 
 # AudioLens 独立 CI: 3 OS lane・依存 dual-mode アクセス・証拠レポート設計
+
+> **現行権威の注記 (2026-11-05)**: §4 lane 構成・§5 集約・Data
+> Flow は Issue #158 で Full CI 化され、最新の正本は
+> [full-ci-ci-summary-issue-158](./full-ci-ci-summary-issue-158.md)。
+> #149 の選択実行設計は superseded。本書の不変条件
+> (hygiene 常時・paths filter なし・依存 dual-mode・証跡正直性)
+> は継続する。
 
 ## Context
 
@@ -108,11 +117,12 @@ concurrency:
   保全する)
 - paths filter は設けない。prek hygiene gate が doc 変更を含む
   全ファイルを検査するため、doc-only PR を skip すると既存違反が
-  潜伏し後続 PR を阻害する。変更対象ごとの lane 分岐は job 構成で
-  実現する。Issue #149 で `impact` 分類 + selective `if:` 導入後も、
-  hygiene(prek)は常時実行の独立 lane として維持し、分類依存 lane
-  の skip は summary の期待集合照合が fail-closed で管理する
-  (詳細は impact-based-ci-issue-149.md)
+  潜伏し後続 PR を阻害する。Issue #149 の `impact` 分類 +
+  selective `if:` は Issue #158 で撤去され、全 lane は全イベントで
+  常時実行される(Full CI)。hygiene(prek)は常時実行の独立 lane
+  として維持し、未実行/skipped の lane は `ci-summary` の
+  fail-closed 判定が拾う(詳細は
+  full-ci-ci-summary-issue-158.md)
 - `permissions: contents: read` のみ。secret 参照は Deploy Key の
   みで job env 経由・ファイル化して渡し、ログへ出さない
 
@@ -162,31 +172,32 @@ provenance)。`pipx:serena-agent` は backend 上 platform entry を
 ### 4. lane 構成(job 分割)
 
 ```
+expected-sha (ubuntu)               # Issue #158: dispatch のみ expected_sha 照合(他 event は no-op)
 ruviform-access (ubuntu)            # access mode 解決(常時)
-impact (ubuntu)                     # Issue #149: PR diff → 分類→期待集合(常時)
-hygiene (ubuntu)                    # Issue #149: prek --all-files(常時)
-  ├─ verify (ubuntu/windows)        # Rust 本体 + Golden + CLI(selective)
-  ├─ ui-verify (ubuntu/windows)     # ui/ TS + vendor 整合(selective)
-  ├─ webview-verify (ubuntu/windows) # al-gui webview feature(selective)
+hygiene (ubuntu)                    # prek --all-files(常時)
+  ├─ verify (ubuntu/windows)        # Rust 本体 + Golden + CLI(常時)
+  ├─ verify-macos (macos)           # 同一 composite(常時)
+  ├─ ui-verify (ubuntu/windows)     # ui/ TS + vendor 整合(常時)
+  ├─ ui-verify-macos (macos)        # 同一 composite(常時)
+  ├─ webview-verify (ubuntu/windows) # al-gui webview feature(常時)
+  ├─ webview-verify-macos (macos)   # 同一 composite(常時)
   ├─ gui-real (ubuntu)              # 実 GUI: not-run 記録 placeholder(常時)
-  └─ summary (ubuntu)               # 証拠集約 + 期待集合 fail-closed(常時)
-
-verify-macos / ui-verify-macos / webview-verify-macos (macos)
-                                    # 非ブロッキング macOS 観察 leg
-  └─ macos-summary (ubuntu)         # macOS lane 別 Pass/Fail/NotRun 記録
+  ├─ summary (ubuntu)               # Required context 互換 gate(macOS 非含有)
+  └─ ci-summary (ubuntu)            # Full CI verdict: 全 job fail-closed + 証跡集約
 ```
 
-Issue #149 以降、`verify`/`ui-verify`/`webview-verify` は PR で
-`impact` 分類が required のときのみ実行され得る(Shadow Mode 中は
-全 lane 実行)。選択条件と分類表は
-[impact-based-ci-issue-149](./impact-based-ci-issue-149.md) を参照。
+Issue #158(安全な第一段階)で選択実行機構(`impact` 分類・
+`CI_IMPACT_SELECTIVE`・Shadow Mode・期待集合照合・
+`macos-summary`)は撤去され、全 lane は全イベントで常時実行
+される。最新の正本は
+[full-ci-ci-summary-issue-158](./full-ci-ci-summary-issue-158.md)。
 
-**macOS leg の物理分離(Issue #149 2026-11-05 追加合意)**:
+**macOS leg の job 分離(#157/#158 で維持)**:
 macOS runner 逼迫で Required `summary` が待機しないよう、各 lane
-の macOS leg は `*-macos` job へ分離され `summary` の needs・判定
-対象から外れる。PR/main では lane と同じ applicability で継続実行
-され、結果は非ブロッキング check `macos-summary` が lane 別に
-Pass/Fail/NotRun/Unsupported/Pending で記録する。step 本体は
+の macOS leg は `*-macos` job として `summary` の needs・判定
+対象から外れたまま維持される。一方、Full CI verdict である
+`ci-summary` は `*-macos` を needs に含め、macOS の失敗/未完了を
+Full CI 全体の失敗/未完了とする。step 本体は
 `.github/actions/<lane>` composite action が必須 legs と共有する
 単一定義。macOS legs を Ruleset Required context に登録しない。
 macOS 対応を表明するリリース/互換受入では候補 SHA の macOS 実測を
@@ -223,31 +234,28 @@ feature surface 検証)。
 **gui-real**: 常時「not run」を記録する placeholder job。
 Ruviform #312(test host)/#313(OS driver)が未整備のため、実
 Window/OS 自動試験は本 run の検証範囲外であることを証拠として
-残す。`status=not_run` を output し、summary が pass と誤認しない
+残す。`status=not_run` を output し、集約 job が pass と誤認しない
 よう明示する。#312/#313 接続時に opt-in lane へ置換する拡張点。
 
-**macos-summary**: `needs: [impact, verify-macos, ui-verify-macos,
-webview-verify-macos]` + `if: always()`(Issue #149 追加合意)。
-macOS legs の結果を lane 別に集約する非ブロッキング check —
-`summary` の needs に含まれないため成否・待機が merge gate を
-阻害しない。leg が queue 滞留の間は check 自身が Pending のまま
-残り(未実行を NotApplicable に変換しない)、実行済みの
-failure/cancelled・`observe` 期待の NotRun は check を失敗にする
-(Fail を隠さない)。
+**ci-summary**: `needs: [expected-sha, ruviform-access, hygiene,
+verify, verify-macos, ui-verify, ui-verify-macos, webview-verify,
+webview-verify-macos, gui-real]` + `if: always()`(Issue #158)。
+Full CI verdict — 旧 `summary` と旧 `macos-summary` の集約責務を
+統一したもの。全必要 job の result が `success` のときのみ run を
+成功にし、failure/cancelled/skipped/NotRun/unknown を Pass に
+しない。macOS legs を needs に含むため macOS の失敗/滞留は
+Full CI 全体の失敗/未完了となる(leg 滞留中は check が Pending
+のまま残る)。対象 SHA・event・expected_sha(dispatch 時)・
+access mode・resolved SHA・lane×OS 別結果・検証範囲・Run URL を
+`$GITHUB_STEP_SUMMARY` に記録する。
 
-**summary**: `needs: [ruviform-access, impact, hygiene, verify,
-ui-verify, webview-verify, gui-real]` + `if: always()`。job ごとの
-`status`(pass/fail/not_run)・access mode・resolved SHA・OS・
-feature を集約した証拠テーブルを `$GITHUB_STEP_SUMMARY` に出力し、
-失敗の Owner 切り分け指針を表示する(§5)。全 lane not-run や
-cancelled は run を失敗にし、unknown を pass に見せない。
-Issue #149 以降は verify/ui-verify/webview-verify について
-`impact` の期待値(required/not_applicable)と実 result を
-fail-closed で照合する(required の skipped/failure/cancelled は
-fail、根拠付き NotApplicable の skipped のみ許容)。
-2026-11-05 合意以降、各 lane job は ubuntu/windows legs のみの
-matrix — macOS legs(`*-macos` job)は needs に含まれず、
-summary の緑は macOS PASS を意味しない。
+**summary**: `needs: [expected-sha, ruviform-access, hygiene,
+verify, ui-verify, webview-verify, gui-real]` + `if: always()`。
+Ruleset `main-checkstatus` の Required context `summary` を継続
+発行する互換 gate。needs 全 job の success のみを要求する単純
+fail-closed。macOS legs(`*-macos` job)は needs に含まれず、
+summary の緑は macOS PASS を意味しない。`ci-summary` が
+Required 化された後に撤去する(最終段階)。
 
 ### 5. 証拠レポート形式と Owner 切り分け
 
@@ -306,15 +314,14 @@ check-ruviform-rev` task を新設し、CI とローカルで同一入口にす�
 
 ```text
 pull_request / push(main) / workflow_dispatch
+  -> expected-sha: dispatch のみ checkout HEAD == inputs.expected_sha
+     を照合(不一致なら全 lane skip -> ci-summary fail)
+     pull_request/push では no-op success
   -> ruviform-access: mode = deploy_key | anonymous | unavailable
-  -> impact: PR diff を分類 -> 期待集合(required/not_applicable)
-     非 PR・分類不能・fetch 失敗 -> mode=full(全 required)
   -> hygiene: prek run --all-files(常時)
-  -> verify / ui-verify / webview-verify (ubuntu/windows, 並列,
-     PR かつ分類 required のときのみ実行。Shadow Mode は全実行)
-  -> verify-macos / ui-verify-macos / webview-verify-macos
-     (分類 observe のとき実行。summary 非依存)
-  -> macos-summary: macOS lane 別 Pass/Fail/NotRun 記録(非ブロッキング)
+  -> verify / ui-verify / webview-verify (ubuntu/windows, 並列, 常時)
+  -> verify-macos / ui-verify-macos / webview-verify-macos (常時。
+     Required `summary` 非依存・`ci-summary` が集約)
        unavailable -> gate step ::error:: (明示 fail)
        deploy_key  -> SSH credential + probe
        anonymous   -> HTTPS probe
@@ -322,7 +329,8 @@ pull_request / push(main) / workflow_dispatch
        -> lane steps (mise run ...)
        -> evidence step (if: always()) -> GITHUB_STEP_SUMMARY
   -> gui-real: not_run を記録
-  -> summary: lane 表 + Owner 切り分け + 期待集合照合で fail
+  -> summary: Required context 互換 gate(macOS 非含有 scope)
+  -> ci-summary: 全 job 表 + Owner 切り分け + fail-closed 判定
 ```
 
 ## Non-Functional Constraints
@@ -347,15 +355,17 @@ pull_request / push(main) / workflow_dispatch
 - webview-verify は wry/webkit2gtk ビルドで重いが、macOS leg を
   含め独立に結果を残す価値に見合う。apt 依存は ruviform 側と同一構成で
   上流実績あり
-- macOS leg の分離は Required gate を 2OS に限定する代わりに、
-  macOS の formal 互換判定をリリース Gate の実測(runbook)へ
-  移す。PR 上で macOS の regressive 失敗は macos-summary check の
-  失敗として可視だが merge は阻害しない — 見逃しリスクを受容
-  しつつ runner 逼迫耐性を得るトレードオフ(2026-11-05 合意)
+- macOS leg の Required gate からの分離(#157)は macOS の formal
+  互換判定をリリース Gate の実測(runbook)へ移す。Issue #158 で
+  `ci-summary` は macOS を含む Full CI verdict となったが、
+  Required `summary` のみが merge gate のため、PR 上の macOS
+  regressive 失敗は ci-summary 赤として可視だが merge は阻害
+  しない — 見逃しリスクを受容しつつ runner 逼迫耐性を得る
+  トレードオフ(2026-11-05 合意・#158 で維持)
 - doc-only PR も全 lane が走る(paths filter 不採用の対価)。
-  concurrency cancel で実害は限定的。Issue #149 で hygiene を
-  独立常時 lane 化し、分類依存 lane は期待集合ベースで選択実行
-  可能となった(Shadow 検証後に有効化)
+  concurrency cancel で実害は限定的。Issue #149 の選択実行は
+  #158 で廃止し、全変更が常時 Full CI となる(移行期間中の CI
+  コスト増は既知の trade-off)
 
 ## Deferred Design Concerns
 

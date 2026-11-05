@@ -1,14 +1,16 @@
 # verify lane 本体(ci.yml の verify/verify-macos job が共有する
-# composite action)。Issue #149 追加合意で macOS leg を Required
-# summary の needs から物理分離するにあたり、同一 lane を
-# PR 必須 legs(ubuntu/windows)と非ブロッキング macOS leg の
-# 両 job から重複なく呼び出すための単一定義(表現ドリフト防止)。
+# composite action)。Issue #158 Full CI 化以降、ubuntu/windows
+# legs と macOS leg は全イベントで常時実行され、結果は
+# `ci-summary` が fail-closed で集約する(Required context
+# `summary` は macOS 非含有 scope — #157 の性質維持)。
+# 同一 lane を両 job から重複なく呼び出すための単一定義
+# (表現ドリフト防止)。
 #
 # 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
 # secrets/needs/vars/matrix context は composite 内で参照できない
 # ため inputs 経由で受け取る。
 name: verify lane
-description: "Rust workspace + Golden/LFS/Export/CLI headless lane (shared by PR-required ubuntu/windows legs and the non-blocking macOS leg)"
+description: "Rust workspace + Golden/LFS/Export/CLI headless lane (shared by ubuntu/windows legs and the macOS leg — full CI on every event)"
 
 inputs:
   os:
@@ -212,7 +214,7 @@ runs:
 
     # lane ごとの証拠行(not-run/skipped もそのまま記録し、
     # pass と偽らない)。OS 単位の記録はこの表 + job result で
-    # 追跡する(macOS leg は macos-summary job が別途集約)。
+    # 追跡する(macOS leg も ci-summary job が集約する)。
     - name: Record lane evidence
       if: always()
       shell: bash
