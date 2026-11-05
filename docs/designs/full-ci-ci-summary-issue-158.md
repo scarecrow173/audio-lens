@@ -167,6 +167,12 @@ hygiene (ubuntu)           # prek --all-files(常時・現行維持)
     exit 1。macOS legs を needs に含むため、macOS 失敗・滞留は
     Full CI 全体の失敗/未完了となる(check が Pending のまま
     残る性質も `always()` + needs 完走で維持される)。
+  - 未検証入力の境界: `if: always()` のため expected-sha job が
+    input を拒否しても本 job は実行される。`github.event.inputs.*`
+    を run 本文へ式展開すると引用符等を含む入力が shell コード
+    として解釈され得るため、dispatch inputs は `env:` 値として
+    渡し、shell にはデータとしてのみ到達させる
+    (`check-ci-workflow.mjs` が run 本文への入力式展開を検査)。
 - **summary**: `needs: [expected-sha, ruviform-access, hygiene,
   verify, ui-verify, webview-verify, gui-real]` + `if: always()`。
   `main-checkstatus` Required context `summary` を継続発行する

@@ -21,6 +21,9 @@
 // - 選択実行機構の残滓(impact job/classify-impact/
 //   CI_IMPACT_SELECTIVE/期待集合 not_applicable/macos-summary)は
 //   存在してはならない。
+// - workflow_dispatch inputs(未検証ユーザー入力)は run 本文へ式
+//   展開しない(always() な集約 job は入力拒否後も実行されるため、
+//   env/if など値としてのみ評価される文脈で扱う)。
 //
 // Usage:
 //   node tools/check-ci-workflow.mjs            ci.yml を検査
@@ -138,6 +141,47 @@ for (const token of [
   "SHADOW",
 ]) {
   check(!codeText.includes(token), `workflow 内に選択実行機構の残滓 '${token}' が存在する`);
+}
+
+// --- 未検証入力の run 本文への式展開禁止 -----------------------------------
+// ci-summary は `if: always()` のため expected-sha job が dispatch
+// input を拒否しても実行される。github.event.inputs.* を run 本文へ
+// 式展開すると、引用符等を含む入力が shell コードとして解釈され得る
+// (env 値として渡せば shell にはデータとしてのみ到達する)。
+// run: のブロック/インライン本文だけを抽出して検査する — env: 値や
+// if: 式への入力式の使用は許可される境界であり違反ではない。
+// ブロック内の行末 `#` 以降も GitHub 式展開は先に走るため、run 本文
+// では行内コメントを除かない(全文を対象にする)。
+
+const noFullCommentLines = lines.map((l) => (/^\s*#/.test(l) ? "" : l));
+
+function runBodies() {
+  const out = [];
+  for (let i = 0; i < noFullCommentLines.length; i++) {
+    const m = noFullCommentLines[i].match(/^(\s*)run:\s*(.*)$/);
+    if (!m) continue;
+    const indent = m[1].length;
+    const inline = m[2].trim();
+    if (inline.startsWith("|") || inline.startsWith(">")) {
+      const body = [];
+      for (let j = i + 1; j < noFullCommentLines.length; j++) {
+        const l = noFullCommentLines[j];
+        if (l.trim() && /^\s*/.exec(l)[0].length <= indent) break;
+        body.push(l);
+      }
+      out.push(body.join("\n"));
+    } else {
+      out.push(inline);
+    }
+  }
+  return out;
+}
+
+for (const body of runBodies()) {
+  check(
+    !/github\.event\.inputs\./.test(body),
+    "run 本文へ github.event.inputs.* を式展開している(未検証入力が shell コードとして解釈され得る。env 経由で値として渡すこと)",
+  );
 }
 
 // --- job 集合契約 ----------------------------------------------------------

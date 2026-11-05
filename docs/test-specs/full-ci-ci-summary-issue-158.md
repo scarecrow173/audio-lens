@@ -75,6 +75,10 @@ fail-closed 集約分離・選択実行機構の不在。
 - コード行中に `impact` job 参照・`classify-impact`・
   `CI_IMPACT_SELECTIVE`・`macos-summary`・`not_applicable`・
   `steps.classify`・`SHADOW` が存在しない。
+- `github.event.inputs.*`(未検証ユーザー入力)を `run:` の
+  ブロック/インライン本文へ式展開しない — always() な集約 job
+  は入力拒否後も実行されるため、inputs は `env:` 値や `if:` 式
+  など値としてのみ評価される文脈で扱う。
 
 ## Examples
 
@@ -84,6 +88,9 @@ fail-closed 集約分離・選択実行機構の不在。
 - lane の needs を `impact` へ差し替える → 検査 exit 1。
 - `summary` job の `name:` を改名する → 検査 exit 1
   (Required context 消滅検出)。
+- `ci-summary` の run 本文に `${{ github.event.inputs.
+  expected_sha }}` を埋め込む → 検査 exit 1(未検証入力の
+  shell 実行を防止)。`env:` 値への同式の記述は違反としない。
 
 ## Guarantees
 

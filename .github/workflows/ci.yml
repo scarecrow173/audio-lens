@@ -364,15 +364,20 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      # dispatch input は always() 実行下でも未検証のまま到達し得る
+      # (expected-sha job が拒否しても本 job は走る)ため、run 本文へ
+      # 式展開せず env 経由で値としてのみ扱う。
       - name: Aggregate lane evidence
         shell: bash
+        env:
+          EXPECTED_SHA_INPUT: ${{ github.event.inputs.expected_sha }}
         run: |
           set -uo pipefail
           {
             echo "# Full CI evidence — ${{ github.ref_name }} @ ${{ github.sha }}"
             echo ""
             echo "- event: ${{ github.event_name }}"
-            echo "- expected_sha (dispatch input): ${{ github.event.inputs.expected_sha || 'n/a (non-dispatch event)' }}"
+            echo "- expected_sha (dispatch input): ${EXPECTED_SHA_INPUT:-n/a (non-dispatch event)}"
             echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
             echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.verify-macos.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || 'unresolved' }}"
             echo "- run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
