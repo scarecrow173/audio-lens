@@ -4,15 +4,19 @@
 // 構造に基づいて静的に照合する(ruviform-lock-rev.mjs と同じく
 // 依存ゼロ・構造検査・任意の文字列 grep ではない)。
 //
-// 契約(正本は docs/designs/full-ci-ci-summary-issue-158.md):
-// - trigger: pull_request/push(main)/workflow_dispatch。dispatch は
-//   inputs.expected_sha を required で持つ。
+// 契約(正本は docs/designs/full-ci-ci-summary-issue-158.md +
+// docs/designs/ci-dispatch-only-issue-147.md):
+// - trigger: workflow_dispatch のみ(Issue #147/#158 最終段階で
+//   pull_request/push を撤去。schedule/workflow_run 等他 trigger も
+//   持たない)。dispatch は inputs.expected_sha を required で持つ。
 // - job 集合は固定: expected-sha, ruviform-access, hygiene,
 //   verify, verify-macos, ui-verify, ui-verify-macos,
 //   webview-verify, webview-verify-macos, gui-real,
 //   ci-summary, summary(追加・削除・rename は契約違反)。
 // - lane jobs は needs: [ruviform-access, expected-sha] で
 //   両 preflight の success を `if:` に課す(常時実行)。
+// - expected-sha job は全 run で expected_sha を無条件照合する
+//   (github.event_name を参照する if: を持たない)。
 // - ci-summary は全 job を needs して `if: always()` —
 //   Full CI verdict。macOS legs を含む。
 // - summary は macOS legs を含まない needs + `if: always()` —
@@ -97,17 +101,28 @@ const on = topBlock("on");
 check(!!on, "`on:` ブロックが存在しない");
 if (on) {
   const onText = on.join("\n");
-  for (const trig of ["pull_request", "push", "workflow_dispatch"]) {
-    check(new RegExp(`^ {2}${trig}:`, "m").test(onText), `trigger ${trig} が on: に存在しない`);
+  // trigger key は on: 直下の 2-indent key(inputs 等の nested key は
+  // より深い indent のため拾われない)。
+  const triggerKeys = on
+    .map((l) => l.match(/^ {2}([A-Za-z_][A-Za-z0-9_]*):/))
+    .filter(Boolean)
+    .map((m) => m[1]);
+  check(
+    triggerKeys.length === 1 && triggerKeys[0] === "workflow_dispatch",
+    `trigger が workflow_dispatch 唯一でない(actual: ${triggerKeys.join(", ")})`,
+  );
+  for (const bad of [
+    "pull_request",
+    "pull_request_target",
+    "push",
+    "schedule",
+    "workflow_run",
+    "issue_comment",
+    "merge_group",
+    "workflow_call",
+  ]) {
+    check(!triggerKeys.includes(bad), `禁止 trigger ${bad} が on: に存在する`);
   }
-  check(
-    /pull_request:\s*\n\s*branches:\s*\[main\]/.test(onText),
-    "pull_request.branches: [main] が維持されていない",
-  );
-  check(
-    /push:\s*\n\s*branches:\s*\[main\]/.test(onText),
-    "push.branches: [main] が維持されていない",
-  );
   check(
     /workflow_dispatch:\s*\n(?:\s+.*\n)*?\s+inputs:\s*\n(?:\s+.*\n)*?\s+expected_sha:\s*\n(?:\s+.*\n)*?\s+required:\s*true/.test(
       onText,
@@ -240,7 +255,8 @@ if (jobs) {
     );
   }
 
-  // expected-sha: dispatch 照合 step の存在
+  // expected-sha: dispatch 照合 step の存在 + 無条件実行(dispatch
+  // 専用下で event 分岐を持つと照合が no-op 化し得るため禁止)
   const es = jobs.get("expected-sha");
   if (es) {
     const b = blockText(es);
@@ -248,7 +264,10 @@ if (jobs) {
       b.includes("git rev-parse HEAD") && b.includes("expected_sha"),
       "job expected-sha: checkout revision と expected_sha の照合 step が無い",
     );
-    check(b.includes("workflow_dispatch"), "job expected-sha: workflow_dispatch 判定が無い");
+    check(
+      !b.includes("github.event_name"),
+      "job expected-sha: github.event_name を参照している(dispatch 専用下では全 run が無条件照合する)",
+    );
   }
 
   // hygiene: expected-sha を needs(prek --all-files は既存維持)
