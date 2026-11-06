@@ -57,6 +57,7 @@ Directory: `docs/tasks`
 | TASK-034EJgPpxRSjjhOJVeBUup | caller 側最適化: 事後計測・Implementation Record 記録・最終検証 | done | [caller-opt-measurement-ir-closeout.md](./caller-opt-measurement-ir-closeout.md) |
 | TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
+| TASK-034phtbniZlSYvFqbrIDH | ci.yml workflow_dispatch 専用化(AL#147/#158 最終段階): PR/push trigger 撤去 | done | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
 | TASK-034SKVSwvA141jYCWJ6SYi | Tracker reconcile 入口(AL#159): 共有 pin eed590e 更新と reconcile workflow 導入 | done | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | TASK-034GMMLy26EDCzZmTAUf9y | coarse-to-fine 境界・cache 監査テスト | done | [coarse-to-fine-cache.md](./coarse-to-fine-cache.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |

@@ -1,33 +1,33 @@
 name: ci
 
-# AudioLens 独立 CI(Issue #142)。Issue #158(安全な第一段階)で
-# 変更影響ベース選択実行(impact 分類・CI_IMPACT_SELECTIVE・
-# Shadow Mode・期待集合照合)を廃止し、pull_request / main push /
-# workflow_dispatch の全イベントで全 lane を毎回実行する Full CI
-# に統一した(Ruviform #365 横断決定)。
+# AudioLens 独立 CI(Issue #142)。Issue #158 で変更影響ベース選択実行
+# (impact 分類・CI_IMPACT_SELECTIVE・Shadow Mode・期待集合照合)を
+# 廃止し全 lane 毎回実行の Full CI に統一した。Issue #147/#158
+# 最終段階で起動入口を workflow_dispatch のみに一元化した
+# (Ruviform #365 横断決定)— PR 作成/更新・main push では本
+# workflow は起動しない。検証は Daily Scheduler(daily-ci.yml が
+# 判定 SHA を expected_sha として dispatch)または手動 dispatch で
+# 実行する。
 #
 # 集約責務は最終 job `ci-summary` に統一: 必要な自動 job 全件を
 # `always()` で待ち、success 以外(failure/cancelled/skipped/
 # NotRun/unknown)を全て run 失敗にする fail-closed 判定。
 # macOS legs の失敗/未完了も Full CI 全体の失敗/未完了となる。
 #
-# 本段階では移行完了ではない。次を維持する:
-# - pull_request / push(main) trigger — Ruleset `main-checkstatus`
-#   の Required 解除を Owner が確認した後の最終段階で削除する
-#   (Issue #158 変更 5 / #147)。先行削除は Required context の
-#   デッドロックを招くため禁止。
-# - check 名 `summary` の Required context 互換 job — 判定範囲は
-#   #157 と同じ macOS 非含有 scope(macOS runner 逼迫で Required
-#   gate が滞留しない)。`ci-summary` が Required 化された後に
-#   撤去する。
-# Scheduler(`daily-ci.yml`)/Tracker(`ci-issue-tracker.yml`)は
-# Issue #159 で別途導入する。
+# check 名 `summary` の job は旧 Required context `summary` の互換
+# gate として維持する(Required 空の現在は redundant だが、撤去
+# 条件は `ci-summary` の Required 化であり未達成 — issue-158
+# design の延期項目)。失敗追跡は ci-issue-tracker.yml
+# (workflow_run、ユーザー dispatch のみ観測)と
+# ci-issue-tracker-reconcile.yml(schedule/manual、権威履歴
+# reconcile)の 2 入口が担う。
 #
 # workflow_dispatch は inputs.expected_sha(必須・40 hex)を持ち、
-# expected-sha job が checkout HEAD との一致を照合する — Daily
-# Scheduler が「判定した SHA」と dispatch を結ぶ契約(判定 SHA ≠
-# 実測 SHA を証跡なしに通さない)。pull_request/push では
-# expected-sha job は no-op success。
+# expected-sha job が全 run で checkout HEAD との一致を無条件照合
+# する — Daily Scheduler が「判定した SHA」と dispatch を結ぶ
+# 契約(判定 SHA ≠ 実測 SHA を証跡なしに通さない)。trigger を
+# 誤って再導入しても expected_sha を持たない event run は照合で
+# 即失敗する。
 #
 # Ruviform Git 依存のアクセス経路(ruviform-access job が解決):
 # - deploy_key: secret RUVIFORM_DEPLOY_KEY 設定済み → read-only
@@ -51,10 +51,6 @@ name: ci
 # (prek hook 経由で hygiene job が全 run で実施する)。
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       expected_sha:
@@ -65,8 +61,9 @@ on:
 permissions:
   contents: read
 
-# 同一 ref の重複実行は PR で cancel(最新 commit のみ検証)。
-# main push は cancel しない(merge ごとの検証履歴を保全する)。
+# 同一 ref への重複 dispatch は非 main ref で cancel(最新のみ
+# 検証)。main への dispatch は cancel しない(実行ごとの検証履歴を
+# 保全する)。
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -76,22 +73,20 @@ env:
   CARGO_INCREMENTAL: "0"
 
 jobs:
-  # workflow_dispatch の判定 SHA 契約(Issue #158)。checkout した
+  # workflow_dispatch の判定 SHA 契約(Issue #158)。起動入口が
+  # dispatch のみのため全 run で無条件照合する — checkout した
   # revision が inputs.expected_sha と一致しない run を即失敗に
-  # する。pull_request/push では no-op success とし DAG を event
-  # 非依存に保つ。全検証 job が needs するため、不一致 run は
-  # lane 全 skip + ci-summary fail で閉じる(lane 実行コストを
-  # 掛けず fail-closed)。
+  # する。全検証 job が needs するため、不一致 run は lane 全 skip
+  # + ci-summary fail で閉じる(lane 実行コストを掛けず
+  # fail-closed)。
   expected-sha:
     name: expected-sha
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (dispatch SHA guard)
-        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v7.0.1
 
       - name: Verify checked-out revision matches expected_sha
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           EXPECTED: ${{ github.event.inputs.expected_sha }}
@@ -112,11 +107,6 @@ jobs:
             echo "- expected_sha (dispatch input): \`$EXPECTED\`"
             echo "- checkout HEAD: \`$actual\`"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Record non-dispatch event
-        if: github.event_name != 'workflow_dispatch'
-        shell: bash
-        run: echo "expected_sha contract applies to workflow_dispatch only (event=${{ github.event_name }}) — no-op"
 
   # secret は job `if:` で参照できないため、preflight job で access
   # mode を解決して output 経由で下流へ渡す(consumer-verify と同型)。

@@ -15,6 +15,7 @@ Directory: `docs/designs`
 | DESIGN-034Gs3MhX5g3FwTsySzAiT | audio fallback merge: native container authority + symphonia AAC decode | approved | [audio-fallback-merge-native-container-authority-symphonia-aac-decode.md](./audio-fallback-merge-native-container-authority-symphonia-aac-decode.md) |
 | DESIGN-T1zXGDg8nn70x2f6GwIeNc | AudioLens 独立 CI: 3 OS lane・依存 dual-mode アクセス・証拠レポート設計 | approved | [audiolens-independent-ci.md](./audiolens-independent-ci.md) |
 | DESIGN-034EIsK2SiNLNZYXmumzOe | caller 側最適化: FIR 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向の実装設計 | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
+| DESIGN-034c5j6d48zGZdh9KX0KM | ci.yml workflow_dispatch 専用化: PR/push trigger 撤去と expected-sha 無条件照合 | approved | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
 | DESIGN-034SKTJUE6Wsd8z241uUcC | Issue #159 Tracker reconcile 入口(consumer 展開): 共有 pin 更新と別 workflow schedule/manual 入口 | approved | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | DESIGN-034yYLaOKRSfRJMRKiYgQV | 分析データセット設計 | approved | [dataset-schema.md](./dataset-schema.md) |
 | DESIGN-034G5QmSv6Yzg756IThZZi | decoded/normalized PCM read-only view 設計 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
