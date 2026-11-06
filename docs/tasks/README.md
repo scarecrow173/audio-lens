@@ -6,7 +6,6 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
-| TASK-034Smu7rL1jyWzIfwIzmyV | Full CI 統一 安全な第一段階(AL#158): 全実行化・ci-summary・expected_sha | in-progress | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
 | TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
@@ -58,6 +57,7 @@ Directory: `docs/tasks`
 | TASK-034EJgPpxRSjjhOJVeBUup | caller 側最適化: 事後計測・Implementation Record 記録・最終検証 | done | [caller-opt-measurement-ir-closeout.md](./caller-opt-measurement-ir-closeout.md) |
 | TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
+| TASK-034SKVSwvA141jYCWJ6SYi | Tracker reconcile 入口(AL#159): 共有 pin eed590e 更新と reconcile workflow 導入 | done | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | TASK-034GMMLy26EDCzZmTAUf9y | coarse-to-fine 境界・cache 監査テスト | done | [coarse-to-fine-cache.md](./coarse-to-fine-cache.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |
 | TASK-034dLdqYk3faqjkGcbspVS | al-media: コンテナ解析の残存エッジケース(PR #25/#27 レビュー LOW) | done | [container-review-edge-cases.md](./container-review-edge-cases.md) |
@@ -84,6 +84,7 @@ Directory: `docs/tasks`
 | TASK-034Rp5Mtq7VNi310OoekT0 | Export 可搬投影と staging publish (AL#141) | done | [export-portable-projection-issue-141.md](./export-portable-projection-issue-141.md) |
 | TASK-034dLdqYq2QFIc8WBq2KLP | al-testkit / ゴールデン fixture / 文書の残存精度(PR #23/#24 レビュー LOW) | done | [fixture-review-fidelity.md](./fixture-review-fidelity.md) |
 | TASK-034GsRM5JI2xVj38GXTd9s | fsutil-atomic-write-primitives | done | [fsutil-atomic-write-primitives.md](./fsutil-atomic-write-primitives.md) |
+| TASK-034Smu7rL1jyWzIfwIzmyV | Full CI 統一 安全な第一段階(AL#158): 全実行化・ci-summary・expected_sha | done | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TASK-034AaG1gz22ttDMRbpSJsW | golden: video/A-V + コンテナケース行列 | done | [golden-av-matrix.md](./golden-av-matrix.md) |
 | TASK-034AaFZQVKvQFjEmAbNfog | golden: locate ケース行列 | done | [golden-locate-matrix.md](./golden-locate-matrix.md) |
 | TASK-034AaG0wyqS2s6eM05bcTA | golden: reference ケース行列 | done | [golden-reference-matrix.md](./golden-reference-matrix.md) |
