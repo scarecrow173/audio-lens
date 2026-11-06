@@ -6,6 +6,7 @@ Directory: `docs/tasks`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| TASK-034phtbniZlSYvFqbrIDH | ci.yml workflow_dispatch 専用化(AL#147/#158 最終段階): PR/push trigger 撤去 | in-progress | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
 | TASK-034P3OOFhUzNrxllVL2POQ | f64 DSP 呼出の Ruviform 切替(AL#101) | todo | [ruviform-dsp-kernel-switch.md](./ruviform-dsp-kernel-switch.md) |
 | TASK-034P3P1fwfyIxni1zVuomQ | ruviform-exec による stage 内並列化の評価(AL#54) | todo | [ruviform-exec-parallel-eval.md](./ruviform-exec-parallel-eval.md) |
 | TASK-034P3P0JW4zZM5GdZlp1WA | 旧基盤撤去と最終検証(AL#104) | todo | [ruviform-foundation-cleanup.md](./ruviform-foundation-cleanup.md) |
