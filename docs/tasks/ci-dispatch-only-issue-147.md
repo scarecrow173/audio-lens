@@ -1,7 +1,7 @@
 ---
 id: "TASK-034phtbniZlSYvFqbrIDH"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "ci.yml workflow_dispatch 専用化(AL#147/#158 最終段階): PR/push trigger 撤去"
 created: "2026-11-06"
 updated: "2026-11-06"
@@ -124,10 +124,9 @@ biome 2.6.2, prek 0.5.7)。
 | effective rules 再確認(3 repo) | `main-checkstatus` disabled・`main-protect` active(deletion/non_fast_forward/pull_request・required_status_checks なし)・classic branch protection 404 |
 | reconcile main 実受入 | run 42180639964 completed/success — `eed590e` 実 checkout・`mode: reconcile`・最小権限・report artifact upload を log 確認 |
 | review-protocol | adversarial pass で 2 件指摘(event_name 検査を includes 強化・includes スタイル)修正、再検証 OK。最終判定 ACCEPT WITH NON-BLOCKING NOTES |
+| PR 無起動実検証(PR #164, head 6399172, 作成 2026-11-06T07:37:08Z) | `gh pr checks` → checks 0 件。`actions/runs?branch=fix/al-ci-manual-only&created>07:36Z` → total 0。repo 全体 `actions/runs?created>07:36Z` → total 0。check-suites → `devin-ai-integration` app suite 1 件のみ(repo workflow ではない外部 app) |
 
 未実施(worker scope 外/実測不可):
 - cron 実観測(reconcile/daily とも NotRun、manual 実行と混同しない)。
-- PR 無起動の実検証は PR 作成後に Actions API/check suite で実施し
-  PR 本文と worker_done に記載(本 task 記録時点では未実施)。
 - merge 後の daily dispatch 実動作(次回 21:23 UTC 以降)。
 - 製品 Rust/UI suite(変更は trigger 層のみ、lane 本体不変)。
