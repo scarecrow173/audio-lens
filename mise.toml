@@ -116,6 +116,14 @@ run = "node tools/verify-toolchain.mjs"
 description = "ci.yml Full CI 構造契約の fail-closed 検査(node、CI/ローカル共通)"
 run = "node tools/check-ci-workflow.mjs"
 
+# Issue #159 (reconcile 展開): tracker 系 workflow 群の構造契約(共有
+# pin 一致・reconcile 入口の trigger/guard/権限/concurrency/mode・
+# event 入口の trigger 不変)を fail-closed で検査する。prek hook 経由で
+# hygiene job が全 run で実施する。
+[tasks.check-ci-tracker-workflows]
+description = "tracker 系 workflow 構造契約の fail-closed 検査(node、CI/ローカル共通)"
+run = "node tools/check-ci-tracker-workflows.mjs"
+
 [tasks.check-cli-headless]
 description = "al-cli 等 headless crate の依存木に GUI/GPU/WebView framework crate が無いことを検証(node、3 OS 共通)"
 run = "node tools/check-headless-deps.mjs"
