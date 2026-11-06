@@ -28,21 +28,23 @@
 //! 構築する local 実装を維持する。#334 解消後は
 //! `SinkDestination::RollingFile` へ移して本ブロックを撤去する。
 //!
-//! # 既知の一時 regression(ruviform#335)
+//! # span lifecycle event
 //!
-//! ruviform adapter の `fmt` layer は `FmtSpan` を設定しない
-//! ([ruviform#335](https://github.com/scarecrow173/ruviform/issues/335))
-//! ため、stderr sink は span lifecycle event(CLOSE)を出力しない。
-//! file JSONL sink は local layer で `FmtSpan::CLOSE` を維持し、
-//! 集計用途の leaf span 観測を保持する。#335 解消後に stderr
-//! sink へも適用する。
+//! stderr sink は `SinkConfig::span_events` に `SpanEvents::CLOSE`
+//! を設定し、span close record(span 自身の field +
+//! `time.busy`/`time.idle`)を出力する — migration 前に両 layer
+//! が持っていた `FmtSpan::CLOSE` 挙動の復旧
+//! ([ruviform#335](https://github.com/scarecrow173/ruviform/issues/335)
+//! で提供、解消済み)。file JSONL sink は local layer の
+//! `FmtSpan::CLOSE` で同 record を維持し、集計用途の leaf
+//! span 観測を両 sink で保持する。
 
 use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use ruviform_observability::logging::{
-    LoggingBuildError, LoggingConfig, SinkConfig, SinkDestination, SinkFailureMode,
+    LoggingBuildError, LoggingConfig, SinkConfig, SinkDestination, SinkFailureMode, SpanEvents,
 };
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_appender::rolling::{self, Rotation};
@@ -264,6 +266,10 @@ pub fn init(config: LogConfig) -> Result<LogGuard, InitError> {
         sinks: vec![SinkConfig {
             destination: SinkDestination::Stderr,
             format: map_log_format(config.stderr_format),
+            // migration 前に stderr layer が持っていた
+            // `FmtSpan::CLOSE` 相当 — leaf span の close record
+            // を復旧する(ruviform#335 解消で提供)。
+            span_events: SpanEvents::CLOSE,
             // `resolve_activation` で parse 済みの directive と同じ
             // ものを per-sink filter として適用する。
             filter: config.filter.to_string(),
