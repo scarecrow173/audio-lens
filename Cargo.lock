@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "addr2line"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e567177890eb1617b1f774005b66b26b2377afd138a2ca37aae7d8f0c81429d4"
+dependencies = [
+ "gimli",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -248,7 +257,7 @@ version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73cd58deff2140a0a8eae87e417bd01db68a33e148aa93d1e8cd837e55e312b6"
 dependencies = [
- "object",
+ "object 0.39.1",
 ]
 
 [[package]]
@@ -689,6 +698,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7178fe5f7d460b13895ebb9dcb28a3a6216d2df2574a0806cb51b555d297f38"
 dependencies = [
  "arrayvec",
+]
+
+[[package]]
+name = "backtrace"
+version = "0.3.77"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42f4220217f3288537b83684130f42fad43320b1c3b805f1910d683d52ded24f"
+dependencies = [
+ "addr2line",
+ "cfg-if",
+ "libc",
+ "miniz_oxide 0.9.1",
+ "object 0.40.0",
+ "rustc-demangle",
+ "windows-link 0.2.1",
 ]
 
 [[package]]
@@ -2706,6 +2730,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "gimli"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1033caf0b349c518623b5396bfb2cf0bddf44f0306d543a250e5743297aafd10"
+
+[[package]]
 name = "gio"
 version = "0.18.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2735,6 +2765,19 @@ dependencies = [
  "libc",
  "system-deps",
  "winapi",
+]
+
+[[package]]
+name = "git2"
+version = "0.20.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b88256088d75a56f8ecfa070513a775dd9107f6530ef14919dac831af9cfe2b"
+dependencies = [
+ "bitflags 2.13.2",
+ "libc",
+ "libgit2-sys",
+ "log",
+ "url",
 ]
 
 [[package]]
@@ -2878,6 +2921,7 @@ dependencies = [
  "as-raw-xcb-connection",
  "ashpd 0.11.1",
  "async-task",
+ "backtrace",
  "bindgen",
  "blade-graphics",
  "blade-macros",
@@ -3094,12 +3138,15 @@ dependencies = [
  "dunce",
  "futures",
  "futures-lite 1.13.0",
+ "git2",
  "globset",
  "gpui_collections",
+ "gpui_util_macros",
  "itertools 0.14.0",
  "libc",
  "log",
  "nix 0.29.0",
+ "rand 0.9.5",
  "regex",
  "rust-embed",
  "schemars",
@@ -3857,6 +3904,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "libgit2-sys"
+version = "0.18.7+1.9.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23c7391e4b9f4ffab1a624223cc1d7385ff9a678f490768add717de7ea2f4d89"
+dependencies = [
+ "cc",
+ "libc",
+ "libz-sys",
+ "pkg-config",
+]
+
+[[package]]
 name = "libloading"
 version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3879,6 +3938,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "libz-sys"
+version = "1.1.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85bc9657773828b90eeb625adff10eeac83cc21bbfd8e23a03eaa8a33c9e28d9"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
 ]
 
 [[package]]
@@ -4701,6 +4772,15 @@ name = "object"
 version = "0.39.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e5a6c098c7a3b6547378093f5cc30bc54fd361ce711e05293a5cc589562739b"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
+name = "object"
+version = "0.40.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd229a0361b9d0d4396176e02d65897f487eebeab7caa6d443855ee152ca0b9c"
 dependencies = [
  "memchr",
 ]
@@ -5770,6 +5850,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustc-demangle"
+version = "0.1.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b74b56ffa8bb2830709a538c2cbcae9aa062db0d2a42563bfb09bdaae44020eb"
+
+[[package]]
 name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5930,7 +6016,7 @@ dependencies = [
 [[package]]
 name = "ruviform-audio-analysis"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-dsp",
@@ -5940,7 +6026,7 @@ dependencies = [
 [[package]]
 name = "ruviform-audio-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -5948,7 +6034,7 @@ dependencies = [
 [[package]]
 name = "ruviform-dsp"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-math",
@@ -5958,7 +6044,7 @@ dependencies = [
 [[package]]
 name = "ruviform-exec"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "audio_thread_priority",
  "ruviform-rt",
@@ -5967,7 +6053,7 @@ dependencies = [
 [[package]]
 name = "ruviform-io-avi"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -5978,7 +6064,7 @@ dependencies = [
 [[package]]
 name = "ruviform-io-file"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
@@ -5987,7 +6073,7 @@ dependencies = [
 [[package]]
 name = "ruviform-io-symphonia"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -5998,7 +6084,7 @@ dependencies = [
 [[package]]
 name = "ruviform-math"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "fearless_simd",
  "fearless_simd_macros",
@@ -6007,12 +6093,12 @@ dependencies = [
 [[package]]
 name = "ruviform-media-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 
 [[package]]
 name = "ruviform-media-io"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-audio-core",
  "ruviform-media-core",
@@ -6022,12 +6108,12 @@ dependencies = [
 [[package]]
 name = "ruviform-numeric"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 
 [[package]]
 name = "ruviform-observability"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-media-core",
  "ruviform-rt",
@@ -6039,7 +6125,7 @@ dependencies = [
 [[package]]
 name = "ruviform-rt"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "arc-swap",
  "rtrb",
@@ -6048,7 +6134,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-exec",
  "ruviform-rt",
@@ -6059,7 +6145,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui-gpui"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "gpui",
  "raw-window-handle",
@@ -6072,7 +6158,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui-test"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "cargo_metadata",
  "proc-macro2",
@@ -6085,7 +6171,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui-theme"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "serde_json",
 ]
@@ -6093,7 +6179,7 @@ dependencies = [
 [[package]]
 name = "ruviform-ui-webview"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "dpi",
  "http",
@@ -6106,7 +6192,7 @@ dependencies = [
 [[package]]
 name = "ruviform-video-core"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-media-core",
 ]
@@ -6114,7 +6200,7 @@ dependencies = [
 [[package]]
 name = "ruviform-viz"
 version = "0.1.0"
-source = "git+https://github.com/scarecrow173/ruviform.git#a57cd3d3bdae2b3dfde02bf4b496132bae7f3235"
+source = "git+https://github.com/scarecrow173/ruviform.git#c31dc67c1d0bed86542c6442843e91c5fafca2dd"
 dependencies = [
  "ruviform-exec",
  "ruviform-media-core",
@@ -7950,6 +8036,12 @@ dependencies = [
  "sval_ref",
  "sval_serde",
 ]
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version-compare"

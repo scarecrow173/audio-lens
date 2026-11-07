@@ -193,16 +193,16 @@ run = "cargo test -p al-gui --features webview"
 # 保つ(ruviform-ui-gpui 側の同名 task と同一構造)。実 OS window は
 # ここでは開かない(compile/lint/headless test まで)。
 [tasks.check-ui-gpui]
-description = "al-gui gpui feature 型チェック(al-desktop 含む)"
-run = "cargo check -p al-gui --features gpui --all-targets"
+description = "al-gui gpui-test feature 型チェック(al-desktop・GpuiObserver parity test 含む)"
+run = "cargo check -p al-gui --features gpui-test --all-targets"
 
 [tasks.lint-ui-gpui]
-description = "al-gui gpui feature lint"
-run = "cargo clippy -p al-gui --all-targets --features gpui -- -D warnings"
+description = "al-gui gpui-test feature lint"
+run = "cargo clippy -p al-gui --all-targets --features gpui-test -- -D warnings"
 
 [tasks.test-ui-gpui]
-description = "al-gui gpui feature テスト(headless)"
-run = "cargo test -p al-gui --features gpui"
+description = "al-gui gpui-test feature テスト(headless: GpuiObserver seam による Fake/GPUI parity)"
+run = "cargo test -p al-gui --features gpui-test"
 
 [tasks.verify-ci]
 description = "Run the CI-equivalent verification sequence: fmt -> check-ci -> lint-ci -> test-ci"
