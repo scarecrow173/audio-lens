@@ -101,16 +101,21 @@ fn blocking_session(
     (DesktopSession::with_policy(rt, policy), gate, outcome)
 }
 
-/// job signal(終端)が drain されるまで Tick を回す。
-fn drain_until_idle(session: &mut DesktopSession, driver: &mut FakeDriver) {
+/// session が `driver.exit()` を発行するまで Tick を回す
+/// (自然な driver-loop 終了)。Fake の `exited` は `exit()` 呼出を
+/// 記録するだけで pump 自体は止まらないため、exit 後に余分な
+/// Tick を流してはいけない — 実 driver では `exit()` = loop
+/// 終了 = process 終了で、それ以降の Tick は存在しない。
+fn pump_until_exited(session: &mut DesktopSession, driver: &mut FakeDriver) {
     for _ in 0..200 {
-        if !session.runtime().has_running_jobs() {
+        if driver.exited() {
             return;
         }
         driver.inject(DriverEvent::Tick);
         pump(session, driver);
         std::thread::sleep(Duration::from_millis(2));
     }
+    panic!("driver loop never exited — session must issue exit() once jobs drain");
 }
 
 #[test]
@@ -239,6 +244,11 @@ fn remaining_live_window_prevents_exit() {
 
 #[test]
 fn destroy_does_not_cancel_jobs_by_default() {
+    // job 実行中の最終 Destroyed: 既定 policy は job も loop も
+    // 止めない — `exit()` は job の終端 signal が drain されるまで
+    // 遅延する。実 driver では `exit()` = loop 終了 = process 終了
+    // で detached worker が未終端 kill されるため、「exit が job
+    // 終端より後に来る」ことを loop が自然に終わるまで回して検証。
     let (mut session, gate, outcome) = blocking_session(DesktopPolicy::default());
     let mut driver = FakeDriver::new();
     let w = driver.create_window(&spec()).unwrap();
@@ -256,19 +266,28 @@ fn destroy_does_not_cancel_jobs_by_default() {
     // (UiRuntime 契約: window close is not job cancellation)。
     driver.destroy_window(w).unwrap();
     pump(&mut session, &mut driver);
-    assert!(driver.exited());
     assert!(
         session.runtime().has_running_jobs(),
         "job survives owner destruction by default"
     );
+    assert!(
+        !driver.exited(),
+        "exit must be deferred while a job is running"
+    );
+    assert_eq!(
+        *outcome.lock().unwrap(),
+        None,
+        "job must still be in flight"
+    );
 
-    // gate を開けると job は完走する(cancel されない)。
+    // gate を開けると job は完走し、終端 drain 後に session が
+    // exit() を発行して loop が自然に終わる。
     gate.store(true, Ordering::SeqCst);
-    drain_until_idle(&mut session, &mut driver);
+    pump_until_exited(&mut session, &mut driver);
     assert_eq!(
         *outcome.lock().unwrap(),
         Some("finished"),
-        "default policy must let the orphaned job finish"
+        "default policy must let the orphaned job finish before exit"
     );
 }
 
@@ -292,12 +311,68 @@ fn cancel_on_destroy_policy_is_opt_in() {
 
     // opt-in: Destroyed で cancel_window_jobs → job 側の
     // check_cancel が cancelled 分岐へ進む(gate は開かない)。
+    // cancel は signal に過ぎず、終端 signal の drain までは
+    // exit() が遅延する — worker が cancelled 分岐を記録した後に
+    // loop が自然に終わる。
     driver.destroy_window(w).unwrap();
     pump(&mut session, &mut driver);
-    drain_until_idle(&mut session, &mut driver);
+    pump_until_exited(&mut session, &mut driver);
     assert_eq!(
         *outcome.lock().unwrap(),
         Some("cancelled"),
         "opt-in policy must cancel window-owned jobs on destroy"
     );
+}
+
+#[test]
+fn request_exit_defers_until_running_job_finishes() {
+    // 明示 quit(`request_exit`): `exit_on_last_window` policy に
+    // 依らず live window を全 destroy して終了要求を立てるが、
+    // 実行中 job の終端までは `exit()` を発行しない。
+    let (mut session, gate, outcome) = blocking_session(DesktopPolicy {
+        exit_on_last_window: false,
+        cancel_jobs_on_destroy: false,
+    });
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Action(Intent::new("j1", "test.block", json!({}))),
+    });
+    pump(&mut session, &mut driver);
+    assert!(session.runtime().has_running_jobs());
+
+    session.request_exit(&mut driver);
+    pump(&mut session, &mut driver); // queue された Destroyed を消費
+    assert!(driver.destroyed().contains(&w));
+    assert!(driver.windows().is_empty(), "quit destroys all windows");
+    assert!(
+        !driver.exited(),
+        "explicit quit must wait for the running job"
+    );
+
+    gate.store(true, Ordering::SeqCst);
+    pump_until_exited(&mut session, &mut driver);
+    assert_eq!(*outcome.lock().unwrap(), Some("finished"));
+}
+
+#[test]
+fn exit_on_last_window_false_keeps_loop_running() {
+    // last-window 終了を無効化した policy: 最終 Destroyed でも
+    // 終了要求は立たず、loop は存続する(exit は consumer の
+    // 明示要求のみ)。
+    let (mut session, _gate, _outcome) = blocking_session(DesktopPolicy {
+        exit_on_last_window: false,
+        cancel_jobs_on_destroy: false,
+    });
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    pump(&mut session, &mut driver);
+    driver.destroy_window(w).unwrap();
+    pump(&mut session, &mut driver);
+    assert!(driver.windows().is_empty());
+    assert!(!driver.exited());
+    driver.inject(DriverEvent::Tick);
+    pump(&mut session, &mut driver);
+    assert!(!driver.exited(), "no exit request was ever armed");
 }

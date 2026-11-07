@@ -178,6 +178,36 @@ fn stream_time_view_bounded_ticks() {
     assert_eq!(v.seconds_at(1), Some(0.01));
     // bounded: end は範囲に clamp される。
     assert_eq!(v.ticks(4, 100), &[1920]);
+    // 範囲外/逆順/空 stream でも panic せず clamp・空 slice。
+    assert_eq!(v.ticks(2, 1), &[] as &[i64]);
+    assert_eq!(v.ticks(5, 6), &[] as &[i64]);
+    assert_eq!(v.ticks(0, usize::MAX), v.ticks(0, v.len()));
+
+    // 空 stream: start > len の `ticks(1, 2)` で slice panic
+    // しない(start も len へ clamp)。
+    let empty: StreamTiming = serde_json::from_value(json!({
+        "stream": 0,
+        "stream_type": "auds",
+        "timestamp_origin": "movi_order",
+        "start_tick": 0,
+        "stream_timestamps": [],
+        "observation": {
+            "clock": "audio",
+            "timebase_hz": 48000,
+            "timestamp_count": 0,
+            "intervals": [],
+            "interval_stats": null,
+            "drift_ppm": null,
+            "discontinuities": [],
+            "duplicates": [],
+            "drop_candidates": []
+        }
+    }))
+    .unwrap();
+    let v = StreamTimeView::new(empty);
+    assert!(v.is_empty());
+    assert_eq!(v.ticks(1, 2), &[] as &[i64]);
+    assert_eq!(v.seconds_at(0), None);
 }
 
 #[test]

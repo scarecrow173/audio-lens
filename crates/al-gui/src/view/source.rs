@@ -259,10 +259,12 @@ impl StreamTimeView {
     }
 
     /// index 範囲 `[start, end)` の PTS window を返す(bounded)。
+    /// `start`/`end` は `len` へ clamp し、`start > len` でも
+    /// panic せず空 slice を返す(空 stream `ticks(1, 2)` 等)。
     #[must_use]
     pub fn ticks(&self, start: usize, end: usize) -> &[i64] {
+        let start = start.min(self.timing.stream_timestamps.len());
         let end = end.min(self.timing.stream_timestamps.len()).max(start);
-        let start = start.min(end);
         &self.timing.stream_timestamps[start..end]
     }
 
