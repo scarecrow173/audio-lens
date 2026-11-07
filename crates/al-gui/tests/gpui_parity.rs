@@ -4,9 +4,9 @@
 //!
 //! GPUI 側は consumer 観測 seam(`ruviform-ui-gpui` の `GpuiObserver`)
 //! だけを使い、GPUI 型は持たない。描画 plan は `GpuiObserver::drawn` で
-//! Meter・TimeAxis・Waveform を観測し、mount した spec の payload から導いた
-//! Fake 層の期待値と照合する。Spectrogram・Label・Table の描画 plan は seam
-//! (`DrawnPlan`)に無いため対象外(NotRun、ruviform#436 の follow-up)。
+//! Meter・TimeAxis・Waveform・Spectrogram・Label・Table を観測し、mount した
+//! spec の payload から導いた Fake 層の期待値と照合する(`DrawnPlan` の
+//! Spectrogram・Label・Table は ruviform#442)。
 
 #![cfg(feature = "gpui-test")]
 
@@ -14,22 +14,31 @@ mod common;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
+use std::sync::Arc;
 
+use al_gui::view::job::{JobRow, RunOutcome};
+use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY, job_list, run_screen};
 use al_gui::view::screen::{
-    METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, WAVEFORM_KEY, source_screen,
+    METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, SPECTROGRAM_KEY, SPECTROGRAM_RANGE_KEY,
+    WAVEFORM_KEY, source_screen, spectrogram_screen,
 };
 use common::{GAP, fixture_view};
 use ruviform_ui::behavior::{CommandPhase, ControlInput, InputSource, ValueInput};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
-    AttachEpoch, AttachEpochAllocator, ComponentKey, ComponentSnapshot, ComponentSpec, MeterSpec,
-    TimeAxisSpec, ViewEvent, ViewHost, ViewSpec, WaveformSpec,
+    A11ySpec, AttachEpoch, AttachEpochAllocator, ComponentKey, ComponentSnapshot, ComponentSpec,
+    ComponentVisualState, MeterSpec, PanelSpec, SpectrogramSpec, TableSpec, TimeAxisSpec,
+    ViewEvent, ViewHost, ViewSpec, WaveformSpec,
 };
 use ruviform_ui::{WindowId, WindowSpec};
 use ruviform_ui_gpui::{
-    DrawnBar, DrawnMark, DrawnPlan, DrawnWaveformChannel, GpuiObserver, ViewMount,
+    DrawnBar, DrawnCell, DrawnMark, DrawnPlan, DrawnWaveformChannel, GpuiObserver, ViewMount,
 };
-use serde_json::Value;
+use ruviform_viz::{
+    Aggregate, BinAxis, FrameGrid, RowSpec, Spectrogram, SpectrumData, SpectrumInfo, TileRequest,
+    VecSpectrum,
+};
+use serde_json::{Value, json};
 
 const COMMAND_OP: &str = "rvf.ui.command.v1";
 const SEEK_PLAIN: f64 = 0.05;
@@ -397,4 +406,176 @@ fn drawn_waveform_omits_the_nan_gap_range() {
         painted.iter().any(|b| b.start < gap.end && b.end > gap.end),
         "a bin straddling the gap end is painted (it holds finite samples)"
     );
+}
+
+/// Spectrogram 画面の fixture。8 frame × 4 bin。frame 2・3 は全 bin が NaN
+/// (gap 列)、frame 4・5 の bin 1 は NaN(gap 列ではない非有限セル)。
+fn spectrogram_view() -> ViewSpec {
+    let mut magnitudes: Vec<f64> = (0..32).map(|i| (i % 4) as f64 + 1.0).collect();
+    magnitudes[8..16].fill(f64::NAN);
+    magnitudes[17] = f64::NAN;
+    magnitudes[21] = f64::NAN;
+    let info = SpectrumInfo {
+        frames: 8,
+        bins: 4,
+        grid: FrameGrid::new(8, 4, 0).expect("grid"),
+        axis: BinAxis::Uniform {
+            first_hz: 0.0,
+            step_hz: 1.0,
+        },
+        sample_rate: 48_000,
+    };
+    let source = VecSpectrum::new(info, SpectrumData::Magnitude(magnitudes)).expect("source");
+    let tile = Spectrogram::new(Arc::new(source))
+        .tile(&TileRequest {
+            frames: 0..8,
+            rows: RowSpec::uniform(4, 4),
+            cols: 4,
+            aggregate: Aggregate::Max,
+        })
+        .expect("tile");
+    spectrogram_screen(&tile, 0.0..10.0, 8).expect("spectrogram screen")
+}
+
+/// Run 画面の fixture。`dataset` の duration と `locate` の error が欠損セル。
+fn run_view() -> ViewSpec {
+    let run = RunOutcome::from_json(&json!({
+        "job_id": "job-1",
+        "stages": [
+            {"stage": "ingest", "status": "completed", "duration_ms": 12},
+            {"stage": "locate", "status": "failed", "duration_ms": null, "error": "no match"},
+            {"stage": "dataset", "status": "skipped", "duration_ms": null}
+        ]
+    }))
+    .expect("run outcome");
+    run_screen(&run).expect("run screen")
+}
+
+/// job 一覧の fixture(一列の Table)。
+fn jobs_view() -> ViewSpec {
+    let job = |id: &str| JobRow {
+        job_id: id.to_string(),
+        inputs: Vec::new(),
+        stages: Vec::new(),
+        errors: Vec::new(),
+        dataset_ready: true,
+    };
+    ViewSpec {
+        root: ComponentSpec::Panel(PanelSpec {
+            key: ComponentKey::from("jobs-view"),
+            title: None,
+            children: vec![job_list(&[job("job-1"), job("job-2")]).expect("job list")],
+            visual: ComponentVisualState::default(),
+            a11y: A11ySpec::default(),
+        }),
+    }
+}
+
+/// Table の期待格子。欠損セルは `None` のまま位置を保つ。
+fn expected_grid(t: &TableSpec) -> Vec<Vec<Option<String>>> {
+    t.rows
+        .iter()
+        .map(|row| {
+            row.iter()
+                .map(|c| c.as_ref().map(ToString::to_string))
+                .collect()
+        })
+        .collect()
+}
+
+/// Spectrogram の期待 cell `(x0, x1, y0, y1, intensity)`。gap 列(`count == 0`)・
+/// viewport 外の列・非有限の magnitude は描かない。y は上から下へ数え、
+/// row 0 が最下段に来る。
+fn expected_cells(s: &SpectrogramSpec) -> Vec<(f64, f64, f64, f64, f64)> {
+    let rows = s.rows as f64;
+    let lo = s.magnitude_range.start;
+    let span = s.magnitude_range.end - lo;
+    let mut out = Vec::new();
+    for column in s.columns.iter().filter(|c| c.count != 0) {
+        let f0 = viewport_x(column.start as f64, &s.viewport);
+        let f1 = viewport_x(column.end as f64, &s.viewport);
+        if f1 <= f0 || f1 <= 0.0 || f0 >= 1.0 {
+            continue;
+        }
+        for (row, &m) in column.magnitudes.iter().enumerate() {
+            if !m.is_finite() {
+                continue;
+            }
+            out.push((
+                f0.max(0.0),
+                f1.min(1.0),
+                1.0 - (row + 1) as f64 / rows,
+                1.0 - row as f64 / rows,
+                ((m - lo) / span).clamp(0.0, 1.0),
+            ));
+        }
+    }
+    out
+}
+
+fn assert_cells(cells: &[DrawnCell], s: &SpectrogramSpec) {
+    let want = expected_cells(s);
+    assert!(!want.is_empty(), "fixture must draw spectrogram cells");
+    assert!(
+        want.len() < s.rows * s.columns.len(),
+        "fixture must omit gap and non-finite cells"
+    );
+    assert_eq!(cells.len(), want.len(), "drawn spectrogram cell count");
+    for (cell, (x0, x1, y0, y1, intensity)) in cells.iter().zip(want) {
+        assert_close(cell.x0, x0);
+        assert_close(cell.x1, x1);
+        assert_close(cell.y0, y0);
+        assert_close(cell.y1, y1);
+        assert_close(cell.intensity, intensity);
+    }
+}
+
+/// `view` を mount した窓の drawn plan を、同じ spec の payload から導いた
+/// 期待値と照合し、描画順の key を返す。
+fn assert_drawn_matches(view: &ViewSpec) -> Vec<String> {
+    let gpui = Gpui::new(view.clone());
+    let drawn = gpui.observer.drawn(gpui.window).expect("drawn view");
+    for component in &drawn.components {
+        match (&component.plan, child(view, &component.key.0)) {
+            (DrawnPlan::Spectrogram { cells }, ComponentSpec::Spectrogram(s)) => {
+                assert_cells(cells, s);
+            }
+            (DrawnPlan::Label { text }, ComponentSpec::Label(l)) => assert_eq!(text, &l.text),
+            (DrawnPlan::Table { header, rows }, ComponentSpec::Table(t)) => {
+                assert_eq!(header, &t.columns);
+                assert_eq!(rows, &expected_grid(t));
+            }
+            (plan, other) => panic!("{plan:?} drawn for {}", other.kind()),
+        }
+    }
+    drawn.components.iter().map(|c| c.key.0.clone()).collect()
+}
+
+#[test]
+fn drawn_spectrogram_and_range_label_match_fake_expectations() {
+    let keys = assert_drawn_matches(&spectrogram_view());
+    assert_eq!(
+        keys,
+        [SPECTROGRAM_RANGE_KEY, SPECTROGRAM_KEY],
+        "paint order"
+    );
+}
+
+#[test]
+fn drawn_run_status_and_stage_table_match_fake_expectations() {
+    let view = run_view();
+    let keys = assert_drawn_matches(&view);
+    assert_eq!(keys, [RUN_STATUS_KEY, STAGES_KEY], "paint order");
+    let ComponentSpec::Table(stages) = child(&view, STAGES_KEY) else {
+        panic!("stages must be a table");
+    };
+    assert!(
+        expected_grid(stages).iter().flatten().any(Option::is_none),
+        "fixture must carry a missing cell"
+    );
+}
+
+#[test]
+fn drawn_job_list_matches_fake_expectations() {
+    assert_eq!(assert_drawn_matches(&jobs_view()), [JOBS_KEY]);
 }
