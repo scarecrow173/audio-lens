@@ -16,8 +16,8 @@ use al_gui::desktop::DesktopSession;
 use al_gui::preferences::{GuiPreferences, default_path};
 use al_gui::service::AlGuiService;
 use al_gui::theme;
-use al_gui::view::screen::{PANEL_KEY, source_screen};
-use al_gui::view::source::WaveformView;
+use al_gui::view::screen::PANEL_KEY;
+use al_gui::view::workspace::workspace_screen;
 use al_service::dataset::DatasetSession;
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
@@ -29,8 +29,6 @@ use ruviform_ui_gpui::ViewMount;
 
 /// job drain tick 間隔(webview host と同程度)。
 const TICK: Duration = Duration::from_millis(30);
-/// Source 画面の表示 bin 数(全長を一度に表示する既定値)。
-const SCREEN_BINS: usize = 1024;
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -70,7 +68,7 @@ fn main() -> ExitCode {
 
     let screen = match source {
         None => empty_screen(),
-        Some((root, input)) => match open_source_screen(Path::new(root), input) {
+        Some((root, input)) => match open_workspace(Path::new(root), input) {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("[al-desktop] source open failed: {e}");
@@ -117,12 +115,10 @@ fn main() -> ExitCode {
     }
 }
 
-/// `root` の dataset の `input` 波形を全長・既定 bin 数で Source 画面へ写す。
-fn open_source_screen(root: &Path, input: &str) -> Result<ViewSpec, String> {
+/// `root` の dataset を Source・Spectrogram・Analysis の tab 画面へ写す。
+fn open_workspace(root: &Path, input: &str) -> Result<ViewSpec, String> {
     let session = DatasetSession::open(root).map_err(|e| e.to_string())?;
-    let view = WaveformView::open(&session, input).map_err(|e| e.to_string())?;
-    let duration_s = view.frames as f64 / f64::from(view.sample_rate);
-    source_screen(&view, 0, 0.0, duration_s, SCREEN_BINS).map_err(|e| e.to_string())
+    workspace_screen(&session, input).map_err(|e| e.to_string())
 }
 
 /// Source を載せない空の画面(dataset 未指定時)。

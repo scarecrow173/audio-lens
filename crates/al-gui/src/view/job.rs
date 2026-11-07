@@ -3,15 +3,7 @@
 use al_core::{StageKind, StageStatus};
 use al_service::jobs::{JobInspection, JobSummary};
 
-use super::ViewError;
-
-/// serde snake_case enum の tag 文字列を得る。
-fn tag<T: serde::Serialize>(v: &T) -> String {
-    serde_json::to_value(v)
-        .ok()
-        .and_then(|v| v.as_str().map(str::to_string))
-        .unwrap_or_default()
-}
+use super::{ViewError, tag};
 
 /// job の input 行(`role` は `InputRole` の表示名)。
 #[derive(Debug, Clone, PartialEq)]
