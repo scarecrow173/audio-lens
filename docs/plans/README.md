@@ -18,6 +18,10 @@ Directory: `docs/plans`
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | PLAN-yVtTxHenQy8bBk2Sd2ZwdH | Native desktop 初期 slice AL-G1〜G3 実装計画 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
+| PLAN-1FzCSROtUwCSQOdQx5Ua4f | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装計画 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| PLAN-5D5yfFUG8HGrWGJlg97kCG | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity 実装計画 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
@@ -26,9 +30,6 @@ Directory: `docs/plans`
 | PLAN-9PUZEliT1Z1FgKwKE0LHmP | al-observability logging の ruviform-observability 委譲実装計画 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
-| PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
-| PLAN-5D5yfFUG8HGrWGJlg97kCG | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity 実装計画 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
-| PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

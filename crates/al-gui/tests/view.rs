@@ -7,6 +7,7 @@ use al_core::{Confidence, StageKind, StageStatus, Validity};
 use al_gui::view::analysis::{AlignmentRow, EventRow, FeatureTable};
 use al_gui::view::dataset::TimelineView;
 use al_gui::view::job::{JobRow, RunOutcome};
+use al_gui::view::run_screen::{STAGES_KEY, job_list, run_screen};
 use al_gui::view::source::{SpectrumView, StreamTimeView, TimeMap, WaveformView};
 use al_locate::{LocateResult, SampleRange};
 use al_media::{ClockKind, StreamTiming, TimestampOrigin};
@@ -15,6 +16,8 @@ use al_service::jobs::{JobService, RunControl, RunSpec};
 use al_service::parse_input_spec;
 use al_testkit::media::wav_s16_bytes;
 use al_testkit::temp::TempDir;
+use ruviform_ui::dock::ViewInstanceId;
+use ruviform_ui::view::{AttachEpochAllocator, CellValue, ComponentKey, ComponentSpec, ViewHost};
 use serde_json::json;
 
 // ---------- unit: synthetic rows ----------
@@ -339,6 +342,57 @@ fn real_dataset_produces_view_models() {
 
     let detail = al_gui::view::job::JobDetail::from_inspection(&service.inspect(&job_id).unwrap());
     assert!(detail.dataset_ready);
+
+    // Job 一覧と Run 画面の射影。Run 結果は `al.job.run` の stage 表示 JSON と
+    // 同じ `{stage,status,duration_ms,error}` 形で写し、実 manifest と照合する。
+    let jobs = job_list(std::slice::from_ref(&row)).unwrap();
+    let ComponentSpec::Table(jobs) = &jobs else {
+        panic!("job list must be a table");
+    };
+    assert_eq!(jobs.rows.len(), 1);
+    assert_eq!(
+        jobs.rows[0][0],
+        Some(CellValue::Text(job_id.as_str().to_string()))
+    );
+
+    let stages: Vec<_> = manifest
+        .stages
+        .iter()
+        .map(|r| json!({"stage": r.stage, "status": r.status, "duration_ms": r.duration_ms, "error": r.error}))
+        .collect();
+    let run = RunOutcome::from_json(&json!({"job_id": job_id.as_str(), "stages": stages})).unwrap();
+    let view = run_screen(&run).unwrap();
+    let ComponentSpec::Panel(panel) = &view.root else {
+        panic!("run screen must be a panel");
+    };
+    let ComponentSpec::Label(status) = &panel.children[0] else {
+        panic!("run status must be a label");
+    };
+    let n = manifest.stages.len();
+    assert_eq!(
+        status.text,
+        format!("job {}: completed {n}/{n}, failed 0", job_id.as_str())
+    );
+    let ComponentSpec::Table(table) = &panel.children[1] else {
+        panic!("stage table");
+    };
+    assert_eq!(table.rows.len(), n);
+    assert!(
+        table
+            .rows
+            .iter()
+            .all(|r| r[1] == Some(CellValue::Text("completed".to_string())))
+    );
+    let mut host = ViewHost::new(
+        ViewInstanceId::new(1).unwrap(),
+        AttachEpochAllocator::new().mint(),
+    );
+    host.mount(view).unwrap();
+    assert!(
+        host.observe(&ComponentKey::from(STAGES_KEY))
+            .unwrap()
+            .mounted
+    );
 
     // Dataset session → bounded view models。
     let session = DatasetSession::open(service.dataset_dir(&job_id)).unwrap();
