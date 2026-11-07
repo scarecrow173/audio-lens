@@ -1,0 +1,77 @@
+{
+  "$extensions": {
+    "dev.ruviform.dtcg-profile": {
+      "profile": "rvf-dtcg-profile.v1",
+      "layer": "primitive",
+      "id": "al-primitive",
+      "modes": ["light", "dark"]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "neutral": {
+      "50": { "$value": "#f8fafc" },
+      "100": { "$value": "#e2e8f0" },
+      "300": { "$value": "#94a3b8" },
+      "600": { "$value": "#475569" },
+      "800": { "$value": "#1e293b" },
+      "900": { "$value": "#0f172a" }
+    },
+    "brand": {
+      "$value": "#0ea5e9",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "#38bdf8" }
+      }
+    },
+    "success": {
+      "$value": "#16a34a",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "#4ade80" }
+      }
+    },
+    "warning": {
+      "$value": "#d97706",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "#fbbf24" }
+      }
+    },
+    "danger": {
+      "$value": "#dc2626",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "#f87171" }
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "xs": { "$value": { "value": 4, "unit": "px" } },
+    "sm": { "$value": { "value": 8, "unit": "px" } },
+    "md": { "$value": { "value": 12, "unit": "px" } },
+    "lg": { "$value": { "value": 16, "unit": "px" } }
+  },
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": { "value": 2, "unit": "px" } },
+    "md": { "$value": { "value": 4, "unit": "px" } }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "$value": ["Segoe UI", "system-ui", "sans-serif"]
+    },
+    "mono": {
+      "$type": "fontFamily",
+      "$value": ["Consolas", "Menlo", "monospace"]
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "$value": "normal"
+    }
+  },
+  "motion": {
+    "fast": {
+      "$type": "duration",
+      "$value": { "value": 120, "unit": "ms" }
+    }
+  }
+}
