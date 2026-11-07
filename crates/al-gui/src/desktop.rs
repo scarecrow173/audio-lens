@@ -64,6 +64,9 @@ pub struct DesktopSession {
     /// `request_exit`(明示 quit)か last-window `Destroyed` で立ち、
     /// `maybe_exit` が条件成立時に降ろす。
     exit_pending: bool,
+    /// `driver.exit()` を既に発行したか。exit 後の event 処理・
+    /// 再 arm・二度目の `exit()` を全て閉じる latch。
+    exited: bool,
 }
 
 impl DesktopSession {
@@ -75,6 +78,7 @@ impl DesktopSession {
             vetoes: BTreeSet::new(),
             theme: None,
             exit_pending: false,
+            exited: false,
         }
     }
 
@@ -127,6 +131,9 @@ impl DesktopSession {
     /// opt-in を通る)。job 実行中は `maybe_exit` の規則どおり
     /// 終端まで `exit()` を遅延する。
     pub fn request_exit(&mut self, driver: &mut dyn WindowDriver) {
+        if self.exited {
+            return;
+        }
         self.exit_pending = true;
         for w in driver.windows() {
             let _ = driver.destroy_window(w);
@@ -137,6 +144,11 @@ impl DesktopSession {
     /// Driver から届いた event を消費する。`run` callback から
     /// `&mut dyn WindowDriver` と一緒に呼ぶ。
     pub fn handle(&mut self, ev: DriverEvent, driver: &mut dyn WindowDriver) {
+        // `exit()` 発行後の event は配送も job spawn もしない —
+        // loop は終了済みで、ここで産んだ job は終端へ辿り着けない。
+        if self.exited {
+            return;
+        }
         match ev {
             DriverEvent::Tick => {
                 let routed = self.runtime.drain_jobs_routed();
@@ -196,9 +208,15 @@ impl DesktopSession {
     /// job が走っている限り driver loop は存続し、`Tick` drain が
     /// 終端 signal を回収(`has_running_jobs` が落ちる)した後の
     /// 次の機会に発火する — 実行中 job を process 終了で
-    /// 黙示停止しない。
+    /// 黙示停止しない。`exited` latch で二度目の発行を閉じる
+    /// (queue に残った後続 `Destroyed` が pending を再 arm しても
+    /// `exit()` は重複しない)。
     fn maybe_exit(&mut self, driver: &mut dyn WindowDriver) {
+        if self.exited {
+            return;
+        }
         if self.exit_pending && driver.windows().is_empty() && !self.runtime.has_running_jobs() {
+            self.exited = true;
             self.exit_pending = false;
             driver.exit();
         }

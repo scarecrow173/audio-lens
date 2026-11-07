@@ -83,14 +83,25 @@ impl WaveformView {
                 self.channels
             )));
         }
-        let start = self.timebase.seconds_to_sample(start_s.max(0.0));
+        // `seconds_to_sample` は巨大な秒入力を u64::MAX へ saturate
+        // する — start も frames へ clamp しないと `start + 1` が
+        // 整数 overflow で panic する(ticks() と同じ両端 clamp)。
+        let start = self
+            .timebase
+            .seconds_to_sample(start_s.max(0.0))
+            .min(self.frames);
         let end = self
             .timebase
             .seconds_to_sample(end_s.max(0.0))
             .min(self.frames)
             .max(start);
         self.series
-            .view(channel, start, end.max(start + 1), bins.max(1))
+            .view(
+                channel,
+                start,
+                end.max(start.saturating_add(1)),
+                bins.max(1),
+            )
             .map_err(|e| ViewError::Invalid(e.to_string()))
     }
 }

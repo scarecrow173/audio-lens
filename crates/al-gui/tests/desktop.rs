@@ -172,8 +172,9 @@ fn tick_drains_ownerless_events_to_all_live_windows() {
             "stages": ["ingest"]
         }),
     );
-    // job signal が溜まるまで Tick を繰り返す。
-    for _ in 0..20 {
+    // job signal が溜まるまで Tick を繰り返す。実 `al.job.run`
+    // (ingest)は負荷下で ~200ms を超え得るため余裕を持たせる。
+    for _ in 0..500 {
         driver.inject(DriverEvent::Tick);
         pump(&mut session, &mut driver);
         if !driver.events_for(w1).is_empty() {
@@ -316,6 +317,10 @@ fn cancel_on_destroy_policy_is_opt_in() {
     // loop が自然に終わる。
     driver.destroy_window(w).unwrap();
     pump(&mut session, &mut driver);
+    assert!(
+        !driver.exited(),
+        "exit must be deferred until the cancelled job terminates"
+    );
     pump_until_exited(&mut session, &mut driver);
     assert_eq!(
         *outcome.lock().unwrap(),

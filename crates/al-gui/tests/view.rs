@@ -1,6 +1,8 @@
 //! AL-G3: view model の写像検証 — synthetic JSON の単体試験と、
 //! 実 dataset(ingest→dataset stage)を経る e2e fixture。
 
+use std::sync::Arc;
+
 use al_core::{Confidence, StageKind, StageStatus, Validity};
 use al_gui::view::analysis::{AlignmentRow, EventRow, FeatureTable};
 use al_gui::view::dataset::TimelineView;
@@ -242,6 +244,20 @@ fn stream_time_view_from_metadata_array() {
     assert!(StreamTimeView::from_metadata(&json!({})).is_err());
     // 単一 object(旧の捏造 shape)は拒否される。
     assert!(StreamTimeView::from_metadata(&json!({"av_timing": {"stream": 0}})).is_err());
+}
+
+#[test]
+fn waveform_window_clamps_saturating_seconds_to_sample() {
+    // `seconds_to_sample` は巨大な秒入力を u64::MAX へ saturate する。
+    // start を frames へ clamp しないと `start + 1` が overflow panic
+    // する(ticks() と同じ両端 clamp の sibling)。
+    let source = Arc::new(ruviform_viz::SliceWaveform::new(48_000, 1, vec![0.0; 4800]).unwrap());
+    let v = WaveformView::try_from_source(source).unwrap();
+    // 3.9e14 s × 48kHz ≫ u64::MAX — panic せず end 側も frames へ収まる。
+    let bins = v.window(0, 1e15, 1e15, 64).unwrap();
+    assert!(bins.len() <= 64);
+    // 有限範囲は従来どおり読める。
+    assert!(v.window(0, 0.0, 0.05, 64).unwrap()[0].end > 0);
 }
 
 #[test]
