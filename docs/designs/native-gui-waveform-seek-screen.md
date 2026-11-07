@@ -70,9 +70,11 @@ driver-neutral で、GPUI 型を持たない。評価は `ruviform_ui::view::Vie
 
 ## 射影規則
 
-1. `viewport` は `WaveformView::frame_range(start_s, end_s)` で導出する。
-   `window` の bins 取得と同じ clamp 規則を使うため、viewport と bins が
-   食い違わない(`frame_range` は `window` の唯一の clamp 実装)。
+1. `viewport` は `WaveformView::read_frames(start_s, end_s)` で導出する。
+   `window` が実際に読む範囲と同一であり、空区間は 1 frame へ広げられるため
+   viewport と bins が食い違わない(`read_frames` は `window` の唯一の
+   範囲決定。clamp は非公開の `frame_range` に閉じる)。
+   `bins` が `MAX_WAVEFORM_BINS` を超える要求は読み出し前に拒否する。
 2. `channel_bins` は `WaveformView::window(channel, start_s, end_s, bins)`
    の `ViewBin` を 1 対 1 で `WaveformBin { start, end, min, max, rms, count }`
    へ写す。`bucket` の値は変換・丸め・再計算しない。

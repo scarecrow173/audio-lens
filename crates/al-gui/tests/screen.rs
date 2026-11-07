@@ -10,8 +10,8 @@ use al_gui::view::source::WaveformView;
 use ruviform_ui::behavior::{CommandIntent, ControlInput, InputSource, ValueInput};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
-    AttachEpoch, ComponentKey, ComponentSpec, ProjectionOp, ViewEvent, ViewHost, ViewSpec,
-    WaveformSpec,
+    AttachEpoch, ComponentKey, ComponentSpec, MAX_WAVEFORM_BINS, ProjectionOp, ViewEvent, ViewHost,
+    ViewSpec, WaveformSpec,
 };
 use ruviform_viz::{SliceWaveform, WaveformSource};
 
@@ -147,13 +147,43 @@ fn viewport_and_seek_range_come_from_source_frames() {
     let wave = waveform_of(&spec);
     assert_eq!(wave.frames, FRAMES as u64);
     assert_eq!(wave.sample_rate, SAMPLE_RATE);
-    assert_eq!(wave.viewport, view.frame_range(0.0, 0.1));
+    assert_eq!(wave.viewport, 0..FRAMES as u64);
     let ComponentSpec::Panel(panel) = &spec.root else {
         unreachable!()
     };
     let seek = panel.children[1].control().expect("seek control");
     assert_eq!(seek.target.as_deref(), Some(SEEK_TARGET));
+    assert_eq!(seek.descriptor.min, 0.0);
     assert_eq!(seek.descriptor.max, FRAMES as f64 / f64::from(SAMPLE_RATE));
+}
+
+#[test]
+fn zero_width_window_keeps_bins_inside_viewport() {
+    let view = fixture_view();
+    let spec = waveform_seek(&view, 0, 0.05, 0.05, 16).expect("spec");
+    let wave = waveform_of(&spec);
+    assert!(
+        !wave.viewport.is_empty(),
+        "viewport must cover the read frame"
+    );
+    assert_eq!(wave.viewport, view.read_frames(0.05, 0.05));
+    assert!(!wave.channel_bins[0].is_empty());
+    for b in &wave.channel_bins[0] {
+        assert!(
+            wave.viewport.start <= b.start && b.end <= wave.viewport.end,
+            "bin {}..{} outside viewport {:?}",
+            b.start,
+            b.end,
+            wave.viewport
+        );
+    }
+}
+
+#[test]
+fn bins_beyond_limit_are_rejected_before_reading() {
+    let view = fixture_view();
+    assert!(waveform_seek(&view, 0, 0.0, 0.1, MAX_WAVEFORM_BINS + 1).is_err());
+    assert!(waveform_seek(&view, 0, 0.0, 0.1, MAX_WAVEFORM_BINS).is_ok());
 }
 
 #[test]

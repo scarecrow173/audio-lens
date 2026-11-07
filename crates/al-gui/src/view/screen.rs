@@ -9,7 +9,7 @@
 use ruviform_ui::behavior::{DetachPolicy, ValueDescriptor};
 use ruviform_ui::view::{
     A11yRole, A11ySpec, ComponentKey, ComponentSpec, ComponentVisualState, ControlSpec,
-    Orientation, PanelSpec, ViewSpec, WaveformBin, WaveformSpec,
+    MAX_WAVEFORM_BINS, Orientation, PanelSpec, ViewSpec, WaveformBin, WaveformSpec,
 };
 
 use super::ViewError;
@@ -29,8 +29,8 @@ pub const SEEK_TARGET: &str = "transport.seek";
 /// Panel の `ViewSpec` を返す。
 ///
 /// # Errors
-/// 範囲外の channel、source の読み出しエラー、または frame を持たない
-/// source の場合。
+/// 範囲外の channel、source の読み出しエラー、frame を持たない source、
+/// または `bins` が `MAX_WAVEFORM_BINS` を超える場合。
 pub fn waveform_seek(
     source: &WaveformView,
     channel: usize,
@@ -41,7 +41,12 @@ pub fn waveform_seek(
     if source.frames == 0 {
         return Err(ViewError::Invalid("waveform source has no frames".into()));
     }
-    let viewport = source.frame_range(start_s, end_s);
+    if bins > MAX_WAVEFORM_BINS {
+        return Err(ViewError::Invalid(format!(
+            "waveform bins {bins} exceed {MAX_WAVEFORM_BINS}"
+        )));
+    }
+    let viewport = source.read_frames(start_s, end_s);
     let duration_s = source.frames as f64 / f64::from(source.sample_rate);
     let channel_bins = source
         .window(channel, start_s, end_s, bins)?

@@ -88,8 +88,7 @@ Spec(`ViewSpec`)へ射影し、driver-neutral な `ViewHost` で評価できる
 - 新規外部依存は追加しない(`ruviform-ui`/`ruviform-viz` は既存)。
 - 数値/Source 契約(f64/NaN/gap/PTS/timebase/Validity/Provenance)は
   変更しない。解析計算を表示層へ移さない。
-- 射影は bounded。bin 数は `ruviform_ui::view::MAX_WAVEFORM_BINS` の
-  mount 時検証に委ね、表示層で上限を再実装しない。
+- 射影は bounded。bin 数は `ruviform_ui::view::MAX_WAVEFORM_BINS`
+  を超える要求を射影の入口で拒否し、読み出し前に上限を確かめる。
 - 既存の `WaveformView::window` の範囲 clamp 規則は維持し、viewport
-  と bins が同じ規則で導出されるよう `frame_range` を単一の
-  実装とする。
+  と bins が同じ範囲を読むよう `read_frames` を単一の範囲決定とする。

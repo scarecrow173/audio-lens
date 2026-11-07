@@ -64,8 +64,19 @@ projection)。実行: `mise run test` または
 ### Rule: viewport と Seek 範囲は source frames に由来する
 
 - Example: `viewport_and_seek_range_come_from_source_frames`
-  - `viewport == frame_range(...)`、`frames`/`sample_rate` が metadata と
-    一致、Seek の `max == frames / sample_rate`、target が `transport.seek`。
+  - `viewport == 0..4800`(0.1 秒 @48 kHz の literal oracle)、`frames`/
+    `sample_rate` が metadata と一致、Seek の `min == 0`、`max == frames /
+    sample_rate`、target が `transport.seek`。
+
+### Rule: 空区間でも bins は viewport の内側にある
+
+- Example: `zero_width_window_keeps_bins_inside_viewport`
+  - `0.05..0.05` の要求で viewport が空でなく、全 bin が viewport 内に収まる。
+
+### Rule: bins 上限を超える要求は読み出し前に拒否する
+
+- Example: `bins_beyond_limit_are_rejected_before_reading`
+  - `MAX_WAVEFORM_BINS + 1` は `Err`、`MAX_WAVEFORM_BINS` は `Ok`。
 
 ### Rule: Seek の Commit は範囲内の transport intent を発行する
 

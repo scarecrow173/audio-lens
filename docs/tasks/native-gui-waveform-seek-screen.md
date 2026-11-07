@@ -46,9 +46,9 @@ relations:
 - [x] `node tools/update-ruviform-rev.mjs a57cd3d3bdae2b3dfde02bf4b496132bae7f3235`
 - [x] `mise run check-ruviform-lock` / `check-ruviform-rev` / `sync-ui-deps`
 
-## T2: frame_range の抽出
+## T2: read_frames の抽出
 
-- [x] `WaveformView::frame_range` を追加し `window` から使う
+- [x] `WaveformView::read_frames` を追加し `window`・viewport から使う
 - [x] 既存 `view` テストが通ること
 
 ## T3: 射影の実装

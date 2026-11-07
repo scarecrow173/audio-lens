@@ -57,12 +57,13 @@ relations:
   副作用として `cargo-platform` 0.3.3→0.1.9、`cargo_metadata` 0.23.1→
   0.19.2 へ下がった(上流 ruviform-ui-test が Issue #411 の MSRV 1.89
   整合のため 0.19 系へ固定しているための収束。意図した変更)。
-- `WaveformView::frame_range` を抽出し、`window` の範囲 clamp を単一実装
-  にした(挙動は不変)。
+- `WaveformView::read_frames` を抽出し、`window` と viewport が同じ読み出し
+  範囲を使うようにした(clamp 本体は非公開 `frame_range`。`window` の読み出し
+  範囲は不変)。
 - `view::screen::waveform_seek` を追加: 解決済み `ViewBin` を
   `WaveformBin` へ 1 対 1 写像し、source 全長の `transport.seek`
   Seek と Panel(`audio-view`)を組み立てる。
-- `tests/screen.rs` に Fake 層(ViewHost headless)の 6 件を追加。
+- `tests/screen.rs` に Fake 層(ViewHost headless)の 8 件を追加(PR 初版 6 件 + レビュー修正で 2 件)。
 
 ## 検証結果(この作業ツリーで実行)
 

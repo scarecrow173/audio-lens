@@ -59,7 +59,7 @@ relations:
 | # | 作業 | 変更ファイル | 検証 |
 | --- | --- | --- | --- |
 | 1 | ruviform rev 更新 | `Cargo.lock` | `check-ruviform-lock`/`check-ruviform-rev`/`sync-ui-deps` |
-| 2 | `frame_range` を単一 clamp 実装として抽出 | `view/source.rs` | `test -p al-gui --test view`(既存) |
+| 2 | `read_frames` を読み出し範囲の単一決定として抽出 | `view/source.rs` | `test -p al-gui --test view`(既存) |
 | 3 | Waveform/Seek の ViewSpec 射影 | `view/screen.rs`、`view/mod.rs` | 型チェック |
 | 4 | Fake 層評価テスト | `tests/screen.rs` | `cargo test -p al-gui --test screen` |
 | 5 | fmt/lint/test/gpui lane | - | `mise run fmt`/`lint`/`test`/`check-ui-gpui`/`lint-ui-gpui`/`test-ui-gpui` |
@@ -76,6 +76,6 @@ relations:
 
 ## ロールバック
 
-射影モジュールと `frame_range` 抽出は独立しており、`view/screen.rs`
+射影モジュールと `read_frames` 抽出は独立しており、`view/screen.rs`
 と `tests/screen.rs` の削除と `view/mod.rs` の 1 行削除で戻せる。
 `Cargo.lock` は `git checkout -- Cargo.lock` で旧 rev に戻る。
