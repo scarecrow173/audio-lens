@@ -17,6 +17,7 @@ Directory: `docs/plans`
 | PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
+| PLAN-yVtTxHenQy8bBk2Sd2ZwdH | Native desktop 初期 slice AL-G1〜G3 実装計画 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |

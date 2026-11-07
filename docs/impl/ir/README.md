@@ -62,6 +62,7 @@ Directory: `docs/impl/ir`
 | mech-cleanup-bench-baseline-characterization | [mech-cleanup-bench-baseline-characterization.md](./mech-cleanup-bench-baseline-characterization.md) |
 | mech-cleanup-measurement-ir-closeout | [mech-cleanup-measurement-ir-closeout.md](./mech-cleanup-measurement-ir-closeout.md) |
 | minimal-cli | [minimal-cli.md](./minimal-cli.md) |
+| native-desktop-initial-slices | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | observability-cli-wiring | [observability-cli-wiring.md](./observability-cli-wiring.md) |
 | observability-crate | [observability-crate.md](./observability-crate.md) |
 | observability-criterion-samply | [observability-criterion-samply.md](./observability-criterion-samply.md) |
