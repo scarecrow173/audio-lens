@@ -2,38 +2,19 @@
 //! headless projection)で評価する。Theme・Source・View・Interaction
 //! の同一 fixture を使い、GPUI 側は composition root からのみ接続する。
 
-use std::sync::Arc;
+mod common;
 
 use al_gui::theme;
-use al_gui::view::screen::{SEEK_KEY, SEEK_TARGET, WAVEFORM_KEY, waveform_seek};
-use al_gui::view::source::WaveformView;
+use al_gui::view::screen::{
+    METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, WAVEFORM_KEY, source_screen,
+};
+use common::{FRAMES, SAMPLE_RATE, fixture_view};
 use ruviform_ui::behavior::{CommandIntent, ControlInput, InputSource, ValueInput};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
-    AttachEpoch, ComponentKey, ComponentSpec, MAX_WAVEFORM_BINS, ProjectionOp, ViewEvent, ViewHost,
-    ViewSpec, WaveformSpec,
+    AttachEpoch, ComponentKey, ComponentSpec, MAX_METER_BINS, MAX_TIME_AXIS_TICKS, ProjectionOp,
+    ViewEvent, ViewHost, ViewSpec, WaveformSpec,
 };
-use ruviform_viz::{SliceWaveform, WaveformSource};
-
-const SAMPLE_RATE: u32 = 48_000;
-/// 0.1 秒。`[1200, 1440)` frame を NaN gap にする。
-const FRAMES: usize = 4_800;
-const GAP: std::ops::Range<usize> = 1_200..1_440;
-
-fn fixture_view() -> WaveformView {
-    let samples: Vec<f64> = (0..FRAMES)
-        .map(|i| {
-            if GAP.contains(&i) {
-                f64::NAN
-            } else {
-                (i as f64 * 0.01).sin() * 0.75
-            }
-        })
-        .collect();
-    let source: Arc<dyn WaveformSource> =
-        Arc::new(SliceWaveform::new(SAMPLE_RATE, 1, samples).expect("slice waveform"));
-    WaveformView::try_from_source(source).expect("waveform view")
-}
 
 fn waveform_of(spec: &ViewSpec) -> &WaveformSpec {
     let ComponentSpec::Panel(panel) = &spec.root else {
@@ -108,7 +89,7 @@ fn seek_gesture(host: &mut ViewHost, plain: f64) -> Vec<ViewEvent> {
 #[test]
 fn projected_bins_are_bit_exact_to_resolved_view_bins() {
     let view = fixture_view();
-    let spec = waveform_seek(&view, 0, 0.0, 0.1, 16).expect("spec");
+    let spec = source_screen(&view, 0, 0.0, 0.1, 16).expect("spec");
     let wave = waveform_of(&spec);
     let resolved = view.window(0, 0.0, 0.1, 16).expect("window");
     assert_eq!(wave.channel_bins[0].len(), resolved.len());
@@ -125,7 +106,7 @@ fn projected_bins_are_bit_exact_to_resolved_view_bins() {
 #[test]
 fn gap_bins_stay_nan_with_zero_count() {
     let view = fixture_view();
-    let spec = waveform_seek(&view, 0, 0.0, 0.1, 64).expect("spec");
+    let spec = source_screen(&view, 0, 0.0, 0.1, 64).expect("spec");
     let wave = waveform_of(&spec);
     let gaps: Vec<_> = wave.channel_bins[0]
         .iter()
@@ -143,7 +124,7 @@ fn gap_bins_stay_nan_with_zero_count() {
 #[test]
 fn viewport_and_seek_range_come_from_source_frames() {
     let view = fixture_view();
-    let spec = waveform_seek(&view, 0, 0.0, 0.1, 16).expect("spec");
+    let spec = source_screen(&view, 0, 0.0, 0.1, 16).expect("spec");
     let wave = waveform_of(&spec);
     assert_eq!(wave.frames, FRAMES as u64);
     assert_eq!(wave.sample_rate, SAMPLE_RATE);
@@ -160,7 +141,7 @@ fn viewport_and_seek_range_come_from_source_frames() {
 #[test]
 fn zero_width_window_keeps_bins_inside_viewport() {
     let view = fixture_view();
-    let spec = waveform_seek(&view, 0, 0.05, 0.05, 16).expect("spec");
+    let spec = source_screen(&view, 0, 0.05, 0.05, 16).expect("spec");
     let wave = waveform_of(&spec);
     assert!(
         !wave.viewport.is_empty(),
@@ -182,14 +163,14 @@ fn zero_width_window_keeps_bins_inside_viewport() {
 #[test]
 fn bins_beyond_limit_are_rejected_before_reading() {
     let view = fixture_view();
-    assert!(waveform_seek(&view, 0, 0.0, 0.1, MAX_WAVEFORM_BINS + 1).is_err());
-    assert!(waveform_seek(&view, 0, 0.0, 0.1, MAX_WAVEFORM_BINS).is_ok());
+    assert!(source_screen(&view, 0, 0.0, 0.1, MAX_METER_BINS + 1).is_err());
+    assert!(source_screen(&view, 0, 0.0, 0.1, MAX_METER_BINS).is_ok());
 }
 
 #[test]
 fn seek_gesture_commits_transport_intent_within_source_range() {
     let view = fixture_view();
-    let spec = waveform_seek(&view, 0, 0.0, 0.1, 16).expect("spec");
+    let spec = source_screen(&view, 0, 0.0, 0.1, 16).expect("spec");
     let mut host = host(spec);
     let events = seek_gesture(&mut host, 0.05);
     let intents: Vec<CommandIntent> = events
@@ -222,7 +203,7 @@ fn product_theme_modes_do_not_change_semantic_event_stream() {
             resolved.color("color.waveform").is_some(),
             "{mode} lacks waveform"
         );
-        let spec = waveform_seek(&view, 0, 0.0, 0.1, 16).expect("spec");
+        let spec = source_screen(&view, 0, 0.0, 0.1, 16).expect("spec");
         let mut host = host(spec);
         streams.push(format!("{:?}", seek_gesture(&mut host, 0.05)));
     }
@@ -236,5 +217,83 @@ fn product_theme_modes_do_not_change_semantic_event_stream() {
 #[test]
 fn channel_out_of_range_is_rejected() {
     let view = fixture_view();
-    assert!(waveform_seek(&view, 1, 0.0, 0.1, 16).is_err());
+    assert!(source_screen(&view, 1, 0.0, 0.1, 16).is_err());
+}
+
+fn component<'a>(spec: &'a ViewSpec, key: &str) -> &'a ComponentSpec {
+    let ComponentSpec::Panel(panel) = &spec.root else {
+        unreachable!("root is the screen panel")
+    };
+    panel
+        .children
+        .iter()
+        .find(|c| c.key().0 == key)
+        .unwrap_or_else(|| panic!("{key} not in screen"))
+}
+
+#[test]
+fn meter_bins_mirror_window_bins_with_peak_from_bucket_extremes() {
+    let view = fixture_view();
+    let spec = source_screen(&view, 0, 0.0, 0.1, 64).expect("spec");
+    let ComponentSpec::Meter(meter) = component(&spec, METER_KEY) else {
+        panic!("meter component expected");
+    };
+    let resolved = view.window(0, 0.0, 0.1, 64).expect("window");
+    assert_eq!(meter.channels, 1);
+    assert_eq!(meter.channel_levels[0].len(), resolved.len());
+    for (projected, source) in meter.channel_levels[0].iter().zip(&resolved) {
+        assert_eq!((projected.start, projected.end), (source.start, source.end));
+        assert_eq!(projected.count, source.bucket.count);
+        assert_eq!(projected.rms.to_bits(), source.bucket.rms.to_bits());
+        let peak = source.bucket.min.abs().max(source.bucket.max.abs());
+        assert_eq!(projected.peak.to_bits(), peak.to_bits());
+    }
+}
+
+#[test]
+fn meter_gap_bins_stay_nan_with_zero_count() {
+    let view = fixture_view();
+    let spec = source_screen(&view, 0, 0.0, 0.1, 64).expect("spec");
+    let ComponentSpec::Meter(meter) = component(&spec, METER_KEY) else {
+        panic!("meter component expected");
+    };
+    let gaps: Vec<_> = meter.channel_levels[0]
+        .iter()
+        .filter(|b| b.count == 0)
+        .collect();
+    assert!(!gaps.is_empty(), "fixture gap must surface as empty bins");
+    for b in gaps {
+        assert!(b.peak.is_nan() && b.rms.is_nan(), "gap bin {b:?}");
+    }
+}
+
+#[test]
+fn ruler_spans_the_source_viewport_with_bounded_ticks() {
+    let view = fixture_view();
+    let spec = source_screen(&view, 0, 0.0, 0.1, 16).expect("spec");
+    let ComponentSpec::TimeAxis(ruler) = component(&spec, RULER_KEY) else {
+        panic!("ruler component expected");
+    };
+    assert_eq!(ruler.viewport, 0..FRAMES as u64);
+    assert!(ruler.ticks.len() <= MAX_TIME_AXIS_TICKS);
+    assert_eq!(ruler.ticks.len(), 11, "0.1 s span at 0.01 s step");
+    assert_eq!(ruler.ticks[0].label, "0.00");
+    assert_eq!(ruler.ticks[0].at, 0.0);
+    assert_eq!(ruler.ticks[10].label, "0.10");
+    assert_eq!(ruler.ticks[10].at, FRAMES as f64);
+    assert!(ruler.ticks[0].major && !ruler.ticks[1].major && ruler.ticks[5].major);
+}
+
+#[test]
+fn ruler_ticks_stay_inside_the_viewport() {
+    let view = fixture_view();
+    let spec = source_screen(&view, 0, 0.02, 0.07, 16).expect("spec");
+    let ComponentSpec::TimeAxis(ruler) = component(&spec, RULER_KEY) else {
+        panic!("ruler component expected");
+    };
+    let (lo, hi) = (ruler.viewport.start as f64, ruler.viewport.end as f64);
+    assert!(!ruler.ticks.is_empty());
+    for t in &ruler.ticks {
+        assert!(lo <= t.at && t.at <= hi, "tick {t:?} outside viewport");
+    }
 }
