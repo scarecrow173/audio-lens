@@ -38,6 +38,7 @@ Directory: `docs/specs`
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | SPEC-o0wlzeWCSUPIniAFtwqSCc | Ruviform Git 依存の Cargo.lock 正本化 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
+| SPEC-GAQPlJtIjsPj8TdfBwrfIw | al-observability の SinkConfig::span_events 追従 (AL#127 / Ruviform #335) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | SPEC-PJaIgGwP5EbiX0UvyC7aZ9 | al-observability の ruviform-observability::logging 委譲移行 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | SPEC-034yYlsZHRt4b5fTzZS7Qr | マルチメソッドソース定位 | proposed | [source-localization.md](./source-localization.md) |
 | SPEC-034FP1KsTCa0WviopfvrnQ | Issue 33 保存仕様と候補成果物の確定 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

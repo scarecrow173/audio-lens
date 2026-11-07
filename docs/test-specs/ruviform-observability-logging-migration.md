@@ -4,7 +4,7 @@ type: "test-spec"
 status: "approved"
 title: "ruviform-observability logging 委譲の検証 (AL-OBS-01)"
 created: "2026-11-04"
-updated: "2026-11-04"
+updated: "2026-11-07"
 owners: []
 relations:
   source:
@@ -86,7 +86,10 @@ retention・失敗時 degrade の外部観測挙動
 - Rule: file sink の JSON-lines に、内部 event を持たない
   span の close event(span lifecycle)が残る(leaf span
   観測の暫定担保。stderr sink は ruviform #335 解消まで
-  close event を出さない既知 regression)。
+  close event を出さない既知 regression — #335 解消済みで
+  本条は取り消し。stderr も close event を出力する現行
+  契約は [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md)
+  参照)。
 - Rule: `init` の2回目呼出しは `AlreadyInitialized` で失敗し、
   global subscriber 登録は `try_init` 1箇所に限定される。
 - Rule: logging ON/OFF で `run` の manifest・成果物・f64

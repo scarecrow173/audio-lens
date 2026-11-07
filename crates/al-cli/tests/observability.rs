@@ -432,6 +432,49 @@ fn flag_overrides_env_and_empty_env_is_off() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+/// Leaf-span observability on stderr: the ruviform stderr sink is
+/// configured with `SpanEvents::CLOSE`, restoring the
+/// pre-migration `FmtSpan::CLOSE` behaviour (ruviform#335), so
+/// span close records carrying `time.busy`/`time.idle` reach
+/// stderr as well as the file sink.
+#[test]
+fn stderr_sink_emits_span_close_events() {
+    let dir = temp_dir("stderr-span-close");
+    let wav = dir.join("cap.wav");
+    std::fs::write(&wav, wav_bytes()).unwrap();
+    let jobs = dir.join("jobs");
+
+    let out = run_ingest(&jobs, &wav, &["--log", "info"]);
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("time.busy"),
+        "stderr sink must carry span close records: {stderr}"
+    );
+
+    // Close records inherit the span's level/target and pass the
+    // same per-sink EnvFilter: the `stage`/`cli::run` spans are
+    // INFO, so `--log warn` must suppress their close records.
+    let jobs_warn = dir.join("jobs-warn");
+    let out = run_ingest(&jobs_warn, &wav, &["--log", "warn"]);
+    assert!(
+        out.status.success(),
+        "run failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        !stderr.contains("time.busy"),
+        "filtered-out spans must not emit close records: {stderr}"
+    );
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 /// Leaf-span observability: the file JSON-lines sink emits
 /// `FmtSpan::CLOSE` lifecycle events (with `time.busy`/`time.idle`
 /// fields) so spans with no inner events still leave a trace.

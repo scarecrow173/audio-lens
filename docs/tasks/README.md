@@ -152,6 +152,7 @@ Directory: `docs/tasks`
 | TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | done | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
+| TASK-HrjjahBSYbViCD72MweZwV | al-observability SinkConfig::span_events 追従 (AL#127) | done | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | TASK-034P3P0cd1tJUcKKBnEB7b | 旧可視化廃止と可搬 export 分離(AL#106) | done | [ruviform-viz-retirement.md](./ruviform-viz-retirement.md) |
 | TASK-034FPu36v3CdIedbBEiiFF | Issue 33 確定仕様を文書に適用し維持契約を検証する | done | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TASK-034dLdqYw5JFCrkMD5dSPk | spec #1 との残差適合項目: 候補検出ステージ独立性、FLAC、Resolution.sample_rate | done | [spec-residual-decisions.md](./spec-residual-decisions.md) |

@@ -41,6 +41,7 @@ Directory: `docs/designs`
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
 | DESIGN-034RN2eWIExEejH7mYYOyj | Issue #139 Ruviform 共通 I/O 移行の残存分類 — StagedFile 移行記録・回帰契約・Structured/Archive 採否 | draft | [ruviform-io-migration-issue-139.md](./ruviform-io-migration-issue-139.md) |
 | DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
+| DESIGN-17NiTSZp7kRH6pAW7EFwiO | SinkConfig::span_events 追従設計 — stderr span close 復旧 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | DESIGN-034P3nlejLy074yTmYSAcJ | Ruviform 移行の処理単位責務マップ | approved | [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) |
 | DESIGN-uCvLq1YDJau0qmwrQqB52k | al-observability logging の ruviform-observability 委譲設計 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | DESIGN-034RIK5GkdCeUVI4sbrxPb | Issue #148 sccache コンパイルキャッシュ採用設計 — lane 選定・namespace・kill switch・計測 | approved | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |

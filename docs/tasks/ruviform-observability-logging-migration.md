@@ -106,7 +106,10 @@ Issue [#138](https://github.com/scarecrow173/audio-lens/issues/138)
 - 暫定 file sink: 既存 `tracing-appender`/`tracing-subscriber`
   (新規外部 dep なし)
 - 追跡: Ruviform #334(filename_suffix)/ #335(FmtSpan) —
-  解消後に暫定 file sink と stderr CLOSE を復旧する
+  解消後に暫定 file sink と stderr CLOSE を復旧する。
+  → #335 側は解消済み(2026-11-07,
+  ruviform-logging-span-events-compat)。#334 側の暫定
+  file sink 撤去は未着手の別タスクとして残る
 
 ## Affected Files
 

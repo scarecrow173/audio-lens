@@ -110,3 +110,4 @@ Directory: `docs/impl/ir`
 | issue-71-residual-band-eval-prepare-parallel | [issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md](./issue-71-residual-band-evaluation-and-dsp-input-prepare-parallelization.md) |
 | issue-131-gui-ruviform-controls | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
 | sccache-compile-cache-issue-148 | [sccache-al-148.md](./sccache-al-148.md) |
+| issue-127-ruviform-consumer-tracking | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |

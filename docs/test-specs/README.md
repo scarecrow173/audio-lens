@@ -36,6 +36,7 @@ Directory: `docs/test-specs`
 | TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
 | TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
+| TSPEC-Jpr62rfkrRNiHtvEJn74bF | SinkConfig::span_events 追従の検証 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | TSPEC-YLw9YwXZe7FPiRD7fbuVwg | ruviform-observability logging 委譲の検証 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-034FPu2UHR9IyKz1LxreDD | Issue 33 正式保存仕様と維持契約 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |

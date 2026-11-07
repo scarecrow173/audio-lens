@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "al-observability logging の ruviform-observability 委譲設計 (AL-OBS-01)"
 created: "2026-11-04"
-updated: "2026-11-04"
+updated: "2026-11-07"
 owners: []
 relations:
   source:
@@ -142,6 +142,9 @@ init(LogConfig)
   を維持するため leaf span の close event は file(JSONL、
   機械集計の主経路)に残り続ける。stderr sink は #335 解消
   まで close event を出さない(下記 regression)。
+  → **#335 解消済み(2026-11-07)**: stderr は
+  `SinkConfig::span_events = SpanEvents::CLOSE` で復旧。
+  後続: [ruviform-logging-span-events-compat](./ruviform-logging-span-events-compat.md)。
 - **登録**: `try_init` は従来どおり `al-observability::init`
   内の1回きり。2回目は `InitError::AlreadyInitialized`。
   ruviform 側は `set_global_default` を呼ばない契約のため、
@@ -198,6 +201,9 @@ leaf crates emit via tracing::info!/info_span!    (変更不要)
   を維持するため、集計用途の leaf span close event は file
   sink に残る。復旧条件: ruviform #335 で span event 設定が
   提供された時点で stderr sink にも適用する。
+  → **解消済み(2026-11-07)**: #335 の `SinkConfig::span_events`
+  提供により `SpanEvents::CLOSE` を stderr に適用
+  ([ruviform-logging-span-events-compat](./ruviform-logging-span-events-compat.md))。
 
 ## Risks and Trade-offs
 
@@ -225,9 +231,12 @@ leaf crates emit via tracing::info!/info_span!    (変更不要)
 ## Deferred Design Concerns
 
 - stderr sink の `FmtSpan::CLOSE` 再有効化(ruviform #335
-  解消待ち)。
+  解消待ち)。→ **対応済み(2026-11-07)**:
+  [ruviform-logging-span-events-compat](./ruviform-logging-span-events-compat.md)。
 - file sink の `SinkDestination::RollingFile` 移行と local
-  file layer 撤去(ruviform #334 解消待ち)。
+  file layer 撤去(ruviform #334 解消待ち)。→ #334 は
+  解消済み(`filename_suffix` 提供)。移行自体は未着手の
+  別タスクとして残る。
 - Collector/OBS-07(#289)導入時の `LoggingHealth` 公開と
   Source 登録。AudioLens に登録可能な Counter/Source 実体が
   現状ないため、本 Issue では `LoggingLayersResult::health`
