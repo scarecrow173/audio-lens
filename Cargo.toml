@@ -75,6 +75,15 @@ ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", 
 ruviform-observability = { git = "https://github.com/scarecrow173/ruviform.git", features = ["logging"] }
 ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git" }
+# Issue #166 AL-G2: DTCG 解釈の正本は ruviform-ui-theme (RF#385)。
+# AudioLens は token 文書と mode 選択のみを所有する。
+ruviform-ui-theme = { git = "https://github.com/scarecrow173/ruviform.git" }
+# Issue #166 AL-G1: GPUI backend adapter (RF#386)。al-gui の `gpui`
+# feature 経由でのみ有効化し、headless 既定解決を維持する。
+ruviform-ui-gpui = { git = "https://github.com/scarecrow173/ruviform.git" }
+# Issue #166 AL-G1: driver lifecycle の semantic fixture 正本
+# (RF#390)。dev-dependency 専用。
+ruviform-ui-test = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git" }
 
 # Keep full debug info in release builds so external CPU samplers

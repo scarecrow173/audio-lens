@@ -188,6 +188,22 @@ run = "cargo clippy -p al-gui --all-targets --features webview -- -D warnings"
 description = "al-gui webview feature テスト"
 run = "cargo test -p al-gui --features webview"
 
+# Issue #166 AL-G1: al-gui `gpui` feature lane。GPUI backend 依存は
+# feature 内に閉じ込め、既定 check/lint/test は headless のまま
+# 保つ(ruviform-ui-gpui 側の同名 task と同一構造)。実 OS window は
+# ここでは開かない(compile/lint/headless test まで)。
+[tasks.check-ui-gpui]
+description = "al-gui gpui feature 型チェック(al-desktop 含む)"
+run = "cargo check -p al-gui --features gpui --all-targets"
+
+[tasks.lint-ui-gpui]
+description = "al-gui gpui feature lint"
+run = "cargo clippy -p al-gui --all-targets --features gpui -- -D warnings"
+
+[tasks.test-ui-gpui]
+description = "al-gui gpui feature テスト(headless)"
+run = "cargo test -p al-gui --features gpui"
+
 [tasks.verify-ci]
 description = "Run the CI-equivalent verification sequence: fmt -> check-ci -> lint-ci -> test-ci"
 run = [

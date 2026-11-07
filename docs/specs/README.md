@@ -31,6 +31,7 @@ Directory: `docs/specs`
 | SPEC-034yYltmjZLj2DYX34Y56t | ループ・長尺・ドリフト対応のトラッキング | proposed | [locate-tracking.md](./locate-tracking.md) |
 | SPEC-034EMwMaXGBCfumSazX7zs | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
+| SPEC-VCx77hBs4d2qAIPreErlEF | Native desktop 初期 slice AL-G1〜G3 (Issue #166 先行実装) | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
 | SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | proposed | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |

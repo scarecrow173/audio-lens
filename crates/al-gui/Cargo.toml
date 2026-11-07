@@ -9,9 +9,13 @@ publish.workspace = true
 al-core.workspace = true
 al-job.workspace = true
 al-dataset.workspace = true
+al-locate.workspace = true
+al-media.workspace = true
 al-service.workspace = true
 ruviform-ui.workspace = true
 ruviform-ui-webview = { workspace = true, optional = true }
+ruviform-ui-theme.workspace = true
+ruviform-ui-gpui = { workspace = true, optional = true }
 ruviform-viz.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -19,12 +23,21 @@ tracing.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true
+ruviform-ui-test.workspace = true
 
 [features]
 # 実窓 host を有効化。デフォルトは headless(lib + op 層のみ)。
 webview = ["dep:ruviform-ui-webview", "ruviform-ui-webview/webview"]
+# Issue #166 AL-G1: GPUI backend composition root (bin/al-desktop)。
+# gpui crate 本体は ruviform-ui-gpui 内に閉じ込められる。
+gpui = ["dep:ruviform-ui-gpui", "ruviform-ui-gpui/gpui"]
 
 [[bin]]
 name = "al-gui"
 path = "src/bin/al-gui.rs"
 required-features = ["webview"]
+
+[[bin]]
+name = "al-desktop"
+path = "src/bin/al-desktop.rs"
+required-features = ["gpui"]

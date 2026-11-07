@@ -86,6 +86,7 @@ Directory: `docs/impl`
 | IMPL-034yZRlHVYt3tuCopmkzRI | minimal cli | completed | [ir/minimal-cli.md](./ir/minimal-cli.md) |
 | IMPL-034FRBaMddoJNJ1MS8Oskb | NCC hot caller reuse verification | completed | [ir/ncc-hot-caller-reuse-verification.md](./ir/ncc-hot-caller-reuse-verification.md) |
 | IMPL-034FQVh1G9J5C9QK9oDZNe | NCC plan workspace foundation | completed | [ir/ncc-plan-workspace-foundation.md](./ir/ncc-plan-workspace-foundation.md) |
+| IMPL-IgijqBdvx2YO4lzFPDz4cA | Native desktop 初期 slice AL-G1〜G3 実装記録(IR) | completed | [ir/native-desktop-initial-slices.md](./ir/native-desktop-initial-slices.md) |
 | IMPL-034Eg35uKyFu2Dmhclk8F5 | al-cli の logging 配線 | completed | [ir/observability-cli-wiring.md](./ir/observability-cli-wiring.md) |
 | IMPL-034Eg353ac42Ik7en8rVVT | al-observability crate の新設 | completed | [ir/observability-crate.md](./ir/observability-crate.md) |
 | IMPL-01M4PAYJMMWWXX3FJG5J45TC2M | criterion smoke bench と samply 手順書 | completed | [ir/observability-criterion-samply.md](./ir/observability-criterion-samply.md) |

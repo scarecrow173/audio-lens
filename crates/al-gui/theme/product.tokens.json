@@ -1,0 +1,37 @@
+{
+  "$extensions": {
+    "dev.ruviform.dtcg-profile": {
+      "profile": "rvf-dtcg-profile.v1",
+      "layer": "product",
+      "id": "audiolens-product",
+      "modes": ["light", "dark"]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "bg": {
+      "$value": "{color.neutral.50}",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "{color.neutral.900}" }
+      }
+    },
+    "fg": {
+      "$value": "{color.neutral.900}",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "{color.neutral.50}" }
+      }
+    },
+    "surface": {
+      "$value": "{color.neutral.100}",
+      "$extensions": {
+        "dev.ruviform.modes": { "dark": "{color.neutral.800}" }
+      }
+    },
+    "muted": { "$value": "{color.neutral.600}" },
+    "accent": { "$value": "{color.brand}" },
+    "good": { "$value": "{color.success}" },
+    "warn": { "$value": "{color.warning}" },
+    "bad": { "$value": "{color.danger}" },
+    "waveform": { "$value": "{color.brand}" }
+  }
+}
