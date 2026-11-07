@@ -69,7 +69,7 @@ features:
       - name: exit-defers-to-job-terminal
         examples:
           - 実行中 job ありで最終 Destroyed → exited=false のまま、job 完走 drain 後に session が exit() を発行し loop が自然終了(worker が "finished" を記録してから exit — process 終了での黙示 kill を検証)
-          - cancel_jobs_on_destroy=true で Destroyed → cancel signal 後、cancelled 終端 drain まで exit() が遅延し loop が自然終了
+          - cancel_jobs_on_destroy=true で Destroyed → cancel signal 後、cancelled 終端 drain まで exit() が遅延し loop が自然終了(destroy pump 直後に exited=false を assert する ordering 検証)
           - request_exit は exit_on_last_window=false でも live window を全 destroy して終了要求を立て、実行中 job の終端まで exit() を遅延する
           - exit_on_last_window=false では最終 Destroyed 後も exit しない(終了要求が立たない)
   theme:
@@ -114,6 +114,7 @@ features:
       - name: waveform-bounded
         examples:
           - window(0.1s..0.2s, bins=64) が ≤64 ViewBin を返し全量ロードしない
+          - seconds_to_sample が u64::MAX へ saturate する巨大 start_s でも panic せず frames へ clamp される
       - name: spectrum-tile
         examples:
           - tile(&TileRequest{frames 0..16, bins 0..8}) が clamp して Tile を返す

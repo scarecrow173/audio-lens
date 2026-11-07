@@ -75,6 +75,8 @@ metadata:
     `exit_on_last_window` に依らず `exit_pending` を立て live
     window を全 destroy する。`exit_pending()` getter で保留状態を
     観測できる(「job 完了後に終了」を UI が表示する点)。
+    `exited` latch が発行済み `exit()` の重複発行と exit 後
+    event の dispatch/配送/新規 job spawn を閉じる。
   - `Resized/Moved/Focused/ScaleFactorChanged` → 対応 `HostEvent` へ
     写像。`Ready` は `HostEvent::Ready{url}` が WebView 由来のため
     写さない(空文字列を捏造しない)。未知 variant は無視。
@@ -132,7 +134,10 @@ metadata:
   `StreamTimeView`(bounded `ticks(i..j)` + `seconds_at`)。
   `ticks` は `start`/`end` を両端 `len` へ clamp し、
   `start > len` や空 stream でも panic せず空 slice を返す
-  (review 第 2 ラウンド P2 対応)。
+  (review 第 2 ラウンド P2 対応)。`WaveformView::window` も
+  同じ両端 clamp — `seconds_to_sample` の u64::MAX saturate で
+  `start + 1` が overflow する経路を `min(frames)` +
+  `saturating_add` で閉じた(review 第 3 ラウンド P2 対応)。
   `from_metadata` は永続化 shape `av_timing` の
   `Vec<StreamTiming>` のみを解釈し `Vec<Self>` を返す。
   `timing()`/`timestamp_origin()`/`observation()` で producer の
@@ -168,11 +173,13 @@ metadata:
 
 ## 検証記録
 
-- `cargo test -p al-gui`: 35 test 全 pass(desktop 9 + service_ops 5 +
-  theme 10 + view 11)。review 第 2 ラウンドでは
+- `cargo test -p al-gui`: 36 test 全 pass(desktop 9 + service_ops 5 +
+  theme 10 + view 12)。review 第 2 ラウンドでは
   `destroy_does_not_cancel_jobs_by_default` が修正前コードで
   `assert!(!driver.exited())` に FAILED することを確認した
-  RED → 修正で GREEN。
+  RED → 修正で GREEN。第 3 ラウンド独立 review verdict: ACCEPT
+  — P2 sibling(`WaveformView::window` overflow)と P3 3 件
+  (`exited` latch・cancel test ordering assert)を同じ修正へ畳んだ。
 - `cargo check -p al-gui --all-targets` / `cargo clippy -p al-gui
   --all-targets -- -D warnings`: pass。
 - `node tools/check-headless-deps.mjs`: pass。guard の候補名に
@@ -220,6 +227,15 @@ metadata:
   P2 対応): 旧実装は `start > len` のとき `end` が `start` に
   引き上げられ `[start..start]` が範囲外で panic した
   (空 stream `ticks(1, 2)`)。
+- `WaveformView::window` も同じ clamp 規則(review 第 3 ラウンド
+  P2 対応): `seconds_to_sample` が巨大秒を u64::MAX へ saturate
+  し、未 clamp の `start` 経由で `start + 1` が overflow panic
+  した。`start.min(frames)` + `end.max(start.saturating_add(1))`。
+- `exited` latch(review 第 3 ラウンド P3 対応): `exit()` 発行後に
+  後続 `Destroyed` が `exit_pending` を再 arm して `exit()` が
+  重複する経路と、exit 後 `Action` が終端へ辿り着けない job を
+  spawn する latent 経路を、`handle`/`request_exit`/`maybe_exit`
+  の早期 return で閉じた。
 - `RoutedEvent{None}` の全 window 配送: `UiRuntime` の unrouted
   契約を app-level 通知として正規化。配送先集合は
   `WindowDriver::windows()` を正本とする(契約 designated source

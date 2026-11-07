@@ -91,6 +91,7 @@ pub struct DesktopSession {
     vetoes: BTreeSet<WindowId>,
     theme: Option<ResolvedTheme>,
     exit_pending: bool,
+    exited: bool,
 }
 ```
 
@@ -121,7 +122,10 @@ pub struct DesktopSession {
   (`has_running_jobs` が落ちる)した直後の機会に発行する。
   `cancel_jobs_on_destroy` opt-in も同じ規則 — cancel は
   signal であって終端ではなく、cancelled 報告の drain までは
-  exit を遅延する。
+  exit を遅延する。発行時に `exited` latch を立て、二度目の
+  `exit()`(queue に残った後続 `Destroyed` の再 arm 経由)と
+  exit 後 event の dispatch/配送/新規 job spawn を閉じる
+  (`handle`/`request_exit` は `exited` で早期 return)。
 - `request_exit(&mut self, driver)` — 明示的な app 終了要求
   (将来の Quit action / OS quit)。`exit_on_last_window` に依らず
   `exit_pending` を立て、live window を全て `destroy_window`
