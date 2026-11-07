@@ -34,6 +34,10 @@ Directory: `docs/designs`
 | DESIGN-034DlwOAFNKWY4VRafyYzo | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | DESIGN-034AasAnWroBLn28EPuQ5Y | MP4 demux とタイミング観測設計 | approved | [mp4-ingest.md](./mp4-ingest.md) |
 | DESIGN-WjCNQiQJztajyjGCJIjb0y | Native desktop 初期 slice AL-G1〜G3 の設計 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
+| DESIGN-KmsgLgUSS9WY4blzhdDRqp | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の設計 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| DESIGN-rmQlUpDmFZLlonLOUfAGa4 | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity の設計 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| DESIGN-hZqY4x9NK3Xg22TQK3K8mB | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価の設計 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | DESIGN-034FPWNHT7czdzzGSNBU2Q | NCC plan/workspace 分離と2サイト再利用設計 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |
 | DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | approved | [pre-migration-baseline.md](./pre-migration-baseline.md) |
@@ -52,9 +56,6 @@ Directory: `docs/designs`
 | DESIGN-034H77LaRZ9cyfPIcdYe0w | Streaming Bandpass 設計 (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | DESIGN-034H5ozhtFnMNl0ZABihBS | Valid FFT NCC plan 設計 (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
-| DESIGN-hZqY4x9NK3Xg22TQK3K8mB | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価の設計 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
-| DESIGN-rmQlUpDmFZLlonLOUfAGa4 | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity の設計 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
-| DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

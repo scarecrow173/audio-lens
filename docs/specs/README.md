@@ -32,6 +32,10 @@ Directory: `docs/specs`
 | SPEC-034EMwMaXGBCfumSazX7zs | 機械的 cleanup 最適化バンドル: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | approved | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-VCx77hBs4d2qAIPreErlEF | Native desktop 初期 slice AL-G1〜G3 (Issue #166 先行実装) | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
+| SPEC-laQ2e5k5G9oPKq1z0KZmcF | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run mount 判断 (Issue #166 第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| SPEC-srSXzJOEfwrrPbP7Q35wbN | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity (Issue #166 第3 slice) | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| SPEC-Gq3Lm8Xv2RtN6pWzK4hYcA | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity (Issue #166 第4 slice) | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| SPEC-XU6YkQ1VJGeG1v6i3nVzTm | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価 (Issue #166 第2 slice) | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
 | SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | proposed | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |
@@ -49,9 +53,6 @@ Directory: `docs/specs`
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
-| SPEC-XU6YkQ1VJGeG1v6i3nVzTm | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価 (Issue #166 第2 slice) | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
-| SPEC-srSXzJOEfwrrPbP7Q35wbN | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity (Issue #166 第3 slice) | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
-| SPEC-Gq3Lm8Xv2RtN6pWzK4hYcA | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity (Issue #166 第4 slice) | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

@@ -32,6 +32,10 @@ Directory: `docs/test-specs`
 | TSPEC-035jRegcnGwUqH1RD6oUtJ | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | proposed | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-0i3Bc6BhkywzIBeHpby4xP | Native desktop 初期 slice AL-G1〜G3 検証仕様 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
+| TSPEC-zOhqLzVO640w2ox49XQgzs | Native GUI drawn parity の Spectrogram・Label・Table と Job/Run 射影の検証仕様 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| TSPEC-O65pjV4Ci4jMZTRqGNRUm2 | Native GUI Source 画面の ViewSpec 射影・GPUI parity 検証仕様 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| TSPEC-Kv7Rn3Ac9WxS5pZdM2hEgH | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity の検証仕様 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| TSPEC-7JyfOx5Dj1B55uTKms7L2h | Native GUI Waveform/Seek 画面の ViewSpec 射影 検証仕様 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
 | TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |
@@ -45,9 +49,6 @@ Directory: `docs/test-specs`
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
 | TSPEC-034Gs7WHAxB3WpFCH8fHIQ | symphonia AAC-LC audio decode fallback | draft | [symphonia-aac-lc-audio-decode-fallback.md](./symphonia-aac-lc-audio-decode-fallback.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
-| TSPEC-7JyfOx5Dj1B55uTKms7L2h | Native GUI Waveform/Seek 画面の ViewSpec 射影 検証仕様 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
-| TSPEC-O65pjV4Ci4jMZTRqGNRUm2 | Native GUI Source 画面の ViewSpec 射影・GPUI parity 検証仕様 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
-| TSPEC-Kv7Rn3Ac9WxS5pZdM2hEgH | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity の検証仕様 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
