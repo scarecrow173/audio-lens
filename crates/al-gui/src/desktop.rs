@@ -20,6 +20,18 @@
 //! `exit_pending` として保留し、`Tick` の drain が終端 signal を
 //! 回収した後の最初の機会に `exit()` する — window close/destroy
 //! が job を暗黙停止しない契約は process 終了にも及ぶ。
+//!
+//! job 終端を「window を消して不可視に待つ」のではなく、最終
+//! window の `CloseRequested` を [`CloseDecision::Defer`] で保留
+//! する: window は close-pending のまま live で、job 一覧・取消
+//! など既存の操作手段と pending 状態(`close_deferred`)が残る。
+//! `Tick` drain が job 終端を回収したら保留中の window へ
+//! `request_close` を再発行し、close policy/veto を通常 flow で
+//! 再評価して `Approve` → `Destroyed` → `exit_pending` → `exit()`
+//! へ進む。OS 強制 `Destroyed`(veto 不能)ではこの保留が適用
+//! できないため、その経路では job 終端まで window が無い
+//! windowless 待機が起こり得る — 既知の残余リスクとして spec /
+//! IR に記録する(暗黙 kill より劣位と判断)。
 
 use std::collections::BTreeSet;
 
@@ -35,8 +47,11 @@ pub struct DesktopPolicy {
     /// live window が尽きたとき driver へ `exit()` を伝える
     /// (single-window desktop の既定: `true`)。
     pub exit_on_last_window: bool,
-    /// `Destroyed` で `cancel_window_jobs` を呼ぶか。`UiRuntime` の
-    /// 契約どおり opt-in のみ。既定 `false`。
+    /// window 消去の意思 = job 取消として `cancel_window_jobs` を
+    /// 呼ぶか — `Destroyed` 時、および最終 window close の `Defer`
+    /// 時点の両方で signal する(後者は「閉じる = その window の
+    /// job を取消」の意思)。`UiRuntime` の契約どおり opt-in のみ。
+    /// 既定 `false`。
     pub cancel_jobs_on_destroy: bool,
 }
 
@@ -57,6 +72,11 @@ pub struct DesktopSession {
     /// `CloseRequested` へ `Veto` を返す window 集合
     /// (`set_close_veto` で登録)。
     vetoes: BTreeSet<WindowId>,
+    /// job 実行中に [`CloseDecision::Defer`] で保留した
+    /// `CloseRequested`。window は close-pending のまま live —
+    /// `Tick` drain が job 終端を回収したら `request_close` を
+    /// 再発行して通常 close flow で再評価する。
+    deferred_close: BTreeSet<WindowId>,
     /// composition root が注入する product theme。renderer
     /// (RF#387 系)への受け渡し点。
     theme: Option<ResolvedTheme>,
@@ -76,6 +96,7 @@ impl DesktopSession {
             runtime,
             policy,
             vetoes: BTreeSet::new(),
+            deferred_close: BTreeSet::new(),
             theme: None,
             exit_pending: false,
             exited: false,
@@ -124,19 +145,31 @@ impl DesktopSession {
         self.exit_pending
     }
 
+    /// `window` の close が job 終端待ちで `Defer` 保留中か。
+    /// window 自体は live で job 一覧・取消など既存の操作手段が
+    /// 使える — UI が「job 完了後に閉じる」状態を表示するための
+    /// 観測点。
+    pub fn close_deferred(&self, window: WindowId) -> bool {
+        self.deferred_close.contains(&window)
+    }
+
     /// 明示的な app 終了要求(将来の Quit action / OS quit 等)。
     /// `exit_on_last_window` policy ではなく consumer の終了意思
-    /// なので live window は全て destroy する(各 `Destroyed` は
-    /// 通常の policy 経路 — veto 掃除と `cancel_jobs_on_destroy`
-    /// opt-in を通る)。job 実行中は `maybe_exit` の規則どおり
-    /// 終端まで `exit()` を遅延する。
+    /// だが、window の閉じ方は通常経路と同じ veto-able close
+    /// (`request_close` → `CloseRequested`)を通る — 強制
+    /// `destroy_window` は製品 veto と job 実行中の `Defer` を
+    /// 踏み越えるため使わない。job 実行中は通常 close と同じく
+    /// 最終 window が `Defer` で残り、終端 drain で close が
+    /// 再開されてから `maybe_exit` の規則どおり `exit()` する。
+    /// 製品 veto が残っている window は quit でも越えない —
+    /// veto の解除は製品側の所有。
     pub fn request_exit(&mut self, driver: &mut dyn WindowDriver) {
         if self.exited {
             return;
         }
         self.exit_pending = true;
         for w in driver.windows() {
-            let _ = driver.destroy_window(w);
+            driver.request_close(w);
         }
         self.maybe_exit(driver);
     }
@@ -153,6 +186,12 @@ impl DesktopSession {
             DriverEvent::Tick => {
                 let routed = self.runtime.drain_jobs_routed();
                 deliver(routed, driver);
+                // job が全て終端へ達したなら `Defer` で保留した
+                // close を通常 flow(request_close → CloseRequested
+                // → policy/veto 再評価 → Approve → Destroyed →
+                // maybe_exit)で再開する。job は Tick の drain で
+                // しか終端へ達しないため再評価点はここだけ。
+                self.resume_deferred_closes(driver);
             }
             DriverEvent::Windowed { window, event } => match event {
                 WindowLifecycle::Action(intent) => {
@@ -165,16 +204,37 @@ impl DesktopSession {
                         .handle_window(window, ruviform_ui::HostEvent::CloseRequested);
                     deliver(routed, driver);
                     let decision = if self.vetoes.contains(&window) {
+                        // 製品 veto(未保存データ等)が最優先 —
+                        // 判断は製品側の所有で、session は
+                        // deferred_close に記録せず自動再開もしない。
                         CloseDecision::Veto
+                    } else if driver.windows().len() == 1 && self.runtime.has_running_jobs() {
+                        // 最終 window + job 実行中: Approve すると
+                        // 全 window が消え、job 終端を可視 window
+                        // も取消導線も無いまま不可視に待つことに
+                        // なる。`Defer` で close を保留し、window・
+                        // job 一覧・取消 intent・pending 状態を残す。
+                        // `cancel_jobs_on_destroy` opt-in は
+                        // 「閉じる = その window の job を取消」の
+                        // 意思として signal を送るが、window は
+                        // 終端 drain まで残る点は変わらない。
+                        CloseDecision::Defer
                     } else {
                         CloseDecision::Approve
                     };
                     // approve 後の Destroyed は backend が発行する。
                     // respond_close 自体の失敗は adapter が記録する。
                     let _ = driver.respond_close(window, decision);
+                    if matches!(decision, CloseDecision::Defer) {
+                        self.deferred_close.insert(window);
+                        if self.policy.cancel_jobs_on_destroy {
+                            self.runtime.cancel_window_jobs(window);
+                        }
+                    }
                 }
                 WindowLifecycle::Destroyed => {
                     self.vetoes.remove(&window);
+                    self.deferred_close.remove(&window);
                     if self.policy.cancel_jobs_on_destroy {
                         self.runtime.cancel_window_jobs(window);
                     }
@@ -219,6 +279,25 @@ impl DesktopSession {
             self.exited = true;
             self.exit_pending = false;
             driver.exit();
+        }
+    }
+
+    /// `Defer` で保留した close を再開する。job が全て終端へ
+    /// 達した(Tick drain 直後の呼び出し前提)ときだけ動き、
+    /// 保留中の window へ `request_close` を再発行する — 新しい
+    /// `CloseRequested` として policy/veto が最初から再評価
+    /// されるため、待機中に立った製品 veto や新規 job でも
+    /// 正しく保留へ戻る。途中で強制 destroy された window は
+    /// `windows()` に残っていないため skip する。
+    fn resume_deferred_closes(&mut self, driver: &mut dyn WindowDriver) {
+        if self.runtime.has_running_jobs() || self.deferred_close.is_empty() {
+            return;
+        }
+        let pending = std::mem::take(&mut self.deferred_close);
+        for w in pending {
+            if driver.windows().contains(&w) {
+                driver.request_close(w);
+            }
         }
     }
 }

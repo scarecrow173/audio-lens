@@ -244,11 +244,149 @@ fn remaining_live_window_prevents_exit() {
 }
 
 #[test]
+fn close_requested_on_last_window_defers_while_job_runs() {
+    // 正常 close(request_close → CloseRequested)で最終 window を
+    // 閉じようとしても job 実行中は `Defer` で保留: window は
+    // close-pending のまま live で、job 一覧・取消 intent・
+    // pending 状態が残る(window を消して不可視に待たない)。
+    // job 終端の drain 後に close が再開されて自然終了する。
+    let (mut session, gate, outcome) = blocking_session(DesktopPolicy::default());
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Action(Intent::new("j1", "test.block", json!({}))),
+    });
+    pump(&mut session, &mut driver);
+    assert!(
+        session.runtime().has_running_jobs(),
+        "job should be running"
+    );
+
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(
+        driver.windows().contains(&w),
+        "last-window close must be held (Defer) while a job runs"
+    );
+    assert!(!driver.destroyed().contains(&w));
+    assert!(
+        session.close_deferred(w),
+        "deferred close intent must be observable to the UI"
+    );
+    assert!(!driver.exited());
+    assert!(!session.exit_pending());
+    assert_eq!(
+        *outcome.lock().unwrap(),
+        None,
+        "job must still be in flight — close deferral is not cancellation"
+    );
+
+    // 実行中の再度 close も同じ判定で保留に戻るだけ(状態は
+    // 冪等、spam で強行突破できない)。
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(driver.windows().contains(&w));
+    assert!(session.close_deferred(w));
+
+    // job が終端へ達すると Tick drain が保留 close を再開 —
+    // 通常 flow を再評価して Approve → Destroyed → exit。
+    gate.store(true, Ordering::SeqCst);
+    pump_until_exited(&mut session, &mut driver);
+    assert_eq!(*outcome.lock().unwrap(), Some("finished"));
+    assert!(
+        driver.destroyed().contains(&w),
+        "deferred close must resume and destroy the window"
+    );
+}
+
+#[test]
+fn deferred_close_resume_respects_new_product_veto() {
+    // 保留中に製品 veto(未保存データ等)が立った場合、job 終端で
+    // 再開される close は強行 destroy ではなく veto-able な
+    // `CloseRequested` として再評価される — veto が有効な間は
+    // window が残り、解除後の通常 close で完結する。
+    let (mut session, gate, _outcome) = blocking_session(DesktopPolicy::default());
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Action(Intent::new("j1", "test.block", json!({}))),
+    });
+    pump(&mut session, &mut driver);
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(session.close_deferred(w));
+
+    // 待機中に製品 veto を立てる → job 終端・close 再開後も
+    // window は残る(再開が veto を越える destroy 直叩きではない
+    // ことの検証)。
+    session.set_close_veto(w, true);
+    gate.store(true, Ordering::SeqCst);
+    for _ in 0..200 {
+        driver.inject(DriverEvent::Tick);
+        pump(&mut session, &mut driver);
+        if !session.runtime().has_running_jobs() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert!(!session.runtime().has_running_jobs());
+    pump(&mut session, &mut driver); // 再発行された CloseRequested を消費
+    assert!(
+        driver.windows().contains(&w),
+        "resumed close must honor a product veto set during the wait"
+    );
+    assert!(!session.close_deferred(w));
+    assert!(!driver.exited());
+
+    session.set_close_veto(w, false);
+    driver.request_close(w);
+    pump_until_exited(&mut session, &mut driver);
+    assert!(driver.destroyed().contains(&w));
+}
+
+#[test]
+fn force_destroy_during_deferral_cleans_state() {
+    // `Defer` 保留中の window が OS 強制 destroy で消えた経路:
+    // `deferred_close` の記録は `Destroyed` で掃除され、job 終端
+    // 後も stale な再 close を残さず loop が自然終了する
+    // (windowless 待機が起こり得る既知の残余経路)。
+    let (mut session, gate, outcome) = blocking_session(DesktopPolicy::default());
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Action(Intent::new("j1", "test.block", json!({}))),
+    });
+    pump(&mut session, &mut driver);
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(session.close_deferred(w));
+
+    driver.destroy_window(w).unwrap();
+    pump(&mut session, &mut driver);
+    assert!(
+        !session.close_deferred(w),
+        "Destroyed must clean the deferred-close record"
+    );
+    assert!(driver.windows().is_empty());
+    assert!(!driver.exited(), "job still running — exit stays deferred");
+
+    gate.store(true, Ordering::SeqCst);
+    pump_until_exited(&mut session, &mut driver);
+    assert_eq!(*outcome.lock().unwrap(), Some("finished"));
+}
+
+#[test]
 fn destroy_does_not_cancel_jobs_by_default() {
-    // job 実行中の最終 Destroyed: 既定 policy は job も loop も
-    // 止めない — `exit()` は job の終端 signal が drain されるまで
-    // 遅延する。実 driver では `exit()` = loop 終了 = process 終了
-    // で detached worker が未終端 kill されるため、「exit が job
+    // OS 強制 destroy(veto 不能)経路: 既定 policy は job も
+    // loop も止めない — `exit()` は job の終端 signal が drain
+    // されるまで遅延する。この経路では job 終端まで window の
+    // 無い windowless 待機が起こり得る(正常 close の `Defer`
+    // 保留は強制 destroy には適用できない — 既知の残余)。
+    // 実 driver では `exit()` = loop 終了 = process 終了で
+    // detached worker が未終端 kill されるため、「exit が job
     // 終端より後に来る」ことを loop が自然に終わるまで回して検証。
     let (mut session, gate, outcome) = blocking_session(DesktopPolicy::default());
     let mut driver = FakeDriver::new();
@@ -294,6 +432,11 @@ fn destroy_does_not_cancel_jobs_by_default() {
 
 #[test]
 fn cancel_on_destroy_policy_is_opt_in() {
+    // 強制 destroy 経路の opt-in: Destroyed で cancel_window_jobs
+    // → job 側の check_cancel が cancelled 分岐へ進む(gate は
+    // 開かない)。cancel は signal に過ぎず、終端 signal の drain
+    // までは exit() が遅延する — worker が cancelled 分岐を
+    // 記録した後に loop が自然に終わる。
     let (mut session, _gate, outcome) = blocking_session(DesktopPolicy {
         exit_on_last_window: true,
         cancel_jobs_on_destroy: true,
@@ -310,11 +453,6 @@ fn cancel_on_destroy_policy_is_opt_in() {
         "job should be running"
     );
 
-    // opt-in: Destroyed で cancel_window_jobs → job 側の
-    // check_cancel が cancelled 分岐へ進む(gate は開かない)。
-    // cancel は signal に過ぎず、終端 signal の drain までは
-    // exit() が遅延する — worker が cancelled 分岐を記録した後に
-    // loop が自然に終わる。
     driver.destroy_window(w).unwrap();
     pump(&mut session, &mut driver);
     assert!(
@@ -330,10 +468,50 @@ fn cancel_on_destroy_policy_is_opt_in() {
 }
 
 #[test]
+fn close_requested_with_cancel_opt_in_cancels_and_defers() {
+    // 正常 close + `cancel_jobs_on_destroy` opt-in: close 要求を
+    // 「その window の job を取消」意思として signal し、window
+    // 自体は `Defer` で残す。cancelled 終端の drain で close が
+    // 再開されて自然終了する。
+    let (mut session, _gate, outcome) = blocking_session(DesktopPolicy {
+        exit_on_last_window: true,
+        cancel_jobs_on_destroy: true,
+    });
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Action(Intent::new("j1", "test.block", json!({}))),
+    });
+    pump(&mut session, &mut driver);
+    assert!(session.runtime().has_running_jobs());
+
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(
+        driver.windows().contains(&w),
+        "window stays (Defer) until the cancelled job terminates"
+    );
+    assert!(session.close_deferred(w));
+    assert!(!driver.exited());
+
+    pump_until_exited(&mut session, &mut driver);
+    assert_eq!(
+        *outcome.lock().unwrap(),
+        Some("cancelled"),
+        "opt-in must signal cancellation at close time and still wait for the terminal drain"
+    );
+    assert!(driver.destroyed().contains(&w));
+}
+
+#[test]
 fn request_exit_defers_until_running_job_finishes() {
     // 明示 quit(`request_exit`): `exit_on_last_window` policy に
-    // 依らず live window を全 destroy して終了要求を立てるが、
-    // 実行中 job の終端までは `exit()` を発行しない。
+    // 依らず終了要求を立てるが、window の閉じ方は veto-able な
+    // 通常 close flow を通る — job 実行中の最終 window は
+    // `Defer` で残り、終端 drain で close が再開されてから
+    // `exit()` する(強制 destroy は veto と job 保留を越えるため
+    // 使わない)。
     let (mut session, gate, outcome) = blocking_session(DesktopPolicy {
         exit_on_last_window: false,
         cancel_jobs_on_destroy: false,
@@ -348,9 +526,16 @@ fn request_exit_defers_until_running_job_finishes() {
     assert!(session.runtime().has_running_jobs());
 
     session.request_exit(&mut driver);
-    pump(&mut session, &mut driver); // queue された Destroyed を消費
-    assert!(driver.destroyed().contains(&w));
-    assert!(driver.windows().is_empty(), "quit destroys all windows");
+    pump(&mut session, &mut driver); // queue された CloseRequested を消費
+    assert!(
+        driver.windows().contains(&w),
+        "quit must not destroy the last window while a job runs — it defers the close"
+    );
+    assert!(session.close_deferred(w));
+    assert!(
+        session.exit_pending(),
+        "explicit quit must arm the exit request"
+    );
     assert!(
         !driver.exited(),
         "explicit quit must wait for the running job"
@@ -359,6 +544,36 @@ fn request_exit_defers_until_running_job_finishes() {
     gate.store(true, Ordering::SeqCst);
     pump_until_exited(&mut session, &mut driver);
     assert_eq!(*outcome.lock().unwrap(), Some("finished"));
+    assert!(driver.destroyed().contains(&w));
+}
+
+#[test]
+fn request_exit_respects_product_veto() {
+    // 明示 quit でも製品 veto(未保存データ等)は越えない —
+    // veto 中の window は残り、exit 要求は armed のまま待つ。
+    // veto 解除後の通常 close で flow が完結する。
+    let (mut session, _gate, _outcome) = blocking_session(DesktopPolicy {
+        exit_on_last_window: true,
+        cancel_jobs_on_destroy: false,
+    });
+    let mut driver = FakeDriver::new();
+    let w = driver.create_window(&spec()).unwrap();
+    session.set_close_veto(w, true);
+
+    session.request_exit(&mut driver);
+    pump(&mut session, &mut driver);
+    assert!(
+        driver.windows().contains(&w),
+        "product veto must hold even against explicit quit"
+    );
+    assert!(!driver.exited());
+
+    // veto 解除 → 通常 close → Destroyed → armed 済みの exit。
+    session.set_close_veto(w, false);
+    driver.request_close(w);
+    pump(&mut session, &mut driver);
+    assert!(driver.destroyed().contains(&w));
+    assert!(driver.exited());
 }
 
 #[test]
