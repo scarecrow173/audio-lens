@@ -408,6 +408,32 @@ fn real_dataset_produces_view_models() {
         "dataset features should be non-empty"
     );
     assert!(table.records.iter().all(|r| !r.feature_id.is_empty()));
+
+    // Source・Spectrogram・Analysis を Tabs 画面へ束ね、Fake 層へ mount する。
+    let workspace = al_gui::view::workspace::workspace_screen(&session, &cap_id).unwrap();
+    let ruviform_ui::view::ComponentSpec::Tabs(tabs) = &workspace.root else {
+        panic!("workspace root must be tabs");
+    };
+    let titles: Vec<_> = tabs.tabs.iter().map(|t| t.title.as_str()).collect();
+    assert_eq!(titles, ["Source", "Spectrogram", "Analysis"]);
+    // Tabs は active の子だけを mount する。tab を切り替えて各画面を検証する。
+    for (active, key) in [(0, "waveform"), (1, "spectrogram"), (2, "alignments")] {
+        let mut view = workspace.clone();
+        let ruviform_ui::view::ComponentSpec::Tabs(tabs) = &mut view.root else {
+            unreachable!("checked above");
+        };
+        tabs.active = active;
+        let mut host = ruviform_ui::view::ViewHost::new(
+            ruviform_ui::dock::ViewInstanceId::new(1).expect("nonzero"),
+            ruviform_ui::view::AttachEpoch::new(1),
+        );
+        host.mount(view).expect("workspace mounts");
+        let key = ruviform_ui::view::ComponentKey::from(key);
+        assert!(
+            host.observe(&key).expect("mounted").mounted,
+            "{key} mounted"
+        );
+    }
 }
 
 #[test]

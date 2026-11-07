@@ -1,4 +1,5 @@
-//! Source 画面(Waveform/Seek/TimeAxis/Meter)の `ViewSpec` 射影 (AL-G3)。
+//! Source 画面(Waveform/Seek/TimeAxis/Meter)と Spectrogram 画面の
+//! `ViewSpec` 射影 (AL-G3/AL-G4)。
 //!
 //! [`WaveformView`] が返す解決済み `ViewBin` を RF#387 の
 //! `WaveformSpec`/`MeterSpec` payload へ 1 対 1 で写す。bin の統計・
@@ -9,16 +10,20 @@
 //! Meter の `peak` は同じ bin の `min`/`max` から `max(|min|, |max|)`
 //! で導く唯一の写像で、他の値は再計算しない。TimeAxis の tick は
 //! 表示 viewport の秒範囲に対する刻みのみを決め、解析値には触れない。
+//!
+//! Spectrogram は `ruviform-viz` の解決済み [`Tile`] を列ごとに写す。
+//! 列の frame 区間は `Spectrogram::tile` の等分割と同じ規則で求め、
+//! 値・gap は再計算しない。
 
 use std::ops::Range;
 
 use ruviform_ui::behavior::{DetachPolicy, ValueDescriptor};
 use ruviform_ui::view::{
     A11yRole, A11ySpec, AxisTick, ComponentKey, ComponentSpec, ComponentVisualState, ControlSpec,
-    MAX_METER_BINS, MeterBin, MeterSpec, Orientation, PanelSpec, TimeAxisSpec, ViewSpec,
-    WaveformBin, WaveformSpec,
+    LabelSpec, MAX_METER_BINS, MeterBin, MeterSpec, Orientation, PanelSpec, SpectrogramColumn,
+    SpectrogramSpec, TimeAxisSpec, ViewSpec, WaveformBin, WaveformSpec,
 };
-use ruviform_viz::ViewBin;
+use ruviform_viz::{Tile, ViewBin};
 
 use super::ViewError;
 use super::source::WaveformView;
@@ -35,6 +40,12 @@ pub const RULER_KEY: &str = "ruler";
 pub const METER_KEY: &str = "meter";
 /// Seek が発行する command target(`CommandIntent::Commit` の target)。
 pub const SEEK_TARGET: &str = "transport.seek";
+/// Spectrogram 画面 Panel の key。
+pub const SPECTROGRAM_PANEL_KEY: &str = "spectrogram-view";
+/// Spectrogram component の key。
+pub const SPECTROGRAM_KEY: &str = "spectrogram";
+/// 表示 frame 範囲を示す Label の key。
+pub const SPECTROGRAM_RANGE_KEY: &str = "spectrogram-range";
 
 /// tick 刻みの候補 `(step_s, decimals)`。小さい順。最大刻みの 10 区間分まで
 /// (約 10 日)の span を扱える。
@@ -158,6 +169,84 @@ pub fn source_screen(
             a11y: A11ySpec::default(),
         }),
     })
+}
+
+/// 解決済み `Tile` を Spectrogram 画面(表示範囲の Label と Spectrogram)の
+/// `ViewSpec` へ写す。`tile.frames` は STFT frame 単位の表示範囲で、
+/// 列 `c` は `Spectrogram::tile` と同じ等分割の frame 区間を持つ。
+/// `magnitude_range` は consumer が決める表示範囲で、値は変換しない。
+///
+/// # Errors
+/// `tile` の `values` 長が `rows × cols` と一致しない場合。
+pub fn spectrogram_screen(
+    tile: &Tile,
+    magnitude_range: Range<f64>,
+    total_frames: u64,
+) -> Result<ViewSpec, ViewError> {
+    if tile.rows == 0 || tile.cols == 0 || tile.values.len() != tile.rows * tile.cols {
+        return Err(ViewError::Invalid(format!(
+            "tile {}x{} does not match {} values",
+            tile.rows,
+            tile.cols,
+            tile.values.len()
+        )));
+    }
+    let range = ComponentSpec::Label(LabelSpec {
+        key: ComponentKey::from(SPECTROGRAM_RANGE_KEY),
+        text: format!(
+            "frames {}..{} of {total_frames}",
+            tile.frames.start, tile.frames.end
+        ),
+        visual: ComponentVisualState::default(),
+        a11y: A11ySpec::default(),
+    });
+    let spectrogram = ComponentSpec::Spectrogram(SpectrogramSpec {
+        key: ComponentKey::from(SPECTROGRAM_KEY),
+        viewport: tile.frames.clone(),
+        rows: tile.rows,
+        magnitude_range,
+        columns: spectrogram_columns(tile),
+        visual: ComponentVisualState::default(),
+        a11y: A11ySpec {
+            role: Some(A11yRole::Img),
+            label: Some("Spectrogram".to_string()),
+            ..A11ySpec::default()
+        },
+    });
+    Ok(ViewSpec {
+        root: ComponentSpec::Panel(PanelSpec {
+            key: ComponentKey::from(SPECTROGRAM_PANEL_KEY),
+            title: None,
+            children: vec![range, spectrogram],
+            visual: ComponentVisualState::default(),
+            a11y: A11ySpec::default(),
+        }),
+    })
+}
+
+/// `Tile` の列を写す。列 `c` の区間は `Spectrogram::tile` の
+/// `cf0 = span·c/cols`、`cf1 = max(span·(c+1)/cols, cf0+1)`(`span` は
+/// 表示 frame 数の下限 1)を `tile.frames.start` だけずらした値。
+/// `count` は列の有限セル数で、`0` は全セルが NaN の gap 列。
+fn spectrogram_columns(tile: &Tile) -> Vec<SpectrogramColumn> {
+    let f0 = tile.frames.start;
+    let span = tile.frames.end.saturating_sub(f0).max(1);
+    let cols = tile.cols as u64;
+    (0..cols)
+        .map(|c| {
+            let cf0 = span * c / cols;
+            let cf1 = (span * (c + 1) / cols).max(cf0 + 1);
+            let magnitudes: Vec<f64> = (0..tile.rows)
+                .map(|r| tile.values[r * tile.cols + c as usize])
+                .collect();
+            SpectrogramColumn {
+                start: f0 + cf0,
+                end: f0 + cf1,
+                count: magnitudes.iter().filter(|m| m.is_finite()).count() as u64,
+                magnitudes,
+            }
+        })
+        .collect()
 }
 
 fn waveform_bin(b: &ViewBin) -> WaveformBin {

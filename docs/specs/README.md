@@ -51,6 +51,7 @@ Directory: `docs/specs`
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
 | SPEC-XU6YkQ1VJGeG1v6i3nVzTm | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価 (Issue #166 第2 slice) | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | SPEC-srSXzJOEfwrrPbP7Q35wbN | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity (Issue #166 第3 slice) | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| SPEC-Gq3Lm8Xv2RtN6pWzK4hYcA | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity (Issue #166 第4 slice) | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

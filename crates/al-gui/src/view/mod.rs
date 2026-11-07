@@ -8,12 +8,20 @@
 //! 保持する。
 
 pub mod analysis;
+pub mod analysis_screen;
 pub mod dataset;
 pub mod job;
+pub mod run_screen;
 pub mod screen;
 pub mod source;
+pub mod workspace;
 
 use std::fmt;
+
+use ruviform_ui::view::{
+    A11ySpec, CellValue, ComponentKey, ComponentSpec, ComponentVisualState, LabelSpec,
+    MAX_TABLE_ROWS, PanelSpec, TableSpec, ViewSpec,
+};
 
 /// view model の写像/開放エラー。
 #[non_exhaustive]
@@ -68,4 +76,71 @@ pub(crate) fn parse_tag<T: serde::de::DeserializeOwned>(
     let raw = required(row, key)?;
     serde_json::from_value(serde_json::Value::String(raw.to_string()))
         .map_err(|_| ViewError::Invalid(format!("unknown {key} tag {raw:?}")))
+}
+
+/// typed enum の snake_case tag 文字列(表示用)。
+pub(crate) fn tag<T: serde::Serialize>(v: &T) -> String {
+    serde_json::to_value(v)
+        .ok()
+        .and_then(|v| v.as_str().map(str::to_string))
+        .unwrap_or_default()
+}
+
+/// 文字列セル。
+pub(crate) fn text_cell(s: &str) -> Option<CellValue> {
+    Some(CellValue::Text(s.to_string()))
+}
+
+/// 数値セル。非有限値(NaN・無限大)は欠損セル(`None`)として位置を保つ。
+pub(crate) fn num_cell(v: f64) -> Option<CellValue> {
+    v.is_finite().then_some(CellValue::Number(v))
+}
+
+/// Label component。
+pub(crate) fn label(key: &str, text: String) -> ComponentSpec {
+    ComponentSpec::Label(LabelSpec {
+        key: ComponentKey::from(key),
+        text,
+        visual: ComponentVisualState::default(),
+        a11y: A11ySpec::default(),
+    })
+}
+
+/// Panel を根とする画面 `ViewSpec`。
+pub(crate) fn panel(key: &str, children: Vec<ComponentSpec>) -> ViewSpec {
+    ViewSpec {
+        root: ComponentSpec::Panel(PanelSpec {
+            key: ComponentKey::from(key),
+            title: None,
+            children,
+            visual: ComponentVisualState::default(),
+            a11y: A11ySpec::default(),
+        }),
+    }
+}
+
+/// Table component。行数・列数は ruviform の上限を超える場合に拒否する
+/// (長い Dataset は呼び出し側が bounded query で行を絞る)。
+pub(crate) fn table(
+    key: &str,
+    title: &str,
+    columns: &[&str],
+    rows: Vec<Vec<Option<CellValue>>>,
+) -> Result<ComponentSpec, ViewError> {
+    if rows.len() > MAX_TABLE_ROWS {
+        return Err(ViewError::Invalid(format!(
+            "table {key} has {} rows (> {MAX_TABLE_ROWS})",
+            rows.len()
+        )));
+    }
+    Ok(ComponentSpec::Table(TableSpec {
+        key: ComponentKey::from(key),
+        columns: columns.iter().map(|c| (*c).to_string()).collect(),
+        rows,
+        visual: ComponentVisualState::default(),
+        a11y: A11ySpec {
+            label: Some(title.to_string()),
+            ..A11ySpec::default()
+        },
+    }))
 }

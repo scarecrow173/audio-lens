@@ -1,27 +1,34 @@
-//! AL-G3 GPUI parity: Source 画面の同一 `ViewSpec` を Fake 層(`ViewHost`
+//! AL-G3/AL-G4 GPUI parity: Source 画面の同一 `ViewSpec` を Fake 層(`ViewHost`
 //! 直接評価)と GPUI Driver(`GpuiObserver` 経由の mount)で評価し、
 //! mount 済みの key・control の projection・intent が一致することを検証する。
 //!
 //! GPUI 側は consumer 観測 seam(`ruviform-ui-gpui` の `GpuiObserver`)
-//! だけを使い、GPUI 型は持たない。Meter/TimeAxis の描画 plan は seam に
-//! 公開されていないため対象外(NotRun)。
+//! だけを使い、GPUI 型は持たない。描画 plan は `GpuiObserver::drawn` で
+//! Meter・TimeAxis・Waveform を観測し、mount した spec の payload から導いた
+//! Fake 層の期待値と照合する。Spectrogram・Label・Table の描画 plan は seam
+//! (`DrawnPlan`)に無いため対象外(NotRun、ruviform#436 の follow-up)。
 
 #![cfg(feature = "gpui-test")]
 
 mod common;
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::ops::Range;
 
-use al_gui::view::screen::{RULER_KEY, SEEK_KEY, SEEK_TARGET, source_screen};
-use common::fixture_view;
+use al_gui::view::screen::{
+    METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, WAVEFORM_KEY, source_screen,
+};
+use common::{GAP, fixture_view};
 use ruviform_ui::behavior::{CommandPhase, ControlInput, InputSource, ValueInput};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
-    AttachEpoch, AttachEpochAllocator, ComponentKey, ComponentSnapshot, ViewEvent, ViewHost,
-    ViewSpec,
+    AttachEpoch, AttachEpochAllocator, ComponentKey, ComponentSnapshot, ComponentSpec, MeterSpec,
+    TimeAxisSpec, ViewEvent, ViewHost, ViewSpec, WaveformSpec,
 };
 use ruviform_ui::{WindowId, WindowSpec};
-use ruviform_ui_gpui::{GpuiObserver, ViewMount};
+use ruviform_ui_gpui::{
+    DrawnBar, DrawnMark, DrawnPlan, DrawnWaveformChannel, GpuiObserver, ViewMount,
+};
 use serde_json::Value;
 
 const COMMAND_OP: &str = "rvf.ui.command.v1";
@@ -238,5 +245,156 @@ fn seek_gesture_intents_and_projections_match() {
     assert_eq!(
         seek.committed.map(|(plain, _)| f64::from_bits(plain)),
         Some(SEEK_PLAIN)
+    );
+}
+
+/// viewport 内の相対位置。contract の描画規則(`at - start` を span で割る、
+/// span は 1 以上)をそのまま写す。
+fn viewport_x(at: f64, viewport: &Range<u64>) -> f64 {
+    let span = (viewport.end - viewport.start).max(1) as f64;
+    (at - viewport.start as f64) / span
+}
+
+fn assert_close(actual: f64, expected: f64) {
+    assert!((actual - expected).abs() < 1e-6, "{actual} != {expected}");
+}
+
+fn child<'a>(spec: &'a ViewSpec, key: &str) -> &'a ComponentSpec {
+    let ComponentSpec::Panel(panel) = &spec.root else {
+        panic!("root must be a panel");
+    };
+    panel
+        .children
+        .iter()
+        .find(|c| c.key() == &ComponentKey::from(key))
+        .expect("child component")
+}
+
+/// Meter の描画 bar の期待値。gap(`count == 0`・非有限 peak)、範囲外の bin は描かない。
+/// `(channel, x0, x1, peak, rms)`。
+fn expected_bars(m: &MeterSpec) -> Vec<(usize, f64, f64, f64, Option<f64>)> {
+    m.channel_levels
+        .iter()
+        .enumerate()
+        .flat_map(|(channel, bins)| {
+            bins.iter().filter_map(move |b| {
+                if b.count == 0 || !b.peak.is_finite() {
+                    return None;
+                }
+                let f0 = viewport_x(b.start as f64, &m.viewport);
+                let f1 = viewport_x(b.end as f64, &m.viewport);
+                if f1 <= f0 || f1 <= 0.0 || f0 >= 1.0 {
+                    return None;
+                }
+                let rms = b.rms.is_finite().then(|| b.rms.clamp(0.0, 1.0));
+                Some((
+                    channel,
+                    f0.max(0.0),
+                    f1.min(1.0),
+                    b.peak.clamp(0.0, 1.0),
+                    rms,
+                ))
+            })
+        })
+        .collect()
+}
+
+/// TimeAxis の期待 mark。viewport 外の tick は描かない。`(x, major, label)`。
+fn expected_marks(t: &TimeAxisSpec) -> Vec<(f64, bool, &str)> {
+    t.ticks
+        .iter()
+        .map(|k| (viewport_x(k.at, &t.viewport), k.major, k.label.as_str()))
+        .filter(|(x, _, _)| (0.0..=1.0).contains(x))
+        .collect()
+}
+
+/// Waveform の描画 bin(非 gap)の frame 範囲。
+fn expected_bins(w: &WaveformSpec, channel: usize) -> Vec<Range<u64>> {
+    w.channel_bins[channel]
+        .iter()
+        .filter(|b| b.count != 0 && b.min.is_finite() && b.max.is_finite())
+        .map(|b| b.start..b.end)
+        .collect()
+}
+
+fn assert_bars(bars: &[DrawnBar], m: &MeterSpec) {
+    let want = expected_bars(m);
+    assert!(!want.is_empty(), "fixture must draw meter bars");
+    assert_eq!(bars.len(), want.len(), "drawn meter bar count");
+    for (bar, (channel, x0, x1, peak, rms)) in bars.iter().zip(want) {
+        assert_eq!(bar.channel, channel);
+        assert_close(bar.x0, x0);
+        assert_close(bar.x1, x1);
+        assert_close(bar.peak, peak);
+        match (bar.rms, rms) {
+            (Some(actual), Some(expected)) => assert_close(actual, expected),
+            (None, None) => {}
+            other => panic!("rms mismatch: {other:?}"),
+        }
+    }
+}
+
+fn assert_marks(marks: &[DrawnMark], t: &TimeAxisSpec) {
+    let want = expected_marks(t);
+    assert!(!want.is_empty(), "fixture must draw tick marks");
+    assert_eq!(marks.len(), want.len(), "drawn tick mark count");
+    for (mark, (x, major, label)) in marks.iter().zip(want) {
+        assert_close(mark.x, x);
+        assert_eq!(mark.major, major);
+        assert_eq!(mark.label, label);
+    }
+}
+
+fn assert_waveform(channels: &[DrawnWaveformChannel], w: &WaveformSpec) {
+    assert_eq!(channels.len(), w.channels, "drawn channel count");
+    for (drawn, channel) in channels.iter().zip(0..w.channels) {
+        assert_eq!(drawn.channel, channel);
+        assert_eq!(
+            drawn.bins,
+            expected_bins(w, channel),
+            "channel {channel} bins"
+        );
+    }
+}
+
+#[test]
+fn drawn_plans_match_fake_expectations_for_meter_ruler_and_waveform() {
+    let spec = spec();
+    let gpui = Gpui::new(spec.clone());
+    let drawn = gpui.observer.drawn(gpui.window).expect("drawn view");
+    assert_eq!(drawn.window, gpui.window);
+
+    let keys: Vec<&str> = drawn.components.iter().map(|c| c.key.0.as_str()).collect();
+    assert_eq!(keys, [WAVEFORM_KEY, RULER_KEY, METER_KEY], "paint order");
+    for component in &drawn.components {
+        match (&component.plan, child(&spec, &component.key.0)) {
+            (DrawnPlan::Waveform { channels }, ComponentSpec::Waveform(w)) => {
+                assert_waveform(channels, w);
+            }
+            (DrawnPlan::TimeAxis { marks }, ComponentSpec::TimeAxis(t)) => assert_marks(marks, t),
+            (DrawnPlan::Meter { bars }, ComponentSpec::Meter(m)) => assert_bars(bars, m),
+            (plan, other) => panic!("{plan:?} drawn for {}", other.kind()),
+        }
+    }
+}
+
+#[test]
+fn drawn_waveform_omits_the_nan_gap_range() {
+    let gpui = Gpui::new(spec());
+    let drawn = gpui.observer.drawn(gpui.window).expect("drawn view");
+    let DrawnPlan::Waveform { channels } = &drawn.components[0].plan else {
+        panic!("waveform is the first paint component");
+    };
+    let gap = GAP.start as u64..GAP.end as u64;
+    let painted = &channels[0].bins;
+    assert!(
+        painted
+            .iter()
+            .all(|b| !(b.start >= gap.start && b.end <= gap.end)),
+        "no painted bin lies entirely inside the gap {gap:?}: {painted:?}"
+    );
+    assert!(
+        painted.iter().any(|b| b.start < gap.end && b.end > gap.end),
+        "a bin straddling the gap end is painted (it holds finite samples)"
     );
 }

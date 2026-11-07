@@ -28,6 +28,7 @@ Directory: `docs/plans`
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | PLAN-5D5yfFUG8HGrWGJlg97kCG | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity 実装計画 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
