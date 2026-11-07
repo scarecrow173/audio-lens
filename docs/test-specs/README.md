@@ -46,6 +46,7 @@ Directory: `docs/test-specs`
 | TSPEC-034Gs7WHAxB3WpFCH8fHIQ | symphonia AAC-LC audio decode fallback | draft | [symphonia-aac-lc-audio-decode-fallback.md](./symphonia-aac-lc-audio-decode-fallback.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
 | TSPEC-7JyfOx5Dj1B55uTKms7L2h | Native GUI Waveform/Seek 画面の ViewSpec 射影 検証仕様 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| TSPEC-O65pjV4Ci4jMZTRqGNRUm2 | Native GUI Source 画面の ViewSpec 射影・GPUI parity 検証仕様 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

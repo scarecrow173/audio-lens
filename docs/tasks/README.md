@@ -18,6 +18,7 @@ Directory: `docs/tasks`
 | TASK-kcnk4zndetw2GNXXC8OfrL | al-observability logging を ruviform-observability::logging へ委譲 (AL#138) | in-progress | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | completed | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | TASK-NWrMC4dBFWhLLr6YuXhEPF | Issue #166 Waveform/Seek 画面 ViewSpec 射影 実装タスク | in-progress | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| TASK-9dUDqYVPHWLYEx2RNUzEzR | Issue #166 Source 画面 ViewSpec 射影・al-desktop mount・GPUI parity 実装タスク | in-progress | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
