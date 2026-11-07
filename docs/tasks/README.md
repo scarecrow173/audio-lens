@@ -19,6 +19,7 @@ Directory: `docs/tasks`
 | TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | completed | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | TASK-NWrMC4dBFWhLLr6YuXhEPF | Issue #166 Waveform/Seek 画面 ViewSpec 射影 実装タスク | in-progress | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | TASK-9dUDqYVPHWLYEx2RNUzEzR | Issue #166 Source 画面 ViewSpec 射影・al-desktop mount・GPUI parity 実装タスク | in-progress | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
+| TASK-Lw4Ts8Bd2YqN6rXfJ3mKiP | Issue #166 Spectrogram・Job/Run/Analysis 射影と drawn parity 実装タスク (第4 slice) | in-progress | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

@@ -122,3 +122,4 @@ Directory: `docs/impl`
 | IMPL-034z0Uhoo3y9fXz1OCXqAl | wav decode and hash | completed | [ir/wav-decode-and-hash.md](./ir/wav-decode-and-hash.md) |
 | IMPL-XreMEx2yJinBr1n3m0A06o | Native GUI Waveform/Seek 画面 ViewSpec 射影 実装記録(IR) | completed | [ir/native-gui-waveform-seek-screen.md](./ir/native-gui-waveform-seek-screen.md) |
 | IMPL-avXvztBqYhq2RTsytk92JZ | Native GUI Source 画面 ViewSpec 射影・mount・GPUI parity 実装記録(IR) | completed | [ir/native-gui-product-screen-mount.md](./ir/native-gui-product-screen-mount.md) |
+| IMPL-Mx9Vu5Ce3ZrO7sYgK4nLjQ | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity 実装記録(IR) | completed | [ir/native-gui-spectrogram-analysis-projection.md](./ir/native-gui-spectrogram-analysis-projection.md) |
