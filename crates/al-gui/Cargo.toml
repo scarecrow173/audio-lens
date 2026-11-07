@@ -31,6 +31,8 @@ webview = ["dep:ruviform-ui-webview", "ruviform-ui-webview/webview"]
 # Issue #166 AL-G1: GPUI backend composition root (bin/al-desktop)。
 # gpui crate 本体は ruviform-ui-gpui 内に閉じ込められる。
 gpui = ["dep:ruviform-ui-gpui", "ruviform-ui-gpui/gpui"]
+# GPUI Driver の consumer 観測 seam(`GpuiObserver`)を使う parity test 用。
+gpui-test = ["gpui", "ruviform-ui-gpui/gpui-test"]
 
 [[bin]]
 name = "al-gui"
