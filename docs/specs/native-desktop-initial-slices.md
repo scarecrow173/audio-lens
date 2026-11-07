@@ -67,7 +67,17 @@ Window/Driver/Slot/Session を含む main)。
 - Window lifecycle policy:
   - `set_close_veto(window, bool)` による veto 登録を持ち、
     `CloseRequested` は veto window へ `CloseDecision::Veto`、
-    それ以外へ `Approve` を返す。
+    それ以外へ `Approve` を返す。ただし最終 live window の
+    close で実行中 Job が残る場合は `CloseDecision::Defer`
+    を返す — window を消したまま Job 終端を「可視 window も
+    取消導線も期限も無く」待つのは不可視な無期限待機であり
+    認めない。`Defer` された window は close-pending のまま
+    live で、Job 一覧・取消 intent・pending 状態
+    (`close_deferred`)が残る。`Tick` drain が Job 終端を
+    回収すると保留中の window へ `request_close` を再発行し、
+    close policy/veto を通常 flow で再評価して
+    `Approve` → `Destroyed` へ進む(保留中に立った製品
+    veto や新規 Job でも正しく保留へ戻る)。
   - `exit_on_last_window`(default true): `Destroyed` で live
     window が尽きたら app 終了を要求する。ただし `driver.exit()`
     自体は実行中 Job が無い時点まで遅延される — `exit()` で
@@ -75,11 +85,24 @@ Window/Driver/Slot/Session を含む main)。
     kill されるため、終了要求は `exit_pending` に保留し、
     `Tick` drain が終端 signal を回収した後に発行する。
   - 明示的な app 終了要求(将来の Quit 経路)は `request_exit` が
-    受け、live window を全 destroy した上で同じ遅延規則に従う。
+    受け、`exit_pending` を立てた上で live window 全てへ
+    `request_close`(veto-able な通常 close flow)を発行する —
+    強制 `destroy_window` は製品 veto と Job 実行中の `Defer`
+    を踏み越えるため使わない。Job 実行中は通常 close と同じく
+    最終 window が `Defer` で残り、終端後に `exit()` する。
   - `cancel_jobs_on_destroy`(default false): opt-in のみ
     `cancel_window_jobs`。既定では window close/destroy が
-    Job を暗黙停止しない(Issue #166 受入に整合)。opt-in cancel
+    Job を暗黙停止しない(Issue #166 受入に整合)。最終 window
+    close の `Defer` 時点で opt-in は Job へ cancel signal を
+    送る(「閉じる = Job 取消」の意思)が、window は終端
+    drain まで残る — cancel は終端ではない。opt-in cancel
     後も `exit()` は終端 signal の drain まで遅延する。
+  - OS 強制 `Destroyed`(veto/`Defer` 不能な teardown)では
+    上記の保留が適用できない。この経路で最終 window が消えた
+    場合、Job 終端まで window の無い windowless 待機が
+    起こり得る — 代替(暗黙 Job kill)を拒否した上での既知の
+    残余リスクとして IR に記録し、保証不能範囲を成功と
+    偽装しない。
 - `feature = "gpui"` 限定の composition root binary
   `al-desktop`: `GuiPreferences` → `ResolvedTheme` →
   `GpuiDriver::new()` → `WindowSpec` → `run` → `session.handle`。

@@ -61,6 +61,9 @@ features:
           - veto なし CloseRequested → Approve で respond_close
           - set_close_veto(true) した window の CloseRequested → Veto
           - veto なし CloseRequested + respond_close Approve 後の Destroyed → live から除去
+          - 最終 live window かつ job 実行中の CloseRequested → Defer: window は live のまま close-pending、close_deferred が true、job/outcome は進行中(不可視待機ではなく window・取消導線・pending 状態を残す)
+          - 実行中の再 close も同じ判定で Defer に留まる(冪等、spam 突破不可)
+          - job 終端 drain で保留中 window へ request_close が再発行され、通常 flow 再評価 → Approve → Destroyed → exit(再評価が実際に veto/policy を通ることを検証)
       - name: destroy-policy
         examples:
           - exit_on_last_window=true かつ全 window Destroyed → driver.exit() が呼ばれる
@@ -68,9 +71,11 @@ features:
           - cancel_jobs_on_destroy=false(default) → cancel_window_jobs が呼ばれない
       - name: exit-defers-to-job-terminal
         examples:
-          - 実行中 job ありで最終 Destroyed → exited=false のまま、job 完走 drain 後に session が exit() を発行し loop が自然終了(worker が "finished" を記録してから exit — process 終了での黙示 kill を検証)
+          - 実行中 job ありで最終 Destroyed(OS 強制経路: Defer 不能) → exited=false のまま、job 完走 drain 後に session が exit() を発行し loop が自然終了(worker が "finished" を記録してから exit — process 終了での黙示 kill を検証)
           - cancel_jobs_on_destroy=true で Destroyed → cancel signal 後、cancelled 終端 drain まで exit() が遅延し loop が自然終了(destroy pump 直後に exited=false を assert する ordering 検証)
-          - request_exit は exit_on_last_window=false でも live window を全 destroy して終了要求を立て、実行中 job の終端まで exit() を遅延する
+          - 正常 close + cancel_jobs_on_destroy=true → Defer 時点で cancel signal、window は live のまま cancelled 終端 drain で close 再開 → destroyed + exit
+          - request_exit は exit_on_last_window=false でも全 live window へ request_close(veto-able)を発行し exit_pending を立てる — job 実行中は最終 window が Defer で残り、終端 drain で close 再開後に exit()(destroy_window 直呼びは veto/job 保留を越えるため不可)
+          - request_exit は製品 veto を越えない: veto window は残り exited=false、veto 解除後の通常 close で完結
           - exit_on_last_window=false では最終 Destroyed 後も exit しない(終了要求が立たない)
   theme:
     rules:

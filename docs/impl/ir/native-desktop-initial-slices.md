@@ -59,12 +59,21 @@ metadata:
   - `Tick` → `drain_jobs_routed` → `post_event` 配送。
   - `Action(Intent)` → `dispatch_window_intent` → 配送。
   - `CloseRequested` → `handle_window(.., CloseRequested)` +
-    `respond_close`(veto 登録 window は `Veto`、他は `Approve`)。
-  - `Destroyed` → `vetoes` から除去。opt-in のみ
+    `respond_close`。decision の優先順位: 製品 veto → `Veto`、
+    最終 live window かつ job 実行中 → `Defer` +
+    `deferred_close` 登録(opt-in 時は同時に
+    `cancel_window_jobs`)、それ以外 → `Approve`
+    (review 第 4 ラウンド対応 — 詳細は判断記録)。
+  - `Destroyed` → `vetoes`/`deferred_close` から除去。opt-in のみ
     `cancel_window_jobs`。`exit_on_last_window`(既定)かつ
     `driver.windows().is_empty()` で `exit_pending` を立てる。
     live window 集合は `WindowDriver::windows()` を正本とし
     session 側に第二の追跡集合を持たない。
+  - `Tick` drain 直後に `resume_deferred_closes`:
+    `!has_running_jobs()` なら `deferred_close` を take し
+    live な window へ `request_close` を再発行 — 新しい
+    `CloseRequested` として policy/veto が最初から再評価
+    される通常 flow に乗る。
   - `maybe_exit` — `driver.exit()` の唯一の発行点。
     `exit_pending && windows().is_empty() && !has_running_jobs()`
     のときのみ発行。`exit()` = loop 終了 = process 終了で
@@ -73,8 +82,11 @@ metadata:
     回収した直後に発行する(review 第 2 ラウンド P1 対応)。
     `request_exit(driver)` は明示 quit 経路 —
     `exit_on_last_window` に依らず `exit_pending` を立て live
-    window を全 destroy する。`exit_pending()` getter で保留状態を
-    観測できる(「job 完了後に終了」を UI が表示する点)。
+    window 全てへ `request_close` を発行する(veto-able な
+    通常 close flow — 強制 destroy は製品 veto と `Defer` を
+    越えるため使わない、review 第 4 ラウンド対応)。
+    `exit_pending()`/`close_deferred(w)` getter で保留状態を
+    観測できる(「job 完了後に終了/閉じる」を UI が表示する点)。
     `exited` latch が発行済み `exit()` の重複発行と exit 後
     event の dispatch/配送/新規 job spawn を閉じる。
   - `Resized/Moved/Focused/ScaleFactorChanged` → 対応 `HostEvent` へ
@@ -173,13 +185,23 @@ metadata:
 
 ## 検証記録
 
-- `cargo test -p al-gui`: 36 test 全 pass(desktop 9 + service_ops 5 +
+- `cargo test -p al-gui`: 41 test 全 pass(desktop 14 + service_ops 5 +
   theme 10 + view 12)。review 第 2 ラウンドでは
   `destroy_does_not_cancel_jobs_by_default` が修正前コードで
   `assert!(!driver.exited())` に FAILED することを確認した
   RED → 修正で GREEN。第 3 ラウンド独立 review verdict: ACCEPT
   — P2 sibling(`WaveformView::window` overflow)と P3 3 件
   (`exited` latch・cancel test ordering assert)を同じ修正へ畳んだ。
+  第 4 ラウンド(不可視無期限待機の禁止)では
+  `close_requested_on_last_window_defers_while_job_runs` 等 4 test が
+  修正前コードで `windows().contains(&w)` に FAILED することを
+  確認した RED → `Defer` 保留実装で GREEN(自然 driver loop、
+  exit 後の Tick 続行・既定強制 cancel・再 close spam 突破なし)。
+  第 4 ラウンドの内部独立 review verdict: ACCEPT — P2(保留中に
+  立った製品 veto を再開 close が尊重するかの test gap)を
+  `deferred_close_resume_respects_new_product_veto` で閉塞、
+  P3(強制 destroy 中の deferred 記録掃除・rustdoc 表現ドリフト・
+  Defer 副作用の ordering)も同じ修正へ畳んだ。
 - `cargo check -p al-gui --all-targets` / `cargo clippy -p al-gui
   --all-targets -- -D warnings`: pass。
 - `node tools/check-headless-deps.mjs`: pass。guard の候補名に
@@ -220,9 +242,44 @@ metadata:
   `windows().is_empty() && !has_running_jobs()` が成立した時点で
   のみ `exit()` を発行する。job が走っている限り loop は存続し、
   `Tick` が終端 signal の drain を続ける — 待機は job の実終端に
-  束ねられており、隠れた無期限待機でも既定値強制 cancel でも
-  ない。`cancel_jobs_on_destroy` opt-in は待機を job 完走ではなく
-  cancelled 終端へ短縮するだけで、規則は同一。
+  束ねられている。`cancel_jobs_on_destroy` opt-in は待機を job
+  完走ではなく cancelled 終端へ短縮するだけで、規則は同一。
+- 最終 window の `CloseRequested` を job 実行中に `Defer` 保留
+  (review 第 4 ラウンド対応 — 前節の「隠れた無期限待機でも
+  ない」はこの修正前は過大だった): 第 2 ラウンドの遅延 exit は
+  「job を kill しない」を満たしたが、正常 close で全 window が
+  消えた後は可視 window・取消導線・表示される pending 状態の
+  ない待機が残り、「不可視な無期限待機の禁止」条件を破って
+  いた。`CloseDecision::Defer` は契約の設計語彙(window は
+  close-pending のまま live — 非同期 cleanup flow 向け)であり、
+  window・job 一覧・取消 intent・`close_deferred` の pending
+  状態が残るため待機は可視かつ操作可能。`Veto` でなく `Defer`
+  を選ぶ理由: `Veto` は close 意思を取消すが、`Defer` は
+  close-pending として意思を保持したまま保留する — job 終端で
+  close が再開される設計意図と一致する。
+- `Defer` の再開は `request_close` 再発行(強制 `destroy_window`
+  ではない): 契約上どちらも許容されるが、再発行は新しい
+  `CloseRequested` として製品 veto・job 再チェックを最初から
+  通るため「close policy/veto の再評価」要件を満たす。待機中に
+  製品 veto が立てば再び Veto、新規 job が走れば再び Defer で
+  保留へ戻る。`deferred_close` は session 側の再開対象記録で、
+  `Destroyed`(強制経路含む)で除去する。
+- `request_exit` は `destroy_window` ではなく `request_close` を
+  全 window へ発行: 明示 quit も製品 veto(未保存データ等)と
+  job 実行中の `Defer` を越えない — これらを踏み越える
+  `destroy_window` 直呼びは veto 契約の意味を壊す。quit が
+  veto に阻まれた場合 `exit_pending` は armed のまま残り、
+  veto 解除後の通常 close で完結する。veto 尊重が必須で、
+  未配線の future API 拡張は行わない。
+- **既知の残余リスク(保証不能範囲)**: OS 強制 `Destroyed`
+  (`destroy_window` / backend 強制 teardown)は veto/`Defer`
+  不能であり、最終 window がこの経路で消えた場合は job 終端
+  まで window の無い windowless 待機が起こり得る。代替案の
+  暗黙 job kill は受入を破るため棄却、job cancel 強制は既定値
+  変更を要求するため棄却。軽減策の候補(強制終了 gesture や
+  タイムアウト/watchdog、upstream driver 側の pre-teardown 通知)
+  は AL-G4 実 OS lifecycle 検証スコープまたは Ruviform 側の
+  検討事項として残す — 本範囲で成功を偽装しない。
 - `ticks(start, end)` は両端を `len` へ clamp(review 第 2 ラウンド
   P2 対応): 旧実装は `start > len` のとき `end` が `start` に
   引き上げられ `[start..start]` が範囲外で panic した

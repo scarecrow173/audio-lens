@@ -89,6 +89,7 @@ pub struct DesktopSession {
     runtime: UiRuntime,
     policy: DesktopPolicy,
     vetoes: BTreeSet<WindowId>,
+    deferred_close: BTreeSet<WindowId>,
     theme: Option<ResolvedTheme>,
     exit_pending: bool,
     exited: bool,
@@ -96,12 +97,17 @@ pub struct DesktopSession {
 ```
 
 - `handle(&mut self, ev: DriverEvent, driver: &mut dyn WindowDriver)`
-  - `Tick` → `deliver(runtime.drain_jobs_routed())`
+  - `Tick` → `deliver(runtime.drain_jobs_routed())` 後に
+    `resume_deferred_closes`(後述)。
   - `Windowed{Action(intent)}` → `deliver(dispatch_window_intent(w, intent))`
   - `Windowed{CloseRequested}` → `deliver(handle_window(w, HostEvent::CloseRequested))`
-    → `driver.respond_close(w, decision)`。decision は veto window
-    なら `Veto`、それ以外は `Approve`。
-  - `Windowed{Destroyed}` → `vetoes` から除去。
+    → `driver.respond_close(w, decision)`。decision の優先順位:
+    製品 veto window なら `Veto`(deferred_close には記録せず
+    自動再開もしない — 解除は製品側の所有)、次に最終 live
+    window(`driver.windows().len() == 1`)かつ Job 実行中なら
+    `Defer` + `deferred_close` へ登録(opt-in 時は同時に
+    `cancel_window_jobs`)、それ以外は `Approve`。
+  - `Windowed{Destroyed}` → `vetoes`/`deferred_close` から除去。
     `cancel_jobs_on_destroy` 時のみ `cancel_window_jobs`。
     `exit_on_last_window && driver.windows().is_empty()` →
     `exit_pending = true`(app 終了要求の保留)。live window 集合は
@@ -128,9 +134,22 @@ pub struct DesktopSession {
   (`handle`/`request_exit` は `exited` で早期 return)。
 - `request_exit(&mut self, driver)` — 明示的な app 終了要求
   (将来の Quit action / OS quit)。`exit_on_last_window` に依らず
-  `exit_pending` を立て、live window を全て `destroy_window`
-  する(各 `Destroyed` は通常経路で veto 掃除・opt-in cancel を
-  通る)。job 実行中は同じく終端まで `exit()` を遅延する。
+  `exit_pending` を立て、live window 全てへ `request_close` を
+  発行する。強制 `destroy_window` は製品 veto と Job 実行中の
+  `Defer` を踏み越えるため使わない — quit も veto-able な通常
+  close flow を通り、Job 実行中の最終 window は `Defer` で
+  残り、終端 drain で close が再開されてから `exit()` する。
+  製品 veto が残る window は quit でも越えない。
+- `resume_deferred_closes` — `Tick` drain 直後の再評価点。
+  `!runtime.has_running_jobs()` のとき `deferred_close` を
+  take し、まだ live な各 window へ `driver.request_close` を
+  再発行する。再発行は新しい `CloseRequested` として policy/
+  veto が最初から再評価される通常 flow に乗る(待機中の製品
+  veto 設定や新規 Job でも正しく保留へ戻る)。
+- `close_deferred(window)` — window の close が Job 終端待ちで
+  `Defer` 保留中かを観測する getter。window は live のまま
+  close-pending となり、UI が「Job 完了後に閉じる」状態を
+  表示するための点。
 - `exit_pending()` — 保留中の終了要求を観測する getter
   (「job 完了後に終了」を UI が表示するための点)。
 - `deliver`: `RoutedEvent.window = Some(w)` → `post_event(w)`。
