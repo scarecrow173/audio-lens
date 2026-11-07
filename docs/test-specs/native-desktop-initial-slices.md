@@ -66,6 +66,12 @@ features:
           - exit_on_last_window=true かつ全 window Destroyed → driver.exit() が呼ばれる
           - live window が残っている限り exit しない
           - cancel_jobs_on_destroy=false(default) → cancel_window_jobs が呼ばれない
+      - name: exit-defers-to-job-terminal
+        examples:
+          - 実行中 job ありで最終 Destroyed → exited=false のまま、job 完走 drain 後に session が exit() を発行し loop が自然終了(worker が "finished" を記録してから exit — process 終了での黙示 kill を検証)
+          - cancel_jobs_on_destroy=true で Destroyed → cancel signal 後、cancelled 終端 drain まで exit() が遅延し loop が自然終了
+          - request_exit は exit_on_last_window=false でも live window を全 destroy して終了要求を立て、実行中 job の終端まで exit() を遅延する
+          - exit_on_last_window=false では最終 Destroyed 後も exit しない(終了要求が立たない)
   theme:
     rules:
       - name: resolves-light-and-dark
@@ -117,6 +123,7 @@ features:
       - name: stream-time-bounded
         examples:
           - ticks(i..j) が PTS window を返し seconds_at が timebase_hz で換算される
+          - ticks の start/end は両端 len へ clamp され、start>len・start>end・空 stream ticks(1,2) でも panic せず空 slice を返す
           - metadata の av_timing は Vec<StreamTiming> 配列として解釈され単一 object は拒否
           - timebase_hz==0 の malformed stream で seconds_at が None(inf/NaN を作らない)
   integration:

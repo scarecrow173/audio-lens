@@ -62,9 +62,19 @@ metadata:
     `respond_close`(veto 登録 window は `Veto`、他は `Approve`)。
   - `Destroyed` → `vetoes` から除去。opt-in のみ
     `cancel_window_jobs`。`exit_on_last_window`(既定)かつ
-    `driver.windows().is_empty()` で `driver.exit()`。live window
-    集合は `WindowDriver::windows()` を正本とし session 側に第二の
-    追跡集合を持たない。
+    `driver.windows().is_empty()` で `exit_pending` を立てる。
+    live window 集合は `WindowDriver::windows()` を正本とし
+    session 側に第二の追跡集合を持たない。
+  - `maybe_exit` — `driver.exit()` の唯一の発行点。
+    `exit_pending && windows().is_empty() && !has_running_jobs()`
+    のときのみ発行。`exit()` = loop 終了 = process 終了で
+    detached job worker が未終端 kill されるため、実行中 job が
+    いる間は終了要求を保留し、`Tick` drain が終端 signal を
+    回収した直後に発行する(review 第 2 ラウンド P1 対応)。
+    `request_exit(driver)` は明示 quit 経路 —
+    `exit_on_last_window` に依らず `exit_pending` を立て live
+    window を全 destroy する。`exit_pending()` getter で保留状態を
+    観測できる(「job 完了後に終了」を UI が表示する点)。
   - `Resized/Moved/Focused/ScaleFactorChanged` → 対応 `HostEvent` へ
     写像。`Ready` は `HostEvent::Ready{url}` が WebView 由来のため
     写さない(空文字列を捏造しない)。未知 variant は無視。
@@ -79,7 +89,10 @@ metadata:
   CloseRequested→veto/approve・Destroyed→last-window exit を検証。
   job cancel 契約は `BlockingService` fixture(gate + 観測路)で
   決定的に検証する — `has_running_jobs` の一瞬状態ではなく job が
-  辿った分岐(finished/cancelled)を観測(7 test)。
+  辿った分岐(finished/cancelled)を観測。exit 遅延は
+  `pump_until_exited` が `driver.exited()` まで Tick を回す
+  自然な loop 終了で検証 — `exit()` 後に Tick を流す偽受入は
+  しない(9 test)。
 
 ### AL-G2 — Product Theme / assets / preferences
 
@@ -117,6 +130,9 @@ metadata:
   `TimeMap`(capture→source 秒 offset+rate 写像。pre-range は
   signed delta で線形外挿、clamp しない)、
   `StreamTimeView`(bounded `ticks(i..j)` + `seconds_at`)。
+  `ticks` は `start`/`end` を両端 `len` へ clamp し、
+  `start > len` や空 stream でも panic せず空 slice を返す
+  (review 第 2 ラウンド P2 対応)。
   `from_metadata` は永続化 shape `av_timing` の
   `Vec<StreamTiming>` のみを解釈し `Vec<Self>` を返す。
   `timing()`/`timestamp_origin()`/`observation()` で producer の
@@ -152,8 +168,11 @@ metadata:
 
 ## 検証記録
 
-- `cargo test -p al-gui`: 33 test 全 pass(desktop 7 + service_ops 5 +
-  theme 10 + view 11)。
+- `cargo test -p al-gui`: 35 test 全 pass(desktop 9 + service_ops 5 +
+  theme 10 + view 11)。review 第 2 ラウンドでは
+  `destroy_does_not_cancel_jobs_by_default` が修正前コードで
+  `assert!(!driver.exited())` に FAILED することを確認した
+  RED → 修正で GREEN。
 - `cargo check -p al-gui --all-targets` / `cargo clippy -p al-gui
   --all-targets -- -D warnings`: pass。
 - `node tools/check-headless-deps.mjs`: pass。guard の候補名に
@@ -183,6 +202,24 @@ metadata:
 - `exit_on_last_window` 既定 `true`: single-window desktop の
   自然な終了経路。`Destroyed` でのみ発火(`CloseRequested`
   approve → `Destroyed` → exit)。
+- `driver.exit()` は `exit_pending` + `maybe_exit` 経路へ集約
+  (review 第 2 ラウンド P1 対応): `exit()` は loop 終了 =
+  process 終了を意味し、`UiRuntime` の job worker は JoinHandle を
+  保持しない detached thread であるため、実行中 job がある状態で
+  exit すると worker が未終端のまま kill される。これは
+  「window close/destroy が job を暗黙停止しない」受入を
+  process 終了経路で破るため、全ての終了要求(last-window
+  policy・`request_exit`)は `exit_pending` に畳み、
+  `windows().is_empty() && !has_running_jobs()` が成立した時点で
+  のみ `exit()` を発行する。job が走っている限り loop は存続し、
+  `Tick` が終端 signal の drain を続ける — 待機は job の実終端に
+  束ねられており、隠れた無期限待機でも既定値強制 cancel でも
+  ない。`cancel_jobs_on_destroy` opt-in は待機を job 完走ではなく
+  cancelled 終端へ短縮するだけで、規則は同一。
+- `ticks(start, end)` は両端を `len` へ clamp(review 第 2 ラウンド
+  P2 対応): 旧実装は `start > len` のとき `end` が `start` に
+  引き上げられ `[start..start]` が範囲外で panic した
+  (空 stream `ticks(1, 2)`)。
 - `RoutedEvent{None}` の全 window 配送: `UiRuntime` の unrouted
   契約を app-level 通知として正規化。配送先集合は
   `WindowDriver::windows()` を正本とする(契約 designated source

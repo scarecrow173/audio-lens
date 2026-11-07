@@ -88,9 +88,9 @@ pub struct DesktopPolicy {
 pub struct DesktopSession {
     runtime: UiRuntime,
     policy: DesktopPolicy,
-    live: BTreeSet<WindowId>,
     vetoes: BTreeSet<WindowId>,
     theme: Option<ResolvedTheme>,
+    exit_pending: bool,
 }
 ```
 
@@ -103,15 +103,32 @@ pub struct DesktopSession {
   - `Windowed{Destroyed}` → `vetoes` から除去。
     `cancel_jobs_on_destroy` 時のみ `cancel_window_jobs`。
     `exit_on_last_window && driver.windows().is_empty()` →
-    `driver.exit()`。live window 集合は `WindowDriver::windows()` を
-    正本とし、session 側に第二の追跡集合を持たない(契約の
-    designated source of truth)。
+    `exit_pending = true`(app 終了要求の保留)。live window 集合は
+    `WindowDriver::windows()` を正本とし、session 側に第二の
+    追跡集合を持たない(契約の designated source of truth)。
   - `Windowed{Resized/Moved/Focused/ScaleFactorChanged}` → 対応する
     `HostEvent` へ写して `handle_window`。
     `Ready` は写さない — `HostEvent::Ready` の `url` は WebView
     adapter の関心事であり、空文字列を捏造しない。
   - 未知の `DriverEvent`/`WindowLifecycle` variant(non-exhaustive)
     は無視する — 意味を捏造しない。
+  - 各 event 処理の末尾で `maybe_exit` を評価する。
+- `maybe_exit` — `driver.exit()` の唯一の発行点。`exit_pending &&
+  driver.windows().is_empty() && !runtime.has_running_jobs()` の
+  ときだけ発行する。`exit()` = loop 終了 = process 終了で
+  detached job worker が未終端 kill されるため、実行中 job が
+  ある間は終了要求を保留し、`Tick` drain が終端 signal を回収
+  (`has_running_jobs` が落ちる)した直後の機会に発行する。
+  `cancel_jobs_on_destroy` opt-in も同じ規則 — cancel は
+  signal であって終端ではなく、cancelled 報告の drain までは
+  exit を遅延する。
+- `request_exit(&mut self, driver)` — 明示的な app 終了要求
+  (将来の Quit action / OS quit)。`exit_on_last_window` に依らず
+  `exit_pending` を立て、live window を全て `destroy_window`
+  する(各 `Destroyed` は通常経路で veto 掃除・opt-in cancel を
+  通る)。job 実行中は同じく終端まで `exit()` を遅延する。
+- `exit_pending()` — 保留中の終了要求を観測する getter
+  (「job 完了後に終了」を UI が表示するための点)。
 - `deliver`: `RoutedEvent.window = Some(w)` → `post_event(w)`。
   `None` → `driver.windows()` の全 window へ `post_event`
   (ownerless = app-level)。

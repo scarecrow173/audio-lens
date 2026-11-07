@@ -63,6 +63,10 @@ Issue #166 の Close や AL-G4/G5 正式受入は目的外。
 - [x] doc index 再生成(`doc_maintenance.js apply` + impl/ir README)
 - [x] 独立 review A/B → Validator → Judge、P0/P1 修正
 - [x] `fmt`/`check`/`lint`/`test`/UI/gpui/headless lane 検証
+- [x] push 済み(PR #168)。post-push 独立 review 第 2 ラウンドの
+  指摘(exit-deferral P1・`ticks` bounds P2)を修正 — `driver.exit()` を
+  `exit_pending`+`maybe_exit` 経路へ集約し、実行中 job の終端 drain まで
+  `exit()` を遅延。RED(修正前 `assert!(!driver.exited())` 失敗)→GREEN
 - [ ] origin/main merge → union → 再生成 → 最終 verify
 - [ ] 日本語 Conventional Commit → push → PR(Refs #166)
 

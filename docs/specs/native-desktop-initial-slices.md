@@ -69,10 +69,17 @@ Window/Driver/Slot/Session を含む main)。
     `CloseRequested` は veto window へ `CloseDecision::Veto`、
     それ以外へ `Approve` を返す。
   - `exit_on_last_window`(default true): `Destroyed` で live
-    window が尽きたら `driver.exit()`。
+    window が尽きたら app 終了を要求する。ただし `driver.exit()`
+    自体は実行中 Job が無い時点まで遅延される — `exit()` で
+    loop/process が終わると detached job worker が未終端のまま
+    kill されるため、終了要求は `exit_pending` に保留し、
+    `Tick` drain が終端 signal を回収した後に発行する。
+  - 明示的な app 終了要求(将来の Quit 経路)は `request_exit` が
+    受け、live window を全 destroy した上で同じ遅延規則に従う。
   - `cancel_jobs_on_destroy`(default false): opt-in のみ
     `cancel_window_jobs`。既定では window close/destroy が
-    Job を暗黙停止しない(Issue #166 受入に整合)。
+    Job を暗黙停止しない(Issue #166 受入に整合)。opt-in cancel
+    後も `exit()` は終端 signal の drain まで遅延する。
 - `feature = "gpui"` 限定の composition root binary
   `al-desktop`: `GuiPreferences` → `ResolvedTheme` →
   `GpuiDriver::new()` → `WindowSpec` → `run` → `session.handle`。
