@@ -49,6 +49,7 @@ Directory: `docs/specs`
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
+| SPEC-XU6YkQ1VJGeG1v6i3nVzTm | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価 (Issue #166 第2 slice) | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

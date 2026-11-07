@@ -26,6 +26,7 @@ Directory: `docs/plans`
 | PLAN-9PUZEliT1Z1FgKwKE0LHmP | al-observability logging の ruviform-observability 委譲実装計画 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
+| PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
