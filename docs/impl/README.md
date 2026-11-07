@@ -120,3 +120,4 @@ Directory: `docs/impl`
 | IMPL-034zkPdjQ6GHTg2DAo8BcH | viz-waveform-lod | completed | [ir/viz-waveform-lod.md](./ir/viz-waveform-lod.md) |
 | IMPL-034z8jdN9kIjPiFpcp0mgM | wav-audio-store | completed | [ir/wav-audio-store.md](./ir/wav-audio-store.md) |
 | IMPL-034z0Uhoo3y9fXz1OCXqAl | wav decode and hash | completed | [ir/wav-decode-and-hash.md](./ir/wav-decode-and-hash.md) |
+| IMPL-XreMEx2yJinBr1n3m0A06o | Native GUI Waveform/Seek 画面 ViewSpec 射影 実装記録(IR) | completed | [ir/native-gui-waveform-seek-screen.md](./ir/native-gui-waveform-seek-screen.md) |

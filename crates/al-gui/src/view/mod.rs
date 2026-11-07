@@ -10,6 +10,7 @@
 pub mod analysis;
 pub mod dataset;
 pub mod job;
+pub mod screen;
 pub mod source;
 
 use std::fmt;

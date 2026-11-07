@@ -5,6 +5,7 @@
 //! `ruviform-viz` の `WaveformSeries`/`Spectrogram` へ束ねる。
 //! 読み出しは常に範囲指定で、長尺 Dataset の全量ロードをしない。
 
+use std::ops::Range;
 use std::sync::Arc;
 
 use al_locate::LocateResult;
@@ -65,6 +66,32 @@ impl WaveformView {
         &self.timebase
     }
 
+    /// `window` が実際に読む frame 範囲。空区間は 1 frame へ広げ、
+    /// 表示 viewport と bins の範囲を一致させる。
+    #[must_use]
+    pub fn read_frames(&self, start_s: f64, end_s: f64) -> Range<u64> {
+        let range = self.frame_range(start_s, end_s);
+        range.start..range.end.max(range.start.saturating_add(1))
+    }
+
+    /// `[start_s, end_s)` を frame 範囲へ写す。両端は `frames` へ
+    /// clamp し、`end` は `start` 以上に保つ。
+    fn frame_range(&self, start_s: f64, end_s: f64) -> Range<u64> {
+        // `seconds_to_sample` は巨大な秒入力を u64::MAX へ saturate
+        // する — start も frames へ clamp しないと `start + 1` が
+        // 整数 overflow で panic する(ticks() と同じ両端 clamp)。
+        let start = self
+            .timebase
+            .seconds_to_sample(start_s.max(0.0))
+            .min(self.frames);
+        let end = self
+            .timebase
+            .seconds_to_sample(end_s.max(0.0))
+            .min(self.frames)
+            .max(start);
+        start..end
+    }
+
     /// `channel` の `[start_s, end_s)` を最大 `bins` 個の
     /// `ViewBin` へ集約して返す。読み出しは範囲のみ。
     ///
@@ -83,25 +110,9 @@ impl WaveformView {
                 self.channels
             )));
         }
-        // `seconds_to_sample` は巨大な秒入力を u64::MAX へ saturate
-        // する — start も frames へ clamp しないと `start + 1` が
-        // 整数 overflow で panic する(ticks() と同じ両端 clamp)。
-        let start = self
-            .timebase
-            .seconds_to_sample(start_s.max(0.0))
-            .min(self.frames);
-        let end = self
-            .timebase
-            .seconds_to_sample(end_s.max(0.0))
-            .min(self.frames)
-            .max(start);
+        let range = self.read_frames(start_s, end_s);
         self.series
-            .view(
-                channel,
-                start,
-                end.max(start.saturating_add(1)),
-                bins.max(1),
-            )
+            .view(channel, range.start, range.end, bins.max(1))
             .map_err(|e| ViewError::Invalid(e.to_string()))
     }
 }
