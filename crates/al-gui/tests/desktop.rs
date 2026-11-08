@@ -11,7 +11,7 @@ use al_gui::command;
 use al_gui::desktop::{DesktopPolicy, DesktopSession};
 use al_gui::service::AlGuiService;
 use al_testkit::temp::TempDir;
-use ruviform_ui::ipc::{ErrorBody, Intent, codes};
+use ruviform_ui::ipc::{ErrorBody, Intent, JobState, codes};
 use ruviform_ui::{
     CallOutcome, DataRegistry, DriverEvent, JobSpec, OpInfo, Service, ServiceContext, UiRuntime,
     WindowDriver, WindowId, WindowLifecycle, WindowSpec,
@@ -754,6 +754,121 @@ fn cancel_intent_cancels_the_window_owned_job_and_replies_accepted() {
         session.take_projection_dirty(),
         "job end must re-project the screen"
     );
+}
+
+/// `id` 宛の `result` を配送順に返す(ack と終端 receipt の二段)。
+fn results(
+    driver: &FakeDriver,
+    window: WindowId,
+    id: &str,
+) -> Vec<(bool, Option<serde_json::Value>)> {
+    driver
+        .events_for(window)
+        .into_iter()
+        .filter_map(|e| match e {
+            ruviform_ui::ipc::Event::Result {
+                id: rid, ok, data, ..
+            } if rid.as_str() == id => Some((*ok, data.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
+/// job が終端に達するまで Tick を流す。終端 signal は Tick の drain で配送される。
+fn drive_until_idle(session: &mut DesktopSession, driver: &mut FakeDriver) {
+    for _ in 0..500 {
+        if !session.runtime().has_running_jobs() {
+            break;
+        }
+        driver.inject(DriverEvent::Tick);
+        pump(session, driver);
+        std::thread::sleep(Duration::from_millis(2));
+    }
+}
+
+#[test]
+fn resume_is_acked_then_receives_an_applied_receipt_after_the_job_finishes() {
+    let dir = TempDir::new("al-gui-desktop-resume-applied");
+    let base = dir.join("jobs");
+    let job_id = common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(
+        w,
+        command_intent(
+            "r1",
+            command::ACTION_RESUME,
+            json!({"job_id": job_id.as_str()}),
+        ),
+    ));
+    pump(&mut session, &mut driver);
+    let ack = results(&driver, w, "r1");
+    assert_eq!(ack.len(), 1, "only the ack before the job ends");
+    assert!(ack[0].0);
+    assert!(ack[0].1.as_ref().and_then(|d| d.get("status")).is_none());
+
+    drive_until_idle(&mut session, &mut driver);
+    let receipts = results(&driver, w, "r1");
+    assert_eq!(receipts.len(), 2, "ack, then the terminal receipt");
+    assert!(receipts[1].0);
+    assert_eq!(
+        receipts[1].1.as_ref().and_then(|d| d["status"].as_str()),
+        Some("applied")
+    );
+    let delivered = driver.events_for(w);
+    let job_end = delivered.iter().position(|e| {
+        matches!(
+            e,
+            ruviform_ui::ipc::Event::Job {
+                state: JobState::Finished,
+                ..
+            }
+        )
+    });
+    let receipt = delivered
+        .iter()
+        .rposition(|e| matches!(e, ruviform_ui::ipc::Event::Result { id, .. } if id == "r1"));
+    assert!(
+        job_end.is_some() && job_end < receipt,
+        "the terminal receipt follows the job end event"
+    );
+    assert!(
+        session.take_projection_dirty(),
+        "job end re-projects the screen"
+    );
+}
+
+#[test]
+fn resume_of_a_missing_job_ends_with_a_rejected_receipt() {
+    let dir = TempDir::new("al-gui-desktop-resume-rejected");
+    let job_id = common::make_job(&dir.join("other"), &dir.join("cap.wav"));
+    let base = dir.join("jobs");
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(
+        w,
+        command_intent(
+            "r2",
+            command::ACTION_RESUME,
+            json!({"job_id": job_id.as_str()}),
+        ),
+    ));
+    pump(&mut session, &mut driver);
+    drive_until_idle(&mut session, &mut driver);
+
+    let receipts = results(&driver, w, "r2");
+    assert_eq!(receipts.len(), 2, "ack, then the terminal receipt");
+    assert!(receipts[0].0, "the spawn is acknowledged");
+    assert!(!receipts[1].0, "a failed job ends rejected");
+    assert!(receipts[1].1.is_none());
 }
 
 fn ready_window(session: &mut DesktopSession, driver: &mut FakeDriver) -> WindowId {
