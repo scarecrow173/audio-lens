@@ -21,7 +21,8 @@ use std::fmt;
 
 use ruviform_ui::view::{
     A11ySpec, ButtonSpec, CellValue, ComponentKey, ComponentSpec, ComponentVisualState, LabelSpec,
-    MAX_TABLE_ROWS, PanelSpec, TabSpec, TableSelectionSpec, TableSpec, TabsSpec, ViewSpec,
+    MAX_TABLE_ROWS, PanelSpec, TabSpec, TableSelectionSpec, TableSpec, TabsSelectionSpec, TabsSpec,
+    ViewSpec,
 };
 
 /// view model の写像/開放エラー。
@@ -121,7 +122,12 @@ pub(crate) fn panel(key: &str, children: Vec<ComponentSpec>) -> ViewSpec {
 }
 
 /// Tabs を根とする画面 `ViewSpec`。各 tab の画面はその root を子にする。
-pub(crate) fn tabs(key: &str, tabs: Vec<(&str, &str, ViewSpec)>) -> ViewSpec {
+/// `selection` を与えると tab header から選択でき、その target へ選択 intent を発行する。
+pub(crate) fn tabs(
+    key: &str,
+    selection: Option<&str>,
+    tabs: Vec<(&str, &str, ViewSpec)>,
+) -> ViewSpec {
     ViewSpec {
         root: ComponentSpec::Tabs(TabsSpec {
             key: ComponentKey::from(key),
@@ -134,7 +140,9 @@ pub(crate) fn tabs(key: &str, tabs: Vec<(&str, &str, ViewSpec)>) -> ViewSpec {
                     child: Box::new(view.root),
                 })
                 .collect(),
-            selection: None,
+            selection: selection.map(|target| TabsSelectionSpec {
+                target: target.to_string(),
+            }),
             visual: ComponentVisualState::default(),
             a11y: A11ySpec::default(),
         }),

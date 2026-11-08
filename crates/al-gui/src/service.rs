@@ -16,6 +16,7 @@ use ruviform_viz::source::SpectrumSource;
 use serde_json::{Value, json};
 
 use crate::command;
+use crate::view::desktop::TAB_COUNT;
 
 const OPS: &[OpInfo] = &[
     OpInfo {
@@ -92,7 +93,7 @@ const OPS: &[OpInfo] = &[
     },
     OpInfo {
         name: command::COMMAND_INTENT_OP,
-        summary: "view の command intent(job 選択・再開)を解釈する",
+        summary: "view の command intent(job 選択・再開・tab 選択)を解釈する",
     },
 ];
 
@@ -245,14 +246,8 @@ impl AlGuiService {
     ) -> Result<CallOutcome, ErrorBody> {
         let action = command::decode_action(params)
             .ok_or_else(|| invalid("command must be an action intent"))?;
-        if action.target != command::JOB_TARGET {
-            return Err(invalid(format!(
-                "unknown command target {:?}",
-                action.target
-            )));
-        }
-        match action.action.as_str() {
-            command::ACTION_SELECT => {
+        match (action.target.as_str(), action.action.as_str()) {
+            (command::JOB_TARGET, command::ACTION_SELECT) => {
                 let jobs = self
                     .job_service(&Value::Null)?
                     .list()
@@ -271,11 +266,24 @@ impl AlGuiService {
                     json!({"status": "applied", "job_id": job.job_id.as_str()}),
                 ))
             }
-            command::ACTION_RESUME => {
+            (command::JOB_TARGET, command::ACTION_RESUME) => {
                 let params = action.params.unwrap_or(Value::Null);
                 self.call_internal("al.job.resume", &params, ctx)
             }
-            other => Err(invalid(format!("unknown action {other:?}"))),
+            (command::DESKTOP_TARGET, command::ACTION_TAB_SELECT) => {
+                let index = action
+                    .params
+                    .as_ref()
+                    .and_then(|p| p.get("index"))
+                    .and_then(Value::as_u64)
+                    .and_then(|i| usize::try_from(i).ok())
+                    .filter(|&i| i < TAB_COUNT)
+                    .ok_or_else(|| invalid(format!("tab-select requires index < {TAB_COUNT}")))?;
+                Ok(CallOutcome::Result(
+                    json!({"status": "applied", "index": index}),
+                ))
+            }
+            (target, other) => Err(invalid(format!("unknown command {target:?} {other:?}"))),
         }
     }
 

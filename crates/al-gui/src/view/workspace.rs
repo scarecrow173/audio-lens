@@ -44,6 +44,7 @@ pub fn workspace_screen(session: &DatasetSession, input_id: &str) -> Result<View
     });
     Ok(tabs(
         WORKSPACE_KEY,
+        None,
         vec![
             ("tab-source", "Source", source),
             ("tab-spectrogram", "Spectrogram", spectrogram),

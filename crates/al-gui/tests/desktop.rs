@@ -602,6 +602,10 @@ fn exit_on_last_window_false_keeps_loop_running() {
 }
 
 fn command_intent(id: &str, action: &str, params: serde_json::Value) -> Intent {
+    command_intent_on(command::JOB_TARGET, id, action, params)
+}
+
+fn command_intent_on(target: &str, id: &str, action: &str, params: serde_json::Value) -> Intent {
     Intent::new(
         id,
         command::COMMAND_INTENT_OP,
@@ -610,7 +614,7 @@ fn command_intent(id: &str, action: &str, params: serde_json::Value) -> Intent {
             "expect_receipt": true,
             "intent": {
                 "kind": "action",
-                "target": command::JOB_TARGET,
+                "target": target,
                 "control_id": "job-table",
                 "sequence": 1,
                 "action": action,
@@ -683,6 +687,40 @@ fn rejected_selection_keeps_the_previous_job() {
     assert_eq!(session.selected_job(), None);
     assert!(!session.take_projection_dirty());
     assert_eq!(reply(&driver, w, "s2").map(|(ok, _)| ok), Some(false));
+}
+
+#[test]
+fn tab_select_replies_applied_for_a_tab_and_rejected_outside_the_tabs() {
+    let dir = TempDir::new("al-gui-desktop-tab-select");
+    let base = dir.join("jobs");
+    common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    let select = |id: &str, index: u64| {
+        action_on(
+            w,
+            command_intent_on(
+                command::DESKTOP_TARGET,
+                id,
+                command::ACTION_TAB_SELECT,
+                json!({ "index": index }),
+            ),
+        )
+    };
+    driver.inject(select("t1", 1));
+    driver.inject(select("t2", 9));
+    pump(&mut session, &mut driver);
+
+    let (ok, data) = reply(&driver, w, "t1").expect("receipt for t1");
+    assert!(ok);
+    assert_eq!(data, Some(json!({ "status": "applied", "index": 1 })));
+    assert_eq!(reply(&driver, w, "t2").map(|(ok, _)| ok), Some(false));
+    assert_eq!(session.selected_job(), None);
+    assert!(!session.take_projection_dirty());
 }
 
 #[test]

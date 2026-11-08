@@ -38,6 +38,7 @@ Directory: `docs/test-specs`
 | TSPEC-mEkVPMvQTo5Q4ov43W1ukN | Native GUI の Job/Run tab mount と Tile::columns 消費の検証仕様 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | TSPEC-O65pjV4Ci4jMZTRqGNRUm2 | Native GUI Source 画面の ViewSpec 射影・GPUI parity 検証仕様 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | TSPEC-Kv7Rn3Ac9WxS5pZdM2hEgH | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity の検証仕様 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| TSPEC-SCd44Z1STaGO2PilFgvrtP | Native GUI の Tabs 選択契約の採用と pointer 切替の検証仕様 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | TSPEC-7JyfOx5Dj1B55uTKms7L2h | Native GUI Waveform/Seek 画面の ViewSpec 射影 検証仕様 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |

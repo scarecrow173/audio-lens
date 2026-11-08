@@ -40,6 +40,7 @@ Directory: `docs/designs`
 | DESIGN-WRNx7ppADH8dxL2tG2HjFK | Native GUI の Job/Run tab mount と Tile::columns 消費の設計 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | DESIGN-rmQlUpDmFZLlonLOUfAGa4 | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity の設計 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| DESIGN-g3Nc8glJv8VXvtDiOoZzpP | Native GUI の Tabs 選択契約の採用と pointer による画面 tab 切替の設計 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | DESIGN-hZqY4x9NK3Xg22TQK3K8mB | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価の設計 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | DESIGN-034FPWNHT7czdzzGSNBU2Q | NCC plan/workspace 分離と2サイト再利用設計 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |

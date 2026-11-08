@@ -7,7 +7,8 @@ mod common;
 use al_core::{JobId, StageKind};
 use al_gui::command;
 use al_gui::view::desktop::{
-    CANCEL_KEY, DATASET_TAB_KEY, DESKTOP_KEY, JOBS_TAB_KEY, RESUME_KEY, RUN_TAB_KEY, desktop_screen,
+    CANCEL_KEY, DATASET_TAB_KEY, DESKTOP_KEY, JOBS_TAB_KEY, RESUME_KEY, RUN_TAB_KEY, TAB_COUNT,
+    desktop_screen,
 };
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY};
 use al_gui::view::screen::SPECTROGRAM_KEY;
@@ -18,7 +19,8 @@ use al_testkit::temp::TempDir;
 use common::{JOB_STAGES, make_job};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
-    AttachEpochAllocator, CellValue, ComponentKey, ComponentSpec, TabsSpec, ViewHost, ViewSpec,
+    AttachEpochAllocator, CellValue, ComponentKey, ComponentSpec, TabsSpec, ViewEvent, ViewHost,
+    ViewSpec,
 };
 use serde_json::json;
 
@@ -263,6 +265,36 @@ fn a_job_outside_the_base_dir_fails_only_its_tabs() {
         format!("unavailable: job {} not found", missing.as_str())
     );
     mount(&view);
+}
+
+#[test]
+fn desktop_tabs_are_selectable_by_pointer_on_the_desktop_target() {
+    let (_dir, base, job_id) = setup();
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let tabs = root_tabs(&view);
+    assert_eq!(tabs.tabs.len(), TAB_COUNT);
+    assert_eq!(
+        tabs.selection.as_ref().map(|s| s.target.as_str()),
+        Some(command::DESKTOP_TARGET)
+    );
+
+    let mut host = mount(&view);
+    let key = ComponentKey::from(DESKTOP_KEY);
+    host.select_tab(host.generation(), &key, 1)
+        .expect("select the run tab");
+    let intents: Vec<serde_json::Value> = host
+        .drain_events()
+        .into_iter()
+        .filter_map(|e| match e {
+            ViewEvent::Intent { intent, .. } => Some(serde_json::to_value(intent).expect("json")),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(intents.len(), 1);
+    assert_eq!(intents[0]["target"], command::DESKTOP_TARGET);
+    assert_eq!(intents[0]["action"], command::ACTION_TAB_SELECT);
+    assert_eq!(intents[0]["params"], json!({ "index": 1 }));
+    assert_eq!(host.observe(&key).expect("tabs").selected, Some(1));
 }
 
 #[test]

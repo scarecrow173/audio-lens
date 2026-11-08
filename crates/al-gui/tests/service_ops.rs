@@ -11,6 +11,7 @@ use std::time::Duration;
 use al_core::JobId;
 use al_gui::AlGuiService;
 use al_gui::command;
+use al_gui::view::desktop::TAB_COUNT;
 use ruviform_ui::data::{DataRegistry, DataRequest};
 use ruviform_ui::ipc::{Event, JobState, codes};
 use ruviform_ui::runtime::UiRuntime;
@@ -301,6 +302,41 @@ fn command_resume_starts_the_job_and_replies_accepted() {
     let (_, state, data, error) = wait_job(&mut rt);
     assert_eq!(state, JobState::Finished, "resume failed: {error:?}");
     assert_eq!(data.unwrap()["job_id"], job_id.as_str());
+}
+
+#[test]
+fn command_tab_select_applies_an_in_range_index_and_rejects_the_rest() {
+    let dir = temp_dir("command-tab-select");
+    let base = dir.join("jobs");
+    common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = service_runtime(&base);
+
+    let data = call_ok(
+        &mut rt,
+        "t1",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::DESKTOP_TARGET,
+            command::ACTION_TAB_SELECT,
+            json!({"index": 1}),
+        ),
+    );
+    assert_eq!(data["status"], "applied");
+    assert_eq!(data["index"], 1);
+
+    for (id, target, params) in [
+        ("t2", command::DESKTOP_TARGET, json!({"index": TAB_COUNT})),
+        ("t3", command::DESKTOP_TARGET, json!({})),
+        ("t4", command::JOB_TARGET, json!({"index": 1})),
+    ] {
+        let err = call_err(
+            &mut rt,
+            id,
+            command::COMMAND_INTENT_OP,
+            command_params(target, command::ACTION_TAB_SELECT, params),
+        );
+        assert_eq!(err.code, codes::INVALID_PARAMS, "{id}");
+    }
 }
 
 #[test]
