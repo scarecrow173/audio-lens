@@ -42,6 +42,7 @@ Directory: `docs/designs`
 | DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | DESIGN-g3Nc8glJv8VXvtDiOoZzpP | Native GUI の Tabs 選択契約の採用と pointer による画面 tab 切替の設計 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | DESIGN-hZqY4x9NK3Xg22TQK3K8mB | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価の設計 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| DESIGN-034TTalkyZgGfHde64ztJY | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer による tab 切替の設計 (第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | DESIGN-034FPWNHT7czdzzGSNBU2Q | NCC plan/workspace 分離と2サイト再利用設計 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |
 | DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | approved | [pre-migration-baseline.md](./pre-migration-baseline.md) |

@@ -15,6 +15,8 @@ pub const COMMAND_INTENT_OP: &str = "rvf.ui.command.v1";
 pub const JOB_TARGET: &str = "al.job";
 /// Desktop 画面の root Tabs の選択の論理 target。
 pub const DESKTOP_TARGET: &str = "al.desktop";
+/// Dataset 画面(workspace)の Tabs の選択の論理 target。
+pub const WORKSPACE_TARGET: &str = "al.workspace";
 /// Jobs 行選択(params: `{"row": n}`)。
 pub const ACTION_SELECT: &str = "select";
 /// 選択 job の再開(params: `{"job_id": "..."}`)。

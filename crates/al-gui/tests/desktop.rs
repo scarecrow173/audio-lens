@@ -724,6 +724,40 @@ fn tab_select_replies_applied_for_a_tab_and_rejected_outside_the_tabs() {
 }
 
 #[test]
+fn workspace_tab_select_replies_applied_and_rejected_without_touching_the_projection() {
+    let dir = TempDir::new("al-gui-desktop-ws-tab-select");
+    let base = dir.join("jobs");
+    common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    let select = |id: &str, index: u64| {
+        action_on(
+            w,
+            command_intent_on(
+                command::WORKSPACE_TARGET,
+                id,
+                command::ACTION_TAB_SELECT,
+                json!({ "index": index }),
+            ),
+        )
+    };
+    driver.inject(select("w1", 1));
+    driver.inject(select("w2", 9));
+    pump(&mut session, &mut driver);
+
+    let (ok, data) = reply(&driver, w, "w1").expect("receipt for w1");
+    assert!(ok);
+    assert_eq!(data, Some(json!({ "status": "applied", "index": 1 })));
+    assert_eq!(reply(&driver, w, "w2").map(|(ok, _)| ok), Some(false));
+    assert_eq!(session.selected_job(), None);
+    assert!(!session.take_projection_dirty());
+}
+
+#[test]
 fn cancel_without_a_window_job_replies_rejected() {
     let mut session = session();
     let mut driver = FakeDriver::new();

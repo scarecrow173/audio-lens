@@ -17,6 +17,7 @@ use serde_json::{Value, json};
 
 use crate::command;
 use crate::view::desktop::TAB_COUNT;
+use crate::view::workspace::WORKSPACE_TAB_COUNT;
 
 const OPS: &[OpInfo] = &[
     OpInfo {
@@ -271,20 +272,28 @@ impl AlGuiService {
                 self.call_internal("al.job.resume", &params, ctx)
             }
             (command::DESKTOP_TARGET, command::ACTION_TAB_SELECT) => {
-                let index = action
-                    .params
-                    .as_ref()
-                    .and_then(|p| p.get("index"))
-                    .and_then(Value::as_u64)
-                    .and_then(|i| usize::try_from(i).ok())
-                    .filter(|&i| i < TAB_COUNT)
-                    .ok_or_else(|| invalid(format!("tab-select requires index < {TAB_COUNT}")))?;
-                Ok(CallOutcome::Result(
-                    json!({"status": "applied", "index": index}),
-                ))
+                Self::tab_select(&action.params, TAB_COUNT)
+            }
+            (command::WORKSPACE_TARGET, command::ACTION_TAB_SELECT) => {
+                Self::tab_select(&action.params, WORKSPACE_TAB_COUNT)
             }
             (target, other) => Err(invalid(format!("unknown command {target:?} {other:?}"))),
         }
+    }
+
+    /// `tab-select` の params 検証と applied 応答。`limit` は対象 Tabs の
+    /// tab 数(`al.desktop` は `TAB_COUNT`、`al.workspace` は `WORKSPACE_TAB_COUNT`)。
+    fn tab_select(params: &Option<Value>, limit: usize) -> Result<CallOutcome, ErrorBody> {
+        let index = params
+            .as_ref()
+            .and_then(|p| p.get("index"))
+            .and_then(Value::as_u64)
+            .and_then(|i| usize::try_from(i).ok())
+            .filter(|&i| i < limit)
+            .ok_or_else(|| invalid(format!("tab-select requires index < {limit}")))?;
+        Ok(CallOutcome::Result(
+            json!({"status": "applied", "index": index}),
+        ))
     }
 
     fn call_internal(

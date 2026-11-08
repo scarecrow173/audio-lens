@@ -13,6 +13,7 @@ use al_gui::command;
 use al_gui::desktop::DesktopSession;
 use al_gui::service::AlGuiService;
 use al_gui::view::desktop::{DESKTOP_KEY, RESUME_KEY, desktop_screen};
+use al_gui::view::workspace::WORKSPACE_KEY;
 use al_testkit::temp::TempDir;
 use ruviform_ui::behavior::{CommandPhase, CommandReceipt, ReceiptStatus};
 use ruviform_ui::dock::ViewInstanceId;
@@ -105,10 +106,10 @@ impl Harness {
     }
 
     /// pointer の tab header 押下相当: `ViewHost::select_tab` で表示を移し、receipt を待つ。
-    fn press_tab(&mut self, index: usize) {
+    fn press_tab(&mut self, key: &str, index: usize) {
         let generation = self.host.generation();
         self.host
-            .select_tab(generation, &ComponentKey::from(DESKTOP_KEY), index)
+            .select_tab(generation, &ComponentKey::from(key), index)
             .expect("select tab");
         self.flush_intents();
     }
@@ -178,7 +179,7 @@ fn resume_receipt_moves_the_run_button_from_pending_to_applied() {
     let base = dir.join("jobs");
     let job_id = common::make_job(&base, &dir.join("cap.wav"));
     let mut h = Harness::new(&base, &job_id);
-    h.press_tab(RUN_TAB);
+    h.press_tab(DESKTOP_KEY, RUN_TAB);
     assert_eq!(h.selected(DESKTOP_KEY), Some(RUN_TAB));
 
     h.host
@@ -213,7 +214,7 @@ fn pointer_tab_selection_is_applied_by_the_service_receipt() {
     let job_id = common::make_job(&base, &dir.join("cap.wav"));
     let mut h = Harness::new(&base, &job_id);
 
-    h.press_tab(RUN_TAB);
+    h.press_tab(DESKTOP_KEY, RUN_TAB);
     assert_eq!(
         receipt_statuses(&h),
         [ReceiptStatus::Applied],
@@ -231,19 +232,64 @@ fn pointer_tab_selection_is_applied_by_the_service_receipt() {
 }
 
 #[test]
+fn workspace_tab_selection_is_applied_and_survives_reprojection() {
+    let dir = TempDir::new("al-gui-receipt-ws-tab-applied");
+    let base = dir.join("jobs");
+    let job_id = common::make_job(&base, &dir.join("cap.wav"));
+    let mut h = Harness::new(&base, &job_id);
+
+    // Spectrogram tab(index 1)を pointer 相当で選ぶ。
+    h.press_tab(WORKSPACE_KEY, 1);
+    assert_eq!(
+        receipt_statuses(&h),
+        [ReceiptStatus::Applied],
+        "the service replies applied"
+    );
+    assert_eq!(h.selected(WORKSPACE_KEY), Some(1), "applied keeps the tab");
+    assert_eq!(
+        h.selected(DESKTOP_KEY),
+        Some(0),
+        "the root tab selection is untouched"
+    );
+    assert!(
+        !h.session.take_projection_dirty(),
+        "a workspace tab switch does not change the job projection"
+    );
+
+    h.reproject(desktop_screen(Some(&base), Some(&job_id)));
+    assert_eq!(
+        h.selected(WORKSPACE_KEY),
+        Some(1),
+        "the pointer-selected workspace tab survives a re-projection whose active tab is unchanged"
+    );
+}
+
+#[test]
 fn rejected_tab_selection_restores_the_previous_tab() {
     // al-gui service を登録しない runtime では tab-select の command は処理されず
-    // rejected の receipt になる。ViewHost は直前の表示 tab(Jobs)へ戻す。
+    // rejected の receipt になる。ViewHost は直前の表示 tab へ戻す。
     let dir = TempDir::new("al-gui-receipt-tab-rejected");
     let base = dir.join("jobs");
     let job_id = common::make_job(&base, &dir.join("cap.wav"));
     let mut h = Harness::start(&base, &job_id, false);
 
-    h.press_tab(RUN_TAB);
+    h.press_tab(DESKTOP_KEY, RUN_TAB);
     assert_eq!(
         receipt_statuses(&h),
         [ReceiptStatus::Rejected],
         "the unhandled command replies rejected"
     );
     assert_eq!(h.selected(DESKTOP_KEY), Some(0), "rejected restores Jobs");
+
+    h.press_tab(WORKSPACE_KEY, 1);
+    assert_eq!(
+        receipt_statuses(&h),
+        [ReceiptStatus::Rejected, ReceiptStatus::Rejected],
+        "the workspace tab-select is rejected as well"
+    );
+    assert_eq!(
+        h.selected(WORKSPACE_KEY),
+        Some(0),
+        "rejected restores Source"
+    );
 }

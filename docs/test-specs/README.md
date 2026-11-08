@@ -40,6 +40,7 @@ Directory: `docs/test-specs`
 | TSPEC-Kv7Rn3Ac9WxS5pZdM2hEgH | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity の検証仕様 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | TSPEC-SCd44Z1STaGO2PilFgvrtP | Native GUI の Tabs 選択契約の採用と pointer 切替の検証仕様 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | TSPEC-7JyfOx5Dj1B55uTKms7L2h | Native GUI Waveform/Seek 画面の ViewSpec 射影 検証仕様 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| TSPEC-034TTalkyWEhHcBPxXaOHj | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer 切替の検証仕様 (第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | TSPEC-034FQrcfiATnKq0wNxx0kz | NCC 再利用と IPD signed lag の契約 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
 | TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |

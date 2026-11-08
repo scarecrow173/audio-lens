@@ -23,6 +23,7 @@ use al_gui::view::screen::{
     METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, SPECTROGRAM_KEY, SPECTROGRAM_RANGE_KEY,
     WAVEFORM_KEY, source_screen, spectrogram_screen,
 };
+use al_gui::view::workspace::WORKSPACE_KEY;
 use al_testkit::temp::TempDir;
 use common::{GAP, fixture_view, make_job};
 use ruviform_ui::behavior::{CommandPhase, ControlInput, InputSource, ValueInput};
@@ -708,4 +709,83 @@ fn tab_selection_intent_and_selected_tab_match_between_fake_and_gpui() {
 
     assert_eq!(fake_selected, Some(1));
     assert_eq!(gpui_selected, fake_selected);
+}
+
+#[test]
+fn workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui() {
+    let dir = TempDir::new("al-gui-parity-ws-tab-select");
+    let base = dir.join("jobs");
+    let job_id = make_job(&base, &dir.join("cap.wav"));
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let root = ComponentKey::from(DESKTOP_KEY);
+    let workspace = ComponentKey::from(WORKSPACE_KEY);
+
+    // Dataset tab を表示してから workspace の Spectrogram tab を選ぶ、
+    // 実際の pointer 操作に相当する流れ。
+    let mut fake = Fake::new(view.clone());
+    fake.host
+        .select_tab(fake.host.generation(), &root, 2)
+        .expect("fake select the dataset tab");
+    let fake_root_intents = drain_intents(&mut fake.host);
+    fake.host
+        .select_tab(fake.host.generation(), &workspace, 1)
+        .expect("fake select the spectrogram tab");
+    let fake_ws_intents = drain_intents(&mut fake.host);
+    let fake_ws_selected = fake
+        .host
+        .observe(&workspace)
+        .expect("workspace mounted")
+        .selected;
+
+    let mut gpui = Gpui::new(view);
+    gpui.observer
+        .select_tab(gpui.window, &root, 2)
+        .expect("gpui select the dataset tab");
+    gpui.observer.settle(|_, _| {});
+    let gpui_root_intents = gpui.command_intents();
+    gpui.observer
+        .select_tab(gpui.window, &workspace, 1)
+        .expect("gpui select the spectrogram tab");
+    gpui.observer.settle(|_, _| {});
+    let gpui_ws_intents = gpui.command_intents()[gpui_root_intents.len()..].to_vec();
+    let gpui_ws_selected = gpui
+        .observer
+        .observe(gpui.window)
+        .expect("observed view")
+        .components
+        .into_iter()
+        .find(|c| c.key == workspace)
+        .expect("workspace observed")
+        .snapshot
+        .selected;
+
+    assert_eq!(
+        fake_root_intents.len(),
+        1,
+        "the dataset tab press emits one intent"
+    );
+    assert_eq!(
+        fake_root_intents[0]["target"],
+        al_gui::command::DESKTOP_TARGET
+    );
+    assert_eq!(gpui_root_intents, fake_root_intents);
+
+    assert_eq!(
+        fake_ws_intents.len(),
+        1,
+        "a workspace tab press emits one intent"
+    );
+    assert_eq!(
+        fake_ws_intents[0]["target"],
+        al_gui::command::WORKSPACE_TARGET
+    );
+    assert_eq!(
+        fake_ws_intents[0]["action"],
+        al_gui::command::ACTION_TAB_SELECT
+    );
+    assert_eq!(fake_ws_intents[0]["params"], json!({"index": 1}));
+    assert_eq!(gpui_ws_intents, fake_ws_intents);
+
+    assert_eq!(fake_ws_selected, Some(1));
+    assert_eq!(gpui_ws_selected, fake_ws_selected);
 }

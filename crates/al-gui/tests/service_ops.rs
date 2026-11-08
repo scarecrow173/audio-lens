@@ -12,6 +12,7 @@ use al_core::JobId;
 use al_gui::AlGuiService;
 use al_gui::command;
 use al_gui::view::desktop::TAB_COUNT;
+use al_gui::view::workspace::WORKSPACE_TAB_COUNT;
 use ruviform_ui::data::{DataRegistry, DataRequest};
 use ruviform_ui::ipc::{Event, JobState, codes};
 use ruviform_ui::runtime::UiRuntime;
@@ -337,6 +338,59 @@ fn command_tab_select_applies_an_in_range_index_and_rejects_the_rest() {
         );
         assert_eq!(err.code, codes::INVALID_PARAMS, "{id}");
     }
+}
+
+#[test]
+fn command_workspace_tab_select_applies_an_in_range_index_and_rejects_the_rest() {
+    let dir = temp_dir("command-ws-tab-select");
+    let base = dir.join("jobs");
+    common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = service_runtime(&base);
+
+    let data = call_ok(
+        &mut rt,
+        "w1",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::WORKSPACE_TARGET,
+            command::ACTION_TAB_SELECT,
+            json!({"index": 2}),
+        ),
+    );
+    assert_eq!(data["status"], "applied");
+    assert_eq!(data["index"], 2);
+
+    for (id, target, params) in [
+        (
+            "w2",
+            command::WORKSPACE_TARGET,
+            json!({"index": WORKSPACE_TAB_COUNT}),
+        ),
+        ("w3", command::WORKSPACE_TARGET, json!({})),
+        ("w4", command::JOB_TARGET, json!({"index": 1})),
+        ("w5", "al.unknown", json!({"index": 1})),
+    ] {
+        let err = call_err(
+            &mut rt,
+            id,
+            command::COMMAND_INTENT_OP,
+            command_params(target, command::ACTION_TAB_SELECT, params),
+        );
+        assert_eq!(err.code, codes::INVALID_PARAMS, "{id}");
+    }
+
+    // `al.desktop` の tab-select は別 index 空間として独立に受理される。
+    let data = call_ok(
+        &mut rt,
+        "w6",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::DESKTOP_TARGET,
+            command::ACTION_TAB_SELECT,
+            json!({"index": 1}),
+        ),
+    );
+    assert_eq!(data["status"], "applied");
 }
 
 #[test]
