@@ -125,3 +125,4 @@ Directory: `docs/impl`
 | IMPL-Mx9Vu5Ce3ZrO7sYgK4nLjQ | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity 実装記録(IR) | completed | [ir/native-gui-spectrogram-analysis-projection.md](./ir/native-gui-spectrogram-analysis-projection.md) |
 | IMPL-yAi6Kuqoh9s4HZcj0OFkFx | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装記録(IR, 第5 slice) | completed | [ir/native-gui-drawn-parity-run-mount.md](./ir/native-gui-drawn-parity-run-mount.md) |
 | IMPL-OXlJYYPSVLg1KyiRb5CoNx | Native GUI の Job/Run tab mount と Tile::columns 消費の実装記録(IR, 第6 slice) | completed | [ir/native-gui-job-run-mount.md](./ir/native-gui-job-run-mount.md) |
+| IMPL-m8DwS64am3rDitdQyEvkiV | Native GUI の job 終端 receipt の消費と再射影検証の実装記録(IR, 第8 slice) | completed | [ir/native-gui-job-receipt-consumption.md](./ir/native-gui-job-receipt-consumption.md) |
