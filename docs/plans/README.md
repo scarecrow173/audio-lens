@@ -24,6 +24,7 @@ Directory: `docs/plans`
 | PLAN-OQLFcsEL9ZueFsfsB5zoZU | Native GUI の Job/Run tab mount と Tile::columns 消費の実装計画 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | PLAN-5D5yfFUG8HGrWGJlg97kCG | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity 実装計画 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
+| PLAN-ibK26JpqMzrShnkIXoAamb | Native GUI の Tabs 選択契約の採用と pointer による画面 tab 切替の実装計画 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |

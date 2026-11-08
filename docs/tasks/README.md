@@ -142,6 +142,7 @@ Directory: `docs/tasks`
 | TASK-034AaFXpJRZWcxVPOfKCdh | mp4: ingest stage 配線 + 成果物記録 | done | [mp4-ingest-stage.md](./mp4-ingest-stage.md) |
 | TASK-034AaFWPLKohMACaTcKkDv | mp4: PCM エントリ取り出し + 圧縮コーデック明示失敗 | done | [mp4-pcm-extract.md](./mp4-pcm-extract.md) |
 | TASK-034AaFWfHy1QUJblugAdk5 | mp4: stts/ctts/stss/stsz/stsc/stco サンプル時刻列 | done | [mp4-sample-tables.md](./mp4-sample-tables.md) |
+| TASK-bcFP7IwsUr4usGeNSqbpVn | Issue #166 Tabs 選択契約の採用と pointer 切替 実装タスク (第9 slice) | done | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | TASK-034FQrcP4zy8KVn51A8pyX | 2hot callerを再利用に移し確保と速度を検証する | done | [ncc-hot-caller-reuse-verification.md](./ncc-hot-caller-reuse-verification.md) |
 | TASK-034FQrcCGZZgIfcHyHbt58 | FFT と相関の不変planと排他workspaceを分離する | done | [ncc-plan-workspace-foundation.md](./ncc-plan-workspace-foundation.md) |
 | TASK-034EeviFOOrOAjrYXMGXHO | al-cli の logging 配線 | done | [observability-cli-wiring.md](./observability-cli-wiring.md) |
