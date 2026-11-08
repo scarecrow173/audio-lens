@@ -16,6 +16,7 @@ Directory: `docs/specs`
 | SPEC-034yYlrxDrz2YSF7QQQ2AK | AudioLens 全体仕様 | proposed | [audiolens-overview.md](./audiolens-overview.md) |
 | SPEC-034EHH6AJBK8GJ2H9EUzjE | caller 側最適化チェーン: fir_model 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向 (A1/A3/A4) | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | SPEC-034yYlFacHOsi95HzKHN7M | 候補イベントモデルと確度伝播 | proposed | [candidate-event-model.md](./candidate-event-model.md) |
+| SPEC-9RvxFJGfN5O4Xk7IQ7Kzc3 | canvas 系 component の実窓 paint 是正（DatasetWaveform の単位振幅正規化）(Issue #179) | approved | [canvas-paint-empty.md](./canvas-paint-empty.md) |
 | SPEC-034yYlu5QuhtAFuUQWBBvQ | 常時実行の低コスト特徴量 | proposed | [cheap-analysis-features.md](./cheap-analysis-features.md) |
 | SPEC-034jbVIejFblXPjaYuN9R | Issue #147/#158 最終段階: ci.yml を workflow_dispatch 専用にし PR/push 起動入口を撤去する | approved | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
 | SPEC-034SKTICUsXIT198jBTZXz | Issue #159 Tracker reconcile 入口: GITHUB_TOKEN dispatch 通知 gap を別 workflow 定期/手動 reconcile で埋める | approved | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |

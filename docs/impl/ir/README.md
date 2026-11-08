@@ -28,6 +28,7 @@ Directory: `docs/impl/ir`
 | caller-opt-least-squares-column-api | [caller-side-optimizations-least-squares-column-api.md](./caller-side-optimizations-least-squares-column-api.md) |
 | caller-opt-measurement-ir-closeout | [caller-side-optimizations-post-measurement-closeout.md](./caller-side-optimizations-post-measurement-closeout.md) |
 | caller-opt-stft-fft-plan-hoist | [caller-side-optimizations-stft-fft-plan-hoist.md](./caller-side-optimizations-stft-fft-plan-hoist.md) |
+| canvas-paint-empty | [normalize-waveform-source-samples-to-unit-range.md](./normalize-waveform-source-samples-to-unit-range.md) |
 | chunked-tensor-store | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | columnar-table-store | [columnar-table-store.md](./columnar-table-store.md) |
 | core-domain-types | [core-domain-types.md](./core-domain-types.md) |
