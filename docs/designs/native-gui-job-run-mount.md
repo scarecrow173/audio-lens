@@ -83,8 +83,9 @@ ruviform の component 集合には Button 相当の command 起動 component �
 | B | 起動引数で job を指定する(`al-desktop <base-dir> <job-id>`) | **採用**。上流変更なしで選択を画面に反映できる |
 | C | job ごとに tab を作る | 不採用。job 数に比例して tab が増え、上限を持てない |
 
-案 A の上流契約(行選択・command 起動)は ruviform へ Issue として起票する(AudioLens 側の恒久回避策は作らない。
-AGENTS.md「Ruviform とのマルチリポジトリ運用」)。Issue 番号は本書の §8 に記す。
+案 A の上流契約(行選択・command 起動)は ruviform#448 として起票し、`a998101c` で契約が入った。第 7 slice で
+案 A を採用し、行選択と Run の再開・取消を接続した(`native-gui-interactive-job-run.md`)。起動引数の `job-id` は
+初期選択として残る。Issue 番号は本書の §8 に記す。
 
 ## 4. base_dir と dataset root の渡し方
 
@@ -119,9 +120,10 @@ root は `desktop` の Tabs。tab の順序・key は固定し、既定の activ
 
 ## 6. Job 操作の範囲
 
-本 slice で desktop から行うのは一覧・選択(起動引数)・結果表示のみとする。Run の起動・再開・取消は、
-`ViewSpec` に command 起動の component が無いため行わない。`DesktopSession`(driver-neutral)の既存の
-close・exit・job 待機の規則は変更しない。
+第 6 slice では desktop から行うのは一覧・選択(起動引数)・結果表示のみとした。第 7 slice(`a998101c` 以降)で
+Jobs 表の行選択と Run tab の再開・取消を接続した(`native-gui-interactive-job-run.md`)。新規 run の起動(`al.job.run`)は
+入力 file を指定する UI が無いため未接続のまま。`DesktopSession`(driver-neutral)の既存の close・exit・job 待機の
+規則は変更しない。
 
 ## 7. 責務と境界
 
@@ -137,7 +139,8 @@ close・exit・job 待機の規則は変更しない。
 | --- | --- | --- |
 | ruviform#443 | Tile → SpectrogramColumn の列区間・count の上流契約 | 部分達成(`ccee0cb1`)。AudioLens の消費をコメントで追記済み |
 | ruviform#446 | 空 frame 範囲の `Spectrogram::tile` panic | 修正済み(`d3be1ad9`) |
-| ruviform#448(本 slice で起票) | 読み取り専用 Table の行選択と command 起動の ViewSpec 契約 | Open。AudioLens の Job 選択・Run 起動の前提 |
+| ruviform#448(第 6 slice で起票) | 読み取り専用 Table の行選択と command 起動の ViewSpec 契約 | Closed(`a998101c` で消費。第 7 slice で接続) |
+| ruviform#456(第 7 slice で起票) | job を伴う command の receipt が終端まで route されない | Open。Run 再開の receipt は `accepted` で止まる |
 
 ## 9. テストの方針
 

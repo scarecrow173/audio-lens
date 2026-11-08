@@ -33,6 +33,7 @@ Directory: `docs/specs`
 | SPEC-034yYlsrSFZyyOA7Kb7IFR | メディアインジェスト | proposed | [media-ingest.md](./media-ingest.md) |
 | SPEC-VCx77hBs4d2qAIPreErlEF | Native desktop 初期 slice AL-G1〜G3 (Issue #166 先行実装) | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | SPEC-laQ2e5k5G9oPKq1z0KZmcF | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run mount 判断 (Issue #166 第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| SPEC-nakcIRYkow5Nc6ljaz99ft | Native GUI の Jobs 対話選択と Run 再開・取消の仕様 (Issue #166 第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |
 | SPEC-rgCOOoX0ixQnYPjuCm3KLQ | Native GUI の Job/Run tab mount と Tile::columns 消費の仕様 (Issue #166 第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | SPEC-srSXzJOEfwrrPbP7Q35wbN | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity (Issue #166 第3 slice) | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | SPEC-Gq3Lm8Xv2RtN6pWzK4hYcA | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity (Issue #166 第4 slice) | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |

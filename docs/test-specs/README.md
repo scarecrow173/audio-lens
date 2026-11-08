@@ -33,6 +33,7 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE5e9xkwiiwSpmK0fa | MP4 demux とタイミング観測の検証 | proposed | [mp4-ingest.md](./mp4-ingest.md) |
 | TSPEC-0i3Bc6BhkywzIBeHpby4xP | Native desktop 初期 slice AL-G1〜G3 検証仕様 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | TSPEC-zOhqLzVO640w2ox49XQgzs | Native GUI drawn parity の Spectrogram・Label・Table と Job/Run 射影の検証仕様 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| TSPEC-Xaqw7FQfeezBD4YV3xV5Em | Native GUI の Jobs 対話選択と Run 再開・取消の検証仕様 (第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |
 | TSPEC-mEkVPMvQTo5Q4ov43W1ukN | Native GUI の Job/Run tab mount と Tile::columns 消費の検証仕様 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | TSPEC-O65pjV4Ci4jMZTRqGNRUm2 | Native GUI Source 画面の ViewSpec 射影・GPUI parity 検証仕様 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | TSPEC-Kv7Rn3Ac9WxS5pZdM2hEgH | Native GUI Spectrogram・Job/Run/Analysis 射影と drawn parity の検証仕様 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
