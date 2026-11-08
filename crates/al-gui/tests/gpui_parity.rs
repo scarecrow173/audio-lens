@@ -16,7 +16,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 use std::sync::Arc;
 
-use al_gui::view::desktop::{RESUME_KEY, desktop_screen};
+use al_gui::view::desktop::{DESKTOP_KEY, RESUME_KEY, desktop_screen};
 use al_gui::view::job::{JobRow, RunOutcome};
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY, job_list, run_screen};
 use al_gui::view::screen::{
@@ -662,5 +662,50 @@ fn jobs_selection_and_resume_button_match_between_fake_and_gpui() {
     assert_eq!(gpui_invoke, fake_invoke);
 
     assert_eq!(fake_selected, Some(0));
+    assert_eq!(gpui_selected, fake_selected);
+}
+
+#[test]
+fn tab_selection_intent_and_selected_tab_match_between_fake_and_gpui() {
+    let dir = TempDir::new("al-gui-parity-tab-select");
+    let base = dir.join("jobs");
+    let job_id = make_job(&base, &dir.join("cap.wav"));
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let tabs = ComponentKey::from(DESKTOP_KEY);
+
+    let mut fake = Fake::new(view.clone());
+    fake.host
+        .select_tab(fake.host.generation(), &tabs, 1)
+        .expect("fake select tab");
+    let fake_intents = drain_intents(&mut fake.host);
+    let fake_selected = fake.host.observe(&tabs).expect("tabs mounted").selected;
+
+    let mut gpui = Gpui::new(view);
+    gpui.observer
+        .select_tab(gpui.window, &tabs, 1)
+        .expect("gpui select tab");
+    gpui.observer.settle(|_, _| {});
+    let gpui_intents = gpui.command_intents();
+    let gpui_selected = gpui
+        .observer
+        .observe(gpui.window)
+        .expect("observed view")
+        .components
+        .into_iter()
+        .find(|c| c.key == tabs)
+        .expect("tabs observed")
+        .snapshot
+        .selected;
+
+    assert_eq!(fake_intents.len(), 1, "a tab press emits one intent");
+    assert_eq!(fake_intents[0]["target"], al_gui::command::DESKTOP_TARGET);
+    assert_eq!(
+        fake_intents[0]["action"],
+        al_gui::command::ACTION_TAB_SELECT
+    );
+    assert_eq!(fake_intents[0]["params"], json!({"index": 1}));
+    assert_eq!(gpui_intents, fake_intents);
+
+    assert_eq!(fake_selected, Some(1));
     assert_eq!(gpui_selected, fake_selected);
 }

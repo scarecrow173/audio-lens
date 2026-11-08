@@ -6,6 +6,8 @@
 //! 理由を示す Label に置き換えて画面全体は開く(`workspace` と同じ規則)。
 //! Jobs の行は選択可能な Table で、選択は `command::JOB_TARGET` の intent として
 //! 発行する。起動引数の `job` は初期選択(設計: `docs/designs/native-gui-interactive-job-run.md`)。
+//! 画面の root Tabs は pointer で選択でき、選択は `command::DESKTOP_TARGET` の
+//! `tab-select` intent として発行する(設計: `docs/designs/native-gui-tabs-selection.md`)。
 
 use std::path::Path;
 
@@ -34,6 +36,8 @@ const DATASET_PANEL_KEY: &str = "dataset-view";
 pub const RESUME_KEY: &str = "run-resume";
 /// Run tab の取消 Button の key。
 pub const CANCEL_KEY: &str = "run-cancel";
+/// 画面の root Tabs の tab 数(Jobs・Run・Dataset)。`tab-select` の index 上限。
+pub const TAB_COUNT: usize = 3;
 
 /// `base_dir` 配下の job 一覧(Jobs)と、`job` の Run 結果(Run)・dataset(Dataset)を
 /// 3 つの tab に写した `ViewSpec`。`base_dir` が無い場合は全 tab が理由を示す。
@@ -43,6 +47,7 @@ pub fn desktop_screen(base_dir: Option<&Path>, job: Option<&JobId>) -> ViewSpec 
     let s = service.as_ref();
     tabs(
         DESKTOP_KEY,
+        Some(command::DESKTOP_TARGET),
         vec![
             (
                 JOBS_TAB_KEY,
