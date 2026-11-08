@@ -66,10 +66,10 @@ relations:
 
 ## T6: 検証・文書・レビュー
 
-- [ ] 全 mise task(fmt・check・lint・test・build・ui-gpui 系・headless・ruviform・ui)を最終 commit で実行
-- [ ] docs の索引(specs・designs・plans・test-specs・tasks・impl)を更新
-- [ ] IR(`impl/ir/native-gui-job-run-mount.md`)へ実装結果と受入対応表を記録
-- [ ] review-protocol を独立サブエージェントで実施し、blocker を解消
+- [x] 全 mise task(fmt・check・lint・test・build・ui-gpui 系・headless・ruviform・ui)をコード HEAD `adbd5ed` で実行(全件通過。NotRun は IR に記録)
+- [x] docs の索引(specs・designs・plans・test-specs・tasks・impl)を更新
+- [x] IR(`impl/ir/native-gui-job-run-mount.md`)へ実装結果と受入対応表を記録
+- [x] review-protocol を独立サブエージェント 2 件で実施し、P2 の B1 を修正。残りは非 blocker として IR に記録
 - [x] Ruviform 側の Issue(行選択・command 起動: ruviform#448)を起票し、ruviform#443 へ消費状況を追記
 
 ## T7: PR
