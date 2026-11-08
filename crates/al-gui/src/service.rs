@@ -15,6 +15,8 @@ use ruviform_ui::service::{CallOutcome, JobSpec, OpInfo, Service, ServiceContext
 use ruviform_viz::source::SpectrumSource;
 use serde_json::{Value, json};
 
+use crate::command;
+
 const OPS: &[OpInfo] = &[
     OpInfo {
         name: "al.app.info",
@@ -87,6 +89,10 @@ const OPS: &[OpInfo] = &[
     OpInfo {
         name: "al.view.spectrogram",
         summary: "スペクトログラムタイルを RVST で発行する",
+    },
+    OpInfo {
+        name: command::COMMAND_INTENT_OP,
+        summary: "view の command intent(job 選択・再開)を解釈する",
     },
 ];
 
@@ -232,6 +238,47 @@ impl AlGuiService {
         })
     }
 
+    fn command(
+        &mut self,
+        params: &Value,
+        ctx: &mut ServiceContext<'_>,
+    ) -> Result<CallOutcome, ErrorBody> {
+        let action = command::decode_action(params)
+            .ok_or_else(|| invalid("command must be an action intent"))?;
+        if action.target != command::JOB_TARGET {
+            return Err(invalid(format!(
+                "unknown command target {:?}",
+                action.target
+            )));
+        }
+        match action.action.as_str() {
+            command::ACTION_SELECT => {
+                let jobs = self
+                    .job_service(&Value::Null)?
+                    .list()
+                    .map_err(Self::map_err)?;
+                let row = action
+                    .params
+                    .as_ref()
+                    .and_then(|p| p.get("row"))
+                    .and_then(Value::as_u64)
+                    .and_then(|r| usize::try_from(r).ok())
+                    .ok_or_else(|| invalid("select requires row (u64)"))?;
+                let job = jobs
+                    .get(row)
+                    .ok_or_else(|| invalid(format!("row {row} is outside {} jobs", jobs.len())))?;
+                Ok(CallOutcome::Result(
+                    json!({"status": "applied", "job_id": job.job_id.as_str()}),
+                ))
+            }
+            command::ACTION_RESUME => {
+                let params = action.params.unwrap_or(Value::Null);
+                self.call_internal("al.job.resume", &params, ctx)
+            }
+            other => Err(invalid(format!("unknown action {other:?}"))),
+        }
+    }
+
     fn call_internal(
         &mut self,
         op: &str,
@@ -352,6 +399,7 @@ impl AlGuiService {
                     },
                 )))
             }
+            command::COMMAND_INTENT_OP => self.command(params, ctx),
             "al.ds.open" => {
                 let session = if let Some(root) = params.get("root").and_then(Value::as_str) {
                     DatasetSession::open(root).map_err(Self::map_err)?

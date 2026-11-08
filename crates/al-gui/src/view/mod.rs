@@ -20,8 +20,8 @@ pub mod workspace;
 use std::fmt;
 
 use ruviform_ui::view::{
-    A11ySpec, CellValue, ComponentKey, ComponentSpec, ComponentVisualState, LabelSpec,
-    MAX_TABLE_ROWS, PanelSpec, TabSpec, TableSpec, TabsSpec, ViewSpec,
+    A11ySpec, ButtonSpec, CellValue, ComponentKey, ComponentSpec, ComponentVisualState, LabelSpec,
+    MAX_TABLE_ROWS, PanelSpec, TabSpec, TableSelectionSpec, TableSpec, TabsSpec, ViewSpec,
 };
 
 /// view model の写像/開放エラー。
@@ -148,13 +148,34 @@ pub(crate) fn unavailable(key: &str, reason: &impl fmt::Display) -> ComponentSpe
     )
 }
 
-/// Table component。行数・列数は ruviform の上限を超える場合に拒否する
+/// Button component(値を伴わない command の起動)。
+pub(crate) fn button(
+    key: &str,
+    label: &str,
+    target: &str,
+    action: &str,
+    params: Option<serde_json::Value>,
+) -> ComponentSpec {
+    ComponentSpec::Button(ButtonSpec {
+        key: ComponentKey::from(key),
+        label: label.to_string(),
+        target: target.to_string(),
+        action: action.to_string(),
+        params,
+        visual: ComponentVisualState::default(),
+        a11y: A11ySpec::default(),
+    })
+}
+
+/// Table component。`selection` を与えると行選択可能になり、その target へ
+/// 選択 intent を発行する。行数・列数は ruviform の上限を超える場合に拒否する
 /// (長い Dataset は呼び出し側が bounded query で行を絞る)。
 pub(crate) fn table(
     key: &str,
     title: &str,
     columns: &[&str],
     rows: Vec<Vec<Option<CellValue>>>,
+    selection: Option<&str>,
 ) -> Result<ComponentSpec, ViewError> {
     if rows.len() > MAX_TABLE_ROWS {
         return Err(ViewError::Invalid(format!(
@@ -166,6 +187,9 @@ pub(crate) fn table(
         key: ComponentKey::from(key),
         columns: columns.iter().map(|c| (*c).to_string()).collect(),
         rows,
+        selection: selection.map(|target| TableSelectionSpec {
+            target: target.to_string(),
+        }),
         visual: ComponentVisualState::default(),
         a11y: A11ySpec {
             label: Some(title.to_string()),

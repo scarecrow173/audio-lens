@@ -1,22 +1,24 @@
 //! al-desktop の root 画面(Jobs・Run・Dataset の Tabs)の `ViewSpec` 射影 (AL-G4)。
 //!
-//! 入力は job の置き場 `base_dir` と、起動時に選んだ job の 2 つだけ。
+//! 入力は job の置き場 `base_dir` と、選択中の job の 2 つだけ。
 //! Dataset tab は job の `analysis/` を開き、先頭 input を
 //! Source・Spectrogram・Analysis の画面へ写す。各 tab は独立に読み、読めない tab は
 //! 理由を示す Label に置き換えて画面全体は開く(`workspace` と同じ規則)。
-//! job の選択は ViewSpec に選択操作が無いため起動引数で与える
-//! (設計: `docs/designs/native-gui-job-run-mount.md`)。
+//! Jobs の行は選択可能な Table で、選択は `command::JOB_TARGET` の intent として
+//! 発行する。起動引数の `job` は初期選択(設計: `docs/designs/native-gui-interactive-job-run.md`)。
 
 use std::path::Path;
 
 use al_core::JobId;
 use al_service::jobs::{JobInspection, JobService};
 use ruviform_ui::view::ViewSpec;
+use serde_json::json;
 
 use super::job::{JobRow, RunOutcome};
 use super::run_screen::{RUN_PANEL_KEY, job_list, run_screen};
 use super::workspace::workspace_screen;
-use super::{ViewError, panel, tabs, unavailable};
+use super::{ViewError, button, panel, tabs, unavailable};
+use crate::command;
 
 /// 画面全体(Tabs)の key。
 pub const DESKTOP_KEY: &str = "desktop";
@@ -28,6 +30,10 @@ pub const RUN_TAB_KEY: &str = "tab-run";
 pub const DATASET_TAB_KEY: &str = "tab-dataset";
 const JOBS_PANEL_KEY: &str = "jobs-view";
 const DATASET_PANEL_KEY: &str = "dataset-view";
+/// Run tab の再開 Button の key。
+pub const RESUME_KEY: &str = "run-resume";
+/// Run tab の取消 Button の key。
+pub const CANCEL_KEY: &str = "run-cancel";
 
 /// `base_dir` 配下の job 一覧(Jobs)と、`job` の Run 結果(Run)・dataset(Dataset)を
 /// 3 つの tab に写した `ViewSpec`。`base_dir` が無い場合は全 tab が理由を示す。
@@ -86,7 +92,24 @@ fn inspect(service: Option<&JobService>, job: Option<&JobId>) -> Result<JobInspe
 
 fn run_panel(service: Option<&JobService>, job: Option<&JobId>) -> Result<ViewSpec, ViewError> {
     let inspection = inspect(service, job)?;
-    run_screen(&RunOutcome::from_manifest(&inspection.manifest))
+    let job = job.ok_or_else(no_job_selected)?;
+    let actions = vec![
+        button(
+            RESUME_KEY,
+            "Resume",
+            command::JOB_TARGET,
+            command::ACTION_RESUME,
+            Some(json!({ "job_id": job.as_str() })),
+        ),
+        button(
+            CANCEL_KEY,
+            "Cancel",
+            command::JOB_TARGET,
+            command::ACTION_CANCEL,
+            None,
+        ),
+    ];
+    run_screen(&RunOutcome::from_manifest(&inspection.manifest), actions)
 }
 
 fn dataset_panel(service: Option<&JobService>, job: Option<&JobId>) -> Result<ViewSpec, ViewError> {

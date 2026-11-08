@@ -99,7 +99,7 @@ fn event_row(event_id: &str, strength: serde_json::Value) -> EventRow {
 
 #[test]
 fn run_status_label_and_stage_table_keep_failure_reasons() {
-    let view = run_screen(&run_fixture()).expect("run screen");
+    let view = run_screen(&run_fixture(), Vec::new()).expect("run screen");
     let items = children(&view);
 
     let status: &LabelSpec = label(&items[0]);
@@ -229,7 +229,7 @@ fn analysis_rejects_more_rows_than_a_table_can_carry() {
 
 #[test]
 fn run_and_analysis_screens_mount_in_the_fake_host() {
-    let run = mount(run_screen(&run_fixture()).expect("run"));
+    let run = mount(run_screen(&run_fixture(), Vec::new()).expect("run"));
     assert!(
         run.observe(&ComponentKey::from(RUN_STATUS_KEY))
             .expect("status mounted")

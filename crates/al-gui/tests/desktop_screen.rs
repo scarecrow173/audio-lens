@@ -5,8 +5,9 @@
 mod common;
 
 use al_core::{JobId, StageKind};
+use al_gui::command;
 use al_gui::view::desktop::{
-    DATASET_TAB_KEY, DESKTOP_KEY, JOBS_TAB_KEY, RUN_TAB_KEY, desktop_screen,
+    CANCEL_KEY, DATASET_TAB_KEY, DESKTOP_KEY, JOBS_TAB_KEY, RESUME_KEY, RUN_TAB_KEY, desktop_screen,
 };
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY};
 use al_gui::view::screen::SPECTROGRAM_KEY;
@@ -261,5 +262,36 @@ fn a_job_outside_the_base_dir_fails_only_its_tabs() {
         )),
         format!("unavailable: job {} not found", missing.as_str())
     );
+    mount(&view);
+}
+
+#[test]
+fn jobs_table_selects_jobs_and_run_tab_offers_resume_and_cancel() {
+    let (_dir, base, job_id) = setup();
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let tabs = root_tabs(&view);
+
+    let ComponentSpec::Table(jobs) = child(tab(tabs, JOBS_TAB_KEY), JOBS_KEY) else {
+        panic!("jobs must be a table");
+    };
+    assert_eq!(
+        jobs.selection.as_ref().map(|s| s.target.as_str()),
+        Some(command::JOB_TARGET)
+    );
+
+    let run = tab(tabs, RUN_TAB_KEY);
+    let ComponentSpec::Button(resume) = child(run, RESUME_KEY) else {
+        panic!("resume must be a button");
+    };
+    assert_eq!(resume.target, command::JOB_TARGET);
+    assert_eq!(resume.action, command::ACTION_RESUME);
+    assert_eq!(resume.params, Some(json!({ "job_id": job_id.as_str() })));
+
+    let ComponentSpec::Button(cancel) = child(run, CANCEL_KEY) else {
+        panic!("cancel must be a button");
+    };
+    assert_eq!(cancel.target, command::JOB_TARGET);
+    assert_eq!(cancel.action, command::ACTION_CANCEL);
+    assert_eq!(cancel.params, None);
     mount(&view);
 }

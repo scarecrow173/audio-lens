@@ -3,11 +3,14 @@
 //! `dispatch_op` 経路で、op の契約・エラー分類・`rvf://data` 登録を
 //! 確認する。
 
+mod common;
+
 use std::path::PathBuf;
 use std::time::Duration;
 
 use al_core::JobId;
 use al_gui::AlGuiService;
+use al_gui::command;
 use ruviform_ui::data::{DataRegistry, DataRequest};
 use ruviform_ui::ipc::{Event, JobState, codes};
 use ruviform_ui::runtime::UiRuntime;
@@ -219,4 +222,105 @@ fn job_cancel_op_is_routed() {
     // 実行中でない job id への cancel は UNKNOWN_JOB。
     let err = call_err(&mut rt, "x1", "job.cancel", json!({"job": 99}));
     assert_eq!(err.code, codes::UNKNOWN_JOB);
+}
+
+fn command_params(target: &str, action: &str, params: Value) -> Value {
+    json!({
+        "command_id": "c",
+        "expect_receipt": true,
+        "intent": {
+            "kind": "action",
+            "target": target,
+            "control_id": "job-table",
+            "sequence": 1,
+            "action": action,
+            "params": params,
+        },
+    })
+}
+
+fn service_runtime(base: &std::path::Path) -> UiRuntime {
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(base))
+        .unwrap();
+    rt
+}
+
+#[test]
+fn command_select_maps_row_to_job_and_replies_applied() {
+    let dir = temp_dir("command-select");
+    let base = dir.join("jobs");
+    let job_id = common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = service_runtime(&base);
+
+    let data = call_ok(
+        &mut rt,
+        "s1",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::JOB_TARGET,
+            command::ACTION_SELECT,
+            json!({"row": 0}),
+        ),
+    );
+    assert_eq!(data["status"], "applied");
+    assert_eq!(data["job_id"], job_id.as_str());
+
+    let err = call_err(
+        &mut rt,
+        "s2",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::JOB_TARGET,
+            command::ACTION_SELECT,
+            json!({"row": 1}),
+        ),
+    );
+    assert_eq!(err.code, codes::INVALID_PARAMS);
+}
+
+#[test]
+fn command_resume_starts_the_job_and_replies_accepted() {
+    let dir = temp_dir("command-resume");
+    let base = dir.join("jobs");
+    let job_id = common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = service_runtime(&base);
+
+    let spawn = call_ok(
+        &mut rt,
+        "r1",
+        command::COMMAND_INTENT_OP,
+        command_params(
+            command::JOB_TARGET,
+            command::ACTION_RESUME,
+            json!({"job_id": job_id.as_str()}),
+        ),
+    );
+    assert!(spawn.get("job").and_then(Value::as_u64).is_some());
+    assert!(spawn.get("status").is_none(), "accepted carries no status");
+    let (_, state, data, error) = wait_job(&mut rt);
+    assert_eq!(state, JobState::Finished, "resume failed: {error:?}");
+    assert_eq!(data.unwrap()["job_id"], job_id.as_str());
+}
+
+#[test]
+fn command_rejects_unknown_targets_and_actions() {
+    let dir = temp_dir("command-reject");
+    let base = dir.join("jobs");
+    let mut rt = service_runtime(&base);
+
+    let err = call_err(
+        &mut rt,
+        "x1",
+        command::COMMAND_INTENT_OP,
+        command_params("al.ds", command::ACTION_SELECT, json!({"row": 0})),
+    );
+    assert_eq!(err.code, codes::INVALID_PARAMS);
+    let err = call_err(
+        &mut rt,
+        "x2",
+        command::COMMAND_INTENT_OP,
+        command_params(command::JOB_TARGET, "explode", json!({})),
+    );
+    assert_eq!(err.code, codes::INVALID_PARAMS);
 }

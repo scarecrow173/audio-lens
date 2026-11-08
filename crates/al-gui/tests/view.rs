@@ -361,7 +361,7 @@ fn real_dataset_produces_view_models() {
         .map(|r| json!({"stage": r.stage, "status": r.status, "duration_ms": r.duration_ms, "error": r.error}))
         .collect();
     let run = RunOutcome::from_json(&json!({"job_id": job_id.as_str(), "stages": stages})).unwrap();
-    let view = run_screen(&run).unwrap();
+    let view = run_screen(&run, Vec::new()).unwrap();
     let ComponentSpec::Panel(panel) = &view.root else {
         panic!("run screen must be a panel");
     };
