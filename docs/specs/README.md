@@ -47,6 +47,7 @@ Directory: `docs/specs`
 | SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | proposed | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |
 | SPEC-034yYluri8PXVLEWU6M3qK | リファレンスアライン比較解析 | proposed | [reference-analysis.md](./reference-analysis.md) |
 | SPEC-034DlyJKMTXtsFFjEVd9w7 | 残存レビュー指摘と仕様適合の追跡 | proposed | [residual-compliance.md](./residual-compliance.md) |
+| SPEC-034U1irN0QulZX3YeqAYVY | ruviform pin 54439fdc 追従と Spectrogram cell intensity の実窓検証（ruviform#463 consumer） | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | SPEC-o0wlzeWCSUPIniAFtwqSCc | Ruviform Git 依存の Cargo.lock 正本化 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | SPEC-GAQPlJtIjsPj8TdfBwrfIw | al-observability の SinkConfig::span_events 追従 (AL#127 / Ruviform #335) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
