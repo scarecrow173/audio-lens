@@ -60,6 +60,7 @@ Directory: `docs/specs`
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
+| SPEC-KeMjbsfCWwN7IG007JihND | al-gui webview host の driver-neutral API 移行（CI webview-verify 修正）(Issue #176) | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
