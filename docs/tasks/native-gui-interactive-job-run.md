@@ -1,7 +1,7 @@
 ---
 id: "TASK-s1DH5J3jmMH1T2IOPpfw65"
 type: "task"
-status: "in-progress"
+status: "approved"
 title: "Issue #166 Jobs 対話選択と Run 再開・取消 実装タスク (第7 slice)"
 created: "2026-11-08"
 updated: "2026-11-08"
@@ -56,9 +56,9 @@ relations:
 - [x] T5 al-desktop の初期選択と dirty 時の `update_view` 再射影
 - [x] T6 テスト: service op（3）・session（4）・screen（1）・GPUI parity（1）
 - [x] T7 文書: spec・design・plan・task・test-spec、`native-gui-job-run-mount.md` §3・§6・§8、各 README 索引
-- [ ] T8 検証: `fmt`・`check`・`lint`・`test`・`check-cli-headless`・`check-ruviform-lock`・`check-ruviform-rev`・`sync-ui-deps`・`check-ui`・`test-ui`・`check-ui-gpui`・`lint-ui-gpui`・`test-ui-gpui`
-- [ ] T9 `git fetch origin main && git merge origin/main` で最新 main を取り込み、生成物（`Cargo.lock`・docs 索引）を再生成
-- [ ] T10 コミット（論理単位）・push（`feature/166-interactive-job-run`）・PR（`Refs #166`）
+- [x] T8 検証: `fmt`・`check`・`lint`・`test`・`check-cli-headless`・`check-ruviform-lock`・`check-ruviform-rev`・`sync-ui-deps`・`check-ui`・`test-ui`・`check-ui-gpui`・`lint-ui-gpui`・`test-ui-gpui`
+- [x] T9 `git fetch origin main && git merge origin/main` で最新 main を取り込み、生成物（`Cargo.lock`・docs 索引）を再生成
+- [x] T10 コミット（論理単位）・push（`feature/166-interactive-job-run`）・PR（`Refs #166`）
 - [ ] T11 ruviform#456 と AudioLens PR を相互参照（ruviform 側へコメント）
 
 ## 未実施として残すもの
