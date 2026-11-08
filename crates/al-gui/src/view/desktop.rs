@@ -8,6 +8,8 @@
 //! 発行する。起動引数の `job` は初期選択(設計: `docs/designs/native-gui-interactive-job-run.md`)。
 //! 画面の root Tabs は pointer で選択でき、選択は `command::DESKTOP_TARGET` の
 //! `tab-select` intent として発行する(設計: `docs/designs/native-gui-tabs-selection.md`)。
+//! Dataset tab の内側の workspace Tabs も同様に `command::WORKSPACE_TARGET` で
+//! 選択できる(設計: `docs/designs/native-gui-workspace-tabs-selection.md`)。
 
 use std::path::Path;
 

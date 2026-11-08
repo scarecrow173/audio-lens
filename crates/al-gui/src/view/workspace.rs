@@ -4,6 +4,8 @@
 //! STFT frame)ため、同じ Panel に並べず Tabs の子に分ける。Source 以外は
 //! dataset に無いことが普通に起こりうるため、読めない場合はその tab に
 //! 理由を示す Label を置き、画面全体は開く。
+//! Tabs は pointer で選択でき、選択は `command::WORKSPACE_TARGET` の
+//! `tab-select` intent として発行する(設計: `docs/designs/native-gui-workspace-tabs-selection.md`)。
 
 use std::ops::Range;
 
@@ -19,9 +21,12 @@ use super::analysis_screen::{
 use super::screen::{SPECTROGRAM_PANEL_KEY, source_screen, spectrogram_screen};
 use super::source::{SpectrumView, WaveformView};
 use super::{ViewError, panel, tabs, unavailable};
+use crate::command;
 
 /// 画面全体(Tabs)の key。
 pub const WORKSPACE_KEY: &str = "workspace";
+/// workspace の Tabs の tab 数(Source・Spectrogram・Analysis)。`tab-select` の index 上限。
+pub const WORKSPACE_TAB_COUNT: usize = 3;
 /// Source 画面の表示 bin 数(全長を一度に表示する既定値)。
 const SCREEN_BINS: usize = 1024;
 /// Spectrogram の出力解像度。`rows × cols` は `MAX_SPECTROGRAM_CELLS` 以下。
@@ -44,7 +49,7 @@ pub fn workspace_screen(session: &DatasetSession, input_id: &str) -> Result<View
     });
     Ok(tabs(
         WORKSPACE_KEY,
-        None,
+        Some(command::WORKSPACE_TARGET),
         vec![
             ("tab-source", "Source", source),
             ("tab-spectrogram", "Spectrogram", spectrogram),

@@ -12,7 +12,7 @@ use al_gui::view::desktop::{
 };
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY};
 use al_gui::view::screen::SPECTROGRAM_KEY;
-use al_gui::view::workspace::WORKSPACE_KEY;
+use al_gui::view::workspace::{WORKSPACE_KEY, WORKSPACE_TAB_COUNT};
 use al_service::jobs::{JobService, RunControl, RunSpec};
 use al_service::parse_input_spec;
 use al_testkit::temp::TempDir;
@@ -292,6 +292,42 @@ fn desktop_tabs_are_selectable_by_pointer_on_the_desktop_target() {
         .collect();
     assert_eq!(intents.len(), 1);
     assert_eq!(intents[0]["target"], command::DESKTOP_TARGET);
+    assert_eq!(intents[0]["action"], command::ACTION_TAB_SELECT);
+    assert_eq!(intents[0]["params"], json!({ "index": 1 }));
+    assert_eq!(host.observe(&key).expect("tabs").selected, Some(1));
+}
+
+#[test]
+fn workspace_tabs_are_selectable_by_pointer_on_the_workspace_target() {
+    let (_dir, base, job_id) = setup();
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let tabs = root_tabs(&view);
+    let ComponentSpec::Tabs(workspace) = tab(tabs, DATASET_TAB_KEY) else {
+        panic!("dataset must be the workspace tabs");
+    };
+    assert_eq!(workspace.key, ComponentKey::from(WORKSPACE_KEY));
+    let keys: Vec<&str> = workspace.tabs.iter().map(|t| t.key.0.as_str()).collect();
+    assert_eq!(keys, ["tab-source", "tab-spectrogram", "tab-analysis"]);
+    assert_eq!(workspace.tabs.len(), WORKSPACE_TAB_COUNT);
+    assert_eq!(
+        workspace.selection.as_ref().map(|s| s.target.as_str()),
+        Some(command::WORKSPACE_TARGET)
+    );
+
+    let mut host = mount(&view);
+    let key = ComponentKey::from(WORKSPACE_KEY);
+    host.select_tab(host.generation(), &key, 1)
+        .expect("select the spectrogram tab");
+    let intents: Vec<serde_json::Value> = host
+        .drain_events()
+        .into_iter()
+        .filter_map(|e| match e {
+            ViewEvent::Intent { intent, .. } => Some(serde_json::to_value(intent).expect("json")),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(intents.len(), 1);
+    assert_eq!(intents[0]["target"], command::WORKSPACE_TARGET);
     assert_eq!(intents[0]["action"], command::ACTION_TAB_SELECT);
     assert_eq!(intents[0]["params"], json!({ "index": 1 }));
     assert_eq!(host.observe(&key).expect("tabs").selected, Some(1));
