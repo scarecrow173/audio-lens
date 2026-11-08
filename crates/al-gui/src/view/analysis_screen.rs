@@ -59,7 +59,7 @@ pub fn events_section(
             EVENTS_NOTE_KEY,
             format!("events {} of {event_total}", events.len()),
         ),
-        table(EVENTS_KEY, "events", &EVENT_COLUMNS, rows)?,
+        table(EVENTS_KEY, "events", &EVENT_COLUMNS, rows, None)?,
     ])
 }
 
@@ -69,7 +69,7 @@ pub fn events_section(
 /// alignment の行数が Table の上限を超える場合。
 pub fn alignments_section(alignments: &[AlignmentRow]) -> Result<ComponentSpec, ViewError> {
     let rows = alignments.iter().map(alignment_cells).collect();
-    table(ALIGNMENTS_KEY, "alignments", &ALIGNMENT_COLUMNS, rows)
+    table(ALIGNMENTS_KEY, "alignments", &ALIGNMENT_COLUMNS, rows, None)
 }
 
 /// 節を並べた Analysis 画面の `ViewSpec`。

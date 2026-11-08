@@ -10,6 +10,7 @@ use ruviform_ui::view::{ComponentSpec, ViewSpec};
 
 use super::job::{JobRow, RunOutcome};
 use super::{ViewError, label, num_cell, panel, table, tag, text_cell};
+use crate::command;
 
 /// Run 画面 Panel の key。
 pub const RUN_PANEL_KEY: &str = "run-view";
@@ -22,11 +23,11 @@ pub const JOBS_KEY: &str = "jobs";
 
 const STAGE_COLUMNS: [&str; 4] = ["stage", "status", "duration_ms", "error"];
 
-/// `RunOutcome` の Run 画面(状態テキスト + stage 表)の `ViewSpec`。
+/// `RunOutcome` の Run 画面(状態テキスト + stage 表 + `actions`)の `ViewSpec`。
 ///
 /// # Errors
 /// stage 数が Table の上限を超える場合。
-pub fn run_screen(run: &RunOutcome) -> Result<ViewSpec, ViewError> {
+pub fn run_screen(run: &RunOutcome, actions: Vec<ComponentSpec>) -> Result<ViewSpec, ViewError> {
     let total = run.stages.len();
     let count = |s: StageStatus| run.stages.iter().filter(|r| r.status == s).count();
     let status = label(
@@ -52,13 +53,16 @@ pub fn run_screen(run: &RunOutcome) -> Result<ViewSpec, ViewError> {
             ]
         })
         .collect();
-    Ok(panel(
-        RUN_PANEL_KEY,
-        vec![status, table(STAGES_KEY, "stages", &STAGE_COLUMNS, rows)?],
-    ))
+    let mut children = vec![
+        status,
+        table(STAGES_KEY, "stages", &STAGE_COLUMNS, rows, None)?,
+    ];
+    children.extend(actions);
+    Ok(panel(RUN_PANEL_KEY, children))
 }
 
-/// job 一覧(List)。一列の Table で job id を並べる。
+/// job 一覧(List)。一列の選択可能な Table で job id を並べる。行の選択は
+/// `command::JOB_TARGET` へ選択 intent を発行する。
 ///
 /// # Errors
 /// job 数が Table の上限を超える場合。
@@ -67,5 +71,5 @@ pub fn job_list(jobs: &[JobRow]) -> Result<ComponentSpec, ViewError> {
         .iter()
         .map(|job| vec![text_cell(&job.job_id)])
         .collect();
-    table(JOBS_KEY, "jobs", &["job"], rows)
+    table(JOBS_KEY, "jobs", &["job"], rows, Some(command::JOB_TARGET))
 }

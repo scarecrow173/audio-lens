@@ -16,7 +16,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 use std::sync::Arc;
 
-use al_gui::view::desktop::desktop_screen;
+use al_gui::view::desktop::{RESUME_KEY, desktop_screen};
 use al_gui::view::job::{JobRow, RunOutcome};
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY, job_list, run_screen};
 use al_gui::view::screen::{
@@ -455,7 +455,7 @@ fn run_view() -> ViewSpec {
         ]
     }))
     .expect("run outcome");
-    run_screen(&run).expect("run screen")
+    run_screen(&run, Vec::new()).expect("run screen")
 }
 
 /// job 一覧の fixture(一列の Table)。
@@ -594,4 +594,73 @@ fn drawn_desktop_jobs_tab_matches_fake_expectations() {
     let job_id = make_job(&base, &dir.join("cap.wav"));
     let view = desktop_screen(Some(&base), Some(&job_id));
     assert_eq!(assert_drawn_matches(&view), [JOBS_KEY]);
+}
+
+fn drain_intents(host: &mut ViewHost) -> Vec<Value> {
+    host.drain_events()
+        .into_iter()
+        .filter_map(|e| match e {
+            ViewEvent::Intent { intent, .. } => Some(serde_json::to_value(intent).expect("json")),
+            _ => None,
+        })
+        .collect()
+}
+
+#[test]
+fn jobs_selection_and_resume_button_match_between_fake_and_gpui() {
+    assert_eq!(COMMAND_OP, al_gui::command::COMMAND_INTENT_OP);
+    let dir = TempDir::new("al-gui-parity-command");
+    let base = dir.join("jobs");
+    let job_id = make_job(&base, &dir.join("cap.wav"));
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    let jobs = ComponentKey::from(JOBS_KEY);
+    let resume = ComponentKey::from(RESUME_KEY);
+
+    let mut fake = Fake::new(view.clone());
+    fake.host
+        .select_row(fake.host.generation(), &jobs, 0)
+        .expect("fake select");
+    let fake_select = drain_intents(&mut fake.host);
+    fake.host
+        .invoke(fake.host.generation(), &resume)
+        .expect("fake invoke");
+    let fake_invoke = drain_intents(&mut fake.host);
+    let fake_selected = fake.host.observe(&jobs).expect("jobs mounted").selected;
+
+    let mut gpui = Gpui::new(view);
+    gpui.observer
+        .select_row(gpui.window, &jobs, 0)
+        .expect("gpui select");
+    gpui.observer.settle(|_, _| {});
+    let gpui_select = gpui.command_intents();
+    gpui.observer
+        .invoke(gpui.window, &resume)
+        .expect("gpui invoke");
+    gpui.observer.settle(|_, _| {});
+    let gpui_invoke = gpui.command_intents()[gpui_select.len()..].to_vec();
+    let gpui_selected = gpui
+        .observer
+        .observe(gpui.window)
+        .expect("observed view")
+        .components
+        .into_iter()
+        .find(|c| c.key == jobs)
+        .expect("jobs observed")
+        .snapshot
+        .selected;
+
+    assert_eq!(fake_select.len(), 1, "select emits one intent");
+    assert_eq!(fake_select[0]["kind"], "action");
+    assert_eq!(fake_select[0]["target"], al_gui::command::JOB_TARGET);
+    assert_eq!(fake_select[0]["action"], al_gui::command::ACTION_SELECT);
+    assert_eq!(fake_select[0]["params"], json!({"row": 0}));
+    assert_eq!(gpui_select, fake_select);
+
+    assert_eq!(fake_invoke.len(), 1, "resume emits one intent");
+    assert_eq!(fake_invoke[0]["action"], al_gui::command::ACTION_RESUME);
+    assert_eq!(fake_invoke[0]["params"], json!({"job_id": job_id.as_str()}));
+    assert_eq!(gpui_invoke, fake_invoke);
+
+    assert_eq!(fake_selected, Some(0));
+    assert_eq!(gpui_selected, fake_selected);
 }
