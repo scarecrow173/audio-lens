@@ -1,9 +1,45 @@
-//! Fake 層・GPUI 層で共有する Source fixture(AL-G3)。
+//! Fake 層・GPUI 層で共有する Source fixture(AL-G3)と Job fixture(AL-G4)。
+#![allow(dead_code)]
 
+use std::path::Path;
 use std::sync::Arc;
 
+use al_core::{JobId, StageKind, StageStatus};
 use al_gui::view::source::WaveformView;
+use al_service::jobs::{JobService, RunControl, RunSpec};
+use al_service::parse_input_spec;
+use al_testkit::media::wav_s16_bytes;
 use ruviform_viz::{SliceWaveform, WaveformSource};
+use serde_json::json;
+
+/// `ingest → cheap_analysis → dataset` の job 段数。
+pub const JOB_STAGES: usize = 3;
+
+/// 1 秒の capture `wav` から `base` 配下に完了済みの job を作る。
+pub fn make_job(base: &Path, wav: &Path) -> JobId {
+    let samples: Vec<i16> = (0..48_000).map(|i| (i % 400) as i16 - 200).collect();
+    std::fs::write(wav, wav_s16_bytes(1, 48_000, &samples)).unwrap();
+    let spec = RunSpec {
+        inputs: vec![parse_input_spec(&format!("capture_bug:{}", wav.display())).unwrap()],
+        stages: Some(vec![
+            StageKind::Ingest,
+            StageKind::CheapAnalysis,
+            StageKind::Dataset,
+        ]),
+        config: json!({}),
+    };
+    let (job_id, manifest) = JobService::new(base)
+        .run(spec, &RunControl::default())
+        .unwrap();
+    assert_eq!(manifest.stages.len(), JOB_STAGES);
+    assert!(
+        manifest
+            .stages
+            .iter()
+            .all(|s| s.status == StageStatus::Completed)
+    );
+    job_id
+}
 
 pub const SAMPLE_RATE: u32 = 48_000;
 /// 0.1 秒。`[1200, 1440)` frame を NaN gap にする。

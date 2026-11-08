@@ -10,6 +10,7 @@
 pub mod analysis;
 pub mod analysis_screen;
 pub mod dataset;
+pub mod desktop;
 pub mod job;
 pub mod run_screen;
 pub mod screen;
@@ -20,7 +21,7 @@ use std::fmt;
 
 use ruviform_ui::view::{
     A11ySpec, CellValue, ComponentKey, ComponentSpec, ComponentVisualState, LabelSpec,
-    MAX_TABLE_ROWS, PanelSpec, TableSpec, ViewSpec,
+    MAX_TABLE_ROWS, PanelSpec, TabSpec, TableSpec, TabsSpec, ViewSpec,
 };
 
 /// view model の写像/開放エラー。
@@ -117,6 +118,34 @@ pub(crate) fn panel(key: &str, children: Vec<ComponentSpec>) -> ViewSpec {
             a11y: A11ySpec::default(),
         }),
     }
+}
+
+/// Tabs を根とする画面 `ViewSpec`。各 tab の画面はその root を子にする。
+pub(crate) fn tabs(key: &str, tabs: Vec<(&str, &str, ViewSpec)>) -> ViewSpec {
+    ViewSpec {
+        root: ComponentSpec::Tabs(TabsSpec {
+            key: ComponentKey::from(key),
+            active: 0,
+            tabs: tabs
+                .into_iter()
+                .map(|(key, title, view)| TabSpec {
+                    key: ComponentKey::from(key),
+                    title: title.to_string(),
+                    child: Box::new(view.root),
+                })
+                .collect(),
+            visual: ComponentVisualState::default(),
+            a11y: A11ySpec::default(),
+        }),
+    }
+}
+
+/// 読めなかった節・画面の理由を示す Label。
+pub(crate) fn unavailable(key: &str, reason: &impl fmt::Display) -> ComponentSpec {
+    label(
+        &format!("{key}-unavailable"),
+        format!("unavailable: {reason}"),
+    )
 }
 
 /// Table component。行数・列数は ruviform の上限を超える場合に拒否する
