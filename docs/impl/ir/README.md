@@ -113,3 +113,4 @@ Directory: `docs/impl/ir`
 | sccache-compile-cache-issue-148 | [sccache-al-148.md](./sccache-al-148.md) |
 | issue-127-ruviform-consumer-tracking | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | native-gui-waveform-seek-screen | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| native-gui-workspace-tabs-selection | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |

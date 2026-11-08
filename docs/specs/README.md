@@ -40,6 +40,7 @@ Directory: `docs/specs`
 | SPEC-Gq3Lm8Xv2RtN6pWzK4hYcA | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity (Issue #166 第4 slice) | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | SPEC-y3fZkq9ExqlJKunYgf6tQs | Native GUI の Tabs 選択契約の採用と pointer による画面 tab 切替の仕様 (Issue #166 第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | SPEC-XU6YkQ1VJGeG1v6i3nVzTm | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価 (Issue #166 第2 slice) | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| SPEC-034TTalkmZRrkmu9SMhAHa | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer による tab 切替の仕様 (Issue #166 第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | SPEC-034FnccPlanWsReuse0002 | NCC plan/workspace 再利用と IPD drift 計測の復旧 | approved | [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) |
 | SPEC-034EdkEKW7URB22O9btHFS | observability foundation: logging・計時基盤の導入スコープ | approved | [observability-foundation.md](./observability-foundation.md) |
 | SPEC-034P3HtT4o8PMr9CfcRf9l | pre-migration baseline: 現行 golden・実メディア・性能の固定 | proposed | [pre-migration-baseline-golden.md](./pre-migration-baseline-golden.md) |

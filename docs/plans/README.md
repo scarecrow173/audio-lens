@@ -26,6 +26,7 @@ Directory: `docs/plans`
 | PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | PLAN-ibK26JpqMzrShnkIXoAamb | Native GUI の Tabs 選択契約の採用と pointer による画面 tab 切替の実装計画 (第9 slice) | approved | [native-gui-tabs-selection.md](./native-gui-tabs-selection.md) |
 | PLAN-c1G8Ggtg9KLne46QN95cua | Native GUI Waveform/Seek 画面の ViewSpec 射影 実装計画 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
+| PLAN-034TTalkyYVJto39C4jwnT | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer による tab 切替の実装計画 (第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
