@@ -13,6 +13,7 @@
 //! どちらの backend にも属さない driver-neutral 層。
 
 pub mod assets;
+pub mod command;
 pub mod desktop;
 pub mod preferences;
 pub mod service;
