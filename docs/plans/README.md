@@ -20,6 +20,7 @@ Directory: `docs/plans`
 | PLAN-yVtTxHenQy8bBk2Sd2ZwdH | Native desktop 初期 slice AL-G1〜G3 実装計画 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | PLAN-1FzCSROtUwCSQOdQx5Ua4f | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装計画 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
 | PLAN-VTpkboiddjpNtaMhsfyNwK | Native GUI の Jobs 対話選択と Run 再開・取消の実装計画 (第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |
+| PLAN-z8HSDcpYPWcoCvEcsik3gB | Native GUI の job 終端 receipt の消費と再射影検証の実装計画 (第8 slice) | approved | [native-gui-job-receipt-consumption.md](./native-gui-job-receipt-consumption.md) |
 | PLAN-OQLFcsEL9ZueFsfsB5zoZU | Native GUI の Job/Run tab mount と Tile::columns 消費の実装計画 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | PLAN-5D5yfFUG8HGrWGJlg97kCG | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity 実装計画 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | PLAN-Jt6Pq2Zx8UvR4mYbN1kCfG | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の実装計画 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
