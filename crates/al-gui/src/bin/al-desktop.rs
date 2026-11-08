@@ -4,8 +4,8 @@
 //! この binary のみが GPUI 型を持つ。`DesktopSession` は
 //! driver-neutral であり、`GpuiDriver` はここで組み立てる。
 //! 使い方: `cargo run -p al-gui --features gpui --bin al-desktop -- [<base-dir> [<job-id>]]`
-//! `base-dir` を省略すると preferences の base_dir を使い、`job-id` を省略すると
-//! job を選ばない(Jobs のみ読める)。実 OS window が開く。
+//! `base-dir` を省略すると preferences の base_dir を使い、`job-id` は初期選択
+//! (省略時は job を選ばない)。Jobs の行選択で Run・Dataset を切り替える。実 OS window が開く。
 //! CI では `check-ui-gpui`/`lint-ui-gpui`/`test-ui-gpui` で compile/lint/headless
 //! test のみ検証)。
 
@@ -83,6 +83,7 @@ fn main() -> ExitCode {
     };
 
     let mut session = DesktopSession::new(runtime);
+    session.set_selected_job(job.clone());
     if let Some(t) = theme {
         session.set_theme(t);
     }
@@ -101,7 +102,16 @@ fn main() -> ExitCode {
     };
     eprintln!("[al-desktop] window {window} (mode={mode})");
 
-    match driver.run(Some(TICK), move |ev, drv| session.handle(ev, drv)) {
+    let view = driver.clone();
+    match driver.run(Some(TICK), move |ev, drv| {
+        session.handle(ev, drv);
+        if session.take_projection_dirty() {
+            let screen = desktop_screen(base_dir.as_deref(), session.selected_job());
+            if let Err(e) = view.update_view(window, screen) {
+                eprintln!("[al-desktop] view update failed: {e}");
+            }
+        }
+    }) {
         Ok(()) => {
             eprintln!("[al-desktop] exited cleanly");
             ExitCode::SUCCESS

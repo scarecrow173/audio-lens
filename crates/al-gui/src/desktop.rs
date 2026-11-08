@@ -35,10 +35,16 @@
 
 use std::collections::BTreeSet;
 
+use al_core::JobId;
+use ruviform_ui::ipc::{ErrorBody, JobState, codes};
 use ruviform_ui::{
-    CloseDecision, DriverEvent, RoutedEvent, UiRuntime, WindowDriver, WindowId, WindowLifecycle,
+    CloseDecision, DriverEvent, Event, Intent, RoutedEvent, UiRuntime, WindowDriver, WindowId,
+    WindowLifecycle,
 };
 use ruviform_ui_theme::ResolvedTheme;
+use serde_json::json;
+
+use crate::command;
 
 /// Window lifecycle の policy。既定値は Issue #166 の受入
 /// (window close/destroy が job を暗黙停止しない)を表現する。
@@ -87,6 +93,13 @@ pub struct DesktopSession {
     /// `driver.exit()` を既に発行したか。exit 後の event 処理・
     /// 再 arm・二度目の `exit()` を全て閉じる latch。
     exited: bool,
+    /// 画面の Jobs 選択の結果(起動引数または行選択で決まる job)。
+    /// Run・Dataset tab の射影元で、行の index は持たない。
+    selected_job: Option<JobId>,
+    /// 選択または job の終端で画面の射影が古くなったことを示す。
+    /// composition root が [`take_projection_dirty`](Self::take_projection_dirty)
+    /// で取り出して再射影する。
+    projection_dirty: bool,
 }
 
 impl DesktopSession {
@@ -100,7 +113,24 @@ impl DesktopSession {
             theme: None,
             exit_pending: false,
             exited: false,
+            selected_job: None,
+            projection_dirty: false,
         }
+    }
+
+    /// 起動時の job 選択を設定する(`<job-id>` 引数)。
+    pub fn set_selected_job(&mut self, job: Option<JobId>) {
+        self.selected_job = job;
+    }
+
+    /// 現在選択されている job。
+    pub fn selected_job(&self) -> Option<&JobId> {
+        self.selected_job.as_ref()
+    }
+
+    /// 射影が古くなっていたか。読み出すと降ろす。
+    pub fn take_projection_dirty(&mut self) -> bool {
+        std::mem::take(&mut self.projection_dirty)
     }
 
     /// 既定 policy で session を作る。
@@ -185,6 +215,7 @@ impl DesktopSession {
         match ev {
             DriverEvent::Tick => {
                 let routed = self.runtime.drain_jobs_routed();
+                self.projection_dirty |= routed.iter().any(|r| is_job_end(&r.event));
                 deliver(routed, driver);
                 // job が全て終端へ達したなら `Defer` で保留した
                 // close を通常 flow(request_close → CloseRequested
@@ -195,7 +226,15 @@ impl DesktopSession {
             }
             DriverEvent::Windowed { window, event } => match event {
                 WindowLifecycle::Action(intent) => {
-                    let routed = self.runtime.dispatch_window_intent(window, intent);
+                    let selecting = is_action(&intent, command::ACTION_SELECT);
+                    let routed = if is_action(&intent, command::ACTION_CANCEL) {
+                        self.cancel_window_job(window, intent.id)
+                    } else {
+                        self.runtime.dispatch_window_intent(window, intent)
+                    };
+                    if selecting {
+                        self.adopt_selection(&routed);
+                    }
                     deliver(routed, driver);
                 }
                 WindowLifecycle::CloseRequested => {
@@ -282,6 +321,44 @@ impl DesktopSession {
         }
     }
 
+    /// window が所有する実行中 job の取消。取消は job の終端で非同期に完了するため、
+    /// receipt は取消の受理(`accepted`)か、取消対象が無いことの `rejected` とする。
+    fn cancel_window_job(&mut self, window: WindowId, id: String) -> Vec<RoutedEvent> {
+        let event = if self.runtime.cancel_window_jobs(window) > 0 {
+            Event::result_ok(id, json!({ "status": "accepted" }))
+        } else {
+            Event::result_err(
+                id,
+                ErrorBody::new(codes::UNKNOWN_JOB, "no running job to cancel"),
+            )
+        };
+        vec![RoutedEvent {
+            window: Some(window),
+            event,
+        }]
+    }
+
+    /// 選択 intent の receipt(`applied`)が返した job を選択として採用する。
+    fn adopt_selection(&mut self, routed: &[RoutedEvent]) {
+        let job = routed.iter().find_map(|r| match &r.event {
+            Event::Result {
+                ok: true,
+                data: Some(data),
+                ..
+            } => data
+                .get("job_id")?
+                .as_str()
+                .and_then(|s| JobId::parse(s).ok()),
+            _ => None,
+        });
+        if let Some(job) = job
+            && self.selected_job.as_ref() != Some(&job)
+        {
+            self.selected_job = Some(job);
+            self.projection_dirty = true;
+        }
+    }
+
     /// `Defer` で保留した close を再開する。job が全て終端へ
     /// 達した(Tick drain 直後の呼び出し前提)ときだけ動き、
     /// 保留中の window へ `request_close` を再発行する — 新しい
@@ -300,6 +377,21 @@ impl DesktopSession {
             }
         }
     }
+}
+
+fn is_action(intent: &Intent, name: &str) -> bool {
+    intent.op == command::COMMAND_INTENT_OP
+        && command::decode_action(&intent.params).is_some_and(|a| a.action == name)
+}
+
+fn is_job_end(event: &Event) -> bool {
+    matches!(
+        event,
+        Event::Job {
+            state: JobState::Finished | JobState::Failed | JobState::Cancelled,
+            ..
+        }
+    )
 }
 
 /// `RoutedEvent` を window へ配送する。`Some(w)` はその window へ、

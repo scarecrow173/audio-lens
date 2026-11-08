@@ -1,16 +1,20 @@
 //! `DesktopSession` の FakeDriver lifecycle fixture (AL-G1)。
 //! driver-neutral 契約のみを検証し、実 OS window は開かない。
 
+mod common;
+
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+use al_gui::command;
 use al_gui::desktop::{DesktopPolicy, DesktopSession};
 use al_gui::service::AlGuiService;
-use ruviform_ui::ipc::{ErrorBody, Intent};
+use al_testkit::temp::TempDir;
+use ruviform_ui::ipc::{ErrorBody, Intent, codes};
 use ruviform_ui::{
     CallOutcome, DataRegistry, DriverEvent, JobSpec, OpInfo, Service, ServiceContext, UiRuntime,
-    WindowDriver, WindowLifecycle, WindowSpec,
+    WindowDriver, WindowId, WindowLifecycle, WindowSpec,
 };
 use ruviform_ui_test::FakeDriver;
 use serde_json::json;
@@ -595,4 +599,169 @@ fn exit_on_last_window_false_keeps_loop_running() {
     driver.inject(DriverEvent::Tick);
     pump(&mut session, &mut driver);
     assert!(!driver.exited(), "no exit request was ever armed");
+}
+
+fn command_intent(id: &str, action: &str, params: serde_json::Value) -> Intent {
+    Intent::new(
+        id,
+        command::COMMAND_INTENT_OP,
+        json!({
+            "command_id": id,
+            "expect_receipt": true,
+            "intent": {
+                "kind": "action",
+                "target": command::JOB_TARGET,
+                "control_id": "job-table",
+                "sequence": 1,
+                "action": action,
+                "params": params,
+            },
+        }),
+    )
+}
+
+fn action_on(window: WindowId, intent: Intent) -> DriverEvent {
+    DriverEvent::Windowed {
+        window,
+        event: WindowLifecycle::Action(intent),
+    }
+}
+
+fn reply(
+    driver: &FakeDriver,
+    window: WindowId,
+    id: &str,
+) -> Option<(bool, Option<serde_json::Value>)> {
+    driver.events_for(window).into_iter().find_map(|e| match e {
+        ruviform_ui::ipc::Event::Result {
+            id: rid, ok, data, ..
+        } if rid.as_str() == id => Some((*ok, data.clone())),
+        _ => None,
+    })
+}
+
+#[test]
+fn select_intent_adopts_the_job_and_marks_the_projection_dirty() {
+    let dir = TempDir::new("al-gui-desktop-select");
+    let base = dir.join("jobs");
+    let job_id = common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(
+        w,
+        command_intent("s1", command::ACTION_SELECT, json!({"row": 0})),
+    ));
+    pump(&mut session, &mut driver);
+
+    assert_eq!(session.selected_job(), Some(&job_id));
+    assert_eq!(reply(&driver, w, "s1").map(|(ok, _)| ok), Some(true));
+    assert!(session.take_projection_dirty());
+    assert!(!session.take_projection_dirty());
+}
+
+#[test]
+fn rejected_selection_keeps_the_previous_job() {
+    let dir = TempDir::new("al-gui-desktop-reject");
+    let base = dir.join("jobs");
+    common::make_job(&base, &dir.join("cap.wav"));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(AlGuiService::with_base_dir(&base))
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(
+        w,
+        command_intent("s2", command::ACTION_SELECT, json!({"row": 7})),
+    ));
+    pump(&mut session, &mut driver);
+
+    assert_eq!(session.selected_job(), None);
+    assert!(!session.take_projection_dirty());
+    assert_eq!(reply(&driver, w, "s2").map(|(ok, _)| ok), Some(false));
+}
+
+#[test]
+fn cancel_without_a_window_job_replies_rejected() {
+    let mut session = session();
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(
+        w,
+        command_intent("c1", command::ACTION_CANCEL, json!(null)),
+    ));
+    pump(&mut session, &mut driver);
+
+    let (ok, _) = reply(&driver, w, "c1").expect("receipt for c1");
+    assert!(!ok);
+    let delivered = driver.events_for(w);
+    assert!(delivered.iter().any(|e| matches!(
+        e,
+        ruviform_ui::ipc::Event::Result { id, error: Some(err), .. }
+            if id == "c1" && err.code == codes::UNKNOWN_JOB
+    )));
+}
+
+#[test]
+fn cancel_intent_cancels_the_window_owned_job_and_replies_accepted() {
+    let gate = Arc::new(AtomicBool::new(false));
+    let outcome = Arc::new(Mutex::new(None));
+    let mut rt = UiRuntime::new(DataRegistry::new());
+    rt.register_service(BlockingService {
+        gate: gate.clone(),
+        outcome: outcome.clone(),
+    })
+    .expect("blocking service");
+    rt.register_service(AlGuiService::new())
+        .expect("al-gui service");
+    let mut session = DesktopSession::new(rt);
+    let mut driver = FakeDriver::new();
+    let w = ready_window(&mut session, &mut driver);
+    driver.inject(action_on(w, Intent::new("j1", "test.block", json!({}))));
+    pump(&mut session, &mut driver);
+    assert!(session.runtime().has_running_jobs());
+
+    driver.inject(action_on(
+        w,
+        command_intent("c1", command::ACTION_CANCEL, json!(null)),
+    ));
+    pump(&mut session, &mut driver);
+    let (ok, data) = reply(&driver, w, "c1").expect("receipt for c1");
+    assert!(ok);
+    assert_eq!(
+        data.as_ref().and_then(|d| d["status"].as_str()),
+        Some("accepted")
+    );
+
+    for _ in 0..200 {
+        if !session.runtime().has_running_jobs() {
+            break;
+        }
+        driver.inject(DriverEvent::Tick);
+        pump(&mut session, &mut driver);
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert!(
+        !session.runtime().has_running_jobs(),
+        "cancelled job must terminate"
+    );
+    assert_eq!(*outcome.lock().unwrap(), Some("cancelled"));
+    assert!(
+        session.take_projection_dirty(),
+        "job end must re-project the screen"
+    );
+}
+
+fn ready_window(session: &mut DesktopSession, driver: &mut FakeDriver) -> WindowId {
+    let w = driver.create_window(&spec()).unwrap();
+    driver.inject(DriverEvent::Windowed {
+        window: w,
+        event: WindowLifecycle::Ready,
+    });
+    pump(session, driver);
+    w
 }
