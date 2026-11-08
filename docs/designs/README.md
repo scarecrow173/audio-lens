@@ -36,6 +36,7 @@ Directory: `docs/designs`
 | DESIGN-WjCNQiQJztajyjGCJIjb0y | Native desktop 初期 slice AL-G1〜G3 の設計 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | DESIGN-KmsgLgUSS9WY4blzhdDRqp | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の設計 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
 | DESIGN-56ekRrs3U0gtF3sylCGYeE | Native GUI の Jobs 対話選択と Run 再開・取消の設計 (第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |
+| DESIGN-Gtwe8oh10Al6yAAXSmfGkL | Native GUI の job 終端 receipt の消費と再射影検証の設計 (第8 slice) | approved | [native-gui-job-receipt-consumption.md](./native-gui-job-receipt-consumption.md) |
 | DESIGN-WRNx7ppADH8dxL2tG2HjFK | Native GUI の Job/Run tab mount と Tile::columns 消費の設計 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | DESIGN-rmQlUpDmFZLlonLOUfAGa4 | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity の設計 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |

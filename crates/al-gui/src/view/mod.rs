@@ -134,6 +134,7 @@ pub(crate) fn tabs(key: &str, tabs: Vec<(&str, &str, ViewSpec)>) -> ViewSpec {
                     child: Box::new(view.root),
                 })
                 .collect(),
+            selection: None,
             visual: ComponentVisualState::default(),
             a11y: A11ySpec::default(),
         }),
