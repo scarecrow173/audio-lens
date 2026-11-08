@@ -9,6 +9,8 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use al_dataset::reader::DatasetReader;
+use al_locate::decode::format_scale;
+use al_media::metadata::SampleFormat;
 use ruviform_viz::error::{Result, VizError};
 use ruviform_viz::source::{
     BinAxis, PcmBlock, SpectrumData, SpectrumInfo, SpectrumSource, SpectrumTile, WaveformInfo,
@@ -27,6 +29,11 @@ pub struct DatasetWaveform {
     reader: Arc<DatasetReader>,
     name: String,
     info: WaveformInfo,
+    /// `audio.sample_format` に対応する [-1,1] 正規化スケール。
+    /// ruviform-viz の port は振幅スケールを持たず、renderer は
+    /// 単位振幅を前提とするため、dataset の生スケールはここで
+    /// 吸収する。
+    scale: f64,
 }
 
 impl DatasetWaveform {
@@ -45,6 +52,13 @@ impl DatasetWaveform {
                 format!("audio metadata for {name} lacks channels/sample_rate"),
             ));
         }
+        let format = serde_json::from_value::<SampleFormat>(meta["audio"]["sample_format"].clone())
+            .map_err(|_| {
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    format!("audio metadata for {name} lacks a valid sample_format"),
+                )
+            })?;
         Ok(Self {
             reader,
             name: name.to_string(),
@@ -53,6 +67,7 @@ impl DatasetWaveform {
                 channels,
                 frames,
             },
+            scale: format_scale(format),
         })
     }
 }
@@ -75,10 +90,16 @@ impl WaveformSource for DatasetWaveform {
             .reader
             .read_audio_range("inputs", &self.name, start, end)
             .map_err(source_err)?;
+        let mut samples = audio.samples;
+        if self.scale != 1.0 {
+            for s in &mut samples {
+                *s /= self.scale;
+            }
+        }
         Ok(PcmBlock {
             start,
             frames: (end - start) as usize,
-            samples: audio.samples,
+            samples,
         })
     }
 }
