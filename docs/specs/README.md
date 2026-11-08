@@ -53,6 +53,7 @@ Directory: `docs/specs`
 | SPEC-034yYlsZHRt4b5fTzZS7Qr | マルチメソッドソース定位 | proposed | [source-localization.md](./source-localization.md) |
 | SPEC-034FP1KsTCa0WviopfvrnQ | Issue 33 保存仕様と候補成果物の確定 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | SPEC-24roIb4kfGhLAuK7OKg933 | spectral_envelope の fft_size 契約: 非ゼロ 2 冪必須と底上げ規則 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
+| SPEC-034TX7soOs7I0ovUdhRVaw | Spectrogram tab 選択時の UI thread hang 解消（ruviform pin 追従）(Issue #180) | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
 | SPEC-034H76gCpx4TVbIGDVGOPZ | Streaming Bandpass (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | SPEC-034Gs0Ej9pXCBUDbXO8456 | symphonia AAC-LC audio decode in MP4 | approved | [symphonia-aac-lc-audio-decode-in-mp4.md](./symphonia-aac-lc-audio-decode-in-mp4.md) |
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |

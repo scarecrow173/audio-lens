@@ -788,4 +788,13 @@ fn workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui()
 
     assert_eq!(fake_ws_selected, Some(1));
     assert_eq!(gpui_ws_selected, fake_ws_selected);
+
+    // AL#180: Spectrogram tab 選択後の再描画で spectrogram が paint 対象に
+    // なることを確認する(0 サイズ canvas での hang は ruviform pin 依存)。
+    let drawn = gpui.observer.drawn(gpui.window).expect("drawn view");
+    let keys: Vec<&str> = drawn.components.iter().map(|c| c.key.0.as_str()).collect();
+    assert!(
+        keys.contains(&SPECTROGRAM_KEY),
+        "spectrogram must be painted after tab selection: {keys:?}"
+    );
 }

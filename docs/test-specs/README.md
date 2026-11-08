@@ -51,6 +51,7 @@ Directory: `docs/test-specs`
 | TSPEC-035iqm9CyhHVBcqennRTlq | SIMD 算術クレート基盤と DSP カーネル高速化 | proposed | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | TSPEC-034FPu2UHR9IyKz1LxreDD | Issue 33 正式保存仕様と維持契約 | approved | [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) |
 | TSPEC-brMJfBQXA6vJ3f4Vm4UKjR | spectral_envelope の fft_size 契約検証 | proposed | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
+| TSPEC-034TX9JbnubNmwchpJ23Hs | Spectrogram tab hang 解消のテスト仕様 | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcE | ステージランナーの部分再開 | proposed | [stage-runner-resume.md](./stage-runner-resume.md) |
 | TSPEC-034Gs7WHAxB3WpFCH8fHIQ | symphonia AAC-LC audio decode fallback | draft | [symphonia-aac-lc-audio-decode-fallback.md](./symphonia-aac-lc-audio-decode-fallback.md) |
 | TSPEC-034AaE4bOFBcUsOjs95C7G | 映像フレーム特徴と A/V 同期の検証 | proposed | [video-av-features.md](./video-av-features.md) |
