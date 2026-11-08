@@ -1,6 +1,8 @@
 //! Fake 層・GPUI 層で共有する Source fixture(AL-G3)と Job fixture(AL-G4)。
 #![allow(dead_code)]
 
+pub mod scenario;
+
 use std::path::Path;
 use std::sync::Arc;
 
