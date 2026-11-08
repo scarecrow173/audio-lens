@@ -71,6 +71,7 @@ Directory: `docs/impl/ir`
 | observability-stage-timing | [observability-stage-timing.md](./observability-stage-timing.md) |
 | resume-reproduction-tests | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | spectrogram-tab-hang | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
+| ruviform-463-spectrogram-intensity | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | stage-runner | [stage-runner.md](./stage-runner.md) |
 | al-math-envelope-fft-size-assert | [spectral-envelope-fft-size-entry-assert.md](./spectral-envelope-fft-size-entry-assert.md) |
 | timing-observation | [timing-observation.md](./timing-observation.md) |

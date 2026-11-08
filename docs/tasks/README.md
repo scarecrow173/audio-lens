@@ -162,6 +162,7 @@ Directory: `docs/tasks`
 | TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | done | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
+| TASK-034U1kYwpGf3uFTaAbXAvM | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のタスク | done | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-HrjjahBSYbViCD72MweZwV | al-observability SinkConfig::span_events 追従 (AL#127) | done | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |

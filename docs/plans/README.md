@@ -30,6 +30,7 @@ Directory: `docs/plans`
 | PLAN-034TTalkyYVJto39C4jwnT | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer による tab 切替の実装計画 (第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
+| PLAN-034U1kiOgFRwvauxIyObiC | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の計画 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | PLAN-4ifedHAkxHtbglJWu8ESIL | Ruviform Git 依存を Cargo.lock 正本へ移行する実装計画 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | PLAN-SQWHGfXx2Hg0nBJWdUgw2A | SinkConfig::span_events 追従の実装計画 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
