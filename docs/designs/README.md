@@ -35,6 +35,7 @@ Directory: `docs/designs`
 | DESIGN-034AasAnWroBLn28EPuQ5Y | MP4 demux とタイミング観測設計 | approved | [mp4-ingest.md](./mp4-ingest.md) |
 | DESIGN-WjCNQiQJztajyjGCJIjb0y | Native desktop 初期 slice AL-G1〜G3 の設計 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | DESIGN-KmsgLgUSS9WY4blzhdDRqp | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の設計 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| DESIGN-WRNx7ppADH8dxL2tG2HjFK | Native GUI の Job/Run tab mount と Tile::columns 消費の設計 (第6 slice) | draft | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | DESIGN-rmQlUpDmFZLlonLOUfAGa4 | Native GUI Source 画面の ViewSpec 射影・al-desktop mount・GPUI parity の設計 | draft | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | DESIGN-Hr5Mn9Yw3StP7qXzL2jBdE | Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity の設計 | draft | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | DESIGN-hZqY4x9NK3Xg22TQK3K8mB | Native GUI Waveform/Seek 画面の ViewSpec 射影と Fake 層評価の設計 | draft | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |

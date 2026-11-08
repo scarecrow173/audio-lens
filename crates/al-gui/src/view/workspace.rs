@@ -8,10 +8,7 @@
 use std::ops::Range;
 
 use al_service::dataset::DatasetSession;
-use ruviform_ui::view::{
-    A11ySpec, ComponentKey, ComponentSpec, ComponentVisualState, MAX_TABLE_ROWS, TabSpec, TabsSpec,
-    ViewSpec,
-};
+use ruviform_ui::view::{MAX_TABLE_ROWS, ViewSpec};
 use ruviform_viz::{Aggregate, RowSpec, TileRequest};
 use serde_json::Value;
 
@@ -21,7 +18,7 @@ use super::analysis_screen::{
 };
 use super::screen::{SPECTROGRAM_PANEL_KEY, source_screen, spectrogram_screen};
 use super::source::{SpectrumView, WaveformView};
-use super::{ViewError, label, panel};
+use super::{ViewError, panel, tabs, unavailable};
 
 /// 画面全体(Tabs)の key。
 pub const WORKSPACE_KEY: &str = "workspace";
@@ -45,11 +42,14 @@ pub fn workspace_screen(session: &DatasetSession, input_id: &str) -> Result<View
             vec![unavailable(SPECTROGRAM_PANEL_KEY, &e)],
         )
     });
-    Ok(tabs(vec![
-        ("tab-source", "Source", source),
-        ("tab-spectrogram", "Spectrogram", spectrogram),
-        ("tab-analysis", "Analysis", analysis_panel(session)),
-    ]))
+    Ok(tabs(
+        WORKSPACE_KEY,
+        vec![
+            ("tab-source", "Source", source),
+            ("tab-spectrogram", "Spectrogram", spectrogram),
+            ("tab-analysis", "Analysis", analysis_panel(session)),
+        ],
+    ))
 }
 
 fn source_panel(session: &DatasetSession, input_id: &str) -> Result<ViewSpec, ViewError> {
@@ -113,28 +113,4 @@ fn rows_of<'a>(v: &'a Value, key: &str) -> Result<&'a [Value], ViewError> {
         .and_then(Value::as_array)
         .map(Vec::as_slice)
         .ok_or_else(|| ViewError::Invalid(format!("result lacks {key}")))
-}
-
-/// 読めなかった節・画面の理由を示す Label。
-fn unavailable(key: &str, e: &ViewError) -> ComponentSpec {
-    label(&format!("{key}-unavailable"), format!("unavailable: {e}"))
-}
-
-fn tabs(tabs: Vec<(&str, &str, ViewSpec)>) -> ViewSpec {
-    ViewSpec {
-        root: ComponentSpec::Tabs(TabsSpec {
-            key: ComponentKey::from(WORKSPACE_KEY),
-            active: 0,
-            tabs: tabs
-                .into_iter()
-                .map(|(key, title, view)| TabSpec {
-                    key: ComponentKey::from(key),
-                    title: title.to_string(),
-                    child: Box::new(view.root),
-                })
-                .collect(),
-            visual: ComponentVisualState::default(),
-            a11y: A11ySpec::default(),
-        }),
-    }
 }

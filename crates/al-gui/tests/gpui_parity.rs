@@ -16,13 +16,15 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 use std::sync::Arc;
 
+use al_gui::view::desktop::desktop_screen;
 use al_gui::view::job::{JobRow, RunOutcome};
 use al_gui::view::run_screen::{JOBS_KEY, RUN_STATUS_KEY, STAGES_KEY, job_list, run_screen};
 use al_gui::view::screen::{
     METER_KEY, RULER_KEY, SEEK_KEY, SEEK_TARGET, SPECTROGRAM_KEY, SPECTROGRAM_RANGE_KEY,
     WAVEFORM_KEY, source_screen, spectrogram_screen,
 };
-use common::{GAP, fixture_view};
+use al_testkit::temp::TempDir;
+use common::{GAP, fixture_view, make_job};
 use ruviform_ui::behavior::{CommandPhase, ControlInput, InputSource, ValueInput};
 use ruviform_ui::dock::ViewInstanceId;
 use ruviform_ui::view::{
@@ -268,15 +270,20 @@ fn assert_close(actual: f64, expected: f64) {
     assert!((actual - expected).abs() < 1e-6, "{actual} != {expected}");
 }
 
+/// `key` の component を Panel・Tabs の子を辿って探す。
+fn find<'a>(node: &'a ComponentSpec, key: &str) -> Option<&'a ComponentSpec> {
+    if node.key() == &ComponentKey::from(key) {
+        return Some(node);
+    }
+    match node {
+        ComponentSpec::Panel(panel) => panel.children.iter().find_map(|c| find(c, key)),
+        ComponentSpec::Tabs(tabs) => tabs.tabs.iter().find_map(|t| find(&t.child, key)),
+        _ => None,
+    }
+}
+
 fn child<'a>(spec: &'a ViewSpec, key: &str) -> &'a ComponentSpec {
-    let ComponentSpec::Panel(panel) = &spec.root else {
-        panic!("root must be a panel");
-    };
-    panel
-        .children
-        .iter()
-        .find(|c| c.key() == &ComponentKey::from(key))
-        .expect("child component")
+    find(&spec.root, key).expect("child component")
 }
 
 /// Meter の描画 bar の期待値。gap(`count == 0`・非有限 peak)、範囲外の bin は描かない。
@@ -578,4 +585,13 @@ fn drawn_run_status_and_stage_table_match_fake_expectations() {
 #[test]
 fn drawn_job_list_matches_fake_expectations() {
     assert_eq!(assert_drawn_matches(&jobs_view()), [JOBS_KEY]);
+}
+
+#[test]
+fn drawn_desktop_jobs_tab_matches_fake_expectations() {
+    let dir = TempDir::new("al-gui-parity-desktop");
+    let base = dir.join("jobs");
+    let job_id = make_job(&base, &dir.join("cap.wav"));
+    let view = desktop_screen(Some(&base), Some(&job_id));
+    assert_eq!(assert_drawn_matches(&view), [JOBS_KEY]);
 }

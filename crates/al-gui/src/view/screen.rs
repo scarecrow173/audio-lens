@@ -12,8 +12,8 @@
 //! 表示 viewport の秒範囲に対する刻みのみを決め、解析値には触れない。
 //!
 //! Spectrogram は `ruviform-viz` の解決済み [`Tile`] を列ごとに写す。
-//! 列の frame 区間は `Spectrogram::tile` の等分割と同じ規則で求め、
-//! 値・gap は再計算しない。
+//! 列の frame 区間・有限セル数(`count`)・magnitude は [`Tile::columns`]
+//! の規則をそのまま使い、値・gap は再計算しない。
 
 use std::ops::Range;
 
@@ -173,7 +173,7 @@ pub fn source_screen(
 
 /// 解決済み `Tile` を Spectrogram 画面(表示範囲の Label と Spectrogram)の
 /// `ViewSpec` へ写す。`tile.frames` は STFT frame 単位の表示範囲で、
-/// 列 `c` は `Spectrogram::tile` と同じ等分割の frame 区間を持つ。
+/// 列の frame 区間は [`Tile::columns`] が定める。
 /// `magnitude_range` は consumer が決める表示範囲で、値は変換しない。
 ///
 /// # Errors
@@ -205,7 +205,15 @@ pub fn spectrogram_screen(
         viewport: tile.frames.clone(),
         rows: tile.rows,
         magnitude_range,
-        columns: spectrogram_columns(tile),
+        columns: tile
+            .columns()
+            .map(|c| SpectrogramColumn {
+                start: c.frames.start,
+                end: c.frames.end,
+                count: c.count,
+                magnitudes: c.magnitudes,
+            })
+            .collect(),
         visual: ComponentVisualState::default(),
         a11y: A11ySpec {
             role: Some(A11yRole::Img),
@@ -222,31 +230,6 @@ pub fn spectrogram_screen(
             a11y: A11ySpec::default(),
         }),
     })
-}
-
-/// `Tile` の列を写す。列 `c` の区間は `Spectrogram::tile` の
-/// `cf0 = span·c/cols`、`cf1 = max(span·(c+1)/cols, cf0+1)`(`span` は
-/// 表示 frame 数の下限 1)を `tile.frames.start` だけずらした値。
-/// `count` は列の有限セル数で、`0` は全セルが NaN の gap 列。
-fn spectrogram_columns(tile: &Tile) -> Vec<SpectrogramColumn> {
-    let f0 = tile.frames.start;
-    let span = tile.frames.end.saturating_sub(f0).max(1);
-    let cols = tile.cols as u64;
-    (0..cols)
-        .map(|c| {
-            let cf0 = span * c / cols;
-            let cf1 = (span * (c + 1) / cols).max(cf0 + 1);
-            let magnitudes: Vec<f64> = (0..tile.rows)
-                .map(|r| tile.values[r * tile.cols + c as usize])
-                .collect();
-            SpectrogramColumn {
-                start: f0 + cf0,
-                end: f0 + cf1,
-                count: magnitudes.iter().filter(|m| m.is_finite()).count() as u64,
-                magnitudes,
-            }
-        })
-        .collect()
 }
 
 fn waveform_bin(b: &ViewBin) -> WaveformBin {

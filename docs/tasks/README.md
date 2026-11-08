@@ -8,6 +8,7 @@ Directory: `docs/tasks`
 | --- | --- | --- | --- |
 | TASK-nyXpQYAjTy5czWCwaEXHcz | Issue #166 Native 初期 slice AL-G1〜G3 実装タスク | in-progress | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | TASK-ntv7UntJkPy8ECuh6iG7Lx | Issue #166 drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影 実装タスク (第5 slice) | in-progress | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
+| TASK-JW0iKTumsryZvMQUhfLfIf | Issue #166 Job/Run tab mount と Tile::columns 消費 実装タスク (第6 slice) | in-progress | [native-gui-job-run-mount.md](./native-gui-job-run-mount.md) |
 | TASK-9dUDqYVPHWLYEx2RNUzEzR | Issue #166 Source 画面 ViewSpec 射影・al-desktop mount・GPUI parity 実装タスク (第3 slice) | in-progress | [native-gui-product-screen-mount.md](./native-gui-product-screen-mount.md) |
 | TASK-Lw4Ts8Bd2YqN6rXfJ3mKiP | Issue #166 Spectrogram・Job/Run/Analysis 射影と drawn parity 実装タスク (第4 slice) | in-progress | [native-gui-spectrogram-analysis-projection.md](./native-gui-spectrogram-analysis-projection.md) |
 | TASK-NWrMC4dBFWhLLr6YuXhEPF | Issue #166 Waveform/Seek 画面 ViewSpec 射影 実装タスク | in-progress | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |

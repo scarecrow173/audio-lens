@@ -1,29 +1,26 @@
 //! `al-desktop`: AudioLens native desktop composition root
-//! (Issue #166 AL-G1/AL-G3)。
+//! (Issue #166 AL-G1/AL-G3/AL-G4)。
 //!
 //! この binary のみが GPUI 型を持つ。`DesktopSession` は
 //! driver-neutral であり、`GpuiDriver` はここで組み立てる。
-//! 使い方: `cargo run -p al-gui --features gpui --bin al-desktop -- [<dataset-root> <input-id>]`
-//! 引数を省略すると Source を載せない空の画面を mount する(実 OS window が開く。
+//! 使い方: `cargo run -p al-gui --features gpui --bin al-desktop -- [<base-dir> [<job-id>]]`
+//! `base-dir` を省略すると preferences の base_dir を使い、`job-id` を省略すると
+//! job を選ばない(Jobs のみ読める)。実 OS window が開く。
 //! CI では `check-ui-gpui`/`lint-ui-gpui`/`test-ui-gpui` で compile/lint/headless
 //! test のみ検証)。
 
-use std::path::Path;
+use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::Duration;
 
+use al_core::JobId;
 use al_gui::desktop::DesktopSession;
 use al_gui::preferences::{GuiPreferences, default_path};
 use al_gui::service::AlGuiService;
 use al_gui::theme;
-use al_gui::view::screen::PANEL_KEY;
-use al_gui::view::workspace::workspace_screen;
-use al_service::dataset::DatasetSession;
+use al_gui::view::desktop::desktop_screen;
 use ruviform_ui::dock::ViewInstanceId;
-use ruviform_ui::view::{
-    A11ySpec, AttachEpochAllocator, ComponentKey, ComponentSpec, ComponentVisualState, PanelSpec,
-    ViewHost, ViewSpec,
-};
+use ruviform_ui::view::{AttachEpochAllocator, ViewHost, ViewSpec};
 use ruviform_ui::{DataRegistry, UiRuntime};
 use ruviform_ui_gpui::ViewMount;
 
@@ -32,11 +29,19 @@ const TICK: Duration = Duration::from_millis(30);
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let source = match args.as_slice() {
-        [] => None,
-        [root, input] => Some((root.as_str(), input.as_str())),
+    let (base_arg, job_arg) = match args.as_slice() {
+        [] => (None, None),
+        [base] => (Some(base.as_str()), None),
+        [base, job] => (Some(base.as_str()), Some(job.as_str())),
         _ => {
-            eprintln!("usage: al-desktop [<dataset-root> <input-id>]");
+            eprintln!("usage: al-desktop [<base-dir> [<job-id>]]");
+            return ExitCode::from(2);
+        }
+    };
+    let job = match job_arg.map(JobId::parse).transpose() {
+        Ok(job) => job,
+        Err(e) => {
+            eprintln!("[al-desktop] invalid job id: {e}");
             return ExitCode::from(2);
         }
     };
@@ -44,6 +49,9 @@ fn main() -> ExitCode {
     let prefs = default_path()
         .map(|p| GuiPreferences::load_or_default(&p))
         .unwrap_or_default();
+    let base_dir = base_arg
+        .map(PathBuf::from)
+        .or_else(|| prefs.base_dir.clone());
 
     // AL-G2: product theme を RF#385 resolver で解決。mode は
     // preferences 由来(OS 通知は未接続 → `resolved_mode(None)`)。
@@ -57,7 +65,7 @@ fn main() -> ExitCode {
     };
 
     let mut runtime = UiRuntime::new(DataRegistry::new());
-    let service = match &prefs.base_dir {
+    let service = match &base_dir {
         Some(dir) => AlGuiService::with_base_dir(dir),
         None => AlGuiService::new(),
     };
@@ -66,17 +74,7 @@ fn main() -> ExitCode {
         return ExitCode::from(2);
     }
 
-    let screen = match source {
-        None => empty_screen(),
-        Some((root, input)) => match open_workspace(Path::new(root), input) {
-            Ok(s) => s,
-            Err(e) => {
-                eprintln!("[al-desktop] source open failed: {e}");
-                return ExitCode::from(2);
-            }
-        },
-    };
-    let host = match mount_host(screen) {
+    let host = match mount_host(desktop_screen(base_dir.as_deref(), job.as_ref())) {
         Ok(h) => h,
         Err(e) => {
             eprintln!("[al-desktop] screen mount failed: {e}");
@@ -112,25 +110,6 @@ fn main() -> ExitCode {
             eprintln!("[al-desktop] driver exited with error: {e}");
             ExitCode::from(2)
         }
-    }
-}
-
-/// `root` の dataset を Source・Spectrogram・Analysis の tab 画面へ写す。
-fn open_workspace(root: &Path, input: &str) -> Result<ViewSpec, String> {
-    let session = DatasetSession::open(root).map_err(|e| e.to_string())?;
-    workspace_screen(&session, input).map_err(|e| e.to_string())
-}
-
-/// Source を載せない空の画面(dataset 未指定時)。
-fn empty_screen() -> ViewSpec {
-    ViewSpec {
-        root: ComponentSpec::Panel(PanelSpec {
-            key: ComponentKey::from(PANEL_KEY),
-            title: None,
-            children: Vec::new(),
-            visual: ComponentVisualState::default(),
-            a11y: A11ySpec::default(),
-        }),
     }
 }
 

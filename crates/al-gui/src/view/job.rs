@@ -1,6 +1,7 @@
 //! Job/Run の view model — `JobSummary`/`JobInspection` の typed 写し。
 
 use al_core::{StageKind, StageStatus};
+use al_job::manifest::Manifest;
 use al_service::jobs::{JobInspection, JobSummary};
 
 use super::{ViewError, tag};
@@ -116,6 +117,24 @@ pub struct RunOutcome {
 }
 
 impl RunOutcome {
+    /// job の永続 manifest(最新の stage 記録)から写す。
+    #[must_use]
+    pub fn from_manifest(m: &Manifest) -> Self {
+        Self {
+            job_id: m.job_id.as_str().to_string(),
+            stages: m
+                .stages
+                .iter()
+                .map(|r| StageRow {
+                    kind: r.stage,
+                    status: r.status,
+                })
+                .collect(),
+            errors: m.stages.iter().map(|r| r.error.clone()).collect(),
+            durations_ms: m.stages.iter().map(|r| r.duration_ms).collect(),
+        }
+    }
+
     /// op 結果 JSON `{"job_id", "stages":[{stage,status,..}]}` から写す。
     ///
     /// # Errors

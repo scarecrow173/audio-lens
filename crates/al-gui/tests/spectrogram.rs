@@ -108,6 +108,53 @@ fn columns_split_span_like_ruviform_tile_when_not_divisible() {
 }
 
 #[test]
+fn more_columns_than_frames_share_frames_like_tile_columns() {
+    let spec = spectrogram(2, 2, vec![1.0; 4]);
+    let t = tile(&spec, 0..2, 1, 4);
+    let view = spectrogram_screen(&t, 0.0..2.0, 2).expect("screen");
+    let spans: Vec<_> = spectrogram_of(&view)
+        .columns
+        .iter()
+        .map(|c| c.start..c.end)
+        .collect();
+    assert_eq!(spans, [0..1, 0..1, 1..2, 1..2]);
+}
+
+#[test]
+fn columns_are_the_tile_columns_frames_count_and_magnitudes() {
+    let spec = spectrogram(10, 2, (0..20).map(f64::from).collect());
+    let t = tile(&spec, 0..10, 1, 4);
+    let view = spectrogram_screen(&t, 0.0..20.0, 10).expect("screen");
+    let got: Vec<_> = spectrogram_of(&view)
+        .columns
+        .iter()
+        .map(|c| (c.start..c.end, c.count, bits(&c.magnitudes)))
+        .collect();
+    let want: Vec<_> = t
+        .columns()
+        .map(|c| (c.frames, c.count, bits(&c.magnitudes)))
+        .collect();
+    assert_eq!(got, want);
+}
+
+#[test]
+fn empty_tile_keeps_empty_column_frames_and_zero_count() {
+    let t = Tile {
+        frames: 7..7,
+        cols: 3,
+        rows: 1,
+        values: vec![f64::NAN; 3],
+    };
+    let view = spectrogram_screen(&t, 0.0..1.0, 7).expect("screen");
+    let columns = &spectrogram_of(&view).columns;
+    assert_eq!(
+        columns.iter().map(|c| c.start..c.end).collect::<Vec<_>>(),
+        [7..7, 7..7, 7..7]
+    );
+    assert!(columns.iter().all(|c| c.count == 0));
+}
+
+#[test]
 fn offset_request_shifts_column_frames_to_absolute_frames() {
     let spec = spectrogram(10, 2, (0..20).map(f64::from).collect());
     let t = tile(&spec, 4..8, 1, 2);
