@@ -8,6 +8,7 @@ Directory: `docs/plans`
 | --- | --- | --- | --- |
 | PLAN-034DXViZtHIbCiHSxsn1O0 | al-math 公開 API 中立化と split re/im FFT 境界 | approved | [al-math-api-boundary.md](./al-math-api-boundary.md) |
 | PLAN-034EpNVDehwMClwkJioA7x | al-math vec プリミティブ集約と dsp ファサード移行 | approved | [al-math-vec-primitives.md](./al-math-vec-primitives.md) |
+| PLAN-xXrPVbEkKKBVIdkHNYU0Jw | canvas paint 是正の実装計画 | approved | [canvas-paint-empty.md](./canvas-paint-empty.md) |
 | PLAN-034GsQ4Xf3tqGpUXx6bUK2 | Implement artifact durability tiers and resume verification | approved | [implement-artifact-durability-tiers.md](./implement-artifact-durability-tiers.md) |
 | PLAN-dmszyxRb1oaST3thMlruEm | AudioLens 独立 CI(#142)の実装計画 | approved | [implement-audiolens-independent-ci.md](./implement-audiolens-independent-ci.md) |
 | PLAN-034Lgf6kv61kqUvJK826Z | ci.yml workflow_dispatch 専用化 実装計画(trigger 撤去 + checker 反転 + PR 無起動実検証) | approved | [implement-ci-dispatch-only-issue-147.md](./implement-ci-dispatch-only-issue-147.md) |

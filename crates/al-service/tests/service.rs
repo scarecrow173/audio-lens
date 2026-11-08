@@ -11,6 +11,7 @@ use al_core::{JobId, StageKind, StageStatus};
 use al_service::dataset::{DatasetSession, FeatureQuery};
 use al_service::jobs::{JobService, RunControl, RunSpec};
 use al_service::{ServiceError, parse_input_spec, parse_stage};
+use ruviform_viz::source::WaveformSource;
 
 fn temp_dir(tag: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("al-service-{tag}-{}", JobId::new()));
@@ -188,6 +189,49 @@ fn run_to_dataset_then_query_features_and_range_reads() {
     // 有界 read: 波形 source の先頭しか読まない(全量ロードしない)。
     let (lod2, _) = session.waveform_view(&input_id, 0, 0.0, 0.005, 32).unwrap();
     assert!(lod2.bytes.0.len() <= lod.bytes.0.len());
+
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn waveform_source_yields_samples_normalized_to_unit_range() {
+    let dir = temp_dir("wave-norm");
+    let wav = wav_path(&dir, "cap.wav", 4_800);
+    let service = JobService::new(dir.join("jobs"));
+    let (job_id, _) = service
+        .run(
+            run_spec(
+                &wav,
+                Some(vec![
+                    StageKind::Ingest,
+                    StageKind::CheapAnalysis,
+                    StageKind::Dataset,
+                ]),
+            ),
+            &RunControl::default(),
+        )
+        .unwrap();
+
+    let session = service.open_dataset(&job_id).unwrap();
+    let timeline = session.timeline().unwrap();
+    let input_id = timeline["inputs"][0]["input_id"]
+        .as_str()
+        .unwrap()
+        .to_string();
+
+    // pcm_s16 の整数スケール(±32768)ではなく [-1,1] に正規化されて
+    // 返ること。ruviform-viz の renderer は単位振幅を前提とする。
+    let source = session.waveform(&input_id).unwrap();
+    let block = source.read(0, 256).unwrap();
+    assert_eq!(block.frames, 256);
+    assert!(!block.samples.is_empty());
+    let max_abs = block.samples.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    // 入力は (i % 400) - 200 の s16 サンプル。最大絶対値は 200。
+    let expected = 200.0 / 32768.0;
+    assert!(
+        (max_abs - expected).abs() < 1e-9,
+        "expected normalized peak {expected}, got {max_abs}"
+    );
 
     std::fs::remove_dir_all(&dir).ok();
 }
