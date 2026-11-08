@@ -26,6 +26,7 @@ Directory: `docs/tasks`
 | TASK-kcnk4zndetw2GNXXC8OfrL | al-observability logging を ruviform-observability::logging へ委譲 (AL#138) | in-progress | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | completed | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | TASK-034TXamYZkkYpc4jWRMRXa | Spectrogram tab hang 解消のタスク | in-progress | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
+| TASK-LG5Rixm1dk6rFHJeCQjRqo | al-gui webview host の driver-neutral API 移行のタスク | in-progress | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 

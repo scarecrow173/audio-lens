@@ -29,7 +29,8 @@ relations:
     - "../impl/ir/issue-103-job-dataset-provenance-regression.md"
   refines:
     - "ruviform-migration-responsibility-map.md"
-  refined-by: []
+  refined-by:
+    - "../specs/webview-host-api-migration.md"
   derives-from:
     - "../specs/gui-app-mvp.md"
   derived-by: []
