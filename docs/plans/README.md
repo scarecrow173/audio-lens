@@ -30,6 +30,7 @@ Directory: `docs/plans`
 | PLAN-034TTalkyYVJto39C4jwnT | Native GUI の Dataset workspace Tabs 選択契約の採用と pointer による tab 切替の実装計画 (第10 slice) | approved | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | PLAN-034Eesy8DzTxxROXy4lSFg | observability foundation 導入 | approved | [observability-foundation.md](./observability-foundation.md) |
 | PLAN-034dLdqZ28TeDZBM9XH3rg | 残存 Issue #28〜#33 の修正・仕様判断計画 | approved | [residual-fixes.md](./residual-fixes.md) |
+| PLAN-034Vc1j1fzjqjqxWEMZUlZ | ruviform 271e2d41 pin 追従評価と棚卸しの計画 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | PLAN-034U1kiOgFRwvauxIyObiC | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の計画 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | PLAN-izcRdci5WYLehmwNZXzE1E | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の計画 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |

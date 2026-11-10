@@ -30,6 +30,7 @@ Directory: `docs/discovery`
 | DISC-034AajCHW8VrVBAMwzlOzL | 高コスト解析の未実装ファミリ | resolved | [expensive-family-gaps.md](./expensive-family-gaps.md) |
 | DISC-034GsCb9zcTq5N9ewsGvON | FFT re-baseline after plan/workspace split (issue #42) | resolved | [fft-rebaseline-post-plan-workspace.md](./fft-rebaseline-post-plan-workspace.md) |
 | DISC-034yYFlTHXyXnjrEm19mGq | AudioLens 要件取りまとめ | resolved | [initial-requirements-consolidation.md](./initial-requirements-consolidation.md) |
+| DISC-034Vc1kRZ36gwoKV3ifQy1 | Legacy WebView 棚卸し（AL#127 / RF#465 ゲート） | resolved | [issue-127-legacy-webview-inventory.md](./issue-127-legacy-webview-inventory.md) |
 | DISC-034Fl0OeHprFoFHitMqBid | Locate consensus argmax ambiguity contract | resolved | [locate-consensus-argmax-ambiguity-contract.md](./locate-consensus-argmax-ambiguity-contract.md) |
 | DISC-TUR7vhR0dFSFD8CjiMNvgM | Issue #166 Native 初期 slice (AL-G1〜G3) の現状棚卸しと実装可能範囲 | resolved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | DISC-8QyfdU1NnGhLDa1c1oqzf2 | spectral_envelope の fft_size 契約と silent 置き換え問題 | resolved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
