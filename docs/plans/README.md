@@ -40,6 +40,7 @@ Directory: `docs/plans`
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | PLAN-034TX99ZbG4qjCPUI15GsW | Spectrogram tab hang 解消の実装計画 | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
+| PLAN-034ViqBa1uvG8YFh7bNhqm | time_map materialize と SyncTimeline wire 経路の実装計画 | approved | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | PLAN-HeEdTT7EYY2zZPDtaS0bzN | al-gui webview host の driver-neutral API 移行の実装計画 | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
 ## Settled <!-- doc-suite:settled-index -->

@@ -64,6 +64,7 @@ Directory: `docs/designs`
 | DESIGN-UuNFjPBJ3weQkbJMWWpkh0 | spectral_envelope の fft_size 入口 assert と底上げ契約の明文化 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | DESIGN-034TX8udVdtrH0SBVRBMly | Spectrogram tab hang 解消の設計（ruviform pin 追従と回帰検証） | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
 | DESIGN-034H77LaRZ9cyfPIcdYe0w | Streaming Bandpass 設計 (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
+| DESIGN-034Vioow1Mm5KhHailH7rG | time_map materialize と SyncTimeline wire 経路の設計 | approved | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | DESIGN-034H5ozhtFnMNl0ZABihBS | Valid FFT NCC plan 設計 (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
 | DESIGN-HzMSjoqoRH2ibQWn8inlUp | al-gui webview host の driver-neutral API 移行の設計 | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |

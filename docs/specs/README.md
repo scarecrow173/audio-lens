@@ -60,6 +60,7 @@ Directory: `docs/specs`
 | SPEC-034TX7soOs7I0ovUdhRVaw | Spectrogram tab 選択時の UI thread hang 解消（ruviform pin 追従）(Issue #180) | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
 | SPEC-034H76gCpx4TVbIGDVGOPZ | Streaming Bandpass (issue #71 P2) | draft | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | SPEC-034Gs0Ej9pXCBUDbXO8456 | symphonia AAC-LC audio decode in MP4 | approved | [symphonia-aac-lc-audio-decode-in-mp4.md](./symphonia-aac-lc-audio-decode-in-mp4.md) |
+| SPEC-034VimECyj7GAvAfJLzSir | time_map.json の locate/ role materialize と SyncTimeline wire 経路接続(Issue #191) | approved | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | SPEC-034H5lyClpFOg52Hv86maq | Valid FFT NCC plan (issue #71 P1) | draft | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
