@@ -142,6 +142,9 @@ export interface FakeDataset {
   durationS: number;
   /** `al.ds.read` table 応答の行(f64 を含む dataset 値)。 */
   featureRows: Record<string, unknown>[];
+  /** `al.ds.read` kind=`json` 応答 — artifact path
+   *  (`locate/<src>/<cap>/time_map.json` 等)→ JSON 値。 */
+  jsonArtifacts: Record<string, unknown>;
   /** `al.ds.events` rows(`events/candidates` 相当)。 */
   eventRows: Record<string, unknown>[];
   /** `al.ds.locate` `alignments` 行(`locate/summary` 相当)。 */
@@ -202,6 +205,7 @@ export class FakeAlService implements AlServicePort {
       channels: ds.channels ?? 2,
       durationS: ds.durationS ?? 60,
       featureRows: ds.featureRows ?? [],
+      jsonArtifacts: ds.jsonArtifacts ?? {},
       eventRows: ds.eventRows ?? [],
       locateRows: ds.locateRows ?? [],
       locateDetailPaths: ds.locateDetailPaths ?? [],
@@ -398,11 +402,29 @@ export class FakeAlService implements AlServicePort {
       }
       case AL_OPS.dsRead: {
         const ds = this.datasetFor(params.session);
-        if (params.kind !== "table" || params.role === undefined || params.name === undefined) {
+        const role = params.role;
+        const name = params.name;
+        const kind = params.kind;
+        if (role === undefined || name === undefined || (kind !== "table" && kind !== "json")) {
           throw {
             code: "invalid",
             message: "ds.read requires kind/role/name",
           } satisfies AlServiceError;
+        }
+        if (kind === "json") {
+          // 実 `DatasetReader::read_json` は name に `.json` を補完し
+          // `<role>/<name>` の Json artifact を引く。未登録は
+          // InvalidData io error → wire code `io`。
+          const rel = `${String(role)}/${String(name)}`;
+          const key = rel.endsWith(".json") ? rel : `${rel}.json`;
+          const body = ds.jsonArtifacts[key];
+          if (body === undefined) {
+            throw {
+              code: "io",
+              message: `no Json artifact at ${key}`,
+            } satisfies AlServiceError;
+          }
+          return body;
         }
         const rowStart = Math.max(0, Number(params.row_start ?? 0));
         const rowEnd = Math.min(

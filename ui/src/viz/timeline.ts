@@ -18,11 +18,11 @@
  *   (segment/anchor 補間 — Rust `TimeMap::capture_to_source` と同じ
  *   片側 interpolation)を使う。写像不能な範囲は `undefined` を返し、
  *   NaN/0 で誤魔化さない。
- *   注: 現行 dataset は `time_map.json` を job dir のみに persist
- *   し `locate/` role へ materialize しない — `timeMaps` 引数で
- *   供給するまで time_map 経路は到達しない(定数オフセット写像は
- *   `locate_detail` のみで成立)。dataset 側への time_map
- *   materialize は別 issue 扱い。
+ *   `time_map.json` artifact は `materialize_locate` が
+ *   `locate/<src>/<cap>/time_map.json` へ複写し、`al.ds.locate`
+ *   の `detail_paths` から発見して `al.ds.read` kind=`json`
+ *   で取得する(`timeMapPaths` helper がこの経路を担う)。
+ *   `timeMaps` に path key で供給された view を使う。
  * - manifest inputs にあって audio artifact の無い input は
  *   `missing` として残し、available と混同しない。
  */
@@ -60,9 +60,9 @@ export interface TimelineAlignment {
   readonly detailPath?: string;
   /** `al.ds.locate_detail` 応答(`{result, derived}` envelope の raw JSON)。 */
   readonly detail?: Record<string, unknown>;
-  /** `time_map.json` artifact の segments(あれば — 現行 dataset は
-   *  `locate/<src>/<cap>.json` のみ materialize し `time_map` は
-   *  job dir に留まるため、`timeMaps` 引数経由の供給が必要)。 */
+  /** `time_map.json` artifact の segments(`locate/<src>/<cap>/
+   *  time_map.json` を `al.ds.read` kind=`json` で取得し
+   *  `timeMapPaths`/`timeMapViewFromWire` 経由で供給される)。 */
   readonly timeMap?: TimeMapView;
 }
 
@@ -313,16 +313,38 @@ export class SyncTimeline {
   }
 }
 
+/** `al.ds.locate` 応答の `detail_paths` から `time_map.json`
+ *  artifact の path を発見する。`locate/<src>/<cap>.json`
+ *  (detail 文書)と `locate/<src>/<cap>/time_map.json` が混在する
+ *  ため `/time_map.json` suffix で選別する。 */
+export function timeMapPaths(locate: unknown): string[] {
+  if (!isRecord(locate) || !Array.isArray(locate.detail_paths)) return [];
+  const out: string[] = [];
+  for (const p of locate.detail_paths) {
+    if (!isRecord(p)) continue;
+    const path = str(p.path);
+    if (path?.endsWith("/time_map.json")) out.push(path);
+  }
+  return out;
+}
+
 /**
- * `time_map.json` の serde wire 形(snake_case `capture_range` /
- * `source_range` / `anchors` / `kind` / `rate`)を `TimeMapView` へ
- * 変換する。wire 名を直接 view model に置くと `_range` だけが噛み
- * 合わず全 segment を skip するため、変換はこの一箇所に集約する。
+ * `time_map.json` artifact の serde wire 形(snake_case
+ * `capture_range` / `source_range` / `anchors` / `kind` / `rate`)
+ * を `TimeMapView` へ変換する。wire 名を直接 view model に置くと
+ * `_range` だけが噛み合わず全 segment を skip するため、変換は
+ * この一箇所に集約する。
+ *
+ * `al.ds.read` kind=`json` の応答は artifact 本体
+ * `{time_map: <TimeMap wire>, anchors, ...}` の envelope なので、
+ * 内側の `time_map` record があればそちらを TimeMap wire として
+ * 扱う。bare の `{segments}` wire 形もそのまま受理する。
  * 非 record / segments 非配列は `undefined`(map 欠落扱い)。
  */
 export function timeMapViewFromWire(raw: unknown): TimeMapView | undefined {
   if (!isRecord(raw)) return undefined;
-  const rawSegs = raw.segments;
+  const tm = isRecord(raw.time_map) ? raw.time_map : raw;
+  const rawSegs = tm.segments;
   if (!Array.isArray(rawSegs)) return undefined;
   const segments: TimeMapSegment[] = [];
   for (const rs of rawSegs) {

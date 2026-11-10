@@ -379,6 +379,64 @@ impl DatasetStage {
                 )
                 .map_err(err)?;
         }
+        // `time_map` artifacts share the `locate/<src>/<cap>/`
+        // layout so the dataset's `locate` role exposes the
+        // piecewise capture↔source map to the SyncTimeline wire
+        // path (`al.ds.read` kind=json). Only accepted alignments
+        // produce one; pairs without it stay absent.
+        for artifact in ctx
+            .manifest
+            .artifacts
+            .iter()
+            .filter(|a| a.role == "time_map")
+        {
+            let param = |key: &str| {
+                artifact
+                    .params
+                    .get(key)
+                    .and_then(|v| v.as_str())
+                    .map(str::to_owned)
+                    .ok_or_else(|| {
+                        StageError::new(
+                            StageKind::Dataset,
+                            format!(
+                                "time_map artifact {} lacks params.{key}",
+                                artifact.path.display()
+                            ),
+                        )
+                    })
+            };
+            let (src, cap) = (param("source_input_id")?, param("capture_input_id")?);
+            let text = fs::read_to_string(checked_job_path(job_dir, &artifact.path).map_err(err)?)
+                .map_err(err)?;
+            let body: serde_json::Value = serde_json::from_str(&text).map_err(|e| {
+                StageError::new(
+                    StageKind::Dataset,
+                    format!(
+                        "time map {} is not valid JSON: {e}",
+                        artifact.path.display()
+                    ),
+                )
+            })?;
+            let mut parents: Vec<String> = vec![artifact.artifact_id.as_str().to_string()];
+            parents.extend(artifact.inputs.iter().map(|a| a.as_str().to_string()));
+            writer
+                .write_json(
+                    "locate",
+                    &format!("{src}/{cap}/time_map"),
+                    &body,
+                    Provenance {
+                        input_id: src,
+                        algorithm_id: "dataset-materialize".into(),
+                        algorithm_version: SCHEMA_VERSION.to_string(),
+                        params: serde_json::json!({"source": "time_map"}),
+                        alignment_id: None,
+                        parents,
+                    },
+                )
+                .map_err(err)?;
+            lineage.push(artifact.artifact_id.clone());
+        }
         Ok(lineage)
     }
 }

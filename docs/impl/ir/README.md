@@ -117,3 +117,4 @@ Directory: `docs/impl/ir`
 | issue-127-ruviform-consumer-tracking | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | native-gui-waveform-seek-screen | [native-gui-waveform-seek-screen.md](./native-gui-waveform-seek-screen.md) |
 | native-gui-workspace-tabs-selection | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
+| timemap-locate-materialize | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
