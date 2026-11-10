@@ -13,7 +13,13 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { SyncTimeline, timeMapCaptureToSource, timeMapViewFromWire } from "../src/viz/timeline.ts";
+import type { TimeMapView } from "../src/viz/timeline.ts";
+import {
+  SyncTimeline,
+  timeMapCaptureToSource,
+  timeMapPaths,
+  timeMapViewFromWire,
+} from "../src/viz/timeline.ts";
 import { FakeAlService } from "./fakes.ts";
 
 const CAP_RANGE_END = 48000 * 60;
@@ -270,6 +276,114 @@ describe("capture→source 時間写像", () => {
     // capture 0.5s → normalized pos 24000 → source 0.5s
     // (原本 rate 44100 で割る誤りだと ~0.544 になる)
     assert.equal(tl.captureToSourceS(a, 0.5), 0.5);
+  });
+
+  it("al.ds.locate detail_paths → al.ds.read kind=json → SyncTimeline の実 wire 経路", async () => {
+    // #191: materialize 済み `time_map.json` artifact を detail_paths から
+    // 発見し、`al.ds.read` kind=`json` で取得して piecewise 写像に使う。
+    const svc = new FakeAlService();
+    svc.addDataset({
+      root: "ds-tm",
+      inputs: [
+        { input_id: "src-1", role: "source_asset" },
+        { input_id: "cap-1", role: "capture_bug" },
+      ],
+      timelineInputs: [
+        { input_id: "src-1", frames: 48000 * 60, sample_rate: 48000, channels: 2, duration_s: 60 },
+        { input_id: "cap-1", frames: 48000 * 60, sample_rate: 48000, channels: 2, duration_s: 60 },
+      ],
+      durationS: 60,
+      locateRows: [
+        {
+          source_input_id: "src-1",
+          capture_input_id: "cap-1",
+          alignment_id: "al-tm",
+          status: "accepted",
+          capture_start: 0,
+          capture_end: 48000,
+        },
+      ],
+      // detail 文書と time_map artifact が detail_paths に混在する
+      locateDetailPaths: [
+        { path: "locate/src-1/cap-1.json", provenance: {} },
+        { path: "locate/src-1/cap-1/time_map.json", provenance: {} },
+      ],
+      locateDetails: {
+        "src-1/cap-1": {
+          result: {
+            source_pcm: { sample_rate: 48000 },
+            capture_range: { start: 0, end: 48000 },
+            normalized_source_range: { start: 0, end: 48000 },
+          },
+        },
+      },
+      // 実 artifact 本体 — al-locate persist_json の envelope 形
+      // (`{time_map: <TimeMap wire>, anchors, ...}`)。
+      jsonArtifacts: {
+        "locate/src-1/cap-1/time_map.json": {
+          time_map: {
+            segments: [
+              {
+                kind: "drift",
+                anchors: [
+                  { source: 0, capture: 0, score: 1 },
+                  { source: 12000, capture: 24000, score: 0.987654321 },
+                ],
+                source_range: [0, 12000],
+                capture_range: [0, 48000],
+                rate: 0.5,
+              },
+            ],
+          },
+          anchors: [],
+          source_coordinate_space: "normalized_pcm",
+        },
+      },
+    });
+    svc.sessions.set(1, "ds-tm");
+    const ov = (await svc.call("al.ds.overview", { session: 1 })) as {
+      overview: unknown;
+      timeline: unknown;
+    };
+    const loc = await svc.call("al.ds.locate", { session: 1 });
+    // detail_paths から time_map artifact のみを発見する
+    const paths = timeMapPaths(loc);
+    assert.deepEqual(paths, ["locate/src-1/cap-1/time_map.json"]);
+    // al.ds.read kind=json で artifact 本体を取得 → wire 変換
+    const timeMaps = new Map<string, TimeMapView>();
+    for (const path of paths) {
+      const rel = path.slice("locate/".length).replace(/\.json$/, "");
+      const body = await svc.call("al.ds.read", {
+        session: 1,
+        kind: "json",
+        role: "locate",
+        name: rel,
+      });
+      const view = timeMapViewFromWire(body);
+      assert.ok(view !== undefined);
+      timeMaps.set(path, view);
+    }
+    const detail = await svc.call("al.ds.locate_detail", {
+      session: 1,
+      source: "src-1",
+      capture: "cap-1",
+    });
+    const tl = new SyncTimeline({
+      overview: ov.overview,
+      timeline: ov.timeline,
+      locate: loc,
+      locateDetails: [{ source: "src-1", capture: "cap-1", detail }],
+      timeMaps,
+    });
+    const a = tl.alignment("src-1", "cap-1");
+    assert.ok(a !== undefined);
+    assert.ok(a.timeMap !== undefined);
+    // capture 0.5s → capPos 24000 → anchor 補間 source 12000 → 0.25s。
+    // detail の定数オフセット写像なら 0.5s になるため、piecewise 経路の
+    // 選択を区別できる。
+    assert.equal(tl.captureToSourceS(a, 0.5), 0.25);
+    // segment capture_range 外は写像不能(undefined — NaN で誤魔化さない)
+    assert.equal(tl.captureToSourceS(a, 1.5), undefined);
   });
 });
 
