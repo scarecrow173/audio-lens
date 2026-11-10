@@ -26,7 +26,6 @@ Directory: `docs/tasks`
 | TASK-kcnk4zndetw2GNXXC8OfrL | al-observability logging を ruviform-observability::logging へ委譲 (AL#138) | in-progress | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |
 | TASK-034RIK6H6kFmyRQnMiiikj | sccache コンパイルキャッシュ導入評価と採用(AL#148) | completed | [sccache-compile-cache-issue-148.md](./sccache-compile-cache-issue-148.md) |
 | TASK-034TXamYZkkYpc4jWRMRXa | Spectrogram tab hang 解消のタスク | in-progress | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
-| TASK-034VirKgERFCR5QUVzfBTN | time_map.json の locate/ role materialize と SyncTimeline wire 経路接続(AL#191) | in-progress | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | TASK-LG5Rixm1dk6rFHJeCQjRqo | al-gui webview host の driver-neutral API 移行のタスク | in-progress | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
@@ -167,6 +166,7 @@ Directory: `docs/tasks`
 | TASK-034Vc1sd1nC8xoAnTOVPsF | ruviform 271e2d41 pin 追従評価タスク | done | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | TASK-034U1kYwpGf3uFTaAbXAvM | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のタスク | done | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TASK-W04xdHiaIegpHOFhvnlQ9d | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のタスク | done | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| TASK-034VnVry1uhHUyyAsDeWFx | ruviform b02942c2 pin 追従評価タスク | done | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-HrjjahBSYbViCD72MweZwV | al-observability SinkConfig::span_events 追従 (AL#127) | done | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
@@ -177,6 +177,7 @@ Directory: `docs/tasks`
 | TASK-034H79j4zxpqdARj0xtWcM | Streaming Bandpass 実装 (issue #71 P2) | done | [streaming-bandpass-issue-71-p2.md](./streaming-bandpass-issue-71-p2.md) |
 | TASK-034Gs7XaxwczdCjzEW33CL | SymphoniaDecoder backend for AAC-LC in MP4 | done | [symphoniadecoder-backend-for-aac-lc-in-mp4.md](./symphoniadecoder-backend-for-aac-lc-in-mp4.md) |
 | TASK-034AaFZgLvWhJ4wJdv5pXt | testkit: 期待メトリクス検証ヘルパ | done | [testkit-expect-helpers.md](./testkit-expect-helpers.md) |
+| TASK-034VirKgERFCR5QUVzfBTN | time_map.json の locate/ role materialize と SyncTimeline wire 経路接続(AL#191) | done | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | TASK-034z0J6W0kR1ncPEkWbQgf | タイムスタンプ源 trait と間隔・ドリフト・不連続観測 | done | [timing-observation.md](./timing-observation.md) |
 | TASK-034H5pLyx9R2CtnfPe4b03 | Valid FFT NCC plan 実装 (issue #71 P1) | done | [valid-fft-ncc-plan-issue-71-p1.md](./valid-fft-ncc-plan-issue-71-p1.md) |
 | TASK-034EpPfi3haBLwJwM4xl66 | vec プリミティブ等価性検証・criterion ベンチ・residual 再構成判定 | done | [vec-primitives-verification-bench.md](./vec-primitives-verification-bench.md) |

@@ -50,6 +50,7 @@ Directory: `docs/specs`
 | SPEC-034VbY715KTXsTOz3r5xlf | ruviform pin 271e2d41 追従評価と Legacy WebView 棚卸し（AL#127） | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | SPEC-034U1irN0QulZX3YeqAYVY | ruviform pin 54439fdc 追従と Spectrogram cell intensity の実窓検証（ruviform#463 consumer） | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | SPEC-VTjFD9We5lvQrqihJN9FVo | ruviform pin 84d21641 追従と al-gui SemanticGuiTest scenario 採用（ruviform#464 Step C / AL#127） | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| SPEC-034VnTwTGyjylLQ7s4DigL | ruviform pin b02942c2 追従評価（AL#127） | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | SPEC-o0wlzeWCSUPIniAFtwqSCc | Ruviform Git 依存の Cargo.lock 正本化 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | SPEC-GAQPlJtIjsPj8TdfBwrfIw | al-observability の SinkConfig::span_events 追従 (AL#127 / Ruviform #335) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
