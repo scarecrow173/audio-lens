@@ -740,6 +740,161 @@ fn corrupt_manifest_with_completed_analysis_refuses() {
     fs::remove_dir_all(&job_dir).ok();
 }
 
+/// Issue #191: `time_map` role artifacts materialize into the
+/// dataset's `locate` role so the SyncTimeline wire path
+/// (`al.ds.read` kind=json → `DatasetReader::read_json`) can reach
+/// them. Pairs without a time map stay absent.
+#[test]
+fn locate_time_map_materializes_into_dataset() {
+    use al_job::manifest::{ArtifactRecord, Manifest};
+    use al_job::registry::ArtifactRegistry;
+    use al_job::stage::{Stage, StageContext};
+
+    let job_dir = tmp("timemap");
+    let mut cap = input(InputRole::CaptureBug, job_dir.join("cap.wav"));
+    cap.source_sha256 = Some("aa".repeat(32));
+    let mut manifest = Manifest::new(
+        JobId::new(),
+        vec![cap],
+        serde_json::json!({}),
+        &[StageKind::Ingest, StageKind::Locate, StageKind::Dataset],
+    );
+    let input_id = manifest.inputs[0].input_id.clone();
+    let declared = manifest.input_artifact(&input_id).unwrap();
+    let input_dir = job_dir.join("inputs").join(input_id.as_str());
+    fs::create_dir_all(&input_dir).unwrap();
+    fs::write(
+        input_dir.join("metadata.json"),
+        serde_json::to_string(&serde_json::json!({"input_id": input_id, "audio": null})).unwrap(),
+    )
+    .unwrap();
+    manifest.artifacts.push(ArtifactRecord {
+        artifact_id: al_core::ArtifactId::new(),
+        role: "ingest_metadata".into(),
+        path: PathBuf::from("inputs")
+            .join(input_id.as_str())
+            .join("metadata.json"),
+        produced_by: Some(StageKind::Ingest),
+        inputs: vec![declared],
+        params: serde_json::json!({}),
+    });
+
+    // locate/<src>/<cap>/{result.json,time_map.json} — the real
+    // locate stage layout. src-1/cap-2 has a result but no time map
+    // (rejected pair).
+    let result_body = |src: &str, cap: &str, accepted: bool| {
+        serde_json::json!({
+            "result": {
+                "alignment_id": "al-1",
+                "source_input_id": src,
+                "capture_input_id": cap,
+                "accepted": accepted,
+                "validity": if accepted { "valid" } else { "invalid" },
+                "confidence": "high",
+                "agreeing_methods": 3,
+                "capture_range": {"start": 0, "end": 48000},
+                "normalized_source_range": {"start": 0, "end": 48000},
+                "source_pcm": {"sample_rate": 48000, "channels": 2},
+                "capture_pcm": {"sample_rate": 48000, "channels": 2},
+            },
+            "derived": {},
+        })
+    };
+    let time_map_body = serde_json::json!({
+        "time_map": {
+            "segments": [{
+                "kind": "drift",
+                "anchors": [
+                    {"source": 0, "capture": 0, "score": 1.0},
+                    {"source": 12000, "capture": 24000, "score": 0.987654321},
+                ],
+                "source_range": [0, 12000],
+                "capture_range": [0, 48000],
+                "rate": 0.5,
+            }],
+        },
+        "anchors": [],
+        "source_coordinate_space": "normalized_pcm",
+    });
+    for (src, cap, with_tm) in [("src-1", "cap-1", true), ("src-1", "cap-2", false)] {
+        let dir = PathBuf::from("locate").join(src).join(cap);
+        fs::create_dir_all(job_dir.join(&dir)).unwrap();
+        let result_rel = dir.join("result.json");
+        fs::write(
+            job_dir.join(&result_rel),
+            serde_json::to_string(&result_body(src, cap, with_tm)).unwrap(),
+        )
+        .unwrap();
+        manifest.artifacts.push(ArtifactRecord {
+            artifact_id: al_core::ArtifactId::new(),
+            role: "locate_result".into(),
+            path: result_rel,
+            produced_by: Some(StageKind::Locate),
+            inputs: vec![],
+            params: serde_json::json!({
+                "source_input_id": src,
+                "capture_input_id": cap,
+            }),
+        });
+        if with_tm {
+            let tm_rel = dir.join("time_map.json");
+            fs::write(
+                job_dir.join(&tm_rel),
+                serde_json::to_string(&time_map_body).unwrap(),
+            )
+            .unwrap();
+            manifest.artifacts.push(ArtifactRecord {
+                artifact_id: al_core::ArtifactId::new(),
+                role: "time_map".into(),
+                path: tm_rel,
+                produced_by: Some(StageKind::Locate),
+                inputs: vec![],
+                params: serde_json::json!({
+                    "source_input_id": src,
+                    "capture_input_id": cap,
+                }),
+            });
+        }
+    }
+
+    let registry = ArtifactRegistry::new(&job_dir);
+    let config = serde_json::json!({});
+    DatasetStage::new()
+        .run(&StageContext {
+            manifest: &manifest,
+            registry: &registry,
+            config: &config,
+        })
+        .unwrap();
+
+    let analysis = job_dir.join("analysis");
+    let ds = DatasetReader::open(&analysis).unwrap();
+    let tm_art = ds
+        .artifacts("locate")
+        .into_iter()
+        .find(|a| a.path == "locate/src-1/cap-1/time_map.json")
+        .expect("time_map artifact registered under locate role");
+    assert_eq!(tm_art.store, al_dataset::StoreKind::Json);
+    // read-back through the same path `al.ds.read` kind=json delegates to.
+    let read_back = ds.read_json("locate", "src-1/cap-1/time_map").unwrap();
+    assert_eq!(read_back, time_map_body);
+    assert_eq!(
+        read_back["time_map"]["segments"][0]["anchors"][1]["score"].as_f64(),
+        Some(0.987654321)
+    );
+    // The sibling result artifact is unaffected.
+    let result = ds.read_json("locate", "src-1/cap-1").unwrap();
+    assert_eq!(result["result"]["alignment_id"], "al-1");
+    // The rejected pair produced no time_map artifact and no error.
+    assert!(
+        !ds.artifacts("locate")
+            .iter()
+            .any(|a| a.path == "locate/src-1/cap-2/time_map.json")
+    );
+    assert!(!analysis.join("locate/src-1/cap-2/time_map.json").exists());
+    fs::remove_dir_all(&job_dir).ok();
+}
+
 // ==== mechanical-caller-cleanup characterization (A16d) ====
 // TASK-034EO484s25JM8bsb6zUCh (plan T1). Instant-based micro-timing
 // section for `TensorReader::read_range` — no new dev dependency.
