@@ -33,6 +33,7 @@ Directory: `docs/plans`
 | PLAN-034Vc1j1fzjqjqxWEMZUlZ | ruviform 271e2d41 pin 追従評価と棚卸しの計画 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | PLAN-034U1kiOgFRwvauxIyObiC | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の計画 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | PLAN-izcRdci5WYLehmwNZXzE1E | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の計画 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| PLAN-034VnV6uzeSDaCLr2eIx2N | ruviform b02942c2 pin 追従評価の計画 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | PLAN-034P3zvTd9Bg7Ps3kxAKOd | Ruviform 基盤移行の段階実施計画 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
 | PLAN-4ifedHAkxHtbglJWu8ESIL | Ruviform Git 依存を Cargo.lock 正本へ移行する実装計画 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | PLAN-SQWHGfXx2Hg0nBJWdUgw2A | SinkConfig::span_events 追従の実装計画 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
@@ -40,7 +41,6 @@ Directory: `docs/plans`
 | PLAN-035aRtYvBnMxQwErTyUiOp | SIMD 算術クレート基盤と DSP カーネル高速化 | approved | [simd-dsp-foundation.md](./simd-dsp-foundation.md) |
 | PLAN-NvzYVuupuqGBJmuEuJJPjA | spectral_envelope の fft_size 入口 assert 実装 | approved | [spectral-envelope-fft-size.md](./spectral-envelope-fft-size.md) |
 | PLAN-034TX99ZbG4qjCPUI15GsW | Spectrogram tab hang 解消の実装計画 | approved | [spectrogram-tab-hang.md](./spectrogram-tab-hang.md) |
-| PLAN-034ViqBa1uvG8YFh7bNhqm | time_map materialize と SyncTimeline wire 経路の実装計画 | approved | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | PLAN-HeEdTT7EYY2zZPDtaS0bzN | al-gui webview host の driver-neutral API 移行の実装計画 | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
@@ -63,5 +63,6 @@ Directory: `docs/plans`
 | PLAN-034GMK73n1nSCbsGEfC6Np | locate 相関 plan ワーカープール導入 | completed | [locate-plan.md](./locate-plan.md) |
 | PLAN-034EO41zt4R9uACMi7eaFH | 機械的 caller クリーンアップ: bandpass バッチ化・csd インライン化・pass 集約 (A6-A16) | completed | [mechanical-caller-cleanup.md](./mechanical-caller-cleanup.md) |
 | PLAN-034AaBsJ00thIonv8bp54N | MP4 demux とタイミング観測の実装 | completed | [mp4-ingest.md](./mp4-ingest.md) |
+| PLAN-034ViqBa1uvG8YFh7bNhqm | time_map materialize と SyncTimeline wire 経路の実装計画 | completed | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | PLAN-034AaBrlpxZEKpyEGpUmmk | 映像フレーム特徴と A/V 同期の実装 | completed | [video-av-features.md](./video-av-features.md) |
 | PLAN-034z8FkQ8VWjuojrvS0HhT | visualization-export | completed | [visualization-export.md](./visualization-export.md) |

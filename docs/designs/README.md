@@ -51,6 +51,7 @@ Directory: `docs/designs`
 | DESIGN-034VbY8pKJZK6aSmZ7mmHA | ruviform 271e2d41 pin 追従の設計と Legacy WebView 棚卸し分類 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | DESIGN-034U1jgDOqHhX2wdbK7ElK | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の設計 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | DESIGN-6qppTQVCUfffmR60C18lKG | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の設計 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
 | DESIGN-034RN2eWIExEejH7mYYOyj | Issue #139 Ruviform 共通 I/O 移行の残存分類 — StagedFile 移行記録・回帰契約・Structured/Archive 採否 | draft | [ruviform-io-migration-issue-139.md](./ruviform-io-migration-issue-139.md) |
