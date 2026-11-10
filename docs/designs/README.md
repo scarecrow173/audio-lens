@@ -48,6 +48,7 @@ Directory: `docs/designs`
 | DESIGN-034EdQdU4O8Ml4IzUkoFFY | observability foundation: sink・activation・計時の配線設計 | approved | [observability-foundation.md](./observability-foundation.md) |
 | DESIGN-034P4pSHzTNg4S497UokuT | pre-migration baseline の実装設計 | approved | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | DESIGN-034DlyKvtWhb8oy1WLAsPV | 残存課題の責務境界と検証設計 | approved | [residual-fixes.md](./residual-fixes.md) |
+| DESIGN-034VbY8pKJZK6aSmZ7mmHA | ruviform 271e2d41 pin 追従の設計と Legacy WebView 棚卸し分類 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | DESIGN-034U1jgDOqHhX2wdbK7ElK | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の設計 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | DESIGN-6qppTQVCUfffmR60C18lKG | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の設計 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |

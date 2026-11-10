@@ -46,6 +46,7 @@ Directory: `docs/test-specs`
 | TSPEC-034EeuZabJTmVBb077k5GE | observability foundation 検証仕様 | approved | [observability-foundation.md](./observability-foundation.md) |
 | TSPEC-034P50olYIsFgSOHmyg3kB | pre-migration baseline の検証仕様 | proposed | [pre-migration-baseline.md](./pre-migration-baseline.md) |
 | TSPEC-034dLdqZ82hOq5hqHwU8MC | 残存課題の契約回帰検証 | approved | [residual-fixes.md](./residual-fixes.md) |
+| TSPEC-034Vc1k9l2KQszbMWnGXdx | ruviform 271e2d41 pin 追従の検証仕様 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | TSPEC-034U1kXWDA80w3D11XAkva | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のテスト仕様 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TSPEC-eMztySmGDwi7ed2B73x33s | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のテスト仕様 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |

@@ -163,6 +163,7 @@ Directory: `docs/tasks`
 | TASK-034GsRMzsYQltCJEffwBfb | resume-artifact-verification | done | [resume-artifact-verification.md](./resume-artifact-verification.md) |
 | TASK-034yZBGf1qCjTi7xP8XFVR | run / resume 再現テストの実装 | done | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | TASK-034GMMKt9UyD6jcOVtDgiW | run_pool ワーカーコンテキスト拡張と window_anchors 移行 | done | [run-pool-window-anchors.md](./run-pool-window-anchors.md) |
+| TASK-034Vc1sd1nC8xoAnTOVPsF | ruviform 271e2d41 pin 追従評価タスク | done | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | TASK-034U1kYwpGf3uFTaAbXAvM | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のタスク | done | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TASK-W04xdHiaIegpHOFhvnlQ9d | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のタスク | done | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
