@@ -50,6 +50,7 @@ Directory: `docs/test-specs`
 | TSPEC-034U1kXWDA80w3D11XAkva | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のテスト仕様 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TSPEC-eMztySmGDwi7ed2B73x33s | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のテスト仕様 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | TSPEC-034VnUDkvuNzZtZMQT43o1 | ruviform b02942c2 pin 追従の検証仕様 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| TSPEC-034VFWMRhZX61nGOW76Cta | ruviform fd1d4d5f pin 追従の検証仕様 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TSPEC-Jpr62rfkrRNiHtvEJn74bF | SinkConfig::span_events 追従の検証 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | TSPEC-YLw9YwXZe7FPiRD7fbuVwg | ruviform-observability logging 委譲の検証 (AL-OBS-01) | approved | [ruviform-observability-logging-migration.md](./ruviform-observability-logging-migration.md) |

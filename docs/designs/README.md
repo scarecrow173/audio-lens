@@ -53,6 +53,7 @@ Directory: `docs/designs`
 | DESIGN-6qppTQVCUfffmR60C18lKG | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の設計 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
+| DESIGN-034VFT8jbz528XiW8ZauIH | ruviform fd1d4d5f pin 追従の設計 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
 | DESIGN-034RN2eWIExEejH7mYYOyj | Issue #139 Ruviform 共通 I/O 移行の残存分類 — StagedFile 移行記録・回帰契約・Structured/Archive 採否 | draft | [ruviform-io-migration-issue-139.md](./ruviform-io-migration-issue-139.md) |
 | DESIGN-6TbEQKqXEHQV8F3VPpYZej | Ruviform 依存の Cargo.lock 正本化設計 | approved | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
