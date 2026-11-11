@@ -119,3 +119,4 @@ Directory: `docs/impl/ir`
 | native-gui-workspace-tabs-selection | [native-gui-workspace-tabs-selection.md](./native-gui-workspace-tabs-selection.md) |
 | timemap-locate-materialize | [timemap-locate-materialize.md](./timemap-locate-materialize.md) |
 | ruviform-b02942c2-rev-watch | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| ruviform-fd1d4d5f-rev-watch | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
