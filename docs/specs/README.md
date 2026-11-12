@@ -26,6 +26,7 @@ Directory: `docs/specs`
 | SPEC-034Rp2PraZGXQhVUwhn5KL | エクスポートパッケージのテキスト成果物可搬投影 | approved | [export-artifact-portability.md](./export-artifact-portability.md) |
 | SPEC-034SmqnKZslN3lFq9I7ahH | Issue #158 Full CI 統一: 全実行化・共通 ci-summary Fail-Closed 集約・expected_sha 契約(安全な第一段階) | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
+| SPEC-034WsMa4H4RpNbIsbWENgu | Issue #199 docs/impl/ir・exp 管理 index を doc-maintenance で生成可能にする | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | SPEC-034GNsDtc88g3RPbhoW9RS | local_lag オーバーラップ正規化相関の FFT 化 | draft | [local-lag-overlap-corr-fft.md](./local-lag-overlap-corr-fft.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
 | SPEC-034GMyXJaIeUXOZB86GpDC | locate 相関 plan ワーカープールと共有 cache 監査 | approved | [locate-plan-cache.md](./locate-plan-cache.md) |

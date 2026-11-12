@@ -60,6 +60,7 @@ Directory: `docs/impl/ir`
 | IMPL-sz2YBubWd7RBFUY4Mc8RNw | Issue #105 Ruviform GUI host 上の AudioLens GUI 実装記録 | completed | [issue-105-gui-app.md](./issue-105-gui-app.md) |
 | IMPL-OLRGo454j948be9Zg2yojU | Issue #106 旧 al-viz / Visualization Dataset / 静的 HTML の撤去と export 分離 | completed | [issue-106-viz-removal.md](./issue-106-viz-removal.md) |
 | IMPL-iahBH1RkF74u2l6lEC9ojf | Issue #117 + Ruviform #167–#170: 契約 API 採用置換と rev/precision stamp | completed | [issue-117-ruviform-contract-api.md](./issue-117-ruviform-contract-api.md) |
+| IMPL-034WsMwd7e8Pcoe1xb5okf | Issue #199 docs/impl/ir・exp 管理 index の doc-maintenance 生成対応 | completed | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | IMPL-034PDpB1abYsEy5uTTUgS4 | Issue #54 stage inner parallelization (pair/input granularity) | completed | [issue-54-stage-inner-parallelization-pair-input-granularity.md](./issue-54-stage-inner-parallelization-pair-input-granularity.md) |
 | IMPL-034PBt7Fxp5gyMIM7qY05a | Issue #71 band_gain pair 内並列化 (al-analysis) | completed | [issue-71-band-gain-pair-al-analysis.md](./issue-71-band-gain-pair-al-analysis.md) |
 | IMPL-byqx6HbPHxQ7pH8caAYCG | Issue #71 band_gain 共有スペクトル化 (ruviform #183 BandSpectrum/BandScratch 適用) | completed | [issue-71-band-gain-shared-spectrum.md](./issue-71-band-gain-shared-spectrum.md) |

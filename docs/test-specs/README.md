@@ -22,6 +22,7 @@ Directory: `docs/test-specs`
 | TSPEC-034SmNbPOS3xJ9KpmCgL4o | Full CI 構造契約(ci.yml): 全実行・ci-summary・expected_sha | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
+| TSPEC-034WsMpecRKShroKP0mrqH | impl index 生成契約: front matter schema・managed marker・決定的出力 | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
 | TSPEC-034GNwf4Cw9BJVBt8akOXm | OverlapCorr/local_lag 検証と小窓計測 | draft | [local-lag-overlap-corr.md](./local-lag-overlap-corr.md) |
 | TSPEC-034Fo8Wnl0C3P71Q2uPUWP | locate 合議 argmax 曖昧性契約の検証 | draft | [locate-argmax-ambiguity.md](./locate-argmax-ambiguity.md) |
