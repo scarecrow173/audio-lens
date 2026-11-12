@@ -36,6 +36,10 @@ relations:
     - "https://github.com/scarecrow173/ruviform/issues/451"
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI の job 終端 receipt の消費と再射影検証の実装記録(IR, 第8 slice)

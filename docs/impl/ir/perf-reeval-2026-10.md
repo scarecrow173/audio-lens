@@ -1,3 +1,46 @@
+---
+id: "IMPL-AiFgHOsAqTTWck7qXhpfIC"
+type: "impl"
+status: "completed"
+title: "perf Issue #76/#71/#54/#60 移行後再評価 (perf-reeval-2026-10)"
+created: "2026-11-01"
+updated: "2026-11-01"
+owners: []
+relations:
+  source: []
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements: []
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related:
+    - "https://github.com/scarecrow173/audio-lens/issues/76"
+    - "https://github.com/scarecrow173/audio-lens/issues/71"
+    - "https://github.com/scarecrow173/audio-lens/issues/54"
+    - "https://github.com/scarecrow173/audio-lens/issues/60"
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # perf Issue #76/#71/#54/#60 移行後再評価 (perf-reeval-2026-10)
 
 ## Summary

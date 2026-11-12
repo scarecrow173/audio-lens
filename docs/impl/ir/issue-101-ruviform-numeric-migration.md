@@ -1,3 +1,44 @@
+---
+id: "IMPL-hL1u8vsDDTmk6RIHcU4cH4"
+type: "impl"
+status: "completed"
+title: "Issue #101 al-math / al-locate::dsp 汎用 f64 カーネルの Ruviform 切替記録"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/101"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements:
+    - "docs/tasks/ruviform-dsp-kernel-switch.md"
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #101 al-math / al-locate::dsp 汎用 f64 カーネルの Ruviform 切替記録
 
 - 対象 Issue: audio-lens #101

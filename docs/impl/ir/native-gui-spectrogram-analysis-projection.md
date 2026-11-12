@@ -10,7 +10,14 @@ relations:
   source:
     - "https://github.com/scarecrow173/audio-lens/issues/166"
   changes:
-    - "../../specs/native-gui-spectrogram-analysis-projection.md"
+    added:
+      - type: "doc"
+        path: "docs/specs/native-gui-spectrogram-analysis-projection.md"
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
   implements:
     - "../../specs/native-gui-spectrogram-analysis-projection.md"
   refines: []
@@ -23,6 +30,10 @@ relations:
   references: []
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity 実装記録(IR)

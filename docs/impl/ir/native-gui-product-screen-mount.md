@@ -10,7 +10,14 @@ relations:
   source:
     - "https://github.com/scarecrow173/audio-lens/issues/166"
   changes:
-    - "../../specs/native-gui-product-screen-mount.md"
+    added:
+      - type: "doc"
+        path: "docs/specs/native-gui-product-screen-mount.md"
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
   implements:
     - "../../specs/native-gui-product-screen-mount.md"
   refines: []
@@ -23,6 +30,10 @@ relations:
   references: []
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI Source 画面 ViewSpec 射影・al-desktop mount・GPUI parity 実装記録(IR)

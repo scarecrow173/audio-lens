@@ -34,6 +34,10 @@ relations:
     - "https://github.com/scarecrow173/ruviform/pull/458"
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI の Tabs 選択契約の採用と pointer 切替の実装記録(IR, 第9 slice)

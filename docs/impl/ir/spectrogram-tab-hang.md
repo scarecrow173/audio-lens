@@ -1,7 +1,7 @@
 ---
 id: "IMPL-034TXa4Ua60lBAZIZ0Txi2"
 type: "impl"
-status: "approved"
+status: "completed"
 title: "Spectrogram tab hang 解消の実装記録"
 created: "2026-11-08"
 updated: "2026-11-08"
