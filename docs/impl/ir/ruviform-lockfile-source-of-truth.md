@@ -130,6 +130,16 @@ test-spec `docs/test-specs/ruviform-lockfile-source-of-truth.md`
   名シードでは検出しない設計とし、未知 source 混入を fail-closed
   にした
 
+## Related Experiments
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
 ## Validation
 
 実施済み(本機 Windows):
@@ -162,19 +172,25 @@ test-spec `docs/test-specs/ruviform-lockfile-source-of-truth.md`
 - private repo の CI deploy key 経路(secret 未設定環境では
   dispatch できず。手順はガイドに記載済み)
 
+## Risks
+
+- resolved revision の正本が `Cargo.lock` のみに移ったため、
+  `Cargo.toml` を読むだけでは revision が分からない。確認は
+  `check-ruviform-lock` / `check-ruviform-rev` の契約ツールと
+  `docs/guides/ruviform-lockfile-update.md` の手順に依存する
+- `?rev=` query 除去は「`cargo fetch --locked` が lockfile を
+  書き換えない」という cargo の挙動への依存であり、本機
+  Windows の toolchain でのみ実証済み。別環境での差異は
+  CI matrix に委譲されており未検証(Validation の未検証項目と
+  同じ残存面)
+- `ruviform-*` crate が未知の source 形式・別 URL から解決
+  される場合は契約ツールが fail-closed で失敗する。意図的な
+  検出であり、誤検出時は lockfile の `source` 表記を確認して
+  対処する運用になる
+
 ## Follow-ups
 
 - 次回 Ruviform 追従時は `update-ruviform-rev.mjs <sha>` で
   lockfile を更新し、差分と回帰結果を PR に記録する
 - doc グラフ全体の pre-existing blocker(discovery 系の壊れた
   source relation 等)は本 Issue の範囲外として別途対応が必要
-
-## Related Experiments
-
-### Adopted
-
-- なし
-
-### Rejected
-
-- なし

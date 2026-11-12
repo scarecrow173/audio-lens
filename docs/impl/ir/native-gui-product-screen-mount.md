@@ -38,7 +38,25 @@ metadata:
 
 # Native GUI Source 画面 ViewSpec 射影・al-desktop mount・GPUI parity 実装記録(IR)
 
-## 実装したこと
+## Summary
+
+Native GUI Source 画面の ViewSpec 射影・al-desktop mount・
+GPUI parity の実装記録。`view::screen::source_screen` で
+Waveform/Meter/TimeAxis を射影し、fixture window を
+`create_view_window` へ置換、Fake(`ViewHost`)と GPUI
+(`GpuiObserver`)の parity test を追加した。
+
+## Context
+
+Issue #166(`relations.source`)の Native GUI Source 画面
+slice。spec `docs/specs/native-gui-product-screen-mount.md`
+(implements)と task
+`docs/tasks/native-gui-product-screen-mount.md`(derives-from)
+の chain に従う。ruviform rev を `c31dc67c` へ更新し、
+`create_view_window`/`ViewMount`/`GpuiObserver` の上流契約を
+利用する。
+
+## Implementation
 
 - **Ruviform rev 更新**: `node tools/update-ruviform-rev.mjs c31dc67c…` で `Cargo.lock` の
   ruviform 20 package を `a57cd3d3` から `c31dc67c` へ(`Cargo.lock` の差分は source SHA のみ)。
@@ -59,7 +77,21 @@ metadata:
 - **mise task**: `check-ui-gpui` / `lint-ui-gpui` / `test-ui-gpui` を `gpui-test` feature へ切替。
 - **文書 chain**: spec / design / plan / test-spec / tasks と、各 README の索引。
 
-## 検証結果(この作業ツリーで実行)
+## Related Experiments
+
+### Adopted
+
+- なし — `docs/impl/exp/` に本 slice に対応する実験ログは
+  存在しない(既存ログは CI 系 issue-139〜153 のみ)。
+  `metadata.experiments` も空。
+
+### Rejected
+
+- なし(同上)。
+
+## Validation
+
+### 検証結果(この作業ツリーで実行)
 
 | コマンド | 結果 |
 | --- | --- |
@@ -75,7 +107,7 @@ metadata:
 
 - 検証の数値 oracle(Waveform bit 同一、gap の NaN・count 0、light/dark の semantic 同一)は既存 test が非回帰で通る。
 
-## 独立レビュー(review-protocol)の結果
+### 独立レビュー(review-protocol)の結果
 
 - 独立した新規コンテキストのサブエージェントを read-only で起動し、diff を検査。
 - 指摘: P2 長尺 source(約 100 分超)で ruler が Err になり `al-desktop` が終了する問題 →
@@ -84,7 +116,22 @@ metadata:
   P3 の部分 NaN の peak を、gap 判定を `count == 0` で明示する形に修正。
 - 最終判定: blocker なし。
 
-## 逸脱・残課題
+## Risks
+
+- Job/Run/Analysis の ViewSpec 化は Ruviform ViewSpec に
+  text / table 系の kind が無いため未達 — Panel title への
+  詰め込みは契約の迂回になるため不採用し、上流 contract の
+  追加(scarecrow173/ruviform#435)待ち。AL 側だけでは解消
+  できない。
+- Spectrogram の射影は ViewSpec に Spectrogram kind が無く
+  未達(scarecrow173/ruviform#434)。
+- Meter/TimeAxis の描画 parity は `GpuiObserver` が描画 plan を
+  公開していない(scarecrow173/ruviform#436)ため検証不能 —
+  component の状態 parity のみ検証済み。
+- al-desktop の実 OS window 起動は NotRun — この作業環境では
+  窓を開いて表示確認していない。
+
+## Follow-ups
 
 - **Job/Run/Analysis の ViewSpec 化は未達**: Ruviform の ViewSpec に text / table 系の kind が無い。
   Panel title への詰め込みは契約の迂回になるため採らず、scarecrow173/ruviform#435 の解消後に射影する。

@@ -282,28 +282,6 @@ post-pin で `score` 1-ULP 差により失敗した。調査の結果、原因�
 不変条件(浮動小数の正確な往復)をパーサ層で回復できるが、
 依存 feature 変更は範囲外のため未実施 — 別途提案する価値あり。
 
-## 検出した残課題(ruviform 側、起票候補)
-
-AudioLens e2e で **canonical +10% の net 回帰**を観測しており、
-原因は ruviform 側の変換長/mode 選択に起因する。pin は Issue
-#133 の指示どおり採用するが、以下は ruviform Issue 起票を
-推奨する実害(コーディネーター経由で起票判断を依頼):
-
-1. **`prefers_direct` コストモデル誤判定**: `T·k ≤ 8·n·log2 n`
-   の係数 8.0 は pow2 radix-4 前提。mixed-radix の per-element
-   コスト増を織り込まないため、n 縮小で閾値が下がり本形状
-   (tpl≈sig、k≤2048 小ラグ)で direct→FFT に反転。隔離計測
-   +63%、実経路 busy/call で 3.5-4.6x 低速化。radix 経路の
-   実効コストで校正するか、該当形状で direct を維持する調整が必要
-2. **Full mode(gcc_phat 経路)の変換長効果不足**:
-   `(2_400_000, 2_400_240)` で n は 8,388,608→7,290,000(-13%)に
-   留まり、per-element コスト増で実時間は増加(busy/call
-   2.6x)。tpl≈sig では Full mode の bound `S+2L-2` が大きく
-   smooth 化の恩恵が薄い
-3. AudioLens への net 影響は canonical e2e +10%/locate +17%、
-   small ±2%。tpl≪sig NCC(anchor 経路)では改善しており、
-   負け側を直せば全体で効く構成
-
 ## Related Experiments
 
 ### Adopted
@@ -343,3 +321,58 @@ AudioLens e2e で **canonical +10% の net 回帰**を観測しており、
   fmt/check/lint/test は実施済み。ci profile は未実行
 - ruviform 側 `issue255_perf` example の本環境計測: al-locate 側
   bench_reeval で代表形状の plan 実測を代替として取得済み
+
+## Risks
+
+- **canonical workload の net 回帰が未解消**: tpl≈sig の
+  メソッド形状で `prefers_direct` 誤判定による direct→FFT
+  反転と Full mode の変換長効果不足により、e2e +10% /
+  locate +17% を観測した。原因は ruviform 側の変換長/mode
+  選択にあり、AudioLens consumer 境界では回避策を取らない
+  (Issue #133 の指示どおり pin は採用)。ruviform 側修正が
+  入るまで回帰は残存する
+- **計測値の再現性**: `busy/call` は並列ワーカー下の実行
+  時間でコンテンションを含む概算値。small run の ±2% は
+  誤差範囲であり、結論は改善/回帰の方向性に依拠し、絶対値の
+  精度には依拠しない(初回 pre 計測は並行負荷で膨らみ棄却
+  した前例あり)
+- **浮動小数の往復精度**: `serde_json` は `float_roundtrip`
+  無効のため永続化 f64 の parse 往復で 1-ULP ずれ得る。今回の
+  失敗はテスト比較経路の修正で解消したが、永続化値を生 f64
+  と直接比較する同種の箇所では再発し得る(feature 有効化は
+  依存変更のため範囲外で未実施)
+- **未実施の検証**: `mise run verify-ci`(ci profile)と
+  ruviform `issue255_perf` example の本環境計測は未実施
+  (Validation の未実施項目を参照)
+
+## Follow-ups
+
+AudioLens e2e で **canonical +10% の net 回帰**を観測しており、
+原因は ruviform 側の変換長/mode 選択に起因する。pin は Issue
+#133 の指示どおり採用するが、以下は ruviform Issue 起票を
+推奨する実害(コーディネーター経由で起票判断を依頼):
+
+1. **`prefers_direct` コストモデル誤判定**: `T·k ≤ 8·n·log2 n`
+   の係数 8.0 は pow2 radix-4 前提。mixed-radix の per-element
+   コスト増を織り込まないため、n 縮小で閾値が下がり本形状
+   (tpl≈sig、k≤2048 小ラグ)で direct→FFT に反転。隔離計測
+   +63%、実経路 busy/call で 3.5-4.6x 低速化。radix 経路の
+   実効コストで校正するか、該当形状で direct を維持する調整が必要
+2. **Full mode(gcc_phat 経路)の変換長効果不足**:
+   `(2_400_000, 2_400_240)` で n は 8,388,608→7,290,000(-13%)に
+   留まり、per-element コスト増で実時間は増加(busy/call
+   2.6x)。tpl≈sig では Full mode の bound `S+2L-2` が大きく
+   smooth 化の恩恵が薄い
+3. AudioLens への net 影響は canonical e2e +10%/locate +17%、
+   small ±2%。tpl≪sig NCC(anchor 経路)では改善しており、
+   負け側を直せば全体で効く構成
+
+上記のほか AudioLens 側の未消化項目:
+
+- `serde_json` の `float_roundtrip` feature 有効化は
+  浮動小数の正確な往復をパーサ層で回復できるが、依存 feature
+  変更は本件範囲外。別途提案する価値あり
+  (「テスト失敗の原因分析」参照)
+- `mise run verify-ci`(ci profile)は未実施。dev profile の
+  fmt/check/lint/test は pass 済み(Validation の未実施項目
+  参照)

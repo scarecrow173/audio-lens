@@ -38,25 +38,20 @@ metadata:
     rejected: []
 ---
 
-## 実装記録
+# al-gui webview host の driver-neutral API 移行 実装記録
 
-### 変更内容
+## Summary
 
-- `crates/al-gui/src/bin/al-gui.rs`: legacy single-window API
-  (`ruviform_ui_webview::{HostConfig, run}` + `host.eval(
-  dispatch_script(..))`)を削除し、driver-neutral 契約
-  `run_multi(&SessionConfig, assets, registry, on_event)` へ移植。
-  event routing と close/job policy は `al_gui::DesktopSession`
-  (`al-desktop` GPUI と同一実装)に委譲し、binary は
-  composition root に徹する。`SessionConfig` は旧 `HostConfig`
-  既定値を維持(tick 16ms、`data_dir: None`、`devtools =
-  cfg!(debug_assertions)`、単一 window title "AudioLens"、
-  `rvf://app/index.html`)。
-- 文書チェーン: `docs/{specs,designs,plans,tasks,test-specs}/
-  webview-host-api-migration.md` と本記録。managed index を
-  `doc_maintenance.js apply` で再生成。
+`crates/al-gui/src/bin/al-gui.rs` の webview host を legacy single-window
+API から driver-neutral な `run_multi` 契約へ移行し、CI `webview-verify`
+の E0432 ビルド失敗を解消した記録。
 
-### root cause(調査結果)
+## Context
+
+task `docs/tasks/webview-host-api-migration.md`(implements)の実装。
+発端は CI run 42431214830(sha `65160914`)の `webview-verify` 失敗。
+
+### 原因調査(root cause)
 
 - CI run 42431214830(sha `65160914`)の `webview-verify` 3 OS 全てが
   `error[E0432]: unresolved imports ruviform_ui_webview::HostConfig,
@@ -72,7 +67,25 @@ metadata:
   flaky ではない。ruviform Issue 起票は不要(意図的な API 移行で
   あり AL 側の追従漏れ)。
 
-### 設計上の判断
+## Implementation
+
+### Changes
+
+- `crates/al-gui/src/bin/al-gui.rs`: legacy single-window API
+  (`ruviform_ui_webview::{HostConfig, run}` + `host.eval(
+  dispatch_script(..))`)を削除し、driver-neutral 契約
+  `run_multi(&SessionConfig, assets, registry, on_event)` へ移植。
+  event routing と close/job policy は `al_gui::DesktopSession`
+  (`al-desktop` GPUI と同一実装)に委譲し、binary は
+  composition root に徹する。`SessionConfig` は旧 `HostConfig`
+  既定値を維持(tick 16ms、`data_dir: None`、`devtools =
+  cfg!(debug_assertions)`、単一 window title "AudioLens"、
+  `rvf://app/index.html`)。
+- 文書チェーン: `docs/{specs,designs,plans,tasks,test-specs}/
+  webview-host-api-migration.md` と本記録。managed index を
+  `doc_maintenance.js apply` で再生成。
+
+### Decisions During Implementation
 
 - `DesktopSession` 再利用: `&mut dyn WindowDriver` 経由の
   driver-neutral session で、canonical mapping と close/job policy
@@ -85,7 +98,21 @@ metadata:
   gui-app-architecture.md のライフサイクル契約に一致させる。
   Issue #166 の受入と同一 policy。
 
-### 検証
+## Related Experiments
+
+本記録に関連する実験ログは存在しない。`metadata.experiments` の
+adopted / rejected はいずれも空で、`docs/impl/exp/` の既存 jsonl
+(issue-139 / 143 / 148 / 149 / 153 の CI 関連記録)は本件と無関係。
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Validation
 
 - `mise run check-ui-webview`: 移行前 E0432 再現 → 移行後 pass。
 - `mise run lint-ui-webview` / `test-ui-webview`: pass
@@ -95,3 +122,19 @@ metadata:
   (Windows 11、mise 管理 toolchain)。
 - NotRun: 実 OS window での webview 起動・IPC 往復(webview-verify
   lane の契約上 compile/lint/test のみ。必要なら別タスクで手動検証)。
+
+## Risks
+
+- 挙動差分(意図的): 旧 `handle(CloseRequested)` は全 job cancel +
+  即 loop 終了だったが、`DesktopSession` は job を継続させ
+  gui-app-architecture.md のライフサイクル契約に一致させる。
+  Issue #166 の受入と同一 policy だが、close 時に job が継続する
+  新挙動は旧実装に依存する運用があれば影響しうる。
+- command 語彙分岐は休眠状態: webview frontend は `rvf.ui.command.v1` を
+  発行しないため、frontend が将来この語彙を発行した場合の経路は
+  本検証の対象外。
+
+## Follow-ups
+
+- 実 OS window での webview 起動・IPC 往復の手動検証
+  (webview-verify lane の契約上 compile/lint/test のみ。必要なら別タスクで実施)。

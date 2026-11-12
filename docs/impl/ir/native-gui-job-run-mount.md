@@ -44,7 +44,24 @@ metadata:
 
 # Native GUI の Job/Run tab mount と Tile::columns 消費の実装記録(IR, 第6 slice)
 
-## 実装内容
+## Summary
+
+Native GUI の Job/Run tab mount と `Tile::columns` 消費
+(第6 slice)。ruviform rev を `d3be1ad9` へ更新し、
+`spectrogram_columns` 複製を削除して `Tile::columns()` を消費、
+`view::desktop` の root Tabs(Jobs・Run・Dataset)と al-desktop の
+`[<base-dir> [<job-id>]]` 引数を実装した。
+
+## Context
+
+Issue #166(`relations.source`)の Native GUI slice(第6 slice)。
+task `docs/tasks/native-gui-job-run-mount.md`(depends-on)と
+plan `docs/plans/native-gui-job-run-mount.md`(derives-from)に
+従う。references の ruviform#443/#446/#448 に対応し、rev
+`d3be1ad9` の `Tile::columns` 契約と ViewSpec の Tabs/Panel/
+Table/Spectrogram を利用する。
+
+## Implementation
 
 コード HEAD は `adbd5ed`。`origin/main`(`6516091`)からの 4 commit と本 IR の commit から成る。
 
@@ -69,7 +86,21 @@ metadata:
   (B1)。dataset 未作成の AC5 を検証するテストを追加(B5)。`cols > span` の例を検証するテストを追加(A2)。
   設計 §4 の「job-id のみ不可」の記述を、実際の挙動(1 個の引数は base-dir)に合わせて修正(B3)。
 
-## 受入対応表
+## Related Experiments
+
+### Adopted
+
+- なし — `docs/impl/exp/` に本 slice に対応する実験ログは
+  存在しない(既存ログは CI 系 issue-139〜153 のみ)。
+  `metadata.experiments` も空。
+
+### Rejected
+
+- なし(同上)。
+
+## Validation
+
+### 受入対応表
 
 | AC | 内容 | 証拠 | 結果 |
 | --- | --- | --- | --- |
@@ -86,19 +117,7 @@ metadata:
 
 Job 選択の対話操作と Run の起動・再開・取消は spec の Non-goals(未達)として扱う(後述)。
 
-## 判断と未達
-
-- **Job 選択(部分達成)**: 選択は起動引数で行う。`ViewSpec` の `Table` は読み取り専用で、行選択の intent が
-  無い。対話選択は ruviform#448(本 slice で起票)の完了後に行う。
-- **Run の起動・再開・取消(未達)**: `ViewSpec` に command 起動 component が無い(ruviform#448)。
-  Run tab は永続 manifest を読むだけで、実行中の進捗は表示しない。
-- **CLI の破壊的変更**: `al-desktop <dataset-root> <input-id>` を廃止し、`[<base-dir> [<job-id>]]` にした。
-  pre-release のため互換層は作らない。PR 本文に明記する。
-- **Dataset の入力**: manifest の先頭 input を表示する。role による選択は採用しない(設計 §5)。
-- **merge 後 HEAD**: 作業ブランチの base は `origin/main`(`6516091`)と同一で、merge commit は生じない。
-  最終検証は本 IR の直前のコード HEAD `adbd5ed` で実施した。PR 作成後に head SHA を報告する。
-
-## 検証結果(コード HEAD `adbd5ed`、working tree はクリーン)
+### 検証結果(コード HEAD `adbd5ed`、working tree はクリーン)
 
 | task | 結果 |
 | --- | --- |
@@ -129,7 +148,7 @@ Job 選択の対話操作と Run の起動・再開・取消は spec の Non-goa
 - `route_graph.js` による文書 chain の検証: 既存の文書の `broken-relation` 診断で blocked になるため
   実行できなかった(本 slice と無関係な既存文書の診断)。文書は前 slice の chain の形式に合わせた。
 
-## 独立レビュー(review-protocol)の結果
+### 独立レビュー(review-protocol)の結果
 
 - 独立した read-only サブエージェント 2 件を並列に起動した。Reviewer A(協調)は受入基準と文書の整合を、
   Reviewer B(敵対的)は panic・mount 失敗・意味論の回帰・境界を検査した。両者とも Issue Candidate のみを出し、
@@ -149,7 +168,37 @@ Job 選択の対話操作と Run の起動・再開・取消は spec の Non-goa
 | B2 | 上流 `Tile::columns` は `frames.end < frames.start` で減算 underflow する。旧複製は `saturating_sub` だった。現在の上流 producer(`Spectrogram::tile`)は `end ≥ start` を保証するため到達しない | P3 | **残課題**。上流契約の注記、または `spectrogram_screen` での検査を別途検討 |
 | B4 | Dataset tab は先頭 input を読めないと tab 全体が失敗する。他の input が dataset にあっても表示しない | P3 | **残課題**(設計 §5 の決定。input 選択の UI は対象外) |
 
-## 逸脱・残課題
+## Risks
+
+- Jobs tab は `JobService::list` に bounded query が無く、job が
+  4096 件を超えると `MAX_TABLE_ROWS` の拒否で tab 全体が理由
+  Label になる(A1 残課題)。
+- 上流 `Tile::columns` は `frames.end < frames.start` で減算
+  underflow する。旧複製は `saturating_sub` だったが、現行の
+  上流 producer(`Spectrogram::tile`)は `end ≥ start` を保証
+  するため到達しない — 上流契約の注記が無い点は残課題(B2)。
+- Dataset tab は manifest の先頭 input を読むだけで、先頭
+  input を読めないと tab 全体が失敗する(B4、設計 §5 の決定)。
+- al-desktop の引数仕様を `<dataset-root> <input-id>` から
+  `[<base-dir> [<job-id>]]` へ破壊的に変更した(pre-release の
+  ため互換層なし。1 個の引数は base-dir として解釈され、
+  誤指定の検出は残課題)。
+
+## Follow-ups
+
+### 判断と未達
+
+- **Job 選択(部分達成)**: 選択は起動引数で行う。`ViewSpec` の `Table` は読み取り専用で、行選択の intent が
+  無い。対話選択は ruviform#448(本 slice で起票)の完了後に行う。
+- **Run の起動・再開・取消(未達)**: `ViewSpec` に command 起動 component が無い(ruviform#448)。
+  Run tab は永続 manifest を読むだけで、実行中の進捗は表示しない。
+- **CLI の破壊的変更**: `al-desktop <dataset-root> <input-id>` を廃止し、`[<base-dir> [<job-id>]]` にした。
+  pre-release のため互換層は作らない。PR 本文に明記する。
+- **Dataset の入力**: manifest の先頭 input を表示する。role による選択は採用しない(設計 §5)。
+- **merge 後 HEAD**: 作業ブランチの base は `origin/main`(`6516091`)と同一で、merge commit は生じない。
+  最終検証は本 IR の直前のコード HEAD `adbd5ed` で実施した。PR 作成後に head SHA を報告する。
+
+### 逸脱・残課題
 
 - **Job 選択の対話操作・Run の起動・再開・取消**: 未達。ruviform#448 に依存(本文の「判断と未達」)。
 - **Jobs の件数上限(A1)、先頭 input 固定(B4)、誤った単一引数の検出(B3)**: 上記の P3 残課題。

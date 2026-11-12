@@ -49,14 +49,31 @@ metadata:
 - baseline 比較出力: `docs/impl/ir/issue-106-baseline/`
   (`tools/baseline/compare.mjs` + `classify-diffs-106.mjs` の結果)
 
-## 目的
+## Summary
 
 GUI が永続化 Analysis Dataset を直接読む構成(#105)が確立したため、
 表示専用の派生 dataset・静的レポート・Visualization Stage を担った
 `al-viz` を撤去し、可搬な解析データ export だけを表示責務から分離して
-`al-dataset` へ再配置する。
+`al-dataset` へ再配置した。`StageKind::Visualization` と
+`analysis/visualization/` ロール、`report.html`/`report.data.js` 生成を
+除去し、dataset 完了済みジョブへ export を後から実行する
+`al export` スタンドアロン経路を追加した。9 ランの golden 比較で
+説明不能な新規差分は 0 件であった。
 
-## 棚卸し:`crates/al-viz/` 全ファイル分類
+## Context
+
+- 対象 Issue: audio-lens #106
+- task: `docs/tasks/ruviform-viz-retirement.md`(front matter `implements`)
+- 前提: #105(Ruviform webview GUI + `al-service`/`DatasetSession`)、
+  #103(Viz 非依存 export 契約 `export_stage_does_not_require_visualization`)
+- 関連: #98(golden baseline)、責務マップ
+  `docs/designs/ruviform-migration-responsibility-map.md`
+- 基準 baseline: Issue #98 成果物。比較出力は
+  `docs/impl/ir/issue-106-baseline/`
+
+## Implementation
+
+### Inventory: crates/al-viz classification
 
 | ファイル | 分類 | 判断 |
 | --- | --- | --- |
@@ -78,9 +95,9 @@ GUI が永続化 Analysis Dataset を直接読む構成(#105)が確立したた�
 「解析保存」に分類されるファイルは無かった(dataset 書込は元々
 `al-dataset` 所有で、`al-viz` は dataset を読む側のみ)。
 
-## 削除 / 移設の構成
+### Removal and Relocation
 
-### `StageKind`・パイプライン
+#### StageKind and Pipeline
 
 - `al-core::types::StageKind::Visualization` と `PIPELINE_ORDER` 内の
   同エントリを削除。`PIPELINE_ORDER` は
@@ -95,7 +112,7 @@ GUI が永続化 Analysis Dataset を直接読む構成(#105)が確立したた�
 - `--stages` 表記から `visualization` を除去。`parse_stage` は
   `visualization` を拒否(`al-service` テストで担保)
 
-### スタンドアロン export
+#### Standalone Export
 
 - `al-job::StageRunner::run_stage` / `run_stage_with_hooks` を追加し、
   plan 済みでない単一 stage を既存ジョブへ実行できるようにした
@@ -107,14 +124,14 @@ GUI が永続化 Analysis Dataset を直接読む構成(#105)が確立したた�
 - `al export --base-dir <dir> --job-id <JOB-...>` を CLI に追加
   (薄い入口。実装の二重化なし)
 
-### 削除したもの
+#### Removed Items
 
 - `analysis/visualization/` ロール(書込・manifest 役割一覧・spec)
 - `report.html`/`report.data.js` 生成と `include_str!` 埋め込み
 - `visualization` stage 名の CLI/help/テスト/fixture 参照
 - `al-viz` crate 全体と `al-cli` → `al-viz` 依存、workspace 定義
 
-## GUI サービス比較(#105 確立済み経路の確認)
+### GUI Service Comparison
 
 GUI は `al-service::DatasetSession` 経由で永続化 dataset を直接読み、
 解析を再実行しない。旧 `al-viz` 生成物との対応:
@@ -131,7 +148,20 @@ GUI は `al-service::DatasetSession` 経由で永続化 dataset を直接読み�
 固有の Visualization Dataset スキーマは Ruviform 側へ漏らしていない
 (ruviform リポジトリは無変更)。
 
-## 検証結果
+## Related Experiments
+
+### Adopted
+
+- なし — 撤去範囲は `crates/al-viz/` 全ファイルの棚卸しと責務マップ
+  (`docs/designs/ruviform-migration-responsibility-map.md`)で確定済みで
+  あり、方式選択のための実験的比較は行わなかった。関連する
+  `docs/impl/exp/*.jsonl` の実験記録は存在しない。
+
+### Rejected
+
+- なし
+
+## Validation
 
 ### 単体・統合テスト
 
@@ -222,7 +252,20 @@ GUI は `al-service::DatasetSession` 経由で永続化 dataset を直接読み�
   `DatasetSession` の範囲/tile 読みは `mise run test` の
   service テストで機能的に担保済み)
 
-## 残課題・起票候補
+## Risks
+
+- GUI の長尺サンプルに対する CPU/メモリ/応答性は未計測: 本環境では
+  webview GUI の対話起動が不能のため手順のみ記録し、機能面は
+  `DatasetSession` の service テストで担保済み(定量化ゲートを設ける
+  なら別 Issue)。
+- `--stages` に `visualization` を含む既存の呼出は `parse_stage` で
+  拒否される仕様変更。pre-release 規約により互換層は設けず、旧
+  `report.html` 同梱 export パッケージの reader/shim も不導入。
+- `analysis/visualization/` ロールと登録 artifact `summary.json` の
+  除去により golden の正規化 `ART-#N` が再採番される(除去件数と
+  一致する -1 シフト。lineage 参照の追跡は差分分類で確認済み)。
+
+## Follow-ups
 
 - 長尺実サンプルの GUI CPU/メモリ/応答性の実測:webview が開ける
   環境での手動計測が必要(手順は上記)。定量化ゲートを設けるなら

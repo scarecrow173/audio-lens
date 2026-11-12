@@ -48,7 +48,28 @@ metadata:
   「境界判定記録 → AL#102 判定」節
 - 本記録の差分出力: `docs/impl/ir/issue-102-baseline/`(`tools/baseline/compare.mjs` の 9 ラン分)
 
-## 目的と判定規則
+## Summary
+
+#101 で汎用 f64 カーネルを `ruviform-numeric` へ移行済みの状態を前提に、
+残存コードの「意味を持たない演算」と「AudioLens 固有の解析意味論」の境界を
+確定し、演算呼出と意味論付与(FeatureRecord 変換)の層を分離する
+リファクタリングを実施した。挙動不変(コード移動 + 同一 FP 演算順序の
+kernel 寄せ)を条件とし、Issue #98 凍結 golden との 9 ラン比較で
+#102 起因の新規差分は 0 件であった。
+
+## Context
+
+- 対象 Issue: audio-lens #102
+- task: `docs/tasks/ruviform-domain-kernel-separation.md`(front matter `implements`)
+- 前提: #101(汎用 f64 カーネルの Ruviform 切替)完了済み、同一 Ruviform
+  rev `f3f474b1734af05ca2435a322f935805010ba8b6`
+- 境界の正本: `docs/designs/ruviform-migration-responsibility-map.md`
+  「境界判定記録 → AL#102 判定」節
+- 基準 baseline: Issue #98 成果物(`baseline/` の凍結 golden)
+
+## Implementation
+
+### Scope and Judgment Rules
 
 #101 で汎用 f64 カーネルは `ruviform-numeric` へ移行済み。#102 は残存コードの
 「意味を持たない演算」と「AudioLens 固有の解析意味論」の境界を確定し、
@@ -57,14 +78,14 @@ metadata:
 AudioLens の解析判断を含む処理は AudioLens。リファクタリングは挙動不変と
 する(コード移動 + 同一 FP 演算順序の kernel 寄せのみ)。
 
-## 移した処理(汎用 kernel 重複の除去)
+### Changes
 
 | 箇所 | 旧 | 新 | 等価根拠 |
 | --- | --- | --- | --- |
 | `al-analysis/src/reference.rs::fir_ir` | inline の `cxx`/`cxy` per-bin 蓄積 + `cxx>0` ガード付き H1 除算 | `ruviform_numeric::xspec::CrossSpectrum::accumulate` + `transfer_h1_into` | per-bin 加算・`conj(x)·y` 規約・`pxx>0.0` ゼロガードが Ruviform 実装と一致(Ruviform 側 doc が AL `fir_ir` 規則を明示)。`powi(2)` ≡ `x*x` で bit-exact |
 | `al-analysis/src/expensive/channel.rs` L/R coherence 蓄積 | band_bins 限定の `sxy`/`sxx`/`syy` 手動蓄積 | `CrossSpectrum::new(bins)` による全 bin 蓄積 | 蓄積は per-bin 独立のため `band_bins` 参照値は不変。第三オクターブ帯選択・`|coh|` 平均・support 判定は AL 側に残置 |
 
-## 分離した層(演算呼出 / 意味論付与)
+### Separated Layers
 
 - `al-analysis/src/cheap.rs::analyze_input`(約 1,150 行): 演算を 5 つの
   `measure_*` 関数へ抽出し、本体は FeatureRecord 変換(validity/confidence/
@@ -80,7 +101,7 @@ AudioLens の解析判断を含む処理は AudioLens。リファクタリング
   済みのため変更なし。`methods.rs` の `evidence_from_corr`/`preflight`/
   `band_*` も同様に演算呼出と証拠変換が分離済み。
 
-## AudioLens に残留した処理と根拠(所有権表対応)
+### Remaining in AudioLens
 
 | 処理 | 判定 | 根拠 |
 | --- | --- | --- |
@@ -95,7 +116,7 @@ AudioLens の解析判断を含む処理は AudioLens。リファクタリング
 | Locate 合議・曖昧性・anchor/window・loop/skip/gap/drift・mixer/residual・candidate 採否 | 残留(変更なし) | AudioLens 固有意味論(責務マップ §3 全行) |
 | Cheap/Reference/Expensive の適用制御・`FeatureRecord`/`Validity`/`Confidence`/Support/Provenance | 残留(変更なし) | AudioLens 固有意味論(責務マップ §4 全行) |
 
-## Ruviform 型への AudioLens 固有意味論の混入監査
+### Ruviform Type Audit
 
 - `ruviform_numeric` 呼出の引数は `&[f64]`・sample rate・plan/workspace の
   みで、`InputRole`/`StageKind`/`CandidateEvent`/`Validity`/`Confidence`/
@@ -105,20 +126,22 @@ AudioLens の解析判断を含む処理は AudioLens。リファクタリング
   表現へ依存している」逆方向の結合であり、AL 固有意味論を Ruviform 型へ
   混入させるものではない。
 
-## Ruviform 契約提案(本 Issue では変更しない — Issue 起票案)
+## Related Experiments
 
-- **R1**: 複素線形ソルバ(`expensive/channel.rs::csolve` 相当: 複素
-  Gaussian 消去 + pivot + 条件数 proxy)。`linalg::LeastSquares` の複素版。
-- **R2**: scalar 直算 overlap-NCC 曲線(`cheap.rs` IPD sweep・
-  `local_lag`/band NCC の直算 `corr0` sweep 置換用)。FFT 分子経路では
-  bit-exact を満たせないため、直算経路の API 化を提案。
-- **R3**: 基礎スペクトル統計プリミティブ(centroid/flatness/rolloff/
-  entropy/flux/bandwidth・OLS slope・median/argmax 選択)の `xspec`/
-  `stats` API。#102 では `measure_*` 層に集約済みのため移行先が明確。
-- **R4**: `ResamplePlan` の安定したパラメータ表現/ID(永続スキーマ・
-  cache 鍵の forward-compat 用)。
+### Adopted
 
-## Golden 比較結果(tools/baseline)
+- なし — 境界判定は責務マップ正本(`docs/designs/
+  ruviform-migration-responsibility-map.md`)で確定済みであり、方式選択の
+  ための実験的比較は行わなかった。関連する `docs/impl/exp/*.jsonl` の
+  実験記録は存在しない。
+
+### Rejected
+
+- なし
+
+## Validation
+
+### Golden Comparison (tools/baseline)
 
 `baseline/runs/<name>`(#98 凍結)を `base98-<name>` へ退避し、9 ランを
 #102 変更後コード(`cargo build --release`)で capture、`compare.mjs`
@@ -145,7 +168,7 @@ AudioLens の解析判断を含む処理は AudioLens。リファクタリング
 凍結 #98 golden を基準に再比較し、上記の通り全差分を #100/#101 へ
 帰属させた。
 
-## 検証結果
+### Verification Results
 
 - `mise run fmt` / `check` / `lint`: pass
 - `mise run test`: pass(`cargo test --workspace` 全スイート green)
@@ -159,8 +182,39 @@ AudioLens の解析判断を含む処理は AudioLens。リファクタリング
 - 付随修正: `crates/al-media/tests/ruviform_deps.rs` の未使用 import
   `Fact` を除去(HEAD で `mise run lint` が既に失敗していたため)
 
-## 残課題
+## Risks
+
+- 挙動不変条件の制約で AudioLens 残留が確定した処理がある:
+  `cheap.rs` の IPD lag sweep・`local_lag`/tracking 系 `corr0` スキャンは
+  `OverlapCorrPlan` の FFT 分子経路が直算 `corr0` と FP 差分を生むため
+  移行できず(R2)、`expensive/channel.rs::csolve` は ruviform-numeric に
+  対応 API がない(R1)。
+- `analyze_pair`・`expensive` 各 family の measure/emit 分離は未実施で
+  AL#104 の監査対象として残る。
+- `ResamplePlan` の永続化・cache 鍵は Ruviform 型の内部表現へ依存する
+  逆方向結合(#98 baseline 互換のため現行維持。R4 で安定表現を提案)。
+- golden 差分は全て #100 decoder provenance・#101 SIMD 既知クラスへ帰属し
+  説明不能な新規差分は 0 件だが、#101 IR の「added 差分 0」は capture
+  時点の差(`settings/ruviform` 導入前)による記録であり、本記録では
+  #98 凍結 golden 基準で再比較している。
+
+## Follow-ups
 
 - `analyze_pair`・`expensive` 各 family の measure/emit 分離(AL#104 監査対象)
-- R1–R4 の Ruviform 契約提案の Issue 起票(本 Issue では報告のみ)
 - `dsp` facade 撤去(AL#104、全呼出側の直呼び移行後)
+- R1–R4 の Ruviform 契約提案の Issue 起票(本 Issue では報告のみ)
+
+### Ruviform Contract Proposals (Issue filing candidates)
+
+本 Issue では変更しない — Issue 起票案:
+
+- **R1**: 複素線形ソルバ(`expensive/channel.rs::csolve` 相当: 複素
+  Gaussian 消去 + pivot + 条件数 proxy)。`linalg::LeastSquares` の複素版。
+- **R2**: scalar 直算 overlap-NCC 曲線(`cheap.rs` IPD sweep・
+  `local_lag`/band NCC の直算 `corr0` sweep 置換用)。FFT 分子経路では
+  bit-exact を満たせないため、直算経路の API 化を提案。
+- **R3**: 基礎スペクトル統計プリミティブ(centroid/flatness/rolloff/
+  entropy/flux/bandwidth・OLS slope・median/argmax 選択)の `xspec`/
+  `stats` API。#102 では `measure_*` 層に集約済みのため移行先が明確。
+- **R4**: `ResamplePlan` の安定したパラメータ表現/ID(永続スキーマ・
+  cache 鍵の forward-compat 用)。

@@ -228,7 +228,21 @@ task `docs/tasks/gui-ruviform-viz-issue-132.md`、Issue
 - `advanceDataset` が overview fingerprint を変え、stale
   検出の検証を可能にする。
 
-## Verification
+## Related Experiments
+
+### Adopted
+
+- なし(experiment log なし。vendored ruviform `ui/viz` の data
+  port 契約へ Analysis Dataset を適合させる構成は task
+  `docs/tasks/gui-ruviform-viz-issue-132.md` と #131 の
+  headless 統合層の延長として確定しており、本 Issue の作業で
+  比較検証した代替 adapter 構成はなかった)
+
+### Rejected
+
+- なし(同上)
+
+## Validation
 
 - `mise run check-ui` — vendor `REV` check + `tsc --noEmit`: PASS
 - `mise run test-ui` — vendor check + node:test:
@@ -251,3 +265,31 @@ task `docs/tasks/gui-ruviform-viz-issue-132.md`、Issue
   theme 切替・実 WebView の `rvf://data` 登録。実 GUI 環境
   (#105 の webview shell)がこの worktree では未整備のため、
   headless 契約検証をもって完了とし実窓証跡は残さない。
+
+## Risks
+
+- `time_map.json` は現行 dataset が job dir のみに persist し
+  `locate/` role へ materialize しないため、
+  `captureToSourceS` の time_map 経路は `timeMaps` 引数経由の
+  供給まで到達しない(既知ギャップ。dataset 側 materialize は
+  別 issue 扱い)
+- `featureSpectrumSource` は `axis` を必須とするため axis 無し
+  record は spectrum を供給しない。非 Hz 軸表現は Ruviform
+  `BinAxis` の責務であり upstream 拡張待ち
+- RVST の `u8` `255` sentinel・IEEE NaN 透過など decode の
+  意味論は ruviform `ruviform-viz` encode 契約(pin `e9e6abe`)
+  に依存し、upstream の wire 変更に追従が必要
+  (encode.rs の doc 表記 `44 B` が stale だった前例あり)
+- 実 desktop GUI shell(#105 の webview shell)がこの worktree
+  では未整備のため、実窓での描画・同期スクロール・theme 切替・
+  実 WebView `rvf://data` は未検証のまま
+
+## Follow-ups
+
+- dataset 側で `time_map.json` を `locate/` role へ
+  materialize する対応(本記録では別 issue 扱いと明記)
+- 非 Hz 軸の spectrum 表現は Ruviform `BinAxis` の拡張として
+  upstream へ要請する
+- 実 GUI 環境(#105 の webview shell)整備後に、実窓での描画・
+  同期スクロール・theme 切替・実 WebView `rvf://data` 登録を
+  検証し実窓証跡を残す

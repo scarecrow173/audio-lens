@@ -59,7 +59,25 @@ metadata:
 
 # Native GUI Waveform/Seek 画面 ViewSpec 射影 実装記録(IR)
 
-## 実装したこと
+## Summary
+
+Waveform/Seek 画面の ViewSpec 射影(`view::screen::waveform_seek`)を実装し、
+ruviform の resolved SHA を `a57cd3d3` へ更新した Native GUI slice の記録。
+Issue #166 の一部。
+
+## Context
+
+Issue #166(https://github.com/scarecrow173/audio-lens/issues/166)の slice。
+task `docs/tasks/native-gui-waveform-seek-screen.md`(implements)と
+design `docs/designs/native-gui-waveform-seek-screen.md`、
+plan `docs/plans/native-gui-waveform-seek-screen.md`、
+spec `docs/specs/native-gui-waveform-seek-screen.md`、
+test-spec `docs/test-specs/native-gui-waveform-seek-screen.md` に従う。
+ruviform 側は commit `a57cd3d3` と issues #421/#426 を参照。
+
+## Implementation
+
+### Changes
 
 - ruviform resolved SHA を `e8adcc09` から `a57cd3d3`(main HEAD)へ
   `node tools/update-ruviform-rev.mjs` で更新。`Cargo.lock` のみ変更。
@@ -74,7 +92,23 @@ metadata:
   Seek と Panel(`audio-view`)を組み立てる。
 - `tests/screen.rs` に Fake 層(ViewHost headless)の 8 件を追加(PR 初版 6 件 + レビュー修正で 2 件)。
 
-## 検証結果(この作業ツリーで実行)
+## Related Experiments
+
+本 slice に関連する実験ログは存在しない。`metadata.experiments` の
+adopted / rejected はいずれも空で、`docs/impl/exp/` の既存 jsonl
+(issue-139 / 143 / 148 / 149 / 153 の CI 関連記録)は本件と無関係。
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Validation
+
+この作業ツリーで実行した検証結果:
 
 | コマンド | 結果 |
 | --- | --- |
@@ -91,14 +125,21 @@ metadata:
 | `mise run check-cli-headless` | pass(headless 10 crate に GUI 依存なし) |
 | `mise run setup-ui` / `check-ui` / `test-ui` | pass(112 tests) |
 
-## 逸脱・残課題
+## Risks
 
-- GPUI driver 上の projection・intent parity は未実施(NotRun)。
-  `ruviform-ui-gpui` の観測 seam が crate 内 `pub(crate)` のみのため、
-  consumer test から Fake と同じ観測を取れない。上流 #421/#426 で扱う。
-- `al-desktop` の window root は従来の fixture surface のまま。product
-  screen を mount していない。
-- TimeAxis / Meter / Spectrogram の ViewSpec 射影は未着手(#421 の
-  範囲)。
-- doc index の `rebuild-index` 提案は既存 hand-curated 行の churn を
-  避けるため適用せず、本件の行のみ手で追記した。
+- Waveform/Seek の projection・intent parity は Fake 層(ViewHost headless)
+  のみで検証した。GPUI driver 上の同等観測は `ruviform-ui-gpui` の観測 seam が
+  crate 内 `pub(crate)` のみのため consumer test から取れず、driver 間の差異は
+  未検出のまま(上流 #421/#426 で扱う)。
+- `al-desktop` の window root は従来の fixture surface のままで product screen
+  を mount していないため、実 window での表示は未確認。
+
+## Follow-ups
+
+- GPUI driver 上の projection・intent parity は、上流 #421/#426 で観測 seam が
+  提供された後に Fake と同じ観測で検証する。
+- `al-desktop` の window root へ product screen を mount する。
+- TimeAxis / Meter / Spectrogram の ViewSpec 射影は未着手(#421 の範囲)。
+- doc index の `rebuild-index` 提案は既存 hand-curated 行の churn を避けるため
+  未適用で、本件の行のみ手で追記した。index を再生成する場合は hand-curated
+  行との整合に注意する。

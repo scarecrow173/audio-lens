@@ -42,7 +42,24 @@ metadata:
 
 # Native GUI の Dataset workspace Tabs 選択契約の採用と pointer 切替の実装記録(IR, 第10 slice)
 
-## 実装内容
+## Summary
+
+Dataset workspace の Tabs(Source・Spectrogram・Analysis)に ruviform の
+選択契約を採用し、pointer 切替を実装した Native GUI slice(第10 slice)の記録。
+Issue #166 の一部。
+
+## Context
+
+Issue #166(https://github.com/scarecrow173/audio-lens/issues/166)の slice。
+task `docs/tasks/native-gui-workspace-tabs-selection.md` と
+plan `docs/plans/native-gui-workspace-tabs-selection.md`(derives-from)に従う。
+ruviform 側の Tabs 選択契約は PR scarecrow173/ruviform#458 を参照。
+第9 slice(root Tabs の `al.desktop` target)の後続として workspace 側の
+`al.workspace` target を追加した。
+
+## Implementation
+
+### Changes
 
 - `al-gui::command`: `WORKSPACE_TARGET`（`al.workspace`）を追加。`ACTION_TAB_SELECT` は
   ruviform の `TAB_SELECT_ACTION` を再利用したまま（第9 slice と同一の定数）。
@@ -59,26 +76,13 @@ metadata:
   動かさない。表示 tab の正本は ruviform の `ViewHost` のまま。
 - ruviform の依存 rev は `a5b1db13` のまま（`Cargo.lock`・`ui/vendor` の変更なし）。
 
-## テスト（先に書いた）
+### テスト（先に書いた）
 
 テストは実装より先に書いた。実装前の時点では `WORKSPACE_TAB_COUNT`・`WORKSPACE_TARGET` が
 未定義のため、対象テストはコンパイルに失敗する（確認したのはこのコンパイル失敗のみで、
 振る舞いの red は観測していない — 第9 slice と同じ状況）。
 
-## 受入対応表
-
-| 受入（spec） | 結果 | 根拠 |
-| --- | --- | --- |
-| R1 workspace Tabs の selection target が `al.workspace` | Passed | `workspace_tabs_are_selectable_by_pointer_on_the_workspace_target`（`TabsSpec.selection.target`・tab key 順・`WORKSPACE_TAB_COUNT` を検証） |
-| R2 select_tab の intent（target・action・params） | Passed | 同上、`workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui` |
-| R3 範囲内 applied・表示保持 | Passed | `command_workspace_tab_select_applies_an_in_range_index_and_rejects_the_rest`、`workspace_tab_select_replies_applied_and_rejected_without_touching_the_projection`、`workspace_tab_selection_is_applied_and_survives_reprojection` |
-| R4 範囲外・不正・誤 target の rejected と巻き戻し | Passed | 上記 service・session テスト、`rejected_tab_selection_restores_the_previous_tab`（workspace 側も rejected → Source へ復帰） |
-| R5 job 選択・dirty の不変 | Passed | `workspace_tab_select_replies_applied_and_rejected_without_touching_the_projection`（`selected_job` None・dirty false）、`workspace_tab_selection_is_applied_and_survives_reprojection` |
-| R6 同一 spec 再射影での保持 | Passed | `workspace_tab_selection_is_applied_and_survives_reprojection`（Spectrogram 選択 → 同 key・同 `active` の再射影後も `selected` = 1） |
-| R7 Fake/GPUI parity | Passed | `workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui`（`test-ui-gpui` の gpui_parity 12 件中） |
-| R8 検証 | Passed | 下記「検証結果」 |
-
-## 判断と未達
+### Decisions During Implementation
 
 - **target を `al.workspace` とした**: `al.desktop`（root Tabs）と index 空間が別のため、
   service の `(target, action)` match で区別する。`al.job` は行選択・job 操作であり tab 選択と
@@ -94,9 +98,37 @@ metadata:
 - **ruviform の issue は起票していない**: 本 slice の検証で ruviform 側の欠陥は見つからなかった。
   キーボード（FU-1）は upstream の既存作業のため重複起票しない。
 
-## 検証結果
+## Related Experiments
 
-コード HEAD は `7b924e6`（main、第9 slice merge 済み）の上の作業ツリー。
+本 slice に関連する実験ログは存在しない。`metadata.experiments` の
+adopted / rejected はいずれも空で、`docs/impl/exp/` の既存 jsonl
+(issue-139 / 143 / 148 / 149 / 153 の CI 関連記録)は本件と無関係。
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Validation
+
+### 受入対応表
+
+| 受入（spec） | 結果 | 根拠 |
+| --- | --- | --- |
+| R1 workspace Tabs の selection target が `al.workspace` | Passed | `workspace_tabs_are_selectable_by_pointer_on_the_workspace_target`（`TabsSpec.selection.target`・tab key 順・`WORKSPACE_TAB_COUNT` を検証） |
+| R2 select_tab の intent（target・action・params） | Passed | 同上、`workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui` |
+| R3 範囲内 applied・表示保持 | Passed | `command_workspace_tab_select_applies_an_in_range_index_and_rejects_the_rest`、`workspace_tab_select_replies_applied_and_rejected_without_touching_the_projection`、`workspace_tab_selection_is_applied_and_survives_reprojection` |
+| R4 範囲外・不正・誤 target の rejected と巻き戻し | Passed | 上記 service・session テスト、`rejected_tab_selection_restores_the_previous_tab`（workspace 側も rejected → Source へ復帰） |
+| R5 job 選択・dirty の不変 | Passed | `workspace_tab_select_replies_applied_and_rejected_without_touching_the_projection`（`selected_job` None・dirty false）、`workspace_tab_selection_is_applied_and_survives_reprojection` |
+| R6 同一 spec 再射影での保持 | Passed | `workspace_tab_selection_is_applied_and_survives_reprojection`（Spectrogram 選択 → 同 key・同 `active` の再射影後も `selected` = 1） |
+| R7 Fake/GPUI parity | Passed | `workspace_tab_selection_intent_and_selected_tab_match_between_fake_and_gpui`（`test-ui-gpui` の gpui_parity 12 件中） |
+| R8 検証 | Passed | 下記コマンド表 |
+
+以下、コード HEAD `7b924e6`（main、第9 slice merge 済み）の上の作業ツリーで
+実行した検証結果。
 `git fetch origin main && git merge origin/main` は "Already up to date"。
 すべて `mise run` 経由（canonical）で実行した。環境: Windows x64、rustc/cargo は mise 管理の
 repo toolchain（`mise run fmt` 等が解決）、mise 2026.10.1。
@@ -128,7 +160,7 @@ future-incompat 警告があるが、本 slice の変更とは無関係の既存
 - **キーボードによるタブ切替**: NotRun（upstream FU-1、別 worker が対応中）。
 - **`check-ui-driver-boundary`**: mise.toml に存在しない task のため NotRun（PR に明記）。
 
-## 独立レビュー（review-protocol）の結果
+### 独立レビュー（review-protocol）
 
 - 実施: 1 回。subagent の起動は worker 契約（helper worker 禁止）により行わず、
   Reviewer・Validator・Judge を分離した pass として同一エージェントが実施した。
@@ -146,7 +178,18 @@ future-incompat 警告があるが、本 slice の変更とは無関係の既存
 - Validator: 上記はいずれも `CONFIRMED` だが P0/P1 は無し。
 - Judge: Blocking なし。判定は **ACCEPT WITH NON-BLOCKING NOTES**。P2/P3 は報告のみで修正ループには入れていない。
 
-## 逸脱・残課題
+## Risks
+
+- 実 OS window での pointer タブ切替は AudioLens 側で未検証。GPUI observer
+  経路（`select_tab` → intent → snapshot）は gpui-test で parity 検証済みだが、
+  実 window のマウス配線は ruviform 側の gpui-test が担保する範囲。
+- workspace Tabs が Dataset root tab 非選択時にも mount され `select_tab`
+  可能であることは receipt テストで暗黙に確認されたのみで、pointer の実経路
+  （Dataset 表示中のクリック）としての明示的検証は gpui_parity 側に委ねた
+  （独立レビューの P3 指摘）。
+- キーボードによるタブ切替は未対応（upstream FU-1、別 worker が対応中）。
+
+## Follow-ups
 
 - 実 OS window での pointer 確認（NotRun）は Coordinator 側の手元確認に委ねる。
 - キーボードによるタブ切替は upstream FU-1（ruviform 側作業）に依存する。

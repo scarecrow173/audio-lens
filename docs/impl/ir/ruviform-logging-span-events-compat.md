@@ -100,6 +100,20 @@ consumer-verify run 42302538464 で検出された E0063(`SinkConfig`
 (ruviform main HEAD)へ明示更新し、vendor を
 `sync-ui-deps` で整合した。
 
+## Context
+
+AL#127 の Ruviform 追従作業の一環。consumer-verify run
+42302538464(RF candidate `30205f2b` × AL `04f1861` × SV
+`d8bf8ca`)で `crates/al-observability` の stderr `SinkConfig`
+literal 構築が必須 field `span_events` を欠き E0063 で
+失敗した。同 field は ruviform `33d93dd`(Issue #335 /
+PR #348)で導入された。migration 前に両 layer が持っていた
+`FmtSpan::CLOSE` の stderr 側出力を本変更で復旧した
+(migration 設計が予約した #335 回復条件の実行)。上流 doc
+chain は specs / designs / plans / tasks / test-specs の
+`ruviform-logging-span-events-compat.md` 各件(relations の
+implements / derives-from / verified-by と一致)。
+
 ## Provenance
 
 | 項目 | 値 |
@@ -111,7 +125,7 @@ consumer-verify run 42302538464 で検出された E0063(`SinkConfig`
 | field 導入 commit | ruviform `33d93dd`(#335 / PR #348) |
 | OS / toolchain | Windows 11 x64, Git Bash, mise 2026.10.1, rust 1.99.0, node 26.12.1 |
 
-## Changes
+## Implementation
 
 - `crates/al-observability/src/lib.rs`: `SpanEvents` import、
   stderr `SinkConfig` に `span_events: SpanEvents::CLOSE`、
@@ -135,7 +149,21 @@ consumer-verify run 42302538464 で検出された E0063(`SinkConfig`
   `docs/impl/ir/README.md` に本 IR の行を追加(同 index は
   手動管理)。
 
-## Verification
+## Related Experiments
+
+### Adopted
+
+なし。
+
+### Rejected
+
+なし。
+
+(front matter の `metadata.experiments.adopted` / `rejected`
+はいずれも空であり、本件では実験ログの採用・却下は
+記録されていない)
+
+## Validation
 
 実施済み(全て Windows 11 x64 上の正規 mise タスク):
 
@@ -154,19 +182,24 @@ consumer-verify run 42302538464 で検出された E0063(`SinkConfig`
 | `mise run setup-ui` → `check-ui` → `test-ui` | 0 | vendor 照合 OK、typecheck OK、node:test 112 pass |
 | `doc_maintenance.js plan/apply` | 0 | 5 index 再生成、残 finding は既存分 |
 
-## Not Run / Remaining Gates
+## Risks
 
-- **consumer-verify tuple 再実行**(RF candidate × AL 修復
-  head × SV): 本 worker の境界外。修復 head push 後に
-  coordinator と調整する。
+- **consumer-verify tuple 再実行が未実施**: 修復はローカルの
+  RED 再現 → `verify-ci` pass で確認したが、consumer-verify
+  pipeline 上の tuple(RF candidate × AL 修復 head × SV)
+  再実行は本 worker の境界外であり、CI 側での最終確認が残る。
+  修復 head push 後に coordinator と調整する
 - **macOS / Linux 実 OS lane**: 未実測(本検証は Windows のみ)。
 - **al-gui `webview` feature lane**(`check-ui-webview`/
   `test-ui-webview`): 実窓 host 依存、未実行。
 - **f64 解析値・実メディア Golden・長尺/性能**: test-ci 内の
   golden は pass。実メディア・性能 re-eval は未実行。
-- PR マージ・Issue close は coordinator 権限。
+- 既存ドリフト(本変更由来ではない)が検出済みのまま残る:
+  `al export` の file sink 構築と USAGE / migration 設計の
+  stderr-only 記述の不一致、および artifact-graph の
+  broken-relation(al-math 参照先の不存在)
 
-## Findings / Follow-ups
+## Follow-ups
 
 - ruviform #334(`RollingFile.filename_suffix`)も解消済みで
   あることを確認。file sink の `SinkDestination::RollingFile`
@@ -182,3 +215,4 @@ consumer-verify run 42302538464 で検出された E0063(`SinkConfig`
   構築するが、USAGE と migration 設計は `export` を
   stderr-only と記述(`main.rs:240` 参照)。sink 契約の
   正本側を確定する別タスクとして切り出すのが適当。
+- PR マージ・Issue close は coordinator 権限。

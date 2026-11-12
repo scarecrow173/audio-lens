@@ -72,9 +72,46 @@ perf Issue 4件の前提を実測で再検証した。**測定・分析のみで
 推奨着手順は **#76 → #71 → #54 → #60** の当初順を維持するが、各 Issue の
 攻めどころは移行前の想定から更新が必要(後述)。
 
-## 計測方法
+## Context
 
-### 環境
+- 対象: 移行前に起票された perf Issue #76/#71/#54/#60 の、Ruviform 基盤
+  移行(#95 系)後の再評価(front matter `related`、`relations.source` は空)
+- 基準となる移行前計測: `docs/impl/ir/issue-104-baseline/perf/canonical.json`
+  (commit `fe3028d`、同じ計測基盤・同一マシン)
+- 比較対象コード: worktree `al-perf-reeval`、commit `bc2846e`
+  (ruviform pin `080c228d197ebc645b8f81cd0082be442abaf10c`)
+
+## Implementation
+
+本記録は測定・分析のみで、本番コードの最適化変更は行っていない。
+計測のために一時的に追加した instrumentation は計測後に除去済み
+(コミット対象外。計測時の worktree は dirty で
+`environment.worktree_dirty` を参照)。残存する計測資産:
+
+- `tools/perf-reeval/capture.mjs`: `al run` + JSON-lines ログ集計の
+  計測ドライバ(再現手順は Validation > Measurement Method)
+- `crates/al-locate/examples/bench_reeval.rs`: `CorrelationPlan` の
+  plan build / workspace / ncc transform を分離計測する microbench
+- `docs/impl/ir/perf-reeval-2026-10/`: run 別の集計 JSON と
+  microbench 出力(附録: データファイル参照)
+
+## Related Experiments
+
+### Adopted
+
+- なし — 再評価は既存の計測基盤と一時 instrumentation で実施し、方式選択の
+  ための実験的比較は行わなかった。関連する `docs/impl/exp/*.jsonl` の
+  実験記録は存在しない。
+
+### Rejected
+
+- なし
+
+## Validation
+
+### Measurement Method
+
+#### Environment
 
 - worktree: `al-perf-reeval`、commit `bc2846e`(+ 一時計時
   instrumentation、後述)
@@ -85,7 +122,7 @@ perf Issue 4件の前提を実測で再検証した。**測定・分析のみで
 - ビルド: `mise exec -- cargo build --release -p al-cli`
   (release + debuginfo)
 
-### 手順
+#### Procedure
 
 1. `tools/perf-reeval/capture.mjs` で `al run` を実行。
    `--log al_locate=info,al_analysis=info,al_job=info
@@ -110,7 +147,7 @@ perf Issue 4件の前提を実測で再検証した。**測定・分析のみで
    の plan build / workspace / ncc transform コストを分離計測
    (min-of-N、単一スレッド)。
 
-### 実行した計測
+#### Runs Executed
 
 | run | 入力 | stages | 結果ファイル |
 |-----|------|--------|--------------|
@@ -123,7 +160,7 @@ stage 時間は job manifest の `duration_ms` 系フィールドから取得。
 span busy は複数タスク並列実行時に合計が stage wall を超え得る
 CPU 時間相当の値であり、wall time とは区別して扱う。
 
-## 移行前後のステージ比較 (canonical)
+### Stage Comparison (canonical)
 
 移行前は `docs/impl/ir/issue-104-baseline/perf/canonical.json`
 (commit `fe3028d`、同じ計測基盤・同一マシン)。
@@ -143,9 +180,9 @@ CPU 時間相当の値であり、wall time とは区別して扱う。
 **変化があったのは locate / reference の内部構成**であり、以下の Issue 別
 評価の対象となる。
 
-## Issue 別評価
+### Per-Issue Evaluation
 
-### #76 `window_anchors_in` 構造最適化
+#### #76 `window_anchors_in` 構造最適化
 
 **元の前提**: locate wall の ~83% を占め、capture あたり
 ~802–804 の `best_window_match` 呼出・~3,200 NCC 呼出と報告。
@@ -193,7 +230,7 @@ CPU 時間相当の値であり、wall time とは区別して扱う。
      セマンティクス(anchor 採否・スコア)を守る必要がある中リスク。
   3. shape 量子化による plan 再利用: 補助的(数%級)。単独ではやらない。
 
-### #71 band 系相関
+#### #71 band 系相関
 
 **元の前提**: locate `band_ncc` が ~174s busy / 16 calls ≈
 10.9s/call、reference `band_gain` が ~23s/pair ≈ analyze_pair の
@@ -241,7 +278,7 @@ CPU 時間相当の値であり、wall time とは区別して扱う。
   `ncc_direct` は 15.8ms vs plan.ncc 0.35ms(実測 ~45× 遅い)。
   コストモデル `prefers_direct` が正しく FFT を選んでいる。
 
-### #54 stage 内並列化
+#### #54 stage 内並列化
 
 **元の前提**: locate は stage 内で既に並列(worker pool)だが、
 cheap/reference は入力/pair 単位で逐次実行。
@@ -267,7 +304,7 @@ cheap/reference は入力/pair 単位で逐次実行。
   の記録順)、resume 境界との整合、pair 並列時のメモリ倍加
   (band signal は ~26 band × 2.4M sample 級)。
 
-### #60 residual gather / interleave-copy
+#### #60 residual gather / interleave-copy
 
 **元の前提**: residual 収集の gather と interleave/copy の小項目
 (lod.rs は可視化撤去で対象外)。
@@ -290,7 +327,7 @@ cheap/reference は入力/pair 単位で逐次実行。
 - gather 本筋は解決済み。残る interleave/copy は ~5〜6s/368s 規模で、
   #76/#71 と比較にならない。lod 系は issue 上も対象外。
 
-## ruviform API が選択肢を変えるか
+### ruviform API Impact
 
 | API (ruviform issue) | 対象パスへの影響(実測・契約確認) |
 |----------------------|-------------------------------|
@@ -299,7 +336,20 @@ cheap/reference は入力/pair 単位で逐次実行。
 | `spec::*`(#169) / `complex_solve`(#167) | #117 で採用済み。今回のホットパスには直接関係しない。 |
 | 新規提案余地(記録のみ、実装しない) | (a) 階層化/decimated NCC(anchor fallback 用)、(b) lag-window 部分曲線計算(エスカレーション時の重複区間スキップ)、(c) 帯域信号に対する windowed correlogram(band_gain 一括計算案)。いずれも ruviform primitive として置けるが、呼出側並列化(#71)や anchor 階層化(#76)で先に効果が取れる。 |
 
-## 推奨着手順
+## Risks
+
+- NCC transform はメモリ帯域律速: microbench 単発 208〜217ms が 16 並列
+  メモリ帯域競合下で ~2.76s/call(~13× slowdown)となり、anchor/full
+  fallback の単価見積もりは並列度に強く依存する。
+- fallback 到達率はデータ依存: small run で 1 call は 85 windows 中 80 が
+  full 到達、別 call は 31/85 と変動し、削減効果の見積もりは入力に依存する。
+- span busy は複数タスク並列実行時に合計が stage wall を超え得る CPU 時間
+  相当の値であり、wall time とは区別して扱う必要がある。
+- 一時計時 instrumentation は計測後に除去済みでコミット対象外のため、
+  再計測には `tools/perf-reeval/capture.mjs` と
+  `crates/al-locate/examples/bench_reeval.rs` による再現が必要。
+
+## Follow-ups
 
 **#76 → #71 → #54 → #60**(当初順を維持、根拠は更新):
 

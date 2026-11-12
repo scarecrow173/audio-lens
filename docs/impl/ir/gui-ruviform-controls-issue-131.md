@@ -189,7 +189,20 @@ task `docs/tasks/gui-ruviform-controls-issue-131.md`、Issue
 - 実 `ErrorBody` は `data` を持たないため fake からも除去し、
   `al.ds.overview` を実応答形 `{overview, timeline}` に修正。
 
-## Verification
+## Related Experiments
+
+### Adopted
+
+- なし(experiment log なし。Ruviform pin `e9e6abe` への bump と
+  `ui/` パッケージ構成は task
+  `docs/tasks/gui-ruviform-controls-issue-131.md` で確定済みで、
+  本 Issue の作業で比較検証した代替 binding 構成はなかった)
+
+### Rejected
+
+- なし(同上)
+
+## Validation
 
 - `mise run check-ui` — vendor `REV` check + `tsc --noEmit`: PASS
 - `mise run test-ui` — vendor check + node:test:
@@ -202,3 +215,28 @@ task `docs/tasks/gui-ruviform-controls-issue-131.md`、Issue
   high-contrast・touch・実 2-window 移動。実 GUI 環境(#105 の
   webview shell)がこの worktree では未整備のため、headless
   契約検証をもって完了とし実窓証跡は残さない。
+
+## Risks
+
+- 実 desktop GUI shell(#105 の webview shell)がこの worktree
+  では未整備のため、実窓での表示・focus・keyboard・
+  high-contrast・touch・実 2-window 移動は未検証のまま
+- `al.job` の resume で job_id 未指定時は `al.job.list` での
+  候補再発見に依存し、0 件・複数件は推測せず rejected とする
+  設計。service 側の job 一覧契約の変化に追従が必要
+- cancel 済み run が job_id を返さない前提は
+  `CallOutcome::Job` 相当 handle の契約に依存する
+- control descriptor の `step` snap は shared control 契約上の
+  明示的丸めとして許容されるため、no-step 経路以外では
+  verbatim な `f64` がそのまま UI 値に反映されない場合がある
+- `ui/vendor/ruviform/` は commit しない生成物であり、
+  `.worktreeinclude` による worktree 間引き継ぎと
+  `sync-ruviform-ui.mjs --check` の REV 整合に依存する
+
+## Follow-ups
+
+- 実 GUI 環境(#105 の webview shell)整備後に、実窓での表示・
+  focus・keyboard・high-contrast・touch・実 2-window 移動を
+  検証し実窓証跡を残す
+- 後続の可視化 headless core(Issue #132)は本記録を
+  `depends-on` で参照し、port/gateway 契約上に構築済み
