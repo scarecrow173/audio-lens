@@ -49,7 +49,27 @@ metadata:
 
 # Native desktop 初期 slice AL-G1〜G3 実装記録(IR)
 
-## 実装済み
+## Summary
+
+Native desktop 初期 slice AL-G1〜G3 の実装記録。`UiRuntime` を
+内包する `DesktopSession`/`DesktopPolicy` と GPUI composition
+root(`al-desktop`)、product theme/preferences、view model
+adapter + fixture を `al-gui` に追加した。`FakeDriver` ベースの
+決定的テストで Action→Intent 配送・job drain・CloseRequested
+の veto/approve/Defer・last-window exit を検証し、review
+4 ラウンドの指摘を同じ修正へ畳んで ACCEPT を得た。
+
+## Context
+
+Issue #166(`relations.source`)の task
+`docs/tasks/native-desktop-initial-slices.md`(implements)に従う。
+design・plan・spec・test-spec の同名 document chain
+(depends-on/related/verified-by)と、Ruviform commit `e8adcc09`
+(references)への rev 更新が前提 — `ruviform-ui` の
+`WindowDriver`/`UiRuntime` 最新契約と `ruviform-ui-theme`/
+`ruviform-ui-gpui`/`ruviform-ui-test` を利用可能にした。
+
+## Implementation
 
 ### AL-G1 — DesktopSession + GPUI composition root
 
@@ -183,47 +203,7 @@ metadata:
 - `mise.toml`: `check-ui-gpui`/`lint-ui-gpui`/`test-ui-gpui` 追加
   (ruviform 側同名 lane と同一構造、`-p al-gui --features gpui`)。
 
-## 検証記録
-
-- `cargo test -p al-gui`: 41 test 全 pass(desktop 14 + service_ops 5 +
-  theme 10 + view 12)。review 第 2 ラウンドでは
-  `destroy_does_not_cancel_jobs_by_default` が修正前コードで
-  `assert!(!driver.exited())` に FAILED することを確認した
-  RED → 修正で GREEN。第 3 ラウンド独立 review verdict: ACCEPT
-  — P2 sibling(`WaveformView::window` overflow)と P3 3 件
-  (`exited` latch・cancel test ordering assert)を同じ修正へ畳んだ。
-  第 4 ラウンド(不可視無期限待機の禁止)では
-  `close_requested_on_last_window_defers_while_job_runs` 等 4 test が
-  修正前コードで `windows().contains(&w)` に FAILED することを
-  確認した RED → `Defer` 保留実装で GREEN(自然 driver loop、
-  exit 後の Tick 続行・既定強制 cancel・再 close spam 突破なし)。
-  第 4 ラウンドの内部独立 review verdict: ACCEPT — P2(保留中に
-  立った製品 veto を再開 close が尊重するかの test gap)を
-  `deferred_close_resume_respects_new_product_veto` で閉塞、
-  P3(強制 destroy 中の deferred 記録掃除・rustdoc 表現ドリフト・
-  Defer 副作用の ordering)も同じ修正へ畳んだ。
-- `cargo check -p al-gui --all-targets` / `cargo clippy -p al-gui
-  --all-targets -- -D warnings`: pass。
-- `node tools/check-headless-deps.mjs`: pass。guard の候補名に
-  `gpui`/`gpui-`/`ruviform-ui-gpui`/`ruviform-ui-webview` を追加し、
-  headless crate への backend 混入を検知可能にした。
-- 正規 `mise run` 検証と gpui lane の結果は PR 本文へ記録する。
-
-## 未実施 / Blocked(明記)
-
-- **ViewSpec 実描画接続**: RF#387 の Component/View renderer は別
-  Worker 実装中(`4c53e28` 候補 branch あり、main 未 merge)。
-  `create_view_window(&WindowSpec, ViewMount{host, theme})` の接続
-  は後段統合条件。`DesktopSession::theme()` が受け渡し点。
-- **AL-G4**: 実 OS 上の全 lifecycle(Cancelled/Stale/Failure/Save/
-  Reload/Source revision/GPU resources/Subscriptions/Job lifetime)
-  検証 → 未達。
-- **AL-G5**: 実 OS/visual/numeric/CLI 正式受入 → 未達。
-- **実 desktop 入力 slot**: RF#389 担当。
-- `ruviform-ui-gpui` の `ime`/`native_surface_slot` capability は
-  `Unsupported` であり、本件で偽装しない。
-
-## 判断記録
+### Decisions During Implementation
 
 - `cancel_jobs_on_destroy` 既定 `false`: window close/destroy が
   job を暗黙停止しない Issue #166 受入を `DesktopPolicy` の既定値
@@ -271,15 +251,6 @@ metadata:
   veto に阻まれた場合 `exit_pending` は armed のまま残り、
   veto 解除後の通常 close で完結する。veto 尊重が必須で、
   未配線の future API 拡張は行わない。
-- **既知の残余リスク(保証不能範囲)**: OS 強制 `Destroyed`
-  (`destroy_window` / backend 強制 teardown)は veto/`Defer`
-  不能であり、最終 window がこの経路で消えた場合は job 終端
-  まで window の無い windowless 待機が起こり得る。代替案の
-  暗黙 job kill は受入を破るため棄却、job cancel 強制は既定値
-  変更を要求するため棄却。軽減策の候補(強制終了 gesture や
-  タイムアウト/watchdog、upstream driver 側の pre-teardown 通知)
-  は AL-G4 実 OS lifecycle 検証スコープまたは Ruviform 側の
-  検討事項として残す — 本範囲で成功を偽装しない。
 - `ticks(start, end)` は両端を `len` へ clamp(review 第 2 ラウンド
   P2 対応): 旧実装は `start > len` のとき `end` が `start` に
   引き上げられ `[start..start]` が範囲外で panic した
@@ -321,3 +292,69 @@ metadata:
 - job cancel fixture は `BlockingService`(gate + outcome 観測路):
   `has_running_jobs` のタイミング依存スナップショットではなく
   job が実際に辿った終端分岐を観測する。
+
+## Related Experiments
+
+### Adopted
+
+- なし — `docs/impl/exp/` に本 slice に対応する実験ログは
+  存在しない(既存ログは CI 系 issue-139〜153 のみ)。
+  `metadata.experiments` も空であり、検証は `cargo test` と
+  review ラウンドで実施した。
+
+### Rejected
+
+- なし(同上)。
+
+## Validation
+
+- `cargo test -p al-gui`: 41 test 全 pass(desktop 14 + service_ops 5 +
+  theme 10 + view 12)。review 第 2 ラウンドでは
+  `destroy_does_not_cancel_jobs_by_default` が修正前コードで
+  `assert!(!driver.exited())` に FAILED することを確認した
+  RED → 修正で GREEN。第 3 ラウンド独立 review verdict: ACCEPT
+  — P2 sibling(`WaveformView::window` overflow)と P3 3 件
+  (`exited` latch・cancel test ordering assert)を同じ修正へ畳んだ。
+  第 4 ラウンド(不可視無期限待機の禁止)では
+  `close_requested_on_last_window_defers_while_job_runs` 等 4 test が
+  修正前コードで `windows().contains(&w)` に FAILED することを
+  確認した RED → `Defer` 保留実装で GREEN(自然 driver loop、
+  exit 後の Tick 続行・既定強制 cancel・再 close spam 突破なし)。
+  第 4 ラウンドの内部独立 review verdict: ACCEPT — P2(保留中に
+  立った製品 veto を再開 close が尊重するかの test gap)を
+  `deferred_close_resume_respects_new_product_veto` で閉塞、
+  P3(強制 destroy 中の deferred 記録掃除・rustdoc 表現ドリフト・
+  Defer 副作用の ordering)も同じ修正へ畳んだ。
+- `cargo check -p al-gui --all-targets` / `cargo clippy -p al-gui
+  --all-targets -- -D warnings`: pass。
+- `node tools/check-headless-deps.mjs`: pass。guard の候補名に
+  `gpui`/`gpui-`/`ruviform-ui-gpui`/`ruviform-ui-webview` を追加し、
+  headless crate への backend 混入を検知可能にした。
+- 正規 `mise run` 検証と gpui lane の結果は PR 本文へ記録する。
+
+## Risks
+
+- **既知の残余リスク(保証不能範囲)**: OS 強制 `Destroyed`
+  (`destroy_window` / backend 強制 teardown)は veto/`Defer`
+  不能であり、最終 window がこの経路で消えた場合は job 終端
+  まで window の無い windowless 待機が起こり得る。代替案の
+  暗黙 job kill は受入を破るため棄却、job cancel 強制は既定値
+  変更を要求するため棄却。軽減策の候補(強制終了 gesture や
+  タイムアウト/watchdog、upstream driver 側の pre-teardown 通知)
+  は AL-G4 実 OS lifecycle 検証スコープまたは Ruviform 側の
+  検討事項として残す — 本範囲で成功を偽装しない。
+- `ruviform-ui-gpui` の `ime`/`native_surface_slot` capability は
+  `Unsupported` であり、本件で偽装しない — IME・native surface
+  を要する入力経路は本 slice の対象外。
+
+## Follow-ups
+
+- **ViewSpec 実描画接続**: RF#387 の Component/View renderer は別
+  Worker 実装中(`4c53e28` 候補 branch あり、main 未 merge)。
+  `create_view_window(&WindowSpec, ViewMount{host, theme})` の接続
+  は後段統合条件。`DesktopSession::theme()` が受け渡し点。
+- **AL-G4**: 実 OS 上の全 lifecycle(Cancelled/Stale/Failure/Save/
+  Reload/Source revision/GPU resources/Subscriptions/Job lifetime)
+  検証 → 未達。
+- **AL-G5**: 実 OS/visual/numeric/CLI 正式受入 → 未達。
+- **実 desktop 入力 slot**: RF#389 担当。

@@ -136,7 +136,33 @@ golden 9 ラン全件 0 diff で契約を維持した。
   canonical で ~8% が発動するが、それ以外は標本推定で受理
   判定を完結できる。
 
-## Validation and Evidence
+## Related Experiments
+
+実験ログファイル(`docs/impl/exp/*.jsonl`)は存在せず、
+`metadata.experiments` の記述と本文の計測記録が実験の記録に
+相当する。
+
+### Adopted
+
+- `decimation=8 + K=256 + strict-tie + near-gate margin`
+  (metadata.experiments.adopted)。間引き率 1/8・粗上位 K=256
+  候補・厳密同点のみの曖昧性判定・受理閾値境界での direct
+  縮退という組合せ。根拠は Implementation
+  「段構成・パラメータの根拠」と Validation
+  「採択・棄却した設計の記録」を参照
+
+### Rejected
+
+- `3% near-tie competition guard (fallback ~97% に縮退)`
+  (metadata.experiments.rejected)。近値ピーク競合を曖昧性と
+  みなすガードは BGM 自己相似性で canonical の ~97-98% が
+  縮退し高速化が消失したため棄却
+- `decimation=4 (低速化し周期性双ピークを解決せず)`
+  (metadata.experiments.rejected)。粗カバレッジ改善を狙ったが
+  周期性双ピークの取りこぼしを解消できず pair あたり ~38s
+  へ低速化したため棄却
+
+## Validation
 
 - [x] `cargo check -p al-locate` / `cargo fmt --all -- --check` /
   `cargo clippy --workspace --all-targets -- -D warnings` pass
@@ -198,7 +224,7 @@ golden 9 ラン全件 0 diff で契約を維持した。
   で widen 受理となる境界ケースだった。`HIER_P2B_GATE_MARGIN`
   (±2%)内なら direct へ縮退する near-gate を追加して解決。
 
-## Risks or Follow-ups
+## Risks
 
 - 粗上位 K=256 に真ピークが入らない理論的余地は残るが、
   K 到達率の計測・9 ラン golden 0 diff・単体一致テストで
@@ -210,6 +236,9 @@ golden 9 ラン全件 0 diff で契約を維持した。
 - `sampled_ncc_background` は標本推定のため、near-gate 帯の外
   でも全曲線 median と微小差がありうるが、受理判定が閾値から
   離れた領域でのみ使われるよう境界帯は direct 縮退で保護した。
+
+## Follow-ups
+
 - 隣接 anchor 予測による fallback 頻度削減(仕様の第2優先)は
   今回未実施。anchor CPU が ~90% → 大幅低減した現状では
   セマンティクス変更リスクに見合わない。

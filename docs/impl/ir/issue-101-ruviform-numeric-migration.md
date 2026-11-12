@@ -48,7 +48,29 @@ metadata:
   `issue-152-al-math-comparison-20261031.md` / `issue-153-al-analysis-al-math-comparison-20261031.md`
 - 本記録の差分出力: `docs/impl/ir/issue-101-baseline/`(`tools/baseline/compare.mjs` の 9 ラン分)
 
-## 切替対象と移行先
+## Summary
+
+task `docs/tasks/ruviform-dsp-kernel-switch.md` に従い、AudioLens 内の
+汎用 f64 カーネル(al-math・al-locate::dsp・al-analysis の inline 実装)を
+Ruviform `ruviform-numeric` の API へ切替えた。`al-math` クレートは全呼出の
+置換完了後に削除し、`al-locate::dsp` は `deinterleave` と旧 panic 契約を
+再現する薄い facade のみを残した。Issue #98 の凍結 golden との 9 ラン比較で
+構造・イベント判定の差分はなく、残差は SIMD/累積順序由来の tolerance/value
+差のみであった。
+
+## Context
+
+- task: `docs/tasks/ruviform-dsp-kernel-switch.md`(front matter `implements`)
+- 基準 baseline: Issue #98 成果物(`baseline/` の凍結 golden)
+- 前提となる ruviform 側比較記録: `issue-150-al-math-comparison-20261031.md` /
+  `issue-152-al-math-comparison-20261031.md` /
+  `issue-153-al-analysis-al-math-comparison-20261031.md`
+- 責務境界の正本: #97 責務マップ(残留処理の判定根拠は
+  Implementation > Remaining Responsibilities in AudioLens 節)
+
+## Implementation
+
+### Changes
 
 | AudioLens 旧 API(al-math / al-locate::dsp / al-analysis) | Ruviform API | 検証根拠 |
 | --- | --- | --- |
@@ -68,7 +90,7 @@ metadata:
 薄い facade のみを残す。複素スペクトルの公開型は tuple `Vec` から `(Vec<f64>, Vec<f64>)`
 の split re/im レイアウトへ移行(中間の zip/unzip adapter を置かない)。
 
-## 保持した数値契約
+### Preserved Numeric Contracts
 
 - FFT: forward=負号回転・無正規化、inverse=正号回転・1/N 正規化、非 2 冪は panic 契約維持
 - Real FFT: 非負周波数 `N/2+1` bins
@@ -82,7 +104,32 @@ metadata:
 - conv: 空入力の早期 return セマンティクスが旧実装と同一であることを確認
 - resample provenance: algorithm `polyphase-blackman-sinc` / version `1` を保持
 
-## Golden 比較結果(tools/baseline)
+### Remaining Responsibilities in AudioLens
+
+- `al-locate::dsp::deinterleave`: チャネル分離は AudioLens の入力境界の責務
+- `al-locate::dsp` の panic 契約 facade: 旧 API の shape 違反=panic という
+  呼出側契約を維持する変換層(新規処理は持たない)
+- `al-analysis::stft` の `StftMatrix`/`stft` 関数: Dataset 永続化形式と
+  AudioLens 側の集約境界。内部カーネルのみ Ruviform
+- locate の anchor 選択・skip/drift・validity/confidence・候補/consensus 解釈、
+  解析 stage の意味論は本 Issue のスコープ外(#102)
+
+## Related Experiments
+
+### Adopted
+
+- なし — 移行方式は task `docs/tasks/ruviform-dsp-kernel-switch.md` と
+  ruviform 側比較記録(#150/#152/#153)で確定済みであり、方式選択のための
+  実験的比較は行わなかった。関連する `docs/impl/exp/*.jsonl` の実験記録は
+  存在しない。
+
+### Rejected
+
+- なし
+
+## Validation
+
+### Golden Comparison (tools/baseline)
 
 9 ラン(`canonical`/`aa`/`resume`/`small`/`variant-*`×5)を新実装で capture し、
 凍結 golden(`baseline/runs/<name>`)と `compare.mjs`(rel 1e-9 / abs 1e-12)で比較。
@@ -99,7 +146,7 @@ metadata:
 - 原因は scalar(ruviform-numeric)対 SIMD(pulp x86-v3 dispatch)の累積順序差であり、
   ruviform 側比較記録(#150 FFT 系 ~1e-13, #152 argmax 一致, #153 bit-exact)と整合
 
-## 性能比較(同一マシン・旧バイナリ `f6a8037` vs 新バイナリ、負荷なし)
+### Performance Comparison
 
 `small` ラン(IN-#61/#62 capture + IN-#63/#64 source、Issue #71/#76 系サンプル)
 の stage 時間:
@@ -128,32 +175,12 @@ metadata:
 - 結論: e2e 合計は -1.7% でネット中立。パイプライン上の性能退行は無いが、
   カーネル単位の退行は scalar 化に起因する既知のトレードオフ
 
-### 同時実行ノイズについての注意
+#### Measurement Noise
 
 負荷下(ビルド並走)で capture したランは stage 時間が数倍に膨らむ
 (例: reference_analysis 23s)。上表は負荷なし再計測の値を採用した。
 
-## AudioLens 側に残した処理(#97 責務マップの根拠)
-
-- `al-locate::dsp::deinterleave`: チャネル分離は AudioLens の入力境界の責務
-- `al-locate::dsp` の panic 契約 facade: 旧 API の shape 違反=panic という
-  呼出側契約を維持する変換層(新規処理は持たない)
-- `al-analysis::stft` の `StftMatrix`/`stft` 関数: Dataset 永続化形式と
-  AudioLens 側の集約境界。内部カーネルのみ Ruviform
-- locate の anchor 選択・skip/drift・validity/confidence・候補/consensus 解釈、
-  解析 stage の意味論は本 Issue のスコープ外(#102)
-
-## Ruviform 側への Issue 起票案
-
-1. ruviform-numeric の scalar NCC/dot 系カーネル(corr0 sweep・窓 NCC 大量呼出)の
-   SIMD/vectorize 対応 — AudioLens の reference_analysis で約 +25% の stage 退行が
-   観測され、per-call 4x(corr0 sweep)~1.2x(plan NCC)が原因。f64 精度契約を
-   維持したまま SIMD ordering を導入できるか検討
-2. `xspec::CrossSpectrum` に band 区間限定の累積 API 追加の検討 — 現状は
-   `band_power` 後段で帯域抽出しており、帯域限定 accumulate で呼出側の
-   帯域ループを削れる可能性
-
-## 検証結果
+### Verification Results
 
 - `cargo fmt --all`: clean
 - `cargo test --workspace`: 全 pass(golden 19 件・al-locate/al-media/doc tests 含む)
@@ -163,3 +190,27 @@ metadata:
 - `mise run check-cli-headless`: pass(al-math を HEADLESS_CRATES から除去)
 - `mise run verify-toolchain`: pass
 - `Cargo.lock` から `al-math` / `pulp` が消え、`ruviform-numeric` が追加済み
+
+## Risks
+
+- scalar(ruviform-numeric)化に伴うカーネル単位の性能退行: `corr0` sweep は
+  per-call ~4x、`analyze_pair` +33%、`reference_analysis` stage +24.8%
+  (約 +0.66s)。e2e 合計は -1.7% でネット中立だが stage 単位の退行は残る
+  (詳細は Validation > Performance Comparison)。
+- 累積順序差による残差: golden 差分は tolerance/value のみだが、絶対
+  1e-12 閾値を超える残差系 fingerprint `sum`(~1e-12〜1e-14)は物理的に
+  0 の和の最終桁符号反転であり、bit 一致は期待できない。
+- 性能計測は負荷なし条件の値。ビルド並走などの負荷下では stage 時間が
+  数倍に膨らむため、計測値は条件依存である。
+
+## Follow-ups
+
+Ruviform 側への Issue 起票案(起票の実施は本記録の範囲外):
+
+1. ruviform-numeric の scalar NCC/dot 系カーネル(corr0 sweep・窓 NCC 大量呼出)の
+   SIMD/vectorize 対応 — AudioLens の reference_analysis で約 +25% の stage 退行が
+   観測され、per-call 4x(corr0 sweep)~1.2x(plan NCC)が原因。f64 精度契約を
+   維持したまま SIMD ordering を導入できるか検討
+2. `xspec::CrossSpectrum` に band 区間限定の累積 API 追加の検討 — 現状は
+   `band_power` 後段で帯域抽出しており、帯域限定 accumulate で呼出側の
+   帯域ループを削れる可能性

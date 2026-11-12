@@ -38,7 +38,24 @@ metadata:
 
 # Native GUI Spectrogram・Job/Run/Analysis の ViewSpec 射影と drawn parity 実装記録(IR)
 
-## 実装したこと
+## Summary
+
+ruviform-viz の ViewSpec へ Spectrogram・Job/Run/Analysis 画面を射影し、
+Tabs 画面を al-desktop へ mount した Native GUI slice の実装記録。
+Meter・TimeAxis・Waveform の drawn parity まで検証した。Issue #166 の一部。
+
+## Context
+
+Issue #166(https://github.com/scarecrow173/audio-lens/issues/166)の slice
+として、task `docs/tasks/native-gui-spectrogram-analysis-projection.md` と
+spec `docs/specs/native-gui-spectrogram-analysis-projection.md`(implements)
+に従って実施した。上流 ruviform へは scarecrow173/ruviform#442
+(drawn plan に Spectrogram・Label・Table を追加)と #443(Tile →
+SpectrogramColumn の列区間・count の規則を上流契約に)を起票した。
+
+## Implementation
+
+### Changes
 
 - **Ruviform rev 更新**: `node tools/update-ruviform-rev.mjs 627e4bc2…` で `Cargo.lock` の 20 package を
   `c31dc67c` から `627e4bc2` へ。差分は source SHA のみ(20 行)。
@@ -56,10 +73,32 @@ metadata:
   `job.rs` の private `tag` を除去。
 - **drawn parity**: `tests/gpui_parity.rs` で `GpuiObserver::drawn` の Meter bar・TimeAxis mark・
   Waveform bin を、mount した spec の payload から導いた Fake 期待値と照合。gap bin の除外も検証。
-- **上流 Issue**: scarecrow173/ruviform#442(drawn plan に Spectrogram・Label・Table を追加)、
-  #443(Tile → SpectrogramColumn の列区間・count の規則を上流契約に)を起票。
 
-## 検証結果(merge 前 HEAD で実行)
+### Decisions During Implementation
+
+- **列の `count` の意味**: `SpectrogramColumn::count` の契約は「有限 sample 数」だが、`Tile` から得られない
+  ため「列の有限セル数」とした。`count == 0` ⇔ 全セル NaN の gap 判定は両解釈で一致する。上流の判断は
+  ruviform#443。
+- **列区間の複製**: `Spectrogram::tile` の等分割規則を `view::screen::spectrogram_columns` に複製した。
+  テストは上流 `tile()` の実出力に対して固定する。上流契約化(ruviform#443)後に差し替える。
+
+## Related Experiments
+
+本 slice に関連する実験ログは存在しない。`metadata.experiments` の
+adopted / rejected はいずれも空で、`docs/impl/exp/` の既存 jsonl
+(issue-139 / 143 / 148 / 149 / 153 の CI 関連記録)は本件と無関係。
+
+### Adopted
+
+- なし
+
+### Rejected
+
+- なし
+
+## Validation
+
+merge 前 HEAD で実行した検証結果:
 
 | コマンド | 結果 |
 | --- | --- |
@@ -80,7 +119,7 @@ metadata:
 - `mise run setup-ui` を一度実行して `ui/node_modules` を復元した(`check-ui` の前提)。
 - 数値 oracle(Waveform bit 同一・gap の NaN・count 0・Meter peak)は既存テストが非回帰で通る。
 
-## 独立レビュー(review-protocol)の結果
+### 独立レビュー(review-protocol)
 
 - 独立した read-only サブエージェントが diff と upstream 627e4bc2 の契約(`check_spectrogram`・
   `table` 検証・`collect_drawn`・`viewport_fraction`・`spectrogram.rs::tile`)を照合。
@@ -95,20 +134,36 @@ metadata:
   - `alignments_of` が呼ぶ `DatasetSession::locate()` は `locate/summary` 全行を読む既存の service メソッド。
     本 slice の新規コードではないが、境界を持たない読み出しとして残課題に記録する。
 
-## 逸脱・残課題
+## Risks
 
-- **列の `count` の意味**: `SpectrogramColumn::count` の契約は「有限 sample 数」だが、`Tile` から得られない
-  ため「列の有限セル数」とした。`count == 0` ⇔ 全セル NaN の gap 判定は両解釈で一致する。上流の判断は
-  ruviform#443。
-- **列区間の複製**: `Spectrogram::tile` の等分割規則を `view::screen::spectrogram_columns` に複製した。
-  テストは上流 `tile()` の実出力に対して固定する。上流契約化(ruviform#443)後に差し替える。
-- **Job/Run の mount は未実施**: al-desktop は job の選択と run 結果の入力源を持たない。射影関数と
-  テストまでで、画面への mount は AL-G4 へ送る。
-- **Spectrogram・Label・Table の描画 parity は NotRun**: `DrawnPlan` に該当 variant が無く観測できない
-  (ruviform#442)。Meter・TimeAxis・Waveform のみ照合した。
-- **Spectrogram の theme token は未実施**: viz の既存色を使う(ruviform#434 F3)。
-- **Spectrogram の読み出し上限**: 先頭 4096 STFT frame と 128×512 セル。表示は Label で明示する。全量表示は
-  上流の LOD 相当の API が必要で本 slice の対象外。
-- **実 OS window の表示確認は NotRun**: この作業環境では窓を開いて確認していない。
-- **merge 後 HEAD での最終検証は NotRun**: マージは本ワーカーの範囲外。coordinator の merge 後に実施する。
-- **AL-G4 / AL-G5 は対象外**: 実機の Save/Reload・性能・visual regression は別 slice。
+- `run_screen` の `zip` は `RunOutcome` の 3 配列が等長であることに依存する。
+  `from_json` は常に等長にするため現状は到達しないが、フィールドは `pub` のため
+  将来の直接構築に注意が必要(独立レビューの非ブロッキング指摘)。
+- 列区間の `span * (c + 1)` は非常に長い frame 範囲で u64 オーバーフローしうる。
+  上流 `Spectrogram::tile` も同じ式のため、複製の既知の性質として
+  ruviform#443 に記録済み。
+- `alignments_of` が呼ぶ `DatasetSession::locate()` は `locate/summary` 全行を
+  読む既存の service メソッドで、境界を持たない読み出し(本 slice の新規コード
+  ではないが残課題として記録)。
+- Spectrogram の表示は先頭 4096 STFT frame・128×512 セルに制限される。
+  表示は Label で明示する。全量表示は上流の LOD 相当の API が必要で本 slice の
+  対象外。
+- drawn parity の照合対象は Meter・TimeAxis・Waveform のみ。
+  Spectrogram・Label・Table は `DrawnPlan` に該当 variant が無く観測できない
+  (ruviform#442)。
+
+## Follow-ups
+
+- Job/Run/Analysis の al-desktop mount は未実施。al-desktop は job の選択と
+  run 結果の入力源を持たないため、射影関数とテストまでで、画面への mount は
+  AL-G4 へ送る。
+- Spectrogram・Label・Table の描画 parity は ruviform#442 で `DrawnPlan` に
+  variant が追加された後に拡張する。
+- 列区間の複製と `count` の意味(上記 Decisions)は、ruviform#443 の上流契約化・
+  上流判断の確定後に差し替える。
+- Spectrogram の theme token 適用は未実施。viz の既存色を使い、
+  ruviform#434 F3 で扱う。
+- 実 OS window の表示確認は NotRun。この作業環境では窓を開いて確認していない。
+- merge 後 HEAD での最終検証は NotRun。マージは本ワーカーの範囲外で、
+  coordinator の merge 後に実施する。
+- AL-G4 / AL-G5(実機の Save/Reload・性能・visual regression)は別 slice。

@@ -123,18 +123,22 @@ dispatch-only 制約と Deferred の自動トリガ項目を解消した
   `pipx:serena-agent` は backend 上 entry を生成できない既知
   gap で、CI scope 外のため設計書 Deferred に記録
 
-### Deferred / 既知制約
+## Related Experiments
 
-- workflow 本体は merge まで実実行で検証できない
-  (actionlint + step のローカル再現で軽減)
-- `pipx:serena-agent` の lockfile platform entry 欠落は残存
-  (CI scope 外。全量 `mise install --locked` は依然不可)
-- Browser Harness/IPC/Visual Golden の AL fixture は
-  Ruviform #310/#311/#314 の提供待ち(ui-verify が受け皿)
-- 実 GUI 試験は gui-real placeholder を opt-in lane へ置換する
-  拡張点として残す
+### Adopted
 
-## Verification
+- なし(experiment log なし。CI 構成は Ruviform
+  `consumer-verify.yml` の既存 convention — access mode 解決・
+  証拠表・scoped mise install — の踏襲が Summary 記載のとおり
+  確定しており、本 Issue の作業で比較検証した代替実装は
+  なかった)
+
+### Rejected
+
+- なし(同上。重複 Runner を作らない方針も convention 踏襲の
+  帰結として決定済みで、棄却した代替案の記録はない)
+
+## Validation
 
 実施済み(ローカル、Windows worktree):
 
@@ -168,3 +172,29 @@ dispatch-only 制約と Deferred の自動トリガ項目を解消した
 - [ ] deploy_key 経路 — 未検証。secret 未設定かつ repo public
       のため anonymous が有効経路(手順は旧構成を継承)
 - [ ] 3 OS 実測 — 未検証(同上)
+
+## Risks
+
+- workflow 本体は merge まで実実行で検証できない
+  (actionlint + step のローカル再現で軽減したが e2e は未検証)
+- `pipx:serena-agent` の lockfile platform entry 欠落が残存し、
+  全量 `mise install --locked` は依然不可(CI scope 外のため
+  本 Issue では未対応)
+- Browser Harness/IPC/Visual Golden の AL fixture は
+  Ruviform #310/#311/#314 の提供待ちで、ui-verify が受け皿の
+  まま
+- deploy_key 経路・3 OS 実測は未検証(secret 未設定・merge 前の
+  ため)。初回 PR/run での確認が前提
+- 実 GUI 試験は gui-real placeholder が `not_run` を記録する
+  段階で、実 Window/OS 自動試験は未接続
+
+## Follow-ups
+
+- merge 後の初回 PR/run で workflow e2e と 3 OS 実測を確認する
+- `RUVIFORM_DEPLOY_KEY` 設定環境で deploy_key 経路を検証する
+- Ruviform #310/#311/#314 の fixture 提供後に ui-verify 側へ
+  統合する
+- gui-real placeholder を opt-in lane へ置き換える拡張を行う
+- 実 run での失敗時の切り分け先は summary の Owner 指針どおり
+  (Consumer 回帰 → AL 側、pin 更新直後の失敗 → ruviform #294、
+  Export → #141)

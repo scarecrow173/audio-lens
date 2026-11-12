@@ -41,7 +41,26 @@ metadata:
 
 # Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装記録(IR, 第5 slice)
 
-## 実装内容
+## Summary
+
+Native GUI drawn parity の第5 slice。ruviform rev を `3121f8e6`
+へ更新し、Spectrogram・Label・Table の drawn 照合と Job/Run
+射影の e2e を追加した。al-desktop への Job/Run tab mount は
+入力源未接続のため未達で、射影と Fake 層 mount の e2e で
+代替検証した。
+
+## Context
+
+Issue #166(`relations.source`)の Native GUI drawn parity 系
+slice(第5 slice)。task
+`docs/tasks/native-gui-drawn-parity-run-mount.md`(depends-on)と
+plan `docs/plans/native-gui-drawn-parity-run-mount.md`
+(derives-from)に従い、spec・design・test-spec を含む文書 chain
+を本 slice で追加した。ruviform rev `3121f8e6` の drawn parity
+契約(`spectrogram_cell_plan`・`table_plan`・`drawn_plans`・
+`CellValue`)を利用する。
+
+## Implementation
 
 - **Ruviform rev の更新**: `node tools/update-ruviform-rev.mjs 3121f8e6…` で `Cargo.lock` の
   ruviform 20 source のみを `627e4bc2` から `3121f8e6` へ更新した(diff は source 行 20 組のみ、
@@ -59,19 +78,21 @@ metadata:
 - **文書 chain**: spec・design・plan・test-spec・tasks を追加し、managed index(designs・plans・specs・
   tasks・test-specs)を `doc_maintenance.js apply` で再生成した。
 
-## 判断と未達
+## Related Experiments
 
-- **al-desktop への Job/Run tab 追加は未達**: 入力源が無い(起動契約は `<dataset-root> <input-id>` のみ、
-  Job 一覧の base_dir と Run 結果の経路が画面に未接続)。UI 契約の判断(base_dir の扱い、Job 操作の
-  AL-G4 での扱い)を coordinator へ送る。射影と Fake 層 mount の e2e で代替検証した。
-- **RF443 の上流契約への移行は未達(NotRun)**: ruviform#443 は OPEN で上流 API が無い。
-  `view::screen::spectrogram_columns` の複製を維持した。
-- **Spectrogram の theme token は未実施**(ruviform#434 F3)。
-- **実 OS window の表示確認は NotRun**。
-- **Job/Run e2e の Run 結果の形は test 側で再現している**: `stage_statuses`(al-gui service、非公開)と
-  同じ形を test で組むため、形の変更は自動検出しない。形を変える場合は両方を同時に更新する。
+### Adopted
 
-## 検証結果(merge 前 HEAD、working tree で実行)
+- なし — `docs/impl/exp/` に本 slice に対応する実験ログは
+  存在しない(既存ログは CI 系 issue-139〜153 のみ)。
+  `metadata.experiments` も空。
+
+### Rejected
+
+- なし(同上)。
+
+## Validation
+
+### 検証結果(merge 前 HEAD、working tree で実行)
 
 | コマンド | 結果 |
 | --- | --- |
@@ -92,7 +113,7 @@ metadata:
 - 数値 oracle(Waveform bit 同一・gap の NaN・count 0・Meter peak)は既存テストが非回帰で通る。
 - `setup-ui` は worktree に `ui/node_modules` が無かったための復元で、依存定義は変更していない。
 
-## 独立レビュー(review-protocol)の結果
+### 独立レビュー(review-protocol)の結果
 
 - 独立した read-only サブエージェント(`subagent_explore`)が working tree の diff と upstream 3121f8e6 の
   契約(`spectrogram_cell_plan`・`table_plan`・`drawn_plans`・`CellValue` の Display)を照合した。
@@ -101,7 +122,32 @@ metadata:
 - レビュアーは shell で `git diff` を実行できなかったため、Cargo.lock の無関係な変更の不在は親で確認した
   (`git diff Cargo.lock` は 20 組の source 行のみ)。
 
-## 逸脱・残課題
+## Risks
+
+- `view::screen::spectrogram_columns` の複製を維持している
+  (ruviform#443 は OPEN で上流 API が無い)。上流契約が変わった
+  場合に AL 側との差分 drift が起き得る — merge 後に上流 API
+  へ差し替える。
+- Job/Run e2e の Run 結果の形は test 側で再現しているため、
+  `stage_statuses`(al-gui service、非公開)の形変更は自動検出
+  しない。形を変える場合は service 側と test 側を同時に更新
+  する必要がある。
+
+## Follow-ups
+
+### 未達・判断(実装時点の記録)
+
+- **al-desktop への Job/Run tab 追加は未達**: 入力源が無い(起動契約は `<dataset-root> <input-id>` のみ、
+  Job 一覧の base_dir と Run 結果の経路が画面に未接続)。UI 契約の判断(base_dir の扱い、Job 操作の
+  AL-G4 での扱い)を coordinator へ送る。射影と Fake 層 mount の e2e で代替検証した。
+- **RF443 の上流契約への移行は未達(NotRun)**: ruviform#443 は OPEN で上流 API が無い。
+  `view::screen::spectrogram_columns` の複製を維持した。
+- **Spectrogram の theme token は未実施**(ruviform#434 F3)。
+- **実 OS window の表示確認は NotRun**。
+- **Job/Run e2e の Run 結果の形は test 側で再現している**: `stage_statuses`(al-gui service、非公開)と
+  同じ形を test で組むため、形の変更は自動検出しない。形を変える場合は両方を同時に更新する。
+
+### 逸脱・残課題
 
 - **Job/Run の al-desktop mount**: 上記のとおり未達。
 - **RF443**: 複製を維持。ruviform#443 merge 後に `spectrogram_columns` を上流 API へ差し替える。

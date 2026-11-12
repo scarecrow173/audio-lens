@@ -47,7 +47,28 @@ metadata:
 - 関連: #97(責務仕様)/ #103(UI 非依存 reader 契約)/ Ruviform #156(`ruviform-ui`/`ruviform-ui-webview`)/ #157(`ruviform-viz`)
 - Ruviform 依存 rev: `f3f474b`
 
-## 構築した構成
+## Summary
+
+Ruviform GUI host(`ruviform-ui`/`ruviform-ui-webview`)上に AudioLens GUI を
+構築した。UI 非依存のサービス層 `al-service`(pipeline/jobs/dataset/source)
+を新設して `al-cli` の stage 構築・config 解決を正本化し、`al-gui` は
+`rvf.ipc.v1` op を提供する thin presentation 層とした。headless で
+op 経路・サービス契約・`RunHooks` を検証し、mise の fmt/check/lint/test
+および headless/webview 各 lane が全て pass した。
+
+## Context
+
+- 対象 Issue: audio-lens #105
+- 画面・操作仕様: `docs/specs/gui-app-mvp.md`
+- アーキテクチャ設計: `docs/designs/gui-app-architecture.md`
+- task: `docs/tasks/ruviform-gui-app.md`(front matter `implements`)
+- 関連: #97(責務仕様)/ #103(UI 非依存 reader 契約)/ Ruviform #156
+  (`ruviform-ui`/`ruviform-ui-webview`)/ #157(`ruviform-viz`)
+- Ruviform 依存 rev: `f3f474b`
+
+## Implementation
+
+### Architecture
 
 ```
 al-cli (bin) ─┐
@@ -98,7 +119,34 @@ al-gui ───────┘                    │
   lane を追加(ruviform 側同名 task と同形。既定 check/lint/test は
   headless のまま)。
 
-## MVP で検証した操作・表示(headless)
+### Issues Found and Fixed During Implementation
+
+- `DatasetSession::artifact_detail` が `path.split_once('/')` で
+  role/name を分割していたが、dataset role は `features/cheap` の
+  ように `/` を含むため tensor/table artifact で name 解決が壊れた。
+  manifest の `artifact.role` を正本に name を剥がすよう修正
+  (service.rs の `al.ds.read` は role/name 分離パラメータなので影響なし)。
+- ingest `metadata.json` の audio 情報は `audio.{sample_rate,channels}`
+  にネストされている(最初トップレベルで読んでいた)。
+- `source_reference` は `InputRole` に存在しない(正:
+  `source_asset`。frontend の role 選択肢も修正)。
+
+## Related Experiments
+
+### Adopted
+
+- なし — 画面・操作仕様は `docs/specs/gui-app-mvp.md`、アーキテクチャは
+  `docs/designs/gui-app-architecture.md` で確定済みであり、方式選択のための
+  実験的比較は行わなかった。関連する `docs/impl/exp/*.jsonl` の実験記録は
+  存在しない。
+
+### Rejected
+
+- なし
+
+## Validation
+
+### Headless MVP Coverage
 
 `crates/al-gui/tests/service_ops.rs` が `UiRuntime::dispatch_op` で
 フロントエンドと同じ intent 経路を検証:
@@ -126,7 +174,7 @@ al-gui ───────┘                    │
 イベント(Started/Completed、index/total)、キャンセルで次 stage 未起動
 + Pending 保持、resume で完了済み stage が Reused。
 
-## 検証結果(実行済み)
+### Verification Results
 
 | task | 結果 |
 | --- | --- |
@@ -139,19 +187,7 @@ al-gui ───────┘                    │
 | `mise run lint-ui-webview` | pass |
 | `mise run test-ui-webview` | pass(service_ops 5 test) |
 
-## 実装中に見つけて直した問題
-
-- `DatasetSession::artifact_detail` が `path.split_once('/')` で
-  role/name を分割していたが、dataset role は `features/cheap` の
-  ように `/` を含むため tensor/table artifact で name 解決が壊れた。
-  manifest の `artifact.role` を正本に name を剥がすよう修正
-  (service.rs の `al.ds.read` は role/name 分離パラメータなので影響なし)。
-- ingest `metadata.json` の audio 情報は `audio.{sample_rate,channels}`
-  にネストされている(最初トップレベルで読んでいた)。
-- `source_reference` は `InputRole` に存在しない(正:
-  `source_asset`。frontend の role 選択肢も修正)。
-
-## 手動検証手順(実窓)
+### Manual Verification (real window)
 
 ```sh
 # Windows: WebView2 Runtime、macOS: WKWebView、Linux: WebKitGTK が必要
@@ -169,7 +205,7 @@ cargo run -p al-gui --features webview -- <jobs_base_dir>
 5. 実行中 job の Cancel で中断 → job が Pending 残しで一覧に残り、
    再 Run(resume 相当 flow)で完走できること
 
-## 残課題・制限
+## Risks
 
 - **video 情報の表示**: `inputs` 系の video frame/timestamp artifact は
   dataset 側で `al.ds.read`/`al.ds.artifact` 経由で取得可能だが、
@@ -189,7 +225,9 @@ cargo run -p al-gui --features webview -- <jobs_base_dir>
   ruviform-ui に無い(下記 Issue 案 1)。
 - **マルチチャネル**: `al.view.*` は channel 指定 1ch 表示のみ。
 
-## Ruviform Issue 起票案
+## Follow-ups
+
+Ruviform 側への Issue 起票案:
 
 1. **DataRegistry の eviction/unregister 契約**: view op が返す
    `{source}` 名を session 内で増殖させないための `unregister` または
