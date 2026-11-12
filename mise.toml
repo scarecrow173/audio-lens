@@ -7,12 +7,11 @@ lockfile = true
 UV_EXCLUDE_NEWER = "1 week"
 
 # 実装言語は Rust(docs/adr/implementation-stack.md)。
-# apm install / serena MCP 用の最小構成に加えて rust を pin する。
+# apm install / serena MCP 用の最小構成を管理する。rust toolchain は
+# ここでは pin しない — 通常開発は環境導入済みの rust(rustup /
+# global mise)を使い、CI 用の pin は mise.ci.toml(MISE_ENV=ci で
+# 有効化)に分離する。
 [tools]
-# rustup default profile は環境依存なので fmt/clippy の component を明示する
-# (fresh CI runner で `cargo fmt`/`cargo clippy` が component 欠落しないように)。
-# バージョンは ruviform のピンに揃える。
-rust = { version = "1.99.0", components = "rustfmt,clippy", mr_boxington = true }
 # python は toolchain に含めない — pipx: バックエンドは uv 経由で uv 管理の
 # cpython に venv を作るため、mise python を参照しない。直接 python を呼ぶ
 # 用途ができた場合のみ追加する。
@@ -44,7 +43,8 @@ git-lfs = "3.8.0"
 actionlint = "1.7.12"
 
 # Repository-owned setup contract: fresh checkout を開発可能にする
-# canonical entrypoint。toolchain は mise.toml + mise.lock で復元される。
+# canonical entrypoint。toolchain は mise.toml + mise.lock で復元される
+# (rust は環境導入済みのものを使う — CI pin は mise.ci.toml/mise.ci.lock)。
 [tasks.setup]
 description = "Restore APM dependencies, git hooks and LFS objects for a fresh checkout"
 run = [
@@ -105,7 +105,7 @@ run = "cargo build --workspace --profile ci"
 env = { CARGO_INCREMENTAL = "0" }
 
 [tasks.verify-toolchain]
-description = "rustc/cargo/rustfmt/clippy が mise pin に解決されることを検証(node、3 OS 共通)"
+description = "rustc/cargo/rustfmt/clippy が mise 解決 toolchain(CI では mise.ci.toml pin)に一致することを検証(node、3 OS 共通)"
 run = "node tools/verify-toolchain.mjs"
 
 # Issue #158: ci.yml の Full CI 構造契約(trigger・expected_sha・

@@ -1,0 +1,9 @@
+# CI 専用ツールチェーン pin。`MISE_ENV=ci` を設定した環境(CI)でのみ
+# mise.toml にマージされる。通常開発では rust は環境導入済みのもの
+# (rustup / global mise)を使い、本ファイルは参照されない。
+# rustup default profile は環境依存なので fmt/clippy の component を
+# 明示する(fresh CI runner で `cargo fmt`/`cargo clippy` が component
+# 欠落しないように)。バージョンは ruviform の pin に揃える。
+# lockfile は `MISE_ENV=ci mise lock` が生成する mise.ci.lock が正本。
+[tools]
+rust = { version = "1.99.0", components = "rustfmt,clippy" }

@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "AudioLens 独立 CI: 3 OS lane・依存 dual-mode アクセス・証拠レポート設計"
 created: "2026-11-04"
-updated: "2026-11-05"
+updated: "2026-11-13"
 owners: []
 relations:
   source:
@@ -154,7 +154,9 @@ activate する(`apm`・`pipx:serena-agent` を CI の `mise exec` /
 `mise run` から除外)。install も `mise install --locked <tools>` で
 scope する:
 
-- `rust`(components rustfmt/clippy、1.99.0 pin): cargo 系全 lane
+- `rust`(components rustfmt/clippy、1.99.0 pin — `mise.ci.toml` に
+  分離し `MISE_ENV=ci` で有効化。lockfile は `mise.ci.lock`):
+  cargo 系全 lane
 - `git-lfs`: fixture 実体復元(`git lfs pull` / checkout lfs)
 - `node`: `tools/*.mjs`・`ui/` npm lane
 - `prek`: hygiene gate(`prek run --all-files`)
