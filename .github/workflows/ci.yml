@@ -70,6 +70,9 @@ concurrency:
 
 env:
   MISE_ENABLE_TOOLS: rust,git-lfs,node,prek,uv,biome,actionlint
+  # Rust toolchain pin は mise.ci.toml(CI 専用)に分離 — MISE_ENV=ci で
+  # 有効化し、通常開発は環境導入済みの rust を使う。
+  MISE_ENV: ci
   CARGO_INCREMENTAL: "0"
 
 jobs:

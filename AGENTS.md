@@ -61,9 +61,15 @@ hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形�
 通常不要。APM 依存が変更された場合や生成資産が存在しない場合は
 `mise install` → `mise run setup` で復元する。
 
+Rust toolchain は `mise.toml` では pin しない。通常開発は環境導入済みの
+rust(rustup / global mise)を使い、cargo 系タスクはその toolchain で
+実行される。CI 専用の pin は `mise.ci.toml` に置き、CI では
+`MISE_ENV=ci` で有効化する(lockfile は `MISE_ENV=ci mise lock` が
+生成する `mise.ci.lock`)。
+
 ユーザー環境の global mise config に追加ツールがある環境で、repo の
 toolchain のみを復元する場合は toolchain を明示した
-`mise install rust python uv github:microsoft/apm pipx:serena-agent prek biome git-lfs`
+`mise install uv github:microsoft/apm pipx:serena-agent prek biome git-lfs node actionlint`
 を使う。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する

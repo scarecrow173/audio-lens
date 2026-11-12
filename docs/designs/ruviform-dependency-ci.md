@@ -4,7 +4,7 @@ type: "design"
 status: "approved"
 title: "Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計"
 created: "2026-10-31"
-updated: "2026-11-04"
+updated: "2026-11-13"
 owners: ["scarecrow173"]
 relations:
   source:
@@ -80,7 +80,7 @@ Ruviform の各 crate を **検証済みの同一 Git commit** から再現可�
   `73190d7d26b3197b1da36749798b5952499d1b70`(2026-10-30、
   PR #158 merge 後の main HEAD)。
 - Ruviform workspace は `publish = false`・`license = "MIT"`(暫定)・
-  `rust-version = "1.89"`・edition 2024。mise pin は rust 1.99.0。
+  `rust-version = "1.89"`・edition 2024。mise.ci.toml pin は rust 1.99.0。
   対象 8 crate の manifest を同 SHA で確認済みであり、
   `ruviform-media-io` は `ruviform-io-symphonia` を依存に持たない
   (backend は別 crate として分離されている)。submodule は無し。
@@ -282,14 +282,18 @@ GIT_LFS_SKIP_SMUDGE = "1"
 
 ### 5. toolchain の明示検証
 
-- `mise.toml` の `rust = "1.99.0"`(components: rustfmt, clippy)を
-  正とする。Ruviform の pin と同一であり、`rust-toolchain.toml` は
-  新設しない(mise が唯一の toolchain 定義であり、二重定義を避ける)。
+- CI の Rust pin は `mise.ci.toml` の `rust = "1.99.0"`
+  (components: rustfmt, clippy)を正とする。Ruviform の pin と
+  同一であり、`rust-toolchain.toml` は新設しない(mise が唯一の
+  toolchain 定義であり、二重定義を避ける)。`mise.ci.toml` は
+  `MISE_ENV=ci` でのみ有効化され、通常開発は環境導入済みの
+  rust(rustup / global mise)を使う。lockfile の正本は
+  `mise.ci.lock`(`MISE_ENV=ci mise lock` が生成)。
 - `[tasks.verify-toolchain]` を新設し、`tools/verify-toolchain.mjs`
   (node スクリプト、3 OS 共通)が `rustc`/`cargo`/`rustfmt`/
   `cargo-clippy` の解決バージョンが `mise current rust` の pin と
   一致することを検証する。バージョンをソースへ二重記述しない
-  (pin の正本は `mise.toml`/`mise.lock` のみ)。
+  (pin の正本は `mise.ci.toml`/`mise.ci.lock` のみ)。
 - `mise run`/`mise exec` 配下では mise の tool dir が PATH 先頭に
   来るため本チェックは主に (a) component 欠落、(b) `mise exec` を
   介さずに cargo を呼ぶ CI step/ローカル手順の検出、(c) 将来の
@@ -298,10 +302,11 @@ GIT_LFS_SKIP_SMUDGE = "1"
 - CI 内の全 cargo 呼出は `mise run <task>` または
   `mise exec -- cargo ...` 経由とし、runner 同梱の別 toolchain が
   使われないことを保証する。
-- Ruviform 側 rust-version(MSRV 1.89)< AL pin 1.99.0 であり、
+- Ruviform 側 rust-version(MSRV 1.89)< AL CI pin 1.99.0 であり、
   依存解決上の矛盾は無い。**AL 側は rust-version(MSRV)を宣言
   しない**ことを本設計で決定する: pre-release で公開もせず、
-  実効 toolchain は mise pin が担う。未検証の MSRV 宣言は嘘に
+  CI の実効 toolchain は mise.ci.toml の pin が担う(通常開発は
+  環境導入済み toolchain)。未検証の MSRV 宣言は嘘に
   なるため、MSRV matrix が必要になった時点で再評価する
   (Deferred 参照)。
 
