@@ -108,6 +108,7 @@ Directory: `docs/tasks`
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
 | TASK-034GMMK00SyuEB3Ztrq2v7 | InputCache hit/miss 計数と release 検証口 | done | [inputcache-hit-miss-release.md](./inputcache-hit-miss-release.md) |
 | TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
+| TASK-034WsMpMwgPJoeSbeFZiC5 | impl index 生成対応(AL#199): ir/exp front matter 是正と managed index 化 | done | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
 | TASK-034GNyEFEOZSC93dTivNPe | local_lag を OverlapCorr 経由へ移行 | done | [local-lag-overlapcorr-migration.md](./local-lag-overlapcorr-migration.md) |
 | TASK-034GNyF8pIMrWca9EKOhHN | 小窓交差の実測と閾値判定・検証記録 | done | [local-lag-small-window-measurement.md](./local-lag-small-window-measurement.md) |

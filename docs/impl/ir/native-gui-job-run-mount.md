@@ -36,6 +36,10 @@ relations:
     - "https://github.com/scarecrow173/ruviform/issues/448"
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI の Job/Run tab mount と Tile::columns 消費の実装記録(IR, 第6 slice)

@@ -58,6 +58,10 @@ relations:
   verified-by: []
   references: []
   defers: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # macOS leg の Required 物理分離(AL#149 追加合意)

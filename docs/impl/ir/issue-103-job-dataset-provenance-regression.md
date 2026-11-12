@@ -1,3 +1,44 @@
+---
+id: "IMPL-KVzXDcQCyU3IKRkJ0lDEOG"
+type: "impl"
+status: "completed"
+title: "Issue #103 Job・Dataset・Provenance・GUI 参照データ回帰検証記録"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/103"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements:
+    - "docs/tasks/ruviform-job-dataset-regression.md"
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #103 Job・Dataset・Provenance・GUI 参照データ回帰検証記録
 
 - 対象 Issue: audio-lens #103

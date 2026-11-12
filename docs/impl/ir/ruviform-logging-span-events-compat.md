@@ -79,6 +79,10 @@ relations:
     - "https://github.com/scarecrow173/ruviform/actions/runs/42302538464"
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # al-observability SinkConfig::span_events 追従 (AL#127)

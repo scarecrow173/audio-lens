@@ -1,3 +1,44 @@
+---
+id: "IMPL-sz2YBubWd7RBFUY4Mc8RNw"
+type: "impl"
+status: "completed"
+title: "Issue #105 Ruviform GUI host 上の AudioLens GUI 実装記録"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/105"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements:
+    - "docs/tasks/ruviform-gui-app.md"
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #105 Ruviform GUI host 上の AudioLens GUI 実装記録
 
 - 対象 Issue: audio-lens #105

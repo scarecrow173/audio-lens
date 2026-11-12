@@ -33,6 +33,10 @@ relations:
   references: []
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装記録(IR, 第5 slice)

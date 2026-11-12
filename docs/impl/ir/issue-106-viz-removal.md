@@ -1,3 +1,44 @@
+---
+id: "IMPL-OLRGo454j948be9Zg2yojU"
+type: "impl"
+status: "completed"
+title: "Issue #106 旧 al-viz / Visualization Dataset / 静的 HTML の撤去と export 分離"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/106"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements:
+    - "docs/tasks/ruviform-viz-retirement.md"
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #106 旧 al-viz / Visualization Dataset / 静的 HTML の撤去と export 分離
 
 - 対象 Issue: audio-lens #106

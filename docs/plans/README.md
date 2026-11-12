@@ -17,6 +17,7 @@ Directory: `docs/plans`
 | PLAN-034SmwSu88qZaqPULzbz13 | Issue #158 Full CI 統一(安全な第一段階)実装計画 | approved | [implement-full-ci-ci-summary-issue-158.md](./implement-full-ci-ci-summary-issue-158.md) |
 | PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
+| PLAN-034WsMb80vBXm59wk7FuFn | Issue #199 impl index 生成対応 実装計画 | approved | [issue-199-impl-index-generation-plan.md](./issue-199-impl-index-generation-plan.md) |
 | PLAN-035bGhJkLmNpQrStUvWxYz | メディア形式拡大・正規化アーキテクチャと解析精度拡張 | approved | [media-format-analysis-extensions.md](./media-format-analysis-extensions.md) |
 | PLAN-yVtTxHenQy8bBk2Sd2ZwdH | Native desktop 初期 slice AL-G1〜G3 実装計画 | approved | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | PLAN-1FzCSROtUwCSQOdQx5Ua4f | Native GUI drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影の実装計画 (第5 slice) | draft | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |

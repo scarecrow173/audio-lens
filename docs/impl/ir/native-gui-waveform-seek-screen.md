@@ -11,12 +11,17 @@ relations:
     - "https://github.com/scarecrow173/audio-lens/issues/166"
   changes:
     added:
-      - "crates/al-gui/src/view/screen.rs"
-      - "crates/al-gui/tests/screen.rs"
+      - type: "code"
+        path: "crates/al-gui/src/view/screen.rs"
+      - type: "test"
+        path: "crates/al-gui/tests/screen.rs"
     modified:
-      - "crates/al-gui/src/view/source.rs"
-      - "crates/al-gui/src/view/mod.rs"
-      - "Cargo.lock"
+      - type: "code"
+        path: "crates/al-gui/src/view/source.rs"
+      - type: "code"
+        path: "crates/al-gui/src/view/mod.rs"
+      - type: "lockfile"
+        path: "Cargo.lock"
     deleted: []
     renamed: []
     moved: []
@@ -46,6 +51,10 @@ relations:
     - "https://github.com/scarecrow173/ruviform/issues/426"
   defers: []
   deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Native GUI Waveform/Seek 画面 ViewSpec 射影 実装記録(IR)

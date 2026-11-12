@@ -1,3 +1,44 @@
+---
+id: "IMPL-c5supRRZiao8OL194tdwTo"
+type: "impl"
+status: "completed"
+title: "Issue #102 解析意味論と汎用カーネルの責務分離リファクタリング記録"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/102"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements:
+    - "docs/tasks/ruviform-domain-kernel-separation.md"
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references: []
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #102 解析意味論と汎用カーネルの責務分離リファクタリング記録
 
 - 対象 Issue: audio-lens #102

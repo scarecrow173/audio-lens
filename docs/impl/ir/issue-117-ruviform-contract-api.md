@@ -1,3 +1,47 @@
+---
+id: "IMPL-iahBH1RkF74u2l6lEC9ojf"
+type: "impl"
+status: "completed"
+title: "Issue #117 + Ruviform #167–#170: 契約 API 採用置換と rev/precision stamp"
+created: "2026-10-31"
+updated: "2026-10-31"
+owners: []
+relations:
+  source:
+    - "https://github.com/scarecrow173/audio-lens/issues/117"
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements: []
+  implemented-by: []
+  depends-on: []
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related: []
+  refines: []
+  refined-by: []
+  derives-from: []
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references:
+    - "https://github.com/scarecrow173/ruviform/issues/167"
+    - "https://github.com/scarecrow173/ruviform/issues/168"
+    - "https://github.com/scarecrow173/ruviform/issues/169"
+    - "https://github.com/scarecrow173/ruviform/issues/170"
+  defers: []
+  deferred-by: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
+---
+
 # Issue #117 + Ruviform #167–#170: 契約 API 採用置換と rev/precision stamp
 
 ## Summary
