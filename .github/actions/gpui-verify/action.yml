@@ -157,8 +157,8 @@ runs:
       shell: bash
       run: mise run check-ruviform-rev
 
-    # Issue #206 OS-L1: gpui-test feature の型/Clippy/Headless
-    # test + al-desktop bin の Native Build/Link。`gpui-test` は
+    # Issue #206 OS-L1: gpui-test feature の型/Headless test(3 OS)と
+    # Clippy(Linux) + al-desktop bin の Native Build/Link(3 OS)。`gpui-test` は
     # `gpui` を内包し `al-desktop` は `required-features =
     # ["gpui"]` のため、feature 有効化なしの silent skip は
     # 起きない(各 task が feature を明示指定する)。
@@ -167,7 +167,8 @@ runs:
       shell: bash
       run: mise run check-ui-gpui
 
-    - name: Lint GPUI feature (mise run lint-ui-gpui)
+    - name: Lint GPUI feature (Linux-only; mise run lint-ui-gpui)
+      if: inputs.os == 'ubuntu-latest'
       id: lint
       shell: bash
       run: mise run lint-ui-gpui
@@ -221,7 +222,7 @@ runs:
           echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
           echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
           echo "| check-ui-gpui | $os | al-gui gpui-test | $sha | ${{ steps.check.outcome }} |"
-          echo "| lint-ui-gpui | $os | al-gui gpui-test | $sha | ${{ steps.lint.outcome }} |"
+          echo "| lint-ui-gpui (Linux canonical) | $os | al-gui gpui-test | $sha | ${{ steps.lint.outcome || 'Linux-only' }} |"
           echo "| test-ui-gpui (headless) | $os | al-gui gpui-test | $sha | ${{ steps.test.outcome }} |"
           echo "| build-ui-gpui (al-desktop bin) | $os | al-gui gpui | $sha | ${{ steps.bin_build.outcome }} |"
           echo ""
