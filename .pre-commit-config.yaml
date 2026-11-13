@@ -1,6 +1,6 @@
 # prek(pre-commit 互換 runner)の hook 定義。
-# commit 時点で高速な整形・衛生 check のみ担い、重い検証は `mise run lint` /
-# `mise run test` と CI に委ねる。整形系は auto-fix で動き、修正が入った
+# commit 時点で高速な整形・衛生 check のみ担い、重い検証は `mise run lint-full` /
+# `mise run test-full` と CI に委ねる。整形系は auto-fix で動き、修正が入った
 # commit は一旦失敗する(再 stage して commit し直す pre-commit 系の慣習どおり)。
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
