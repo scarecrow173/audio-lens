@@ -130,7 +130,6 @@ SOLID・YAGNI・DRY・KISS に従い、現在の要件に必要な範囲で設�
 
 - **Always**: 変更後は関連する検証(型チェック・テスト等、
   存在する範囲で)を実行してから完了とする
-- **Local vs CI**: 通常は `mise run check-local <package>` / `mise run test-local <package>` など、変更範囲の検証のみを実施する。`build-local` は必要時のみ。全Workspaceの `check`/`lint`/`test`/`build` と3OS/Feature/Golden等の網羅検証は既存Daily/手動Full CIで担保し、未実行をPass扱いしない（[POLICIES.md](POLICIES.md) 第5章）。
 - **Ask first**: 依存の追加・変更、破壊的な Git 操作(ブランチ
   削除・履歴書き換え等)
 - **Never**: 秘密情報のコミット、このリポジトリ外のファイルの変更
