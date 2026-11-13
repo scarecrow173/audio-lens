@@ -55,7 +55,7 @@ mise run setup   # apm install + prek install + git lfs install/pull
 
 `mise run setup` は `prek install` で pre-commit hook も有効化する。
 hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形・
-衛生 check のみ担い、重い検証は `mise run lint` / `mise run test` に
+衛生 check のみ担い、重い検証は `mise run lint-full` / `mise run test-full` に
 委ねる。`git lfs install --local` + `git lfs pull` で LFS 実体も復元する
 (git-lfs 未導入のまま clone した環境でも pointer のまま残らない)。
 
