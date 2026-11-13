@@ -38,7 +38,9 @@ repos:
         name: actionlint (changed workflows)
         entry: mise exec -- actionlint
         language: system
-        files: '^\.github/workflows/.*\.(yml|yaml)
+        files: '^\.github/workflows/.*\.ya?ml'
+        types: [yaml]
+        pass_filenames: true
       # ci.yml の Full CI 構造契約検査(Issue #158)。actionlint の
       # 文法検査を補完し、trigger・job 集合・needs・ci-summary/
       # summary 分離・選択実行機構の不在を検証する。script は引数を
