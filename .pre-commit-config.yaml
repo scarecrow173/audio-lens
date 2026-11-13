@@ -1,12 +1,12 @@
-# prek(pre-commit 互換 runner)の hook 定義。
-# commit 時点で高速な整形・衛生 check のみ担い、重い検証は `mise run lint-full` /
-# `mise run test-full` と CI に委ねる。整形系は auto-fix で動き、修正が入った
-# commit は一旦失敗する(再 stage して commit し直す pre-commit 系の慣習どおり)。
+# prek: staged-file formatting, syntax and safety checks.
+# Rust package checks/tests run through normal mise tasks; full workspace
+# and cross-OS verification belong to Full CI (POLICIES.md).
+# Hooks that auto-fix files require restaging before retrying the commit.
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+  - repo: builtin
     hooks:
       - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
       # .ps1/.bat/.cmd の改行は .gitattributes(eol=crlf)が管轄する領域のため
       # 対象外。.ps1 の BOM も Windows PowerShell の解釈に関わるため除外する
@@ -33,21 +33,33 @@ repos:
         language: system
         files: '\.(js|mjs|cjs|ts|mts|cts|jsx|tsx|json|jsonc)$'
         exclude: '(^|/)package-lock\.json$|(^|/)(dist|node_modules)/|^baseline/(runs|bench)/'
-      # workspace 全体を整形するため file list は渡さない
-      # (staged .rs があれば発火する)。
-      - id: cargo-fmt
-        name: cargo fmt
-        entry: mise exec -- cargo fmt --all
-        language: system
-        types: [rust]
-        pass_filenames: false
-      # GitHub Actions workflow の静的検証。workflow file が repo に
-      # 存在する間は常に発火する(dispatch-only CI の事前検証手段)。
+      # 変更されたworkflowだけを検査する。Full CIでは全workflowを走査。
       - id: actionlint
-        name: actionlint
+        name: actionlint (changed workflows)
         entry: mise exec -- actionlint
         language: system
-        files: '^\.github/workflows/.*\.(yml|yaml)$'
+        files: '^\.github/workflows/.*\.(yml|yaml)
+      # ci.yml の Full CI 構造契約検査(Issue #158)。actionlint の
+      # 文法検査を補完し、trigger・job 集合・needs・ci-summary/
+      # summary 分離・選択実行機構の不在を検証する。script は引数を
+      # 取らない(ci.yml 固定)ため pass_filenames: false。
+      - id: check-ci-workflow
+        name: check-ci-workflow
+        entry: mise exec -- node tools/check-ci-workflow.mjs
+        language: system
+        files: '^\.github/workflows/ci\.yml$|^tools/check-ci-workflow\.mjs$'
+        pass_filenames: false
+      # tracker 系 workflow 群の構造契約検査(Issue #159 reconcile 展開)。
+      # 共有 pin 一致・reconcile 入口契約・event 入口 trigger 不変を
+      # 検証する。script は引数を取らない(repo root 固定)ため
+      # pass_filenames: false。
+      - id: check-ci-tracker-workflows
+        name: check-ci-tracker-workflows
+        entry: mise exec -- node tools/check-ci-tracker-workflows.mjs
+        language: system
+        files: '^\.github/workflows/(daily-ci|ci-issue-tracker|ci-issue-tracker-reconcile)\.yml$|^tools/check-ci-tracker-workflows\.mjs$'
+        pass_filenames: false
+
       # ci.yml の Full CI 構造契約検査(Issue #158)。actionlint の
       # 文法検査を補完し、trigger・job 集合・needs・ci-summary/
       # summary 分離・選択実行機構の不在を検証する。script は引数を
