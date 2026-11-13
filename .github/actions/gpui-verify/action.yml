@@ -1,0 +1,229 @@
+# gpui-verify lane 本体(ci.yml の gpui-verify/gpui-verify-macos
+# job が共有する composite action)。Issue #206 OS-L1:
+# `al-gui --features gpui-test` の型/Clippy/Headless テストと
+# `al-desktop` bin の Native Build/Link を 3 OS で検証する。
+# 呼び出し側 job が checkout を先に行う(local action 解決の前提)。
+#
+# headless 限定: `gpui-test` は OS surface を stub する test
+# platform であり、実 OS Window 操作(GUI-L2)は検証しない
+# (gui-real lane の not_run 証跡と併記される)。
+name: gpui-verify lane
+description: "al-gui `gpui-test` feature + al-desktop bin native build/link lane (shared by ubuntu/windows legs and the macOS leg — full CI on every event, headless OS-L1 only)"
+
+inputs:
+  os:
+    description: "runner label recorded in lane evidence (e.g. ubuntu-latest, macos-latest)"
+    required: true
+  access_mode:
+    description: "ruviform-access job が解決した mode (deploy_key | anonymous | unavailable)"
+    required: true
+  deploy_key:
+    description: "RUVIFORM_DEPLOY_KEY secret (deploy_key mode 時のみ使用)"
+    required: false
+    default: ""
+  sccache_disable:
+    description: "repo variable CI_SCCACHE_DISABLE (=1 で sccache step を全 skip)"
+    required: false
+    default: "0"
+
+outputs:
+  resolved_sha:
+    description: "check-ruviform-rev が記録した ruviform resolved SHA"
+    value: ${{ steps.guard.outputs.resolved_sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Gate on ruviform access mode
+      if: inputs.access_mode == 'unavailable'
+      shell: bash
+      run: |
+        echo "::error::ruviform dependency is unreachable — see docs/guides/ruviform-private-access-ci.md"
+        exit 1
+
+    - name: Set up mise
+      uses: jdx/mise-action@v5.2.0
+      with:
+        install: false
+
+    - name: Restore CI-scoped tools from mise.lock
+      shell: bash
+      run: |
+        mise trust
+        mise install --locked rust node
+
+    # GPUI の Linux platform は X11/Wayland・fontconfig・Vulkan・
+    # EGL/GL を link し、-sys 依存が pkg-config で probe する
+    # -dev 群が必要(ruviform ui-gpui-verify lane と同一構成、
+    # gpui 0.2.2)。`gpui-test` の headless render は software
+    # Vulkan(lavapipe = mesa-vulkan-drivers)を使うため runtime
+    # 側の libvulkan/mesa も導入する。実 Window/GPU は使わない。
+    - name: Install GPUI Linux build/runtime dependencies
+      if: inputs.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          pkg-config libxcb1-dev libxkbcommon-dev libxkbcommon-x11-dev \
+          libx11-dev libxi-dev libxtst-dev libwayland-dev wayland-protocols \
+          libfontconfig1-dev libfreetype-dev libvulkan-dev libegl-dev \
+          libgl1-mesa-dev mesa-vulkan-drivers libvulkan1
+
+    - name: Restore cargo registry/git index cache
+      uses: actions/cache@v6.1.0
+      with:
+        path: |
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: ${{ runner.os }}-cargo-ui-gpui-${{ hashFiles('Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-ui-gpui-
+
+    # verify/webview-verify lane と同一の sccache 構成。
+    # `gpui-test` feature + dev profile は他 lane と compile
+    # fingerprint が異なり同一 OS namespace でも誤共有しない。
+    # kill switch も同一(CI_SCCACHE_DISABLE=1 で全 step skip)。
+    - name: Set up sccache
+      if: inputs.sccache_disable != '1'
+      uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+      with:
+        version: "v0.19.0"
+
+    - name: Export sccache GHA backend env
+      if: inputs.sccache_disable != '1'
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      with:
+        script: |
+          const token = process.env.ACTIONS_RUNTIME_TOKEN || '';
+          const url = process.env.ACTIONS_RESULTS_URL || '';
+          const gha = token !== '' && url !== '';
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', token);
+          core.exportVariable('ACTIONS_RESULTS_URL', url);
+          core.exportVariable('SCCACHE_GHA_ENABLED', gha ? 'true' : 'false');
+          core.exportVariable('SCCACHE_GHA_VERSION', `audiolens-v1-${process.env.RUNNER_OS || 'unknown'}`);
+          core.exportVariable('RUSTC_WRAPPER', 'sccache');
+          core.info(`sccache GHA backend: ${gha ? 'enabled' : 'disabled (cache credentials absent)'}`);
+
+    - name: Verify sccache environment
+      if: inputs.sccache_disable != '1'
+      shell: bash
+      run: |
+        set -euo pipefail
+        command -v sccache
+        sccache --version
+        echo "RUSTC_WRAPPER=$RUSTC_WRAPPER"
+        echo "SCCACHE_GHA_ENABLED=$SCCACHE_GHA_ENABLED"
+        echo "SCCACHE_GHA_VERSION=$SCCACHE_GHA_VERSION"
+        if [ -n "${ACTIONS_RESULTS_URL:-}" ]; then echo "ACTIONS_RESULTS_URL: set"; else echo "::warning::ACTIONS_RESULTS_URL missing — sccache GHA backend disabled (local disk fallback)"; fi
+        if [ -n "${ACTIONS_RUNTIME_TOKEN:-}" ]; then echo "ACTIONS_RUNTIME_TOKEN: set"; else echo "::warning::ACTIONS_RUNTIME_TOKEN missing — sccache GHA backend disabled (local disk fallback)"; fi
+
+    - name: Configure read-only access to private ruviform dependency
+      if: inputs.access_mode == 'deploy_key'
+      id: ssh_cred
+      shell: bash
+      env:
+        RUVIFORM_DEPLOY_KEY: ${{ inputs.deploy_key }}
+      run: |
+        set -euo pipefail
+        key="${RUNNER_TEMP//\\//}/ruviform_deploy_key"
+        printf '%s\n' "$RUVIFORM_DEPLOY_KEY" > "$key"
+        chmod 600 "$key"
+        known_hosts="${RUNNER_TEMP//\\//}/github_known_hosts"
+        curl -fsSL https://api.github.com/meta \
+          | jq -r '.ssh_keys[] | "github.com " + .' > "$known_hosts"
+        test -s "$known_hosts"
+        echo "GIT_SSH_COMMAND=ssh -i \"$key\" -o IdentitiesOnly=yes -o UserKnownHostsFile=\"$known_hosts\" -o StrictHostKeyChecking=yes" >> "$GITHUB_ENV"
+        git config --global url."git@github.com:scarecrow173/ruviform.git".insteadOf "https://github.com/scarecrow173/ruviform.git"
+
+    - name: Probe private ruviform access
+      id: probe_key
+      if: inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: git ls-remote git@github.com:scarecrow173/ruviform.git HEAD
+
+    - name: Probe anonymous ruviform access
+      id: probe_anon
+      if: inputs.access_mode == 'anonymous'
+      shell: bash
+      run: git ls-remote https://github.com/scarecrow173/ruviform.git HEAD
+
+    - name: Fetch locked dependencies
+      id: fetch
+      shell: bash
+      run: mise exec -- cargo fetch --locked
+
+    - name: Verify ruviform resolved SHA (lockfile single-source)
+      id: guard
+      shell: bash
+      run: mise run check-ruviform-rev
+
+    # Issue #206 OS-L1: gpui-test feature の型/Clippy/Headless
+    # test + al-desktop bin の Native Build/Link。`gpui-test` は
+    # `gpui` を内包し `al-desktop` は `required-features =
+    # ["gpui"]` のため、feature 有効化なしの silent skip は
+    # 起きない(各 task が feature を明示指定する)。
+    - name: Check GPUI feature (mise run check-ui-gpui)
+      id: check
+      shell: bash
+      run: mise run check-ui-gpui
+
+    - name: Lint GPUI feature (mise run lint-ui-gpui)
+      id: lint
+      shell: bash
+      run: mise run lint-ui-gpui
+
+    - name: Test GPUI feature (mise run test-ui-gpui)
+      id: test
+      shell: bash
+      run: mise run test-ui-gpui
+
+    # `al-desktop` bin(required-features = gpui)を production
+    # feature のみで build し、Native Build/Link を明示的に
+    # 検証する(bin が条件を満たさず skip されることはない)。
+    - name: Build al-desktop bin (mise run build-ui-gpui)
+      id: bin_build
+      shell: bash
+      run: mise run build-ui-gpui
+
+    - name: sccache statistics
+      if: inputs.sccache_disable != '1'
+      shell: bash
+      run: sccache --show-stats || true
+
+    - name: Cleanup credential
+      if: always() && inputs.access_mode == 'deploy_key'
+      shell: bash
+      run: |
+        git config --global --unset-all url."git@github.com:scarecrow173/ruviform.git".insteadOf || true
+        rm -f "${RUNNER_TEMP//\\//}/ruviform_deploy_key" "${RUNNER_TEMP//\\//}/github_known_hosts"
+        # 注: 本 step 以降に git/ssh を使う step を追加しないこと
+
+    # lane ごとの証拠行(not-run/skipped もそのまま記録し、
+    # pass と偽らない)。headless OS-L1 のみを記録し、実 OS
+    # Window 操作(GUI-L2)は gui-real lane の not_run が担う。
+    - name: Record lane evidence
+      if: always()
+      shell: bash
+      env:
+        MODE: ${{ inputs.access_mode }}
+      run: |
+        set -uo pipefail
+        os="${{ inputs.os }}"
+        sha="${{ steps.guard.outputs.resolved_sha || 'unresolved' }}"
+        probe="${{ steps.probe_anon.outcome }}"
+        [ "${MODE:-}" = "deploy_key" ] && probe="${{ steps.probe_key.outcome }}"
+        [ "${MODE:-}" = "unavailable" ] && probe="not run"
+        {
+          echo "## gpui-verify — $os (access: ${MODE:-unknown})"
+          echo ""
+          echo "| lane | OS | feature | ruviform resolved SHA | 結果 |"
+          echo "|---|---|---|---|---|"
+          echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
+          echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
+          echo "| check-ui-gpui | $os | al-gui gpui-test | $sha | ${{ steps.check.outcome }} |"
+          echo "| lint-ui-gpui | $os | al-gui gpui-test | $sha | ${{ steps.lint.outcome }} |"
+          echo "| test-ui-gpui (headless) | $os | al-gui gpui-test | $sha | ${{ steps.test.outcome }} |"
+          echo "| build-ui-gpui (al-desktop bin) | $os | al-gui gpui | $sha | ${{ steps.bin_build.outcome }} |"
+          echo ""
+          echo "検証範囲: OS-L1 headless のみ(gpui-test は OS surface stub)。実 OS Window 操作は GUI-L2 で別 Gate(gui-real = not_run)"
+        } >> "$GITHUB_STEP_SUMMARY"

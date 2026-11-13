@@ -5,13 +5,16 @@
 // 依存ゼロ・構造検査・任意の文字列 grep ではない)。
 //
 // 契約(正本は docs/designs/full-ci-ci-summary-issue-158.md +
-// docs/designs/ci-dispatch-only-issue-147.md):
+// docs/designs/ci-dispatch-only-issue-147.md +
+// docs/designs/ci-os-l1-gpui-desktop.md(Issue #206 で gpui lane
+// 追加・job 集合 14 へ拡張)):
 // - trigger: workflow_dispatch のみ(Issue #147/#158 最終段階で
 //   pull_request/push を撤去。schedule/workflow_run 等他 trigger も
 //   持たない)。dispatch は inputs.expected_sha を required で持つ。
 // - job 集合は固定: expected-sha, ruviform-access, hygiene,
 //   verify, verify-macos, ui-verify, ui-verify-macos,
-//   webview-verify, webview-verify-macos, gui-real,
+//   webview-verify, webview-verify-macos, gpui-verify,
+//   gpui-verify-macos, gui-real,
 //   ci-summary, summary(追加・削除・rename は契約違反)。
 // - lane jobs は needs: [ruviform-access, expected-sha] で
 //   両 preflight の success を `if:` に課す(常時実行)。
@@ -21,7 +24,8 @@
 //   Full CI verdict。macOS legs を含む。
 // - summary は macOS legs を含まない needs + `if: always()` —
 //   Ruleset Required context `summary` の互換 gate(#157 の
-//   macOS 非含有 scope 維持)。
+//   macOS 非含有 scope 維持。gpui-verify は非 macOS lane と
+//   して含み、gpui-verify-macos は含まない)。
 // - 選択実行機構の残滓(impact job/classify-impact/
 //   CI_IMPACT_SELECTIVE/期待集合 not_applicable/macos-summary)は
 //   存在してはならない。
@@ -214,6 +218,8 @@ const EXPECTED_JOBS = [
   "ui-verify-macos",
   "webview-verify",
   "webview-verify-macos",
+  "gpui-verify",
+  "gpui-verify-macos",
   "gui-real",
   "ci-summary",
   "summary",
@@ -234,6 +240,8 @@ if (jobs) {
     "ui-verify-macos",
     "webview-verify",
     "webview-verify-macos",
+    "gpui-verify",
+    "gpui-verify-macos",
   ];
   for (const lane of LANES) {
     const block = jobs.get(lane);
@@ -304,6 +312,8 @@ if (jobs) {
     "ui-verify-macos",
     "webview-verify",
     "webview-verify-macos",
+    "gpui-verify",
+    "gpui-verify-macos",
     "gui-real",
   ];
   const cs = jobs.get("ci-summary");
@@ -333,6 +343,7 @@ if (jobs) {
     "verify",
     "ui-verify",
     "webview-verify",
+    "gpui-verify",
     "gui-real",
   ];
   const su = jobs.get("summary");

@@ -213,6 +213,13 @@ run = "cargo clippy -p al-gui --all-targets --features gpui-test -- -D warnings"
 description = "al-gui gpui-test feature テスト(headless: GpuiObserver seam による Fake/GPUI parity)"
 run = "cargo test -p al-gui --features gpui-test"
 
+# Issue #206 AL-CI-L1-01: `al-desktop` bin(required-features =
+# gpui)の Native Build/Link 検証。production feature `gpui`
+# のみで build し、gpui-test の test-support 経路とは分離する。
+[tasks.build-ui-gpui]
+description = "al-desktop bin (gpui feature) の Native Build/Link 検証"
+run = "cargo build -p al-gui --features gpui --bin al-desktop"
+
 [tasks.verify-full]
 description = "Workspace standard full verification: fmt, check-full, lint-full, test-full (profile selected by MISE_ENV)"
 run = [
