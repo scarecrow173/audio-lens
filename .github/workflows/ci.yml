@@ -321,8 +321,8 @@ jobs:
           sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
   # al-gui `gpui-test` feature + `al-desktop` bin lane
-  # (Issue #206 OS-L1)。`check-ui-gpui`/`lint-ui-gpui`/
-  # `test-ui-gpui`/`build-ui-gpui` を 3 OS で実行する
+  # (Issue #206 OS-L1)。`check-ui-gpui`/`test-ui-gpui`/
+  # `build-ui-gpui` は3OSで実行し、`lint-ui-gpui` はLinuxに集約する
   # headless 検証 — `gpui-test` は OS surface を stub する
   # test platform であり、実 OS Window 操作(GUI-L2)は
   # gui-real lane の not_run が担う。ubuntu は GPUI の
