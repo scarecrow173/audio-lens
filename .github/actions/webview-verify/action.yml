@@ -148,7 +148,8 @@ runs:
       shell: bash
       run: mise run check-ui-webview
 
-    - name: Lint UI webview feature (mise run lint-ui-webview)
+    - name: Lint UI webview feature (Linux-only; mise run lint-ui-webview)
+      if: inputs.os == 'ubuntu-latest'
       id: lint
       shell: bash
       run: mise run lint-ui-webview
@@ -190,6 +191,6 @@ runs:
           echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
           echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
           echo "| check-ui-webview | $os | al-gui webview | $sha | ${{ steps.check.outcome }} |"
-          echo "| lint-ui-webview | $os | al-gui webview | $sha | ${{ steps.lint.outcome }} |"
+          echo "| lint-ui-webview (Linux canonical) | $os | al-gui webview | $sha | ${{ steps.lint.outcome || 'Linux-only' }} |"
           echo "| test-ui-webview | $os | al-gui webview | $sha | ${{ steps.test.outcome }} |"
         } >> "$GITHUB_STEP_SUMMARY"
