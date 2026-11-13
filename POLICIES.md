@@ -52,4 +52,4 @@ Scope: scarecrow173/audio-lens / 三リポジトリ共通の検証方針
 
 - OS-L1ではf64/native PCM精度、長尺Dataset、NaN/欠測/Validity/Provenance、Job・CLI/headless・Export等の独立Oracleを保護する。
 - WindowsでGPUI解析画面や操作を提供する場合は、実Windowの入力→Receipt→描画/分析状態のGUI-L2を検証する。物理Audio/MIDI/実Plugin等を**製品機能として提供しない限り**そのEXT-L3を一律要求しない。
-- 製品固有の対応は[AudioLens #127](https://github.com/scarecrow173/audio-lens/issues/127)等へ、汎用基盤修正は[Ruviform](https://github.com/scarecrow173/ruviform)へ振り分ける。SynvelisのRT/DAW要求を犠牲にしない。
+- 製品固有の要求・実装・受入・追従対応はAudioLensのIssueで管理する。製品ドメインに依存せず再利用可能な契約・実装・不具合修正はRuviformのIssueへ還元し、両Consumerへの影響とSynvelisのRT/DAW契約を検証する。
