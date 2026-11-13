@@ -266,3 +266,15 @@ member の `cargo check` pass 分(lane あたり数秒〜十数秒、
   実測: run 43422571711 (SHA 7e5412d) — gpui-verify
   ubuntu 10m04s / windows 10m14s / macos 9m42s 全て
   success、ci-summary/summary も success。
+
+## 追補（2026-11-14）：LintのOS間重複を解消
+
+上記の`check-full`/Clippy重複最適化は同一OS・同一対象についての判断。
+現在のCIでは静的Lint・整形（`biome check`、`cargo clippy`、`cargo fmt -- --check`）をLinuxに集約し、
+Windows/macOSでは`check-full`によるネイティブ型チェックと`build-full`によるBuild/Link、
+`test-full`およびCLIのNative Build/Linkを維持する。
+`gpui-verify`・`webview-verify`のFeature専用ClippyもLinuxのみとし、
+各OSのFeature専用check/testと`al-desktop`のBuild/Linkは変更しない。
+各Composite Actionの結果表はLinux専用の未実行を明示しており、OS-L1の実行結果には転用しない。
+
+元の計測・判断を削除せず、現行CIとの相違のみを記録する。
