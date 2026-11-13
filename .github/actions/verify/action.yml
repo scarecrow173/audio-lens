@@ -172,20 +172,20 @@ runs:
       shell: bash
       run: mise run fmt
 
-    - name: Type-check workspace (mise run check-ci)
+    - name: Type-check workspace (mise run check-full)
       id: check
       shell: bash
-      run: mise run check-ci
+      run: mise run check-full
 
-    - name: Lint workspace (mise run lint-ci)
+    - name: Lint workspace (mise run lint-full)
       id: lint
       shell: bash
-      run: mise run lint-ci
+      run: mise run lint-full
 
-    - name: Test workspace (mise run test-ci)
+    - name: Test workspace (mise run test-full)
       id: test
       shell: bash
-      run: mise run test-ci
+      run: mise run test-full
 
     # headless artifact lane: al-cli の依存木に GUI/WebView/GPU
     # crate が入らないことを境界検証する。
@@ -235,8 +235,8 @@ runs:
           echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
           echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
           echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
-          echo "| mise run check-ci | $os | workspace | $sha | ${{ steps.check.outcome }} |"
-          echo "| mise run lint-ci | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
-          echo "| mise run test-ci (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
+          echo "| mise run check-full | $os | workspace | $sha | ${{ steps.check.outcome }} |"
+          echo "| mise run lint-full | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
+          echo "| mise run test-full (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
           echo "| al-cli --profile ci build / check-cli-headless | $os | al-cli headless | $sha | ${{ steps.cli_build.outcome }} / ${{ steps.headless.outcome }} |"
         } >> "$GITHUB_STEP_SUMMARY"
