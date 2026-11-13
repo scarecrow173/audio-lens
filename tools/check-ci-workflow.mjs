@@ -367,6 +367,61 @@ if (jobs) {
   }
 }
 
+// --- CI/Composite Action の実行OS分担契約 ----------------------------
+// 本番CIファイルの検査時のみ、参照先Composite ActionのLint/Native境界も照合。
+// fixture pathを明示した負例テストは従来どおりci.yml単独を検査する。
+if (path === WORKFLOW) {
+  function actionStep(src, label) {
+    const start = src.indexOf("    - name: " + label + "\n");
+    check(start >= 0, "composite step missing: " + label);
+    if (start < 0) return "";
+    const next = src.indexOf("\n    - name:", start + 1);
+    return src.slice(start, next < 0 ? src.length : next);
+  }
+
+  const specs = [
+    [".github/actions/verify/action.yml",
+      "Lint workspace (Linux; mise run lint-full)"],
+    [".github/actions/webview-verify/action.yml",
+      "Lint UI webview feature (Linux-only; mise run lint-ui-webview)"],
+    [".github/actions/gpui-verify/action.yml",
+      "Lint GPUI feature (Linux-only; mise run lint-ui-gpui)"],
+  ];
+  for (const [file, lintLabel] of specs) {
+    const body = readFileSync(resolve(file), "utf8");
+    const lint = actionStep(body, lintLabel);
+    check(lint.includes("if: inputs.os == 'ubuntu-latest'"),
+      file + ": Clippy must run only in the canonical Linux lane");
+    if (file.includes("/verify/")) {
+      const fmt = actionStep(body, "Check formatting (Linux canonical rustfmt)");
+      check(fmt.includes("if: inputs.os == 'ubuntu-latest'"),
+        "verify: rustfmt must be Linux-only");
+      for (const [label, task] of [
+        ["Type-check workspace (non-Linux; mise run check-full)", "check-full"],
+        ["Build/link workspace (non-Linux; mise run build-full)", "build-full"],
+      ]) {
+        const step = actionStep(body, label);
+        check(step.includes("if: inputs.os != 'ubuntu-latest'"),
+          "verify: native " + task + " missing outside Linux");
+        check(step.includes("run: mise run " + task), "verify: wrong " + task + " command");
+      }
+      check(body.includes("run: mise run test-full"), "verify: native test-full was removed");
+      check(body.includes("cargo build -p al-cli --profile ci"),
+        "verify: headless CLI Build/Link missing");
+    } else {
+      const suffix = file.includes("webview") ? "webview" : "gpui";
+      check(body.includes("run: mise run check-ui-" + suffix),
+        file + ": OS-specific type-check removed");
+      check(body.includes("run: mise run test-ui-" + suffix),
+        file + ": OS-specific test removed");
+      if (suffix === "gpui") {
+        check(body.includes("run: mise run build-ui-gpui"),
+          file + ": native al-desktop Build/Link removed");
+      }
+    }
+  }
+}
+
 // --- 結果 -----------------------------------------------------------------
 
 if (failures.length) {
