@@ -233,6 +233,19 @@ member の `cargo check` pass 分(lane あたり数秒〜十数秒、
   重いが feature lane のため verify lane と cache
   namespace を分離(`-cargo-ui-gpui-`)し、sccache で
   compile を共有可能にする。
+- **libc pin (実装時に発見・解消済み)**: `zed-async-tar`
+  経由の `xattr 0.2.3` が `libc::ENOATTR` を要求するが、
+  libc 0.2.191 は Linux (`unix/linux_like/`) から同定数を
+  撤去済みで Ubuntu leg の `check-ui-gpui` が E0425 で
+  失敗した (run 43421012773)。Ruviform の lock は
+  `libc 0.2.189` で同一 xattr/zed-async-tar/gpui 構成が
+  稼働しているため、`cargo update -p libc --precise
+  0.2.189` で Cargo.lock のみを揃えた (Cargo.toml 変更
+  なし)。`x86_64-unknown-linux-gnu` target への
+  `cargo check` で xattr が解決することを確認
+  (ring/libz-sys 等の C cross toolchain 不在は Windows
+  host 固有の環境制約であり本件と無関係)。恒久対応は
+  上流 (zed-async-tar → xattr 1.x 系) の更新待ち。
 
 ## Deferred Design Concerns
 
@@ -244,8 +257,8 @@ member の `cargo check` pass 分(lane あたり数秒〜十数秒、
 
 ## Verification Notes
 
-- [ ] `mise exec -- actionlint` が ci.yml を受理する。
-- [ ] `mise run check-ci-workflow` が更新後の構造契約で
+- [x] `mise exec -- actionlint` が ci.yml を受理する。
+- [x] `mise run check-ci-workflow` が更新後の構造契約で
   exit 0。
 - [ ] 手動 Full CI(`gh workflow run ci.yml --ref <branch>
   -f expected_sha=<sha>`)で 3 OS の gpui-verify 系 job が
