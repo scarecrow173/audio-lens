@@ -7,7 +7,6 @@ Directory: `docs/tasks`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | TASK-rD6fg03HkkWxkiNSjqpxrS | canvas paint 是正のタスク | in-progress | [canvas-paint-empty.md](./canvas-paint-empty.md) |
-| TASK-034WQNI8ouT229zjnxOOZl | OS-L1 GPUI Desktop CI 統合(AL#206): gpui-verify lane + 構造契約更新 | in-progress | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | TASK-nyXpQYAjTy5czWCwaEXHcz | Issue #166 Native 初期 slice AL-G1〜G3 実装タスク | in-progress | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | TASK-ntv7UntJkPy8ECuh6iG7Lx | Issue #166 drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影 実装タスク (第5 slice) | in-progress | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
 | TASK-s1DH5J3jmMH1T2IOPpfw65 | Issue #166 Jobs 対話選択と Run 再開・取消 実装タスク (第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |
@@ -70,6 +69,7 @@ Directory: `docs/tasks`
 | TASK-034EJgxFS2IJznrYHnuNJy | caller 側最適化 A3: stft の Fft plan 巻き上げ | done | [caller-opt-stft-fft-plan-hoist.md](./caller-opt-stft-fft-plan-hoist.md) |
 | TASK-034z8821L9FbGf5lvsQjiM | チャンクテンソルストア | done | [chunked-tensor-store.md](./chunked-tensor-store.md) |
 | TASK-034phtbniZlSYvFqbrIDH | ci.yml workflow_dispatch 専用化(AL#147/#158 最終段階): PR/push trigger 撤去 | done | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
+| TASK-034WQNI8ouT229zjnxOOZl | OS-L1 GPUI Desktop CI 統合(AL#206): gpui-verify lane + 構造契約更新 | done | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | TASK-034SKVSwvA141jYCWJ6SYi | Tracker reconcile 入口(AL#159): 共有 pin eed590e 更新と reconcile workflow 導入 | done | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | TASK-034GMMLy26EDCzZmTAUf9y | coarse-to-fine 境界・cache 監査テスト | done | [coarse-to-fine-cache.md](./coarse-to-fine-cache.md) |
 | TASK-034z881BJBYiNLa5ozHuiO | 列指向チャンク表ストア | done | [columnar-table-store.md](./columnar-table-store.md) |

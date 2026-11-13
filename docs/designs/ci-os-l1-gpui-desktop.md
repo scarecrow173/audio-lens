@@ -260,6 +260,9 @@ member の `cargo check` pass 分(lane あたり数秒〜十数秒、
 - [x] `mise exec -- actionlint` が ci.yml を受理する。
 - [x] `mise run check-ci-workflow` が更新後の構造契約で
   exit 0。
-- [ ] 手動 Full CI(`gh workflow run ci.yml --ref <branch>
+- [x] 手動 Full CI(`gh workflow run ci.yml --ref <branch>
   -f expected_sha=<sha>`)で 3 OS の gpui-verify 系 job が
   success となり、`ci-summary`/`summary` が pass する。
+  実測: run 43422571711 (SHA 7e5412d) — gpui-verify
+  ubuntu 10m04s / windows 10m14s / macos 9m42s 全て
+  success、ci-summary/summary も success。

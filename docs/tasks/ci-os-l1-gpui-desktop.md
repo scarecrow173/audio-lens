@@ -1,7 +1,7 @@
 ---
 id: "TASK-034WQNI8ouT229zjnxOOZl"
 type: "task"
-status: "in-progress"
+status: "done"
 title: "OS-L1 GPUI Desktop CI 統合(AL#206): gpui-verify lane + 構造契約更新"
 created: "2026-11-13"
 updated: "2026-11-13"
@@ -131,12 +131,15 @@ index を整備し、手動 Full CI で 3 OS OS-L1 を実測する。
 - [x] `check-ui-gpui`/`lint-ui-gpui`/`test-ui-gpui`/
   `build-ui-gpui` が 3 OS で実行される lane が接続済み
 - [x] `check-ci-workflow` が新契約で exit 0
-- [ ] 手動 Full CI で 3 OS OS-L1 Pass の証拠がある
+- [x] 手動 Full CI で 3 OS OS-L1 Pass の証拠がある
+  (run 43422571711, SHA 7e5412d: gpui-verify ubuntu/windows/
+  macos 全 success、ci-summary/summary success)
 
 ## Verification
 
 - [x] `mise exec -- actionlint` exits 0
 - [x] `mise run check-ci-workflow` exits 0
 - [x] `mise run check-ci-tracker-workflows` exits 0
-- [ ] `gh workflow run ci.yml --ref <branch> -f expected_sha=<sha>`
+- [x] `gh workflow run ci.yml --ref <branch> -f expected_sha=<sha>`
   の run で gpui-verify 系・ci-summary・summary が success
+  (run 43422571711)
