@@ -172,11 +172,11 @@ runs:
       shell: bash
       run: mise run fmt
 
-    - name: Type-check workspace (mise run check-full)
-      id: check
-      shell: bash
-      run: mise run check-full
-
+    # Issue #206: check-full は撤去 — `cargo clippy
+    # --workspace --all-targets`(lint-full)が rustc frontend を
+    # 包含し同一の型診断を全 target に実行するため、check と
+    # clippy の二重 compile を解消した(計測証拠:
+    # docs/designs/ci-os-l1-gpui-desktop.md)。
     - name: Lint workspace (mise run lint-full)
       id: lint
       shell: bash
@@ -235,8 +235,7 @@ runs:
           echo "| dep access (${MODE:-unknown}) + probe | $os | git deps | $sha | $probe |"
           echo "| cargo fetch --locked / check-ruviform-rev | $os | workspace | $sha | ${{ steps.fetch.outcome }} / ${{ steps.guard.outcome }} |"
           echo "| mise run fmt | $os | workspace | $sha | ${{ steps.fmt.outcome }} |"
-          echo "| mise run check-full | $os | workspace | $sha | ${{ steps.check.outcome }} |"
-          echo "| mise run lint-full | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
+          echo "| mise run lint-full (clippy が型診断を包含、check-full は #206 で統合) | $os | workspace | $sha | ${{ steps.lint.outcome }} |"
           echo "| mise run test-full (Golden/LFS/Export) | $os | workspace | $sha | ${{ steps.test.outcome }} |"
           echo "| al-cli --profile ci build / check-cli-headless | $os | al-cli headless | $sha | ${{ steps.cli_build.outcome }} / ${{ steps.headless.outcome }} |"
         } >> "$GITHUB_STEP_SUMMARY"

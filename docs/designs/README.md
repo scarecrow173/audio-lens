@@ -17,6 +17,7 @@ Directory: `docs/designs`
 | DESIGN-034EIsK2SiNLNZYXmumzOe | caller 側最適化: FIR 畳み込み FFT 化・STFT plan 再利用・LeastSquares 列指向の実装設計 | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | DESIGN-byFehhoxeAg9rB1zUWZc59 | canvas paint 空の設計（DatasetWaveform での振幅正規化） | approved | [canvas-paint-empty.md](./canvas-paint-empty.md) |
 | DESIGN-034c5j6d48zGZdh9KX0KM | ci.yml workflow_dispatch 専用化: PR/push trigger 撤去と expected-sha 無条件照合 | approved | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
+| DESIGN-034WQJLvsRIXxWUeAMY3BF | Issue #206 OS-L1 GPUI Desktop CI 統合: gpui-verify lane 設計 | approved | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | DESIGN-034SKTJUE6Wsd8z241uUcC | Issue #159 Tracker reconcile 入口(consumer 展開): 共有 pin 更新と別 workflow schedule/manual 入口 | approved | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | DESIGN-034yYLaOKRSfRJMRKiYgQV | 分析データセット設計 | approved | [dataset-schema.md](./dataset-schema.md) |
 | DESIGN-034G5QmSv6Yzg756IThZZi | decoded/normalized PCM read-only view 設計 | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |

@@ -12,6 +12,7 @@ Directory: `docs/plans`
 | PLAN-034GsQ4Xf3tqGpUXx6bUK2 | Implement artifact durability tiers and resume verification | approved | [implement-artifact-durability-tiers.md](./implement-artifact-durability-tiers.md) |
 | PLAN-dmszyxRb1oaST3thMlruEm | AudioLens 独立 CI(#142)の実装計画 | approved | [implement-audiolens-independent-ci.md](./implement-audiolens-independent-ci.md) |
 | PLAN-034Lgf6kv61kqUvJK826Z | ci.yml workflow_dispatch 専用化 実装計画(trigger 撤去 + checker 反転 + PR 無起動実検証) | approved | [implement-ci-dispatch-only-issue-147.md](./implement-ci-dispatch-only-issue-147.md) |
+| PLAN-034WQMHCumqJGCDGugGOYF | Issue #206 OS-L1 GPUI Desktop CI 統合 実装計画 | approved | [implement-ci-os-l1-gpui-desktop.md](./implement-ci-os-l1-gpui-desktop.md) |
 | PLAN-034SKVQSQ4akoGIp96Tksi | Issue #159 Tracker reconcile 入口実装計画 | approved | [implement-ci-tracker-reconcile-issue-159.md](./implement-ci-tracker-reconcile-issue-159.md) |
 | PLAN-034G5TxZGhHh39SQ8S5su4 | decoded/normalized PCM read-only view の実装 | approved | [implement-decoded-pcm-artifact-view.md](./implement-decoded-pcm-artifact-view.md) |
 | PLAN-034SmwSu88qZaqPULzbz13 | Issue #158 Full CI 統一(安全な第一段階)実装計画 | approved | [implement-full-ci-ci-summary-issue-158.md](./implement-full-ci-ci-summary-issue-158.md) |

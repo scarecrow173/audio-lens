@@ -1,7 +1,7 @@
 # POLICIES.md — audio-lens
 
-Status: Accepted  
-Effective: 2026-11-13  
+Status: Accepted\
+Effective: 2026-11-13\
 Scope: scarecrow173/audio-lens / 三リポジトリ共通の検証方針
 
 ## 1. 方針の適用と責務

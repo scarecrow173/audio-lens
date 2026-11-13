@@ -43,8 +43,8 @@ name: ci
 # (開発ツールの apm/pipx:serena-agent は activate しない)。
 #
 # lane の step 本体は .github/actions/{verify,ui-verify,
-# webview-verify} の composite action が単一定義を持ち、
-# ubuntu/windows legs と macOS leg が共有する。
+# webview-verify,gpui-verify} の composite action が単一定義を
+# 持ち、ubuntu/windows legs と macOS leg が共有する。
 #
 # 構造契約(trigger・job 集合・needs・ci-summary/summary 分離・
 # 選択実行機構の不在)は tools/check-ci-workflow.mjs が検査する
@@ -320,6 +320,60 @@ jobs:
           deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
           sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
+  # al-gui `gpui-test` feature + `al-desktop` bin lane
+  # (Issue #206 OS-L1)。`check-ui-gpui`/`lint-ui-gpui`/
+  # `test-ui-gpui`/`build-ui-gpui` を 3 OS で実行する
+  # headless 検証 — `gpui-test` は OS surface を stub する
+  # test platform であり、実 OS Window 操作(GUI-L2)は
+  # gui-real lane の not_run が担う。ubuntu は GPUI の
+  # Linux build/runtime deps(X11/Wayland/fontconfig/Vulkan/
+  # lavapipe)が必要(ruviform ui-gpui-verify と同一構成)。
+  gpui-verify:
+    name: gpui-verify (${{ matrix.os }})
+    needs: [ruviform-access, expected-sha]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && needs.expected-sha.result == 'success' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    outputs:
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: gpui-verify lane
+        id: lane
+        uses: ./.github/actions/gpui-verify
+        with:
+          os: ${{ matrix.os }}
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
+
+  # gpui-verify の macOS leg(verify-macos と同構造 — Required
+  # `summary` の needs に含めず、`ci-summary` が集約する)。
+  gpui-verify-macos:
+    name: gpui-verify (macos-latest)
+    needs: [ruviform-access, expected-sha]
+    if: ${{ !cancelled() && needs.ruviform-access.result == 'success' && needs.expected-sha.result == 'success' }}
+    runs-on: macos-latest
+    outputs:
+      resolved_sha: ${{ steps.lane.outputs.resolved_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: gpui-verify lane
+        id: lane
+        uses: ./.github/actions/gpui-verify
+        with:
+          os: macos-latest
+          access_mode: ${{ needs.ruviform-access.outputs.mode }}
+          deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
+          sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
+
   # 実 Window/OS 自動試験の placeholder。Ruviform #312(test host)/
   # #313(OS driver)が未接続のため、本 run では検証範囲外であること
   # を not-run の証拠として常時記録する(headless/ui-verify を実
@@ -353,7 +407,7 @@ jobs:
   # 変換しない)。
   ci-summary:
     name: ci-summary
-    needs: [expected-sha, ruviform-access, hygiene, verify, verify-macos, ui-verify, ui-verify-macos, webview-verify, webview-verify-macos, gui-real]
+    needs: [expected-sha, ruviform-access, hygiene, verify, verify-macos, ui-verify, ui-verify-macos, webview-verify, webview-verify-macos, gpui-verify, gpui-verify-macos, gui-real]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -372,7 +426,7 @@ jobs:
             echo "- event: ${{ github.event_name }}"
             echo "- expected_sha (dispatch input): ${EXPECTED_SHA_INPUT:-n/a (non-dispatch event)}"
             echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
-            echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.verify-macos.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || 'unresolved' }}"
+            echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.verify-macos.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || needs.gpui-verify.outputs.resolved_sha || needs.gpui-verify-macos.outputs.resolved_sha || 'unresolved' }}"
             echo "- run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo "- 実 GUI/Window 自動試験: not run(Ruviform #312/#313 未接続。実機未検証)"
             echo ""
@@ -387,14 +441,16 @@ jobs:
             echo "| ui-verify | macos-latest | ${{ needs.ui-verify-macos.result }} |"
             echo "| webview-verify | ubuntu-latest / windows-latest | ${{ needs.webview-verify.result }} |"
             echo "| webview-verify | macos-latest | ${{ needs.webview-verify-macos.result }} |"
+            echo "| gpui-verify | ubuntu-latest / windows-latest | ${{ needs.gpui-verify.result }} |"
+            echo "| gpui-verify | macos-latest | ${{ needs.gpui-verify-macos.result }} |"
             echo "| gui-real | ubuntu-latest | ${{ needs.gui-real.result }} (status=${{ needs.gui-real.outputs.status || 'not_run' }}) |"
             echo ""
-            echo "検証範囲: Golden/LFS/Export/全回帰=test-ci(verify), CLI headless=verify(al-cli build + check-cli-headless), UI=ui-verify(vendor 整合+tsc+happy-dom), WebView=webview-verify(al-gui webview feature), 実 GUI=gui-real(not_run placeholder)"
+            echo "検証範囲: Golden/LFS/Export/全回帰=test-full(verify), CLI headless=verify(al-cli build + check-cli-headless), UI=ui-verify(vendor 整合+tsc+happy-dom), WebView=webview-verify(al-gui webview feature), GPUI=gpui-verify(al-gui gpui-test + al-desktop bin、OS-L1 headless), 実 GUI=gui-real(not_run placeholder)"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # 失敗時の Owner 切り分け指針(レポート形式の固定部)。
       - name: Owner triage guidance
-        if: needs.expected-sha.result != 'success' || needs.ruviform-access.result != 'success' || needs.hygiene.result != 'success' || needs.verify.result != 'success' || needs.verify-macos.result != 'success' || needs.ui-verify.result != 'success' || needs.ui-verify-macos.result != 'success' || needs.webview-verify.result != 'success' || needs.webview-verify-macos.result != 'success'
+        if: needs.expected-sha.result != 'success' || needs.ruviform-access.result != 'success' || needs.hygiene.result != 'success' || needs.verify.result != 'success' || needs.verify-macos.result != 'success' || needs.ui-verify.result != 'success' || needs.ui-verify-macos.result != 'success' || needs.webview-verify.result != 'success' || needs.webview-verify-macos.result != 'success' || needs.gpui-verify.result != 'success' || needs.gpui-verify-macos.result != 'success'
         shell: bash
         run: |
           {
@@ -406,6 +462,7 @@ jobs:
             echo "- dep access/fetch 失敗 → repo visibility / Deploy Key 登録を [guide](https://github.com/scarecrow173/audio-lens/blob/main/docs/guides/ruviform-private-access-ci.md) に従い確認"
             echo "- ui-verify で REV 不一致 → sync-ui-deps 未実行または pin ずれ(Consumer 側)"
             echo "- macOS leg の失敗/滞留 → Full CI 全体の失敗/未完了。macOS 対応のリリース受入条件は docs/guides/release-macos-verification.md を参照"
+            echo "- gpui-verify 失敗 → al-gui gpui-test feature または al-desktop bin の OS-L1 回帰(Consumer 側)。Linux のみ deps 不足なら action の apt 群を確認"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # fail-closed 判定: needs 全 job の result が success のときのみ
@@ -426,6 +483,8 @@ jobs:
             "ui-verify-macos:${{ needs.ui-verify-macos.result }}" \
             "webview-verify:${{ needs.webview-verify.result }}" \
             "webview-verify-macos:${{ needs.webview-verify-macos.result }}" \
+            "gpui-verify:${{ needs.gpui-verify.result }}" \
+            "gpui-verify-macos:${{ needs.gpui-verify-macos.result }}" \
             "gui-real:${{ needs.gui-real.result }}"; do
             lane="${pair%%:*}"; res="${pair##*:}"
             if [ "$res" != "success" ]; then
@@ -448,7 +507,7 @@ jobs:
   # は撤去する(最終段階)。
   summary:
     name: summary
-    needs: [expected-sha, ruviform-access, hygiene, verify, ui-verify, webview-verify, gui-real]
+    needs: [expected-sha, ruviform-access, hygiene, verify, ui-verify, webview-verify, gpui-verify, gui-real]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -462,7 +521,7 @@ jobs:
             echo "- 本 check は Ruleset Required context \`summary\` — 判定範囲は macOS 非含有 scope(#157 維持)"
             echo "- Full CI verdict(macOS 込み fail-closed)は \`ci-summary\` check / run を参照"
             echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
-            echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || 'unresolved' }}"
+            echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || needs.gpui-verify.outputs.resolved_sha || 'unresolved' }}"
             echo "- run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo ""
             echo "| lane | OS | 結果 |"
@@ -473,8 +532,9 @@ jobs:
             echo "| verify | ubuntu-latest / windows-latest | ${{ needs.verify.result }} |"
             echo "| ui-verify | ubuntu-latest / windows-latest | ${{ needs.ui-verify.result }} |"
             echo "| webview-verify | ubuntu-latest / windows-latest | ${{ needs.webview-verify.result }} |"
+            echo "| gpui-verify | ubuntu-latest / windows-latest | ${{ needs.gpui-verify.result }} |"
             echo "| gui-real | ubuntu-latest | ${{ needs.gui-real.result }} (status=${{ needs.gui-real.outputs.status || 'not_run' }}) |"
-            echo "| verify / ui-verify / webview-verify | macos-latest | 判定対象外 | \`ci-summary\` が集約(Full CI verdict) |"
+            echo "| verify / ui-verify / webview-verify / gpui-verify | macos-latest | 判定対象外 | \`ci-summary\` が集約(Full CI verdict) |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Enforce required-gate
@@ -489,6 +549,7 @@ jobs:
             "verify:${{ needs.verify.result }}" \
             "ui-verify:${{ needs.ui-verify.result }}" \
             "webview-verify:${{ needs.webview-verify.result }}" \
+            "gpui-verify:${{ needs.gpui-verify.result }}" \
             "gui-real:${{ needs.gui-real.result }}"; do
             lane="${pair%%:*}"; res="${pair##*:}"
             if [ "$res" != "success" ]; then
