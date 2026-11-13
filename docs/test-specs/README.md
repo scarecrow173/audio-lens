@@ -13,6 +13,7 @@ Directory: `docs/test-specs`
 | TSPEC-034EJgd4MF3zQZ1FN9K4WV | caller 側最適化チェーン検証仕様 | approved | [caller-side-optimizations.md](./caller-side-optimizations.md) |
 | TSPEC-TtiAdwHDGfAC5s9X2nNkrz | canvas paint 是正のテスト仕様 | approved | [canvas-paint-empty.md](./canvas-paint-empty.md) |
 | TSPEC-034FdwKCwLDfKlaVU7JcO | ci.yml 構造契約(最終段階): workflow_dispatch 唯一 trigger・expected-sha 無条件照合 | approved | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
+| TSPEC-034WQLTUarQM5Vm4biCEVQ | OS-L1 GPUI Desktop CI 構造契約(gpui-verify lane) | approved | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | TSPEC-034SKW5DYSMKrwyMXiVFqe | Tracker workflow 構造契約: reconcile 入口・共有 pin・event 入口不変 | approved | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | TSPEC-034z87fIonHcU07IHGb1dE | dataset 来歴と validity セマンティクス | proposed | [dataset-provenance-validity.md](./dataset-provenance-validity.md) |
 | TSPEC-034z87feL8uCPOIagychsT | dataset store 往復と部分読み出し | proposed | [dataset-store-roundtrip.md](./dataset-store-roundtrip.md) |

@@ -7,6 +7,7 @@ Directory: `docs/tasks`
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
 | TASK-rD6fg03HkkWxkiNSjqpxrS | canvas paint 是正のタスク | in-progress | [canvas-paint-empty.md](./canvas-paint-empty.md) |
+| TASK-034WQNI8ouT229zjnxOOZl | OS-L1 GPUI Desktop CI 統合(AL#206): gpui-verify lane + 構造契約更新 | in-progress | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | TASK-nyXpQYAjTy5czWCwaEXHcz | Issue #166 Native 初期 slice AL-G1〜G3 実装タスク | in-progress | [native-desktop-initial-slices.md](./native-desktop-initial-slices.md) |
 | TASK-ntv7UntJkPy8ECuh6iG7Lx | Issue #166 drawn parity の Spectrogram・Label・Table 拡張と Job/Run 射影 実装タスク (第5 slice) | in-progress | [native-gui-drawn-parity-run-mount.md](./native-gui-drawn-parity-run-mount.md) |
 | TASK-s1DH5J3jmMH1T2IOPpfw65 | Issue #166 Jobs 対話選択と Run 再開・取消 実装タスク (第7 slice) | approved | [native-gui-interactive-job-run.md](./native-gui-interactive-job-run.md) |

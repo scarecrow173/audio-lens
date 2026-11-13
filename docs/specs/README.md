@@ -19,6 +19,7 @@ Directory: `docs/specs`
 | SPEC-9RvxFJGfN5O4Xk7IQ7Kzc3 | canvas 系 component の実窓 paint 是正（DatasetWaveform の単位振幅正規化）(Issue #179) | approved | [canvas-paint-empty.md](./canvas-paint-empty.md) |
 | SPEC-034yYlu5QuhtAFuUQWBBvQ | 常時実行の低コスト特徴量 | proposed | [cheap-analysis-features.md](./cheap-analysis-features.md) |
 | SPEC-034jbVIejFblXPjaYuN9R | Issue #147/#158 最終段階: ci.yml を workflow_dispatch 専用にし PR/push 起動入口を撤去する | approved | [ci-dispatch-only-issue-147.md](./ci-dispatch-only-issue-147.md) |
+| SPEC-034WQIsi86TSdELsIsTNHl | Issue #206 OS-L1 GPUI Desktop CI 統合: 3OS Native/Headless 検証 lane | approved | [ci-os-l1-gpui-desktop.md](./ci-os-l1-gpui-desktop.md) |
 | SPEC-034SKTICUsXIT198jBTZXz | Issue #159 Tracker reconcile 入口: GITHUB_TOKEN dispatch 通知 gap を別 workflow 定期/手動 reconcile で埋める | approved | [ci-tracker-reconcile-issue-159.md](./ci-tracker-reconcile-issue-159.md) |
 | SPEC-034G5M6Djv4xJOZKHXQniH | decoded/normalized PCM read-only view | approved | [decoded-pcm-artifact-view.md](./decoded-pcm-artifact-view.md) |
 | SPEC-034GsJJVWBOQmxiKManOlL | Artifact durability tiers and resume verification (issue #55) | approved | [durability-tiered-artifact-writes.md](./durability-tiered-artifact-writes.md) |
