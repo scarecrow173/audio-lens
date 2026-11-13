@@ -4,6 +4,8 @@
 
 Issueの起票・改訂、設計、実装、テスト、レビュー、受入判定の際は、このリポジトリの [POLICIES.md](POLICIES.md) を読み、その規則に従う。
 
+作業開始時は、検証・受入方針を `POLICIES.md`、タスク名・引数を `mise.toml`、Rust Workspace の構成を `Cargo.toml` で確認する。詳細をこのファイルに重複記載しない。
+
 `audio-lens`(AudioLens)は、ゲームのキャプチャ映像と比較用入力を
 アラインし、音声に何が起きたかを計測して構造化解析データを
 出力する、ゲーム音声デバッグ解析ツール。
@@ -44,9 +46,7 @@ Issueの起票・改訂、設計、実装、テスト、レビュー、受入判
 
 ## 環境とコマンド
 
-開発環境の正規インターフェースは mise task。新しいワークツリー
-では、作業開始前に次を実行する(Windows / macOS / Linux 共通、
-Bash 不要)。
+開発環境の正規インターフェースはmiseタスク。初回cloneや必要なツール・生成物がないワークツリーでは、以下でセットアップする。タスクの詳細と検証の運用方針は `mise.toml` と `POLICIES.md` を参照する。
 
 ```bash
 mise install
@@ -54,10 +54,7 @@ mise run setup   # apm install + prek install + git lfs install/pull
 ```
 
 `mise run setup` は `prek install` で pre-commit hook も有効化する。
-hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形・
-衛生 check のみ担い、重い検証は `mise run lint-full` / `mise run test-full` に
-委ねる。`git lfs install --local` + `git lfs pull` で LFS 実体も復元する
-(git-lfs 未導入のまま clone した環境でも pointer のまま残らない)。
+hookの定義は `.pre-commit-config.yaml`。どの検証を実行するかは `POLICIES.md`、タスクの実行内容は `mise.toml` を参照する。`git lfs install --local` と `git lfs pull` でLFS実体も復元する。
 
 `.worktreeinclude` に列挙した gitignore 済み生成物（APM 依存・各 agent
 向け deploy 物）は、新しいworktreeへ引き継がれる。ツールチェーンが
@@ -65,22 +62,10 @@ hook 定義は `.pre-commit-config.yaml` — commit 時点では高速な整形�
 通常不要。APM 依存が変更された場合や生成資産が存在しない場合は
 `mise install` → `mise run setup` で復元する。
 
-Rust toolchain は `mise.toml` では pin しない。通常開発は環境導入済みの
-rust(rustup / global mise)を使い、cargo 系タスクはその toolchain で
-実行される。CI 専用の pin は `mise.ci.toml` に置き、CI では
-`MISE_ENV=ci` で有効化する(lockfile は `MISE_ENV=ci mise lock` が
-生成する `mise.ci.lock`)。
-
-ユーザー環境の global mise config に追加ツールがある環境で、repo の
-toolchain のみを復元する場合は toolchain を明示した
-`mise install uv github:microsoft/apm pipx:serena-agent prek biome git-lfs node actionlint`
-を使う。
+RustツールチェーンとCargo Profileの設定は `mise.toml` / `mise.ci.toml` / `Cargo.toml`、適用方針は `POLICIES.md` を参照する。
 
 mise 管理下のコマンドは `mise exec -- <コマンド>` で実行する
 (例: `mise exec -- apm compile`)。
-
-言語 stack は未定。決定次第 `mise.toml` に toolchain と
-lint / typecheck / test 等の検証 task を追加し、この節も更新する。
 
 ## 開発原則
 
@@ -95,10 +80,6 @@ SOLID・YAGNI・DRY・KISS に従い、現在の要件に必要な範囲で設�
   だけの処理を無理に共通化しない。
 - **KISS**: 要件を満たす最も単純で理解しやすい構成を選び、不要な
   抽象化や複雑さを持ち込まない。
-- **Pre-release**: このプロジェクトはリリース前のため、後方互換を
-  維持するための互換層・deprecation 期間・マイグレーション・
-  バージョン管理は設けない。形式や API を変更する場合は互換を
-  保とうとせず、既存の成果物は作り直す(再生成する)方針とする。
 
 実装内で表現ドリフトを起こさない。同じ情報を複数の表現方法
 (型・フォーマット・命名)で扱うことを避け、同一概念の表現は
@@ -119,17 +100,12 @@ SOLID・YAGNI・DRY・KISS に従い、現在の要件に必要な範囲で設�
 ## APM / 生成物
 
 - commit 対象: `apm.yml`, `apm.lock.yaml`, `AGENTS.md`
-- commit しない: `apm_modules/` と `apm install` / `apm compile`
-  が生成する各 agent 向け deploy 物(`.agents/`・`.claude/`・
-  `.codex/`・`.cursor/`・`.github/`・`.windsurf/`・`.mcp.json`
-  等)。ignore 済みかは `.gitignore` を参照
+- commit しない: `apm_modules/` と `apm install` / `apm compile` による未追跡のagent向け配布生成物。`.github/workflows/` 等の追跡済みファイルとは区別し、実際の管理対象は `.gitignore` と `git ls-files` で確認する
 - clone / 生成資産のないfresh worktreeでは `mise run setup` で依存を復元する。
   資産を継承したworktreeでは依存定義の変更時など必要な場合に再実行する。
 
 ## 境界
 
-- **Always**: 変更後は関連する検証(型チェック・テスト等、
-  存在する範囲で)を実行してから完了とする
 - **Ask first**: 依存の追加・変更、破壊的な Git 操作(ブランチ
   削除・履歴書き換え等)
 - **Never**: 秘密情報のコミット、このリポジトリ外のファイルの変更
