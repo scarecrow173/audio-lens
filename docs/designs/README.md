@@ -29,6 +29,7 @@ Directory: `docs/designs`
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034WsMaALpLsJSgSFhJLyp | Issue #199 impl index 生成対応: front matter 是正と managed marker 設計 | approved | [issue-199-impl-index-generation-design.md](./issue-199-impl-index-generation-design.md) |
 | DESIGN-034WuVuaQKt33yJv9vseJb | Issue #202 ir missing-section 補完設計 | approved | [issue-202-ir-missing-sections-design.md](./issue-202-ir-missing-sections-design.md) |
+| DESIGN-034XpYvyDBAl0hCspnQyXV | main CI hygiene/verify 失敗の修正設計 | approved | [issue-210-ci-failure-fix-design.md](./issue-210-ci-failure-fix-design.md) |
 | DESIGN-034yYLbiufAAGV4Pj6UKJc | ジョブオーケストレーション設計 | approved | [job-orchestration.md](./job-orchestration.md) |
 | DESIGN-034GNsEgwjRPsPqegmSEWU | local_lag FFT 化の設計 | approved | [local-lag-fft.md](./local-lag-fft.md) |
 | DESIGN-034yYLaqu0owt08BLocFDQ | ソース定位・トラッキング設計 | approved | [localization.md](./localization.md) |

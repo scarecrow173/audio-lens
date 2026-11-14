@@ -56,7 +56,7 @@ function check(cond, msg) {
 // 0 インデントの top-level key ブロックを行配列で返す
 // (例: topBlock("on") → `on:` 行の次の 0 indent までの行)。
 function topBlock(key) {
-  const start = lines.findIndex((l) => l === `${key}:`);
+  const start = lines.indexOf(`${key}:`);
   if (start === -1) return null;
   const out = [];
   for (let i = start + 1; i < lines.length; i++) {
@@ -356,7 +356,7 @@ if (jobs) {
       `job summary: needs が Required context scope と一致しない(actual: ${needs ? needs.join(",") : "none"})`,
     );
     check(
-      !needs || !needs.some((n) => n.endsWith("-macos")),
+      !needs?.some((n) => n.endsWith("-macos")),
       "job summary: needs に macOS leg が含まれている(#157 の Required 非含有 scope を破壊)",
     );
     check(/^\s*if:\s*always\(\)\s*$/m.test(blockText(su)), "job summary: `if: always()` が無い");
@@ -372,8 +372,8 @@ if (jobs) {
 // fixture pathを明示した負例テストは従来どおりci.yml単独を検査する。
 if (path === WORKFLOW) {
   const actionStep = (src, label) => {
-    const start = src.indexOf("    - name: " + label + "\n");
-    check(start >= 0, "composite step missing: " + label);
+    const start = src.indexOf(`    - name: ${label}\n`);
+    check(start >= 0, `composite step missing: ${label}`);
     if (start < 0) return "";
     const next = src.indexOf("\n    - name:", start + 1);
     return src.slice(start, next < 0 ? src.length : next);
@@ -396,7 +396,7 @@ if (path === WORKFLOW) {
     const lint = actionStep(body, lintLabel);
     check(
       lint.includes("if: inputs.os == 'ubuntu-latest'"),
-      file + ": Clippy must run only in the canonical Linux lane",
+      `${file}: Clippy must run only in the canonical Linux lane`,
     );
 
     if (file.includes("/verify/")) {
@@ -409,9 +409,9 @@ if (path === WORKFLOW) {
         const step = actionStep(body, label);
         check(
           step.includes("if: inputs.os != 'ubuntu-latest'"),
-          "verify: native " + task + " missing outside Linux",
+          `verify: native ${task} missing outside Linux`,
         );
-        check(step.includes("run: mise run " + task), "verify: wrong " + task + " command");
+        check(step.includes(`run: mise run ${task}`), `verify: wrong ${task} command`);
       }
       check(body.includes("run: mise run test-full"), "verify: native test-full was removed");
       check(
@@ -421,17 +421,14 @@ if (path === WORKFLOW) {
     } else {
       const suffix = file.includes("webview") ? "webview" : "gpui";
       check(
-        body.includes("run: mise run check-ui-" + suffix),
-        file + ": OS-specific type-check removed",
+        body.includes(`run: mise run check-ui-${suffix}`),
+        `${file}: OS-specific type-check removed`,
       );
-      check(
-        body.includes("run: mise run test-ui-" + suffix),
-        file + ": OS-specific test removed",
-      );
+      check(body.includes(`run: mise run test-ui-${suffix}`), `${file}: OS-specific test removed`);
       if (suffix === "gpui") {
         check(
           body.includes("run: mise run build-ui-gpui"),
-          file + ": native al-desktop Build/Link removed",
+          `${file}: native al-desktop Build/Link removed`,
         );
       }
     }

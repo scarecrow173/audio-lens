@@ -49,19 +49,7 @@ repos:
         name: check-ci-workflow
         entry: mise exec -- node tools/check-ci-workflow.mjs
         language: system
-        files: '^\.github/workflows/ci\.yml$|^\.github/actions/(verify|webview-verify|gpui-verify)/action\.yml$|^tools/check-ci-workflow\.mjs
-        pass_filenames: false
-      # tracker 系 workflow 群の構造契約検査(Issue #159 reconcile 展開)。
-      # 共有 pin 一致・reconcile 入口契約・event 入口 trigger 不変を
-      # 検証する。script は引数を取らない(repo root 固定)ため
-      # pass_filenames: false。
-      - id: check-ci-tracker-workflows
-        name: check-ci-tracker-workflows
-        entry: mise exec -- node tools/check-ci-tracker-workflows.mjs
-        language: system
-        files: '^\.github/workflows/(daily-ci|ci-issue-tracker|ci-issue-tracker-reconcile)\.yml$|^tools/check-ci-tracker-workflows\.mjs$'
-        pass_filenames: false
-
+        files: '^\.github/workflows/ci\.yml$|^\.github/actions/(verify|webview-verify|gpui-verify)/action\.yml$|^tools/check-ci-workflow\.mjs$'
         pass_filenames: false
       # tracker 系 workflow 群の構造契約検査(Issue #159 reconcile 展開)。
       # 共有 pin 一致・reconcile 入口契約・event 入口 trigger 不変を
