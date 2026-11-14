@@ -25,6 +25,7 @@ Directory: `docs/test-specs`
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
 | TSPEC-034WsMpecRKShroKP0mrqH | impl index 生成契約: front matter schema・managed marker・決定的出力 | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TSPEC-034WuVDeP2Keiu82igc78e | ir 必須セクション契約: missing-section 0 件と本文具体性 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
+| TSPEC-034Xq14aOWwCe83ety6DBH | CI hygiene/verify 修復の外部契約 | approved | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
 | TSPEC-034GNwf4Cw9BJVBt8akOXm | OverlapCorr/local_lag 検証と小窓計測 | draft | [local-lag-overlap-corr.md](./local-lag-overlap-corr.md) |
 | TSPEC-034Fo8Wnl0C3P71Q2uPUWP | locate 合議 argmax 曖昧性契約の検証 | draft | [locate-argmax-ambiguity.md](./locate-argmax-ambiguity.md) |

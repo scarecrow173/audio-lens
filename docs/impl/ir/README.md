@@ -9,6 +9,7 @@ Directory: `docs/impl/ir`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| IMPL-034Xq29FlHgba07R8zdOkr | main CI hygiene/verify 失敗修正(Issue #210) | in-progress | [main-ci-hygiene-verify-issue-210.md](./main-ci-hygiene-verify-issue-210.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
