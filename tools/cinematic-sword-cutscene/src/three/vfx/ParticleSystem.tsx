@@ -31,7 +31,8 @@ export const getSpriteTexture = (): THREE.Texture => {
   if (spriteTexture) return spriteTexture;
   const c = document.createElement("canvas");
   c.width = c.height = 64;
-  const ctx = c.getContext("2d")!;
+  const ctx = c.getContext("2d");
+  if (!ctx) throw new Error("2d canvas context is unavailable");
   const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   g.addColorStop(0, "rgba(255,255,255,1)");
   g.addColorStop(0.4, "rgba(255,255,255,0.6)");

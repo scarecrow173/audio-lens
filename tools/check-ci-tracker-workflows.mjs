@@ -39,6 +39,7 @@ const WF = join(ROOT, ".github", "workflows");
 const RECONCILE = join(WF, "ci-issue-tracker-reconcile.yml");
 const EVENT = join(WF, "ci-issue-tracker.yml");
 const DAILY = join(WF, "daily-ci.yml");
+// biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub 式 ${...} をそのまま含む照合対象リテラル。template literal 化すると JS の式展開対象になり検査意味が壊れるため通常文字列を維持する
 const TRACKER_GROUP = "ci-issue-tracker-${{ github.repository }}";
 
 const failures = [];
@@ -56,7 +57,7 @@ function load(path) {
 
 // 0 インデントの top-level key ブロックを行配列で返す。
 function topBlock(lines, key) {
-  const start = lines.findIndex((l) => l === `${key}:`);
+  const start = lines.indexOf(`${key}:`);
   if (start === -1) return null;
   const out = [];
   for (let i = start + 1; i < lines.length; i++) {
@@ -225,10 +226,12 @@ if (rec) {
     }
 
     check(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub 式 ${...} をそのまま含む照合対象リテラル。template literal 化すると JS の式展開対象になり検査意味が壊れるため通常文字列を維持する
       jt.includes("ref: ${{ github.event.repository.default_branch || 'main' }}"),
       `${RECONCILE}: 自 repo checkout が default branch 式 pin でない`,
     );
     check(
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub 式 ${...} をそのまま含む照合対象リテラル。template literal 化すると JS の式展開対象になり検査意味が壊れるため通常文字列を維持する
       jt.includes("ssh-key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}"),
       `${RECONCILE}: 共有 checkout が RUVIFORM_DEPLOY_KEY を使っていない`,
     );
