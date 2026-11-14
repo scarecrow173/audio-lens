@@ -171,6 +171,7 @@ Directory: `docs/tasks`
 | TASK-034U1kYwpGf3uFTaAbXAvM | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のタスク | done | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TASK-W04xdHiaIegpHOFhvnlQ9d | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のタスク | done | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | TASK-034VnVry1uhHUyyAsDeWFx | ruviform b02942c2 pin 追従評価タスク | done | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| TASK-034XCTlP3ywzs0qRZu0Muv | ruviform c6e4f334 pin 追従評価タスク | done | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-034VFTar4Un3iqKLVQ4LR4 | ruviform fd1d4d5f pin 追従評価タスク | done | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |

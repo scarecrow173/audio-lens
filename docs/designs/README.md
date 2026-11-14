@@ -56,6 +56,7 @@ Directory: `docs/designs`
 | DESIGN-034U1jgDOqHhX2wdbK7ElK | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の設計 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | DESIGN-6qppTQVCUfffmR60C18lKG | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の設計 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| DESIGN-034XCQM1h8KbyVH2VDHQNl | ruviform c6e4f334 pin 追従の設計 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | DESIGN-034VFT8jbz528XiW8ZauIH | ruviform fd1d4d5f pin 追従の設計 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | DESIGN-034PdHI4tDTk3iOLaSJO54 | Ruviform media I/O ingest 移行(Issue #100) | approved | [ruviform-ingest-migration.md](./ruviform-ingest-migration.md) |
