@@ -53,6 +53,7 @@ Directory: `docs/test-specs`
 | TSPEC-034Vc1k9l2KQszbMWnGXdx | ruviform 271e2d41 pin 追従の検証仕様 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | TSPEC-034U1kXWDA80w3D11XAkva | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のテスト仕様 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TSPEC-eMztySmGDwi7ed2B73x33s | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のテスト仕様 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| TSPEC-034XLUrPKy2kz5PYTSGInn | ruviform ac10a2f7 pin 追従の検証仕様 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TSPEC-034VnUDkvuNzZtZMQT43o1 | ruviform b02942c2 pin 追従の検証仕様 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | TSPEC-034XCSoWwxBG9UbWOh0Ebw | ruviform c6e4f334 pin 追従の検証仕様 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TSPEC-034VFWMRhZX61nGOW76Cta | ruviform fd1d4d5f pin 追従の検証仕様 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |

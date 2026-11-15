@@ -170,6 +170,7 @@ Directory: `docs/tasks`
 | TASK-034Vc1sd1nC8xoAnTOVPsF | ruviform 271e2d41 pin 追従評価タスク | done | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | TASK-034U1kYwpGf3uFTaAbXAvM | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証のタスク | done | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | TASK-W04xdHiaIegpHOFhvnlQ9d | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のタスク | done | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| TASK-034XLUpL4KslyVSItyRR9g | ruviform ac10a2f7 pin 追従評価タスク | done | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TASK-034VnVry1uhHUyyAsDeWFx | ruviform b02942c2 pin 追従評価タスク | done | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | TASK-034XCTlP3ywzs0qRZu0Muv | ruviform c6e4f334 pin 追従評価タスク | done | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
