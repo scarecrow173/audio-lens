@@ -117,6 +117,7 @@ Directory: `docs/impl/ir`
 | IMPL-034XLUtOnusrJZxCBd0Q6x | ruviform ac10a2f7 pin 追従評価の実施記録 | completed | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | IMPL-034VnVtzhBuw5urVoJzgnw | ruviform b02942c2 pin 追従評価の実施記録 | completed | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | IMPL-034XCW3SvHJVdWjyHNmcwb | ruviform c6e4f334 pin 追従評価の実施記録 | completed | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
+| IMPL-034YaRbwcLs7BNyNI6lTIY | ruviform eafe0a08 pin 追従評価の実施記録 | completed | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | IMPL-034VFTb0yP663bAtG9lOHq | ruviform fd1d4d5f pin 追従評価の実施記録 | completed | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | IMPL-034P70XgpUzok2HsL8bOrX | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携 | completed | [ruviform-git-sha-toolchain-private-repo-ci.md](./ruviform-git-sha-toolchain-private-repo-ci.md) |
 | IMPL-xiM69SgT2jizDTQoeb | ruviform lockfile source of truth | completed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |

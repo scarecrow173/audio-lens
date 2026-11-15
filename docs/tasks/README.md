@@ -177,6 +177,7 @@ Directory: `docs/tasks`
 | TASK-034XCTlP3ywzs0qRZu0Muv | ruviform c6e4f334 pin 追従評価タスク | done | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
+| TASK-034YaQRhfjwFoCxtc2kZrh | ruviform eafe0a08 pin 追従評価タスク | done | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | TASK-034VFTar4Un3iqKLVQ4LR4 | ruviform fd1d4d5f pin 追従評価タスク | done | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | TASK-HrjjahBSYbViCD72MweZwV | al-observability SinkConfig::span_events 追従 (AL#127) | done | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
 | TASK-034P3P0cd1tJUcKKBnEB7b | 旧可視化廃止と可搬 export 分離(AL#106) | done | [ruviform-viz-retirement.md](./ruviform-viz-retirement.md) |
