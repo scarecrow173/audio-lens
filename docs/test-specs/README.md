@@ -58,6 +58,7 @@ Directory: `docs/test-specs`
 | TSPEC-034XLUrPKy2kz5PYTSGInn | ruviform ac10a2f7 pin 追従の検証仕様 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TSPEC-034VnUDkvuNzZtZMQT43o1 | ruviform b02942c2 pin 追従の検証仕様 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | TSPEC-034XCSoWwxBG9UbWOh0Ebw | ruviform c6e4f334 pin 追従の検証仕様 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
+| TSPEC-034YaRb4ebaeqPddL37Fqv | ruviform eafe0a08 pin 追従の検証仕様 | approved | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | TSPEC-034VFWMRhZX61nGOW76Cta | ruviform fd1d4d5f pin 追従の検証仕様 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | TSPEC-j4tOtpIhG5QAglrGV0BZjb | Ruviform Cargo.lock 正本化の検証 | proposed | [ruviform-lockfile-source-of-truth.md](./ruviform-lockfile-source-of-truth.md) |
 | TSPEC-Jpr62rfkrRNiHtvEJn74bF | SinkConfig::span_events 追従の検証 (AL#127) | approved | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
