@@ -18,6 +18,7 @@ Directory: `docs/plans`
 | PLAN-034SmwSu88qZaqPULzbz13 | Issue #158 Full CI 統一(安全な第一段階)実装計画 | approved | [implement-full-ci-ci-summary-issue-158.md](./implement-full-ci-ci-summary-issue-158.md) |
 | PLAN-034P4YN0NpG6X9OObVjUYA | pre-migration baseline の実装計画 | approved | [implement-pre-migration-baseline.md](./implement-pre-migration-baseline.md) |
 | PLAN-034Gs73yLxitjnNfDd2Cz4 | implement symphonia AAC-LC audio decode fallback in MP4 | approved | [implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md](./implement-symphonia-aac-lc-audio-decode-fallback-in-mp4.md) |
+| PLAN-034Y19owSjMFxXkwkts0L2 | Issue #127 RF#628 consumer oracle: 実装計画 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | PLAN-034WsMb80vBXm59wk7FuFn | Issue #199 impl index 生成対応 実装計画 | approved | [issue-199-impl-index-generation-plan.md](./issue-199-impl-index-generation-plan.md) |
 | PLAN-034WuVer3DEk2J0wDG2Yn2 | Issue #202 ir missing-section 補完 実装計画 | approved | [issue-202-ir-missing-sections-plan.md](./issue-202-ir-missing-sections-plan.md) |
 | PLAN-034Xq09g8IwNjIHhpHYbgT | main CI hygiene/verify 失敗修正 実装計画 | approved | [issue-210-ci-failure-fix-plan.md](./issue-210-ci-failure-fix-plan.md) |

@@ -23,6 +23,11 @@ ruviform-numeric.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true
+# RF#628 deterministic PCM fixture/oracle — AL#127 slice の file-based
+# 解析独立 Oracle(f64 fidelity・長尺・gap/Validity)で使用。
+ruviform-audio-test.workspace = true
+# `PcmFixture::new` が要求する SampleRate 型の構築用。
+ruviform-audio-core.workspace = true
 # criterion 0.8.2 — same pin as al-math (bench baseline for the
 # caller-side optimization chain, docs/designs/caller-side-optimizations.md).
 criterion = "=0.8.2"

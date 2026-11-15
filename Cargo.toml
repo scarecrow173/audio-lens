@@ -85,6 +85,11 @@ ruviform-ui-gpui = { git = "https://github.com/scarecrow173/ruviform.git" }
 # (RF#390)。dev-dependency 専用。
 ruviform-ui-test = { git = "https://github.com/scarecrow173/ruviform.git" }
 ruviform-viz = { git = "https://github.com/scarecrow173/ruviform.git" }
+# Issue #127 AL#127-slice: RF#628 の deterministic PCM fixture/oracle
+# (PcmFixture/PcmScenario + oracle::pcm_reference_block)を file-based
+# 解析の独立 Oracle として消費する。dev-dependency 専用 — 製品コードは
+# 本クレートに依存しない(test-only 境界は ruviform 側 lib.rs が保証)。
+ruviform-audio-test = { git = "https://github.com/scarecrow173/ruviform.git" }
 
 # Keep full debug info in release builds so external CPU samplers
 # (samply — see docs/guides/profiling-samply.md) resolve symbols.

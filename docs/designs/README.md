@@ -27,6 +27,7 @@ Directory: `docs/designs`
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
+| DESIGN-034Y19nInNC42C6kYwz7tm | Issue #127 RF#628 consumer oracle: file-based f64/長尺/gap oracle 設計 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | DESIGN-034WsMaALpLsJSgSFhJLyp | Issue #199 impl index 生成対応: front matter 是正と managed marker 設計 | approved | [issue-199-impl-index-generation-design.md](./issue-199-impl-index-generation-design.md) |
 | DESIGN-034WuVuaQKt33yJv9vseJb | Issue #202 ir missing-section 補完設計 | approved | [issue-202-ir-missing-sections-design.md](./issue-202-ir-missing-sections-design.md) |
 | DESIGN-034XpYvyDBAl0hCspnQyXV | main CI hygiene/verify 失敗の修正設計 | approved | [issue-210-ci-failure-fix-design.md](./issue-210-ci-failure-fix-design.md) |
@@ -55,6 +56,7 @@ Directory: `docs/designs`
 | DESIGN-034VbY8pKJZK6aSmZ7mmHA | ruviform 271e2d41 pin 追従の設計と Legacy WebView 棚卸し分類 | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | DESIGN-034U1jgDOqHhX2wdbK7ElK | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の設計 | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | DESIGN-6qppTQVCUfffmR60C18lKG | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用の設計 | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| DESIGN-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従 + consumer oracle 設計 | approved | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | DESIGN-034XLUnMxIuBKdxEIBpIL6 | ruviform ac10a2f7 pin 追従の設計 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | DESIGN-034XCQM1h8KbyVH2VDHQNl | ruviform c6e4f334 pin 追従の設計 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |

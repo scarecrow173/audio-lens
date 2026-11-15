@@ -61,6 +61,7 @@ Directory: `docs/impl/ir`
 | IMPL-sz2YBubWd7RBFUY4Mc8RNw | Issue #105 Ruviform GUI host 上の AudioLens GUI 実装記録 | completed | [issue-105-gui-app.md](./issue-105-gui-app.md) |
 | IMPL-OLRGo454j948be9Zg2yojU | Issue #106 旧 al-viz / Visualization Dataset / 静的 HTML の撤去と export 分離 | completed | [issue-106-viz-removal.md](./issue-106-viz-removal.md) |
 | IMPL-iahBH1RkF74u2l6lEC9ojf | Issue #117 + Ruviform #167–#170: 契約 API 採用置換と rev/precision stamp | completed | [issue-117-ruviform-contract-api.md](./issue-117-ruviform-contract-api.md) |
+| IMPL-034Y19C4d5E6f7G8h9J0k1 | Issue #127 RF#628 consumer oracle 実装記録 | completed | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | IMPL-034WsMwd7e8Pcoe1xb5okf | Issue #199 docs/impl/ir・exp 管理 index の doc-maintenance 生成対応 | completed | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | IMPL-034PDpB1abYsEy5uTTUgS4 | Issue #54 stage inner parallelization (pair/input granularity) | completed | [issue-54-stage-inner-parallelization-pair-input-granularity.md](./issue-54-stage-inner-parallelization-pair-input-granularity.md) |
 | IMPL-034PBt7Fxp5gyMIM7qY05a | Issue #71 band_gain pair 内並列化 (al-analysis) | completed | [issue-71-band-gain-pair-al-analysis.md](./issue-71-band-gain-pair-al-analysis.md) |
@@ -112,6 +113,7 @@ Directory: `docs/impl/ir`
 | IMPL-034Gsq1D0B9oXYkMM4W8pP | registry audio fallback merge | completed | [registry-audio-fallback-merge.md](./registry-audio-fallback-merge.md) |
 | IMPL-034yZPZx2PZbqcLEJtvlsz | resume reproduction tests | completed | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | IMPL-034U1KCagcyUJtf8NCqG7M | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の実装記録 | completed | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
+| IMPL-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従 + consumer oracle 実装記録 | completed | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | IMPL-034XLUtOnusrJZxCBd0Q6x | ruviform ac10a2f7 pin 追従評価の実施記録 | completed | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | IMPL-034VnVtzhBuw5urVoJzgnw | ruviform b02942c2 pin 追従評価の実施記録 | completed | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | IMPL-034XCW3SvHJVdWjyHNmcwb | ruviform c6e4f334 pin 追従評価の実施記録 | completed | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
