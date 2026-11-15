@@ -54,6 +54,7 @@ Directory: `docs/specs`
 | SPEC-034VbY715KTXsTOz3r5xlf | ruviform pin 271e2d41 追従評価と Legacy WebView 棚卸し（AL#127） | approved | [ruviform-271e2d41-rev-watch.md](./ruviform-271e2d41-rev-watch.md) |
 | SPEC-034U1irN0QulZX3YeqAYVY | ruviform pin 54439fdc 追従と Spectrogram cell intensity の実窓検証（ruviform#463 consumer） | approved | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
 | SPEC-VTjFD9We5lvQrqihJN9FVo | ruviform pin 84d21641 追従と al-gui SemanticGuiTest scenario 採用（ruviform#464 Step C / AL#127） | approved | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
+| SPEC-034XLU7bVQnduz0Pr4H8aI | ruviform pin ac10a2f7 追従評価（AL#127） | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | SPEC-034VnTwTGyjylLQ7s4DigL | ruviform pin b02942c2 追従評価（AL#127） | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | SPEC-034XCOYQWCk6bOeIZofauh | ruviform pin c6e4f334 追従評価（AL#127） | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | SPEC-034VFSKyms68sXggutXJmw | ruviform pin fd1d4d5f 追従評価（AL#127） | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |

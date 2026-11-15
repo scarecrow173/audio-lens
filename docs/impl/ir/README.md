@@ -112,6 +112,7 @@ Directory: `docs/impl/ir`
 | IMPL-034Gsq1D0B9oXYkMM4W8pP | registry audio fallback merge | completed | [registry-audio-fallback-merge.md](./registry-audio-fallback-merge.md) |
 | IMPL-034yZPZx2PZbqcLEJtvlsz | resume reproduction tests | completed | [resume-reproduction-tests.md](./resume-reproduction-tests.md) |
 | IMPL-034U1KCagcyUJtf8NCqG7M | ruviform pin 54439fdc 追従と Spectrogram intensity 実窓検証の実装記録 | completed | [ruviform-463-spectrogram-intensity.md](./ruviform-463-spectrogram-intensity.md) |
+| IMPL-034XLUtOnusrJZxCBd0Q6x | ruviform ac10a2f7 pin 追従評価の実施記録 | completed | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | IMPL-034VnVtzhBuw5urVoJzgnw | ruviform b02942c2 pin 追従評価の実施記録 | completed | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | IMPL-034XCW3SvHJVdWjyHNmcwb | ruviform c6e4f334 pin 追従評価の実施記録 | completed | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | IMPL-034VFTb0yP663bAtG9lOHq | ruviform fd1d4d5f pin 追従評価の実施記録 | completed | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
