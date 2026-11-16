@@ -175,6 +175,7 @@ Directory: `docs/tasks`
 | TASK-034XLUpL4KslyVSItyRR9g | ruviform ac10a2f7 pin 追従評価タスク | done | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TASK-034VnVry1uhHUyyAsDeWFx | ruviform b02942c2 pin 追従評価タスク | done | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | TASK-034XCTlP3ywzs0qRZu0Muv | ruviform c6e4f334 pin 追従評価タスク | done | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
+| TASK-034YnH7YfuK1bhY85g3gRg | ruviform cbcc8343 pin 追従評価タスク | done | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
 | TASK-034YaQRhfjwFoCxtc2kZrh | ruviform eafe0a08 pin 追従評価タスク | done | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |

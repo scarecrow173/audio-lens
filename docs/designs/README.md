@@ -60,6 +60,7 @@ Directory: `docs/designs`
 | DESIGN-034XLUnMxIuBKdxEIBpIL6 | ruviform ac10a2f7 pin 追従の設計 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
 | DESIGN-034XCQM1h8KbyVH2VDHQNl | ruviform c6e4f334 pin 追従の設計 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
+| DESIGN-034YnH7oRHxqGNv9Fl5qMK | ruviform cbcc8343 pin 追従の設計 | approved | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | DESIGN-034YaQQQPq20bNhuQdu0AH | ruviform eafe0a08 pin 追従の設計 | approved | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | DESIGN-034VFT8jbz528XiW8ZauIH | ruviform fd1d4d5f pin 追従の設計 | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
