@@ -23,7 +23,7 @@ const BIN: &str = env!("CARGO_BIN_EXE_al-gui-real-scenario");
 
 /// catalog の case 数 — bin 内 `CASES` と一致することを
 /// blocked-probe 出力で検査する(定数の drift は test で検出)。
-const EXPECTED_CASES: usize = 7;
+const EXPECTED_CASES: usize = 9;
 
 struct RunOutput {
     success: bool,
@@ -119,7 +119,7 @@ fn out_without_path_exits_2() {
 #[test]
 fn case_catalog_ids_are_stable() {
     // catalog drift 検出: 既知の scenario/case id を pinned する。
-    // helper 定数由来の 2 件 + real-input/visual の 5 件。
+    // helper 定数由来の 3 件 + real-input/visual/window の 6 件。
     let dir = TempDir::new("al219-catalog");
     let out = dir.join("catalog.jsonl");
     let run = run_bin(&["--blocked-probe", "--out", out.to_str().expect("utf8 path")]);
@@ -139,11 +139,13 @@ fn case_catalog_ids_are_stable() {
         vec![
             ("al.desktop.jobs", "job-select-resume"),
             ("al.source.seek", "seek-commit"),
+            ("al.dataset.workspace", "workspace-tabs"),
             ("al.real-os.input", "os-input-preflight"),
             ("al.real-os.pointer", "seek-pointer-click"),
             ("al.real-os.keyboard", "seek-key-end"),
             ("al.real-os.visual", "capture-frame-desktop"),
             ("al.real-os.visual", "capture-frame-source"),
+            ("al.real-os.window", "close-veto-approve"),
         ]
     );
 }

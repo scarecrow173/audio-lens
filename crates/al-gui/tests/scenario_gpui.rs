@@ -17,8 +17,10 @@ use std::collections::BTreeSet;
 use al_gui::command;
 use al_gui::view::run_screen::JOBS_KEY;
 use common::scenario::{
-    CASE_JOB_SELECT_RESUME, SCENARIO_DESKTOP_JOBS, al_scenario_report, al_view, command_actions,
-    desktop_jobs_scenario, desktop_spec, source_seek_scenario, source_spec,
+    CASE_JOB_SELECT_RESUME, CASE_WORKSPACE_TABS, SCENARIO_DATASET_WORKSPACE, SCENARIO_DESKTOP_JOBS,
+    al_scenario_report, al_view, command_actions, dataset_workspace, dataset_workspace_cells,
+    dataset_workspace_scenario, desktop_jobs_scenario, desktop_spec, source_seek_scenario,
+    source_spec,
 };
 use ruviform_ui::behavior::CommandIntent;
 use ruviform_ui::dock::ViewInstanceId;
@@ -302,4 +304,74 @@ fn gpui_unrunnable_items_report_unsupported_not_pass() {
     assert_eq!(report.driver, ScenarioDriver::GpuiSimulated);
     assert_eq!(report.verdict, ScenarioVerdict::Unsupported);
     assert_eq!(report.verdict.lane_status(), "unsupported");
+}
+
+#[test]
+fn gpui_dataset_workspace_scenario_switches_tabs_with_al_oracle() {
+    let fixture = dataset_workspace();
+    let mut gui = GpuiGuiTest::new();
+    let window = mount_gpui(&mut gui, fixture.spec.clone());
+
+    let outcome = dataset_workspace_scenario(&mut gui, window).expect("dataset workspace scenario");
+
+    // Fake adapter と同一契約: al.workspace / tab-select / index 1,2,0。
+    assert_eq!(
+        command_actions(&outcome.intents),
+        vec![
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 1 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 2 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 0 })),
+            ),
+        ],
+        "workspace tab-select intents"
+    );
+    assert_eq!(outcome.selected, vec![Some(1), Some(2), Some(0)]);
+    assert!(
+        outcome.mounted.iter().all(|(_, mounted)| *mounted),
+        "all workspace tab components mounted: {:?}",
+        outcome.mounted
+    );
+
+    // AL 独立 oracle は adapter 非依存 — spec の typed cell を
+    // fixture の既知期待値で照合する。
+    let (cells_ok, cells) = dataset_workspace_cells(&fixture);
+    assert!(cells_ok, "dataset workspace cell oracle failed: {cells}");
+
+    let mut report = al_scenario_report(
+        &gui,
+        "run-gpui-dataset-workspace",
+        SCENARIO_DATASET_WORKSPACE,
+        CASE_WORKSPACE_TABS,
+    );
+    report.targets = vec![outcome.target];
+    report.expected = Some(json!({
+        "selected": [1, 2, 0],
+        "cells": cells,
+    }));
+    report.observed = Some(json!({
+        "actions": command_actions(&outcome.intents),
+        "selected": outcome.selected,
+        "mounted": outcome
+            .mounted
+            .iter()
+            .map(|(key, mounted)| json!({ "key": key, "mounted": mounted }))
+            .collect::<Vec<_>>(),
+    }));
+    report.evidence = vec!["crates/al-gui/tests/scenario_gpui.rs".to_string()];
+    report.verdict = ScenarioVerdict::Pass;
+
+    // semantic pass は GpuiSimulated のまま — 実機・pixel 証拠へ昇格しない。
+    assert_eq!(report.driver, ScenarioDriver::GpuiSimulated);
+    assert_eq!(report.verdict, ScenarioVerdict::Pass);
 }

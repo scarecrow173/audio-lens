@@ -52,14 +52,18 @@ use al_gui::command;
 use al_gui::view::desktop::DESKTOP_KEY;
 use al_gui::view::screen::{SEEK_KEY, SEEK_TARGET};
 use common::scenario::{
-    CASE_JOB_SELECT_RESUME, CASE_SEEK_COMMIT, SCENARIO_DESKTOP_JOBS, SCENARIO_SOURCE_SEEK, al_view,
-    command_actions, desktop_jobs_scenario, desktop_spec, source_seek_scenario, source_spec,
+    CASE_JOB_SELECT_RESUME, CASE_SEEK_COMMIT, CASE_WORKSPACE_TABS, DatasetWorkspace,
+    SCENARIO_DATASET_WORKSPACE, SCENARIO_DESKTOP_JOBS, SCENARIO_SOURCE_SEEK, al_view,
+    command_actions, dataset_workspace, dataset_workspace_cells, dataset_workspace_scenario,
+    desktop_jobs_scenario, desktop_spec, source_seek_scenario, source_spec,
 };
 use ruviform_ui::behavior::CommandIntent;
 use ruviform_ui::view::{AttachEpochAllocator, ComponentKey, ViewHost, ViewSpec};
-use ruviform_ui::{WindowId, WindowSpec};
+use ruviform_ui::{CloseDecision, WindowId, WindowSpec};
 use ruviform_ui_gpui::os_input::{OsInputOutcome, OsKey, PreflightScope};
-use ruviform_ui_gpui::{RealOsGuiTest, RealWindowMount, RealWindowOptions, ViewMount};
+use ruviform_ui_gpui::{
+    RealOsGuiTest, RealWindowMount, RealWindowOptions, ViewMount, WindowLifecycleEvent,
+};
 use ruviform_ui_test::{
     CaptureOutcome, CaseId, RunId, ScenarioCapability, ScenarioDriver, ScenarioId, ScenarioOutcome,
     ScenarioReport, ScenarioSpec, ScenarioVerdict, SemanticGuiTest, TargetQuery, VisualGuiTest,
@@ -93,6 +97,11 @@ const CASE_SOURCE_SEEK: LaneCase = LaneCase {
     case: CASE_SEEK_COMMIT,
     required: &[ScenarioCapability::SemanticAction],
 };
+const CASE_DATASET_WORKSPACE: LaneCase = LaneCase {
+    scenario: SCENARIO_DATASET_WORKSPACE,
+    case: CASE_WORKSPACE_TABS,
+    required: &[ScenarioCapability::SemanticAction],
+};
 const CASE_PREFLIGHT: LaneCase = LaneCase {
     scenario: "al.real-os.input",
     case: "os-input-preflight",
@@ -118,16 +127,29 @@ const CASE_CAPTURE_SOURCE: LaneCase = LaneCase {
     case: "capture-frame-source",
     required: &[ScenarioCapability::VisualCapture],
 };
+/// window close/DPI 観測面(`ruviform#709`、pin `b6d0cc6a` で解放)。
+/// `request_close`/`arm_close_response`/`respond_close`/
+/// `window_events`/`window_geometry` は `RealOsGuiTest` 固有の
+/// 観測面で capability ゲートを持たない — session が実 window を
+/// 開けた時点でのみ意味を持つ。window を破棄するため catalog の
+/// 最後に置く。
+const CASE_WINDOW_CLOSE: LaneCase = LaneCase {
+    scenario: "al.real-os.window",
+    case: "close-veto-approve",
+    required: &[],
+};
 
 /// 実行順の catalog。blocked-probe の件数・id 検査もこの表が正本。
 const CASES: &[&LaneCase] = &[
     &CASE_DESKTOP_JOBS,
     &CASE_SOURCE_SEEK,
+    &CASE_DATASET_WORKSPACE,
     &CASE_PREFLIGHT,
     &CASE_POINTER_SEEK,
     &CASE_KEYBOARD_SEEK,
     &CASE_CAPTURE_DESKTOP,
     &CASE_CAPTURE_SOURCE,
+    &CASE_WINDOW_CLOSE,
 ];
 
 fn main() -> ExitCode {
@@ -211,9 +233,11 @@ fn main() -> ExitCode {
 /// 写す — 実行していないものを Pass にしない。
 fn live_reports(repo_sha: &Option<String>) -> Vec<ScenarioReport> {
     // `TempDir` は desktop spec の dataset session 基底 dir を保持
-    // するため、session 終了まで生存させる。
+    // するため、session 終了まで生存させる。dataset workspace fixture
+    // も同様に `DatasetWorkspace.dir` で job/dataset 基底を保持する。
     let (_desktop_dir, desktop_view, job_id) = desktop_spec();
     let source_view = source_spec();
+    let dataset_fixture = dataset_workspace();
     let environment = environment_json("real-window", repo_sha, LANE_REAL);
 
     let mounts = vec![
@@ -225,10 +249,14 @@ fn live_reports(repo_sha: &Option<String>) -> Vec<ScenarioReport> {
             window: WindowSpec::default(),
             view: view_mount(source_view),
         },
+        RealWindowMount {
+            window: WindowSpec::default(),
+            view: view_mount(dataset_fixture.spec.clone()),
+        },
     ];
 
     let outcome = RealOsGuiTest::run(mounts, RealWindowOptions::default(), |gui| {
-        run_live_cases(gui, &environment, &job_id, repo_sha)
+        run_live_cases(gui, &environment, &job_id, &dataset_fixture, repo_sha)
     });
 
     match outcome {
@@ -237,7 +265,7 @@ fn live_reports(repo_sha: &Option<String>) -> Vec<ScenarioReport> {
                 if report.cleanup.is_none() {
                     report.cleanup = Some(json!({
                         "real_window_session": "closed",
-                        "windows": 2,
+                        "windows": 3,
                     }));
                 }
             }
@@ -268,14 +296,15 @@ fn run_live_cases(
     gui: &mut RealOsGuiTest,
     environment: &Value,
     job_id: &al_core::JobId,
+    dataset_fixture: &DatasetWorkspace,
     repo_sha: &Option<String>,
 ) -> Vec<ScenarioReport> {
     let windows = gui.windows();
-    if windows.len() != 2 {
+    if windows.len() != 3 {
         return blocked_reports(
             repo_sha,
             &format!(
-                "real-window session mounted {} windows, expected 2",
+                "real-window session mounted {} windows, expected 3",
                 windows.len()
             ),
             LANE_REAL,
@@ -287,6 +316,7 @@ fn run_live_cases(
     }
     let desktop_window = windows[0];
     let source_window = windows[1];
+    let dataset_window = windows[2];
 
     let mut reports = Vec::with_capacity(CASES.len());
     reports.push(desktop_jobs_case(
@@ -299,6 +329,12 @@ fn run_live_cases(
         gui,
         source_window,
         &spec_for(&CASE_SOURCE_SEEK, environment),
+    ));
+    reports.push(dataset_workspace_case(
+        gui,
+        dataset_window,
+        &spec_for(&CASE_DATASET_WORKSPACE, environment),
+        dataset_fixture,
     ));
     reports.push(preflight_case(gui, &spec_for(&CASE_PREFLIGHT, environment)));
 
@@ -329,6 +365,13 @@ fn run_live_cases(
         source_window,
         SEEK_KEY,
         &spec_for(&CASE_CAPTURE_SOURCE, environment),
+    ));
+    // window を破棄する case は必ず最後 — 以降の case は window を
+    // 前提にするため、catalog 順 = 実行順を維持する。
+    reports.push(window_close_case(
+        gui,
+        desktop_window,
+        &spec_for(&CASE_WINDOW_CLOSE, environment),
     ));
     reports
 }
@@ -428,6 +471,70 @@ fn source_seek_case(
         if !ok {
             result.detail =
                 Some("seek gesture did not commit the expected transport.seek value".to_string());
+        }
+        Ok(result)
+    })
+}
+
+/// `al.dataset.workspace`/`workspace-tabs`: Dataset tab→workspace
+/// (Source/Spectrogram/Analysis)の tab 選択を共有 scenario で実行し、
+/// `al.workspace`/`tab-select` intent 列・`selected` 観測・全 tab
+/// component の mounted、および Analysis tab typed cell の AL 独立
+/// oracle(`dataset_workspace_cells`)を合取して判定する。
+fn dataset_workspace_case(
+    gui: &mut RealOsGuiTest,
+    window: WindowId,
+    spec: &ScenarioSpec,
+    fixture: &DatasetWorkspace,
+) -> ScenarioReport {
+    run_scenario(gui, spec, |gui| {
+        let outcome = dataset_workspace_scenario(&mut *gui, window)?;
+        let actions = command_actions(&outcome.intents);
+        let expected_actions = vec![
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 1 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 2 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 0 })),
+            ),
+        ];
+        let (cells_ok, cells) = dataset_workspace_cells(fixture);
+        let selected_ok = outcome.selected == vec![Some(1), Some(2), Some(0)];
+        let mounted_ok = outcome.mounted.iter().all(|(_, mounted)| *mounted);
+        let ok = actions == expected_actions && selected_ok && mounted_ok && cells_ok;
+        let mut result = ScenarioOutcome::new(if ok {
+            ScenarioVerdict::Pass
+        } else {
+            ScenarioVerdict::Fail
+        });
+        result.expected = Some(json!({
+            "actions": expected_actions,
+            "selected": [1, 2, 0],
+            "cells": cells,
+        }));
+        result.observed = Some(json!({
+            "actions": actions,
+            "selected": outcome.selected,
+            "mounted": outcome
+                .mounted
+                .iter()
+                .map(|(key, mounted)| json!({ "key": key, "mounted": mounted }))
+                .collect::<Vec<_>>(),
+        }));
+        result.targets = vec![outcome.target];
+        if !ok {
+            result.detail = Some(
+                "dataset workspace tabs/intents/cells diverged from the AL contract".to_string(),
+            );
         }
         Ok(result)
     })
@@ -660,6 +767,153 @@ fn capture_case(
             }
         }
     })
+}
+
+/// `al.real-os.window`/`close-veto-approve`: window close/DPI 観測面
+/// (`ruviform#709`、pin `b6d0cc6a`)の consumer 側検証。
+/// `window_geometry` の実測値(scale factor・physical 寸法)を記録し、
+/// `request_close` + armed `Veto` で window が生存し、続く armed
+/// `Approve` で `Destroyed` へ至ることを `window_events` で oracle
+/// 判定する。観測面の前提が無い(`window_geometry`/`request_close`
+/// の `ScenarioError`)やイベントが settle 予算内に観測できない
+/// 場合は `NotRun` — 観測不能を Pass にしない。catalog 最後の
+/// case で、desktop window を実際に閉じる。
+fn window_close_case(
+    gui: &mut RealOsGuiTest,
+    window: WindowId,
+    spec: &ScenarioSpec,
+) -> ScenarioReport {
+    run_scenario(gui, spec, |gui| {
+        let not_run = |reason: String| {
+            let mut result = ScenarioOutcome::new(ScenarioVerdict::NotRun);
+            result.detail = Some(reason);
+            result.observed = Some(json!({ "observed": "environment_blocked" }));
+            result
+        };
+
+        let geometry = match gui.window_geometry(window) {
+            Ok(geometry) => json!({
+                "origin_x": geometry.origin_x,
+                "origin_y": geometry.origin_y,
+                "width": geometry.width,
+                "height": geometry.height,
+                "scale_factor": geometry.scale_factor,
+            }),
+            Err(error) => {
+                return Ok(not_run(format!("window_geometry unavailable: {error}")));
+            }
+        };
+
+        // Phase 1: armed Veto — close request は拒否され window は生存。
+        gui.arm_close_response(window, CloseDecision::Veto);
+        if let Err(error) = gui.request_close(window) {
+            return Ok(not_run(format!("request_close unavailable: {error}")));
+        }
+        let close_seen = settle_until(
+            gui,
+            |g| {
+                g.window_events(window)
+                    .contains(&WindowLifecycleEvent::CloseRequested)
+            },
+            50,
+        )?;
+        let after_veto_events = gui.window_events(window);
+        let alive_after_veto = gui.windows().contains(&window);
+
+        // Phase 2: armed Approve — close request は受理され Destroyed。
+        let mut approve_requested = false;
+        let mut destroyed_seen = false;
+        if close_seen {
+            gui.arm_close_response(window, CloseDecision::Approve);
+            if let Err(error) = gui.request_close(window) {
+                return Ok(not_run(format!(
+                    "second request_close unavailable: {error}"
+                )));
+            }
+            approve_requested = true;
+            destroyed_seen = settle_until(
+                gui,
+                |g| {
+                    g.window_events(window)
+                        .contains(&WindowLifecycleEvent::Destroyed)
+                },
+                50,
+            )?;
+        }
+        let final_events = gui.window_events(window);
+        let gone = !gui.windows().contains(&window);
+
+        let veto_ok = close_seen && alive_after_veto;
+        let approve_ok = approve_requested && destroyed_seen && gone;
+        let ok = veto_ok && approve_ok;
+        let mut result = ScenarioOutcome::new(if ok {
+            ScenarioVerdict::Pass
+        } else if !close_seen {
+            ScenarioVerdict::NotRun
+        } else {
+            ScenarioVerdict::Fail
+        });
+        if !close_seen {
+            result.detail =
+                Some("CloseRequested was not observed within the settle budget".to_string());
+        } else if !ok {
+            result.detail = Some(
+                "window close lifecycle diverged: veto did not keep the window alive or approve did not destroy it"
+                    .to_string(),
+            );
+        }
+        result.expected = Some(json!({
+            "geometry_observed": true,
+            "veto_keeps_window": true,
+            "approve_destroys_window": true,
+        }));
+        result.observed = Some(json!({
+            "geometry": geometry,
+            "close_requested_seen": close_seen,
+            "alive_after_veto": alive_after_veto,
+            "approve_requested": approve_requested,
+            "destroyed_seen": destroyed_seen,
+            "window_retired": gone,
+            "events_after_veto": lifecycle_events_json(&after_veto_events),
+            "events_final": lifecycle_events_json(&final_events),
+        }));
+        Ok(result)
+    })
+}
+
+// ---------------------------------------------------------------------
+// window lifecycle helpers
+// ---------------------------------------------------------------------
+
+/// `WindowLifecycleEvent` 列を observed JSON へ写す。
+/// enum は `non_exhaustive` — 未知 variant は `"unknown"` として
+/// 正直に記録する(`OsInputOutcome` の `op_json` と同じ規約)。
+fn lifecycle_events_json(events: &[WindowLifecycleEvent]) -> Value {
+    events
+        .iter()
+        .map(|event| match event {
+            WindowLifecycleEvent::Created => json!({ "event": "created" }),
+            WindowLifecycleEvent::Ready => json!({ "event": "ready" }),
+            WindowLifecycleEvent::Resized { width, height } => {
+                json!({ "event": "resized", "width": width, "height": height })
+            }
+            WindowLifecycleEvent::Moved { x, y } => {
+                json!({ "event": "moved", "x": x, "y": y })
+            }
+            WindowLifecycleEvent::Focused(focused) => {
+                json!({ "event": "focused", "focused": focused })
+            }
+            WindowLifecycleEvent::ScaleFactorChanged { factor } => {
+                json!({ "event": "scale_factor_changed", "factor": factor })
+            }
+            WindowLifecycleEvent::CloseRequested => {
+                json!({ "event": "close_requested" })
+            }
+            WindowLifecycleEvent::Destroyed => json!({ "event": "destroyed" }),
+            _ => json!({ "event": "unknown" }),
+        })
+        .collect::<Vec<_>>()
+        .into()
 }
 
 // ---------------------------------------------------------------------
