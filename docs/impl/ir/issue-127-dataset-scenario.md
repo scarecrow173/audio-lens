@@ -51,6 +51,10 @@ relations:
   supersedes: []
   superseded-by: []
   related: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # Dataset tab→workspace scenario の実施記録

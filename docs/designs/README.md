@@ -27,6 +27,7 @@ Directory: `docs/designs`
 | DESIGN-034AasB7gEcddWOpUHrKX8 | ゴールデン fixture マトリクス設計 | approved | [golden-validation.md](./golden-validation.md) |
 | DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
+| DESIGN-034Z9kQmDatasetScen02 | Dataset tab→workspace scenario の設計 | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | DESIGN-034Y19nInNC42C6kYwz7tm | Issue #127 RF#628 consumer oracle: file-based f64/長尺/gap oracle 設計 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | DESIGN-034WsMaALpLsJSgSFhJLyp | Issue #199 impl index 生成対応: front matter 是正と managed marker 設計 | approved | [issue-199-impl-index-generation-design.md](./issue-199-impl-index-generation-design.md) |
 | DESIGN-034WuVuaQKt33yJv9vseJb | Issue #202 ir missing-section 補完設計 | approved | [issue-202-ir-missing-sections-design.md](./issue-202-ir-missing-sections-design.md) |
@@ -61,6 +62,7 @@ Directory: `docs/designs`
 | DESIGN-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従 + consumer oracle 設計 | approved | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | DESIGN-034XLUnMxIuBKdxEIBpIL6 | ruviform ac10a2f7 pin 追従の設計 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | DESIGN-034VnUBxnA88YiQguHXjSc | ruviform b02942c2 pin 追従の設計 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| DESIGN-034Z9kQmDatasetRevWatch02 | ruviform b6d0cc6a pin 追従の設計 | approved | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | DESIGN-034XCQM1h8KbyVH2VDHQNl | ruviform c6e4f334 pin 追従の設計 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | DESIGN-034YnH7oRHxqGNv9Fl5qMK | ruviform cbcc8343 pin 追従の設計 | approved | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | DESIGN-034P5eOr1bEaMgiImL3DHd | Ruviform Git 依存・SHA 固定・Private repo CI アクセス設計 | approved | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |

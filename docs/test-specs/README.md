@@ -23,6 +23,7 @@ Directory: `docs/test-specs`
 | TSPEC-034SmNbPOS3xJ9KpmCgL4o | Full CI 構造契約(ci.yml): 全実行・ci-summary・expected_sha | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
+| TSPEC-034Z9kQmDatasetScen04 | Dataset tab→workspace scenario の検証仕様 | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | TSPEC-034Y19pTojHQhGnOiVrawz | Issue #127 RF#628 consumer oracle: file-based oracle テスト仕様 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | TSPEC-034WsMpecRKShroKP0mrqH | impl index 生成契約: front matter schema・managed marker・決定的出力 | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TSPEC-034WuVDeP2Keiu82igc78e | ir 必須セクション契約: missing-section 0 件と本文具体性 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
@@ -59,6 +60,7 @@ Directory: `docs/test-specs`
 | TSPEC-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従 + consumer oracle テスト仕様 | approved | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | TSPEC-034XLUrPKy2kz5PYTSGInn | ruviform ac10a2f7 pin 追従の検証仕様 | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TSPEC-034VnUDkvuNzZtZMQT43o1 | ruviform b02942c2 pin 追従の検証仕様 | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| TSPEC-034Z9kQmDatasetRevWatch04 | ruviform b6d0cc6a pin 追従の検証仕様 | approved | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | TSPEC-034XCSoWwxBG9UbWOh0Ebw | ruviform c6e4f334 pin 追従の検証仕様 | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TSPEC-034YnH8GZCnGo4aoFK6mgM | ruviform cbcc8343 pin 追従の検証仕様 | approved | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | TSPEC-034YaRb4ebaeqPddL37Fqv | ruviform eafe0a08 pin 追従の検証仕様 | approved | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |

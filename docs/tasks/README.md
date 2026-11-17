@@ -111,6 +111,7 @@ Directory: `docs/tasks`
 | TASK-cwUga2iqYje7mVg950IY46 | Rust ワークスペースの初期化 | done | [init-rust-workspace.md](./init-rust-workspace.md) |
 | TASK-034GMMK00SyuEB3Ztrq2v7 | InputCache hit/miss 計数と release 検証口 | done | [inputcache-hit-miss-release.md](./inputcache-hit-miss-release.md) |
 | TASK-034FQrcq7vbkfsYZwC2wrc | IPD 検索窓と signed lag 原点を修復する | done | [ipd-lag-search-fix.md](./ipd-lag-search-fix.md) |
+| TASK-034Z9kQmDatasetScen03 | Dataset tab→workspace scenario 実装タスク | done | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | TASK-034WsMpMwgPJoeSbeFZiC5 | impl index 生成対応(AL#199): ir/exp front matter 是正と managed index 化 | done | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TASK-034WuVJXa5i7mHx8qvE4zj | ir missing-section 本文補完(AL#202) | done | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
 | TASK-034Xq1IjYBr7OnhswOHW6s | main CI hygiene/verify 失敗修正(AL#210) | done | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
@@ -176,6 +177,7 @@ Directory: `docs/tasks`
 | TASK-W04xdHiaIegpHOFhvnlQ9d | ruviform#464 Step C / AL#127 SemanticGuiTest scenario 採用のタスク | done | [ruviform-464-scenario-adoption.md](./ruviform-464-scenario-adoption.md) |
 | TASK-034XLUpL4KslyVSItyRR9g | ruviform ac10a2f7 pin 追従評価タスク | done | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | TASK-034VnVry1uhHUyyAsDeWFx | ruviform b02942c2 pin 追従評価タスク | done | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| TASK-034Z9kQmDatasetRevWatch03 | ruviform b6d0cc6a pin 追従評価タスク | done | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | TASK-034XCTlP3ywzs0qRZu0Muv | ruviform c6e4f334 pin 追従評価タスク | done | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | TASK-034YnH7YfuK1bhY85g3gRg | ruviform cbcc8343 pin 追従評価タスク | done | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |

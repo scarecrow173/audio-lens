@@ -39,6 +39,10 @@ relations:
   supersedes: []
   superseded-by: []
   related: []
+metadata:
+  experiments:
+    adopted: []
+    rejected: []
 ---
 
 # ruviform b6d0cc6a pin 追従の実施記録
