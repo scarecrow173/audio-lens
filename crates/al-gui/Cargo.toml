@@ -21,6 +21,14 @@ serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
 
+# Issue #219: `al-gui-real-scenario` test-only bin(`gpui-real`
+# feature)が使う test-support crate。optional + feature ゲートで
+# 製品配布・既定 build には含めない(POLICIES §2.1)。bin target は
+# dev-dependencies を解決しないため、lane 実行に必要な分だけを
+# optional dependency として持つ。
+al-testkit = { workspace = true, optional = true }
+ruviform-ui-test = { workspace = true, optional = true }
+
 [dev-dependencies]
 al-testkit.workspace = true
 ruviform-ui-test.workspace = true
@@ -33,6 +41,23 @@ webview = ["dep:ruviform-ui-webview", "ruviform-ui-webview/webview"]
 gpui = ["dep:ruviform-ui-gpui", "ruviform-ui-gpui/gpui"]
 # GPUI Driver の consumer 観測 seam(`GpuiObserver`)を使う parity test 用。
 gpui-test = ["gpui", "ruviform-ui-gpui/gpui-test"]
+# Issue #219 AL-E2E-REAL: 実 OS window lane。`RealOsGuiTest`
+# (ruviform-ui-gpui `real-scenario`)で製品 ViewSpec を実 window に
+# mount し、`ruviform-ui-test` の `run_scenario`/`ScenarioSpec` で
+# driver-neutral scenario を `ScenarioDriver::RealOs` として実行する
+# test-only lane。
+#
+# `gpui-test` とは同居不可: ruviform-ui-gpui の Cargo.toml 注記どおり
+# test platform が OS surface を stub するため、両 feature を同時に
+# 有効化すると pixel capture が正直に `Unsupported` へ落ち、real-OS
+# 証拠と simulated 証拠が混ざる。`al-gui-real-scenario` bin は
+# `all(gpui-test, gpui-real)` で compile_error により排他を強制する。
+gpui-real = [
+    "gpui",
+    "ruviform-ui-gpui/real-scenario",
+    "dep:al-testkit",
+    "dep:ruviform-ui-test",
+]
 
 [[bin]]
 name = "al-gui"
@@ -43,3 +68,13 @@ required-features = ["webview"]
 name = "al-desktop"
 path = "src/bin/al-desktop.rs"
 required-features = ["gpui"]
+
+# Issue #219: 実 OS window E2E lane の接続 bin。test-only —
+# `gpui-real` feature 指定時のみ build され、製品配布には含めない
+# (POLICIES §2.1)。interactive desktop session でのみ実 window を
+# 開き、headless host では全 case を `NotRun` +
+# `observed.environment_blocked` の fail-closed JSONL で記録する。
+[[bin]]
+name = "al-gui-real-scenario"
+path = "src/bin/al-gui-real-scenario.rs"
+required-features = ["gpui-real"]
