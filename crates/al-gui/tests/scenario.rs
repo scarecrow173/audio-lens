@@ -14,9 +14,10 @@ use al_gui::command;
 use al_gui::view::run_screen::JOBS_KEY;
 use al_gui::view::screen::SEEK_TARGET;
 use common::scenario::{
-    CASE_JOB_SELECT_RESUME, CASE_SEEK_COMMIT, SCENARIO_DESKTOP_JOBS, SCENARIO_SOURCE_SEEK,
-    al_scenario_report, al_view, command_actions, desktop_jobs_scenario, desktop_spec,
-    source_seek_scenario, source_spec,
+    CASE_JOB_SELECT_RESUME, CASE_SEEK_COMMIT, CASE_WORKSPACE_TABS, SCENARIO_DATASET_WORKSPACE,
+    SCENARIO_DESKTOP_JOBS, SCENARIO_SOURCE_SEEK, al_scenario_report, al_view, command_actions,
+    dataset_workspace, dataset_workspace_cells, dataset_workspace_scenario, desktop_jobs_scenario,
+    desktop_spec, source_seek_scenario, source_spec,
 };
 use ruviform_ui::WindowId;
 use ruviform_ui::behavior::CommandIntent;
@@ -228,6 +229,83 @@ fn fake_target_resolution_covers_window_view_component_and_pins() {
         matches!(err, ScenarioError::StaleEpoch { .. }),
         "expected StaleEpoch, got {err:?}"
     );
+}
+
+#[test]
+fn fake_dataset_workspace_scenario_switches_tabs_with_al_oracle() {
+    let fixture = dataset_workspace();
+    let mut gui = FakeGuiTest::new();
+    let window = gui.open_window();
+    gui.mount_view(window, al_view(), fixture.spec.clone())
+        .expect("mount workspace");
+
+    let outcome = dataset_workspace_scenario(&mut gui, window).expect("dataset workspace scenario");
+
+    // workspace Tabs の tab-select intent 契約(al.workspace / tab-select / {"index": n})。
+    assert_eq!(
+        command_actions(&outcome.intents),
+        vec![
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 1 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 2 })),
+            ),
+            (
+                command::WORKSPACE_TARGET.to_string(),
+                command::ACTION_TAB_SELECT.to_string(),
+                Some(json!({ "index": 0 })),
+            ),
+        ],
+        "workspace tab-select intents"
+    );
+    assert_eq!(outcome.selected, vec![Some(1), Some(2), Some(0)]);
+    assert!(
+        outcome.mounted.iter().all(|(_, mounted)| *mounted),
+        "all workspace tab components mounted: {:?}",
+        outcome.mounted
+    );
+
+    // AL 独立 oracle: Analysis tab の typed cell(events/alignments)を
+    // fixture の既知期待値で照合する。
+    let (cells_ok, cells) = dataset_workspace_cells(&fixture);
+    assert!(cells_ok, "dataset workspace cell oracle failed: {cells}");
+
+    let mut report = al_scenario_report(
+        &gui,
+        "run-fake-dataset-workspace",
+        SCENARIO_DATASET_WORKSPACE,
+        CASE_WORKSPACE_TABS,
+    );
+    report.targets = vec![outcome.target];
+    report.expected = Some(json!({
+        "actions": [
+            { "target": command::WORKSPACE_TARGET, "action": command::ACTION_TAB_SELECT, "params": { "index": 1 } },
+            { "target": command::WORKSPACE_TARGET, "action": command::ACTION_TAB_SELECT, "params": { "index": 2 } },
+            { "target": command::WORKSPACE_TARGET, "action": command::ACTION_TAB_SELECT, "params": { "index": 0 } },
+        ],
+        "selected": [1, 2, 0],
+        "cells": cells,
+    }));
+    report.observed = Some(json!({
+        "actions": command_actions(&outcome.intents),
+        "selected": outcome.selected,
+        "mounted": outcome
+            .mounted
+            .iter()
+            .map(|(key, mounted)| json!({ "key": key, "mounted": mounted }))
+            .collect::<Vec<_>>(),
+    }));
+    report.evidence = vec!["crates/al-gui/tests/scenario.rs".to_string()];
+    report.verdict = ScenarioVerdict::Pass;
+
+    assert_eq!(report.driver, ScenarioDriver::Fake);
+    assert_eq!(report.verdict, ScenarioVerdict::Pass);
+    assert_eq!(report.verdict.lane_status(), "pass");
 }
 
 #[test]
