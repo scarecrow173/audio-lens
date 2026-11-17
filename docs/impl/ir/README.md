@@ -122,6 +122,7 @@ Directory: `docs/impl/ir`
 | IMPL-034Z9kQmDatasetRevWatch05 | ruviform b6d0cc6a pin 追従評価の実施記録 | completed | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | IMPL-034XCW3SvHJVdWjyHNmcwb | ruviform c6e4f334 pin 追従評価の実施記録 | completed | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | IMPL-034YnH9gny1R4SISLshw3K | ruviform cbcc8343 pin 追従評価の実施記録 | completed | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
+| IMPL-sdkjbhBGWPFajNDZPGXdrB | ruviform e4c9f6f0 pin 追従評価の実施記録 | completed | [ruviform-e4c9f6f0-rev-watch.md](./ruviform-e4c9f6f0-rev-watch.md) |
 | IMPL-034YaRbwcLs7BNyNI6lTIY | ruviform eafe0a08 pin 追従評価の実施記録 | completed | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | IMPL-034VFTb0yP663bAtG9lOHq | ruviform fd1d4d5f pin 追従評価の実施記録 | completed | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | IMPL-034P70XgpUzok2HsL8bOrX | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携 | completed | [ruviform-git-sha-toolchain-private-repo-ci.md](./ruviform-git-sha-toolchain-private-repo-ci.md) |

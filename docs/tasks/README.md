@@ -182,6 +182,7 @@ Directory: `docs/tasks`
 | TASK-034YnH7YfuK1bhY85g3gRg | ruviform cbcc8343 pin 追従評価タスク | done | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | TASK-034P6lzwtU7fjoiE2fyPus | Ruviform Git 依存 SHA 固定・toolchain 検証・Private repo CI 連携(AL#99) | done | [ruviform-dependency-ci.md](./ruviform-dependency-ci.md) |
 | TASK-034P3OPfg52Iv5UK2zrr4F | 固有処理と汎用カーネルの責務分離(AL#102) | done | [ruviform-domain-kernel-separation.md](./ruviform-domain-kernel-separation.md) |
+| TASK-ueCr6an23J49bQuGKAM6bx | ruviform e4c9f6f0 pin 追従評価タスク | done | [ruviform-e4c9f6f0-rev-watch.md](./ruviform-e4c9f6f0-rev-watch.md) |
 | TASK-034YaQRhfjwFoCxtc2kZrh | ruviform eafe0a08 pin 追従評価タスク | done | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | TASK-034VFTar4Un3iqKLVQ4LR4 | ruviform fd1d4d5f pin 追従評価タスク | done | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | TASK-HrjjahBSYbViCD72MweZwV | al-observability SinkConfig::span_events 追従 (AL#127) | done | [ruviform-logging-span-events-compat.md](./ruviform-logging-span-events-compat.md) |
