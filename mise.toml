@@ -220,6 +220,28 @@ run = "cargo test -p al-gui --features gpui-test"
 description = "al-desktop bin (gpui feature) の Native Build/Link 検証"
 run = "cargo build -p al-gui --features gpui --bin al-desktop"
 
+# Issue #219 AL-E2E-REAL: `al-gui-real-scenario` test-only bin
+# (`gpui-real` feature)の実 OS window E2E lane。製品 ViewSpec を
+# `RealOsGuiTest::run` の実 window に mount し、driver-neutral
+# scenario を `ScenarioDriver::RealOs` で実行する。interactive
+# Windows desktop session でのみ実 window を開く opt-in lane で、
+# CI Required gate ではない(POLICIES §2.1/§4)。headless host では
+# 全 case が `NotRun` + `observed.environment_blocked` で
+# fail-closed 記録され、それが正しい結果(lane 失敗ではない)。
+# 実走 Pass 証拠はこの lane の interactive 実行が前提 — Issue #219
+# は実走証拠が揃うまで Open を維持する。
+[tasks.test-ui-gpui-real]
+description = "al-gui-real-scenario 実 OS window E2E lane(interactive desktop session 前提の opt-in)"
+run = "cargo run --locked -p al-gui --features gpui-real --bin al-gui-real-scenario -- --out evidence/al219/gui-real-scenario.jsonl"
+
+# `test-ui-gpui-real` と同じ bin の deterministic headless 自己検証:
+# window を開かず catalog 全 case が `NotRun` +
+# `observed.environment_blocked` かつ `environment_kind` が
+# `real-window` を主張しないことを bin 内で検査する(exit 0 = 合格)。
+[tasks.test-ui-gpui-real-headless]
+description = "al-gui-real-scenario blocked-probe(headless fail-closed 自己検証)"
+run = "cargo run --locked -p al-gui --features gpui-real --bin al-gui-real-scenario -- --blocked-probe --out evidence/al219/gui-real-headless.jsonl"
+
 [tasks.verify-full]
 description = "Workspace standard full verification: fmt, check-full, lint-full, test-full (profile selected by MISE_ENV)"
 run = [

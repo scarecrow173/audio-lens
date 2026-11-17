@@ -374,10 +374,14 @@ jobs:
           deploy_key: ${{ secrets.RUVIFORM_DEPLOY_KEY }}
           sccache_disable: ${{ vars.CI_SCCACHE_DISABLE }}
 
-  # 実 Window/OS 自動試験の placeholder。Ruviform #312(test host)/
-  # #313(OS driver)が未接続のため、本 run では検証範囲外であること
-  # を not-run の証拠として常時記録する(headless/ui-verify を実
-  # GUI 検証の代用としない)。接続時は opt-in lane へ置き換える。
+  # 実 Window/OS 自動試験の placeholder。Ruviform の RealOsGuiTest
+  # runner は pin cbcc8343 で接続済み(audio-lens#219 の
+  # `al-gui-real-scenario` lane)だが、実 OS window を開く検証は
+  # interactive desktop session 前提の opt-in 実行
+  # (`mise run test-ui-gpui-real`)であり、headless/非対話の CI
+  # runner では実行できない。本 run では検証範囲外であることを
+  # not-run の証拠として常時記録する(headless/ui-verify を実
+  # GUI 検証の代用としない)。macOS/Linux の GUI-L2 は Deferred。
   gui-real:
     name: gui-real
     runs-on: ubuntu-latest
@@ -393,7 +397,7 @@ jobs:
             echo ""
             echo "| lane | OS | feature | ruviform resolved SHA | 結果 | 備考 |"
             echo "|---|---|---|---|---|---|"
-            echo "| gui-real | - | 実 Window/OS 自動試験 | - | not run | Ruviform #312/#313 未接続。opt-in/専用 Runner で別 Gate |"
+            echo "| gui-real | - | 実 Window/OS 自動試験 | - | not run | runner は pin cbcc8343 で接続済み。opt-in/interactive session 実走待ち(`mise run test-ui-gpui-real`)。macOS/Linux は Deferred |"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "status=not_run" >> "$GITHUB_OUTPUT"
 
