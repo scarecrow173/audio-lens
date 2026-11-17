@@ -8,13 +8,13 @@ updated: "2026-10-11"
 owners: []
 relations:
   source:
-    - "../../crates/al-math/src/lib.rs"
-    - "../../crates/al-math/src/fft.rs"
-    - "../../crates/al-locate/src/dsp.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/lib.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/fft.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-locate/src/dsp.rs"
     - "../../crates/al-locate/examples/bench_dsp.rs"
-    - "../../crates/al-math/tests/fft.rs"
-    - "../../crates/al-math/tests/correlation_filter.rs"
-    - "../../crates/al-math/examples/bench_correlation.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/tests/fft.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/tests/correlation_filter.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/examples/bench_correlation.rs"
   changes:
     added: []
     modified: []

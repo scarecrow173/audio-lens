@@ -10,14 +10,14 @@ relations:
   source:
     - "../../crates/al-analysis/src/reference.rs"
     - "../../crates/al-analysis/src/stft.rs"
-    - "../../crates/al-locate/src/dsp.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-locate/src/dsp.rs"
     - "../../crates/al-locate/src/mixer.rs"
     - "../../crates/al-locate/src/residual.rs"
     - "../../crates/al-locate/src/stage.rs"
-    - "../../crates/al-math/src/linalg.rs"
-    - "../../crates/al-math/src/fft.rs"
-    - "../../crates/al-math/src/correlation.rs"
-    - "../../crates/al-math/src/filter.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/linalg.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/fft.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/correlation.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/filter.rs"
     - "../../crates/al-job/src/runner.rs"
   changes:
     added: []

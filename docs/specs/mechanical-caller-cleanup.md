@@ -14,12 +14,12 @@ relations:
     - "../../crates/al-analysis/src/band_gain.rs"
     - "../../crates/al-analysis/src/expensive/channel.rs"
     - "../../crates/al-analysis/src/expensive/mod.rs"
-    - "../../crates/al-locate/src/dsp.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-locate/src/dsp.rs"
     - "../../crates/al-locate/src/normalize.rs"
     - "../../crates/al-media/src/video.rs"
     - "../../crates/al-dataset/src/tensor.rs"
-    - "../../crates/al-math/src/filter.rs"
-    - "../../crates/al-math/src/vec.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/filter.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/vec.rs"
   changes:
     added: []
     modified: []

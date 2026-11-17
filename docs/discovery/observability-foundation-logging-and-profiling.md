@@ -14,7 +14,7 @@ relations:
     - "../../crates/al-locate/examples/bench_dsp.rs"
     - "../../crates/al-locate/examples/bench_locate_prepared.rs"
     - "../../crates/al-locate/examples/bench_ncc.rs"
-    - "../../crates/al-math/examples/bench_correlation.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/examples/bench_correlation.rs"
   changes:
     added: []
     modified: []
