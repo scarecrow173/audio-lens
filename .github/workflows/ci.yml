@@ -432,7 +432,7 @@ jobs:
             echo "- access mode: ${{ needs.ruviform-access.outputs.mode || 'unknown' }}"
             echo "- ruviform resolved SHA: ${{ needs.verify.outputs.resolved_sha || needs.verify-macos.outputs.resolved_sha || needs.ui-verify.outputs.resolved_sha || needs.ui-verify-macos.outputs.resolved_sha || needs.webview-verify.outputs.resolved_sha || needs.webview-verify-macos.outputs.resolved_sha || needs.gpui-verify.outputs.resolved_sha || needs.gpui-verify-macos.outputs.resolved_sha || 'unresolved' }}"
             echo "- run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            echo "- 実 GUI/Window 自動試験: not run(Ruviform #312/#313 未接続。実機未検証)"
+            echo "- 実 GUI/Window 自動試験: not run(runner は pin cbcc8343 で接続済み。opt-in/interactive session 実走待ち。実機未検証)"
             echo ""
             echo "| lane | OS | 結果 |"
             echo "|---|---|---|"

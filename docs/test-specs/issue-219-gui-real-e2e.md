@@ -9,8 +9,38 @@ owners: []
 relations:
   source: []
   changes:
-    added: []
-    modified: []
+    added:
+      - type: "doc"
+        path: "docs/specs/issue-219-gui-real-e2e.md"
+      - type: "doc"
+        path: "docs/designs/issue-219-gui-real-e2e.md"
+      - type: "doc"
+        path: "docs/plans/issue-219-gui-real-e2e.md"
+      - type: "doc"
+        path: "docs/tasks/issue-219-gui-real-e2e.md"
+      - type: "doc"
+        path: "docs/test-specs/issue-219-gui-real-e2e.md"
+      - type: "doc"
+        path: "docs/impl/ir/gpui-gui-os-e2e-lane-issue-219.md"
+      - type: "doc"
+        path: "docs/impl/exp/issue-219-gui-real-e2e-exp.jsonl"
+      - type: "file"
+        path: "crates/al-gui/src/bin/al-gui-real-scenario.rs"
+      - type: "file"
+        path: "crates/al-gui/tests/scenario_real.rs"
+      - type: "file"
+        path: "evidence/al219/gui-real-scenario.jsonl"
+      - type: "file"
+        path: "evidence/al219/gui-real-headless.jsonl"
+      - type: "file"
+        path: "evidence/al219/README.md"
+    modified:
+      - type: "file"
+        path: "crates/al-gui/Cargo.toml"
+      - type: "file"
+        path: "mise.toml"
+      - type: "file"
+        path: ".github/workflows/ci.yml"
     deleted: []
     renamed: []
     moved: []
