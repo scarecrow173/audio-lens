@@ -31,6 +31,7 @@ Directory: `docs/specs`
 | SPEC-034WsMa4H4RpNbIsbWENgu | Issue #199 docs/impl/ir・exp 管理 index を doc-maintenance で生成可能にする | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | SPEC-034WuVtJ4jL3z3QSJ5v5RB | Issue #202 docs/impl/ir missing-section 本文補完 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
 | SPEC-034XpWEQMpT2Z7xn8JP2Nh | main CI hygiene/verify 失敗の修正(Issue #210) | approved | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
+| SPEC-034YZwLV3g7PRe9pyO6a8B | route_graph blocked 解消: stale crates/al-math・al-locate source 参照の修復(Issue #220) | approved | [issue-220-stale-doc-refs.md](./issue-220-stale-doc-refs.md) |
 | SPEC-034GNsDtc88g3RPbhoW9RS | local_lag オーバーラップ正規化相関の FFT 化 | draft | [local-lag-overlap-corr-fft.md](./local-lag-overlap-corr-fft.md) |
 | SPEC-034FlHW8GmjrKvTJlf0UWw | Locate 合議におけるピーク曖昧性契約 | approved | [locate-consensus-ambiguity-contract.md](./locate-consensus-ambiguity-contract.md) |
 | SPEC-034GMyXJaIeUXOZB86GpDC | locate 相関 plan ワーカープールと共有 cache 監査 | approved | [locate-plan-cache.md](./locate-plan-cache.md) |
