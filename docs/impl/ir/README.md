@@ -46,6 +46,7 @@ Directory: `docs/impl/ir`
 | IMPL-034z8jflmxl3ZTDBOlZmIQ | dataset-stage | completed | [dataset-stage.md](./dataset-stage.md) |
 | IMPL-034z8jeiDvJJ5osxk1UhA2 | dataset-writer-provenance | completed | [dataset-writer-provenance.md](./dataset-writer-provenance.md) |
 | IMPL-034zkPfGy6qmBc2hwZj6Nz | export-package | completed | [export-package.md](./export-package.md) |
+| IMPL-034Z0TOzRf8EG8PhLYl8aD | GPUI 製品 GUI 実 OS E2E 接続 lane(Issue #219) | completed | [gpui-gui-os-e2e-lane-issue-219.md](./gpui-gui-os-e2e-lane-issue-219.md) |
 | IMPL-APfHsvtdVEm01PMVUM2Jvg | Ruviform Controls・Gesture・Binding の GUI 統合 headless core(Issue #131) | completed | [gui-ruviform-controls-issue-131.md](./gui-ruviform-controls-issue-131.md) |
 | IMPL-DDwFaI0Gd2SuWUe3iM02A | Ruviform 可視化部品で Analysis Dataset・同期 Timeline・Feature 閲覧 headless core(Issue #132) | completed | [gui-ruviform-viz-issue-132.md](./gui-ruviform-viz-issue-132.md) |
 | IMPL-qy44xObaluKWYoHyVuVHq1 | 変更影響ベース CI・Fail-Closed summary 整合(AL#149) | completed | [impact-based-ci-al-149.md](./impact-based-ci-al-149.md) |
