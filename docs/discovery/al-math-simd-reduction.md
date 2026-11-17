@@ -8,12 +8,12 @@ updated: "2026-10-13"
 owners: []
 relations:
   source:
-    - "../../crates/al-math/src/linalg.rs"
-    - "../../crates/al-math/src/lib.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/linalg.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-math/src/lib.rs"
     - "../../crates/al-locate/src/methods.rs"
     - "../../crates/al-locate/src/residual.rs"
     - "../../crates/al-locate/src/mixer.rs"
-    - "../../crates/al-locate/src/dsp.rs"
+    - "https://github.com/scarecrow173/audio-lens/blob/1824fe169460a0e7314cb73686db638bf1ee9f5e/crates/al-locate/src/dsp.rs"
     - "../../crates/al-analysis/src/cheap.rs"
     - "../../crates/al-analysis/src/reference.rs"
     - "../../crates/al-analysis/src/band_gain.rs"
