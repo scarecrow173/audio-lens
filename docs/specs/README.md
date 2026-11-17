@@ -27,6 +27,7 @@ Directory: `docs/specs`
 | SPEC-034Rp2PraZGXQhVUwhn5KL | エクスポートパッケージのテキスト成果物可搬投影 | approved | [export-artifact-portability.md](./export-artifact-portability.md) |
 | SPEC-034SmqnKZslN3lFq9I7ahH | Issue #158 Full CI 統一: 全実行化・共通 ci-summary Fail-Closed 集約・expected_sha 契約(安全な第一段階) | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
+| SPEC-034Z9kQmDatasetScen01 | Dataset tab→workspace driver-neutral scenario + AL 独立 oracle（AL#127） | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | SPEC-034Y17EML4OKyeGCYsuFS8 | Issue #127 RF#628 consumer oracle: file-based f64 fidelity・長尺非回帰・gap/Validity | proposed | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | SPEC-034WsMa4H4RpNbIsbWENgu | Issue #199 docs/impl/ir・exp 管理 index を doc-maintenance で生成可能にする | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | SPEC-034WuVtJ4jL3z3QSJ5v5RB | Issue #202 docs/impl/ir missing-section 本文補完 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
@@ -60,6 +61,7 @@ Directory: `docs/specs`
 | SPEC-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従評価 + RF#628 consumer oracle（AL#127） | approved | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | SPEC-034XLU7bVQnduz0Pr4H8aI | ruviform pin ac10a2f7 追従評価（AL#127） | approved | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | SPEC-034VnTwTGyjylLQ7s4DigL | ruviform pin b02942c2 追従評価（AL#127） | approved | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| SPEC-034Z9kQmDatasetRevWatch01 | ruviform pin b6d0cc6a 追従評価（AL#127 dataset-scenario slice） | approved | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | SPEC-034XCOYQWCk6bOeIZofauh | ruviform pin c6e4f334 追従評価（AL#127） | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | SPEC-034YnFfBgevMiuCJ5T6H98 | ruviform pin cbcc8343 追従評価（AL#127） | approved | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | SPEC-034YaQQiC29QG0oPeT4iVS | ruviform pin eafe0a08 追従評価（AL#127） | approved | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |

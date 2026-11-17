@@ -62,6 +62,7 @@ Directory: `docs/impl/ir`
 | IMPL-sz2YBubWd7RBFUY4Mc8RNw | Issue #105 Ruviform GUI host 上の AudioLens GUI 実装記録 | completed | [issue-105-gui-app.md](./issue-105-gui-app.md) |
 | IMPL-OLRGo454j948be9Zg2yojU | Issue #106 旧 al-viz / Visualization Dataset / 静的 HTML の撤去と export 分離 | completed | [issue-106-viz-removal.md](./issue-106-viz-removal.md) |
 | IMPL-iahBH1RkF74u2l6lEC9ojf | Issue #117 + Ruviform #167–#170: 契約 API 採用置換と rev/precision stamp | completed | [issue-117-ruviform-contract-api.md](./issue-117-ruviform-contract-api.md) |
+| IMPL-034Z9kQmDatasetScen05 | Dataset tab→workspace scenario の実施記録 | completed | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | IMPL-034Y19C4d5E6f7G8h9J0k1 | Issue #127 RF#628 consumer oracle 実装記録 | completed | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | IMPL-034WsMwd7e8Pcoe1xb5okf | Issue #199 docs/impl/ir・exp 管理 index の doc-maintenance 生成対応 | completed | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | IMPL-034YZx6QBW04BAak9deUjc | Issue #220 stale crates/al-math・al-locate source 参照修復記録 | completed | [issue-220-stale-doc-refs.md](./issue-220-stale-doc-refs.md) |
@@ -118,6 +119,7 @@ Directory: `docs/impl/ir`
 | IMPL-034Y1A2b3C4d5E6f7G8h9 | ruviform pin abb9f372 追従 + consumer oracle 実装記録 | completed | [ruviform-abb9f372-rev-watch.md](./ruviform-abb9f372-rev-watch.md) |
 | IMPL-034XLUtOnusrJZxCBd0Q6x | ruviform ac10a2f7 pin 追従評価の実施記録 | completed | [ruviform-ac10a2f7-rev-watch.md](./ruviform-ac10a2f7-rev-watch.md) |
 | IMPL-034VnVtzhBuw5urVoJzgnw | ruviform b02942c2 pin 追従評価の実施記録 | completed | [ruviform-b02942c2-rev-watch.md](./ruviform-b02942c2-rev-watch.md) |
+| IMPL-034Z9kQmDatasetRevWatch05 | ruviform b6d0cc6a pin 追従評価の実施記録 | completed | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | IMPL-034XCW3SvHJVdWjyHNmcwb | ruviform c6e4f334 pin 追従評価の実施記録 | completed | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | IMPL-034YnH9gny1R4SISLshw3K | ruviform cbcc8343 pin 追従評価の実施記録 | completed | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
 | IMPL-034YaRbwcLs7BNyNI6lTIY | ruviform eafe0a08 pin 追従評価の実施記録 | completed | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
