@@ -64,6 +64,7 @@ Directory: `docs/specs`
 | SPEC-034Z9kQmDatasetRevWatch01 | ruviform pin b6d0cc6a 追従評価（AL#127 dataset-scenario slice） | approved | [ruviform-b6d0cc6a-rev-watch.md](./ruviform-b6d0cc6a-rev-watch.md) |
 | SPEC-034XCOYQWCk6bOeIZofauh | ruviform pin c6e4f334 追従評価（AL#127） | approved | [ruviform-c6e4f334-rev-watch.md](./ruviform-c6e4f334-rev-watch.md) |
 | SPEC-034YnFfBgevMiuCJ5T6H98 | ruviform pin cbcc8343 追従評価（AL#127） | approved | [ruviform-cbcc8343-rev-watch.md](./ruviform-cbcc8343-rev-watch.md) |
+| SPEC-8cAy4DVGaJhpVS3KXAB999 | ruviform pin e4c9f6f0 追従評価（AL#127 pin 追従 slice） | approved | [ruviform-e4c9f6f0-rev-watch.md](./ruviform-e4c9f6f0-rev-watch.md) |
 | SPEC-034YaQQiC29QG0oPeT4iVS | ruviform pin eafe0a08 追従評価（AL#127） | approved | [ruviform-eafe0a08-rev-watch.md](./ruviform-eafe0a08-rev-watch.md) |
 | SPEC-034VFSKyms68sXggutXJmw | ruviform pin fd1d4d5f 追従評価（AL#127） | approved | [ruviform-fd1d4d5f-rev-watch.md](./ruviform-fd1d4d5f-rev-watch.md) |
 | SPEC-034P3nkrA1BoZbYjM3OrQ3 | Ruviform 基盤移行の要求仕様 | approved | [ruviform-foundation-migration.md](./ruviform-foundation-migration.md) |
