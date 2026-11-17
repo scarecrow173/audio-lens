@@ -397,7 +397,7 @@ jobs:
             echo ""
             echo "| lane | OS | feature | ruviform resolved SHA | 結果 | 備考 |"
             echo "|---|---|---|---|---|---|"
-            echo "| gui-real | - | 実 Window/OS 自動試験 | - | not run | runner は pin cbcc8343 で接続済み。opt-in/interactive session 実走待ち(`mise run test-ui-gpui-real`)。macOS/Linux は Deferred |"
+            echo "| gui-real | - | 実 Window/OS 自動試験 | - | not run | runner は pin cbcc8343 で接続済み。opt-in/interactive session 実走待ち(<code>mise run test-ui-gpui-real</code>)。macOS/Linux は Deferred |"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "status=not_run" >> "$GITHUB_OUTPUT"
 
