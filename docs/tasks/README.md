@@ -114,6 +114,7 @@ Directory: `docs/tasks`
 | TASK-034WsMpMwgPJoeSbeFZiC5 | impl index 生成対応(AL#199): ir/exp front matter 是正と managed index 化 | done | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TASK-034WuVJXa5i7mHx8qvE4zj | ir missing-section 本文補完(AL#202) | done | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
 | TASK-034Xq1IjYBr7OnhswOHW6s | main CI hygiene/verify 失敗修正(AL#210) | done | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
+| TASK-034Z0TAlmWUlPYLbNXWQdH | GPUI 製品 GUI 実 OS E2E 接続 lane(Issue #219) | done | [issue-219-gui-real-e2e.md](./issue-219-gui-real-e2e.md) |
 | TASK-034YZx1dxbhs8e3HyFQIc3 | stale source 参照修復と route_graph 復帰(AL#220) | done | [issue-220-stale-doc-refs.md](./issue-220-stale-doc-refs.md) |
 | TASK-J14iCJv5kCKP839iZfaROa | 不変ジョブ・manifest・成果物レジストリの実装 | done | [job-manifest-registry.md](./job-manifest-registry.md) |
 | TASK-034GNyEFEOZSC93dTivNPe | local_lag を OverlapCorr 経由へ移行 | done | [local-lag-overlapcorr-migration.md](./local-lag-overlapcorr-migration.md) |

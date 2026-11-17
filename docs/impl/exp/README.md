@@ -13,4 +13,5 @@ Directory: `docs/impl/exp`
 | [issue-149-impact-ci-shadow.jsonl](./issue-149-impact-ci-shadow.jsonl) |
 | [issue-149-macos-separation.jsonl](./issue-149-macos-separation.jsonl) |
 | [issue-153-impact-ci-selective.jsonl](./issue-153-impact-ci-selective.jsonl) |
+| [issue-219-gui-real-e2e-exp.jsonl](./issue-219-gui-real-e2e-exp.jsonl) |
 | [issue-220-stale-doc-refs-exp.jsonl](./issue-220-stale-doc-refs-exp.jsonl) |

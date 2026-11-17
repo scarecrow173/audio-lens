@@ -27,6 +27,7 @@ Directory: `docs/test-specs`
 | TSPEC-034WsMpecRKShroKP0mrqH | impl index 生成契約: front matter schema・managed marker・決定的出力 | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TSPEC-034WuVDeP2Keiu82igc78e | ir 必須セクション契約: missing-section 0 件と本文具体性 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
 | TSPEC-034Xq14aOWwCe83ety6DBH | CI hygiene/verify 修復の外部契約 | approved | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
+| TSPEC-034Z0TNTa3fbvzgGIfWd6y | GPUI 実 OS E2E lane の検証契約 | approved | [issue-219-gui-real-e2e.md](./issue-219-gui-real-e2e.md) |
 | TSPEC-034YZwUon7PniX1lnJv9Hf | route_graph・doc_status lint の stale 参照非再発契約 | approved | [issue-220-stale-doc-refs.md](./issue-220-stale-doc-refs.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
 | TSPEC-034GNwf4Cw9BJVBt8akOXm | OverlapCorr/local_lag 検証と小窓計測 | draft | [local-lag-overlap-corr.md](./local-lag-overlap-corr.md) |
