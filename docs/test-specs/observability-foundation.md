@@ -184,8 +184,8 @@ foundation。
   受理されるため parse 失敗例には使えない。`al --log x run`
   は unknown subcommand
 - Example(優先順位): `AL_LOG=warn` + `--log info` では info が
-  効き、`AL_LOG_FORMAT=file=text` + `--log-format file=json`
-  では file=json が効く(per-concern 全体置換)
+  優先され、`AL_LOG_FORMAT=file=text` + `--log-format file=json`
+  では file=json が優先される(per-concern 全体置換)
 - Example(format 切替): `--log-format stderr=text,file=json`
   で stderr=text・file=JSON-lines の同時併用が動作する
 - Example(ドリルダウン): `AL_LOG=al_locate=debug` で file
