@@ -101,8 +101,7 @@ specの等価性、共有plan/独立workspace、反復確保、cold/warm計測�
 ## More Information
 
 共通discovery anchorと関連specにscope・証拠を記録。shapeが入力依存のal-locate移行、
-kernel交換は将来別Issue/測定で判断する。ownersは2026-10-15にscarecrow173と設定した。文書承認は今回reviewcheckpointで判断する。
-
+kernel交換は将来別Issue/測定で判断する。ownersは2026-10-15にscarecrow173と設定した。文書承認は今回のreview checkpointで判断する。
 
 ## 2026-10-15 Decision Review
 

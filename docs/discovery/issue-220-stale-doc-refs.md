@@ -71,7 +71,7 @@ Issue #220: doc-driven-dev-graph の route_graph が `status: blocked`
   `../impl/ir/issue-101-ruviform-numeric-migration.md`。
 - `crates/al-locate/` は `src/dsp.rs` 以外存続する
   (`src/methods.rs`・`src/prepared.rs`・`examples/bench_dsp.rs` 等は
-  実在し broken でない。消し過ぎ注意)。
+  実在し broken でない。過剰な削除を避けること)。
 - resolver の受理形式: `scheme:`・`//` 始まりは external ref として
   受理される(実例: `issue-40-locate-pair-plan-cache.md` の `source`
   内 GitHub Issue URL は broken 扱いされない)。それ以外は repo 内の
@@ -80,7 +80,7 @@ Issue #220: doc-driven-dev-graph の route_graph が `status: blocked`
   連動する派生 blocker)+ `broken-relation:*` 24 件 +
   `focus-required`(`--focus` 未指定時の意図された hard stop)。
 - 対象 9 文書の本文中の `crates/al-math/...` 言及は当時の分析記録と
-  しての歴史的言及であり finding を生じない。AC の「stale 参照」は
+  しての歴史的言及であり finding にならない。AC の「stale 参照」は
   frontmatter `source` を正本とする。
 
 ## Alternatives and Comparison

@@ -75,8 +75,8 @@ because 等長窓・両側 lag・overlap 正規化は
 `CorrelationPlan`(片側スライド・固定長正規化)とは別の演算契約
 であり、同一型へのモード追加は「最大 lag = signal−template」の
 不変式を曖昧にする。独立型は shape キー `window_len` のみで
-invariant が単純で、既存型の契約を侵さない。al-analysis は既存
-通り `al_locate::dsp` 経由で re-export を使う(直接の al-math
+invariant が単純で、既存型の契約を侵さない。al-analysis は従来
+どおり `al_locate::dsp` 経由で re-export を使う(直接の al-math
 依存を増やさない)。
 
 ### Consequences

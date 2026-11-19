@@ -118,7 +118,7 @@ P1 適用後も locate ステージ wall は ~274s でほぼ不変だった。
   (valid FFT 化済みだが小さい)。
 - つまり **#71 で想定した「band_ncc が e2e 最大」は誤りで、locate
   の真の壁は anchor 探索だった**。band_ncc busy 削減は並列で
-  ~7s/pair の壁にしか効かず、wall をほぼ改善しなかった。
+  ~7s/pair の壁にしか寄与せず、wall をほぼ改善しなかった。
 - anchor 探索の構造的改善は #71 の P1 スコープ外(新たな形状問題:
   窓ごとの信号長変動→plan 再構築、範囲限定検索の効率化、
   フォールバック削減)。P2/P3 より優先すべき大きい対象として
@@ -198,7 +198,7 @@ counting allocator):**
   帯域波形 ~915MB 分＋バッファ差分がそのまま −1.25GB に対応。
 - CPU は設計通り同等(coarse 除去分の微差は run 分散より小さい)。
 - プロセス peak は locate(`window_anchors_in` 周辺)が支配する
-  ため変わらず — 全行程の削減には #76 側が効く。
+  ため変わらず — 全行程の削減には #76 側の改善が要る。
 
 ## P3 実装結果(2026-10-17 実測)
 
@@ -248,7 +248,7 @@ max_lag クランプ・ゼロエネルギー early return は FFT 経路と
 
 ### e2e A/B 計測で発覚した P2 回帰と修正(5bbf3fc)
 
-ユーザー指示の e2e サンプル計測(#71 全相前 `b532396` vs
+ユーザー指示の e2e サンプル計測(#71 全適用前 `b532396` vs
 P3 後 `40c1643`、各 2 回)で `analysis::reference` busy が
 ~58s→~112s(+93%)と再現性ある悪化を検出。`analyze_pair`
 単体ベンチ(2.2M×2ch)でも 28.0s→52.0s、コミット bisect で
@@ -355,31 +355,31 @@ fft.rs 内コメントが不変条件として明記)を断ち切り、
 
 ## Tentative Conclusions and Hypotheses
 
-- **confirmed**: `analyze_pair` の支配要因は `band_gain::analyze` で
+- confirmed: `analyze_pair` の支配要因は `band_gain::analyze` で
   約83%。内部は「窓ごと FFT-NCC(~47,600呼/pair、~6.9s/ch)」と
   「26帯域スペクトルマスクフィルタ(~4.4s/ch)」が半々。
-- **confirmed**: 「I/O 支配」仮説は棄却。write path は ~200MB/s で
+- confirmed: 「I/O 支配」仮説は棄却。write path は ~200MB/s で
   健全、異常 run は環境要因の一過性悪化。
-- **confirmed(修正)**: 当初仮説の「窓相関を帯域信号全体の一括相関に
+- confirmed(修正): 当初仮説の「窓相関を帯域信号全体の一括相関に
   再構成」は**数学的に不成立**と判明(調査レポート §4.F/§5.3)。
   分子は lag ごとに異なる積時系列で、全ラグ prefix 化は O(NR) に
   なり既定形状では巨大。また時間窓の切り出しと周波数マスクは
   可換でない。
-- **confirmed(調査由来)**: `band_gain` の帯域波形同時保持は
+- confirmed(調査由来): `band_gain` の帯域波形同時保持は
   source+capture×2ch で **~1.8GB**(26帯域×2.2M×8B×2入力×2ch)。
   Streaming Bandpass(帯域ごとに IFFT→窓解析→破棄)でピークメモリを
   大幅削減できる。これは CPU 時間よりもメモリ削減が主成果。
-- **hypothesis(調査由来、互換維持の最優先案)**: NCC 有効ラグ専用
+- hypothesis(調査由来、互換維持の最優先案): NCC 有効ラグ専用
   FFT長 — テンプレートが信号内に完全収まる valid lag のみなら
   `nextpow2(S+L-1)` ではなく `nextpow2(S)` で十分(STUMPY `sdp.py`
   と同型)。等長 band_ncc で FFT 長を半減できる。**GCC-PHAT には
   適用不可**(周波数ビン位相正規化が FFT 長依存のため plan 分離必須)。
-- **hypothesis(調査由来)**: `band_gain` 局所 NCC の Blocked FFT
+- hypothesis(調査由来): `band_gain` 局所 NCC の Blocked FFT
   (現行 16384×3 → 8192×5、N log N モデルで ~23% 演算量減)は
   実測比較が必要な次候補。OpenCV `templmatch.cpp` が先例。
-- **hypothesis(調査由来)**: Direct SIMD / Valid FFT / Blocked FFT の
+- hypothesis(調査由来): Direct SIMD / Valid FFT / Blocked FFT の
   形状適応 dispatch(SciPy `choose_conv_method` 型)を基盤 API 化。
-- **confirmed(調査由来)**: 音声専用 OSS(librosa multirate、pyfar
+- confirmed(調査由来): 音声専用 OSS(librosa multirate、pyfar
   SOS/FIR、ViSQOL 段階整列、Essentia/aubio 帯域集約、指紋系)は
   すべて**別推定器**であり #71 の互換維持最適化には直接使えない。
   導入するなら別 feature_id/メタデータ版管理で別 issue。
@@ -397,7 +397,7 @@ fft.rs 内コメントが不変条件として明記)を断ち切り、
 - 改善後の効果上限: band_gain が ~0 になっても reference は
   ~4-5s/pair 残る(similarity/residuals)。locate band_ncc との
   優先度比較をどう置くか。
-- (調査由来) Valid FFT 短縮が効く条件 `nextpow2(S+L-1) >
+- (調査由来) Valid FFT 短縮が有効となる条件 `nextpow2(S+L-1) >
   nextpow2(S)` を実ジョブ形状がどの程度満たすかは未計測。
 - (調査由来) Streaming Bandpass 導入時のメモリ上限と #54 並列化の
   相互作用(worker 数 × 帯域バッファ)はピーク RSS 計測後に決める。

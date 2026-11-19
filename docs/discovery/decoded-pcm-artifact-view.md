@@ -43,7 +43,7 @@ relations:
 
 ロードマップ §#56 の2026-10-14確定判断を、専用の spec/ADR に記録する。
 Entry Decision: A-4。要求・選択肢・採用判断は確定済みで、view の所有境界と
-API 詳細は次の design review が所有する。
+API 詳細は次の design review で確定する。
 
 ## Key Issues and Assumptions
 

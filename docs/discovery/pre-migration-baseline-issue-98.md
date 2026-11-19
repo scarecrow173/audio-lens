@@ -173,7 +173,7 @@ before/after を客観比較できる状態を作ることが目的。
 - golden 既存 coverage(test 名)は上記「Tentative
   Conclusions」に集約。multitrack・欠落/不連続の素材は
   AVI dup/drop・MP4 stts/ctts・多 track MP4 writer で
-  部分的にfixture 化済み(al-testkit)。
+  部分的に fixture 化済み(al-testkit)。
 - `al inspect` は manifest を JSON 表示するのみで集計機能
   なし(今回は計測 script 側で manifest から stage/成果物
   サイズを集計する)。

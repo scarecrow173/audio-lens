@@ -81,7 +81,7 @@ issue #13(検証戦略・ゴールデン fixture)は幅広い合成/ゴールデ
   issue の大半を満たせる
 - hypothesis: 新規機能(映像特徴/MP4/expensive 追加ファミリ)の
   fixture は各ワークストリームの task で追加し、本 WS は
-  既存機能のマトリクス + ハーネスを担うのが綺麗
+  既存機能のマトリクス + ハーネスを担うのが適切
 
 ## Open Questions
 

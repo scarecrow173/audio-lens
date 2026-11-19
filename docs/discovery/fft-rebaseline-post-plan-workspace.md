@@ -45,7 +45,7 @@ relations:
 
 ## Exploration Goal
 
-Issue #42 は旧スカラー複素 FFT が NumPy 比 ~2.7 倍劣後していた時代に起票され、
+Issue #42 は旧スカラー複素 FFT が NumPy 比 ~2.7 倍劣後していた時期に起票され、
 rustfft(または同等の混合基数・実数 FFT・SIMD 対応ライブラリ)への換装を提案
 していた。しかし前提は PR #44/#45/#52 で変化した: `RealFft` は pulp SIMD 化
 済みで split re/im 表現を持ち、plan/workspace が分離されている。本 discovery
@@ -107,16 +107,16 @@ forward を計測した。
 
 ## Tentative Conclusions and Hypotheses
 
-- **confirmed**: 起票時の動機であった「NumPy 比 ~2.7x 劣後」は反転しており、
+- confirmed: 起票時の動機であった「NumPy 比 ~2.7x 劣後」は反転しており、
   現行 pulp SIMD `RealFft` は全計測サイズで NumPy rfft を約 1.5-3.2x
   上回る。換装提案の前提は消滅した。
-- **confirmed**: plan 生成コストは forward 1 回分と同程度(1M で 8.6ms vs
+- confirmed: plan 生成コストは forward 1 回分と同程度(1M で 8.6ms vs
   10.7ms)。#52 の plan/workspace 分離による plan 再利用は引き続き有効。
-- **confirmed**: 残存差異は混基数による pad 効率のみ。観測した waste は
+- confirmed: 残存差異は混基数による pad 効率のみ。観測した waste は
   1.30-1.99x だが、実呼び出し側はブロックサイズを pow2 で自前選択する
   overlap-save 構造のため、悪条件は入力長が直接 FFT サイズを決める経路に
   限定される。
-- **hypothesis**: rustfft 換装が pad waste を改善し得るサイズ帯でも、
+- hypothesis: rustfft 換装が pad waste を改善し得るサイズ帯でも、
   カーネル単位で現行実装を 1.5x 以上上回る保証はなく、依存追加・API
   再設計・数値等価検証のコストに見合わない。
 

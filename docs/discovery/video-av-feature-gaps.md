@@ -78,7 +78,7 @@ issue #11(video timing / A-V sync)の受け入れ基準と現在の実装を
   ・確度・分布・ドリフト」を出力する汎用比較で足り、
   ゲーム固有の検出器をコアに入れない
 - hypothesis: 映像特徴は Ingest 時点ではなく dataset の中間生成物
-  として分析側で算出する方が責務がきれい(検討は design で)
+  として分析側で算出する方が責務が明確(検討は design で)
 
 ## Open Questions
 

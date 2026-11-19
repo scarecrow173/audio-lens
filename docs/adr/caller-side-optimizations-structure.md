@@ -132,9 +132,10 @@ A3 — plan 所有境界:
 
 Chosen option: "A4 = `from_columns` 追加 + rows API 置換、A1 =
 overlap-save を dsp 側関数として実装、A3 = dsp 側に plan 公開
-経路を追加", because 列が既に連続バッファで存在するため行マテリ
-アライズを構造的に除去でき、overlap-save は巨大な単一 FFT を避け
-てメモリを有界に保ち、dsp への集約がファサード一元化と既存の
+経路を追加", because 列が既に連続バッファで存在するため行
+マテリアライズを構造的に除去でき、overlap-save は巨大な単一 FFT
+を避けてメモリを有界に保ち、dsp への集約がファサード一元化と
+既存の
 手書き wrapper 先例(`dsp::fft` 自体がその形)に一致するため。
 
 契約の確定内容:
@@ -166,12 +167,12 @@ overlap-save を dsp 側関数として実装、A3 = dsp 側に plan 公開
   維持する
 * **fit_mix のシグネチャ**: `fit_mix(source_channels: &[&[f64]],
   capture_channels: &[&[f64]], ridge)` に変更し、caller 側の
-  `&[Vec<f64>]` 用コピーを除去可能にする。`reference.rs` の
+  `&[Vec<f64>]` 用のコピーを除去可能にする。`reference.rs` の
   `src_chs`/`cap_chs` の `.to_vec()` は `src.src`/`src.cap`
   (`Vec<&[f64]>`)をそのまま渡す形に置き換え、`stage.rs` の
   `cap_window` もスライス参照へ切り替える。`residual.rs` の
-  clone+resize は長さ合わせとして必要なら残す(評価の上で最小化)
-  。AᵀA 集計も列上の `dot` で行う
+  clone+resize は長さ合わせとして必要なら残す(評価の上で
+  最小化)。AᵀA 集計も列上の `dot` で行う
 * **A1 方式**: overlap-save による FFT 畳み込みを採用する。
   `conv_len = hre.len().min(4096)` のキャップと「出力 = 線形
   畳み込みの先頭 n 要素(尾部打ち切り)」という現行意味を維持

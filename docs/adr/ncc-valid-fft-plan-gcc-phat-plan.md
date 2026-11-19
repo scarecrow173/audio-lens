@@ -116,7 +116,7 @@ FFT 実行・正規化・workspace 構造の大半を共有しており、実行
   plan、`CorrelationWorkspace::new(&plan)` による plan 依存 workspace、
   pool の形状キー reuse
 * Patterns to avoid: FFT 実行・正規化・workspace の複製、呼出側への
-  FFT 長露出、PHAT plan の短縮
+  FFT 長の公開、PHAT plan の短縮
 * Dependencies or configuration: なし
 
 ## Verification
