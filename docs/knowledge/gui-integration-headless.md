@@ -1,7 +1,9 @@
 ---
-id: "KNOW-cV6yRmNsWdXbQjTkHgLf"
+id: "KNOW-ypTKQfVSQnD9tcmquk1nXc"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "GUI 統合: ruviform controls/viz・SemanticGuiTest・実 OS E2E"
 created: "2026-11-19"
 updated: "2026-11-19"

@@ -1,7 +1,9 @@
 ---
-id: "KNOW-hT5vXnWzQmRbKpYjFgSd"
+id: "KNOW-F9q35gwGjC2ez4BCkzflfg"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "operation"
 title: "性能工学: 特性化・baseline・等価性ゲート・最適化方法論"
 created: "2026-11-19"
 updated: "2026-11-19"

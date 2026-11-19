@@ -1,7 +1,9 @@
 ---
-id: "KNOW-wA8yNmQrTxVbHkLpGsDf"
+id: "KNOW-V3c9UhI9GCpH4CCugl6grt"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "codebase"
 title: "可観測性: logging・stage 計時・span 計装・プロファイリング"
 created: "2026-11-19"
 updated: "2026-11-19"

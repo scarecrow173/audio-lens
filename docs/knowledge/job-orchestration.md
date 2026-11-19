@@ -1,7 +1,9 @@
 ---
-id: "KNOW-qT4vLx9mZnKpRsFhJbDy"
+id: "KNOW-mPeKwI4SmG1jeUYZ5lYBXn"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "ジョブオーケストレーション: 不変ジョブ・manifest・ステージランナー"
 created: "2026-11-19"
 updated: "2026-11-19"

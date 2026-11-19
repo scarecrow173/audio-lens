@@ -1,7 +1,9 @@
 ---
-id: "KNOW-xR7wJk8hTqBmYvPzNfCs"
+id: "KNOW-ftoVnskfNQROBPHiY48VVR"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "Analysis Dataset: 永続化スキーマ・追記プロトコル・PCM ビュー"
 created: "2026-11-19"
 updated: "2026-11-19"

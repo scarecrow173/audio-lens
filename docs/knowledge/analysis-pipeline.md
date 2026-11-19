@@ -1,7 +1,9 @@
 ---
-id: "KNOW-M55fFQcr3GlnEmyNGK3T"
+id: "KNOW-EpXLDAeWGabg0W1wZJcxHC"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "解析パイプライン: 3層ステージ・特徴ファミリ・候補イベント"
 created: "2026-11-19"
 updated: "2026-11-19"

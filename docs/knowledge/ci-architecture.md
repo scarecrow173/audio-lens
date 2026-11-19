@@ -1,7 +1,9 @@
 ---
-id: "KNOW-fN4wXvPzTsRjYbKmQhDc"
+id: "KNOW-NrL9tC9HxfoCXX4fs4vbNh"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "CI アーキテクチャ: 独立 CI・fail-closed 概要・Ruviform アクセス"
 created: "2026-11-19"
 updated: "2026-11-19"

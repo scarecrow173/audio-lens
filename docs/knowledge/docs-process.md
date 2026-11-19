@@ -1,7 +1,9 @@
 ---
-id: "KNOW-jX8vWpRzQyTbNmKfHsLd"
+id: "KNOW-1os3MWTpo2hqh1pYkDWcTA"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "lesson"
 title: "文書運用: status ドリフト・記録規約・文書管理の教訓"
 created: "2026-11-19"
 updated: "2026-11-19"

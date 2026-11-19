@@ -1,7 +1,9 @@
 ---
-id: "KNOW-dM8sVwXcPzBnLkQfHjTy"
+id: "KNOW-1n0ScAnNs7xrnhmDSd18Wa"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "可視化と export: dataset 由来製品・決定性・パッケージ"
 created: "2026-11-19"
 updated: "2026-11-19"
