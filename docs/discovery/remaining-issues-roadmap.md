@@ -251,7 +251,7 @@ issue/PR 混在):
 - **リスク**: cache keyでsample rate/ch/layoutを取り違えると解析値破損 / 未圧縮PCM常駐によるRAM浪費 / mmapのプラットフォーム差・ファイル寿命
 - **影響**: al-media, al-job, al-analysis, Cache/RSS, Security
 - **対象ファイル**: `crates/al-media/`, `crates/al-job/`, `crates/al-analysis/src/stage.rs`
-- **優先度の理由**: 局所的な改善で大きな冗長IOを除去し、後続並列化のメモリ設計にも効く。
+- **優先度の理由**: 局所的な改善で大きな冗長IOを除去し、後続並列化のメモリ設計にも寄与する。
 
 #### #36 主要コーデックの実デコード対応 — P1 / XL / 一部実装 / Media
 
@@ -352,7 +352,7 @@ issue/PR 混在):
 #### #33 spec #1への残差適合 — P3 / L / 一部実装 / Contract
 
 - **概要**: 候補stage・FLAC・Resolution.sample_rate
-- **現状**: 候補はExpensiveAnalysisStage内部で抽出済み、WAV保存とparams経由のsample_rate保持も実装。PR #44でstage構造とsample_rate適合の一部が処理されたと記述。
+- **現状**: 候補はExpensiveAnalysisStage内部で抽出済み、WAV保存とparams経由のsample_rate保持も実装。PR #44でstage構造とsample_rate適合の一部が処理されたと記述されている。
 - **ギャップ**: 候補のみ再計算できない、FLAC encodeなし、Resolutionにsample_rateが第一級でない(現行Issue本文記載)。
 - **提案決定**: 3論点を一括実装しない。まず仕様とのズレが機能要件か記述だけかを選び、sample_rate型追加は低リスクだがスキーマの移行方針を定義。
 - **確定決定(2026-10-14)**: ①候補検出は独立 StageKind を追加せず `ExpensiveAnalysisStage` 内 fused を維持し、spec 文言を実装に合わせて改訂する。候補データは `events/candidates` の独立成果物契約を維持(空テーブルでも保存し「候補なし」と「未実行」を区別)。manifest/resume 境界は不変。将来単独実行需要が出たら再検討。②FLAC は実装せず WAV のみを正式仕様にする(spec 改訂)。FLAC エンコーダ依存は導入しない。将来は別 Issue(浮動小数点 PCM の量子化精度損失に注意)。#36 の FLAC デコード(入力)とエンコード(出力)は独立。③`Resolution.sample_rate` は実装済み(`types.rs:67`、5箇所の構築サイト、commit 3386fab)のため確認して close のみ。残作業は **spec 文言改訂のみ(実装不要の docs タスク)**。

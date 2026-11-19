@@ -54,7 +54,7 @@ issue #9(高コスト詳細解析)の要求ファミリと `al-analysis`
   周波数帯別 L/R コヒーレンス
 - 未実装または部分(issue #9 要求):
   - impulse-response 候補推定 + early/late energy・decay 記述子
-  - click/splice 定位・stuck/repeated buffer 候補の深掘り
+  - click/splice 定位・stuck/repeated buffer 候補の精緻化
   - pre-echo 候補・transient smear(codec 系の残り)
   - compressor/limiter transfer-curve 候補・pumping/ducking 変調
   - intermodulation 証拠(実用的な範囲で)
@@ -88,12 +88,12 @@ issue #9(高コスト詳細解析)の要求ファミリと `al-analysis`
   expensive.rs 内に各ファミリの算出を追加し、特徴 id は
   `exp.*` 命名規約に従う
 - hypothesis: ファミリ単位の内部関数分割が済んでいれば
-  ファイル分割不要で済む(design で確認)
+  ファイル分割は不要になる(design で確認)
 
 ## Open Questions
 
-- intermodulation・周波数依存混合行列は「実用的な範囲」と spec が
-  言う範囲の切り分け → design で決定
+- intermodulation・周波数依存混合行列について、spec のいう
+  「実用的な範囲」の切り分け → design で決定
 
 ## Promotion Candidates
 

@@ -94,7 +94,7 @@ NCC plan 再利用** に限定。IIR/SOS 帯域化は位相応答が変わるた
   さらにフリー関数 `ncc()`/`gcc_phat()` は返却のための
   `.to_vec()` で curve 全体(full-rate で ~2.4M samples ≈ 19MB)を
   毎回追加確保する — plan API 経由の借用でこのコピーも消せる
-- **メソッド実行は既にワーカー並列**(`stage.rs::run_pool`):
+- メソッド実行は既にワーカー並列(`stage.rs::run_pool`):
   `available_parallelism` までのワーカーが `(method, channel-pair)`
   タスクを steal する。各ワーカーが `default_methods()` を持ち、
   メソッドは `Send` ではないため証拠のみスレッド境界を越える。
@@ -115,7 +115,7 @@ NCC plan 再利用** に限定。IIR/SOS 帯域化は位相応答が変わるた
 
 ## Tentative Conclusions and Hypotheses
 
-- **hypothesis**: `CorrelationPlan`/`CorrelationWorkspace` を
+- hypothesis: `CorrelationPlan`/`CorrelationWorkspace` を
   `(template_len, signal_len)` キーの pool を `run_pool` の
   ワーカーコンテキストとして持たせると、pair 内の ~8-9 回 +
   pair 間の同形状呼出で plan 構築が 1 回/shape/worker に
@@ -123,10 +123,10 @@ NCC plan 再利用** に限定。IIR/SOS 帯域化は位相応答が変わるた
   帯域別呼出も full-rate と同一 shape に乗り、同一 plan で
   NCC/PHAT 両方を実行できる(#52 の分離設計により plan は
   手法非依存)
-- **hypothesis**: `InputCache` の hit 率は設計上高い(入力×帯域
+- hypothesis: `InputCache` の hit 率は設計上高い(入力×帯域
   1回計算)が、実測証跡を取る。release の実効性とピーク RSS を
   併せて記録する
-- **confirmed**: 方向は「監査計測 + plan 再利用」、IIR は除外
+- confirmed: 方向は「監査計測 + plan 再利用」、IIR は除外
   (roadmap 確定決定 2026-10-15)
 
 ## Open Questions
