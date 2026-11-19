@@ -216,7 +216,7 @@ API は原則追加しない。全サイト・等価性クラスは discovery
     frame ごとの全画素 luminance 和(`:427`)と prev との diff
     zip-sum(`:428-440`)を、同一イテレーション順の別 accumulator
     として 1 pass に fuse する。各和の加算順は不変。
-    初帧の `prev == None` 分岐(`None => 0.0`、`:438-439` —
+    初フレームの `prev == None` 分岐(`None => 0.0`、`:438-439` —
     `diff[0] = 0.0` 相当)は融合後も必ず保持し、`pixels == 0`
     (`width * height`、`:391`)の退化 case でも現行と同じ出力
     (空 luma の `0.0 / 0.0` → NaN 系列)を再現すること →
@@ -450,7 +450,7 @@ A8 単体で frames×half 規模(~8.6M)の微小 alloc が消え、A7/A9/A16
   行優先形であることをコード検査)、`ref.harmonic_freq_ratio`
   record が一致(dom() が再利用 scratch への `mag_sq` 呼出しで
   実装され手書き `re*re+im*im` がないことをコード検査)、video
-  `luminance`/`diff` 系列が `to_bits` 一致(初帧 `diff` = 0.0
+  `luminance`/`diff` 系列が `to_bits` 一致(初フレーム `diff` = 0.0
   分岐と `pixels == 0` 退化出力が保持されていることを
   コード検査+characterization で確認)、tensor
   `read_range` の返却データが fast path・fallback 双方で完全一致
