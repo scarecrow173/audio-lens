@@ -162,7 +162,7 @@ ubuntu leg で初めて顕在化した。診断は 3 ファイルに限定され
   ため、明示 Error への置き換えは悪化ではなく診断可能性の
   向上。silent fallback(テクスチャ無しで継続)は描画を壊すため
   採用しない。
-- parse 修復で hook 本体の失敗が新たに露出するリスク →
+- parse 修復で hook 本体の失敗が新たに顕在化するリスク →
   `prek run --all-files` で全 hook の実実行を確認済み。
 
 ## Deferred Design Concerns

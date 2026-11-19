@@ -136,7 +136,7 @@ capture とも処理する。帯域境界生成と filter 適用は reference �
 
 各窓で有効な overlap に対する正規化相関の絶対値 `|correlation|` を最大化する
 lag を探索し、同点は
-|lag| が小さいもの、次に符号の固定順で決める。lag の正方向は capture が遅れる
+`|lag|` が小さいもの、次に符号の固定順で決める。lag の正方向は capture が遅れる
 方向に統一し、補償した source x と capture y で `g = Σ(x*y)/Σ(x*x)` を求める。
 filter 過渡と境界不足を除外し、無音・分母不足・探索端の peak・低相関は理由付きで
 記録する。低相関判定にも `|correlation|` を使う。選択に使う絶対値とは別に、

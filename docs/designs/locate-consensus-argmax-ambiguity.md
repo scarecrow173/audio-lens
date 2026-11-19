@@ -513,7 +513,7 @@ spec Req 6-7 に従い、`rel_eps`/`abs_floor` の実現可能レンジを実装
 - **定数の配置(ConsensusConfig でなく methods.rs の const)**: 値は
   ユーザー設定ではなく T1 で較正される契約定数であり、
   `ConsensusConfig` は `params` へ serde 永続化されるため実装詳細を
-  設定面へ露出させない。`LocateMethod::locate` のシグネチャに設定を
+  設定面へ公開しない。`LocateMethod::locate` のシグネチャに設定を
   通す経路もないため、const + 共有ヘルパが最小かつ唯一の定義点と
   なる(KISS)
 - **`merged_votes` の全ペア曖昧条件**: 非曖昧(他の非 Valid を含む)

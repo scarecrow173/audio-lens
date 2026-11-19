@@ -221,7 +221,7 @@ criterion の baseline 保存は `--save-baseline <name>` /
 キャリアを新設せず、re-export で公開する — `pub use` による
 dsp 集約は既存の `pub use al_math::correlation::{...}` と同じ
 pattern で、`Fft` は変換・スレッド間で再利用可能な不変係数の
-型としてそのまま露出してよい(ADR「re-export または等価の薄い
+型としてそのまま公開してよい(ADR「re-export または等価の薄い
 キャリア」の re-export 選択)。
 
 ```rust

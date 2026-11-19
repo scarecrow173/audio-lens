@@ -392,6 +392,6 @@ pull_request / push(main) / workflow_dispatch
       不一致・REV 不一致)が非ゼロ exit になることを unit 相当で
       確認する
 - [ ] scoped tool list で `prek run --all-files` が通る
-      (python hook の env 構築に uv が効くこと)
+      (python hook の env 構築に uv が使われること)
 - [ ] PR 上の実際の CI 実行は merge 後の初回 PR/run で確認する
       (本 PR 上では e2e 検証不可。旧設計 §10 と同じ制約)

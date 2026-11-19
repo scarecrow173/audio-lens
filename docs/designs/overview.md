@@ -50,9 +50,11 @@ relations:
 | [dataset-schema.md](./dataset-schema.md) | manifest・表・テンソル・音声の構造 | データセット spec、ストレージ ADR |
 | [analysis-stages.md](./analysis-stages.md) | cheap / reference / expensive・イベント | 解析系 spec、観測主義 ADR |
 | [visualization-export.md](./visualization-export.md) | (superseded) 旧可視化派生データ・静的レポート | エクスポート spec は analysis-export.md へ移行 |
-
 | [residual-fixes.md](./residual-fixes.md) | #28〜#33 の残存契約修正・仕様判断(draft) | 残件 spec、責務境界 ADR |
 | [locate-consensus-argmax-ambiguity.md](./locate-consensus-argmax-ambiguity.md) | #59 合議 argmax 曖昧性検出契約の実装設計(draft) | 曖昧性契約 spec、証拠表現 ADR、探索 |
+| [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) | #33 確定仕様の文書適用設計(approved) | 今回spec、ADR |
+| [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) | #52 不変plan/排他workspaceと2site再利用(approved) | NCC reuse spec、ADR |
+| [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) | Ruviform 移行の処理単位責務マップ(approved) | 移行 spec、移行 ADR |
 
 ## 層構造と依存
 
@@ -85,8 +87,3 @@ job-orchestration (不変ジョブ / ステージ計画)
   toolchain / crate 構成の具体化は `mise.toml` と開発環境整備で行う
 - 各詳細設計の status は `draft`。少なくとも 1 件の詳細設計が
   レビュアー承認(`approved`)されるまでは planning に進まない
-
-| [spec-residual-contract-finalization.md](./spec-residual-contract-finalization.md) | #33 確定仕様の文書適用設計(approved) | 今回spec、ADR |
-
-| [ncc-plan-workspace-reuse.md](./ncc-plan-workspace-reuse.md) | #52 不変plan/排他workspaceと2site再利用(approved) | NCC reuse spec、ADR |
-| [ruviform-migration-responsibility-map.md](./ruviform-migration-responsibility-map.md) | Ruviform 移行の処理単位責務マップ(approved) | 移行 spec、移行 ADR |
