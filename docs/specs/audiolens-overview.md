@@ -88,7 +88,7 @@ Export(可搬パッケージ) / GUI(範囲読み表示)
 cheap/reference 特徴と観測へのリンクを保持する。候補0件でも空テーブルを保存し、
 候補なしと未実行を区別する。候補データは解析結果から独立して参照できる。
 この仕様改訂は #33 の coordinator 承認による
-([判断と証拠](../tasks/spec-residual-decisions.md))。
+([判断と証拠](residual-compliance.md))。
 
 解析ステージ:
 
@@ -158,7 +158,7 @@ cheap/reference 特徴と観測へのリンクを保持する。候補0件でも
     圧縮は容量・保存時間・I/O の実測が問題となった場合に別 Issue で検討し、
     PCM の量子化による精度損失を含め解析に必要な精度を保持することを条件とする。
     [今回の正式仕様](spec-residual-contract-finalization.md) と
-    [旧判断履歴](../tasks/spec-residual-decisions.md) を参照。
+    [旧判断履歴](residual-compliance.md) を参照。
   - メタデータ / スキーマ / 来歴: JSON
   - 複素 STFT と代替解析を導出できる十分な基礎量を保持する
   - アルゴリズムバージョン、パラメータ、サンプルレート、

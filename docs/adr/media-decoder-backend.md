@@ -18,12 +18,10 @@ relations:
   implements:
     - "../designs/media-format-analysis-extensions.md"
     - "../specs/media-ingest.md"
-  implemented-by:
-    - "../tasks/media-decoder-native.md"
+  implemented-by: []
   depends-on:
     - "implementation-stack.md"
-  blocks:
-    - "../tasks/media-decoder-native.md"
+  blocks: []
   supersedes: []
   superseded-by: []
   related: []
@@ -32,7 +30,6 @@ relations:
   refined-by:
     - "ruviform-foundation-migration.md"
   derives-from:
-    - "../tasks/media-decoder-adr.md"
     - "../designs/media-format-analysis-extensions.md"
     - "../specs/media-ingest.md"
   derived-by: []
@@ -55,7 +52,7 @@ metadata:
 
 2026-10-10 に coordinator が本具体案を承認した。
 TASK-036a(#36 フェーズ0)は、approved design の必須ゲートとして、
-[フェーズ1](../tasks/media-decoder-native.md)より前に backend 境界を固定する。
+フェーズ1(`docs/tasks/media-decoder-native.md`・削除済み源文書)より前に backend 境界を固定する。
 現在の `al-media` は WAV/AVI の独自 parser と MP4 demux を持ち、
 `stage.rs` が形式ごとに直接分岐する。AAC/H.264 の decode 経路はない。
 新しい codec を追加する前に、選択・出力・部分失敗・来歴の責務を統一する。
@@ -264,7 +261,7 @@ TASK-036a の文書チェックと、TASK-036b の runtime 検証は区別する
 * Patterns to avoid: 拡張子 dispatch、文字列による fallback 判定、backend 内の成果物登録。
 * Dependencies or configuration: 新規依存なし、registry は native のみ。
 
-1. [native タスク](../tasks/media-decoder-native.md)で
+1. native タスク(`docs/tasks/media-decoder-native.md`・削除済み源文書)で
    `crates/al-media/src/decoder.rs` に trait、共通 result と registry を定義する。
    `format.rs` の signature 判定、`metadata.rs` の既存エラー/PCM metadata を再利用し、
    capability 不足と局所破損の結果区分を一箇所で定義する。

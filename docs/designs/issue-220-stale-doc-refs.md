@@ -9,7 +9,6 @@ owners: []
 relations:
   source:
     - "https://github.com/scarecrow173/audio-lens/issues/220"
-    - "../impl/ir/issue-101-ruviform-numeric-migration.md"
   changes:
     added:
       - type: "doc"

@@ -38,8 +38,7 @@ relations:
     - "docs/test-specs/issue-199-impl-index-generation.md"
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/issue-202-ir-missing-sections-plan.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/issue-202-ir-missing-sections.md"

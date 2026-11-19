@@ -24,7 +24,6 @@ relations:
   superseded-by: []
   related:
     - "../adr/spec-residual-contract-finalization.md"
-    - "../tasks/spec-residual-decisions.md"
   refines: []
   refined-by: []
   derives-from:

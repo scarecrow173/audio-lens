@@ -12,7 +12,6 @@ relations:
     - "https://github.com/scarecrow173/synvelis/issues/519"
     - "https://github.com/scarecrow173/audio-lens/commit/0a1bd24ec01f55d84cedc8cfd2d081310ab1bab7"
     - "https://github.com/scarecrow173/audio-lens/commit/9db115394e80701f597ef019057d8b2a84bcd0c9"
-    - "../impl/ir/issue-101-ruviform-numeric-migration.md"
   changes:
     added:
       - type: "doc"

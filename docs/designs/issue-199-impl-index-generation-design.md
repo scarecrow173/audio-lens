@@ -80,8 +80,7 @@ relations:
         path: "docs/test-specs/README.md"
   implements:
     - "../specs/issue-199-impl-index-generation.md"
-  implemented-by:
-    - "../plans/issue-199-impl-index-generation-plan.md"
+  implemented-by: []
   depends-on: []
   blocks: []
   supersedes: []

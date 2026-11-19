@@ -90,7 +90,7 @@ red/green、等価性・共有・確保削減・性能実証は未実施であ�
 
 ## 2026-10-15 Acceptance Evidence
 
-IPD独立red/greenは[IPD IR](../impl/ir/ipd-lag-search-fix.md)、
-所有/数値/firstcold/dropは[基盤IR](../impl/ir/ncc-plan-workspace-foundation.md)、
-2site確保/実caller全出力同値/速度観測は[完成IR](../impl/ir/ncc-hot-caller-reuse-verification.md)を参照。
+IPD独立red/greenは[IPD 検証記録](../evidence/locate-verification.md)、
+所有/数値/firstcold/dropは[基盤検証記録](../evidence/locate-verification.md)、
+2site確保/実caller全出力同値/速度観測は[完成時検証記録](../evidence/locate-verification.md)を参照。
 今回完成Judge ACCEPT。性能は記録したfixtureの観測であり統計的有意性を主張しない。

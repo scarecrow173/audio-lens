@@ -18,7 +18,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/caller-side-optimizations.md"
-    - "../plans/caller-side-optimizations.md"
   depends-on:
     - "./al-math-vec-primitives.md"
     - "../adr/al-math-vec-primitives-slice-boundary.md"
@@ -37,8 +36,6 @@ relations:
     - "../discovery/caller-side-optimizations.md"
   derived-by:
     - "../designs/caller-side-optimizations.md"
-    - "../tasks/caller-opt-bench-baseline-characterization.md"
-    - "../tasks/caller-opt-measurement-ir-closeout.md"
   verifies: []
   verified-by:
     - "../test-specs/caller-side-optimizations.md"

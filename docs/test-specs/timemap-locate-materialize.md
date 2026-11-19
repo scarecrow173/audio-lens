@@ -23,7 +23,6 @@ relations:
   superseded-by: []
   related:
     - "../specs/timemap-locate-materialize.md"
-    - "../plans/timemap-locate-materialize.md"
   refines: []
   refined-by: []
   derives-from:
@@ -33,8 +32,7 @@ relations:
     - "docs/specs/timemap-locate-materialize.md"
     - "docs/designs/timemap-locate-materialize.md"
   verified-by: []
-  references:
-    - "../impl/ir/gui-ruviform-viz-issue-132.md"
+  references: []
   defers: []
   deferred-by: []
 ---

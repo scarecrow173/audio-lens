@@ -57,8 +57,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/issue-220-stale-doc-refs.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/issue-220-stale-doc-refs.md"

@@ -30,8 +30,7 @@ relations:
     - "../test-specs/ci-tracker-reconcile-issue-159.md"
   refines: []
   refined-by: []
-  derives-from:
-    - "../plans/implement-ci-dispatch-only-issue-147.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "../specs/ci-dispatch-only-issue-147.md"

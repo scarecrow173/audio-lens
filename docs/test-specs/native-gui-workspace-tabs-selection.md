@@ -18,14 +18,12 @@ relations:
     generated: []
   implements: []
   implemented-by: []
-  depends-on:
-    - "../plans/native-gui-workspace-tabs-selection.md"
+  depends-on: []
   blocks: []
   supersedes: []
   superseded-by: []
   related:
     - "../designs/native-gui-workspace-tabs-selection.md"
-    - "../tasks/native-gui-workspace-tabs-selection.md"
   refines: []
   refined-by: []
   derives-from:

@@ -26,7 +26,6 @@ relations:
   supersedes: []
   superseded-by: []
   related:
-    - "../plans/native-gui-waveform-seek-screen.md"
     - "../test-specs/native-gui-waveform-seek-screen.md"
     - "gui-app-architecture.md"
   refines:

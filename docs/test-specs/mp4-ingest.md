@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/mp4-ingest.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/media-ingest.md"

@@ -29,8 +29,7 @@ relations:
     generated: []
   implements:
     - "../specs/ci-os-l1-gpui-desktop.md"
-  implemented-by:
-    - "../plans/implement-ci-os-l1-gpui-desktop.md"
+  implemented-by: []
   depends-on:
     - "../designs/full-ci-ci-summary-issue-158.md"
     - "../designs/sccache-compile-cache-issue-148.md"
@@ -40,7 +39,6 @@ relations:
   related:
     - "../specs/ci-os-l1-gpui-desktop.md"
     - "../test-specs/ci-os-l1-gpui-desktop.md"
-    - "../tasks/ci-os-l1-gpui-desktop.md"
   refines: []
   refined-by: []
   derives-from:

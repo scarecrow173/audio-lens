@@ -30,8 +30,7 @@ relations:
   refined-by: []
   derives-from: []
   derived-by: []
-  verifies:
-    - "../plans/implement-pre-migration-baseline.md"
+  verifies: []
   verified-by: []
   references: []
   defers: []

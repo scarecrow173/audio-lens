@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/ruviform-463-spectrogram-intensity.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/ruviform-463-spectrogram-intensity.md"

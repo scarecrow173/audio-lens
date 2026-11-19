@@ -28,7 +28,6 @@ relations:
   refined-by: []
   derives-from:
     - "../designs/ruviform-observability-logging-migration.md"
-    - "../plans/ruviform-observability-logging-migration.md"
   derived-by: []
   verifies:
     - "../specs/ruviform-observability-logging-migration.md"
@@ -49,7 +48,7 @@ Issue #138 の委譲後も、AudioLens の logging 互換契約(既定
 OFF・優先順位・sink/format・stdout 保護・daily 7 世代命名・
 error/degrade)が golden 挙動どおり維持されることを保証する。
 検証対象は [設計](../designs/ruviform-observability-logging-migration.md)
-/ [計画](../plans/ruviform-observability-logging-migration.md)
+/ 計画(`docs/plans/ruviform-observability-logging-migration.md`・削除済み源文書)
 の契約と [ADR](../adr/logging-sink-format-activation-contract.md)
 の Confirmation 項。
 

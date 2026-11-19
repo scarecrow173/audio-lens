@@ -23,12 +23,10 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related:
-    - "../plans/implement-full-ci-ci-summary-issue-158.md"
+  related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "../plans/implement-full-ci-ci-summary-issue-158.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "../designs/full-ci-ci-summary-issue-158.md"

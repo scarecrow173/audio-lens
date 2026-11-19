@@ -21,8 +21,7 @@ relations:
   derives-from:
     - "docs/specs/residual-compliance.md"
     - "docs/adr/residual-issue-boundaries.md"
-  derived-by:
-    - "docs/plans/residual-fixes.md"
+  derived-by: []
   verifies: []
   verified-by: []
   references:
@@ -142,7 +141,7 @@ Float64 WAV の残差と lineage を維持する。`Resolution` は window/hop �
 計算に使用する decoded/normalized PCM レートを渡す。expensive 共通 Emit は
 analyze_region のレートを保持して有効・無効の両経路へ伝播する。
 互換層や manifest レートへの暗黙 fallback は設けず成果物を再生成する。
-[承認・理由・証拠](../tasks/spec-residual-decisions.md) を参照。
+[承認・理由・証拠](../specs/residual-compliance.md) を参照。
 
 
 ## #31 の採用設計 (2026-10-11)
@@ -180,5 +179,5 @@ params に marker キーを追加しない。新規入力 role と外部 marker 
 fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
 Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
 将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
-今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+今回の承認/適用/検証は [今回spec](../specs/spec-residual-contract-finalization.md) に記録する。
 旧taskのdoneは今回検証を意味しない。

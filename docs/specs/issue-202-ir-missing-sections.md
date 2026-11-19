@@ -91,7 +91,6 @@ relations:
   implements: []
   implemented-by:
     - "docs/designs/issue-202-ir-missing-sections-design.md"
-    - "docs/plans/issue-202-ir-missing-sections-plan.md"
   depends-on: []
   blocks: []
   supersedes: []

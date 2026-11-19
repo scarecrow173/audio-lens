@@ -28,7 +28,6 @@ relations:
     - "../specs/source-localization.md"
     - "locate-argmax-ambiguity-representation.md"
     - "../designs/locate-consensus-argmax-ambiguity.md"
-    - "../plans/implement-locate-argmax-ambiguity.md"
   refines: []
   refined-by: []
   derives-from:

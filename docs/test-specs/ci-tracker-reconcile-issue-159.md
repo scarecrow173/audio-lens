@@ -29,8 +29,7 @@ relations:
     - "../test-specs/full-ci-ci-summary-issue-158.md"
   refines: []
   refined-by: []
-  derives-from:
-    - "../plans/implement-ci-tracker-reconcile-issue-159.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "../specs/ci-tracker-reconcile-issue-159.md"

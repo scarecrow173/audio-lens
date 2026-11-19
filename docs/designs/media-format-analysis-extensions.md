@@ -259,7 +259,7 @@ dataset 表現の追加は実装時にこの責務の一箇所で定義し、既
 
 ## References
 
-- [approved plan](../plans/media-format-analysis-extensions.md)
+- approved plan(`docs/plans/media-format-analysis-extensions.md`・削除済み源文書)
 - [reference-analysis spec](../specs/reference-analysis.md): 帯域・複素伝達・残差契約。
 - [test-spec](../test-specs/media-format-analysis-extensions.md)
 - [ingest design](ingest-av.md)、[video design](video-features.md)、

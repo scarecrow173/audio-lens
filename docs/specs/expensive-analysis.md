@@ -175,7 +175,7 @@ always-run 実行も許可する。
 別 Issue と実装 task を作成し、本 spec の計測契約・feature 辞書・test-spec
 を承認してから着手する。予算と trigger 理由、未支持時の validity、下位
 測定を上書きしない契約を維持する。現時点で四項目の実装 task は runnable
-ではない。対応結果は [fixture-review-fidelity task](../tasks/fixture-review-fidelity.md)
+ではない。対応結果は fixture-review-fidelity task(`docs/tasks/fixture-review-fidelity.md`・削除済み源文書)
 から追跡する。
 
 - 各ファミリの実行順とコスト予算 | fixture / 実測での計算時間計測が

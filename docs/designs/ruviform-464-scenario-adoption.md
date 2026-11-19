@@ -22,7 +22,6 @@ relations:
   supersedes: []
   superseded-by: []
   related:
-    - "docs/plans/ruviform-464-scenario-adoption.md"
     - "docs/test-specs/ruviform-464-scenario-adoption.md"
   refines: []
   refined-by: []

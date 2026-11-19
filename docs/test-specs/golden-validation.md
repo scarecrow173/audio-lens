@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/golden-validation.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/validation-strategy.md"

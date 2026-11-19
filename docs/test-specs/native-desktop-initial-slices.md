@@ -26,8 +26,6 @@ relations:
   superseded-by: []
   related:
     - "../specs/native-desktop-initial-slices.md"
-    - "../plans/native-desktop-initial-slices.md"
-    - "../tasks/native-desktop-initial-slices.md"
   refines: []
   refined-by: []
   derives-from: []

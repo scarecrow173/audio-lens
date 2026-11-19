@@ -37,13 +37,7 @@ relations:
     - "../adr/caller-side-optimizations-structure.md"
     - "../discovery/caller-side-optimizations.md"
   derived-by:
-    - "../plans/caller-side-optimizations.md"
     - "../test-specs/caller-side-optimizations.md"
-    - "../tasks/caller-opt-bench-baseline-characterization.md"
-    - "../tasks/caller-opt-stft-fft-plan-hoist.md"
-    - "../tasks/caller-opt-least-squares-column-api.md"
-    - "../tasks/caller-opt-dsp-conv-overlap-save.md"
-    - "../tasks/caller-opt-measurement-ir-closeout.md"
   verifies: []
   verified-by: []
   references: []

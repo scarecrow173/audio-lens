@@ -38,8 +38,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/issue-210-ci-failure-fix-plan.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/issue-210-ci-failure-fix.md"

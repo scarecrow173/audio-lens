@@ -29,7 +29,6 @@ relations:
     - "../specs/ruviform-foundation-migration.md"
   implemented-by:
     - "../designs/ruviform-migration-responsibility-map.md"
-    - "../plans/ruviform-foundation-migration.md"
   depends-on:
     - "measurement-over-verdict.md"
     - "immutable-resumable-job.md"
@@ -72,7 +71,6 @@ relations:
     - "https://github.com/scarecrow173/audio-lens/issues/95"
   derived-by:
     - "../designs/ruviform-migration-responsibility-map.md"
-    - "../plans/ruviform-foundation-migration.md"
   verifies: []
   verified-by: []
   references: []

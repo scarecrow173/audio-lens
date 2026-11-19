@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/spectrogram-tab-hang.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/spectrogram-tab-hang.md"

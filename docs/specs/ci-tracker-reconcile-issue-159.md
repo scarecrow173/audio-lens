@@ -31,7 +31,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/ci-tracker-reconcile-issue-159.md"
-    - "../plans/implement-ci-tracker-reconcile-issue-159.md"
   depends-on:
     - "../designs/audiolens-independent-ci.md"
     - "../designs/ruviform-dependency-ci.md"

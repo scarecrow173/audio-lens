@@ -24,7 +24,6 @@ relations:
   superseded-by: []
   related:
     - "docs/designs/ruviform-ac10a2f7-rev-watch.md"
-    - "docs/tasks/ruviform-ac10a2f7-rev-watch.md"
   refines: []
   refined-by: []
   derives-from:

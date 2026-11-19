@@ -26,7 +26,6 @@ relations:
   superseded-by: []
   related:
     - "../specs/gui-app-mvp.md"
-    - "../impl/ir/issue-103-job-dataset-provenance-regression.md"
   refines:
     - "ruviform-migration-responsibility-map.md"
   refined-by:

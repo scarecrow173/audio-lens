@@ -24,9 +24,7 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related:
-    - "../plans/native-gui-waveform-seek-screen.md"
-    - "../tasks/native-gui-waveform-seek-screen.md"
+  related: []
   refines: []
   refined-by: []
   derives-from: []

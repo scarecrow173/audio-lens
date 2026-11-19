@@ -20,7 +20,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/artifact-durability-tiers-resume-verification.md"
-    - "../plans/implement-artifact-durability-tiers.md"
   depends-on: []
   blocks: []
   supersedes: []

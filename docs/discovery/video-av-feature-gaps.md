@@ -30,7 +30,6 @@ relations:
   derived-by:
     - "../designs/video-features.md"
     - "../adr/avi.md"
-    - "../plans/video-av-features.md"
   verifies: []
   verified-by: []
   references: []

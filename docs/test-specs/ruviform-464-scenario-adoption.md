@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/ruviform-464-scenario-adoption.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/ruviform-464-scenario-adoption.md"

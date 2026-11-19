@@ -30,7 +30,6 @@ relations:
   derives-from: []
   derived-by:
     - "../designs/golden-validation.md"
-    - "../plans/golden-validation.md"
   verifies: []
   verified-by: []
   references: []

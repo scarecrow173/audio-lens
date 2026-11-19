@@ -97,7 +97,7 @@ Artifact Graph が一意の spec/ADR/design/plan を選び、全 Issue の task 
 独立 task 分割は省略して項目別証拠と論理別コミットで追跡すること、
 packet-slot 文書化、dwStart 実相対 offset の保持、rec LIST 未対応の明示、
 i64 overflow の構造不正境界を承認した。
-[実施 task](../tasks/container-review-edge-cases.md) に全項目の証拠を記録する。
+実施 task(`docs/tasks/container-review-edge-cases.md`・削除済み源文書)に全項目の証拠を記録した。
 本確認は #28 の実施判断であり、#33 等の未承認方式を採択しない。
 
 ## #33 の方式承認 (2026-10-11)
@@ -109,7 +109,7 @@ coordinator は task の事前質問に対し、候補検出の fused 実行を�
 分解能は解析対象 PCM のレートを保存し、旧成果物は再生成する。
 独立実装修正は分解能のみのため task 分割が不要であることも承認された。
 この承認は #33 の方式判断に限り、本 ADR 全体の status は変更しない。
-[選択肢・理由・再検討条件・証拠](../tasks/spec-residual-decisions.md) を参照。
+[選択肢・理由・再検討条件・証拠](../specs/residual-compliance.md) を参照。
 
 ## #33 現在の正式契約 (2026-10-14)
 
@@ -118,5 +118,5 @@ coordinator は task の事前質問に対し、候補検出の fused 実行を�
 fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
 Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
 将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
-今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+今回の承認/適用/検証は [今回spec](../specs/spec-residual-contract-finalization.md) に記録する。
 旧taskのdoneは今回検証を意味しない。

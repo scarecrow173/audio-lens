@@ -25,13 +25,10 @@ relations:
   supersedes: []
   superseded-by: []
   related:
-    - "../plans/implement-ci-os-l1-gpui-desktop.md"
-    - "../tasks/ci-os-l1-gpui-desktop.md"
     - "../test-specs/full-ci-ci-summary-issue-158.md"
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/implement-ci-os-l1-gpui-desktop.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/ci-os-l1-gpui-desktop.md"

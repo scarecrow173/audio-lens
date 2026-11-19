@@ -22,8 +22,7 @@ relations:
     - "analysis-stages.md"
   blocks: []
   supersedes: []
-  superseded-by:
-    - "../impl/ir/issue-106-viz-removal.md"
+  superseded-by: []
   related: []
   refines: []
   refined-by: []
@@ -45,7 +44,7 @@ relations:
 > `al-gui` + `ruviform-viz` が Analysis Dataset を直接読んで担い、
 > 可搬 export のみ `al-dataset::export` として残る。移行判断の記録
 > は
-> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> [`viz-export-verification.md`](../evidence/viz-export-verification.md)
 > を参照。以下は歴史的記録として残す。
 
 # 可視化・エクスポート設計

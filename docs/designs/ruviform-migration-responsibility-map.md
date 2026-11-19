@@ -18,8 +18,7 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by:
-    - "../plans/ruviform-foundation-migration.md"
+  implemented-by: []
   depends-on:
     - "../adr/ruviform-foundation-migration.md"
   blocks: []

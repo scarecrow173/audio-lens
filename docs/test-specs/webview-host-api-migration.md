@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/webview-host-api-migration.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/webview-host-api-migration.md"

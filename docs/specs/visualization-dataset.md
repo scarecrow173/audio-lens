@@ -21,8 +21,7 @@ relations:
     - "analysis-dataset.md"
   blocks: []
   supersedes: []
-  superseded-by:
-    - "../impl/ir/issue-106-viz-removal.md"
+  superseded-by: []
   related:
     - "../adr/derived-visualization-dataset.md"
   refines:
@@ -43,7 +42,7 @@ relations:
 > Analysis Dataset を `al-service`/`DatasetSession` の範囲読み API
 > 経由で直接読み、表示レイヤでの再計算や派生データセットは持た
 > ない。移行判断・削除対象・export 分離の記録は
-> [`../impl/ir/issue-106-viz-removal.md`](../impl/ir/issue-106-viz-removal.md)
+> [`viz-export-verification.md`](../evidence/viz-export-verification.md)
 > を参照。以下は歴史的記録として残す。
 
 # 可視化データセット

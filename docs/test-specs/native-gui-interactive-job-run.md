@@ -25,7 +25,6 @@ relations:
   superseded-by: []
   related:
     - "../designs/native-gui-interactive-job-run.md"
-    - "../tasks/native-gui-interactive-job-run.md"
   refines: []
   refined-by: []
   derives-from:
