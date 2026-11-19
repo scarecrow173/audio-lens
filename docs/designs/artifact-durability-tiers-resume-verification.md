@@ -164,7 +164,7 @@ ArtifactRecord.params(自由 JSON、schema 変更なし)に:
 - resume 検証の失敗は stage エラーではなく降格である
   (修復可能な状態であり、ユーザーの再実行要求は要らない)。
 - `ArtifactRecord.params.byte_len`: 記録されていれば必ず正しい
-  値でなければならない(嘘のサイズは resume を壊す)。
+  値でなければならない(誤ったサイズは resume を壊す)。
 
 ## Error Handling
 
