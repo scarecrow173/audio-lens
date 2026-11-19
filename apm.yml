@@ -11,7 +11,6 @@ targets:
 dependencies:
   apm:
     - scarecrow173/apm-packages/packages/basic-dev-foundation#main
-    - scarecrow173/apm-packages/packages/recommended-dev-suite#main
     - scarecrow173/apm-packages/packages/steer-enterprise-web-research#main
     - scarecrow173/apm-packages/packages/github-automation#main
     - scarecrow173/apm-packages/packages/token-compression#main
