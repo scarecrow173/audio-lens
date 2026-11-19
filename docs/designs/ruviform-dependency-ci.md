@@ -536,7 +536,7 @@ workflow_dispatch
 - fine-grained PAT/GitHub App への credential 移行 | Deploy Key で
   現要件を満たす | 監査・期限管理要件の変化時 | 長期の key 管理負債。
 - AL の MSRV(`rust-version`)宣言 | pre-release で未検証の floor
-  宣言は嘘になる | MSRV matrix の必要性が生じた時点 | 宣言無しは
+  宣言は誤りとなる | MSRV matrix の必要性が生じた時点 | 宣言無しは
   現状維持で矛盾しない(実効 floor は mise pin)。
 - Ruviform 暫定 license(`MIT` 仮置き)の確定 | Ruviform 側の
   配布方針未確定 | Ruviform 側 licensing 決定時 | AL 側の同梱・
