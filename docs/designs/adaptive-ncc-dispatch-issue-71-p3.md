@@ -97,7 +97,7 @@ mode `NccDirect` を追加し、分子の計算方式だけを plan 内部で
 - `pulp` は al-math 内部のまま。direct カーネルも `WithSimd` で
   scalar↔dispatch 同等を保つ
 - direct workspace は `real`/`a_*`/`b_*` なし(形状あたり
-  ~100MB 級のメモリ削減)
+  ~100MB 級の削減が pool で得られる)
 
 ## Risks and Trade-offs
 

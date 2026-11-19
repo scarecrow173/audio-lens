@@ -42,7 +42,7 @@ relations:
 ## Context
 
 `al-math` のカーネルは pulp dispatch で SIMD 化済みだが、公開面に
-pulp 型が露出している(`lib.rs` の `pub use` と `Fft`/`RealFft` の
+pulp 型が表れている(`lib.rs` の `pub use` と `Fft`/`RealFft` の
 `c64` シグネチャ)。ADR で「公開 API はバックエンド中立の型のみ、
 FFT 境界は split re/im」と決定された。本設計はその具体化である。
 
