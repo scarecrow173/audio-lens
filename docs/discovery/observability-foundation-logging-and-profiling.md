@@ -56,7 +56,7 @@ relations:
 論点になった際にユーザーが「先に Logging と Profile の方針を決めて
 全体に導入してからの方がいい」と順序変更を決定。本探索は全 crate へ
 の logging + profiling 基盤導入方針を確定するもので、vec プリミティブ
-集約の先行チェーンとして位置づく。
+集約の先行チェーンとして位置づけられる。
 
 課題フレーミング: AudioLens の observability は構造化 artifacts
 (manifest・feature records)による「結果」の記録のみで、「過程」の
@@ -88,7 +88,7 @@ activation の各決定を方向づけた。
 - 確認済み(構造化永続先): `StageRecord` が manifest に既存し、
   `duration_ms` を追加すれば計時を job 成果物として永続化できる
   (cheaper は相当する構造化 record を持たず log stream に流した。
-  AudioLens は「計時=manifest、診断=log」の分離が可能で良い形)
+  AudioLens は「計時=manifest、診断=log」と分離できる)
 - 確認済み(ベンチ現状): criterion 未導入。examples/ の `Instant`
   手動計測が4本のみ(bench_dsp/bench_ncc/bench_correlation/
   bench_locate_prepared)。profiler 連携・CI ベンチもなし
@@ -97,7 +97,7 @@ activation の各決定を方向づけた。
 - 前提: secret(credential 等)は扱わない。redaction 対象は
   「raw PCM/巨大データを field に載せない」規約に置き換え
 - 前提: pre-release 方針により互換層は設けないが、旧 manifest の
-  読込が壊れないよう `#[serde(default)]` は無難に入れる
+  読込が壊れないよう `#[serde(default)]` は入れておく
 - 参照実装: `F:\repositry\cheaper` の observability foundation
   (DISC-034DUx01YRjOAf4gTaftO7 / ADR-034DUFA70cQdAyG7Lbuuay /
   ADR-034DUFzrXJxOwfl1qveXWR)で同テーマを確定済み。9 軸の比較は

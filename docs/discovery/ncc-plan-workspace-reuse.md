@@ -25,7 +25,7 @@ relations:
 ## Exploration Goal
 
 ロードマップ §#52 の2026-10-14確定判断を、専用の spec/ADR に記録する。
-Entry Decision: A-4。要求・選択肢・採用判断は確定済みで、API詳細は次の design review が所有する。
+Entry Decision: A-4。要求・選択肢・採用判断は確定済みで、API詳細は次の design review で確定する。
 dispatch-specific override: 親からの限定文書作成指示に従い、briefing-flow の SUBAGENT-STOP を適用し、profile生成・追加委譲・共有index更新を行わない。
 
 ## Findings
@@ -37,7 +37,7 @@ dispatch-specific override: 親からの限定文書作成指示に従い、brie
 
 IPD drift の `cheap.rs:1278-1280` は同長blockを渡すため、NCCの合法なclampにより
 候補がlag 0一つになる。さらにindexからmax_lagを引くため、全blockの推定値が同じになりdriftが0になる。
-違反の所有者はcallerの検索窓shape/座標であり、NCC clampではない。これは静的診断で、red実行は未実施。
+違反の原因はcallerの検索窓shape/座標にあり、NCC clampではない。これは静的診断で、red実行は未実施。
 
 ## Decision Inputs
 
