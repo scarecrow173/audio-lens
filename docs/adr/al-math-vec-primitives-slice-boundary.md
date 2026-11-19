@@ -57,7 +57,7 @@ metadata:
 
 al-locate・al-analysis に分散する f64 ベクトル演算(`corr0`/`rms`/
 `energy`/`dot`/`scale`/re²+im² 合成)を `al-math` の vec
-プリミティブに集約するにあたり、(1) どこに置きどう公開するか
+プリミティブに集約するにあたり、(1) どこに置き、どう公開するか
 (公開境界)、(2) 下流 crate がどの経路で消費するか(消費経路)、
 (3) 2入力の長さ不整合をどう扱うか(契約)を決める必要がある。
 
@@ -70,8 +70,8 @@ re-export、`fft` は dsp.rs:31-38 の手書き wrapper fn で
 `Fft::new`+`transform` を呼ぶもので re-export ではない)。
 al-analysis への al-math 依存追加は規約上「依存の追加・変更」の
 確認対象。
-長さ不整合は現行 corr0 が `zip` による min-len 黙認で、呼出しバグを
-隠す(discovery の棚卸し・確定事項に基づく)。
+長さ不整合は現行 corr0 が `zip` による min-len で黙認しており、
+呼出しバグを隠す(discovery の棚卸し・確定事項に基づく)。
 
 ## Decision Drivers
 

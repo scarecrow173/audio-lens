@@ -72,7 +72,7 @@ TASK-034EpPesSpbjbAQBsmjvJx / PR #49 で明示的に保留されている
 どこで検出し、どう表現し、合議がどう扱うか。これは #42
 (FFT カーネル変更)・#40(coarse-to-fine)など数値挙動を変える
 全作業の先行ゲートであり、永続化される `MethodEvidence`
-(evidence.json / result.json)の意味論に触れるため ADR で記録する。
+(evidence.json / result.json)の意味論に関わるため ADR で記録する。
 
 ## Decision Drivers
 
@@ -293,7 +293,7 @@ variant を追加する際は同関数への明示アーム追加が必須であ
   候補保持の既存先例(`LowCorrelation`)と同型で、evidence への
   provenance が得られる。raw 相関曲線への判定なので、`is_peak`
   の非対称条件が潰す平坦 plateau 同点も捕捉できる。
-* Bad, because per-pair と merged の両方に効く — merged は clone で
+* Bad, because per-pair と merged の両方に及ぶ — merged は clone で
   自動伝播するが、`merged_votes` の選択規則を「非曖昧優先」へ
   変更する必要がある(Consequences 参照)。
 * Bad, because `peaks_from_correlation` 内では検出できない —
@@ -330,8 +330,8 @@ variant を追加する際は同関数への明示アーム追加が必須であ
 
 * Good, because repeated/loop の等間隔配置による偽陽性を追加で
   抑制し得る。
-* Bad, because 判定が複合化して調整コストが増える。延期された
-  フォールバックとする — スコアのみの基準(E-2)が正当な繰返しと
+* Bad, because 判定が複合化して調整コストが増える。フォールバック
+  として保留する — スコアのみの基準(E-2)が正当な繰返しと
   位相曖昧を分離できないと T1 が示した場合にのみ再検討する。
 
 ## More Information

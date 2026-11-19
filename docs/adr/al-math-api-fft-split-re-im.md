@@ -47,7 +47,7 @@ metadata:
 [pulp 採用 ADR](simd-arithmetic-pulp.md) と
 [SIMD 算術基盤設計](../designs/simd-dsp-foundation.md) により `al-math` の
 カーネルは pulp dispatch で SIMD 化された。しかし公開 API には pulp 型が
-露出している: `lib.rs` が `pulp::{Simd, WithSimd, c64}` を再公開し、
+表れている: `lib.rs` が `pulp::{Simd, WithSimd, c64}` を再公開し、
 `F64s`/`C64s`/`dispatch` も公開、`Fft::transform` と `RealFft` 系の
 シグネチャが `&mut [c64]` を取る。将来 pulp 以外のバックエンドへ移行する
 可能性を残すため、公開面をバックエンド中立の型だけにする必要がある。
@@ -89,7 +89,7 @@ shuffle を要さず AoS と同等以上で、境界が純データのままバ�
   消え、STFT 等のフレーム単位呼出しで O(n×frames) の帯域を削減する
 * Good, because `StftMatrix` と永続テンソルの re/im 分離表現と一致し、
   表現ドリフトを起こさない
-* Good, because pulp 型の外部露出が消え、将来のバックエンド移行が
+* Good, because pulp 型が公開 API から消え、将来のバックエンド移行が
   `al-math` 内部に閉じる
 * Bad, because `Fft`/`RealFft` カーネルの複素演算を実部演算へ分解する
   書き換え量が3案で最大であり、bit-reversal の要素交換が re/im の
