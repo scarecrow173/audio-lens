@@ -96,7 +96,7 @@ epsilon 窓の存在を実証し、`TIE_REL_EPS`/`TIE_ABS_FLOOR` を確定
   fc=1kHz/48kHz Biquad lowpass ノイズで ~8.6e-3、実効帯域が
   狭い仮定下で ~1e-4 級、~35Hz 帯域制限で ~1e-6 級。いずれも
   未検証の推定値)が eps 候補レンジ(1e-9..1e-6)と重なり
-  得るため、ショルダーデルタ曝露を明示的に確認する
+  得るため、ショルダーデルタの顕在化を明示的に確認する
 - Rule: `spectral_envelope` の慢性曖昧リスク(32-bin log 振幅
   包絡 NCC がホワイトノイズ・チャープ・広帯域 SFX で殆どの lag
   が準同点)を noise 系入力で実測し、曖昧となる頻度を記録する
@@ -141,9 +141,9 @@ epsilon 窓の存在を実証し、`TIE_REL_EPS`/`TIE_ABS_FLOOR` を確定
   受理必須)で各メソッドの raw 相関曲線から `M` と第二順位
   大きさを計測し、マージンが eps 窓を許すか判定材料にする
 - Example(ショルダー): `case_long_source_linear_drift` の帯域
-  制限ノイズで argmax 隣接サンプルの |corr| が M に極めて近い
+  制限ノイズで argmax 隣接サンプルの |corr| が M に近い
   (ショルダーデルタは未検証推定で ~1e-2..1e-6 級)ことを
-  計測で曝露し、eps の実質上限を確定する
+  計測で明らかにし、eps の実質上限を確定する
 - Example(慢性曖昧): `different_rates_locate_without_false_drift`
   のチャープ入力で `spectral_envelope` の |T| が大きくなる
   ことを計測し、曖昧頻度として記録する
