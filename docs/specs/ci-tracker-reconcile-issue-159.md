@@ -129,7 +129,7 @@ AudioLens の CI failure Issue Tracker に、Ruviform で実装・統合済み�
     schedule は payload に `repository` が欠落し得るため無条件通過
     (ref 比較が `main == ''` に解決して cron 全体を silent skip
     させない)。`workflow_dispatch` の非 default ref 起動は job を
-    skip する防御としてのみ効く。
+    skip する防御としてのみ機能する。
   - AudioLens repo の checkout は
     `ref: ${{ github.event.repository.default_branch || 'main' }}`
     で default branch code に pin し、

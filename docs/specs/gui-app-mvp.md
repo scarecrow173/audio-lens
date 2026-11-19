@@ -93,10 +93,10 @@ MVP では複数ウィンドウ・タブは持たない。
    - stage 一覧: Pending/Running/Completed/Failed + duration_ms +
      error 表示。
    - progress は stage 粒度(完了 stage / 全 stage)。キャンセル要求は
-     stage 境界で効く(キャンセル = 次 stage 起動せず manifest を
+     stage 境界で処理される(キャンセル = 次 stage 起動せず manifest を
      Pending のまま保存; resume で続行可能)。
-   - `run` / `resume` / `cancel` 操作。失敗時は stage 名+error メッ
-     セージを表示。
+   - `run` / `resume` / `cancel` 操作。失敗時は stage 名+error
+     メッセージを表示。
    - `al-cli inspect` と同一 manifest を読むため結果は一致する。
 
 3. **データセット概要**
