@@ -61,7 +61,7 @@ locate の合議(consensus)において、「メソッド証拠の argmax が統
   イプシロン内で上位候補が識別不能である場合、非 Valid の曖昧状態
   としてマークされる。表現は既存 variant
   `Validity::AmbiguousAlignment` の `MethodEvidence.validity` への
-  流用とする(表現選択は ADR ADR-034FlIKrgxUPy1AQk3WGlb で確定・
+  流用とする(表現選択は ADR-034FlIKrgxUPy1AQk3WGlb で確定・
   記録済み)。
 - 曖昧とマークされた証拠でも候補列は保持され、evidence の
   observability が失われない。
@@ -189,7 +189,7 @@ Phase 0 として、曖昧性を構造的に検出・拒否する契約を先に
      **後**に評価され、弱さで既に棄却された曲線は
      `LowCorrelation` のままとし、曖昧へ格上げしない。
    表現は `MethodEvidence.validity = Validity::AmbiguousAlignment`
-   とする(ADR ADR-034FlIKrgxUPy1AQk3WGlb で確定記録済み)。この
+   とする(ADR-034FlIKrgxUPy1AQk3WGlb で確定記録済み)。この
    判定は全 locate メソッド・全
    チャンネルペアに一様に適用されること。
 2. **候補の保持**: 曖昧とマークされた証拠でも、抽出された候補列は
@@ -225,7 +225,7 @@ Phase 0 として、曖昧性を構造的に検出・拒否する契約を先に
    通じたものであって、他メソッドの投票そのものへの拒否権では
    ない。
 5. **決定的タイブレークの禁止**: 同点を index 順・最小 lag 優先などで
-   決定的に解くことを、受理や confidence の根拠にしてはならない。
+   決定的に解くことを、受理や confidence の根拠にしない。
    stable sort による順序付けは `candidates` 内の表示順序としてのみ
    許容される。
 6. **dispatch 不変の epsilon**: 曖昧性検出は scalar と SIMD
@@ -290,7 +290,7 @@ Phase 0 として、曖昧性を構造的に検出・拒否する契約を先に
     区別できなければならない。結果レベルでは、曖昧証拠により投票
     が空になった分岐は独自の pin 文言を持つ — 推奨文言:
     `"all voting methods produced ambiguous (tied) peaks"`。"method(s)
-    agree" を含んではならない(golden
+    agree" を含めない(golden
     `pinned_periodic_everywhere_not_accepted_at_wrong_phase` の
     reject_reason 断言はこの新文言へ更新する — 意図的な契約変更と
     して記録する)。合意不足分岐("method(s) agree")は、曖昧証拠が
@@ -354,8 +354,8 @@ AC の assertion 粒度は、特に断りのない限り結果レベル
 
 - Option C(周期性・自己相関モデルによる位相同値性の意味的検証):
   判定式(E-2 型の相対 epsilon)では「同一事象の位相」と「別出現」
-  を意味論的に完全には区別しない。T1 が eps 実現可能範囲を示さ
-  なかった場合のエスカレーション先(Req 7: E-3 拡張または
+  を意味論的に完全には区別しない。T1 が eps 実現可能範囲を
+  示さなかった場合のエスカレーション先(Req 7: E-3 拡張または
   Option C フォールバック)として留保する。無視した場合のリスクは
   等スコア多重埋め込みの受理不能(本契約では曖昧報告を受諾済み)
 

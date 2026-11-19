@@ -76,7 +76,7 @@ prefix-sum・同一 `normalize` 規則・同一 early-zero・同一戻り範囲
   (26 帯域 × ~240ms)。K=236 と極小で、直接法は帯域あたり
   ~61ms — **band_ncc busy をさらに ~3.7× 削減**する余地がある。
 - #76(anchor 探索)の narrow NCC でも、狭い範囲(K 小)では
-  直接法が効き、さらに FFT plan 不要化で pool の plan 再構築
+  直接法が速く、さらに FFT plan 不要化で pool の plan 再構築
   コスト自体も軽減できる可能性がある(#76 側の実装は別 issue)。
 - #71 の確定方針で P3 = 「適応 dispatch + Blocked FFT(実測採否)」
   と決定済み。Blocked FFT は形状ベンチの結果**不採用**(下記
