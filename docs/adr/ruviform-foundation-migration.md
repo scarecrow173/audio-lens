@@ -225,8 +225,8 @@ Chosen option: "B: 処理単位の責務分割", because Issue #95 で採用
 
 なお、本 ADR が `depends-on`/`refines` で参照する proposed ADR
 の記述内容は、本 ADR の acceptance により不変条件として採用
-され、対象 ADR が後に改訂・却下されても本 ADR の前提は変わら
-ない。
+され、対象 ADR が後に改訂・却下されても本 ADR の前提は
+変わらない。
 
 | ADR | 扱い | 変更点 |
 | --- | --- | --- |
@@ -254,7 +254,7 @@ Chosen option: "B: 処理単位の責務分割", because Issue #95 で採用
   AL 側 stage が満たす必要がある(#54 で評価)。矛盾なし。
 - `dsp-simd-backend-adoption.md`・`simd-ulp.md`(fearless-simd):
   AL の `simd-arithmetic-pulp.md` と採用基盤が異なる。カーネル
-  移行時は Ruviform 側の SIMD 契約に従う。ADL 側の pulp 撤去は
+  移行時は Ruviform 側の SIMD 契約に従う。AL 側の pulp 撤去は
   #104。矛盾なし(共存期間の重複は許容、撤去条件で解消)。
 - `ui-architecture-webview-hybrid.md`・`ui-tech-selection-poc.md`
   (WebView hybrid): #105 はこの選定を再審査せず利用する。
@@ -282,7 +282,7 @@ RT/モジュール分割 ADR と矛盾を発見した場合は、AudioLens 内�
   覆うこと。f64→f32 の暗黙変換、元 PCM/PTS の正規化喪失、
   `unavailable` と 0/デフォルトの混同、AudioLens 固有型の
   Ruviform 公開 API への混入。
-- Dependencies or configuration: Ruviform crate は検証済み同一
+- Dependencies or configuration: Ruviform crate は検証済みの同一
   Git SHA の git 依存(#99 で固定)。本 ADR 自体は新規依存を
   追加しない。
 

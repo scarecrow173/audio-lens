@@ -101,9 +101,8 @@ init/format/routing/activation 解釈を所有し、leaf crate は
 `tracing` 直接依存で emit のみ行う", because sink/format/
 activation 方針の単一所有境界ができることで backend 切替・sink
 追加を1境界に吸収でき、計装対象 crate への横展開で一貫する
-ため。leaf
-crate が `tracing` 標準 API を直接使うことで facade が隠すだけの
-無益な間接層を避けられる。cheaper で同一構成が検証済み。
+ため。leaf crate が `tracing` 標準 API を直接使うことで facade が
+隠すだけの無益な間接層を避けられる。cheaper で同一構成が検証済み。
 
 ### Consequences
 

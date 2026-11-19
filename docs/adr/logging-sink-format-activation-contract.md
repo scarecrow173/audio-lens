@@ -171,8 +171,8 @@ routing、各 sink 独立に text/JSON 切替・同時併用可、既定 OFF、
   manifest に常時記録されるため OFF でも俯瞰データは残る
 * Bad, because `<base_dir>/logs/` が肥大するため retention
   管理(rolling + 世代数)が必須になる
-* Bad, because 同一 `<base_dir>` では複数 `al` プロセスが同日同
-  log file に append し得る既知制約がある。行書込みの原子性は
+* Bad, because 同一 `<base_dir>` では複数 `al` プロセスが同日の
+  同じ log file に append し得る既知制約がある。行書込みの原子性は
   tracing-appender に依存し、retention による古 file の削除は
   他プロセスが open 中だと Windows で失敗し得る
 * Bad, because sink ごとの format 配線と env/flag 両経路の

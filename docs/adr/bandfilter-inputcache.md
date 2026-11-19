@@ -90,8 +90,8 @@ PreparedChannel の契約拡張(遅延評価・内部可変性・スペクトル
 
 ### Consequences
 
-* Good, because band_gain の帯域同時生存が 26×2ch から現帯域 2
-  信号に減り、ピークメモリが大幅に削減される。
+* Good, because band_gain の帯域同時生存が 26×2ch から処理中の
+  帯域の 2 信号に減り、ピークメモリが大幅に削減される。
 * Good, because coarse リサンプルが band_gain 経路から完全に消える。
 * Good, because `bandpass_many` の外部契約・出力は不変で、locate 側
   `InputCache` も無変更。
