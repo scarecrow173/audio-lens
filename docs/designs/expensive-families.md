@@ -56,7 +56,7 @@ spec `../specs/expensive-analysis.md` の要求ファミリのうち、
   `exp.echo_delay_s`/`exp.cepstrum_prominence` に追加して記録。
   現状は主ピーク 1 件のみで spec の「二次エコー」要件を
   満たさない)
-- click/splice 定位と stuck/repeated buffer 候補の深掘り
+- click/splice 定位と stuck/repeated buffer 候補の詳細調査
 - 高分解能の局所 time map(リージョン内の局所 lag/オフセット
   軌跡を系列として記録。spec のタイミング系先頭項目で、
   locate の `build_time_map` とは別物)

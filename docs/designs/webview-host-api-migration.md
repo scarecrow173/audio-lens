@@ -73,7 +73,7 @@ on_event)` が `DriverEvent` + `&mut dyn WindowDriver` を UI thread で
 - **プロセス終了**: `run_multi` は `WindowDriver::exit()` でのみ
   loop を抜ける。`DesktopSession` の `exit_on_last_window` policy
   (既定 true)と `maybe_exit`(live window 無し + job 無しでのみ
-  `exit()`)がそのまま効く — job 実行中の window close は `Defer` で
+  `exit()`)がそのまま有効 — job 実行中の window close は `Defer` で
   保留され、job 終端 drain 後に close が再開される。旧
   `UiRuntime::handle(CloseRequested)` の「全 job cancel」は
   gui-app-architecture.md のライフサイクル契約

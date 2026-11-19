@@ -99,7 +99,7 @@ panic 契約・ゼロ入力規則・等価性 predicate)が ADR と乖離した
   アルゴリズム変更(issue #42)、`al-viz` `lod.rs` の
   incremental `sum_sq`、lag 走査自体のプリミティブ化、
   ベクトル/行列抽象型、al-analysis への al-math 直接依存、
-  pulp 型の公開面露出、golden 意味・Validity 閾値の変更
+  pulp 型の公開範囲、golden 意味・Validity 閾値の変更
 - spec「残存許容」リストの箇所(`expensive/ir.rs` タプルスライス
   合成、residual 列 gather dot(再構成非採用時)、
   `Vec<Vec<f64>>`/`Vec<(f64,f64)>` 上の合成、同一式でない

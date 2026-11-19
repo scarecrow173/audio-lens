@@ -252,7 +252,7 @@ pub struct WindowPrefs { pub width: u32, pub height: u32, pub resizable: bool }
     `Vec<StreamTiming>` のみを解釈し `Vec<Self>` で返す。
     `timing()`/`timestamp_origin()`/`observation()` で producer が
     計算した `TimingObservation`(discontinuities・duplicates・
-    drop_candidates・drift_ppm)を typed のまま露出する。
+    drop_candidates・drift_ppm)を typed のまま返す。
 - `view/dataset.rs`: `TimelineView`(`al.ds.timeline` の
   `{inputs:[{input_id,frames,sample_rate,channels,duration_s}],
   event_count,locate_count}` の typed 写し)。必須列欠損は
