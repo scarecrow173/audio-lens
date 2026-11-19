@@ -288,7 +288,7 @@ required context `summary` は名称・常時実行(`if: always()`)を
   2026-11-04 時点で確認)。名称・job の存在・`if: always()` を
   不変とし、**ruleset 変更不要 → 無保護期間ゼロ**
 - lane job(verify 等)は required context ではないため、
-  skip されても GitHub 上は `summary` のみが gate 判定に効く。
+  skip されても GitHub 上は `summary` のみが gate 判定に使われる。
   「skipped が success 扱い」問題は summary の期待集合照合で
   構造的に排除される
 - `impact`/`hygiene` は新規 check 名だが required context では

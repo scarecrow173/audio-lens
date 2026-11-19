@@ -225,7 +225,7 @@ GIT_LFS_SKIP_SMUDGE = "1"
 
 - cargo の Git 取得を system git に委譲し、ローカルでは Git
   Credential Manager、CI では後述の credential 設定がそのまま
-  効く。libgit2 転送では private HTTPS repo を認証できないため必須。
+  有効となる。libgit2 転送では private HTTPS repo を認証できないため必須。
 - ローカル開発者は repo へのアクセス権を既に持つため追加設定不要。
 
 ### 4. CI アクセス設計(最小権限 read-only)
@@ -306,7 +306,7 @@ GIT_LFS_SKIP_SMUDGE = "1"
   依存解決上の矛盾は無い。**AL 側は rust-version(MSRV)を宣言
   しない**ことを本設計で決定する: pre-release で公開もせず、
   CI の実効 toolchain は mise.ci.toml の pin が担う(通常開発は
-  環境導入済み toolchain)。未検証の MSRV 宣言は嘘に
+  環境導入済み toolchain)。未検証の MSRV 宣言は誤りと
   なるため、MSRV matrix が必要になった時点で再評価する
   (Deferred 参照)。
 
@@ -561,5 +561,5 @@ workflow_dispatch
 - [ ] `mise run check-cli-headless` が対象 headless crate 群の
       GUI framework 依存非存在を検証する。
 - [ ] ci.yml が actionlint で検証される(prek hook)。
-- [ ] 手順書の credential 設定手順が secret を露出しない構成を持ち、
+- [ ] 手順書の credential 設定手順が secret を漏えいしない構成を持ち、
       `read_only=true`・host key 照合・probe を含む。

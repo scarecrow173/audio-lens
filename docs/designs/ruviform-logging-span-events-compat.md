@@ -82,7 +82,7 @@ file sink の暫定 local 構築は変更しない。**
   の写しではなく、migration 前 stderr の本来挙動の復旧値。
   NONE(Default)を選ぶと compile は通るが、設計が明記した
   回復条件を満たさず leaf span 観測(AL-OBS-01 要件)の
-  暫定 regression を固定化してしまう。
+  暫定 regression を固定化する。
 - file sink は local layer(`RollingFileAppender` + suffix
   命名 + `non_blocking` + `FmtSpan::CLOSE`)を維持する。
   ruviform #334 の `filename_suffix` 公開により

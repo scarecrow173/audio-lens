@@ -139,7 +139,7 @@ spec のプロセス契約(最優先): 各項目について (1) 現行出力を
   テスト、`tensor.rs` の `read_range` 単体テスト
   (round-trip/境界エラー)、`locate.rs` の normalized_pcm
   layout テスト群、各 `tests/golden.rs` のシナリオ pin は
-  そのまま回帰として効く。これらは**現行出力の値 pin で
+  そのまま回帰テストとして有効。これらは**現行出力の値 pin で
   はない**ため、spec 契約上の characterization は別途追加する。
 
 #### characterization テスト配置
