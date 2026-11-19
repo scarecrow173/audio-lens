@@ -60,7 +60,7 @@ green であることを意図し、最適化適用後も継続して残る。�
 
 ## Feature
 
-al-analysis / al-locate の caller 側3ホットスポットの最適化が、
+al-analysis / al-locate の caller 側の3ホットスポットの最適化が、
 変更前後で捕捉済みの振る舞い契約を守ること — 畳み込み・
 STFT・最小二乗の出力等価性、公開シグネチャと依存境界の不変、
 計測基盤の存在と baseline/事後比較の記録。
