@@ -1,7 +1,9 @@
 ---
-id: "KNOW-bW5xQjRyVtNmPfKsAhGc"
+id: "KNOW-DkaV632pgTaNlez5btBaNC"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "ネイティブ GUI: DesktopSession・テーマ・ViewSpec 射影"
 created: "2026-11-19"
 updated: "2026-11-19"

@@ -1,7 +1,9 @@
 ---
-id: "KNOW-gzU7hx0hLiTVsc2bQ0JH"
+id: "KNOW-huh1feWoWSYtVFnuRlIkru"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "codebase"
 title: "DSP/数学基盤: al-math・ベクトルプリミティブ・相関 plan"
 created: "2026-11-19"
 updated: "2026-11-19"

@@ -1,7 +1,9 @@
 ---
-id: "KNOW-pV9f2kLmWbHh8xQ7yRzT"
+id: "KNOW-ExvMEixYOBHa8BS43eCC75"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "codebase"
 title: "メディア取り込みと時刻情報: WAV/AVI/MP4・SHA-256・タイミング観測"
 created: "2026-11-19"
 updated: "2026-11-19"

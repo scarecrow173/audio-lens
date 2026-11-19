@@ -1,7 +1,9 @@
 ---
-id: "KNOW-gR9kXnPwTmVbYsHjQfLd"
+id: "KNOW-HiQYg29MP0OZp4vrNUhv8n"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "operation"
 title: "Ruviform コラボレーション: 依存解決・契約 API・消費者検証"
 created: "2026-11-19"
 updated: "2026-11-19"

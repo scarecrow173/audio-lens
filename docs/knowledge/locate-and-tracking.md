@@ -1,7 +1,9 @@
 ---
-id: "KNOW-CeamlTyzSlo2fkExKcrO"
+id: "KNOW-cDipZH89ugcVXoI2r5GpZ5"
 type: "knowledge"
-status: "approved"
+status: "confirmed"
+lifecycle: "current"
+knowledge_kind: "architecture"
 title: "ソース定位: 複数手法の合議・曖昧性検出・トラッキング"
 created: "2026-11-19"
 updated: "2026-11-19"
