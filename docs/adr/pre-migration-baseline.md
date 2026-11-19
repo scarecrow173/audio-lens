@@ -122,7 +122,7 @@ diff 可能、clone で残り、docs の artifact graph を汚染せず、
 
 - `environment.json` — commit SHA・branch・worktree dirty
   flag、rustc/cargo・mise tools・ffmpeg(版数と検出パス)、
-  OS/アーチ/CPU モデル・物理コア数・SIMD dispatch の注意書き、
+  OS/アーキテクチャ/CPU モデル・物理コア数・SIMD dispatch の注意書き、
   build profile(release, `debug=true`)、取得日時
 - `inputs.json` — baseline で使う入力一式:`role`・repo 相対
   `path`・`size`・`sha256`・由来。由来は LFS 実サンプル
@@ -353,7 +353,7 @@ Visualization Dataset・export HTML は #105/#106 で廃止予定の
   comparator 意味論を先に固定するため、移行差分の報告を
   機械化できる
 * Good, because run matrix + coverage 台帳で、Issue #98
-  列挙項目の担保先が曖昧さなく追跡できる
+  列挙項目の担保先が曖昧さなしに追跡できる
 * Bad, because 正規化・比較 script の維持対象が増え、
   comparator 自体の正しさを保つ必要がある(自己検証を
   組み込む)

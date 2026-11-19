@@ -83,10 +83,10 @@ dispatch が必要。
   無駄に確保される(pool 内で ~170MB/shape)。選択は実質 (L,S)
   一意なので呼出時判断の利点がない。
 * C. 別の公開 API(`ncc_direct` 等)を呼出側が選ぶ: 全呼出側に
-  形状判断が漏れ、pool 経由では効かない。責務の層違い。
+  形状判断が漏れ、pool 経由では機能しない。責務の層違い。
 * D. Blocked FFT(帯状タイル化): P1 後の実形状では
-  `nextpow2(S)` plan が既に最小域であり、ベンチで効く隙間なし。
-  不採用。
+  `nextpow2(S)` plan が既に最小域であり、ベンチで逆転する隙間
+  なし。不採用。
 
 ## Decision Outcome
 
@@ -101,8 +101,8 @@ plan 構築が自然な選択点であり、workspace の FFT バッファ省略
   pool の workspace メモリ削減、呼出側・下流契約は完全に不変。
 * Bad: 2 つの NCC 実装を維持する。閾値は環境校正値で、別 CPU では
   誤分類し得る(性能のみ、正しさ不変)。
-* Neutral: #76(narrow anchor 探索)には plan 選択経由で間接的に
-  効く可能性があるが、anchor 構造自体は変えない。
+* Neutral: #76(narrow anchor 探索)には plan 選択経由で間接的な
+  恩恵が及ぶ可能性があるが、anchor 構造自体は変えない。
 
 ### Confirmation
 
