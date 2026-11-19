@@ -51,7 +51,7 @@ macOS 対応を表明する次のイベントすべてに適用する:
 `*-macos` legs は全イベントで常時実行され、結果は Full CI
 verdict `ci-summary` が fail-closed で集約する — macOS 失敗/
 未完了は `ci-summary` 失敗となるが、`summary` は Required の
-ため PR 緑 + macOS 赤の状態は merge 可能であり得る。リリース
+ため PR 緑 + macOS 赤の状態でも merge は可能である。リリース
 判断は必ず本手順の実測結果で行う。
 
 ## 必須証拠(候補 SHA ごと)
