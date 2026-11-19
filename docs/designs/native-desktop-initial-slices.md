@@ -18,8 +18,7 @@ relations:
     generated: []
   implements:
     - "../specs/native-desktop-initial-slices.md"
-  implemented-by:
-    - "../plans/native-desktop-initial-slices.md"
+  implemented-by: []
   depends-on:
     - "../discovery/native-desktop-initial-slices.md"
     - "../specs/native-desktop-initial-slices.md"

@@ -28,7 +28,6 @@ relations:
   refined-by: []
   derives-from:
     - "../designs/ruviform-logging-span-events-compat.md"
-    - "../plans/ruviform-logging-span-events-compat.md"
   derived-by: []
   verifies:
     - "../specs/ruviform-logging-span-events-compat.md"

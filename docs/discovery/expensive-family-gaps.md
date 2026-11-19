@@ -29,7 +29,6 @@ relations:
   derives-from: []
   derived-by:
     - "../designs/expensive-families.md"
-    - "../plans/expensive-families.md"
   verifies: []
   verified-by: []
   references: []

@@ -42,8 +42,7 @@ relations:
     generated: []
   implements:
     - "../specs/full-ci-ci-summary-issue-158.md"
-  implemented-by:
-    - "../plans/implement-full-ci-ci-summary-issue-158.md"
+  implemented-by: []
   depends-on:
     - "../designs/audiolens-independent-ci.md"
   blocks: []

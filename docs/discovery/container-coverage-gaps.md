@@ -31,7 +31,6 @@ relations:
   derived-by:
     - "../designs/mp4-ingest.md"
     - "../adr/mp4-demux-decode.md"
-    - "../plans/mp4-ingest.md"
   verifies: []
   verified-by: []
   references: []

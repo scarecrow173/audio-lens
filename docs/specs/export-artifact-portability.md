@@ -24,8 +24,7 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related:
-    - "../tasks/export-package.md"
+  related: []
   refines:
     - "analysis-export.md"
   refined-by: []

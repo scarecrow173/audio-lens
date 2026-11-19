@@ -3,7 +3,7 @@
 //! window_anchors_in / band_gain windows で使われる代表 shape を測る。
 //!
 //! 使い方: `cargo run --release -p al-locate --example bench_reeval`
-//! 結果: `docs/impl/ir/perf-reeval-2026-10/bench-reeval.txt`
+//! 結果の記録先(当時): `docs/impl/ir/perf-reeval-2026-10/bench-reeval.txt`(docs/impl は削除済み)
 
 use std::time::Instant;
 

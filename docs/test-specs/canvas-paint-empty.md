@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/canvas-paint-empty.md"
+  derives-from: []
   derived-by: []
   verified-by: []
   verifies:

@@ -23,7 +23,6 @@ relations:
   implemented-by:
     - "../adr/locate-plan-run-pool.md"
     - "../designs/locate-plan.md"
-    - "../plans/locate-plan.md"
   depends-on: []
   blocks: []
   supersedes: []

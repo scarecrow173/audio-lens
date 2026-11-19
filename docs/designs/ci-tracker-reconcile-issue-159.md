@@ -30,8 +30,7 @@ relations:
     generated: []
   implements:
     - "../specs/ci-tracker-reconcile-issue-159.md"
-  implemented-by:
-    - "../plans/implement-ci-tracker-reconcile-issue-159.md"
+  implemented-by: []
   depends-on:
     - "../designs/audiolens-independent-ci.md"
     - "../designs/ruviform-dependency-ci.md"

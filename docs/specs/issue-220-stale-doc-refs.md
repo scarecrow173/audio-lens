@@ -57,8 +57,7 @@ relations:
   blocks: []
   supersedes: []
   superseded-by: []
-  related:
-    - "docs/impl/ir/issue-101-ruviform-numeric-migration.md"
+  related: []
   refines: []
   refined-by: []
   derives-from:

@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/expensive-families.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/expensive-analysis.md"

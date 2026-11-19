@@ -25,8 +25,6 @@ relations:
   superseded-by: []
   related:
     - "docs/discovery/issue-53-local-lag-fft.md"
-    - "docs/tasks/al-locate-vec-migration.md"
-    - "docs/impl/ir/al-locate-dsp-re-export-vec-migration.md"
     - "docs/discovery/issue-40-locate-pair-plan-cache.md"
   refines: []
   refined-by: []

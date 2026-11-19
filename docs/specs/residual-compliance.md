@@ -98,7 +98,7 @@ SIMD 高速化(#37/#40/#42/#43)、デコーダ拡張(#36)、ROI(#39)、経路校
 ## AC-28 の実施結果
 
 #28 は native registry/direct parser 共通境界で修正し、全14項目の
-結果・承認・回帰検証を [task](../tasks/container-review-edge-cases.md#項目別の結果と証拠)
+結果・承認・回帰検証を task(`docs/tasks/container-review-edge-cases.md`・削除済み源文書)
 に記録した。dwStart は音声 PCM 開始を共通原点として実相対 offset を保持する。
 OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応とする。
 利用不能とデータ不正の区分は共通 UnavailableKind に従う。
@@ -108,7 +108,7 @@ OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応�
 三方式は coordinator の事前承認を得て、候補検出の論理段/fused 実行の
 仕様改訂、FLAC 保存の承認済み defer、Resolution.sample_rate の第一級 u32
 実装に対応させた。FLAC を実装済み適合とは扱わない。
-[task の項目別判断と証拠](../tasks/spec-residual-decisions.md) を正本として参照する。
+task の項目別判断と証拠(`docs/tasks/spec-residual-decisions.md`・削除済み源文書)を正本として参照する。
 
 ## #33 現在の正式契約 (2026-10-14)
 
@@ -117,5 +117,5 @@ OpenDML decode 拡張は追加せず、nested rec LIST を明示的に未対応�
 fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
 Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
 将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
-今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+今回の承認/適用/検証は [今回spec](spec-residual-contract-finalization.md) に記録する。
 旧taskのdoneは今回検証を意味しない。

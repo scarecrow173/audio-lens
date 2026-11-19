@@ -90,8 +90,7 @@ relations:
         path: "docs/test-specs/README.md"
   implements:
     - "docs/specs/issue-202-ir-missing-sections.md"
-  implemented-by:
-    - "docs/plans/issue-202-ir-missing-sections-plan.md"
+  implemented-by: []
   depends-on: []
   blocks: []
   supersedes: []

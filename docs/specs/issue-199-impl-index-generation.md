@@ -81,7 +81,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/issue-199-impl-index-generation-design.md"
-    - "../plans/issue-199-impl-index-generation-plan.md"
   depends-on: []
   blocks: []
   supersedes: []

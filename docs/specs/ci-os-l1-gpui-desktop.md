@@ -20,7 +20,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/ci-os-l1-gpui-desktop.md"
-    - "../plans/implement-ci-os-l1-gpui-desktop.md"
   depends-on:
     - "../specs/audiolens-independent-ci.md"
     - "../specs/full-ci-ci-summary-issue-158.md"

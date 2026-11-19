@@ -27,7 +27,6 @@ relations:
   depends-on:
     - "../adr/ruviform-foundation-migration.md"
     - "../designs/ruviform-migration-responsibility-map.md"
-    - "../plans/ruviform-foundation-migration.md"
   blocks: []
   supersedes: []
   superseded-by: []

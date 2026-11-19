@@ -22,7 +22,6 @@ relations:
   supersedes: []
   superseded-by: []
   related:
-    - "docs/plans/ruviform-463-spectrogram-intensity.md"
     - "docs/test-specs/ruviform-463-spectrogram-intensity.md"
   refines: []
   refined-by: []

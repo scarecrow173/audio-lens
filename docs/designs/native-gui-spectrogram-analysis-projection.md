@@ -18,8 +18,7 @@ relations:
     generated: []
   implements:
     - "../specs/native-gui-spectrogram-analysis-projection.md"
-  implemented-by:
-    - "../plans/native-gui-spectrogram-analysis-projection.md"
+  implemented-by: []
   depends-on:
     - "../specs/native-gui-product-screen-mount.md"
   blocks: []

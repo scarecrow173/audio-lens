@@ -32,8 +32,7 @@ relations:
     - "../adr/spec-residual-contract-finalization.md"
   verifies: []
   verified-by: []
-  references:
-    - "../tasks/spec-residual-decisions.md"
+  references: []
   defers: []
   deferred-by: []
 ---

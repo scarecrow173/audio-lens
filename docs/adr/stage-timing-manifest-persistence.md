@@ -18,8 +18,7 @@ relations:
     moved: []
     generated: []
   implements: []
-  implemented-by:
-    - "../plans/observability-foundation.md"
+  implemented-by: []
   depends-on: []
   blocks: []
   supersedes: []
@@ -34,7 +33,6 @@ relations:
     - "../discovery/observability-foundation-logging-and-profiling.md"
   derived-by:
     - "../designs/observability-foundation.md"
-    - "../tasks/observability-stage-timing.md"
   verifies: []
   verified-by: []
   references: []

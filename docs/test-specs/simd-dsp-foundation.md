@@ -63,7 +63,7 @@ metadata:
 - [x] `bench_dsp` で NumPy pocketfft 同等以上(~3× 現行比)
 - [x] `fft` 往復・`gcc_phat` 等の既存テストがパス
 
-2026-10-10: [FFT task の検証結果](../tasks/al-math-fft.md)を参照。
+2026-10-10: [FFT の検証記録](../evidence/dsp-kernel-verification.md)を参照。
 旧 radix-2/独立 DFT/scalar/dispatch の比較と既存 golden を再生成なしで検証。
 実数入力 rfft は同プロセス旧版 270.6 ms に対し 53.1 ms(5.10×)、
 NumPy pocketfft 参照値 157 ms 以下。
@@ -80,7 +80,7 @@ thin split wrapper(161.8 ms)比で判定する。rfft はその 32.8% で受入�
 - [ ] bandpass が現行比 10× 以上高速(sosfiltfilt 46ms 参照)
 - [x] `bandpass_isolates_band` 等の既存契約を維持
 
-2026-10-10: [相関 task の検証記録](../tasks/al-math-correlation.md)を参照。
+2026-10-10: [相関の検証記録](../evidence/dsp-kernel-verification.md)を参照。
 scalar/dispatch、直接窓内積、旧複素スペクトル、帯域境界・端点と極性反転の
 signed score を検証し、既存 golden 16 件を再生成なしで維持した。
 同一プロセスの 2.4M 単帯域は 184.0 ms、移行直前 complex wrapper
@@ -109,7 +109,7 @@ coordinator 承認によりこの未達は **non-blocking の残課題**とし�
 - [x] locate golden 16 件と workspace 全テストを維持する
 
 実行済み検証・20 秒素材の性能測定・全探索維持に伴う制限は
-[タスクの検証記録](../tasks/locate-coarse-fine.md#検証記録-2026-10-10) を参照。
+[タスク当時の検証記録](../evidence/locate-verification.md) を参照。
 
 ### リサンプル正規化(TASK-035h)
 
@@ -123,7 +123,7 @@ coordinator 承認によりこの未達は **non-blocking の残課題**とし�
 - [x] PCM 参照欠落、role/レート/チャンネル/長さ/区間不整合でエラー
 
 実行済みの対象検証と既存 fmt 差分は
-[タスクの検証記録](../tasks/locate-resample-normalize.md#検証記録-2026-10-10)
+[タスク当時の検証記録](../evidence/locate-verification.md)
 を参照。基盤全体の他タスクに関する未検証項目はこの結果に含めない。
 
 ## Verdict Criteria

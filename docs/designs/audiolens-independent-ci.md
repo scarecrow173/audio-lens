@@ -18,8 +18,7 @@ relations:
     generated: []
   implements:
     - "../specs/audiolens-independent-ci.md"
-  implemented-by:
-    - "../plans/implement-audiolens-independent-ci.md"
+  implemented-by: []
   depends-on:
     - "../designs/ruviform-dependency-ci.md"
   blocks: []

@@ -141,7 +141,7 @@ defer とする。現行は WAV のみを実装し、#32 の減算後残差は F
 provenance で保持する。FLAC 圧縮を実装済みとは扱わず、保存容量・I/O の
 実測と浮動小数解析値の保持方式を review し、新 codec 依存は明示承認を得る。
 RIFF 上限超過はエラーとし、別形式への暗黙変換は行わない。
-[詳細と証拠](../tasks/spec-residual-decisions.md) を参照。
+[詳細と証拠](../specs/residual-compliance.md) を参照。
 
 ## #33 現在の正式契約 (2026-10-14)
 
@@ -150,5 +150,5 @@ RIFF 上限超過はエラーとし、別形式への暗黙変換は行わない
 fused 実行と独立 events/candidates、空保存、manifest/resume 境界、Float64 PCM と来歴、
 Resolution.sample_rate の既存契約を維持する。入力 decode と出力 encode は独立。
 将来の圧縮は容量・保存時間・I/O の実測と PCM 精度保持を条件に別 Issue で検討する。
-今回の承認/適用/検証は [今回task](../tasks/spec-residual-contract-finalization.md) に記録する。
+今回の承認/適用/検証は [今回spec](../specs/spec-residual-contract-finalization.md) に記録する。
 旧taskのdoneは今回検証を意味しない。

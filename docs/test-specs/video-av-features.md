@@ -24,8 +24,7 @@ relations:
   related: []
   refines: []
   refined-by: []
-  derives-from:
-    - "docs/plans/video-av-features.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "docs/specs/video-av-timing.md"

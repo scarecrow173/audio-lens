@@ -42,7 +42,7 @@ relations:
 
 [定位仕様](../specs/source-localization.md)の独立した 4 手法と証拠保存を
 保ちながら、[pulp 採用 ADR](../adr/simd-arithmetic-pulp.md)を具体化する。
-[承認済み plan](../plans/simd-dsp-foundation.md)の #37/#40/#42/#43 全体を
+承認済み plan(`docs/plans/simd-dsp-foundation.md`・削除済み源文書)の #37/#40/#42/#43 全体を
 対象にする。本設計は draft であり、実装入力としての承認は別途レビューで行う。
 
 現行 `crates/al-locate/src/dsp.rs` は radix-2 FFT、FFT 相関、帯域ごとの

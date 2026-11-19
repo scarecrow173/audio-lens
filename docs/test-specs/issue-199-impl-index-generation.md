@@ -30,8 +30,7 @@ relations:
     - "../test-specs/ci-tracker-reconcile-issue-159.md"
   refines: []
   refined-by: []
-  derives-from:
-    - "../plans/issue-199-impl-index-generation-plan.md"
+  derives-from: []
   derived-by: []
   verifies:
     - "../specs/issue-199-impl-index-generation.md"

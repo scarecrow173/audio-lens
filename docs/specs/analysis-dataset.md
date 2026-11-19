@@ -104,7 +104,7 @@ validity セマンティクス(最低限の区別):
   RIFF サイズ上限を超える保存はエラーとする。圧縮形式は容量・保存時間・I/O の
   実測が問題となった場合に別 Issue で検討する。浮動小数 PCM の量子化損失を含め
   解析に必要な精度を損なわないことを採用条件とする。入力 FLAC デコードとは独立。
-  [今回仕様](spec-residual-contract-finalization.md) と [旧判断履歴](../tasks/spec-residual-decisions.md) を参照。
+  [今回仕様](spec-residual-contract-finalization.md) と [旧判断履歴](residual-compliance.md) を参照。
 
 推奨レイアウト:
 

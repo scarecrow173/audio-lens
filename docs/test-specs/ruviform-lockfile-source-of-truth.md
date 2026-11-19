@@ -27,7 +27,6 @@ relations:
   refined-by: []
   derives-from:
     - "../designs/ruviform-lockfile-source-of-truth.md"
-    - "../plans/ruviform-lockfile-source-of-truth.md"
   derived-by: []
   verifies:
     - "../designs/ruviform-lockfile-source-of-truth.md"
@@ -47,7 +46,7 @@ Issue #140 の依存管理契約が、「manifest に固定 rev が存在
 fail-closed」「UI vendor が lockfile revision と一致」ことを
 保証する。検証対象は
 [設計](../designs/ruviform-lockfile-source-of-truth.md) /
-[計画](../plans/ruviform-lockfile-source-of-truth.md) の契約。
+計画(`docs/plans/ruviform-lockfile-source-of-truth.md`・削除済み源文書)の契約。
 
 ## Feature
 

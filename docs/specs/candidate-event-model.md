@@ -154,7 +154,7 @@ AudioLens をバグ分類器にしないための規範を定める。
 候補なしでも空の `events/candidates` を保存して未実行と区別し、
 高コスト解析が抑制されても候補を保持する。元の連続特徴を変更せず、
 候補テーブルの provenance.parents から走査した特徴へ辿れる契約を維持する。
-[承認と検証証拠](../tasks/spec-residual-decisions.md) を参照。
+[承認と検証証拠](residual-compliance.md) を参照。
 
 2026-10-14 に上記の維持を再確認。候補のみの実行・再実行が必要になれば stage 分離を再検討する。
 [今回仕様](spec-residual-contract-finalization.md) を参照。

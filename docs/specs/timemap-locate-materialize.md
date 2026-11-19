@@ -32,9 +32,7 @@ relations:
   verifies: []
   verified-by:
     - "../test-specs/timemap-locate-materialize.md"
-  references:
-    - "../impl/ir/gui-ruviform-viz-issue-132.md"
-    - "../tasks/gui-ruviform-viz-issue-132.md"
+  references: []
   defers: []
   deferred-by: []
 ---

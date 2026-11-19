@@ -23,7 +23,6 @@ relations:
   implements: []
   implemented-by:
     - "../designs/ci-dispatch-only-issue-147.md"
-    - "../plans/implement-ci-dispatch-only-issue-147.md"
   depends-on:
     - "../designs/audiolens-independent-ci.md"
     - "../designs/full-ci-ci-summary-issue-158.md"

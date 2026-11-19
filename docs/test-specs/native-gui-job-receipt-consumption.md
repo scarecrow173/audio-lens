@@ -25,8 +25,6 @@ relations:
   superseded-by: []
   related:
     - "../designs/native-gui-job-receipt-consumption.md"
-    - "../plans/native-gui-job-receipt-consumption.md"
-    - "../tasks/native-gui-job-receipt-consumption.md"
   refines: []
   refined-by: []
   derives-from:
