@@ -38,7 +38,7 @@
 
 ### thermite — 機能最豊富だが新しい
 
-2026-08 の全面リライトで復活。trait ラダー + `dispatch_dyn!` + **ポリシー設定可能な超越関数**(exp/log/sin/cos を UltraPerformance〜Reference で選択、gather/scatter、compress/expand、interleave、自動微分 Dual、Compensated double-double)。機能は圧倒的だが **0.2.x が2ヶ月前**、被依存4件のみ、SPIR-V は壊れていると明記。AVX-512 も未実装。
+2026-08 の全面リライトで復活。trait ラダー + `dispatch_dyn!` + **ポリシー設定可能な超越関数**(exp/log/sin/cos を UltraPerformance〜Reference で選択、gather/scatter、compress/expand、interleave、自動微分 Dual、Compensated double-double)。機能は最も豊富だが **0.2.x が2ヶ月前**、被依存4件のみ、SPIR-V は壊れていると明記。AVX-512 も未実装。
 
 向いている用途: 超越関数をベクトル化したい場合(ただし現行の解析パスではスカラ libm で十分)。長期的に育てば最有力。
 
@@ -64,7 +64,7 @@
 2. **f64 ベクトル** — 3 者ともあり
 3. **FMA / mul_add** — 3 者とも使用可能
 4. **複素数** — FFT 内部で有利。pulp のみ c64xN 標準
-5. **超越関数** — 包絡の log、PSD の dB 化など。thermite のみベクトル化実装あり(ただし現行パスではそれほど熱くない)
+5. **超越関数** — 包絡の log、PSD の dB 化など。thermite のみベクトル化実装あり(ただし現行パスでは使用頻度が低い)
 6. **安定性・実績** — pulp(faer)> wide(成熟)> thermite(新規)
 
 ### リスク評価
@@ -79,7 +79,7 @@
 ## Gaps / Uncertainties
 
 - thermite の stable Rust MSRV(Rust 2024 edition = 比較的新しい toolchain 必要)
-- 各クレートの実性能差 — 抽象化レイヤーの違いが熱いループで差になるかは実測が必要
+- 各クレートの実性能差 — 抽象化レイヤーの違いが支配的なループで差になるかは実測が必要
 - pulp のドキュメント率 21% — 内部実装の把握にソース読みが必要な可能性
 
 ## Recommendations

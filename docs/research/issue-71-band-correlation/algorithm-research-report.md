@@ -194,7 +194,7 @@ GitHub `repository` メタデータ（2026-10-17取得）に記録された `pus
 4. [`sequence.dtw`](https://librosa.org/doc/latest/generated/librosa.sequence.dtw.html)：subsequence matching、局所ステップやグローバル帯制約を備え、全体アライン後に時間伸縮を調べる参考になる。入力はChromaなどの特徴行列で、原波形のサンプル精度NCCとは別物。
 5. [`filters.mel`](https://github.com/librosa/librosa/blob/main/librosa/filters.py)：FFTビンからMel帯域への重み行列。音響特徴を共通STFTから分配する構造を学べる。
 
-**AudioLensへの移植可能性。** `band_gain` の高価な26帯域IFTTをそのまま減らすのではなく、(a) スペクトルだけで足りる低コスト帯域特徴と、(b) 独立にラグを探索するM2を分離、(c) M2の**別モード**として帯域ごと低レート相関を試作、(d) 入力/作業メモリ予算を厳密に管理、という4点が有用。
+**AudioLensへの移植可能性。** `band_gain` の高価な26帯域IFFTをそのまま減らすのではなく、(a) スペクトルだけで足りる低コスト帯域特徴と、(b) 独立にラグを探索するM2を分離、(c) M2の**別モード**として帯域ごと低レート相関を試作、(d) 入力/作業メモリ予算を厳密に管理、という4点が有用。
 
 **非互換・限界。** `sosfiltfilt`は元の全長矩形 spectral mask と帯域応答、端点処理、サンプル位置が異なる。`iirt`出力はパワーであり、`gain = dot(a,b)/sum_sq(a)`もラグの符号/位相も失う。M2との比較には**同じフィルタ応答であるという前提を置けない**。
 
@@ -329,7 +329,7 @@ GitHub `repository` メタデータ（2026-10-17取得）に記録された `pus
 
 **関連する設計知見。** 多数の窓の同一FFT長・stride付きデータをひとまとめに処理する計画。`band_gain`では約47,600の小FFTが反復されるため、バッチ処理とメモリ配置（SoA/AoS、行優先・列優先）を組み合わせる実験は理にかなう。
 
-**制約。** FFTの回数・フィルタbankの本数・NCCの数学的コストを自動的に減らすわけではない。FFTWのplan生成コスト、メモリ、thread数、既存Rust `al-math` FFT実装とのベンチが先。GPL/商用オプション等の**配布条件を確認すること**。FFTWのGitHubリポジトリは自ら通常のソース配布用cloneと誤解しないよう注意を記しているため、公式の配布・文書を優先する。
+**制約。** FFTの回数・フィルタbankの本数・NCCの数学的コストを自動的に減らすわけではない。FFTWのplan生成コスト、メモリ、thread数、既存Rust `al-math` FFT実装とのベンチが先。GPL/商用オプション等の**配布条件を確認すること**。FFTWのGitHubリポジトリには通常のソース配布用cloneと誤解しないよう注意が記されているため、公式の配布・文書を優先する。
 
 **評価**：Plan reuseは実装済み／**batch・workspaceの検証 P2**。
 
@@ -365,7 +365,7 @@ GitHub `repository` メタデータ（2026-10-17取得）に記録された `pus
 
 **AudioLensへの用途。** 途切れたイベント、オンセットの時間シフト、beat同期不良などの検出について、Cheap/Expensive featuresの参考にできる。**現行の帯域別正規化相関を高速化するカーネルではない**。
 
-**重大なライセンス区分。** ソースコードは原則BSDで、同梱のモデル・データは**CC BY-NC-SA 4.0**として別管理される。[ライセンス説明](https://github.com/CPJKU/madmom/blob/main/README.rst)　学習済みモデルを組み込む場合は用途を慎重に確認する。
+**重大なライセンス区分。** ソースコードは原則BSDで、同梱のモデル・データは**CC BY-NC-SA 4.0**として別管理される([ライセンス説明](https://github.com/CPJKU/madmom/blob/main/README.rst))。学習済みモデルを組み込む場合は用途を慎重に確認する。
 
 **評価**：音楽イベント解析の追加候補○／#71の直接高速化×。
 
@@ -553,7 +553,7 @@ D_{t+1}(\tau)=D_t(\tau)-x[t]y[t+\tau]+x[t+W]y[t+W+\tau].
 
 ### H. Pruned FFT / sparse-spectrum演算 — **研究枠** [仮説]
 
-1/3オクターブ低域では非ゼロFFTビンが少ない。非ゼロビンのみ計算するpruned IFFTや周波数帯域間の演算共有は、理論的には機会がある。しかし汎用FFT実装の最適化・データ配置が強力で、必ずしも速くない。**同じ半開FFTビンマスクを再現できる**方式だけを互換候補とし、IIR/SOSなど別のフィルタ応答への置換とは区別する。
+1/3オクターブ低域では非ゼロFFTビンが少ない。非ゼロビンのみ計算するpruned IFFTや周波数帯域間の演算共有は、理論的には機会がある。しかし汎用FFT実装の最適化・データ配置は既に高度で、pruned化や演算共有が必ずしも速くなるとは限らない。**同じ半開FFTビンマスクを再現できる**方式だけを互換候補とし、IIR/SOSなど別のフィルタ応答への置換とは区別する。
 
 ### I. librosa型multirate・pyfar型SOS/FIR・ViSQOL型局所パッチ — **新推定器・追加特徴量枠** [変更]
 
@@ -771,7 +771,7 @@ Optional/new route
 
 ## 11. 最終提言
 
-**短期**：#71の主実装候補を **(1) Valid FFT NCC、(2) Direct/FFT/Blocked適応dispatch、(3) Streaming Bandpass、(4) `band_gain`の局所Blocked FFT試作** の4系列に整理する。いずれも既存M2やlocate evidenceを維持することを目標にし、個別の前後比較と回帰試験を行う。`band_gain`の単純な「窓NCC全体を1回の全長相関に変える」発想は数学的に不足があり、実装方針に確定しない。
+**短期**：#71の主実装候補を **(1) Valid FFT NCC、(2) Direct/FFT/Blocked適応dispatch、(3) Streaming Bandpass、(4) `band_gain`の局所Blocked FFT試作** の4系列に整理する。いずれも既存M2やlocate evidenceを維持することを目標にし、個別の前後比較と回帰試験を行う。`band_gain`の単純な「窓NCC全体を1回の全長相関に変える」発想は数学的に成り立たず、実装方針に確定しない。
 
 **中期**：メモリ削減と実測による適応方式で負荷が下がった後、FFTスペクトルのpair間キャッシュ、バッチFFT、狭lag専用のSTOMP更新を条件付きで検討する。
 

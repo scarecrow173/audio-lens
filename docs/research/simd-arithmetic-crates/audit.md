@@ -1,7 +1,7 @@
 # Audit
 
 ## Coverage
-- [x] 3 クレートの stable/nightly 要件 — 全て確認(全て stable で動作、pulp AVX-512 のみ nightly)
+- [x] 3 クレートの stable/nightly 要件 — 全て確認(3 者とも stable で動作、pulp AVX-512 のみ nightly)
 - [x] f64 サポート — 3 者とも f64xN 型あり
 - [x] ISA カバレッジ — 確認済み(AVX-512 は thermite=未実装 / pulp=nightly / wide=型のみ)
 - [x] 実行時 dispatch — pulp=yes, thermite=yes, wide=no(自前)
@@ -15,7 +15,7 @@
 - [x] マイナス面(thermite 採用実績、pulp ドキュメント率、wide の dispatch 欠落)も記録
 
 ## Contradictions
-- thermite のドキュメント内に SPIR-V バックエンドの自己言及的な破損警告あり → 現在は CPU 用途のみと解釈
+- thermite のドキュメント自体に SPIR-V バックエンドが壊れているとの警告あり → 現在は CPU 用途のみと解釈
 
 ## Search Quality
 - [x] 公式ソース優先

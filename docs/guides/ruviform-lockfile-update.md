@@ -109,7 +109,7 @@ main 追従は行わない。
    git diff --stat
    ```
 
-   `Cargo.lock` 以外に差分が無いことを確認する(manifest・
+   `Cargo.lock` 以外に差分がないことを確認する(manifest・
    コードは不変のはず)。
 
 4. **vendor と検証を再実行する**。
@@ -138,7 +138,7 @@ mise run check-ruviform-lock  # 復帰後の単一 SHA を検証
 
 manifest 側は SHA を持たないため復帰対象は lockfile のみ。
 未 commit の lockfile 変更を手放す操作のため、実行前に
-`git status` で意図しない差分が無いことを確認する。
+`git status` で意図しない差分がないことを確認する。
 `update-ruviform-rev.mjs <旧SHA>` の再実行でも同等に戻せる。
 
 ## 失敗時の復旧

@@ -69,7 +69,7 @@ samply record -- target/release/al run --base-dir ./jobs --stages ingest,locate 
 ```
 
 `--` 以降は通常の `al` 実行そのまま。`AL_LOG` 等の環境変数も
-そのまま効く(計装と sampling は独立)。
+そのまま有効である(計装と sampling は独立)。
 
 ## 出力の見方
 
