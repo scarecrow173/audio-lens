@@ -79,7 +79,7 @@ argmax が最小 lag に倒れて複数メソッドが誤った位置で合意�
 - `evidence_from_corr`(`methods.rs:255-289`): 4分岐。
   ピークなし → `InsufficientSupport`(候補空)、非有限/非正 →
   `LowCorrelation`(候補空)、p2b 不足 → `LowCorrelation`(**候補は保持**)、
-  以外 → `Valid`。**非 Valid validity + 候補保持の先例が既に存在する**。
+  以外 → `Valid`。非 Valid validity + 候補保持の先例が既に存在する。
 - 全4メソッド(`full_ncc`/`band_ncc`/`gcc_phat`/`spectral_envelope`)が
   `evidence_from_corr` に集約される → ここに曖昧性検出を置けば
   全メソッド・全チャンネルペアに一様適用できる。
@@ -92,7 +92,7 @@ argmax が最小 lag に倒れて複数メソッドが誤った位置で合意�
     分類に曖昧性を考慮した分岐が必要。
   - `reject_reason` "only {n} method(s) agree (need {m})" は golden が
     文字列で pin している。
-- `merged_votes`(`stage.rs:450-464`): メソッド毎に最强チャンネルペアを
+- `merged_votes`(`stage.rs:450-464`): メソッド毎に最強チャンネルペアを
   スコアで選択、validity は見ない → 曖昧マークは evidence と共に
   合議へ届く(構造上問題なし)。
 - occurrence クラスタリング(`stage.rs:703-741`): `pair.evidence.validity
@@ -179,29 +179,29 @@ argmax が最小 lag に倒れて複数メソッドが誤った位置で合意�
 
 ## Tentative Conclusions and Hypotheses
 
-- **(confirmed)** 現行の周期拒否は全メソッドで偶然である。
+- confirmed: 現行の周期拒否は全メソッドで偶然である。
   FFT 経路も lag 毎に丸め誤差が異なり近接同点を出すため argmax が散り、
   tolerance 256 内に 2 メソッド揃わず `AmbiguousAlignment` になる。
   逐次 envelope はノイズがやや大きいだけで本質は同じ。
-- **(confirmed)** `corr0` 化で envelope の位相整列 lag への入力
+- confirmed: `corr0` 化で envelope の位相整列 lag への入力
   (32bin envelope)が bit-identical になり**厳密同点**が生じ、
   stable sort で argmax が最小整列 lag に固定される。
-- **(hypothesis)** 方向は B: 曖昧性をメソッド証拠レベルで検出し、
+- hypothesis: 方向は B: 曖昧性をメソッド証拠レベルで検出し、
   候補は保持したまま validity で投票から除外する。
   判定式の主軸は E-2(top |score| からの相対 eps 内の候補数/分布)、
   eps は T1 特性計測で「dispatch 間 FP 差の最大値より十分大きく、
   golden 受理系の最小ピーク分離より十分小さい」範囲として較正する。
-- **(hypothesis)** 表現は B-1(`AmbiguousAlignment` 流用)が本命。
+- hypothesis: 表現は B-1(`AmbiguousAlignment` 流用)が本命。
   `propagate_validity` の catch-all 危険を回避でき、既存の意味論・
   永続化語彙・occurrence 除外と整合する。
-- **(confirmed)** 合議側は2箇所の変更が必要: (a) 投票フィルタを
+- confirmed: 合議側は2箇所の変更が必要: (a) 投票フィルタを
   `ComputationFailed` のみから曖昧証拠も除外へ拡張、(b) 空投票/不足時の
   分岐が `AmbiguousAlignment` を返すよう分類規則の更新
   (現状は `LowCorrelation`/`InsufficientSupport` に落ちる)。
-- **(hypothesis)** golden の `reject_reason` "method(s) agree" pin は、
+- hypothesis: golden の `reject_reason` "method(s) agree" pin は、
   分類分岐を調整するか、より正確な文言へ**意図的に更新するか**の
   どちらかが要る — spec で決定し、偶然への依存でなく契約として残す。
-- **(confirmed)** `corr0` 移行は契約確立後の T3 で実施し、
+- confirmed: `corr0` 移行は契約確立後の T3 で実施し、
   「厳密同点 → 構造的曖昧検出 → 拒否維持」を検証することで本 issue の
   完了証拠とする(TASK-034EpPesSpbjbAQBsmjvJx の残存許容の解消)。
 

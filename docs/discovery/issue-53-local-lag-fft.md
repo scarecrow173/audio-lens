@@ -108,16 +108,16 @@ FFT plan(`rustfft`)は窓長同一のため pair 内で再利用可能。
 
 ## Tentative Conclusions and Hypotheses
 
-- **confirmed**: 分子は線形相互相関として厳密に FFT 計算できる。
+- confirmed: 分子は線形相互相関として厳密に FFT 計算できる。
   N = next_pow2(2L) で |lag| ≤ L−1 の全域をカバーする
-- **confirmed**: 分母は prefix 二乗和で同一 overlap 範囲を厳密に
+- confirmed: 分母は prefix 二乗和で同一 overlap 範囲を厳密に
   再現できる(SIMD corr0 の和順序とは異なるが誤差は ulp 級)
-- **confirmed**: 返却値契約 `(best_lag, best_score, half_width)` と
+- confirmed: 返却値契約 `(best_lag, best_score, half_width)` と
   `corr0` の 0 ガードは維持する。`local_lag` の公開挙動不変
-- **hypothesis**: FFT 版は `lag_window=8192` で桁違いに速い。
+- hypothesis: FFT 版は `lag_window=8192` で桁違いに速い。
   小窓(数百サンプル級)では直接和と交差する可能性があり、
   交差の有無と位置は実測で決める
-- **hypothesis**: `lag_max < L−1` のとき FFT は全 lag を計算し
+- hypothesis: `lag_max < L−1` のとき FFT は全 lag を計算し
   必要範囲だけ読む — 分子は変わらないので問題なし。
   `lag_max ≥ L` は現行同様 |lag| ≥ L を 0.0 で埋める
 

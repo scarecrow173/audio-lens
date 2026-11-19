@@ -253,7 +253,7 @@ al-locate の呼出し側コード)の既知ホットスポット調査結果 A1
   O(n log n) に縮み、stage `duration_ms` の大きな改善として
   観測できる(実測で確認)
 - hypothesis: A3 の plan 巻き上げで STFT コストの ~30-50%
-  が消え、~10 本/pair の STFT 全体に効く(実測で確認。
+  が消え、その削減は ~10 本/pair の STFT 全体に及ぶ(実測で確認。
   フレームバッファは `re.push(fre)` で出力行に move されるため
   巻き上げ対象は plan のみ — spec で確定)
 - hypothesis: A4 の列優先化で ~8.6M 規模の一時 alloc と strided

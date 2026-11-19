@@ -48,7 +48,7 @@ fsync が発生して Windows で秒単位のコストになる(issue 報告)。
 削減する。確定決定(ロードマップ 2026-10-14): **無条件の耐久性等級
 (モード切替なし)**、manifest + 最終レコードは full durability 維持、
 中間 artifact は緩和、resume は「manifest 記録 = 存在かつ完全」を
-前提にできること。
+前提にできる。
 
 ## Key Issues and Assumptions
 
@@ -60,7 +60,7 @@ fsync が発生して Windows で秒単位のコストになる(issue 報告)。
   - **記録系(full 維持)**: `al-job`/`al-dataset` manifest.json、
     table `schema.json`/`index.json`、tensor `array.json`、
     ingest metadata/provenance JSON、`persist_json` 等の小 JSON
-- **確認済みの重大な前提**: `StageRunner::resume` は
+- 確認済み(重大な前提): `StageRunner::resume` は
   `StageStatus::Completed` を無条件に信用し、artifact の実在を
   検証しない。relaxed tier で電源断ロストした artifact を持つ
   Completed stage は resume でスキップされ、下流が存在しない
@@ -84,19 +84,19 @@ fsync が発生して Windows で秒単位のコストになる(issue 報告)。
 
 ## Tentative Conclusions and Hypotheses
 
-- **confirmed**: 耐久性等級は2等級で十分 — `durable`(manifest・
+- confirmed: 耐久性等級は2等級で十分 — `durable`(manifest・
   store メタデータ・小 JSON 記録)と `relaxed`(再生成可能な bulk
   データ)。fsutil に `write_atomic`(tmp+write+rename、fsync なし)
   を追加し call site 毎に格付けする。
-- **confirmed**: resume は Completed stage の artifact path の
+- confirmed: resume は Completed stage の artifact path の
   実在を検証し、欠落があれば当該 stage を Pending に降格して
   再実行する。降格時は stale な artifact レコードを manifest から
   除去する(再実行で新 ID が再登録されるため)。
-- **hypothesis**: 「manifest 記録 = 存在かつ完全」は resume 検証
+- hypothesis: 「manifest 記録 = 存在かつ完全」は resume 検証
   通過後の不変条件として維持される — relaxed artifact は電源断で
   欠落し得るが、resume が検出して再生成するため観測可能な
   不完全状態は残らない。
-- **hypothesis**: 切り詰め検出は存在検証のみでは不十分
+- hypothesis: 切り詰め検出は存在検証のみでは不十分
   (未フラッシュ部分が残り得る)。`params` に byte_len を記録する
   producer ではサイズ照合を追加できる。範囲は設計で確定する。
 
