@@ -93,7 +93,7 @@ baseline/事後比較の記録。
 - Rule: 既存カバレッジ(`dsp.rs:196` deinterleave 単体
   テスト、`tensor.rs` read_range 単体テスト、`locate.rs`
   normalized_pcm layout テスト群、各 `tests/golden.rs` の
-  シナリオ pin)は回帰として効くが、現行出力の値 pin
+  シナリオ pin)は回帰としては有効だが、現行出力の値 pin
   ではないため spec 契約上の characterization とは別に
   追加する
 - Rule: characterization コミットと bench 腕は既存公開 API
@@ -268,7 +268,7 @@ baseline/事後比較の記録。
 - Example(A6): 決定的入力で `band_correlation` を実行し、
   各 band の corr 要素が `to_bits` 一致。低 sample rate で
   bands が 8 未満になる fixture でも panic せず `.min(8)`
-  bound が効く
+  bound が機能する
 - Example(A7): `expensive/channel.rs` の `sxy` 経路で、
   `band_bins` 内の bin のみ inline 積を計算し、下流の
   coherence record が `to_bits` 一致

@@ -41,7 +41,7 @@ relations:
 
 `docs/specs/al-math-vec-primitives.md` の Acceptance Criteria を
 検証可能な形に分解した検証仕様。`al_math::vec` の公開境界
-(スライスのみ・pulp 非露出)、等長 panic 契約、値の契約、
+(スライスのみ・pulp 非公開)、等長 panic 契約、値の契約、
 scalar 経路のビット一致と dispatch↔Scalar の許容誤差等価、
 dsp ファサード消費経路の一元化、重複解消(残存許容リスト付き)、
 および計測・記録義務が、spec/ADR の契約が変わらない限り保持
@@ -120,7 +120,7 @@ f64 スライスのベクトル演算プリミティブ(`dot`/`sum_sq`/`corr0`/
   使わない
 - Rule: 検証サイズ行列は 0..=33(空・1要素・lane 端数の全
   経過)・1k・64k・~1M(1_048_576)とし、決定的入力(負値・
-  混合桁を含む)で lane 順序差を露出させる
+  混合桁を含む)で lane 順序差を顕在化させる
 - Rule: 本ビルドの pulp features は `["std","x86-v3"]` であり、
   検証される dispatch 経路は x86-v3 と Scalar のみ(v4 等は
   feature 追加時に拡張)
