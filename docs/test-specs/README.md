@@ -30,6 +30,7 @@ Directory: `docs/test-specs`
 | TSPEC-034Xq14aOWwCe83ety6DBH | CI hygiene/verify 修復の外部契約 | approved | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
 | TSPEC-034Z0TNTa3fbvzgGIfWd6y | GPUI 実 OS E2E lane の検証契約 | approved | [issue-219-gui-real-e2e.md](./issue-219-gui-real-e2e.md) |
 | TSPEC-034YZwUon7PniX1lnJv9Hf | route_graph・doc_status lint の stale 参照非再発契約 | approved | [issue-220-stale-doc-refs.md](./issue-220-stale-doc-refs.md) |
+| TSPEC-0A257frOzEnBeNchSLicE1xY | frozen benchmark harness 検証仕様(Issue #257 slice 1) | draft | [issue-257-frozen-bench.md](./issue-257-frozen-bench.md) |
 | TSPEC-034yZAoH14s9ut6X3MkhcD | ジョブ不変性と来歴の再構成 | proposed | [job-immutability-provenance.md](./job-immutability-provenance.md) |
 | TSPEC-034GNwf4Cw9BJVBt8akOXm | OverlapCorr/local_lag 検証と小窓計測 | draft | [local-lag-overlap-corr.md](./local-lag-overlap-corr.md) |
 | TSPEC-034Fo8Wnl0C3P71Q2uPUWP | locate 合議 argmax 曖昧性契約の検証 | draft | [locate-argmax-ambiguity.md](./locate-argmax-ambiguity.md) |
