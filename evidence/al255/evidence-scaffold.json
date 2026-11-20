@@ -1,0 +1,17 @@
+{
+  "command": "evidence",
+  "dir": "G:/orca/workspaces/audio-lens/al255-skill-slice2\\evidence\\al255",
+  "dry_run": false,
+  "files": [
+    {
+      "path": "G:/orca/workspaces/audio-lens/al255-skill-slice2\\evidence\\al255\\actions.jsonl",
+      "status": "exists"
+    },
+    {
+      "path": "G:/orca/workspaces/audio-lens/al255-skill-slice2\\evidence\\al255\\verification.md",
+      "status": "exists"
+    }
+  ],
+  "ledger": "al255",
+  "subcommand": "scaffold"
+}

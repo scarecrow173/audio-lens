@@ -1,0 +1,79 @@
+{
+  "cases": [
+    {
+      "case": "job-select-resume",
+      "drivers": ["fake", "gpui", "real-os"],
+      "fake_filter": "fake_desktop_jobs",
+      "gpui_filter": "gpui_desktop_jobs",
+      "required": ["SemanticAction"],
+      "scenario": "al.desktop.jobs"
+    },
+    {
+      "case": "seek-commit",
+      "drivers": ["fake", "gpui", "real-os"],
+      "fake_filter": "fake_source_seek",
+      "gpui_filter": "gpui_and_fake_run_the_same_scenarios",
+      "required": ["SemanticAction"],
+      "scenario": "al.source.seek"
+    },
+    {
+      "case": "workspace-tabs",
+      "drivers": ["fake", "gpui", "real-os"],
+      "fake_filter": "fake_dataset_workspace",
+      "gpui_filter": "gpui_dataset_workspace",
+      "required": ["SemanticAction"],
+      "scenario": "al.dataset.workspace"
+    },
+    {
+      "case": "os-input-preflight",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": ["RealOsPointerOrKeyboard"],
+      "scenario": "al.real-os.input"
+    },
+    {
+      "case": "seek-pointer-click",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": ["RealOsPointerOrKeyboard"],
+      "scenario": "al.real-os.pointer"
+    },
+    {
+      "case": "seek-key-end",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": ["RealOsPointerOrKeyboard"],
+      "scenario": "al.real-os.keyboard"
+    },
+    {
+      "case": "capture-frame-desktop",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": ["VisualCapture"],
+      "scenario": "al.real-os.visual"
+    },
+    {
+      "case": "capture-frame-source",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": ["VisualCapture"],
+      "scenario": "al.real-os.visual"
+    },
+    {
+      "case": "close-veto-approve",
+      "drivers": ["real-os"],
+      "fake_filter": null,
+      "gpui_filter": null,
+      "required": [],
+      "scenario": "al.real-os.window"
+    }
+  ],
+  "catalog_source": "crates/al-gui/src/bin/al-gui-real-scenario.rs CASES + crates/al-gui/tests/scenario_real.rs case_catalog_ids_are_stable pins",
+  "command": "drive",
+  "subcommand": "list"
+}
