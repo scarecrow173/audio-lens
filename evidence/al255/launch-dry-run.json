@@ -1,0 +1,16 @@
+{
+  "al": "G:\\orca\\workspaces\\audio-lens\\al255-verify-skill-slice1\\target\\debug\\al.exe",
+  "args": [
+    "run",
+    "--base-dir",
+    "tmp/al255-proof/dry",
+    "--input",
+    "capture_bug:x.wav",
+    "--stages",
+    "ingest"
+  ],
+  "command": "launch",
+  "dry_run": true,
+  "source": "sibling",
+  "spawned": false
+}
