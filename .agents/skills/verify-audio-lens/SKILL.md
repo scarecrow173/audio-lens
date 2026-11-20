@@ -137,8 +137,9 @@ run `al-ctl drive --driver real-os` in one).
 
 ## Formal verification
 
-Issue #256 D-layer, first target: the `al-media` WAV codec
-(`crates/al-media/src/wav.rs`). Two lanes:
+Issue #256 D-layer. Targets so far: the `al-media` WAV codec
+(`crates/al-media/src/wav.rs`) and the MP4/AVI container parse
+(`mp4.rs`/`avi.rs`/`format.rs`). Two lanes:
 
 ```bash
 mise run test-formal        # proptest suite, native, always runnable
@@ -146,11 +147,17 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
 ```
 
 - `test-formal` runs `cargo test --locked -p al-media --test
-  formal_wav`. Properties: `decode_wav`/`wav_frame_count`/
-  `read_wav_range` never panic on arbitrary bytes; `WavWriter` →
-  `decode_wav` round-trip is lossless per encoding (documented contract:
-  integer encodings clamp+round, floats cast); `wav_frame_count` agrees
-  with `read_wav_range`; writer parameter validation rejects bad input.
+  formal_wav --test formal_containers`. WAV properties:
+  `decode_wav`/`wav_frame_count`/`read_wav_range` never panic on
+  arbitrary bytes; `WavWriter` → `decode_wav` round-trip is lossless
+  per encoding (documented contract: integer encodings clamp+round,
+  floats cast); `wav_frame_count` agrees with `read_wav_range`; writer
+  parameter validation rejects bad input. Container properties:
+  `decode_mp4`/`decode_avi`/`detect_format` never panic on arbitrary,
+  mutated, or truncated bytes; `detect_format` follows the signature
+  rules; `write_mp4`/`write_avi` output round-trips through decode
+  with declared facts, timing, and PCM intact; compressed or missing
+  audio is a capability observation, not a container error.
 - `test-formal-kani` runs `tools/run-formal-kani.mjs`, which env-detects
   a usable `cargo kani` (native Linux/macOS, or a WSL2 distro on
   Windows). In WSL it first mirrors the cargo-visible source set to

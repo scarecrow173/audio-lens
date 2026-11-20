@@ -151,6 +151,7 @@ if (missing.length > 0) {
     "not_run",
     `kani-verifier (env: ${distro}) lacks ${missing.join("/")}; ` +
       `harnesses live under ${PACKAGE}/tests/formal_wav.rs ` +
+      `and ${PACKAGE}/tests/formal_containers.rs ` +
       "and cannot be reached",
   );
 }
@@ -161,12 +162,19 @@ if (missing.length > 0) {
 // not flush per-harness results until the process exits, so a kill
 // mid-run loses completed proofs. Per-harness runs keep every
 // finished verdict. TIMEOUT_MS is the per-harness budget (env
-// override: AL_KANI_TIMEOUT_MS). Keep this list in sync with
-// tests/formal_wav.rs `mod kani_proofs`.
+// override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
+// `mod kani_proofs` blocks in tests/formal_wav.rs and
+// tests/formal_containers.rs.
 const HARNESSES = [
   "decode_never_panics_on_bounded_input",
   "writer_round_trip_is_exact",
   "header_reads_agree_with_writer_layout",
+  "containers_never_panic_on_bounded_input",
+  "detect_format_signature_rules",
+  "mp4_writer_output_decodes",
+  "avi_writer_output_decodes",
+  "mutated_mp4_never_panics",
+  "mutated_avi_never_panics",
 ];
 
 // script は base64 で渡す — wsl.exe → bash -lc の入れ子 quoting で
