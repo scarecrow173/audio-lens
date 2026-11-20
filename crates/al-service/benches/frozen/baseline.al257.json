@@ -13,32 +13,24 @@
   "cells": {
     "kernel/band_ncc": {
       "errors": 0,
-      "measured_a_median_ns": 1652905100,
-      "measured_b_median_ns": 122049900,
       "measured_ratio": 13.542863205951008,
       "min_ratio": 7.272,
       "work": 26891088007
     },
     "kernel/full_ncc": {
       "errors": 0,
-      "measured_a_median_ns": 1651862500,
-      "measured_b_median_ns": 23280400,
       "measured_ratio": 70.95507379598288,
       "min_ratio": 35.978,
       "work": 26891088007
     },
     "kernel/gcc_phat": {
       "errors": 0,
-      "measured_a_median_ns": 1656619800,
-      "measured_b_median_ns": 26567200,
       "measured_ratio": 62.35582974494866,
       "min_ratio": 31.678,
       "work": 26891088007
     },
     "kernel/spectral_envelope": {
       "errors": 0,
-      "measured_a_median_ns": 1654580200,
-      "measured_b_median_ns": 137035600,
       "measured_ratio": 12.074090236405722,
       "min_ratio": 6.538,
       "work": 26891088007
@@ -48,10 +40,8 @@
       "fingerprint_files": 18,
       "max_norm_ratio": 6.56,
       "max_norm_ratio_locate": 4.6,
-      "measured_e2e_wall_median_ns": 7227019100,
       "measured_norm_ratio": 4.370007569036278,
       "measured_norm_ratio_locate": 3.060871710503939,
-      "ref_kernel_median_ns": 1653777250,
       "work": 2147119220
     }
   },

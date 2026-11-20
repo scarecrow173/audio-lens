@@ -3,7 +3,7 @@
 {"action":"write-baseline","command":"cargo bench -p al-service --bench frozen_pipeline -- --write-baseline benches/frozen/baseline.al257.candidate.json","exit_code":0,"observed":"candidate emitted with approval:null; kernel ratio 12.1-71.0, pipeline norm_e2e 4.37 / locate 3.06"}
 {"action":"baseline-promote","command":"node <promote script> (candidate -> pin + approval fill)","exit_code":0,"observed":"baseline.al257.json promoted: approval.kind=initial_pin"}
 {"action":"gated-run","command":"mise run bench-frozen","exit_code":0,"observed":"PASS: 5 cells within thresholds (reps=7); pipeline fingerprint_rep_divergence=0, pin_diffs=0 — A/A determinism proven"}
-{"action":"selftest","command":"cargo bench -p al-service --bench frozen_pipeline -- --selftest","exit_code":1,"observed":"gate fail proven: band_ncc ratio_below_threshold(5.174<7.272) + lag_mismatch on all cells + fingerprint_pin_diffs=14 — exit 1"}
+{"action":"selftest","command":"cargo bench -p al-service --bench frozen_pipeline -- --selftest","exit_code":1,"observed":"gate fail proven: 4 kernel cells ratio_below_threshold(17.264<35.978, 3.182<7.272, 15.636<31.678, 5.001<6.538) + pipeline e2e_norm_above_threshold(8.000>6.56) + errors>0 on all cells (embed 欠落→lag_mismatch/validity/fingerprint diffs) — exit 1"}
 {"action":"smoke","command":"cargo bench -p al-service --bench frozen_pipeline -- --test","exit_code":0,"observed":"1-rep smoke PASS exit 0"}
 {"action":"baseline-unreadable","command":"cargo bench -p al-service --bench frozen_pipeline -- --baseline C:/nonexistent.json","exit_code":1,"observed":"gate verdict=fail baseline_unreadable — fail-closed"}
 {"action":"baseline-unpromoted","command":"cargo bench -p al-service --bench frozen_pipeline -- --baseline benches/frozen/baseline.al257.candidate.json","exit_code":1,"observed":"gate verdict=fail (approval null) — fail-closed"}
@@ -11,3 +11,8 @@
 {"action":"workspace-lanes","command":"mise run check-full && mise run lint-full && mise run test-full","exit_code":0,"observed":"all exit 0 — workspace check/lint/test clean"}
 {"action":"package-tests","command":"mise run test al-service && mise run test al-locate","exit_code":0,"observed":"al-service + al-locate suites pass"}
 {"action":"prek","command":"mise exec -- prek run --all-files","exit_code":0,"observed":"all hooks passed/skipped"}
+{"action":"gate-review-fixes","command":"selftest 注入を確定的劣化へ改修(B×4 直列反復 + e2e floor ref×8)+ 0-match filter を not_run/exit0 へ + baseline から measured_*_ns 除去","exit_code":0,"observed":"clippy/fmt clean; pin+candidate 両方から絶対時間フィールド削除"}
+{"action":"gated-run-rerun","command":"cargo bench -p al-service --bench frozen_pipeline","exit_code":0,"observed":"PASS: 5 cells within thresholds (reps=7); errors=0 pin_diffs=0 rep_divergence=0 — run.jsonl 再採"}
+{"action":"selftest-rerun","command":"cargo bench -p al-service --bench frozen_pipeline -- --selftest","exit_code":1,"observed":"閾値逸脱が確定発火: kernel 4cell ratio_below_threshold + e2e_norm_above_threshold(8.000>6.56) + 全cell errors>0 — selftest.jsonl 再採"}
+{"action":"filter-nomatch","command":"cargo bench -p al-service --bench frozen_pipeline -- no_such_cell_filter","exit_code":0,"observed":"gate verdict=not_run (no_cells_matched) exit 0 — rf807/cargo bench 慣習に整合"}
+{"action":"candidate-regen","command":"cargo bench -p al-service --bench frozen_pipeline -- --write-baseline evidence/al257/baseline-candidate.json","exit_code":0,"observed":"candidate 再生成: approval=null、measured_*_ns 無し(spec binding 整合)"}

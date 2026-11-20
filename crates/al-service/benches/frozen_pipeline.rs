@@ -25,13 +25,15 @@
 //! - 引数なし: 実走(構造化 JSONL を stdout、PASS/FAIL を stderr、gate 適用)
 //! - `--test`: 1 反復 smoke(同じ記録を出すが閾値 gate は report_only、
 //!   correctness 由来の fail は通常どおり exit 1)
-//! - `--selftest`: 回帰注入(embed 欠落 fixture + kernel B 側 pool 再利用
-//!   無効)で gate fail を実証する
+//! - `--selftest`: 回帰注入(embed 欠落 fixture + kernel B 側を rep 内
+//!   直列反復・pipeline e2e wall を ref kernel の 8 倍まで床上げする
+//!   劣化注入)で、閾値逸脱・correctness 双方の gate fail を実証する
 //! - `--write-baseline <path>`: 実測 candidate JSON を出力(gate 不適用、
 //!   `"approval": null` — pin への昇格は人間が行う)
 //! - `--baseline <path>`: 既定 pin 以外を読む
 //! - positional 引数は cell filter(substring 一致、`kernel/` `pipeline/`
-//!   `<method>` 等)。複数可。
+//!   `<method>` 等)。複数可。0 cell 一致は gate `not_run`・exit 0
+//!   (cargo bench 慣習)。
 //!
 //! pinned baseline は `benches/frozen/baseline.al257.json`。昇格は手作業:
 //! candidate を pin path に複写し `approval` を記入する。
@@ -631,6 +633,7 @@ enum Verdict {
     Fail,
     ReportOnly,
     Unsupported,
+    NotRun,
 }
 
 impl Verdict {
@@ -640,6 +643,7 @@ impl Verdict {
             Verdict::Fail => "fail",
             Verdict::ReportOnly => "report_only",
             Verdict::Unsupported => "unsupported",
+            Verdict::NotRun => "not_run",
         }
     }
 }
@@ -663,9 +667,15 @@ struct KernelCellResult {
     work: u64,
 }
 
+/// selftest の回帰注入: B 側を 1 rep 内でこの回数だけ直列実行し、
+/// timed region を確定的に遅くする(`median(A)/median(B)` を pin の
+/// min_ratio 未満へ落とす — 機器差に依存しない閾値逸脱)。
+const SELFTEST_B_REPEATS: usize = 4;
+
 /// kernel cell を 1 つ計測する(A/B 交互、median+range、error+work 計数)。
-/// `fresh_pool_per_call` は selftest の回帰注入(本番 pool 再利用を
-/// 失わせ、plan/workspace 再構築コストを復活させる — 実在の回帰形)。
+/// `degrade_b` は selftest の回帰注入(B 側 timed region を
+/// `SELFTEST_B_REPEATS` 倍にする — 実在の「本番側が閾値を外れるほど
+/// 遅くなった」回帰形)。
 fn measure_kernel_cell(
     method_idx: usize,
     methods: &[Box<dyn al_locate::methods::LocateMethod>],
@@ -673,11 +683,12 @@ fn measure_kernel_cell(
     signal: &[f64],
     expected_lag: usize,
     reps: usize,
-    fresh_pool_per_call: bool,
+    degrade_b: bool,
 ) -> KernelCellResult {
     let method = &methods[method_idx];
     let id = method.id();
     let mut pool = CorrelationPool::new();
+    let b_repeats = if degrade_b { SELFTEST_B_REPEATS } else { 1 };
     let mut a_times = Vec::with_capacity(reps);
     let mut b_times = Vec::with_capacity(reps);
     let mut work = 0u64;
@@ -694,19 +705,19 @@ fn measure_kernel_cell(
         naive_lag = lag;
 
         let t1 = Instant::now();
-        let ev = if fresh_pool_per_call {
-            method.locate(template, signal, RATE, &mut CorrelationPool::new())
-        } else {
-            method.locate(template, signal, RATE, &mut pool)
-        };
+        let mut ev = method.locate(template, signal, RATE, &mut pool);
+        for _ in 1..b_repeats {
+            ev = method.locate(template, signal, RATE, &mut pool);
+        }
         b_times.push(t1.elapsed().as_nanos() as u64);
         if rep == 0 {
             evidence = Some(ev);
         }
     }
-    // B 側 work: 相関曲線の探索域サイズ × reps(signal 長に応じた実作業量)。
+    // B 側 work: 相関曲線の探索域サイズ × reps × 直列反復数
+    // (signal 長に応じた実作業量)。
     let max_lag = signal.len().saturating_sub(template.len());
-    work += (max_lag as u64 + 1) * reps as u64;
+    work += (max_lag as u64 + 1) * reps as u64 * b_repeats as u64;
 
     let mut lag_mismatch = 0u64;
     let mut validity_rejects = 0u64;
@@ -808,11 +819,7 @@ fn stage_name(kind: StageKind) -> String {
 /// pipeline rep を 1 回実行する。fixture dir の WAV 2 本を入力に、
 /// fresh job dir で full stage plan を走らせ、e2e wall + stage wall +
 /// fingerprint + error/work を採る。
-fn run_pipeline_rep(
-    service: &JobService,
-    fixture_dir: &Path,
-    scratch_root: &Path,
-) -> PipelineRep {
+fn run_pipeline_rep(service: &JobService, fixture_dir: &Path, scratch_root: &Path) -> PipelineRep {
     let cap = fixture_dir.join("capture.wav");
     let src = fixture_dir.join("source.wav");
     let mut inputs = vec![
@@ -910,12 +917,16 @@ struct PipelineResult {
     rep_details: Vec<Value>,
 }
 
+/// `degrade_floor_ns` は selftest の回帰注入 — rep 毎に e2e wall が
+/// この値を下回らないよう実 sleep を timed region に追加し、
+/// 正規化比を pin の max_norm_ratio 超へ確定的に押し上げる。
 fn measure_pipeline(
     service: &JobService,
     fixture_dir: &Path,
     scratch_root: &Path,
     pinned_fingerprint: Option<&BTreeMap<String, String>>,
     reps: usize,
+    degrade_floor_ns: Option<u64>,
 ) -> PipelineResult {
     let mut wall_ns = Vec::with_capacity(reps);
     let mut locate_wall_ns = Vec::with_capacity(reps);
@@ -928,7 +939,13 @@ fn measure_pipeline(
     let mut output_bytes = 0u64;
     for _ in 0..reps {
         let rep = run_pipeline_rep(service, fixture_dir, scratch_root);
-        wall_ns.push(rep.wall_ns);
+        let deficit = degrade_floor_ns
+            .map(|floor| floor.saturating_sub(rep.wall_ns))
+            .unwrap_or(0);
+        if deficit > 0 {
+            std::thread::sleep(std::time::Duration::from_nanos(deficit));
+        }
+        wall_ns.push(rep.wall_ns + deficit);
         stage_failures += rep.stage_failures;
         artifacts += rep.artifacts;
         output_bytes += rep.output_bytes;
@@ -1133,7 +1150,7 @@ fn main() -> ExitCode {
         records.push(
             json!({
                 "kind": "injected",
-                "detail": "missing_embed fixture + kernel B fresh CorrelationPool per call — gate は fail が期待値",
+                "detail": "missing_embed fixture + kernel B 側直列反復(B timed region ×SELFTEST_B_REPEATS)+ pipeline e2e floor(ref×8)— 閾値逸脱と correctness 両経路で gate fail が期待値",
             })
             .to_string(),
         );
@@ -1194,6 +1211,9 @@ fn main() -> ExitCode {
             &scratch,
             pinned_fingerprint.as_ref(),
             reps,
+            // selftest 注入: e2e wall を ref median の 8 倍まで床上げ
+            // (pin max_norm ≈6.6 を確定的に超える劣化)。
+            selftest.then(|| ref_kernel_median_ns.saturating_mul(8)),
         ))
     } else {
         None
@@ -1361,7 +1381,10 @@ fn main() -> ExitCode {
         .flat_map(|c| c.reasons.iter().map(move |r| format!("{}:{r}", c.key)))
         .collect();
     if cells.is_empty() {
-        run_verdict = Verdict::Fail;
+        // rf807 先例・cargo bench 慣習: filter が 0 cell に一致した
+        // 場合は gate not_run・exit 0(実行する対象が無いだけで
+        // 回帰ではない)。
+        run_verdict = Verdict::NotRun;
         gate_reasons.push("no_cells_matched".to_string());
     }
     records.push(
@@ -1391,23 +1414,14 @@ fn main() -> ExitCode {
     if write_baseline {
         let mut cells_out = Map::new();
         for res in &kernel_results {
-            let a_med = {
-                let mut v = res.a_times.clone();
-                v.sort();
-                median(&v)
-            };
-            let b_med = {
-                let mut v = res.b_times.clone();
-                v.sort();
-                median(&v)
-            };
+            // spec binding: baseline には比と計数のみ格納し、絶対時間
+            // (median_ns 系)は置かない — 実測絶対時間は evidence の
+            // run 記録側が保持する。
             cells_out.insert(
                 res.key.clone(),
                 json!({
                     "min_ratio": kernel_threshold(res.ratio),
                     "measured_ratio": res.ratio,
-                    "measured_a_median_ns": a_med,
-                    "measured_b_median_ns": b_med,
                     "errors": res.errors,
                     "work": res.work,
                 }),
@@ -1437,8 +1451,6 @@ fn main() -> ExitCode {
                     "measured_norm_ratio": norm_e2e,
                     "max_norm_ratio_locate": pipeline_threshold(locate_norm),
                     "measured_norm_ratio_locate": locate_norm,
-                    "measured_e2e_wall_median_ns": e2e_median_ns,
-                    "ref_kernel_median_ns": ref_kernel_median_ns,
                     "errors": p.errors,
                     "work": p.work,
                     "fingerprint_files": fp_map.len(),

@@ -20,6 +20,7 @@ sibling 先例: ruviform `evidence/rf807/`。
 | `baseline-candidate.json` | emit された未昇格 candidate(`approval:null`) |
 | `baseline-missing.jsonl` | 存在しない pin → `baseline_unreadable` fail(exit 1) |
 | `baseline-unpromoted.jsonl` | 未昇格 candidate を pin 指定 → fail(exit 1) |
+| `filter-nomatch.jsonl` | cell filter 0 一致 → gate `not_run`(exit 0) |
 | `decision.tsv` | hillclimb schema の判断台帳 |
 | `verification.md` | 本ファイル |
 
@@ -37,12 +38,13 @@ pinned baseline 本体は `crates/al-service/benches/frozen/baseline.al257.json`
 | work 計数(timed region の実作業) | Required | Pass | kernel: naive MAC+探索 lag ≈ 26.9G; pipeline: artifacts+output bytes ≈ 2.1G |
 | limiter 記述 + e2e 関連性 | Required | Pass | candidate `limiter` 節; locate stage wall ≈ e2e の 70%(本番 69-79% と整合) |
 | pinned baseline 比較(ratio gate) | Required | Pass | `run.jsonl` gate verdict=pass; 全 cell 閾値内 |
-| `--selftest` gate-fail 実証 | Required | Pass | exit 1; band_ncc `ratio_below_threshold(5.174<7.272)` + lag/fingerprint errors |
+| `--selftest` gate-fail 実証(閾値逸脱 + correctness 両経路) | Required | Pass | exit 1; 4 kernel cells `ratio_below_threshold`(17.264<35.978 等) + `pipeline/e2e e2e_norm_above_threshold(8.000>6.56)` + 全 cell errors>0 |
+| cell filter 0 一致 | Required | Pass | `filter-nomatch.jsonl` — gate `not_run`("no_cells_matched")・exit 0(rf807/cargo bench 慣習) |
 | `--write-baseline` candidate(非昇格) | Required | Pass | `baseline-candidate.json` approval=null; 未昇格 pin 指定は fail |
 | baseline 未 read/未昇格 → fail-closed | Required | Pass | `baseline-missing.jsonl`/`baseline-unpromoted.jsonl` 共に exit 1 |
 | `mise run bench-frozen` lane(manual/opt-in) | Required | Pass | `run.jsonl` — `cargo bench --locked -p al-service --bench frozen_pipeline --` |
 | A/A 決定性(pipeline fingerprint) | Required | Pass | 7 rep 全て `fingerprint_files=18`・`rep_divergence=0` |
-| pipeline 正規化比(ref kernel median 分母) | Required | Pass | `ref_kernel` record; `norm_ratio_e2e=4.280`(pin 6.56)・`locate_norm=3.021`(pin 4.60) |
+| pipeline 正規化比(ref kernel median 分母) | Required | Pass | `ref_kernel` record; `norm_ratio_e2e=4.158`(pin 6.56)・`locate_norm=2.879`(pin 4.60) |
 | `cargo fmt` | Required | Pass | `mise run fmt` exit 0 |
 | `check-full` / `lint-full` / `test-full` | Required | Pass | 各 exit 0(workspace 全体) |
 | `test al-service` / `test al-locate` | Required | Pass | 57+16+12+7+2 locate tests ok; al-service suite ok |
@@ -55,16 +57,16 @@ pinned baseline 本体は `crates/al-service/benches/frozen/baseline.al257.json`
 
 | cell | 計測値 | pin 閾値 | verdict |
 | --- | --- | --- | --- |
-| kernel/full_ncc | ratio 62.3 (A=1668ms/B=27ms) | min 35.978 | pass |
-| kernel/band_ncc | ratio 9.4 (A=2430ms/B=259ms) | min 7.272 | pass |
-| kernel/gcc_phat | ratio 58.5 (A=1660ms/B=28ms) | min 31.678 | pass |
-| kernel/spectral_envelope | ratio 10.6 (A=1700ms/B=160ms) | min 6.538 | pass |
-| pipeline/e2e | norm 4.280 (wall median 7.25s, range 7.01-8.40s) | max 6.56 | pass |
-| pipeline locate stage | norm 3.021 (median 5117ms) | max 4.60 | pass |
+| kernel/full_ncc | ratio 71.1 (A=1657ms/B=23ms) | min 35.978 | pass |
+| kernel/band_ncc | ratio 13.8 (A=1653ms/B=120ms) | min 7.272 | pass |
+| kernel/gcc_phat | ratio 62.5 (A=1654ms/B=26ms) | min 31.678 | pass |
+| kernel/spectral_envelope | ratio 12.4 (A=1649ms/B=133ms) | min 6.538 | pass |
+| pipeline/e2e | norm 4.158 (wall median 6.87s, range 6.76-7.09s) | max 6.56 | pass |
+| pipeline locate stage | norm 2.879 (median 4759ms) | max 4.60 | pass |
 
-ref kernel median = 1694ms(全 kernel cell A 側 pooled)。stage wall
-内訳: locate 5117ms(70.5%) / expensive 763ms / cheap 756ms /
-reference 408ms / ingest 126ms / dataset 65ms。
+ref kernel median = 1653ms(全 kernel cell A 側 pooled)。stage wall
+内訳: locate 4759ms(69.3%) / expensive 762ms / cheap 724ms /
+reference 408ms / ingest 123ms / dataset 66ms。
 
 ## 補足
 

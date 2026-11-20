@@ -89,13 +89,16 @@ fingerprint 照合)を測定・判定できる。
   逸脱、error>0 のいずれでも fail。pin に無い cell は
   `unsupported`(run を fail させない)
 - Rule: mode 契約 — 引数なし=実走(gate 適用、JSONL stdout)、
-  `--test`=1 反復 smoke(閾値 gate は report_only、correctness
-  由来の fail と baseline unreadable は exit 1、他は exit 0)、
-  `--selftest`=回帰注入(embed 欠落 fixture + kernel B 側の
-  `CorrelationPool` 再利用無効)で gate fail を実証、
+  `--test`=1 反復 smoke(閾値 gate は report_only、baseline
+  unreadable は limiter note に落として継続 — smoke では
+  fail-closed しない。correctness 由来の fail のみ exit 1)、
+  `--selftest`=回帰注入(embed 欠落 fixture + kernel B 側直列反復
+  + pipeline e2e wall 床上げ)で閾値逸脱と correctness 双方の
+  gate fail を実証、
   `--write-baseline <path>`=candidate 出力(`"approval": null`、
   gate 不適用)、`--baseline <path>`=pin 参照先変更、positional
-  引数は cell filter(substring)
+  引数は cell filter(substring、0 cell 一致は gate `not_run`・
+  exit 0)
 - Rule: baseline 昇格は 2 段階。`--write-baseline` は candidate
   を書くだけで pin を上書きしない。人間が pin path へ複写し
   `approval` を記入して初めて有効
@@ -113,8 +116,10 @@ fingerprint 照合)を測定・判定できる。
   `FAIL: <cell>:<reason>` で exit 1
 - `mise run bench-frozen --selftest` が embed 欠落で pipeline
   locate 不成立(lag_mismatch + fingerprint_pin_diffs + stage
-  失敗)と kernel validity reject を発生させ、gate `fail` で
-  exit 1
+  失敗)と kernel validity reject を発生させ、かつ kernel B 側
+  直列反復 + pipeline e2e wall 床上げの劣化注入で
+  `ratio_below_threshold` / `e2e_norm_above_threshold` の閾値逸脱
+  も発火させ、gate `fail` で exit 1
 - `--write-baseline` 出力 candidate をそのまま pin path に置くと
   `approval` が null で gate が `baseline_not_promoted` 相当の
   fail を返す
