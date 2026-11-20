@@ -22,3 +22,15 @@ ruviform-io-symphonia.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true
+# Issue #256 (D 層 formal verification 第 1 標的): WAV codec の
+# property suite (tests/formal_wav.rs) で使用。依存追加は Issue
+# スコープで事前承認済み。workspace 継承はルート Cargo.toml 編集を
+# 要するためバージョン直書きにする。
+proptest = "1"
+
+# Issue #256: tests/formal_wav.rs の #[cfg(kani)] proof harness が
+# `unexpected_cfgs` warning (`lint` = `-D warnings`) に抵触するため
+# check-cfg で `cfg(kani)` を宣言する。ルート Cargo.toml に
+# [workspace.lints] は存在せず新設もしないため crate-local に置く。
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }

@@ -242,6 +242,30 @@ run = "cargo run --locked -p al-gui --features gpui-real --bin al-gui-real-scena
 description = "al-gui-real-scenario blocked-probe(headless fail-closed 自己検証)"
 run = "cargo run --locked -p al-gui --features gpui-real --bin al-gui-real-scenario -- --blocked-probe --out evidence/al219/gui-real-headless.jsonl"
 
+# Issue #256 D 層 formal verification 第 1 標的: al-media WAV codec の
+# property-based 検証 lane(proptest)。native で常時実行でき、第 1 標的
+# の `mise run` 1 コマンド再実行入口となる。同じ tests/formal_wav.rs に
+# #[cfg(kani)] の bounded proof harness が同居し、そちらは
+# test-formal-kani が実行する(通常の cargo build/test では cfg で
+# 除外されるため影響しない)。
+[tasks.test-formal]
+description = "al-media WAV codec proptest suite (Issue #256 formal verification D-layer)"
+run = "cargo test --locked -p al-media --test formal_wav"
+
+# Issue #256: Kani bounded proof lane。Windows native では cargo kani が
+# 動かないため tools/run-formal-kani.mjs が実行環境を検出し(native
+# linux/macOS または WSL2)利用可能なら `cargo kani` を実行する。
+# WSL では source mirror(~/.cache/al-formal-kani/src)経由で各
+# kani_proofs harness を逐次実行(kani-driver は harness 結果を
+# process 終了まで flush しないため、per-harness 実行で完了分の
+# verdict を保持する)。環境不在・kani 未 provision なら verdict
+# `not_run`/`unsupported` + 理由 + provision 手順を出力して exit 0
+# (環境不在は lane 失敗ではない — POLICIES §3)。実走して
+# verification 結果が出れば pass/fail で exit 0/1 の fail-closed。
+[tasks.test-formal-kani]
+description = "al-media WAV codec Kani bounded proofs via env-detect (Issue #256)"
+run = "node tools/run-formal-kani.mjs"
+
 [tasks.verify-full]
 description = "Workspace standard full verification: fmt, check-full, lint-full, test-full (profile selected by MISE_ENV)"
 run = [
