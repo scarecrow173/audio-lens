@@ -135,6 +135,45 @@ reproduces that deterministically without opening a window.
 Not wired yet: real-window Pass proof (interactive session required —
 run `al-ctl drive --driver real-os` in one).
 
+## Formal verification
+
+Issue #256 D-layer, first target: the `al-media` WAV codec
+(`crates/al-media/src/wav.rs`). Two lanes:
+
+```bash
+mise run test-formal        # proptest suite, native, always runnable
+mise run test-formal-kani   # Kani bounded proofs, environment-gated
+```
+
+- `test-formal` runs `cargo test --locked -p al-media --test
+  formal_wav`. Properties: `decode_wav`/`wav_frame_count`/
+  `read_wav_range` never panic on arbitrary bytes; `WavWriter` →
+  `decode_wav` round-trip is lossless per encoding (documented contract:
+  integer encodings clamp+round, floats cast); `wav_frame_count` agrees
+  with `read_wav_range`; writer parameter validation rejects bad input.
+- `test-formal-kani` runs `tools/run-formal-kani.mjs`, which env-detects
+  a usable `cargo kani` (native Linux/macOS, or a WSL2 distro on
+  Windows). In WSL it first mirrors the cargo-visible source set to
+  `~/.cache/al-formal-kani/src` (keeps `target/` for the dep cache;
+  no target-dir config or env is touched — artifacts stay in the
+  mirror's default `./target`), then runs each `kani_proofs` proof
+  as its own `cargo kani -p al-media --tests --harness <name>`
+  sequentially, because kani-driver buffers per-harness results
+  until process exit. Output is a JSON verdict record: `pass`/`fail`
+  with the harness counts, or `not_run`/`unsupported` with the
+  reason and provision steps. Environment absence is `not_run` +
+  exit 0 — the honest record, not a lane failure (POLICIES §3).
+  Provision inside WSL2:
+  `cargo install --locked kani-verifier && cargo kani setup`.
+- The proofs encode the documented contract, not the implementation —
+  a failure is either a product defect or a modeling error; check the
+  counterexample against the `wav.rs` doc comments before acting.
+- Mutation evidence lives in the ledger: a deliberately broken variant
+  is injected into `crates/al-media/src/`, the failing proptest seed is
+  captured, then the edit is reverted — committed product diff stays
+  zero. See `docs/specs/formal-verification.md` for the promotion path
+  and `evidence/al256/` for the recorded runs.
+
 ## Evidence
 
 - Ledgers live per-issue at `evidence/al<N>/` — see
