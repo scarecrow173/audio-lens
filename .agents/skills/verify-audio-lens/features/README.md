@@ -4,11 +4,11 @@ This directory is the maintained source for verifying AudioLens's
 user-facing behavior. Read the index before driving the app, then use
 the matching feature file as the recipe.
 
-Status: seeded in the first `verify-audio-lens` slice with one feature
-(`cli-job-run`). Normalizing every user-visible feature — the
-`docs/specs/gui-app-mvp.md` surfaces, the full scenario catalog, and
-the remaining `al` subcommand surface — is deferred to a later slice
-(`scarecrow173/audio-lens#255`).
+Status: normalized. The map covers the full `al` CLI surface
+(`cli-job-run`), the `al-desktop` GUI surfaces (`gui-desktop`,
+`gui-dataset-workspace`, `gui-source-view`), and the pinned scenario
+catalog the GUI surfaces are verified through
+(`gui-scenario-catalog`).
 
 ## Baseline preconditions
 
@@ -27,7 +27,8 @@ the remaining `al` subcommand surface — is deferred to a later slice
 - Start every recipe from the baseline state unless its preconditions
   say otherwise.
 - Drive `al` through `al-ctl launch -- <al args>` (or invoke `al`
-  directly); treat every command as literal.
+  directly); drive GUI scenario lanes through `al-ctl drive`. Treat
+  every command as literal.
 - Parse `job_id=` and `job_dir=` from `al run` stdout; pass them to
   later `inspect`/`resume`/`export` calls.
 - Capture the action and the resulting state. Confirm side effects
@@ -45,6 +46,9 @@ the remaining `al` subcommand surface — is deferred to a later slice
 - A path that cannot run records `NotRun` with the reason (e.g.
   `environment_blocked` for a real-window drive on a headless host) —
   never report it as `Pass`.
+- Scaffold a ledger with `al-ctl evidence scaffold --issue <N>` and
+  append each action with `al-ctl evidence append --issue <N>
+  --action <name> --command <cmd> --exit-code <n> --observed <text>`.
 
 ## Feature entry contract
 
@@ -66,3 +70,15 @@ stable handles, required state, commands, and observable proof.
 
 - [Run and inspect a job](./cli-job-run.md) covers `al run` through
   `inspect`, `resume`, and `export` — the CLI analysis-job journey.
+- [Browse and drive jobs on the desktop screen](./gui-desktop.md)
+  covers the `al-desktop` root tabs — Jobs row select, Run status and
+  Resume/Cancel, tab navigation.
+- [Read and scrub the Source view](./gui-source-view.md) covers the
+  Source tab's waveform, seek commit, time-axis ruler, and level
+  meter.
+- [Inspect a dataset workspace](./gui-dataset-workspace.md) covers
+  the Dataset tab's Source/Spectrogram/Analysis workspace and its
+  degrade-to-label rule.
+- [Drive the GUI scenario catalog](./gui-scenario-catalog.md) covers
+  the pinned 9-case catalog and the fake/gpui/real-os lanes behind
+  `al-ctl drive`.

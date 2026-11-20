@@ -26,8 +26,7 @@ Resuming and exporting are the companion journeys on the same job.
   `al export --base-dir <dir> --job-id <JOB-...>` for the follow-on
   actions.
 - The same jobs are listed and resumed from the `al-desktop` GUI
-  desktop screen (Run tab) — the GUI journey is a separate feature
-  file in a later slice.
+  desktop screen (Run tab) — see [gui-desktop](./gui-desktop.md).
 
 ## Driving it with al-ctl
 

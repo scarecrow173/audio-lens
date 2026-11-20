@@ -74,9 +74,9 @@ spawned child PID; doctor itself does not spawn anything besides the
 
 ## Drive
 
-Wired this slice: the `al` CLI through `al-ctl launch` (or directly).
-GUI scenario driving exists in the repo but is not yet routed through
-`al-ctl` — call the mise lanes directly and see "Not wired yet".
+Two wired surfaces: the `al` CLI through `al-ctl launch` (or
+directly), and the GUI scenario lanes through `al-ctl drive` (which
+spawns the lane's `cargo` command as a child process).
 
 ```bash
 al-ctl launch -- run --base-dir <scratch> \
@@ -100,7 +100,7 @@ al-ctl launch --dry-run -- run ...     # resolve + print, do not spawn
   `inspect` is read-only; `export` writes `export/<name>/` under the
   job dir.
 
-GUI scenario catalog (driven via mise lanes, not `al-ctl`):
+GUI scenario catalog (driven via `al-ctl drive`):
 `crates/al-gui/src/bin/al-gui-real-scenario.rs` `CASES` is the source
 of truth — currently 9 cases (`al.desktop.jobs/job-select-resume`,
 `al.source.seek/seek-commit`, `al.dataset.workspace/workspace-tabs`,
@@ -108,17 +108,32 @@ of truth — currently 9 cases (`al.desktop.jobs/job-select-resume`,
 `al.real-os.pointer/seek-pointer-click`,
 `al.real-os.keyboard/seek-key-end`,
 `al.real-os.visual/capture-frame-desktop` + `capture-frame-source`,
-`al.real-os.window/close-veto-approve`). The same bodies run under
-three drivers: Fake (headless, `cargo test -p al-gui`), GPUI
-(`mise run test-ui-gpui`), RealOs (`mise run test-ui-gpui-real`,
-opt-in, interactive Windows desktop only). On a headless host
-`mise run test-ui-gpui-real-headless` records every case `not_run`
-with `observed.environment_blocked` — the correct fail-closed result,
-not a lane failure.
+`al.real-os.window/close-veto-approve`). `al-ctl drive --list` prints
+the catalog; the same bodies run under three drivers:
 
-Not wired yet (later slices): `al-ctl` drive/evidence subcommands,
-scenario catalog invocation through `al-ctl`, and real-window proof
-(interactive session required).
+```bash
+al-ctl drive --list [--json]                       # pinned 9-case catalog
+al-ctl drive --driver fake [--json]                # all semantic tests, headless
+al-ctl drive scenario al.desktop.jobs --driver fake    # one scenario's filter
+al-ctl drive --driver gpui                         # gpui-test adapter lane
+al-ctl drive --driver real-os [--blocked-probe] [--out <jsonl>]
+al-ctl drive --driver fake --dry-run               # resolve + print, do not spawn
+```
+
+Drivers: Fake spawns `cargo test -p al-gui --test scenario` (headless,
+any host); GPUI spawns `cargo test -p al-gui --features gpui-test
+--test scenario_gpui`; RealOs spawns `cargo run -p al-gui --features
+gpui-real --bin al-gui-real-scenario` — opt-in, interactive Windows
+desktop only, always the whole catalog in one session (no
+per-scenario filter). The same bodies are reachable as the canonical
+mise lanes (`mise run test-ui-gpui`, `test-ui-gpui-real`,
+`test-ui-gpui-real-headless`). On a headless host the real-os lane
+records every case `not_run` with `observed.environment_blocked` —
+the correct fail-closed result, not a lane failure; `--blocked-probe`
+reproduces that deterministically without opening a window.
+
+Not wired yet: real-window Pass proof (interactive session required —
+run `al-ctl drive --driver real-os` in one).
 
 ## Evidence
 
@@ -127,6 +142,18 @@ scenario catalog invocation through `al-ctl`, and real-window proof
   `<sha>-verification.md` or `verification.md` (environment, commands,
   exit codes, result table, honest NotRun list) plus raw JSON/JSONL
   outputs.
+- `al-ctl evidence` manages the ledger skeleton:
+
+  ```bash
+  al-ctl evidence scaffold --issue <N>          # create evidence/al<N>/ + actions.jsonl + verification.md (no overwrite)
+  al-ctl evidence append --issue <N> \
+    --action <name> --command <cmd> \
+    --exit-code <n> --observed <text>           # append one JSON line to actions.jsonl
+  ```
+
+  `scaffold` is idempotent (existing files report `exists`); `append`
+  fails when the ledger does not exist — scaffold first. Both accept
+  `--repo`, `--dry-run`, and `--json`.
 - Record Required/Deferred/NotApplicable separately from
   Pass/Fail/NotRun/Unsupported (`POLICIES.md` §3). `NotRun` +
   `environment_blocked` is the honest record for a real-window drive
@@ -158,12 +185,33 @@ cargo run -p al-cli --bin al-ctl -- <command>   # via cargo
 target/debug/al-ctl <command>                   # after mise run build al-cli
 al-ctl doctor [--repo <dir>] [--base-dir <dir>] [--al-path <path>] [--json]
 al-ctl launch [--repo <dir>] [--al-path <path>] [--dry-run] [--json] -- <al args>
+al-ctl drive --list [--json]
+al-ctl drive [scenario] <scenario-id> --driver <fake|gpui>
+              [--repo <dir>] [--dry-run] [--json]
+al-ctl drive --driver <fake|gpui|real-os> [--repo <dir>]
+              [--blocked-probe] [--out <path>] [--dry-run] [--json]
+al-ctl evidence scaffold --issue <N> [--repo <dir>] [--dry-run] [--json]
+al-ctl evidence append --issue <N> --action <name> --command <cmd>
+              --exit-code <n> --observed <text>
+              [--repo <dir>] [--dry-run] [--json]
 al-ctl --help
 ```
 
 - `--json` emits a single JSON object per run; `--dry-run` resolves
-  the `al` command line without spawning.
-- Exit `0` success, `1` failed doctor check or non-zero child, `2`
-  usage error / unresolvable `al`. Errors name the fix (e.g. "build
-  `al` with `mise run build al-cli`").
-- Everything after `--` is passed verbatim to `al`.
+  the command without spawning (`launch`/`drive`) or writing
+  (`evidence`).
+- `drive` spawns the resolved lane (`cargo test`/`cargo run` on
+  `al-gui`) as a child process — the subprocess boundary is what keeps
+  GUI crates out of the headless `al-ctl` binary. Its receipt reports
+  the spawned pid, exit code, captured stdout/stderr, and the real-os
+  `--out` record count.
+- `drive` rejects unknown drivers/scenarios, per-scenario filters on
+  the real-os lane, `--blocked-probe`/`--out` on fake/gpui, and any
+  trailing `--` args — the lane argv is `al-ctl`-built, not caller
+  input.
+- Exit `0` success, `1` failed doctor check / non-zero child /
+  unapplied evidence write, `2` usage error / unresolvable binary.
+  Errors name the fix (e.g. "build `al` with `mise run build
+  al-cli`").
+- Everything after `--` is passed verbatim to `al` (launch only —
+  `drive`/`evidence` take no trailing args).
