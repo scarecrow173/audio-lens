@@ -1,0 +1,20 @@
+{
+  "al": "G:\\orca\\workspaces\\audio-lens\\al255-verify-skill-slice1\\target\\debug\\al.exe",
+  "args": [
+    "run",
+    "--base-dir",
+    "tmp/al255-proof/jobs",
+    "--input",
+    "capture_bug:tmp/al255-proof/cap.wav,source_asset:tmp/al255-proof/src.wav",
+    "--stages",
+    "ingest,locate"
+  ],
+  "command": "launch",
+  "dry_run": false,
+  "exit_code": 0,
+  "pid": 65816,
+  "source": "sibling",
+  "spawned": true,
+  "stderr": "",
+  "stdout": "job_id=JOB-DN0TilJa5Cemqu957HSXBc\njob_dir=tmp/al255-proof/jobs\\JOB-DN0TilJa5Cemqu957HSXBc\n"
+}

@@ -1,0 +1,11 @@
+=== git check-ignore -v (verify-audio-lens must NOT match; other .agents paths must) ===
+.gitignore:47:.agents/skills/*	.agents/skills/apm-usage/SKILL.md
+.gitignore:47:.agents/skills/*	.agents/skills/foo/SKILL.md
+.gitignore:45:.agents/*	.agents/other.txt
+check-ignore exit: 0 (1 = no match on queried paths)
+
+=== git status --porcelain .agents/ ===
+?? .agents/
+
+=== git status --porcelain .agents/skills/verify-audio-lens/ (untracked = listed, ignored = absent) ===
+?? .agents/skills/verify-audio-lens/

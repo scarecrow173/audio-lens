@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "detail": {
+        "arch": "x86_64",
+        "os": "windows",
+        "pid": 53892
+      },
+      "guidance": null,
+      "name": "environment",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "name": "al-ctl",
+        "version": "0.1.0"
+      },
+      "guidance": null,
+      "name": "tool",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "dir": "G:/orca/workspaces/audio-lens/al255-verify-skill-slice1",
+        "dirty": true,
+        "sha": "c917431b877935e7cfb0b4a703a47e64abbac2d7"
+      },
+      "guidance": null,
+      "name": "git",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "dir": "G:/orca/workspaces/audio-lens/al255-verify-skill-slice1\\samples",
+        "files": 38,
+        "materialized": 38,
+        "pointers": []
+      },
+      "guidance": null,
+      "name": "fixtures.samples",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "entries": 6,
+        "parsed": true,
+        "path": "G:/orca/workspaces/audio-lens/al255-verify-skill-slice1\\dictionaries\\capture-artifacts.v1.json",
+        "version": "1"
+      },
+      "guidance": null,
+      "name": "fixtures.dictionaries",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "entries": 2,
+        "exists": true,
+        "is_dir": true,
+        "job_dirs": 1,
+        "path": "tmp/al255-proof/jobs"
+      },
+      "guidance": null,
+      "name": "base_dir",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "path": "G:\\orca\\workspaces\\audio-lens\\al255-verify-skill-slice1\\target\\debug\\al.exe",
+        "probe_exit": 0,
+        "source": "sibling",
+        "usage_seen": true
+      },
+      "guidance": null,
+      "name": "al_binary",
+      "status": "ok"
+    }
+  ],
+  "command": "doctor",
+  "ok": true,
+  "repo": "G:/orca/workspaces/audio-lens/al255-verify-skill-slice1",
+  "tool": "al-ctl",
+  "version": "0.1.0"
+}
