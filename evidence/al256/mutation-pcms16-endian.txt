@@ -1,0 +1,69 @@
+   Compiling al-media v0.1.0 (G:\orca\workspaces\audio-lens\al256-formal-slice1\crates\al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.91s
+     Running tests\formal_wav.rs (target\debug\deps\formal_wav-1f29e7270127782c.exe)
+
+running 6 tests
+test write_samples_rejects_exactly_unaligned_lengths ... ok
+test mutated_or_truncated_headers_never_panic ... ok
+test writer_new_rejects_exactly_the_documented_invalid_params ... ok
+test writer_output_round_trips_losslessly ... FAILED
+test frame_count_and_range_reads_hold_the_contract ... ok
+test decode_wav_never_panics_on_arbitrary_bytes ... ok
+
+failures:
+
+---- writer_output_round_trips_losslessly stdout ----
+proptest: FileFailurePersistence::SourceParallel set, but failed to find lib.rs or main.rs
+proptest: Aborting shrinking after the PROPTEST_MAX_SHRINK_ITERS environment variable or ProptestConfig.max_shrink_iters iterations (set 1024 to a large(r) value to shrink more; current configuration: 1024 iterations)
+proptest: FileFailurePersistence::SourceParallel set, but failed to find lib.rs or main.rs
+proptest: Saving this and future failures in G:\orca\workspaces\audio-lens\al256-formal-slice1\crates\al-media\tests\formal_wav.proptest-regressions
+proptest: If this test was run on a CI system, you may wish to add the following line to your copy of the file. (You may need to create it.)
+cc c8c8aadba36c661cb24b9b609ad560736501a5546823afe70153c7bf2b823fde
+
+thread 'writer_output_round_trips_losslessly' (79284) panicked at crates\al-media\tests\formal_wav.rs:98:1:
+Test failed: assertion failed: `(left == right)`
+  left: `[0.0, 0.0, 0.0, 3584.0, -16992.0, -615.0, 13865.0, 19266.0, -14636.0, 23643.0, -2873.0, -3604.0, -24135.0, 10822.0, -9715.0, 21644.0, 30241.0]`,
+ right: `[0.0, 0.0, 0.0, 14.0, -24387.0, -26115.0, 10550.0, 16971.0, -11066.0, 23388.0, -14348.0, -4879.0, -18015.0, 17962.0, 3546.0, -29612.0, 8566.0]` at crates\al-media\tests\formal_wav.rs:185.
+minimal failing input: (enc, channels, sample_rate, frames, samples, splits) = (
+    PcmS16,
+    1,
+    11981959,
+    17,
+    [
+        0.0,
+        0.0,
+        0.0,
+        14.0,
+        -24387.0,
+        -26115.0,
+        10550.0,
+        16971.0,
+        -11066.0,
+        23388.0,
+        -14348.0,
+        -4879.0,
+        -18015.0,
+        17962.0,
+        3546.0,
+        -29612.0,
+        8566.0,
+    ],
+    [
+        14,
+    ],
+), start = 74, end = 105
+	successes: 4
+	local rejects: 0
+	global rejects: 0
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    writer_output_round_trips_losslessly
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `-p al-media --test formal_wav`
+mbx[cache]: 0 hits, 1 misses, 1 not looked up, 2 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: the sweep found 10.4 TiB logical nobody would miss. nobody has.
