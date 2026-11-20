@@ -1,0 +1,141 @@
+   Compiling al-media v0.1.0 (G:\orca\workspaces\audio-lens\al256-formal-slice2\crates\al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.11s
+     Running tests\formal_containers.rs (target\debug\deps\formal_containers-7fe44fcee5061f33.exe)
+
+running 7 tests
+test detect_format_follows_signature_rules ... ok
+test missing_or_undecodable_auds_is_audio_unavailable ... ok
+test mutated_or_truncated_containers_never_panic ... ok
+test compressed_audio_is_an_observation_not_an_error ... ok
+test mp4_writer_output_round_trips_through_decode ... FAILED
+test avi_writer_output_round_trips_through_decode ... ok
+test container_decoders_never_panic_on_arbitrary_bytes ... ok
+
+failures:
+
+---- mp4_writer_output_round_trips_through_decode stdout ----
+proptest: FileFailurePersistence::SourceParallel set, but failed to find lib.rs or main.rs
+proptest: Aborting shrinking after the PROPTEST_MAX_SHRINK_ITERS environment variable or ProptestConfig.max_shrink_iters iterations (set 1024 to a large(r) value to shrink more; current configuration: 1024 iterations)
+proptest: FileFailurePersistence::SourceParallel set, but failed to find lib.rs or main.rs
+proptest: Saving this and future failures in G:\orca\workspaces\audio-lens\al256-formal-slice2\crates\al-media\tests\formal_containers.proptest-regressions
+proptest: If this test was run on a CI system, you may wish to add the following line to your copy of the file.
+cc b13b82d5f8f1e1633a1b84b183d4c056b5774a473c717465eae7ea33cec3af70
+
+thread 'mp4_writer_output_round_trips_through_decode' (46556) panicked at crates\al-media\tests\formal_containers.rs:1177:1:
+Test failed: assertion failed: `(left == right)`
+  left: `"pcm_s16be"`,
+ right: `"pcm_s16le"` at crates\al-media\tests\formal_containers.rs:1376.
+minimal failing input: case = Mp4Case {
+    major_brand: [
+        105,
+        115,
+        111,
+        109,
+    ],
+    compatible_brands: [],
+    movie_timescale: 0,
+    extra_top_boxes: [],
+    tracks: [
+        TrackGen {
+            track_id: 1,
+            timescale: 1,
+            duration: 0,
+            language: [
+                117,
+                110,
+                100,
+            ],
+            language_text: "und",
+            kind: Soun(
+                SounGen {
+                    codec: [
+                        115,
+                        111,
+                        119,
+                        116,
+                    ],
+                    version: 0,
+                    lpcm_flags: 0,
+                    pcmc: None,
+                    bits: 16,
+                    channels: 1,
+                    rate: 1849,
+                    delta: 4,
+                    count: 15,
+                    sample_size: 2,
+                    payload: [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        35,
+                        236,
+                        140,
+                        22,
+                        11,
+                        238,
+                        17,
+                        133,
+                        252,
+                        216,
+                        150,
+                        31,
+                        214,
+                        166,
+                        161,
+                        189,
+                    ],
+                    pcm_track: true,
+                    expect: Decoded {
+                        codec: "pcm_s16le",
+                        format: PcmS16,
+                        bits_per_sample: 16,
+                        samples: [
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            -5085.0,
+                            5772.0,
+                            -4597.0,
+                            -31471.0,
+                            -9988.0,
+                            8086.0,
+                            -22826.0,
+                            -16991.0,
+                        ],
+                    },
+                },
+            ),
+            extra_boxes: [],
+        },
+    ],
+}
+	successes: 6
+	local rejects: 0
+	global rejects: 0
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    mp4_writer_output_round_trips_through_decode
+
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+error: test failed, to rerun pass `-p al-media --test formal_containers`
+mbx[cache]: 0 hits, 1 misses, 1 not looked up, 2 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: 3d 17h refunded over 5106 builds. no receipt necessary.

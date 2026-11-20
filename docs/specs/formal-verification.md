@@ -2,9 +2,9 @@
 id: "SPEC-034FormalVerification256"
 type: "spec"
 status: "proposed"
-title: "formal verification (D 層) 導入: 昇格路と第 1 標的 WAV codec (Issue #256)"
+title: "formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的 (Issue #256)"
 created: "2026-11-20"
-updated: "2026-11-20"
+updated: "2026-11-21"
 owners: []
 relations:
   source:
@@ -13,6 +13,8 @@ relations:
     added:
       - type: "file"
         path: "crates/al-media/tests/formal_wav.rs"
+      - type: "file"
+        path: "crates/al-media/tests/formal_containers.rs"
       - type: "file"
         path: "tools/run-formal-kani.mjs"
       - type: "doc"
@@ -48,14 +50,15 @@ relations:
   deferred-by: []
 ---
 
-# formal verification (D 層) 導入: 昇格路と第 1 標的 WAV codec
+# formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的
 
 Issue #256。検証環境の理想形(`.devin/verify-env-survey/synthesis.md`
 §1)が置く 7 層のうち、D 層は「高コストバグ領域への形式的検証」
 を担う。本文書は D 層の設計(器の選択規則と昇格路)と、第 1 標的
-WAV codec の検証構成・bounds・assumptions・coverage 記録をまとめた
-正本である。実行記録(コマンド・exit code・verdict 表・変異 fail
-証拠)は `evidence/al256/` の台帳が持つ。
+WAV codec・第 2 標的 MP4/AVI container parse の検証構成・bounds・
+assumptions・coverage 記録をまとめた正本である。実行記録
+(コマンド・exit code・verdict 表・変異 fail 証拠)は
+`evidence/al256/` の台帳が持つ。
 
 ## 器の選択規則と昇格路
 
@@ -147,11 +150,83 @@ property 言語の異なる強度の段である。
   に限る。PcmU8 の decode は mutated/structured 入力側の
   no-panic 契約と、`read_wav_range` 経路の一部として間接に覆う。
 
+## 第 2 標的: MP4/AVI container parse (`mp4.rs`/`avi.rs`/`format.rs`)
+
+第 2 標的は第 1 標的と同じ hardened-layout 形を持つ
+`decode_mp4`/`decode_avi`/`detect_format`(いずれも純粋 `&[u8]`
+入口)である。demux 契約は codec 契約より広い: container 破損は
+`Malformed`、compressed/missing audio はエラーではなく integrity
+observation(partial ingest)、declared facts(brands・track 宣言・
+skipped_boxes・stts/ctts timing)と PCM 抽出が「最初に復号できる
+`soun`」の規則で決まる。`al-testkit` の `write_mp4`/`write_avi`
+が writer 側の正本となり、spec → bytes → decode → facts の
+round-trip を生成検査できる。
+
+`crates/al-media/tests/formal_containers.rs` 一ファイルに proptest
+suite と `#[cfg(kani)]` bounded proof harness を同居させる。
+
+### 検証する property(coverage 記録)
+
+| property | 検証する契約 |
+| --- | --- |
+| `container_decoders_never_panics_on_arbitrary_bytes` | 任意 `&[u8]`(0..=4096B)で `decode_mp4`/`decode_avi`/`detect_format` が panic しない。返り値は `Ok`/`Err(MediaError)`/`Option` のみ |
+| `mp4_writer_output_round_trips_through_decode` | `write_mp4` 出力を必ず受理し、ftyp/mvhd facts・track 宣言(handler/codec/timescale/duration/language/sample_count/sync_samples/audio dims/video dims)・`skipped_boxes`・stts DTS と ctts PTS の timing・`packet_lengths`・`pcm_tracks`・先頭 decodable `soun` の PCM 復号・残り `soun` の `decode_unavailable` observation が spec と一致する |
+| `avi_writer_output_round_trips_through_decode` | `write_avi` 出力を必ず受理し、先頭 `vids` の metadata(rawvideo codec・寸法・bpp・frames/fps/duration)+features、先頭 `auds` の PCM 復号または `audio_unavailable`、両 stream の `movi_order` packet timing(`dwStart*dwScale` 起点・`dwSampleSize` remainder 則・独立 clock)が spec と一致する |
+| `compressed_audio_is_an_observation_not_an_error` | compressed のみの `soun`(`mp4a`/`ac-3`/`alac`/`ec-3`)を含む MP4 が `Err` にならず、`audio` None + `soun` 個数分の capability observation になる(partial ingest) |
+| `missing_or_undecodable_auds_is_audio_unavailable` | `auds` なし・非 PCM `auds`・`wb` を持たない `auds` の AVI が `Err` にならず、`audio` None + `audio_unavailable`(capability)+video/timing は健在 |
+| `detect_format_follows_signature_rules` | `RIFF`+`WAVE`/`AVI `・offset 4 `ftyp`→`Mp4`・それ以外/短い入力→`None` の署名規則が doc 契約 model と一致(切り詰め view 含む) |
+| `mutated_or_truncated_containers_never_panic` | writer 生成物への byte 上書き+truncate が panic しない |
+| `kani_proofs::containers_never_panic_on_bounded_input` | 64B の全バイト列で 3 入口が panic しない(bounded 網羅) |
+| `kani_proofs::detect_format_signature_rules` | len<8/8/12 の境界長で署名規則を網羅(RIFF 優先の順序を含む) |
+| `kani_proofs::mp4_writer_output_decodes` | symbolic `soun` パラメータ(channels 1..=2・rate 1..=192000・4 frame s16)の write_mp4 出力が復号+PCM 往復する |
+| `kani_proofs::avi_writer_output_decodes` | concrete video(4x2・2 frame)+symbolic PCM `auds` の write_avi 出力が復号+PCM 往復+両 stream の timing 一致 |
+| `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き+truncate で panic しない |
+
+### bounds・assumptions・model/product の区別
+
+- **入力 bound**: proptest の任意 byte 列は 0..=4096B。Kani の
+  decode 入力は 64B 固定 — ISO-BMFF は `stsd` 到達まで約 60B の
+  入れ子を要するため、top-level box 走査と早期 header 検証を覆う
+  bound(全 size の主張ではない)。
+- **生成範囲**: MP4 は track 1..=3・`soun`/`vide` 混在。
+  `soun` entry は decodable 系(sowt/twos 16bit、sowt/twos 8bit、
+  `raw ` unsigned、lpcm v2 signed+packed LE/BE、ipcm+pcmC LE/BE)
+  と unavailable 系(compressed fourcc・ipcm pcmC 無・lpcm
+  unpacked・12bit sowt・mid-frame・0ch/0rate)を網羅する。mdhd
+  timescale は 1..=192000(0 は Malformed なので対象外)。
+  AVI は vids BGR24 width {4,8,16,32,64}(word-align)×height
+  1..=16・fps 1..=60・frames 0..=4、auds は PCM s16 1..=4ch・
+  非 PCM(tag 0x55)・absent を網羅、`dwStart` 0..=8、mux は
+  hdrl 順序差と packet interleave の双方。
+- **16.16 fixed rate の wrap**: v0/v1 `soun` entry の sample rate
+  は 16.16 fixed-point で書かれ、rate > 65535 は下位 16bit に
+  折り返す(65536/131072 → declared rate 0 → malformed
+  observation)。model は emitted field でなく decoder が見る
+  declared rate を写す — container の表現限界であり不具合では
+  ない。
+- **unwind bound**: decode/format 系 8–80、writer round-trip 系
+  64–96、mutation 系 64–80。WAV 同様、この環境の 45min cap 内に
+  収めるための最小実用 bound。
+- **model/product 区別**: `skipped_boxes`(minf の非 stbl 子と
+  top-level extras が path 記録される)、`pcm_tracks` 所属(宣言
+  capability であり復号成功とは独立)、secondary `soun` の
+  capability observation、上記 rate wrap は doc 契約として model
+  が写す。counterexample が文書化契約に反すれば product defect、
+  model が強く読みすぎていれば model error と見分ける方針は
+  第 1 標的と同じ。
+- **coverage の残り**: sample table は単一 chunk の uniform 形のみ
+  (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
+  `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
+  復号は未生成(layout 規則は同型)。AVI は先頭 `vids`/`auds`
+  各 1 本(`dc`/`pc` kind・`idx1`・非 DIB 圧縮・`dwLength` ずれは
+  未生成)。free/mdat 先頭 MP4 の `detect_format` 非認識は
+  signature-rule property の分岐に依存する。
+
 ## 昇格路: 第 2 標的以降の候補
 
 | 器 | 候補標的 | 根拠 |
 | --- | --- | --- |
-| Kani | MP4 `decode_mp4`(`mp4.rs:1187`、純粋 `&[u8]` 入口)・AVI `decode_avi`(`avi.rs:370`、`VideoFeatureConfig` 併用)の任意入力安全+round-trip | WAV と同型の hardened layout を持ち、第 1 標的の harness 形がそのまま移植できる |
+| Kani | MP4 `decode_mp4`(`mp4.rs:1187`、純粋 `&[u8]` 入口)・AVI `decode_avi`(`avi.rs:370`、`VideoFeatureConfig` 併用)の任意入力安全+round-trip | **第 2 標的として proptest+Kani harness を導入済み**(本書 §第 2 標的)。WAV と同型の hardened layout を持ち、第 1 標的の harness 形がそのまま移植できる |
 | Kani | `al-job` job 状態遷移関数・tolerance compare 算術 | 単位の小さい決定的関数で bounded 化しやすい |
 | TLA+ | `al-job` `runner.rs` の resume/cancel、`fsutil` staged publish の順序 | 順序・設計レベルの問いであり、設計モデルとして写す。pstack `statechart` skill で結果を解釈する |
 | Lean 4 | `al-locate`/`al-analysis` の解析数学不変量(spectral/feature 恒等式)・baseline compare の決定性 | 全サイズで成立する性質で、文書化された promise に限る |
@@ -203,7 +278,8 @@ cargo kani setup    # CBMC toolchain を ~/.kani に展開する
 正規入口は mise task である。
 
 - `mise run test-formal`: proptest lane。native で常時実行できる
-  第 1 標的の 1 コマンド再実行。
+  第 1・第 2 標的の 1 コマンド再実行(`--test formal_wav --test
+  formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
@@ -213,7 +289,10 @@ cargo kani setup    # CBMC toolchain を ~/.kani に展開する
 
 - Issue: <https://github.com/scarecrow173/audio-lens/issues/256>
 - 設計正本: `G:/repositry/audio-products/.devin/verify-env-survey/synthesis.md` §4.3
-- 対象コード: `crates/al-media/src/wav.rs`・`crates/al-media/tests/formal_wav.rs`
+- 対象コード: `crates/al-media/src/wav.rs`・`crates/al-media/src/mp4.rs`・
+  `crates/al-media/src/avi.rs`・`crates/al-media/src/format.rs`・
+  `crates/al-media/tests/formal_wav.rs`・
+  `crates/al-media/tests/formal_containers.rs`
 - lane runner: `tools/run-formal-kani.mjs`
 - 証拠台帳: `evidence/al256/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
