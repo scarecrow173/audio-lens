@@ -1,13 +1,18 @@
 //! `al-ctl` — AudioLens verification control CLI (Issue #255).
 //!
 //! Thin control surface for the `verify-audio-lens` skill: a read-only
-//! `doctor` that reports environment/fixture/binary health, and a
-//! `launch` entry that spawns the product `al` binary and reports the
-//! spawned process identity (PID) plus captured output.
+//! `doctor` that reports environment/fixture/binary health, a `launch`
+//! entry that spawns the product `al` binary and reports the spawned
+//! process identity (PID) plus captured output, a `drive` entry that
+//! resolves and spawns GUI scenario lanes (`cargo test`/`cargo run` on
+//! `al-gui`) as child processes, and `evidence` ledger scaffold/append.
 //!
 //! Headless boundary: std + serde_json only — this bin must not pull
-//! GUI/GPU/WebView dependencies (`mise run check-cli-headless`).
+//! GUI/GPU/WebView dependencies (`mise run check-cli-headless`). `drive`
+//! keeps that boundary by spawning the lanes as subprocesses instead of
+//! linking `al-gui`.
 
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
@@ -21,6 +26,16 @@ USAGE:
                 [--json]
   al-ctl launch [--repo <dir>] [--al-path <path>] [--dry-run] [--json]
                 -- <args for al>
+  al-ctl drive --list [--json]
+  al-ctl drive [scenario] <scenario-id> --driver <fake|gpui>
+                [--repo <dir>] [--dry-run] [--json]
+  al-ctl drive --driver <fake|gpui|real-os> [--repo <dir>]
+                [--blocked-probe] [--out <path>] [--dry-run] [--json]
+  al-ctl evidence scaffold --issue <N> [--repo <dir>] [--dry-run]
+                [--json]
+  al-ctl evidence append --issue <N> --action <name> --command <cmd>
+                --exit-code <n> --observed <text> [--repo <dir>]
+                [--dry-run] [--json]
   al-ctl --help | -h
 
 SUBCOMMANDS:
@@ -32,24 +47,56 @@ SUBCOMMANDS:
            `--`, wait for it, and report the spawned PID, exit code,
            and captured stdout/stderr. `--dry-run` prints the resolved
            command without spawning.
+  drive    Resolve a GUI scenario lane to a `cargo` invocation and
+           spawn it as a child process (the subprocess boundary keeps
+           GUI crates out of al-ctl). `--list` prints the pinned
+           scenario catalog. Drivers: fake (`cargo test -p al-gui
+           --test scenario`), gpui (`--features gpui-test --test
+           scenario_gpui`), real-os (`--features gpui-real --bin
+           al-gui-real-scenario`; always drives the whole catalog in
+           one session — no per-scenario filter; `--blocked-probe`
+           and `--out` apply to it). `scenario <id>` or `--scenario
+           <id>` restricts a fake/gpui lane to that scenario's test
+           filter. Receipt reports the spawned PID, exit code,
+           captured stdout/stderr, and the real-os `--out` path.
+  evidence Manage `evidence/al<N>/` ledgers. `scaffold` creates the
+           ledger directory plus `actions.jsonl`/`verification.md`
+           seeds (existing files are left untouched); `append` writes
+           one {action, command, exit_code, observed} JSON line to
+           `actions.jsonl`.
 
 OPTIONS:
-  --repo <dir>     Repository root to inspect. Default: discovered via
-                   `git rev-parse --show-toplevel` from the current
-                   directory.
+  --repo <dir>     Repository root to inspect / run lanes in. Default:
+                   discovered via `git rev-parse --show-toplevel` from
+                   the current directory.
   --base-dir <dir> Job data dir to report on (the `--base-dir` used by
                    `al run`). Optional; skipped when not given.
   --al-path <path> Explicit path to the `al` binary. Default: sibling
                    of the al-ctl executable, then <repo>/target/debug,
                    then <repo>/target/release, then PATH.
+  --driver <name>  (drive) Lane driver: fake | gpui | real-os.
+  --scenario <id>  (drive) Restrict a fake/gpui lane to one scenario's
+                   test filter. See `al-ctl drive --list` for ids.
+  --blocked-probe  (drive --driver real-os) Deterministic headless
+                   self-check; no window is opened.
+  --out <path>     (drive --driver real-os) JSONL report destination.
+  --issue <N>      (evidence) Issue number — ledger dir is
+                   `evidence/al<N>/`.
+  --action <name>  (evidence append) Record `action` field.
+  --command <cmd>  (evidence append) Record `command` field.
+  --exit-code <n>  (evidence append) Record `exit_code` field.
+  --observed <txt> (evidence append) Record `observed` field.
   --json           Emit a single JSON object instead of text lines.
-  --dry-run        (launch) resolve and print the command only.
+  --dry-run        (launch/drive/evidence) resolve and print only —
+                   no spawn, no write.
   --help, -h       Show this text.
 
 EXIT CODES:
-  0  success (doctor: all checks ok/skipped; launch: child exited 0)
-  1  doctor found a failed check, or the launched `al` exited non-zero
-  2  usage error or unresolvable `al` binary
+  0  success (doctor: all checks ok/skipped; launch/drive: child
+     exited 0; evidence: write applied)
+  1  doctor found a failed check, a spawned child exited non-zero,
+     or an evidence write could not be applied
+  2  usage error or unresolvable binary/command
 ";
 
 fn fail(message: impl std::fmt::Display) -> ExitCode {
@@ -574,6 +621,662 @@ fn cmd_launch(args: &[String], al_args: &[String]) -> ExitCode {
     }
 }
 
+// ------------------------------------------------------------------
+// drive
+// ------------------------------------------------------------------
+
+/// scenario lane の driver。`fake`/`gpui` は `cargo test` の scenario
+/// lane、`real-os` は test-only bin `al-gui-real-scenario` の lane。
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Driver {
+    Fake,
+    Gpui,
+    RealOs,
+}
+
+impl Driver {
+    fn parse(raw: &str) -> Option<Self> {
+        match raw {
+            "fake" => Some(Self::Fake),
+            "gpui" => Some(Self::Gpui),
+            "real-os" => Some(Self::RealOs),
+            _ => None,
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Fake => "fake",
+            Self::Gpui => "gpui",
+            Self::RealOs => "real-os",
+        }
+    }
+}
+
+/// 静的 scenario catalog の 1 行。
+///
+/// 正本は `crates/al-gui/src/bin/al-gui-real-scenario.rs` の `CASES`
+/// (実行順)と `crates/al-gui/tests/scenario_real.rs` の
+/// `case_catalog_ids_are_stable` が pin する (scenario, case) 組。
+/// `tests/al_ctl.rs` がこの表と pin の一致、および各 filter 文字列が
+/// lane 側 test 源に実在することを検査する — catalog 意味論を変える
+/// 更新では正本側を先に直し、本表を追従させる。`required` は
+/// `LaneCase.required` の写し(表示用)。
+struct CatalogCase {
+    scenario: &'static str,
+    case: &'static str,
+    /// `tests/scenario.rs`(fake lane)内の test 名 filter。
+    /// `None` は fake lane で走らない(real-os 専用 case)。
+    fake_filter: Option<&'static str>,
+    /// `tests/scenario_gpui.rs`(gpui lane)内の test 名 filter。
+    gpui_filter: Option<&'static str>,
+    required: &'static [&'static str],
+}
+
+impl CatalogCase {
+    /// この case が実行可能な driver。real-os lane は catalog 全体を
+    /// 1 session で実行するため全 case に含まれる。
+    fn drivers(&self) -> Vec<Driver> {
+        let mut drivers = Vec::with_capacity(3);
+        if self.fake_filter.is_some() {
+            drivers.push(Driver::Fake);
+        }
+        if self.gpui_filter.is_some() {
+            drivers.push(Driver::Gpui);
+        }
+        drivers.push(Driver::RealOs);
+        drivers
+    }
+}
+
+/// 実行順の静的 catalog。正本の写し(出典は [`CatalogCase`])。
+const CATALOG: &[CatalogCase] = &[
+    CatalogCase {
+        scenario: "al.desktop.jobs",
+        case: "job-select-resume",
+        fake_filter: Some("fake_desktop_jobs"),
+        gpui_filter: Some("gpui_desktop_jobs"),
+        required: &["SemanticAction"],
+    },
+    CatalogCase {
+        scenario: "al.source.seek",
+        case: "seek-commit",
+        fake_filter: Some("fake_source_seek"),
+        gpui_filter: Some("gpui_and_fake_run_the_same_scenarios"),
+        required: &["SemanticAction"],
+    },
+    CatalogCase {
+        scenario: "al.dataset.workspace",
+        case: "workspace-tabs",
+        fake_filter: Some("fake_dataset_workspace"),
+        gpui_filter: Some("gpui_dataset_workspace"),
+        required: &["SemanticAction"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.input",
+        case: "os-input-preflight",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &["RealOsPointerOrKeyboard"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.pointer",
+        case: "seek-pointer-click",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &["RealOsPointerOrKeyboard"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.keyboard",
+        case: "seek-key-end",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &["RealOsPointerOrKeyboard"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.visual",
+        case: "capture-frame-desktop",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &["VisualCapture"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.visual",
+        case: "capture-frame-source",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &["VisualCapture"],
+    },
+    CatalogCase {
+        scenario: "al.real-os.window",
+        case: "close-veto-approve",
+        fake_filter: None,
+        gpui_filter: None,
+        required: &[],
+    },
+];
+
+/// `cargo` へ渡す解決済み lane コマンド。
+struct LaneCommand {
+    /// argv[0] は `cargo`(PATH 解決)。
+    argv: Vec<String>,
+    /// receipt に載せる lane 表示名。
+    lane: &'static str,
+}
+
+/// driver + scenario 指定から spawn する cargo argv を組み立てる。
+/// lane 形状は mise task と同一(`mise.toml` の `test`/`test-ui-gpui`/
+/// `test-ui-gpui-real(-headless)`)— 違いは al-ctl が cargo を子
+/// プロセスとして直接呼ぶ点だけ。
+fn resolve_lane(
+    driver: Driver,
+    scenario: Option<&str>,
+    blocked_probe: bool,
+    out: Option<&str>,
+) -> Result<LaneCommand, String> {
+    match driver {
+        Driver::Fake | Driver::Gpui => {
+            let mut argv = vec![
+                "cargo".to_owned(),
+                "test".to_owned(),
+                "--locked".to_owned(),
+                "-p".to_owned(),
+                "al-gui".to_owned(),
+            ];
+            let lane = if driver == Driver::Gpui {
+                argv.extend(["--features".to_owned(), "gpui-test".to_owned()]);
+                argv.extend(["--test".to_owned(), "scenario_gpui".to_owned()]);
+                "cargo test -p al-gui --features gpui-test --test scenario_gpui"
+            } else {
+                argv.extend(["--test".to_owned(), "scenario".to_owned()]);
+                "cargo test -p al-gui --test scenario"
+            };
+            if let Some(id) = scenario {
+                let entry = CATALOG.iter().find(|c| c.scenario == id).ok_or_else(|| {
+                    format!("unknown scenario {id:?}; see `al-ctl drive --list` for the catalog")
+                })?;
+                let filter = match driver {
+                    Driver::Fake => entry.fake_filter,
+                    _ => entry.gpui_filter,
+                };
+                let Some(filter) = filter else {
+                    return Err(format!(
+                        "scenario {id:?} has no {driver} lane — it runs only under \
+                         `--driver real-os` (which drives the whole catalog)",
+                        driver = driver.name()
+                    ));
+                };
+                argv.extend(["--".to_owned(), filter.to_owned()]);
+            }
+            Ok(LaneCommand { argv, lane })
+        }
+        Driver::RealOs => {
+            if let Some(id) = scenario {
+                return Err(format!(
+                    "the real-os lane always drives the whole catalog in one \
+                     session — drop `scenario {id:?}` and run `al-ctl drive \
+                     --driver real-os`"
+                ));
+            }
+            let mut argv = vec![
+                "cargo".to_owned(),
+                "run".to_owned(),
+                "--locked".to_owned(),
+                "-p".to_owned(),
+                "al-gui".to_owned(),
+                "--features".to_owned(),
+                "gpui-real".to_owned(),
+                "--bin".to_owned(),
+                "al-gui-real-scenario".to_owned(),
+                "--".to_owned(),
+            ];
+            if blocked_probe {
+                argv.push("--blocked-probe".to_owned());
+            }
+            if let Some(path) = out {
+                argv.extend(["--out".to_owned(), path.to_owned()]);
+            }
+            Ok(LaneCommand {
+                argv,
+                lane: "cargo run -p al-gui --features gpui-real --bin al-gui-real-scenario",
+            })
+        }
+    }
+}
+
+/// drive/evidence 用の flag 検査 — 値を取る flag と bool flag 以外の
+/// token を usage error にする。launch と違ってこれらの subcommand は
+/// `--` の後ろを子へ素通ししない。
+fn check_flags(args: &[String], value_flags: &[&str], bool_flags: &[&str]) -> Result<(), String> {
+    let mut i = 0;
+    while i < args.len() {
+        let arg = args[i].as_str();
+        if value_flags.contains(&arg) {
+            if i + 1 >= args.len() {
+                return Err(format!("{arg} requires a value"));
+            }
+            i += 2;
+        } else if bool_flags.contains(&arg) {
+            i += 1;
+        } else {
+            return Err(format!("unknown argument {arg:?}; see `al-ctl --help`"));
+        }
+    }
+    Ok(())
+}
+
+fn drive_list(json_out: bool) -> ExitCode {
+    let cases: Vec<Value> = CATALOG
+        .iter()
+        .map(|c| {
+            json!({
+                "scenario": c.scenario,
+                "case": c.case,
+                "drivers": c.drivers().iter().map(|d| d.name()).collect::<Vec<_>>(),
+                "required": c.required,
+                "fake_filter": c.fake_filter,
+                "gpui_filter": c.gpui_filter,
+            })
+        })
+        .collect();
+    if json_out {
+        let report = json!({
+            "command": "drive",
+            "subcommand": "list",
+            "cases": cases,
+            "catalog_source": "crates/al-gui/src/bin/al-gui-real-scenario.rs CASES + \
+                 crates/al-gui/tests/scenario_real.rs case_catalog_ids_are_stable pins",
+        });
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+    } else {
+        println!(
+            "scenario catalog: {} cases (source: crates/al-gui/src/bin/al-gui-real-scenario.rs CASES)",
+            CATALOG.len()
+        );
+        for c in CATALOG {
+            let drivers = c
+                .drivers()
+                .iter()
+                .map(|d| d.name())
+                .collect::<Vec<_>>()
+                .join(",");
+            let required = if c.required.is_empty() {
+                "-".to_owned()
+            } else {
+                c.required.join(",")
+            };
+            println!(
+                "  {}/{}  drivers={}  required={}",
+                c.scenario, c.case, drivers, required
+            );
+        }
+    }
+    ExitCode::SUCCESS
+}
+
+fn cmd_drive(args: &[String], trailing: &[String]) -> ExitCode {
+    if flag_present(args, "--help") || flag_present(args, "-h") {
+        print!("{USAGE}");
+        return ExitCode::SUCCESS;
+    }
+    if flag_present(args, "--list") {
+        return drive_list(flag_present(args, "--json"));
+    }
+    if !trailing.is_empty() {
+        return fail("drive builds the lane command itself — nothing is forwarded after `--`");
+    }
+    // `drive scenario <id>` の positional 形を先に剥がす。
+    let mut positional_scenario: Option<&str> = None;
+    let mut flags: &[String] = args;
+    if args.first().map(String::as_str) == Some("scenario") {
+        match args.get(1) {
+            Some(id) => {
+                positional_scenario = Some(id.as_str());
+                flags = &args[2..];
+            }
+            None => {
+                return fail("`drive scenario` requires a scenario id; see `al-ctl drive --list`");
+            }
+        }
+    }
+    if let Err(e) = check_flags(
+        flags,
+        &["--repo", "--driver", "--scenario", "--out"],
+        &["--json", "--dry-run", "--blocked-probe"],
+    ) {
+        return fail(e);
+    }
+
+    let raw_driver = match parse_flag(flags, "--driver") {
+        Some(d) => d,
+        None => return fail("drive requires `--driver <fake|gpui|real-os>` (or `--list`)"),
+    };
+    let Some(driver) = Driver::parse(raw_driver) else {
+        return fail(format!(
+            "unknown driver {raw_driver:?}; expected fake|gpui|real-os"
+        ));
+    };
+    let scenario = match (positional_scenario, parse_flag(flags, "--scenario")) {
+        (Some(pos), Some(flag)) if pos != flag => {
+            return fail("scenario given twice (`scenario <id>` and `--scenario`)");
+        }
+        (Some(pos), _) => Some(pos.to_owned()),
+        (None, flag) => flag.map(str::to_owned),
+    };
+    let blocked_probe = flag_present(flags, "--blocked-probe");
+    let out_path = parse_flag(flags, "--out");
+    if driver != Driver::RealOs && (blocked_probe || out_path.is_some()) {
+        return fail("`--blocked-probe`/`--out` apply only to `--driver real-os`");
+    }
+    let lane = match resolve_lane(driver, scenario.as_deref(), blocked_probe, out_path) {
+        Ok(lane) => lane,
+        Err(e) => return fail(e),
+    };
+    let (repo, _) = repo_root(flags);
+    let json_out = flag_present(flags, "--json");
+
+    if flag_present(flags, "--dry-run") {
+        let report = json!({
+            "command": "drive",
+            "dry_run": true,
+            "spawned": false,
+            "driver": driver.name(),
+            "scenario": scenario,
+            "lane": lane.lane,
+            "argv": lane.argv,
+            "cwd": repo.display().to_string(),
+        });
+        if json_out {
+            println!("{}", serde_json::to_string_pretty(&report).unwrap());
+        } else {
+            println!(
+                "dry-run: would spawn {} (cwd: {})",
+                lane.argv.join(" "),
+                repo.display()
+            );
+        }
+        return ExitCode::SUCCESS;
+    }
+
+    let spawned = Command::new(&lane.argv[0])
+        .args(&lane.argv[1..])
+        .current_dir(&repo)
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn();
+    let child = match spawned {
+        Ok(child) => child,
+        Err(e) => {
+            return fail(format!(
+                "cannot spawn `cargo`: {e}; run on a host with the rust \
+                 toolchain, or drive the mise lanes directly"
+            ));
+        }
+    };
+    let pid = child.id();
+    let output = match child.wait_with_output() {
+        Ok(output) => output,
+        Err(e) => return fail(format!("`{}` did not complete: {e}", lane.argv.join(" "))),
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let exit_code = output.status.code().unwrap_or(-1);
+    // real-os の `--out` レポートは receipt に行数で写す(観測の一部)。
+    let out_records = out_path.and_then(|p| {
+        let path = Path::new(p);
+        let path = if path.is_absolute() {
+            path.to_path_buf()
+        } else {
+            repo.join(path)
+        };
+        std::fs::read_to_string(path)
+            .ok()
+            .map(|text| text.lines().filter(|line| !line.trim().is_empty()).count())
+    });
+    let report = json!({
+        "command": "drive",
+        "dry_run": false,
+        "spawned": true,
+        "driver": driver.name(),
+        "scenario": scenario,
+        "lane": lane.lane,
+        "argv": lane.argv,
+        "cwd": repo.display().to_string(),
+        "pid": pid,
+        "exit_code": exit_code,
+        "stdout": stdout,
+        "stderr": stderr,
+        "out": out_path,
+        "out_records": out_records,
+    });
+    if json_out {
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+    } else {
+        print!("{stdout}");
+        eprint!("{stderr}");
+        println!(
+            "drive: pid={pid} exit={exit_code} driver={} scenario={}",
+            driver.name(),
+            scenario.as_deref().unwrap_or("(whole lane)")
+        );
+    }
+    if output.status.success() {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
+    }
+}
+
+// ------------------------------------------------------------------
+// evidence
+// ------------------------------------------------------------------
+
+/// `evidence/al<N>/verification.md` の scaffold 雛形。台帳規約は
+/// `evidence/al219/README.md`・`evidence/al255/verification.md` の先例 —
+/// 生成するのは最小の骨格で、実測の記録は台帳の owner が書く。
+const VERIFICATION_SKELETON: &str = "\
+# Issue #{ISSUE} — verification evidence
+
+実行環境: <os>/<arch> — <fill in>
+
+## ファイル
+
+| ファイル | 内容 |
+| --- | --- |
+| `actions.jsonl` | action → 観測結果の 1 行台帳 |
+
+## verdict(POLICIES §3 — 要求状態 × 実行結果)
+
+| 項目 | 要求状態 | 結果 | 根拠 |
+| --- | --- | --- | --- |
+";
+
+/// `--issue <N>` の検査。数字列のみ受理し `al<N>` の dir 名を返す。
+fn ledger_name(args: &[String]) -> Result<String, String> {
+    let raw = parse_flag(args, "--issue")
+        .ok_or("`--issue <N>` is required (e.g. `--issue 255` -> evidence/al255/)")?;
+    if raw.is_empty() || !raw.bytes().all(|b| b.is_ascii_digit()) {
+        return Err(format!(
+            "--issue must be digits (e.g. `--issue 255` -> evidence/al255/), got {raw:?}"
+        ));
+    }
+    Ok(format!("al{raw}"))
+}
+
+fn cmd_evidence(args: &[String], trailing: &[String]) -> ExitCode {
+    if flag_present(args, "--help") || flag_present(args, "-h") {
+        print!("{USAGE}");
+        return ExitCode::SUCCESS;
+    }
+    if !trailing.is_empty() {
+        return fail("evidence takes no `--` arguments");
+    }
+    let Some(sub) = args.first().map(String::as_str) else {
+        return fail("evidence requires a subcommand: scaffold | append");
+    };
+    let rest = &args[1..];
+    const BOOLS: &[&str] = &["--json", "--dry-run"];
+    let (scaffold, value_flags) = match sub {
+        "scaffold" => (true, ["--repo", "--issue"].as_slice()),
+        "append" => (
+            false,
+            [
+                "--repo",
+                "--issue",
+                "--action",
+                "--command",
+                "--exit-code",
+                "--observed",
+            ]
+            .as_slice(),
+        ),
+        other => {
+            return fail(format!(
+                "unknown evidence subcommand {other:?}; expected scaffold | append"
+            ));
+        }
+    };
+    if let Err(e) = check_flags(rest, value_flags, BOOLS) {
+        return fail(e);
+    }
+    let ledger = match ledger_name(rest) {
+        Ok(name) => name,
+        Err(e) => return fail(e),
+    };
+    let (repo, _) = repo_root(rest);
+    let dir = repo.join("evidence").join(&ledger);
+    if scaffold {
+        evidence_scaffold(rest, &dir, &ledger)
+    } else {
+        evidence_append(rest, &dir)
+    }
+}
+
+fn evidence_scaffold(args: &[String], dir: &Path, ledger: &str) -> ExitCode {
+    let issue = ledger.strip_prefix("al").unwrap_or(ledger);
+    let actions = dir.join("actions.jsonl");
+    let verification = dir.join("verification.md");
+    let dry_run = flag_present(args, "--dry-run");
+    let json_out = flag_present(args, "--json");
+
+    let mut files: Vec<Value> = Vec::new();
+    for (path, content) in [
+        (&actions, String::new()),
+        (
+            &verification,
+            VERIFICATION_SKELETON.replace("{ISSUE}", issue),
+        ),
+    ] {
+        let existed = path.exists();
+        let state = if existed {
+            "exists"
+        } else if dry_run {
+            "would-create"
+        } else {
+            "created"
+        };
+        if !existed && !dry_run {
+            if let Err(e) = std::fs::create_dir_all(dir) {
+                return fail(format!("cannot create {}: {e}", dir.display()));
+            }
+            if let Err(e) = std::fs::write(path, content) {
+                return fail(format!("cannot write {}: {e}", path.display()));
+            }
+        }
+        files.push(json!({ "path": path.display().to_string(), "status": state }));
+    }
+    let report = json!({
+        "command": "evidence",
+        "subcommand": "scaffold",
+        "dry_run": dry_run,
+        "ledger": ledger,
+        "dir": dir.display().to_string(),
+        "files": files,
+    });
+    if json_out {
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+    } else {
+        for file in &files {
+            println!("{}: {}", file["status"], file["path"]);
+        }
+        println!("scaffold: {dir}", dir = dir.display());
+    }
+    ExitCode::SUCCESS
+}
+
+fn evidence_append(args: &[String], dir: &Path) -> ExitCode {
+    let actions_path = dir.join("actions.jsonl");
+    let json_out = flag_present(args, "--json");
+    let dry_run = flag_present(args, "--dry-run");
+    for name in ["--action", "--command", "--exit-code", "--observed"] {
+        if parse_flag(args, name).is_none() {
+            return fail(format!("evidence append requires {name} <value>"));
+        }
+    }
+    let exit_code = match parse_flag(args, "--exit-code").unwrap().parse::<i64>() {
+        Ok(code) => code,
+        Err(_) => {
+            return fail(format!(
+                "--exit-code must be an integer, got {:?}",
+                parse_flag(args, "--exit-code").unwrap()
+            ));
+        }
+    };
+    let record = json!({
+        "action": parse_flag(args, "--action").unwrap(),
+        "command": parse_flag(args, "--command").unwrap(),
+        "exit_code": exit_code,
+        "observed": parse_flag(args, "--observed").unwrap(),
+    });
+    if !actions_path.is_file() {
+        return fail_with_code(
+            format!(
+                "ledger {} not found; run `al-ctl evidence scaffold` for this issue first",
+                actions_path.display()
+            ),
+            1,
+        );
+    }
+    if !dry_run {
+        let line = serde_json::to_string(&record).unwrap();
+        let appended = std::fs::OpenOptions::new()
+            .append(true)
+            .open(&actions_path)
+            .and_then(|mut f| writeln!(f, "{line}"));
+        if let Err(e) = appended {
+            return fail_with_code(
+                format!("cannot append to {}: {e}", actions_path.display()),
+                1,
+            );
+        }
+    }
+    let report = json!({
+        "command": "evidence",
+        "subcommand": "append",
+        "dry_run": dry_run,
+        "appended": !dry_run,
+        "ledger": actions_path.display().to_string(),
+        "record": record,
+    });
+    if json_out {
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+    } else {
+        println!(
+            "{}: {} -> {}",
+            if dry_run { "would append" } else { "appended" },
+            serde_json::to_string(&record).unwrap(),
+            actions_path.display()
+        );
+    }
+    ExitCode::SUCCESS
+}
+
+/// 操作失敗(usage ではない)の報告 — exit 1。
+fn fail_with_code(message: impl std::fmt::Display, code: u8) -> ExitCode {
+    eprintln!("error: {message}");
+    ExitCode::from(code)
+}
+
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     // `--` 以降は launch が `al` へそのまま渡す引数 — al-ctl 自身の
@@ -592,6 +1295,8 @@ fn main() -> ExitCode {
     match head.first().map(String::as_str) {
         Some("doctor") => cmd_doctor(&head[1..]),
         Some("launch") => cmd_launch(&head[1..], al_args),
+        Some("drive") => cmd_drive(&head[1..], al_args),
+        Some("evidence") => cmd_evidence(&head[1..], al_args),
         Some(other) => fail(format!("unknown subcommand {other:?}\n{USAGE}")),
         None => fail(format!("expected a subcommand\n{USAGE}")),
     }
