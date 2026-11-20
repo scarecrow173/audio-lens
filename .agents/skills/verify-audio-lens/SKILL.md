@@ -174,6 +174,58 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   zero. See `docs/specs/formal-verification.md` for the promotion path
   and `evidence/al256/` for the recorded runs.
 
+## Bench
+
+Frozen kernel + pipeline benchmark with a ratio regression gate
+(Issue #257, slice 1):
+
+```sh
+mise run bench-frozen                          # gated real run vs pinned baseline
+mise run bench-frozen --test                   # 1-rep smoke (threshold gates report_only; correctness defects still exit 1)
+mise run bench-frozen --selftest               # regression injection -> gate must fail
+mise run bench-frozen --write-baseline <path>  # emit an un-promoted baseline candidate
+mise run bench-frozen -- kernel/               # cell filter (substring): kernel/, pipeline/, full_ncc, ...
+```
+
+- Two arms in `crates/al-service/benches/frozen_pipeline.rs`
+  (`harness = false`, bench profile). Arm K `kernel/<method>`:
+  production `al-locate` `default_methods()` vs a frozen naive NCC
+  (coarse stride grid + refine — same shape as
+  `FullNcc::locate_coarse_to_fine`), alternating A/B, 7 reps,
+  median + range; the metric is `median(A)/median(B)` vs
+  `min_ratio` pins. Arm P `pipeline/e2e`: real
+  `JobService::run` (`ingest..dataset`, the same path `al run`
+  takes) on a deterministic seeded WAV pair; e2e + locate stage
+  walls are normalized by the same-session frozen kernel median
+  vs `max_norm_ratio` pins.
+- The pipeline also gates the analysis payload fingerprint —
+  every job-dir `*.json` (skipping table-structure files,
+  `export/`, `analysis/visualization/`, `video_thumbs.json`)
+  normalized per `baseline/contracts.json` vocabulary (record-only
+  keys dropped, `JOB|ART|IN|ALN` IDs canonicalized, absolute paths
+  placeholdered, f64 quantized to `rel=1e-9 abs=1e-12`) then
+  sha256'd per file. Rep-to-rep divergence and pin diffs count as
+  errors — correctness is fail-closed alongside the perf ratio.
+- Errors counted and gated: kernel = lag mismatch vs the known
+  embedded offset (`±64` samples, both sides), `validity !=
+  valid` rejects, full_ncc peak deviation vs the naive reference;
+  pipeline = stage failures / `run` errors, accepted-lag
+  mismatch, fingerprint diffs. Work counted: kernel = naive MACs
+  + explored lags, pipeline = manifest artifacts + output bytes.
+- Fail-closed: unreadable/un-promoted baseline, threshold breach,
+  or errors>0 all fail the run. `baseline.al257.json` is
+  read-only during gating; updates are two-phase —
+  `--write-baseline` emits a candidate with `"approval": null`,
+  a human promotes it to the pin path with `approval` filled.
+  Repin when `measured_env` (machine, rustc, repo/ruviform SHA)
+  or fixture constants change.
+- Evidence follows `evidence/al257/`: run JSONL, `--selftest`
+  gate-fail, the candidate + promoted pin, `decision.tsv`, and
+  `verification.md`. Contract:
+  `docs/test-specs/issue-257-frozen-bench.md`.
+- This lane is manual/opt-in only — there is no CI bench lane to
+  wire into; do not add one.
+
 ## Evidence
 
 - Ledgers live per-issue at `evidence/al<N>/` — see

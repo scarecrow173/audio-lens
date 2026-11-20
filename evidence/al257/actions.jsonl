@@ -1,0 +1,13 @@
+{"action":"harness-build","command":"cargo check --locked -p al-service --benches","exit_code":0,"observed":"frozen_pipeline.rs compiles (bench profile target, harness=false)"}
+{"action":"calibrate","command":"cargo bench -p al-service --bench frozen_pipeline -- --test","exit_code":0,"observed":"naive NCC 1.66s/rep(stride6), pipeline rep 7.2s(capture 50s) — spec 目安 1-3s/5-15s に収束"}
+{"action":"write-baseline","command":"cargo bench -p al-service --bench frozen_pipeline -- --write-baseline benches/frozen/baseline.al257.candidate.json","exit_code":0,"observed":"candidate emitted with approval:null; kernel ratio 12.1-71.0, pipeline norm_e2e 4.37 / locate 3.06"}
+{"action":"baseline-promote","command":"node <promote script> (candidate -> pin + approval fill)","exit_code":0,"observed":"baseline.al257.json promoted: approval.kind=initial_pin"}
+{"action":"gated-run","command":"mise run bench-frozen","exit_code":0,"observed":"PASS: 5 cells within thresholds (reps=7); pipeline fingerprint_rep_divergence=0, pin_diffs=0 — A/A determinism proven"}
+{"action":"selftest","command":"cargo bench -p al-service --bench frozen_pipeline -- --selftest","exit_code":1,"observed":"gate fail proven: band_ncc ratio_below_threshold(5.174<7.272) + lag_mismatch on all cells + fingerprint_pin_diffs=14 — exit 1"}
+{"action":"smoke","command":"cargo bench -p al-service --bench frozen_pipeline -- --test","exit_code":0,"observed":"1-rep smoke PASS exit 0"}
+{"action":"baseline-unreadable","command":"cargo bench -p al-service --bench frozen_pipeline -- --baseline C:/nonexistent.json","exit_code":1,"observed":"gate verdict=fail baseline_unreadable — fail-closed"}
+{"action":"baseline-unpromoted","command":"cargo bench -p al-service --bench frozen_pipeline -- --baseline benches/frozen/baseline.al257.candidate.json","exit_code":1,"observed":"gate verdict=fail (approval null) — fail-closed"}
+{"action":"fmt","command":"mise run fmt","exit_code":0,"observed":"cargo fmt --all --check pass"}
+{"action":"workspace-lanes","command":"mise run check-full && mise run lint-full && mise run test-full","exit_code":0,"observed":"all exit 0 — workspace check/lint/test clean"}
+{"action":"package-tests","command":"mise run test al-service && mise run test al-locate","exit_code":0,"observed":"al-service + al-locate suites pass"}
+{"action":"prek","command":"mise exec -- prek run --all-files","exit_code":0,"observed":"all hooks passed/skipped"}
