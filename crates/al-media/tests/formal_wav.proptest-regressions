@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc c8c8aadba36c661cb24b9b609ad560736501a5546823afe70153c7bf2b823fde # shrinks to (enc, channels, sample_rate, frames, samples, splits) = (PcmS16, 1, 11981959, 17, [0.0, 0.0, 0.0, 14.0, -24387.0, -26115.0, 10550.0, 16971.0, -11066.0, 23388.0, -14348.0, -4879.0, -18015.0, 17962.0, 3546.0, -29612.0, 8566.0], [14]), start = 74, end = 105
