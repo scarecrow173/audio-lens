@@ -19,3 +19,9 @@ tracing.workspace = true
 
 [dev-dependencies]
 al-testkit.workspace = true
+
+# Issue #257 frozen benchmark harness。standalone(harness = false) —
+# kernel A/B + pipeline 計測と pinned baseline gate を 1 main で行う。
+[[bench]]
+name = "frozen_pipeline"
+harness = false

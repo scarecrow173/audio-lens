@@ -1,0 +1,87 @@
+{
+  "approval": {
+    "kind": "initial_pin",
+    "issue": "https://github.com/scarecrow173/audio-lens/issues/257",
+    "promoted_by": "worker task_efd69fdd6614 (Devin, slice 1)",
+    "promoted_at": "2026-10-31",
+    "note": "初回 pin。measured_env の機器/toolchain/repo+ruviform SHA で採取。環境・fixture・閾値ルール変更時は repin"
+  },
+  "arms": {
+    "kernel/<method>": "A=凍結 naive NCC(stride grid+refine) vs B=al_locate 本番 method — in-process A/B、計測系で吸収しきれない回帰を比で検出",
+    "pipeline/e2e": "JobService::run(ingest..dataset) e2e+stage wall を同一セッションの naive ref median で正規化 + analysis payload fingerprint(JobId/時刻/record-only 除く)を exact-match"
+  },
+  "cells": {
+    "kernel/band_ncc": {
+      "errors": 0,
+      "measured_ratio": 13.542863205951008,
+      "min_ratio": 7.272,
+      "work": 26891088007
+    },
+    "kernel/full_ncc": {
+      "errors": 0,
+      "measured_ratio": 70.95507379598288,
+      "min_ratio": 35.978,
+      "work": 26891088007
+    },
+    "kernel/gcc_phat": {
+      "errors": 0,
+      "measured_ratio": 62.35582974494866,
+      "min_ratio": 31.678,
+      "work": 26891088007
+    },
+    "kernel/spectral_envelope": {
+      "errors": 0,
+      "measured_ratio": 12.074090236405722,
+      "min_ratio": 6.538,
+      "work": 26891088007
+    },
+    "pipeline/e2e": {
+      "errors": 0,
+      "fingerprint_files": 18,
+      "max_norm_ratio": 6.56,
+      "max_norm_ratio_locate": 4.6,
+      "measured_norm_ratio": 4.370007569036278,
+      "measured_norm_ratio_locate": 3.060871710503939,
+      "work": 2147119220
+    }
+  },
+  "fingerprint": {
+    "analysis/features/cheap/IN-#1.json": "b39c00f12566176e27bb205c96430fd1b545393d950b457374e7592a7e689b4c",
+    "analysis/features/cheap/IN-#2.json": "268c4ffa3ac46a5b501e6be24079df2ba022f64d4b590f2b8c9ea8ce9692bcd2",
+    "analysis/features/expensive/IN-#1__r000.json": "cb76e92b4cbb2751e0dbdf727c70f514be7f8d1b203c19c2bb531a4dc4009eff",
+    "analysis/features/expensive/IN-#2__r000.json": "fec20681c12a408ddd133c1be738f578009dd26f9c60163066420020afcab006",
+    "analysis/features/reference/IN-#2__IN-#1.json": "6a5d73a3ec4bacae9315b7e711d0c77e5cec066ef236a85e1bddc62cb7029f71",
+    "analysis/inputs/IN-#1.metadata.json": "8ae1210d861502ffcfe0f8261c11baeca432e3c1f798ce8bca9d722226cef23c",
+    "analysis/inputs/IN-#2.metadata.json": "503d802c0ab753481fb02f5e001e2966c9f2e00c948d76c724545ff7fc5f4fdd",
+    "analysis/inputs/declared.json": "8bc414232fafb9f5d2f3bd3d91cd7eece03edd123f5fe8ff46f8ff98ae15addb",
+    "analysis/locate/IN-#2/IN-#1.json": "696803f46aa9b503388a18158ec1149baa18248a88f35a3a28f0084e5e46ec62",
+    "analysis/locate/IN-#2/IN-#1/time_map.json": "601cbaebcf5e0fa4a6b8cb8363881a9c13579e7dbc72887ec8e3b51510f5597c",
+    "analysis/manifest.json": "fc298d3c84d02d267c8ae75ae2bf3847adf522aa941db73bb347aac87ef0c94e",
+    "inputs/IN-#1/metadata.json": "8ae1210d861502ffcfe0f8261c11baeca432e3c1f798ce8bca9d722226cef23c",
+    "inputs/IN-#2/metadata.json": "503d802c0ab753481fb02f5e001e2966c9f2e00c948d76c724545ff7fc5f4fdd",
+    "locate/IN-#2/IN-#1/evidence.json": "13643297f4fbc6b881d1c28cac772cf78c7e6b50c451a54974de775d2bd710ce",
+    "locate/IN-#2/IN-#1/residual_IN-#2.json": "d67f0a5eb7b573bf6965d564dc0666bf2b7cfa1a1050a7cb64736847e11b8151",
+    "locate/IN-#2/IN-#1/result.json": "696803f46aa9b503388a18158ec1149baa18248a88f35a3a28f0084e5e46ec62",
+    "locate/IN-#2/IN-#1/time_map.json": "601cbaebcf5e0fa4a6b8cb8363881a9c13579e7dbc72887ec8e3b51510f5597c",
+    "manifest.json": "9fdd1b90f2622f172dc23bbeba195aaf56a669b4479693acfbcc83924448f5e3"
+  },
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/257",
+  "limiter": {
+    "kernel": "naive NCC は single-thread scalar — CPU bound。production method は FFT(plan reuse)+prepared 入力で支配的に速い",
+    "pipeline": "locate stage が支配(本番 baseline で e2e の 69-79%)。disk I/O・s16 WAV decode は小さい",
+    "relevance": "production `al run` と同じ JobService::run 経路 — e2e 応答時間そのもの。kernel arm はその支配 stage の hot kernel"
+  },
+  "measured_env": {
+    "arch": "x86_64",
+    "cores": 16,
+    "cpu": "Intel64 Family 6 Model 158 Stepping 13, GenuineIntel",
+    "note": "repin は機器/toolchain/al* コード・入力 asset・ruviform SHA の変更時に検討する",
+    "os": "windows",
+    "repo_sha": "14d38f21ac68fc66875fdd2a4bbf50d4f06a1b1e",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "ruviform_sha": "e4c9f6f0715da3ac479f8c437d21a021327e51da"
+  },
+  "metric": "kernel: median(A)/median(B) ratio >= min_ratio; pipeline: wall/ref_kernel <= max_norm_ratio (+ fingerprint exact match)",
+  "schema": "al.frozen-pipeline-baseline/v1",
+  "threshold_rule": "kernel: min_ratio = ceil(1+(measured-1)*0.5, 0.001); pipeline: max_norm = ceil(measured*1.5, 0.01)"
+}

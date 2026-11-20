@@ -278,3 +278,15 @@ run = [
 [tasks.baseline]
 description = "Issue #98 pre-migration baseline の計測・収集(tools/baseline)"
 run = "node tools/baseline/capture.mjs"
+
+# Issue #257: frozen benchmark lane(E 層)。al-service/benches/frozen_pipeline
+# の standalone harness(bench profile)が kernel A/B + JobService pipeline を
+# 計測し、pinned baseline(crates/al-service/benches/frozen/baseline.al257.json)
+# と比較する。fail-closed、manual/opt-in — CI 組込みは行わない
+# (本 repo の CI bench lane は存在しない)。`--test` smoke、
+# `--selftest` gate-fail 実証、`--write-baseline <path>` candidate 出力。
+# 契約: docs/test-specs/issue-257-frozen-bench.md。
+[tasks.bench-frozen]
+description = "Run the Issue #257 frozen kernel/pipeline benchmark + ratio gate with `cargo bench -p al-service --bench frozen_pipeline -- <args>` (bench profile; vs pinned baseline crates/al-service/benches/frozen/baseline.al257.json, fail-closed; manual/opt-in lane — not in CI; pass `--test` for 1-rep smoke, `--selftest` to prove gate failure, `--write-baseline <path>` to emit an un-promoted baseline candidate; writes only target/ + temp)"
+raw_args = true
+run = "cargo bench --locked -p al-service --bench frozen_pipeline --"
