@@ -6,6 +6,7 @@ Directory: `docs/knowledge`
 
 | ID | Title | Status | File |
 | --- | --- | --- | --- |
+| KNOW-kWjzzpfxNUayNY2v49kTWz | システムアーキテクチャ: crate レイヤ・実行モデル・永続化・インターフェース | confirmed | [architecture-overview.md](./architecture-overview.md) |
 | KNOW-EpXLDAeWGabg0W1wZJcxHC | 解析パイプライン: 3層ステージ・特徴ファミリ・候補イベント | confirmed | [analysis-pipeline.md](./analysis-pipeline.md) |
 | KNOW-NrL9tC9HxfoCXX4fs4vbNh | CI アーキテクチャ: 独立 CI・fail-closed 概要・Ruviform アクセス | confirmed | [ci-architecture.md](./ci-architecture.md) |
 | KNOW-ftoVnskfNQROBPHiY48VVR | Analysis Dataset: 永続化スキーマ・追記プロトコル・PCM ビュー | confirmed | [dataset-artifact-store.md](./dataset-artifact-store.md) |
