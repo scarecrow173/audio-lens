@@ -1,0 +1,26 @@
+{
+  "kind": "measured_env_diff",
+  "from_pin": "al.frozen-pipeline-baseline/v1 (slice 1, repo 14d38f21ac68fc66875fdd2a4bbf50d4f06a1b1e)",
+  "to_pin": "al.frozen-pipeline-baseline/v2 (slice 2, repo 7423546f754a7267a057bb125f61cc2f649f38eb)",
+  "fields_changed": {
+    "repo_sha": [
+      "14d38f21ac68fc66875fdd2a4bbf50d4f06a1b1e",
+      "7423546f754a7267a057bb125f61cc2f649f38eb"
+    ]
+  },
+  "fields_unchanged": [
+    "os=windows",
+    "arch=x86_64",
+    "cores=16",
+    "cpu=Intel64 Family 6 Model 158 Stepping 13",
+    "rustc=1.99.1 (58cf8f9c3 2026-10-13)",
+    "ruviform_sha=e4c9f6f0715da3ac479f8c437d21a021327e51da"
+  ],
+  "contract_changes": [
+    "baseline schema v1→v2 (fingerprint: top-level map→cells[key].fingerprint)",
+    "pipeline cells +pipeline/avi +pipeline/mp4 (PIPELINE_CELLS)",
+    "stage plan Some(6)→None = PIPELINE_ORDER 7 stage (export 追加)",
+    "selftest floor: ref×8 固定 → pin max_norm_ratio+1"
+  ],
+  "repin_reason": "al* コード変更(harness slice 2)+ 閾値ルール/fixture 契約変更 — pin note の repin 事由に合致"
+}

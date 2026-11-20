@@ -1,27 +1,46 @@
 # Issue #257 — verification evidence
 
 実行環境: windows/x86_64 — Intel64 Family 6 Model 158 Stepping 13 (16 cores),
-rustc 1.99.1 (58cf8f9c3 2026-10-13), repo HEAD `14d38f21`(実走時点
-`origin/main` 一致), ruviform `e4c9f6f0`。bench profile。
+rustc 1.99.1 (58cf8f9c3 2026-10-13), repo HEAD `7423546f`(slice 2 起点),
+ruviform `e4c9f6f0`。bench profile。
 
 frozen benchmark harness(`crates/al-service/benches/frozen_pipeline.rs`)の
-slice 1 検証証拠。契約: `docs/test-specs/issue-257-frozen-bench.md`。
-sibling 先例: ruviform `evidence/rf807/`。
+slice 2 検証証拠。契約: `docs/test-specs/issue-257-frozen-bench.md`。
+sibling 先例: ruviform `evidence/rf807/`。slice 1 の証拠は
+`actions.jsonl`/`decision.tsv` の先頭側履歴に残す。
+
+slice 2 変更点:
+- pipeline arm を `PIPELINE_CELLS` テーブル 1 箇所で定義した 3 cell 化
+  (`pipeline/e2e`=WAV pair、`pipeline/avi`=CFR AVI BGR24+PCM s16、
+  `pipeline/mp4`=`sowt` PCM `soun` track)。fixture は `al-testkit` の
+  `write_avi`/`write_mp4` で hermetic 生成、音声は共通 `to_s16` →
+  `s16le_bytes` 変換で bit 等価
+- `RunSpec.stages=None` により `default_stage_kinds()`
+  (`StageKind::PIPELINE_ORDER`、export 込み 7 stage)を採用 —
+  既定 `al run` plan と同一
+- baseline schema v1→v2: fingerprint pin を top-level map から
+  `cells["pipeline/<container>"].fingerprint` へ移設(v1 は fail-closed
+  reject)
+- selftest の pipeline wall 床上げを pin `max_norm_ratio+1` 倍の ref
+  median へ(pin 追従の確定的逸脱、pin 無し時は従来の ×8)
+- 2 段階 repin を実施: candidate 生成 → review → approval 記入で昇格。
+  measured_env 差分は repo_sha のみ(別ファイル `measured-env-diff.json`)
 
 ## ファイル
 
 | ファイル | 内容 |
 | --- | --- |
-| `actions.jsonl` | action → 観測結果の 1 行台帳 |
-| `run.jsonl` | `mise run bench-frozen` 実走 JSONL(7 reps, gate pass) |
+| `actions.jsonl` | action → 観測結果の 1 行台帳(slice 1 + slice 2) |
+| `run.jsonl` | `mise run bench-frozen` 実走 JSONL(7 reps・7 cells, gate pass) |
 | `selftest.jsonl` | `--selftest` 回帰注入 → gate fail 証拠(exit 1) |
-| `test.jsonl` | `--test` 1-rep smoke(exit 0) |
+| `test.jsonl` | `--test` 1-rep smoke(exit 0、v2 pin 昇格後) |
 | `write-baseline.jsonl` | `--write-baseline` candidate 生成 run の JSONL |
-| `baseline-candidate.json` | emit された未昇格 candidate(`approval:null`) |
-| `baseline-missing.jsonl` | 存在しない pin → `baseline_unreadable` fail(exit 1) |
+| `baseline-candidate.json` | emit された未昇格 candidate v2(`approval:null`) |
+| `baseline-missing.jsonl` | 存在しない pin → fail(exit 1) |
 | `baseline-unpromoted.jsonl` | 未昇格 candidate を pin 指定 → fail(exit 1) |
 | `filter-nomatch.jsonl` | cell filter 0 一致 → gate `not_run`(exit 0) |
-| `decision.tsv` | hillclimb schema の判断台帳 |
+| `measured-env-diff.json` | v1 pin → v2 pin の measured_env 差分と repin 事由 |
+| `decision.tsv` | hillclimb schema の判断台帳(slice 1 + slice 2) |
 | `verification.md` | 本ファイル |
 
 pinned baseline 本体は `crates/al-service/benches/frozen/baseline.al257.json`
@@ -31,46 +50,73 @@ pinned baseline 本体は `crates/al-service/benches/frozen/baseline.al257.json`
 
 | 項目 | 要求状態 | 結果 | 根拠 |
 | --- | --- | --- | --- |
-| harness 実装(2 arm + CLI + gate) | Required | Pass | `cargo check -p al-service --benches` exit 0; `run.jsonl` 全 record |
-| 決定的 fixture(al-testkit seed 固定 WAV + 固定 InputId) | Required | Pass | `run.jsonl` fixture record; pipeline fingerprint rep divergence=0 |
-| 交互反復 ≥5 + median/range | Required | Pass | reps=7、A/B 交互; 各 cell record の stats(median/min/max) |
-| error 計数(lag 不一致・validity reject・stage 失敗・fingerprint 差分) | Required | Pass | `error_detail` 内訳; `selftest.jsonl` で全経路が非零になることを実証 |
-| work 計数(timed region の実作業) | Required | Pass | kernel: naive MAC+探索 lag ≈ 26.9G; pipeline: artifacts+output bytes ≈ 2.1G |
-| limiter 記述 + e2e 関連性 | Required | Pass | candidate `limiter` 節; locate stage wall ≈ e2e の 70%(本番 69-79% と整合) |
-| pinned baseline 比較(ratio gate) | Required | Pass | `run.jsonl` gate verdict=pass; 全 cell 閾値内 |
-| `--selftest` gate-fail 実証(閾値逸脱 + correctness 両経路) | Required | Pass | exit 1; 4 kernel cells `ratio_below_threshold`(17.264<35.978 等) + `pipeline/e2e e2e_norm_above_threshold(8.000>6.56)` + 全 cell errors>0 |
-| cell filter 0 一致 | Required | Pass | `filter-nomatch.jsonl` — gate `not_run`("no_cells_matched")・exit 0(rf807/cargo bench 慣習) |
-| `--write-baseline` candidate(非昇格) | Required | Pass | `baseline-candidate.json` approval=null; 未昇格 pin 指定は fail |
-| baseline 未 read/未昇格 → fail-closed | Required | Pass | `baseline-missing.jsonl`/`baseline-unpromoted.jsonl` 共に exit 1 |
-| `mise run bench-frozen` lane(manual/opt-in) | Required | Pass | `run.jsonl` — `cargo bench --locked -p al-service --bench frozen_pipeline --` |
-| A/A 決定性(pipeline fingerprint) | Required | Pass | 7 rep 全て `fingerprint_files=18`・`rep_divergence=0` |
-| pipeline 正規化比(ref kernel median 分母) | Required | Pass | `ref_kernel` record; `norm_ratio_e2e=4.158`(pin 6.56)・`locate_norm=2.879`(pin 4.60) |
-| `cargo fmt` | Required | Pass | `mise run fmt` exit 0 |
-| `check-full` / `lint-full` / `test-full` | Required | Pass | 各 exit 0(workspace 全体) |
-| `test al-service` / `test al-locate` | Required | Pass | 57+16+12+7+2 locate tests ok; al-service suite ok |
-| `prek run --all-files` | Required | Pass | exit 0(全 hook passed/skipped) |
-| AVI/MP4 入力・export stage 計測 | Deferred | NotRun | slice 1 範囲外(後続 slice) |
-| 異機器での pin 再現検証 | Deferred | NotRun | 単一機器で採取 — repin 手順は test-spec Rules に記録 |
+| pipeline container cell 拡張(e2e/avi/mp4) | Required | Pass | `run.jsonl` cells=7; `pipeline/avi`/`pipeline/mp4` が計測・gate 対象として記録される |
+| hermetic media fixture(al-testkit、外部 ffmpeg 不使用) | Required | Pass | `write_avi(AviSpec::cfr)`/`write_mp4(sowt)`; `test.jsonl` 全 cell pass; `run.jsonl` rep_divergence=0 |
+| 3 container で bit 等価 s16 PCM(変換 1 箇所) | Required | Pass | `s16le_bytes` 共通変換 — AVI/MP4 の locate が offset 一致で成立(errors=0, lag_mismatch=0) |
+| export 込み既定 plan(`stages=None` → PIPELINE_ORDER) | Required | Pass | run record `fixture.pipeline.stages`=7(ingest..export); `stage_walls` に `export` キーが全 cell 全 rep で存在 |
+| per-cell fingerprint pin(schema v2) | Required | Pass | candidate `cells[pipeline/*].fingerprint`; run で pin_diffs=0(e2e:18, avi:24, mp4:18 files) |
+| v1 baseline の fail-closed reject | Required | Pass | smoke(v1 pin 残留時)が `baseline schema mismatch — expected al.frozen-pipeline-baseline/v2` を limiter note に記録 |
+| error 計数・work 計数(全 cell) | Required | Pass | `error_detail` 内訳・work が 3 pipeline cell にも記録; selftest で errors>0 実証 |
+| 2 段階 repin(candidate→昇格)+ measured_env 差分記録 | Required | Pass | `baseline-candidate.json` approval=null → pin 昇格 approval.kind=repin; `measured-env-diff.json`(repo_sha のみ差分) |
+| `--selftest` gate-fail 実証(閾値逸脱 + correctness 両経路) | Required | Pass | exit 1; kernel 4cell `ratio_below_threshold` + `pipeline/e2e e2e_norm_above_threshold(8.930>7.93 = pin max+1)` + pipeline 3cell errors>0(embed 欠落) |
+| cell filter(substring、0 一致 → not_run/exit 0) | Required | Pass | `filter-nomatch.jsonl` — gate `not_run`("no_cells_matched")・exit 0。`--test` 時の `pipeline/avi` 単 cell も動作 |
+| baseline 未 read/未昇格 → fail-closed | Required | Pass | `baseline-missing.jsonl`/`baseline-unpromoted.jsonl` 共に exit 1(v2 候補でも不変) |
+| pinned baseline 比較(ratio gate)実走 | Required | Pass | `run.jsonl` gate verdict=pass・`PASS: 7 cells within thresholds (reps=7)` exit 0 |
+| A/A 決定性(pipeline fingerprint、全 container) | Required | Pass | 3 cell とも 7 rep `rep_divergence=0`・pin_diffs=0 |
+| repin runbook 記述(cross-machine) | Required | Pass | test-spec `## repin runbook` 節 |
+| `mise run fmt` | Required | Pass | exit 0(`cargo fmt --all` 適用後 --check 通過) |
+| `check al-service` / `lint al-service` | Required | Pass | 各 exit 0(bench target 含め warnings 無し) |
+| `test al-service` / `test al-media` | Required | Pass | al-service suite ok; al-media 154 tests all pass(sowt 系含む) |
+| `prek run --all-files` | Required | Pass | exit 0 |
+| AAC(`mp4a`)等の非 PCM MP4 cell | Deferred | NotRun | hermetic fixture には実 ffmpeg が必要 — frozen bench の要件と矛盾(Non-goals) |
+| JobOrchestrator arm | Deferred | NotRun | repo に該当型無し — 後続 slice(Non-goals) |
+| 異機器での pin 再現検証 | Deferred | NotRun | 単一機器で採取 — runbook に手順記録 |
 | GUI/CLI 経由の bench 実行 | NotApplicable | — | lane は cargo bench 直接起動 |
 
-## 採取値(実走 `run.jsonl` より)
+## 採取値(実走 `run.jsonl`、pin `baseline.al257.json` v2)
 
 | cell | 計測値 | pin 閾値 | verdict |
 | --- | --- | --- | --- |
-| kernel/full_ncc | ratio 71.1 (A=1657ms/B=23ms) | min 35.978 | pass |
-| kernel/band_ncc | ratio 13.8 (A=1653ms/B=120ms) | min 7.272 | pass |
-| kernel/gcc_phat | ratio 62.5 (A=1654ms/B=26ms) | min 31.678 | pass |
-| kernel/spectral_envelope | ratio 12.4 (A=1649ms/B=133ms) | min 6.538 | pass |
-| pipeline/e2e | norm 4.158 (wall median 6.87s, range 6.76-7.09s) | max 6.56 | pass |
-| pipeline locate stage | norm 2.879 (median 4759ms) | max 4.60 | pass |
+| kernel/full_ncc | ratio 62.63 | min 32.186 | pass |
+| kernel/band_ncc | ratio 11.96 | min 6.627 | pass |
+| kernel/gcc_phat | ratio 54.30 | min 23.649 | pass |
+| kernel/spectral_envelope | ratio 11.03 | min 6.322 | pass |
+| pipeline/e2e (wav) | norm 5.98 / locate 3.46 | max 7.93 / 4.64 | pass |
+| pipeline/avi | norm 6.55 / locate 4.12 | max 7.96 / 4.69 | pass |
+| pipeline/mp4 | norm 10.88 / locate 5.15 | max 13.05 / 5.67 | pass |
 
-ref kernel median = 1653ms(全 kernel cell A 側 pooled)。stage wall
-内訳: locate 4759ms(69.3%) / expensive 762ms / cheap 724ms /
-reference 408ms / ingest 123ms / dataset 66ms。
+pipeline stage wall 中央値(実走、`stage_walls_ns.median_ns`):
 
-## 補足
+| stage | e2e (wav) | avi | mp4 |
+| --- | --- | --- | --- |
+| ingest | ~0.13s | ~0.14s | ~2.0s (sowt decode) |
+| locate | ~5.1s | ~5.2s | ~6.0s |
+| cheap_analysis | ~0.75s | ~0.74s | ~1.1s |
+| reference_analysis | ~0.42s | ~0.42s | ~0.44s |
+| expensive_analysis | ~0.78s | ~0.76s | ~1.1s |
+| dataset | ~0.07s | ~0.08s | ~0.74s |
+| export | ~1.4s | ~1.4s | ~2.7s |
 
-- local 検証はこの変更範囲の妥当性を示すもので、merge 後の統合受入は
-  merge-after-main SHA での CI 証拠が前提(POLICIES §3)。
-- docs index(`docs/**/README.md`)は coordinator 所有のため今回は
-  同期していない(意図的な未更新)。
+locate が依然支配的だが、export(dataset 複写 I/O)が第 2 の stage として
+slice 1 で未計測だった約 15-20% の e2e wall を可視化した。
+
+## repin 記録(2 段階)
+
+1. `mise run bench-frozen --write-baseline
+   evidence/al257/baseline-candidate.json` → v2 candidate
+   (`approval:null`)生成 — `write-baseline.jsonl`
+2. review: env 差分 = repo_sha のみ(`measured-env-diff.json`)。
+   measured_norm(e2e 5.29/avi 5.31/mp4 8.70)が閾値ルールで妥当な
+   余裕を確認
+3. 昇格: pin path へ複写 + `approval.kind=repin, promoted_at=
+   2026-11-21` 記入
+4. 実走検証: `mise run bench-frozen` → PASS(exit 0) — 昇格 pin の
+   受入証拠
+
+## 範囲外・未対応
+
+- AAC/`mp4a` MP4 cell・real ffmpeg fixture(Non-goals — hermetic 要件)
+- JobOrchestrator arm(該当型が repo に存在しない — 後続 slice)
+- `docs/**/README.md` 索引同期(coordinator 所管 — 本 worker は触れない)
+- 本 verification は変更範囲のローカル検証。マージ後 main SHA での CI /
+  統合検証が正式な受入証拠となる(本 lane は CI 非搭載の manual 証拠)

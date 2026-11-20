@@ -1,1 +1,10 @@
-{"detail":"baseline benches/frozen/baseline.al257.candidate.json is not promoted (`approval` is null) — promote the candidate explicitly","kind":"gate","reasons":["baseline_unreadable"],"verdict":"fail"}
+[bench-frozen] $ cargo bench --locked -p al-service --bench frozen_pipeline -- --baseline ../../evidence/al257/baseline-candidate.json
+    Finished `bench` profile [optimized + debuginfo] target(s) in 0.41s
+     Running benches\frozen_pipeline.rs (target\release\deps\frozen_pipeline-e11f4a5bf1300dec.exe)
+{"detail":"baseline ../../evidence/al257/baseline-candidate.json is not promoted (`approval` is null) — promote the candidate explicitly","kind":"gate","reasons":["baseline_unreadable"],"verdict":"fail"}
+FAIL: baseline_unreadable — baseline ../../evidence/al257/baseline-candidate.json is not promoted (`approval` is null) — promote the candidate explicitly
+error: bench failed, to rerun pass `-p al-service --bench frozen_pipeline`
+
+Caused by:
+  process didn't exit successfully: `G:\orca\workspaces\audio-lens\al257-frozen-bench-slice2\target\release\deps\frozen_pipeline-e11f4a5bf1300dec.exe --baseline ../../evidence/al257/baseline-candidate.json --bench` (exit code: 1)
+[bench-frozen] ERROR task failed
