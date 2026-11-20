@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "cargo",
+    "run",
+    "--locked",
+    "-p",
+    "al-gui",
+    "--features",
+    "gpui-real",
+    "--bin",
+    "al-gui-real-scenario",
+    "--",
+    "--blocked-probe",
+    "--out",
+    "tmp/al255-proof2/gui-real-blocked.jsonl"
+  ],
+  "command": "drive",
+  "cwd": "G:/orca/workspaces/audio-lens/al255-skill-slice2",
+  "driver": "real-os",
+  "dry_run": false,
+  "exit_code": 0,
+  "lane": "cargo run -p al-gui --features gpui-real --bin al-gui-real-scenario",
+  "out": "tmp/al255-proof2/gui-real-blocked.jsonl",
+  "out_records": 10,
+  "pid": 8172,
+  "scenario": null,
+  "spawned": true,
+  "stderr": "   Compiling ring v0.17.14\n   Compiling vswhom-sys v0.1.3\n   Compiling psm v0.1.32\n   Compiling stacker v0.1.25\n   Compiling gpui_collections v0.2.2\n   Compiling gpui_perf v0.2.2\n   Compiling gpui_util v0.2.2\n   Compiling gpui_util_macros v0.2.2\nmbx[warning]: build-script result was not stored: build-script stdout is not UTF-8: invalid utf-8 sequence of 1 bytes from index 8681\nmbx[warning]: rustc cache bypassed: failed to read Cargo's build-script declarations: stream did not contain valid UTF-8\n   Compiling vswhom v0.1.0\n   Compiling embed-resource v3.0.12\n   Compiling gpui v0.2.2\n   Compiling stacksafe v0.1.4\nmbx[warning]: build-script result was not stored: build-script stdout is not UTF-8: invalid utf-8 sequence of 1 bytes from index 5443\n   Compiling rustls v0.23.46\n   Compiling rustls-webpki v0.103.16\n   Compiling tokio-rustls v0.26.6\n   Compiling hyper-rustls v0.27.10\n   Compiling zed-reqwest v0.12.15-zed\n   Compiling gpui_http_client v0.2.2\nmbx[progress]: 15s elapsed; 10 hits, 12 misses, 2 bypassed, 3 not looked up; ~6.23s compiler work saved\n   Compiling ruviform-ui-gpui v0.1.0 (https://github.com/scarecrow173/ruviform.git#e4c9f6f0)\nmbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\\Users\\akiyoshi\\.cargo\\git\\checkouts\\ruviform-8f0ffdb08acc57df\\e4c9f6f\\crates\\ruviform-ui-gpui\\src\\lib.rs\n   Compiling al-gui v0.1.0 (G:\\orca\\workspaces\\audio-lens\\al255-skill-slice2\\crates\\al-gui)\nmbx[progress]: 30s elapsed; 10 hits, 15 misses, 2 bypassed, 3 not looked up; ~6.23s compiler work saved\nmbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\\Users\\akiyoshi\\.cargo\\git\\checkouts\\ruviform-8f0ffdb08acc57df\\e4c9f6f\\crates\\ruviform-ui-gpui\\src\\lib.rs\nmbx[progress]: 45s elapsed; 10 hits, 16 misses, 2 bypassed, 3 not looked up; ~6.23s compiler work saved\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 45.48s\nwarning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1\nnote: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`\n     Running `mbx-launch 'target\\debug\\al-gui-real-scenario.exe' --blocked-probe --out tmp/al255-proof2/gui-real-blocked.jsonl`\nmbx[cache]: 10 hits, 17 misses, 3 not looked up, 2 bypassed; 0 B downloaded, 0 B uploaded, 976.8 MiB stored locally\nmbx[savings]: has quietly disposed of 10.2 TiB logical of build leftovers. nobody saw anything.\n",
+  "stdout": ""
+}

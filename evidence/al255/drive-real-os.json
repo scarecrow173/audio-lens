@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "cargo",
+    "run",
+    "--locked",
+    "-p",
+    "al-gui",
+    "--features",
+    "gpui-real",
+    "--bin",
+    "al-gui-real-scenario",
+    "--",
+    "--out",
+    "tmp/al255-proof2/gui-real-live.jsonl"
+  ],
+  "command": "drive",
+  "cwd": "G:/orca/workspaces/audio-lens/al255-skill-slice2",
+  "driver": "real-os",
+  "dry_run": false,
+  "exit_code": 0,
+  "lane": "cargo run -p al-gui --features gpui-real --bin al-gui-real-scenario",
+  "out": "tmp/al255-proof2/gui-real-live.jsonl",
+  "out_records": 10,
+  "pid": 72512,
+  "scenario": null,
+  "spawned": true,
+  "stderr": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s\nwarning: the following packages contain code that will be rejected by a future version of Rust: proc-macro-error2 v2.0.1\nnote: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`\n     Running `mbx-launch 'target\\debug\\al-gui-real-scenario.exe' --out tmp/al255-proof2/gui-real-live.jsonl`\n",
+  "stdout": ""
+}
