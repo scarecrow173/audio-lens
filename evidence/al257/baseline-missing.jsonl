@@ -1,1 +1,10 @@
+[bench-frozen] $ cargo bench --locked -p al-service --bench frozen_pipeline -- --baseline C:/nonexistent.json
+    Finished `bench` profile [optimized + debuginfo] target(s) in 0.51s
+     Running benches\frozen_pipeline.rs (target\release\deps\frozen_pipeline-e11f4a5bf1300dec.exe)
 {"detail":"baseline read failed for C:/nonexistent.json: 指定されたファイルが見つかりません。 (os error 2)","kind":"gate","reasons":["baseline_unreadable"],"verdict":"fail"}
+FAIL: baseline_unreadable — baseline read failed for C:/nonexistent.json: 指定されたファイルが見つかりません。 (os error 2)
+error: bench failed, to rerun pass `-p al-service --bench frozen_pipeline`
+
+Caused by:
+  process didn't exit successfully: `G:\orca\workspaces\audio-lens\al257-frozen-bench-slice2\target\release\deps\frozen_pipeline-e11f4a5bf1300dec.exe --baseline 'C:/nonexistent.json' --bench` (exit code: 1)
+[bench-frozen] ERROR task failed

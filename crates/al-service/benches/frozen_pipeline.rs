@@ -1,4 +1,4 @@
-//! Issue #257 frozen benchmark harness (slice 1) — `harness = false` standalone.
+//! Issue #257 frozen benchmark harness — `harness = false` standalone。
 //!
 //! 2 経路を同一バイナリで計測し、pinned baseline と比較する fail-closed
 //! regression gate。
@@ -9,12 +9,19 @@
 //!   A/B で計測する。PRIMARY metric は `median(A)/median(B)` の比 —
 //!   絶対時間は機器依存なので informational。naive 側は本ファイル凍結
 //!   のため、本番側の回帰は ratio 低下として現れる。
-//! - Arm P `pipeline/e2e`: `JobService::run` の本番 end-to-end 解析
-//!   pipeline(ingest..dataset)を決定的 WAV fixture 上で計測する。
-//!   PRIMARY は同一セッションの凍結参照 kernel median で正規化した
-//!   e2e/locate stage wall — 併せて JobId/時刻を除く analysis payload
-//!   fingerprint を exact-match で照合し、正確性・機器非依存を
-//!   fail-closed で担保する。
+//! - Arm P `pipeline/<container>`: `JobService::run` の本番 end-to-end
+//!   解析 pipeline を既定 `al run` plan(`stages: None` →
+//!   `default_stage_kinds()` = `PIPELINE_ORDER` 全 7 stage、export 込み)
+//!   で計測する。cell は入力コンテナで分かれ、いずれも同じ embed 構造・
+//!   `to_s16` が出す bit 等価の s16 PCM を詰める:
+//!   `pipeline/e2e` は WAV pair、`pipeline/avi` は `AviSpec::cfr` の
+//!   非圧縮 BGR24 映像 + PCM s16 音声、`pipeline/mp4` は `soun` 単一
+//!   track の `sowt` PCM(AAC/`mp4a` は実 ffmpeg fixture が必要で
+//!   hermetic を崩すため対象外)。PRIMARY は同一セッションの凍結参照
+//!   kernel median で正規化した e2e/locate stage wall — 併せて
+//!   JobId/時刻を除く analysis payload fingerprint を cell 毎の
+//!   pin(`cells[key].fingerprint`)と exact-match で照合し、正確性・
+//!   機器非依存を fail-closed で担保する。
 //!
 //! gate は cell 単位: 計測 ratio / 正規化比が pin の閾値を外れる、
 //! error>0(lag 不一致・validity reject・stage 失敗・fingerprint 差分)、
@@ -26,8 +33,9 @@
 //! - `--test`: 1 反復 smoke(同じ記録を出すが閾値 gate は report_only、
 //!   correctness 由来の fail は通常どおり exit 1)
 //! - `--selftest`: 回帰注入(embed 欠落 fixture + kernel B 側を rep 内
-//!   直列反復・pipeline e2e wall を ref kernel の 8 倍まで床上げする
-//!   劣化注入)で、閾値逸脱・correctness 双方の gate fail を実証する
+//!   直列反復・pipeline/e2e wall を ref kernel median の pin 連動倍
+//!   (max_norm_ratio+1、pin 無しなら 8 倍)まで床上げする劣化注入)で、
+//!   閾値逸脱・correctness 双方の gate fail を実証する
 //! - `--write-baseline <path>`: 実測 candidate JSON を出力(gate 不適用、
 //!   `"approval": null` — pin への昇格は人間が行う)
 //! - `--baseline <path>`: 既定 pin 以外を読む
@@ -49,11 +57,15 @@ use al_core::{InputId, StageKind, StageStatus, Validity};
 use al_locate::candidate::MethodEvidence;
 use al_locate::methods::default_methods;
 use al_locate::pool::CorrelationPool;
-use al_service::{JobService, RunControl, RunSpec, parse_input_spec};
+use al_service::{JobService, RunControl, RunSpec, default_stage_kinds, parse_input_spec};
 use serde_json::{Map, Value, json};
 
 const SCHEMA: &str = "al.frozen-pipeline-bench/v1";
-const BASELINE_SCHEMA: &str = "al.frozen-pipeline-baseline/v1";
+// v2: fingerprint pin を top-level `fingerprint` 単一 map から
+// `cells["pipeline/*"].fingerprint` の cell 毎 map へ移したレイアウト
+// 変更。旧 v1 pin は schema mismatch で fail-closed に拒否される
+// (cell 毎 fingerprint の欠落を diff 0 と誤認する fail-open を防ぐ)。
+const BASELINE_SCHEMA: &str = "al.frozen-pipeline-baseline/v2";
 const ISSUE: &str = "https://github.com/scarecrow173/audio-lens/issues/257";
 const DEFAULT_BASELINE: &str = "benches/frozen/baseline.al257.json";
 
@@ -73,12 +85,22 @@ const BED_AMP: f64 = 0.2;
 // naive 参照: coarse grid stride + ±refine。1-3s/rep 目安で調整。
 const NAIVE_STRIDE: usize = 6;
 
-// Arm P: capture_bug(埋込) + source_asset の WAV pair。
+// Arm P: capture_bug(埋込) + source_asset の同一コンテナ pair。
 const P_CAPTURE_LEN: usize = 2_400_000; // 50.0s
 const P_TEMPLATE_LEN: usize = 48_000; // 1.0s
 const P_EMBED_OFFSET: usize = 960_000; // 20.0s
 const P_TEMPLATE_SEED: u64 = 0xA25713;
 const P_BED_SEED: u64 = 0xA25714;
+
+// Arm P AVI fixture 形状(凍結 — 変更する場合は repin 事由)。
+// `AviSpec::cfr` は movi を `00db` フレーム列 + `01wb` 1 個にする。
+// 映像は計測対象外(音声が embed を担う)のため最小・固定内容。
+// `width * 3 % 4 == 0`(非パディング BGR24 行の DWORD 境界)が必要。
+const AVI_W: u32 = 64;
+const AVI_H: u32 = 48;
+const AVI_FPS: u32 = 10;
+const AVI_FRAMES: usize = 30;
+const AVI_FRAME_BYTE: u8 = 0x2A;
 
 const CAPTURE_ID: &str = "IN-0000000000000000000001";
 const SOURCE_ID: &str = "IN-0000000000000000000002";
@@ -373,22 +395,139 @@ fn kernel_fixture(embed: bool) -> (Vec<f64>, Vec<f64>, usize) {
     (template, signal, K_EMBED_OFFSET)
 }
 
-/// Arm P fixture を scratch dir に WAV として生成し、fixture dir path を返す。
-fn pipeline_fixture(scratch: &Path, embed: bool) -> std::io::Result<PathBuf> {
-    let dir = scratch.join("inputs");
+/// Arm P の入力コンテナ。3 cell は「同じ embed 構造・`to_s16` が出す
+/// 同一 s16 PCM 列・異なるコンテナ」— 表現ドリフトを避けるため
+/// s16→LE byte 化は `s16le_bytes` の一箇所変換に集約する。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PipelineInput {
+    /// WAV pair(slice 1 の `pipeline/e2e` が担ってきた入力形)。
+    Wav,
+    /// `AviSpec::cfr` の非圧縮 BGR24 映像 + PCM s16 音声。
+    Avi,
+    /// `soun` 単一 track の `sowt` PCM。AAC/`mp4a` は実 ffmpeg
+    /// fixture が必要で hermetic を崩すため対象外。
+    Mp4,
+}
+
+impl PipelineInput {
+    /// fixture ファイルの拡張子 / fixture dir 名 / コンテナ表示名。
+    fn extension(self) -> &'static str {
+        match self {
+            Self::Wav => "wav",
+            Self::Avi => "avi",
+            Self::Mp4 => "mp4",
+        }
+    }
+}
+
+/// Arm P cell 定義。`pipeline/` prefix は filter の substring 規約。
+struct PipelineCell {
+    key: &'static str,
+    input: PipelineInput,
+    /// selftest で e2e wall 床上げ注入を受ける cell(閾値逸脱経路の
+    /// 代表証明 — 全 pipeline cell は同一閾値ルールと gate 経路を
+    /// 共有するため 1 cell で証明になる。床上げが無い cell も
+    /// embed 欠落で correctness fail する)。
+    selftest_floor: bool,
+}
+
+const PIPELINE_CELLS: &[PipelineCell] = &[
+    PipelineCell {
+        key: "pipeline/e2e",
+        input: PipelineInput::Wav,
+        selftest_floor: true,
+    },
+    PipelineCell {
+        key: "pipeline/avi",
+        input: PipelineInput::Avi,
+        selftest_floor: false,
+    },
+    PipelineCell {
+        key: "pipeline/mp4",
+        input: PipelineInput::Mp4,
+        selftest_floor: false,
+    },
+];
+
+/// `to_s16` の i16 列をコンテナ共通の PCM LE byte 列へ — 全 Arm P
+/// cell の音声内容を bit 等価に保つ一箇所変換。
+/// (`al_testkit::media::pcm_s16le` は整数スケール f64 を取るため
+/// ここでは使わない — `to_s16` 出力の LE 化が直接の対応)。
+fn s16le_bytes(samples: &[i16]) -> Vec<u8> {
+    samples.iter().flat_map(|v| v.to_le_bytes()).collect()
+}
+
+/// `soun` PCM track 1 本の MP4(`crates/al-media/tests/mp4.rs` の
+/// `soun_pcm_track`/`base_spec` と同形 — ruviform native PCM decode
+/// で hermetic に再生される実績のある形。al-testkit に helper は
+/// 無いため bench 内に置く)。
+fn mp4_soun_fixture(pcm: &[u8]) -> Vec<u8> {
+    let frames = pcm.len() as u32 / 2;
+    al_testkit::mp4::write_mp4(&al_testkit::mp4::Mp4Spec {
+        major_brand: *b"isom",
+        compatible_brands: vec![*b"isom", *b"mp41"],
+        movie_timescale: 1000,
+        tracks: vec![al_testkit::mp4::Mp4TrackSpec {
+            track_id: 1,
+            handler: *b"soun",
+            timescale: RATE,
+            duration: u64::from(frames),
+            language: al_testkit::mp4::mp4_language(b"und"),
+            entry: al_testkit::mp4::Mp4EntrySpec::Sound {
+                codec: *b"sowt",
+                channels: 1,
+                bits: 16,
+                rate: RATE,
+                version: 0,
+                lpcm_flags: 0,
+                pcmc: None,
+            },
+            table: al_testkit::mp4::Mp4TableSpec::uniform(pcm.to_vec(), frames, 2, 1),
+            extra_trak_boxes: vec![],
+        }],
+        extra_top_boxes: vec![],
+    })
+}
+
+/// s16 PCM 列をコンテナ byte 列へ詰める。
+fn container_bytes(input: PipelineInput, s16: &[i16]) -> Vec<u8> {
+    match input {
+        PipelineInput::Wav => al_testkit::media::wav_s16_bytes(1, RATE, s16),
+        PipelineInput::Avi => {
+            let frame = vec![AVI_FRAME_BYTE; (AVI_W * AVI_H * 3) as usize];
+            al_testkit::media::write_avi(&al_testkit::media::AviSpec::cfr(
+                AVI_W,
+                AVI_H,
+                AVI_FPS,
+                vec![frame; AVI_FRAMES],
+                s16le_bytes(s16),
+                1,
+                RATE,
+            ))
+        }
+        PipelineInput::Mp4 => mp4_soun_fixture(&s16le_bytes(s16)),
+    }
+}
+
+/// Arm P fixture を scratch dir に cell のコンテナ形式で生成し、
+/// fixture dir path を返す。capture_bug + source_asset の両入力は
+/// 同じコンテナ形式・同じ s16 PCM 内容(`to_s16` 出力 — bit 等価)。
+fn pipeline_fixture(scratch: &Path, input: PipelineInput, embed: bool) -> std::io::Result<PathBuf> {
+    let dir = scratch.join(format!("inputs-{}", input.extension()));
     fs::create_dir_all(&dir)?;
     let template = al_testkit::signal::noise(P_TEMPLATE_LEN, P_TEMPLATE_SEED, TEMPLATE_AMP);
     let mut capture = al_testkit::signal::noise(P_CAPTURE_LEN, P_BED_SEED, BED_AMP);
     if embed {
         al_testkit::signal::embed(&mut capture, &template, P_EMBED_OFFSET, 1.0);
     }
+    let ext = input.extension();
     fs::write(
-        dir.join("capture.wav"),
-        al_testkit::media::wav_s16_bytes(1, RATE, &to_s16(&capture)),
+        dir.join(format!("capture.{ext}")),
+        container_bytes(input, &to_s16(&capture)),
     )?;
     fs::write(
-        dir.join("source.wav"),
-        al_testkit::media::wav_s16_bytes(1, RATE, &to_s16(&template)),
+        dir.join(format!("source.{ext}")),
+        container_bytes(input, &to_s16(&template)),
     )?;
     Ok(dir)
 }
@@ -770,15 +909,10 @@ fn measure_kernel_cell(
 }
 
 // ---- Arm P: pipeline ----
-
-const PIPELINE_STAGES: &[StageKind] = &[
-    StageKind::Ingest,
-    StageKind::Locate,
-    StageKind::CheapAnalysis,
-    StageKind::ReferenceAnalysis,
-    StageKind::ExpensiveAnalysis,
-    StageKind::Dataset,
-];
+// plan は `stages: None` → `default_stage_kinds()`(`PIPELINE_ORDER`
+// 全 7 stage、export 込み)= 既定 `al run` と同一。stage 集合の
+// 表現は `default_stage_kinds()` 一箇所に集約し、cell 間で plan が
+// 違う表現ドリフトを作らない。
 
 struct PipelineRep {
     wall_ns: u64,
@@ -816,12 +950,17 @@ fn stage_name(kind: StageKind) -> String {
         .unwrap_or_else(|| format!("{kind:?}"))
 }
 
-/// pipeline rep を 1 回実行する。fixture dir の WAV 2 本を入力に、
-/// fresh job dir で full stage plan を走らせ、e2e wall + stage wall +
-/// fingerprint + error/work を採る。
-fn run_pipeline_rep(service: &JobService, fixture_dir: &Path, scratch_root: &Path) -> PipelineRep {
-    let cap = fixture_dir.join("capture.wav");
-    let src = fixture_dir.join("source.wav");
+/// pipeline rep を 1 回実行する。fixture dir の同一コンテナ 2 本を
+/// 入力に、fresh job dir で既定 plan(export 込み)を走らせ、
+/// e2e wall + stage wall + fingerprint + error/work を採る。
+fn run_pipeline_rep(
+    service: &JobService,
+    fixture_dir: &Path,
+    ext: &str,
+    scratch_root: &Path,
+) -> PipelineRep {
+    let cap = fixture_dir.join(format!("capture.{ext}"));
+    let src = fixture_dir.join(format!("source.{ext}"));
     let mut inputs = vec![
         parse_input_spec(&format!("capture_bug:{}", cap.display()))
             .unwrap_or_else(|_| fail("capture_bug input spec parse")),
@@ -839,7 +978,9 @@ fn run_pipeline_rep(service: &JobService, fixture_dir: &Path, scratch_root: &Pat
 
     let spec = RunSpec {
         inputs,
-        stages: Some(PIPELINE_STAGES.to_vec()),
+        // 既定 `al run` plan(export 込み)に委ねる — この bench の
+        // slice 2 変更点(旧 6 stage 明示から既定 plan への gap 解消)。
+        stages: None,
         config: json!({}),
     };
     let t0 = Instant::now();
@@ -879,7 +1020,7 @@ fn run_pipeline_rep(service: &JobService, fixture_dir: &Path, scratch_root: &Pat
         Err(e) => PipelineRep {
             wall_ns,
             stage_walls: BTreeMap::new(),
-            stage_failures: PIPELINE_STAGES.len() as u64,
+            stage_failures: default_stage_kinds().len() as u64,
             run_error: Some(format!("{e}")),
             artifacts: 0,
             output_bytes: 0,
@@ -923,6 +1064,7 @@ struct PipelineResult {
 fn measure_pipeline(
     service: &JobService,
     fixture_dir: &Path,
+    ext: &str,
     scratch_root: &Path,
     pinned_fingerprint: Option<&BTreeMap<String, String>>,
     reps: usize,
@@ -938,7 +1080,7 @@ fn measure_pipeline(
     let mut artifacts = 0u64;
     let mut output_bytes = 0u64;
     for _ in 0..reps {
-        let rep = run_pipeline_rep(service, fixture_dir, scratch_root);
+        let rep = run_pipeline_rep(service, fixture_dir, ext, scratch_root);
         let deficit = degrade_floor_ns
             .map(|floor| floor.saturating_sub(rep.wall_ns))
             .unwrap_or(0);
@@ -967,6 +1109,7 @@ fn measure_pipeline(
         }
         rep_details.push(json!({
             "wall_ns": rep.wall_ns,
+            "stage_walls": rep.stage_walls,
             "artifacts": rep.artifacts,
             "output_bytes": rep.output_bytes,
             "fingerprint_files": fingerprint_files,
@@ -1056,8 +1199,8 @@ fn main() -> ExitCode {
     // (benchmark checklist の必須項)。
     let mut limiter_notes: Vec<String> = vec![
         "kernel: naive NCC は single-thread scalar(CPU bound)。本番 method は FFT+pool 再利用で支配的に速い — ratio は 10x-70x 帯".to_string(),
-        "pipeline: locate stage が支配(本番 baseline で e2e の 69-79%)。disk I/O・s16 WAV decode は小さい".to_string(),
-        "relevance: pipeline arm は production `al run` と同じ JobService::run 経路 — e2e 応答時間そのもの。kernel arm はその支配 stage の hot kernel".to_string(),
+        "pipeline: locate stage が支配(本番 baseline で e2e の 69-79%)。export stage は dataset 複写の I/O で次点級。disk I/O・s16 PCM decode・AVI/MP4 demux は小さい".to_string(),
+        "relevance: pipeline arm は production `al run` と同じ JobService::run 経路 + 同じ既定 plan(export 込み)— e2e 応答時間そのもの。kernel arm はその支配 stage の hot kernel".to_string(),
     ];
 
     // gate 用 pin は計測前に解決する(fail fast)。write-baseline は読まない。
@@ -1088,13 +1231,33 @@ fn main() -> ExitCode {
             }
         }
     };
-    let pinned_fingerprint: Option<BTreeMap<String, String>> = pinned.as_ref().and_then(|b| {
-        b.get("fingerprint").and_then(Value::as_object).map(|obj| {
-            obj.iter()
-                .filter_map(|(k, v)| v.as_str().map(|s| (k.clone(), s.to_string())))
+    // fingerprint pin は cell 毎(`cells[key].fingerprint` — schema v2)。
+    // pin 側に cell が無い / fingerprint を持たない cell は pin 差分
+    // 0 扱い(閾値 cell として unsupported 側に倒れる既存意味論を維持)。
+    let pinned_fingerprints: BTreeMap<String, BTreeMap<String, String>> = pinned
+        .as_ref()
+        .and_then(|b| b.get("cells"))
+        .and_then(Value::as_object)
+        .map(|cells| {
+            cells
+                .iter()
+                .filter_map(|(key, cell)| {
+                    cell.get("fingerprint")
+                        .and_then(Value::as_object)
+                        .map(|obj| {
+                            (
+                                key.clone(),
+                                obj.iter()
+                                    .filter_map(|(f, v)| {
+                                        v.as_str().map(|s| (f.clone(), s.to_string()))
+                                    })
+                                    .collect(),
+                            )
+                        })
+                })
                 .collect()
         })
-    });
+        .unwrap_or_default();
 
     // filter: 空なら全 cell。write-baseline は pin 全体を再測定するため
     // filter を適用しない。
@@ -1108,7 +1271,8 @@ fn main() -> ExitCode {
     let run_kernels: Vec<usize> = (0..methods.len())
         .filter(|&i| want(&kernel_keys[i]))
         .collect();
-    let run_pipeline = want("pipeline/e2e");
+    let run_pipeline_cells: Vec<&PipelineCell> =
+        PIPELINE_CELLS.iter().filter(|c| want(c.key)).collect();
 
     let mut records: Vec<String> = Vec::new();
     let mut cells: Vec<CellResult> = Vec::new();
@@ -1120,7 +1284,7 @@ fn main() -> ExitCode {
             "issue": ISSUE,
             "mode": mode_name,
             "reps": reps,
-            "metric": "kernel: in-process A/B median(A)/median(B); pipeline: wall/ref_kernel_median",
+            "metric": "kernel: in-process A/B median(A)/median(B); pipeline: wall/ref_kernel_median (per-container cells)",
             "fixture": {
                 "rate": RATE,
                 "kernel": {
@@ -1139,7 +1303,17 @@ fn main() -> ExitCode {
                         {"role": "capture_bug", "input_id": CAPTURE_ID},
                         {"role": "source_asset", "input_id": SOURCE_ID},
                     ],
-                    "stages": PIPELINE_STAGES.iter().map(|k| stage_name(*k)).collect::<Vec<_>>(),
+                    "stages": default_stage_kinds().iter().map(|k| stage_name(*k)).collect::<Vec<_>>(),
+                    "cells": PIPELINE_CELLS.iter().map(|c| json!({
+                        "cell": c.key,
+                        "container": c.input.extension(),
+                    })).collect::<Vec<_>>(),
+                    "avi": {
+                        "width": AVI_W,
+                        "height": AVI_H,
+                        "fps": AVI_FPS,
+                        "frames": AVI_FRAMES,
+                    },
                 },
             },
             "measured_env": measured_env(),
@@ -1150,7 +1324,7 @@ fn main() -> ExitCode {
         records.push(
             json!({
                 "kind": "injected",
-                "detail": "missing_embed fixture + kernel B 側直列反復(B timed region ×SELFTEST_B_REPEATS)+ pipeline e2e floor(ref×8)— 閾値逸脱と correctness 両経路で gate fail が期待値",
+                "detail": "missing_embed fixture(全 pipeline cell で locate 不成立→ correctness)+ kernel B 側直列反復(B timed region ×SELFTEST_B_REPEATS)+ pipeline/e2e wall floor(ref kernel median × pin max_norm+1、pin 無しなら ×8 — pin 追従の確定的閾値逸脱)— 閾値逸脱と correctness 両経路で gate fail が期待値",
             })
             .to_string(),
         );
@@ -1177,7 +1351,7 @@ fn main() -> ExitCode {
     }
     // pipeline arm が選ばれているが kernel cell が 0 のときも、
     // 正規化分母として naive ref だけは測る。
-    if run_pipeline && kernel_results.is_empty() {
+    if !run_pipeline_cells.is_empty() && kernel_results.is_empty() {
         for _ in 0..reps {
             let t0 = Instant::now();
             frozen_naive_ncc(&template, &signal, NAIVE_STRIDE);
@@ -1201,23 +1375,37 @@ fn main() -> ExitCode {
     let scratch = std::env::temp_dir().join(format!("al257-frozen-bench-{}", std::process::id()));
     let _ = fs::remove_dir_all(&scratch);
     fs::create_dir_all(&scratch).unwrap_or_else(|e| fail(&format!("scratch dir: {e}")));
-    let fixture_dir = pipeline_fixture(&scratch, !selftest)
-        .unwrap_or_else(|e| fail(&format!("pipeline fixture: {e}")));
     let service = JobService::new(scratch.join("jobs"));
-    let pipeline_result = if run_pipeline {
-        Some(measure_pipeline(
+    // selftest 注入: e2e wall を pin の max_norm_ratio + 1 倍の ref
+    // median まで床上げる(pin 追従の確定的閾値逸脱 — pin に cell が
+    // 無ければ slice 1 既定の ×8)。
+    let selftest_floor_ns = selftest.then(|| {
+        let ratio = pinned
+            .as_ref()
+            .and_then(|b| b.get("cells"))
+            .and_then(|c| c.get("pipeline/e2e"))
+            .and_then(|c| c.get("max_norm_ratio"))
+            .and_then(Value::as_f64)
+            .map(|m| m + 1.0)
+            .unwrap_or(8.0);
+        (ref_kernel_median_ns as f64 * ratio) as u64
+    });
+    let mut pipeline_results: Vec<(&PipelineCell, PipelineResult)> =
+        Vec::with_capacity(run_pipeline_cells.len());
+    for cell in &run_pipeline_cells {
+        let fixture_dir = pipeline_fixture(&scratch, cell.input, !selftest)
+            .unwrap_or_else(|e| fail(&format!("pipeline fixture {}: {e}", cell.key)));
+        let result = measure_pipeline(
             &service,
             &fixture_dir,
+            cell.input.extension(),
             &scratch,
-            pinned_fingerprint.as_ref(),
+            pinned_fingerprints.get(cell.key),
             reps,
-            // selftest 注入: e2e wall を ref median の 8 倍まで床上げ
-            // (pin max_norm ≈6.6 を確定的に超える劣化)。
-            selftest.then(|| ref_kernel_median_ns.saturating_mul(8)),
-        ))
-    } else {
-        None
-    };
+            selftest_floor_ns.filter(|_| cell.selftest_floor),
+        );
+        pipeline_results.push((cell, result));
+    }
     let _ = fs::remove_dir_all(&scratch);
 
     // ---- Arm K cell records + gate ----
@@ -1277,8 +1465,8 @@ fn main() -> ExitCode {
         });
     }
 
-    // ---- Arm P cell record + gate ----
-    if let Some(p) = &pipeline_result {
+    // ---- Arm P cell records + gate ----
+    for (cell, p) in &pipeline_results {
         let mut wall_sorted = p.wall_ns.clone();
         wall_sorted.sort();
         let e2e_median_ns = median(&wall_sorted) as f64;
@@ -1291,7 +1479,7 @@ fn main() -> ExitCode {
         let pin_cell = pinned
             .as_ref()
             .and_then(|b| b.get("cells"))
-            .and_then(|c| c.get("pipeline/e2e"));
+            .and_then(|c| c.get(cell.key));
         let max_norm_e2e = pin_cell
             .and_then(|c| c.get("max_norm_ratio"))
             .and_then(Value::as_f64);
@@ -1319,7 +1507,8 @@ fn main() -> ExitCode {
                 if mode == Mode::Test {
                     verdict = Verdict::ReportOnly;
                     limiter_notes.push(format!(
-                        "pipeline {label} {norm:.3} above pin {th} — smoke は report_only"
+                        "{} {label} {norm:.3} above pin {th} — smoke は report_only",
+                        cell.key
                     ));
                 } else {
                     verdict = Verdict::Fail;
@@ -1338,13 +1527,14 @@ fn main() -> ExitCode {
             .map(|(k, v)| (k.clone(), stats(v)))
             .collect();
         cells.push(CellResult {
-            key: "pipeline/e2e".to_string(),
+            key: cell.key.to_string(),
             verdict,
             reasons: reasons.clone(),
             record: json!({
                 "kind": "cell",
-                "cell": "pipeline/e2e",
+                "cell": cell.key,
                 "arm": "pipeline",
+                "container": cell.input.extension(),
                 "metric": "wall_ns/ref_kernel_median_ns",
                 "ref_kernel_median_ns": ref_kernel_median_ns,
                 "wall": stats(&p.wall_ns),
@@ -1427,7 +1617,7 @@ fn main() -> ExitCode {
                 }),
             );
         }
-        if let Some(p) = &pipeline_result {
+        for (cell, p) in &pipeline_results {
             let mut wall_sorted = p.wall_ns.clone();
             wall_sorted.sort();
             let e2e_median_ns = median(&wall_sorted) as f64;
@@ -1436,6 +1626,8 @@ fn main() -> ExitCode {
             let mut loc_sorted = p.locate_wall_ns.clone();
             loc_sorted.sort();
             let locate_norm = (median(&loc_sorted) as f64) / ref_med;
+            // fingerprint pin は cell 毎(`cells[key].fingerprint`)—
+            // top-level との二重表現を作らない(schema v2)。
             let fp_map: Map<String, Value> = p
                 .fingerprints
                 .first()
@@ -1445,7 +1637,7 @@ fn main() -> ExitCode {
                 .map(|(k, v)| (k, Value::String(v)))
                 .collect();
             cells_out.insert(
-                "pipeline/e2e".to_string(),
+                cell.key.to_string(),
                 json!({
                     "max_norm_ratio": pipeline_threshold(norm_e2e),
                     "measured_norm_ratio": norm_e2e,
@@ -1454,23 +1646,25 @@ fn main() -> ExitCode {
                     "errors": p.errors,
                     "work": p.work,
                     "fingerprint_files": fp_map.len(),
+                    "fingerprint": Value::Object(fp_map),
                 }),
             );
+        }
+        if !pipeline_results.is_empty() {
             let candidate = json!({
                 "schema": BASELINE_SCHEMA,
                 "issue": ISSUE,
-                "metric": "kernel: median(A)/median(B) ratio >= min_ratio; pipeline: wall/ref_kernel <= max_norm_ratio (+ fingerprint exact match)",
+                "metric": "kernel: median(A)/median(B) ratio >= min_ratio; pipeline: wall/ref_kernel <= max_norm_ratio (+ per-cell fingerprint exact match)",
                 "arms": {
                     "kernel/<method>": "A=凍結 naive NCC(stride grid+refine) vs B=al_locate 本番 method — in-process A/B、計測系で吸収しきれない回帰を比で検出",
-                    "pipeline/e2e": "JobService::run(ingest..dataset) e2e+stage wall を同一セッションの naive ref median で正規化 + analysis payload fingerprint(JobId/時刻/record-only 除く)を exact-match",
+                    "pipeline/<container>": "JobService::run(既定 plan: PIPELINE_ORDER 全 stage、export 込み)e2e+stage wall を同一セッションの naive ref median で正規化 + analysis payload fingerprint(JobId/時刻/record-only 除く)を cell 毎に exact-match。pipeline/e2e=WAV pair、pipeline/avi=非圧縮 AVI+PCM s16、pipeline/mp4=sowt PCM — 同一 embed・bit 等価 s16 PCM",
                 },
                 "threshold_rule": "kernel: min_ratio = ceil(1+(measured-1)*0.5, 0.001); pipeline: max_norm = ceil(measured*1.5, 0.01)",
                 "measured_env": measured_env(),
-                "fingerprint": Value::Object(fp_map),
                 "limiter": {
                     "kernel": "naive NCC は single-thread scalar — CPU bound。production method は FFT(plan reuse)+prepared 入力で支配的に速い",
-                    "pipeline": "locate stage が支配(本番 baseline で e2e の 69-79%)。disk I/O・s16 WAV decode は小さい",
-                    "relevance": "production `al run` と同じ JobService::run 経路 — e2e 応答時間そのもの。kernel arm はその支配 stage の hot kernel",
+                    "pipeline": "locate stage が支配(本番 baseline で e2e の 69-79%)。export stage は dataset 複写の I/O で次点級。disk I/O・s16 PCM decode・AVI/MP4 demux は小さい",
+                    "relevance": "production `al run` と同じ JobService::run 経路 + 同じ既定 plan(export 込み)— e2e 応答時間そのもの。kernel arm はその支配 stage の hot kernel",
                 },
                 "cells": Value::Object(cells_out),
                 "approval": null,
