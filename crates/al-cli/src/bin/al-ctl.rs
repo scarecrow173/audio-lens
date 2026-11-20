@@ -27,7 +27,7 @@ USAGE:
   al-ctl launch [--repo <dir>] [--al-path <path>] [--dry-run] [--json]
                 -- <args for al>
   al-ctl drive --list [--json]
-  al-ctl drive [scenario] <scenario-id> --driver <fake|gpui>
+  al-ctl drive scenario <scenario-id> --driver <fake|gpui>
                 [--repo <dir>] [--dry-run] [--json]
   al-ctl drive --driver <fake|gpui|real-os> [--repo <dir>]
                 [--blocked-probe] [--out <path>] [--dry-run] [--json]

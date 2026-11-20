@@ -186,7 +186,7 @@ target/debug/al-ctl <command>                   # after mise run build al-cli
 al-ctl doctor [--repo <dir>] [--base-dir <dir>] [--al-path <path>] [--json]
 al-ctl launch [--repo <dir>] [--al-path <path>] [--dry-run] [--json] -- <al args>
 al-ctl drive --list [--json]
-al-ctl drive [scenario] <scenario-id> --driver <fake|gpui>
+al-ctl drive scenario <scenario-id> --driver <fake|gpui>
               [--repo <dir>] [--dry-run] [--json]
 al-ctl drive --driver <fake|gpui|real-os> [--repo <dir>]
               [--blocked-probe] [--out <path>] [--dry-run] [--json]
