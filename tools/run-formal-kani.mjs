@@ -1,5 +1,6 @@
-// Issue #256 (D 層 formal verification 第 1 標的): al-media WAV codec
-// の #[cfg(kani)] bounded proof harness(tests/formal_wav.rs)を
+// Issue #256 (D 層 formal verification): al-media WAV codec(第 1 標的)
+// と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
+// harness(tests/formal_wav.rs・tests/formal_containers.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
