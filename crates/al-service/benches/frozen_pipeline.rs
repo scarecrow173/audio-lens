@@ -293,10 +293,10 @@ fn cpu_model() -> String {
     {
         if let Ok(text) = fs::read_to_string("/proc/cpuinfo") {
             for line in text.lines() {
-                if let Some((k, v)) = line.split_once(':') {
-                    if k.trim() == "model name" {
-                        return v.trim().to_string();
-                    }
+                if let Some((k, v)) = line.split_once(':')
+                    && k.trim() == "model name"
+                {
+                    return v.trim().to_string();
                 }
             }
         }
