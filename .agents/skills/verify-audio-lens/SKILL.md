@@ -184,7 +184,7 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
 ## Bench
 
 Frozen kernel + pipeline benchmark with a ratio regression gate
-(Issue #257, slice 1):
+(Issue #257):
 
 ```sh
 mise run bench-frozen                          # gated real run vs pinned baseline
@@ -200,13 +200,15 @@ mise run bench-frozen -- kernel/               # cell filter (substring): kernel
   (coarse stride grid + refine — same shape as
   `FullNcc::locate_coarse_to_fine`), alternating A/B, 7 reps,
   median + range; the metric is `median(A)/median(B)` vs
-  `min_ratio` pins. Arm P `pipeline/e2e`: real
-  `JobService::run` (`ingest..dataset`, the same path `al run`
-  takes) on a deterministic seeded WAV pair; e2e + locate stage
-  walls are normalized by the same-session frozen kernel median
-  vs `max_norm_ratio` pins.
+  `min_ratio` pins. Arm P `pipeline/<container>` (WAV/AVI/MP4):
+  real `JobService::run` (`ingest..dataset`, the same path
+  `al run` takes) on deterministic seeded per-container fixture
+  pairs (AVI embeds a synthetic video track); e2e + locate
+  stage walls are normalized per container by the same-session
+  frozen kernel median vs `max_norm_ratio` pins.
 - The pipeline also gates the analysis payload fingerprint —
-  every job-dir `*.json` (skipping table-structure files,
+  stored per `pipeline/<container>` cell (baseline schema v2).
+  Every job-dir `*.json` (skipping table-structure files,
   `export/`, `analysis/visualization/`, `video_thumbs.json`)
   normalized per `baseline/contracts.json` vocabulary (record-only
   keys dropped, `JOB|ART|IN|ALN` IDs canonicalized, absolute paths
