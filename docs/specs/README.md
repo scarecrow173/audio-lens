@@ -29,6 +29,7 @@ Directory: `docs/specs`
 | SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
 | SPEC-034Z9kQmDatasetScen01 | Dataset tab→workspace driver-neutral scenario + AL 独立 oracle（AL#127） | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
 | SPEC-034Y17EML4OKyeGCYsuFS8 | Issue #127 RF#628 consumer oracle: file-based f64 fidelity・長尺非回帰・gap/Validity | proposed | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
+| SPEC-034bAl189GuiMtx001 | Native al-desktop 機能 × 検証 lane 対応表（Issue #189 AC2） | proposed | [issue-189-native-gui-feature-matrix.md](./issue-189-native-gui-feature-matrix.md) |
 | SPEC-034WsMa4H4RpNbIsbWENgu | Issue #199 docs/impl/ir・exp 管理 index を doc-maintenance で生成可能にする | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | SPEC-034WuVtJ4jL3z3QSJ5v5RB | Issue #202 docs/impl/ir missing-section 本文補完 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |
 | SPEC-034XpWEQMpT2Z7xn8JP2Nh | main CI hygiene/verify 失敗の修正(Issue #210) | approved | [issue-210-ci-failure-fix.md](./issue-210-ci-failure-fix.md) |
