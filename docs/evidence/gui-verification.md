@@ -80,4 +80,4 @@ relations:
 - `check-ui-driver-boundary`・`test-ui-parity` は mise.toml に存在しない task で常に NotRun。
 - `Cancelled` の resume job 終端 receipt は ruviform の分類依存で AL 側直接検証未実施。
 - workspace Tabs 非採用のため Dataset 内 Source・Spectrogram・Analysis tab は pointer で到達不能(P2 既知残課題、受入欠落ではなく非スコープ)。
-- drawn plan に Spectrogram・Label・Table の variant が無く drawn parity の対象外(RF#442)。
+- drawn plan の Spectrogram・Label・Table variant は RF#442 完了で追加済み・gpui_parity.rs が drawn parity を検証済み(詳細は docs/specs/issue-189-native-gui-feature-matrix.md を参照)。
