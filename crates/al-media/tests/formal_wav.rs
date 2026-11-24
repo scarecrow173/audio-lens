@@ -271,28 +271,32 @@ proptest! {
 /// Bounded proofs for `cargo kani` (`cargo kani -p al-media --tests`).
 /// `cfg(kani)` is declared in the crate's check-cfg; plain `cargo
 /// test`/`clippy` never compile this module.
+///
+/// Proof granularity (al#274): the original combined proofs were
+/// solver-/envelope-bound at a 45min budget — one proof calling all
+/// three read entry points, and one proof spanning all five
+/// encodings. Each proof below covers exactly one entry point or one
+/// encoding or one signature class, so the proof set as a whole
+/// discharges the same contract while each individual formula stays
+/// inside the lane budget.
+/// Unwind bounds are sized to the worst-case loop trip count of the
+/// code under proof (layout walk <= 5 chunks for a 48B input, sample
+/// decode <= 28 iterations for a <=28B data body), not to a global
+/// guess — CBMC unwinding checks are on, so a bound that is too small
+/// fails loudly.
 #[cfg(kani)]
 mod kani_proofs {
     use super::*;
 
-    /// Symbolic encoding + parameters inside the writer's valid space:
-    /// 1..=4 channels keeps `block_align` <= 32, so rates up to
-    /// 192_000 can never overflow `byte_rate`.
-    fn symbolic_params() -> (WavEncoding, u16, u32) {
-        let sel: u8 = kani::any();
-        kani::assume(sel < 5);
-        let enc = match sel {
-            0 => WavEncoding::PcmS16,
-            1 => WavEncoding::PcmS24,
-            2 => WavEncoding::PcmS32,
-            3 => WavEncoding::Float32,
-            _ => WavEncoding::Float64,
-        };
+    /// Symbolic writer params inside the valid space: 1..=4 channels
+    /// keeps `block_align` <= 32, so rates up to 192_000 can never
+    /// overflow `byte_rate`.
+    fn symbolic_params() -> (u16, u32) {
         let channels: u16 = kani::any();
         kani::assume((1..=4).contains(&channels));
         let sample_rate: u32 = kani::any();
         kani::assume((1..=192_000).contains(&sample_rate));
-        (enc, channels, sample_rate)
+        (channels, sample_rate)
     }
 
     /// One symbolic in-range sample, mirroring `sample_strategy`.
@@ -324,12 +328,12 @@ mod kani_proofs {
         }
     }
 
-    /// A writer-produced WAV over a symbolic encoding/params with one
-    /// frame of symbolic samples (symbolic `f64` conversion is the
-    /// dominant verification cost; one frame still exercises the
-    /// full write -> decode -> slice path).
-    fn symbolic_wav() -> (Vec<u8>, u16, u32, Vec<f64>) {
-        let (enc, channels, sample_rate) = symbolic_params();
+    /// A writer-produced WAV over symbolic params for one fixed
+    /// encoding, with one frame of symbolic samples (symbolic `f64`
+    /// conversion is the dominant verification cost; one frame still
+    /// exercises the full write -> decode -> slice path).
+    fn symbolic_wav(enc: WavEncoding) -> (Vec<u8>, u16, u32, Vec<f64>) {
+        let (channels, sample_rate) = symbolic_params();
         let samples: Vec<f64> = (0..usize::from(channels))
             .map(|_| symbolic_sample(enc))
             .collect();
@@ -344,50 +348,116 @@ mod kani_proofs {
         )
     }
 
-    /// No input byte pattern may panic the three read entry points.
-    /// 48 bytes covers a complete minimal RIFF/WAVE header (44B) plus
-    /// a few bytes of chunk data — enough to exercise every
-    /// `wav_layout` branch and a few iterations of the sample loops,
-    /// which `unwind(56)` covers with slack. (The bound is a
-    /// verification budget trade-off: arbitrary-byte decode is
-    /// documented as bounded, not total.)
+    /// RIFF/WAVE signature test shared by the signature-gated splits:
+    /// `wav_layout` rejects inputs failing it after a 12-byte read,
+    /// so the signature is the natural input-domain boundary.
+    fn wave_signed(data: &[u8; 48]) -> bool {
+        &data[0..4] == b"RIFF" && &data[8..12] == b"WAVE"
+    }
+
+    /// Inputs WITHOUT the RIFF/WAVE signature: every read entry point
+    /// must reject them without a panic. This is the shallow class —
+    /// cheap to verify and disjoint from the three `*_signed` proofs,
+    /// so together they cover the same input domain as the original
+    /// single proof (al#274 input-domain split).
     #[kani::proof]
-    #[kani::unwind(56)]
-    fn decode_never_panics_on_bounded_input() {
+    #[kani::unwind(16)]
+    fn wav_reads_never_panics_unsigned() {
         let data: [u8; 48] = kani::any();
+        kani::assume(!wave_signed(&data));
         let _ = decode_wav(&data);
         let _ = wav_frame_count(&mut io::Cursor::new(&data[..]));
-        // u8-derived bounds: every `read_wav_range` branch is decided
-        // by start<end / end<=total — values past total exit before
-        // the (end-start)*block multiply, so [0,255] is exhaustive
-        // over branch space while unconstrained u64 multiplies would
-        // dominate the solver.
         let start = u64::from(kani::any::<u8>());
         let end = u64::from(kani::any::<u8>());
         let _ = read_wav_range(&mut io::Cursor::new(&data[..]), start, end);
     }
 
-    /// Writer -> decoder round-trip is exact for representable input.
+    /// RIFF/WAVE-signed inputs may never panic `decode_wav`. 48 bytes
+    /// covers a complete minimal RIFF/WAVE header (44B) plus a few
+    /// bytes of chunk data — enough to exercise every `wav_layout`
+    /// branch and a few iterations of the sample loops, which
+    /// `unwind(40)` covers with slack (the bound is a verification
+    /// budget trade-off: arbitrary-byte decode is documented as
+    /// bounded, not total).
     #[kani::proof]
-    #[kani::unwind(32)]
-    fn writer_round_trip_is_exact() {
-        let (bytes, channels, sample_rate, samples) = symbolic_wav();
+    #[kani::unwind(40)]
+    fn decode_wav_never_panics_signed() {
+        let data: [u8; 48] = kani::any();
+        kani::assume(wave_signed(&data));
+        let _ = decode_wav(&data);
+    }
+
+    /// `wav_frame_count` on signed inputs shares the no-panic
+    /// contract; it only runs the layout walk, so a smaller unwind
+    /// suffices.
+    #[kani::proof]
+    #[kani::unwind(16)]
+    fn wav_frame_count_never_panics_signed() {
+        let data: [u8; 48] = kani::any();
+        kani::assume(wave_signed(&data));
+        let _ = wav_frame_count(&mut io::Cursor::new(&data[..]));
+    }
+
+    /// `read_wav_range` on signed inputs. u8-derived bounds:
+    /// every branch is decided by start<end / end<=total — values
+    /// past total exit before the (end-start)*block multiply, so
+    /// [0,255] is exhaustive over branch space while unconstrained
+    /// u64 multiplies would dominate the solver.
+    #[kani::proof]
+    #[kani::unwind(40)]
+    fn read_wav_range_never_panics_signed() {
+        let data: [u8; 48] = kani::any();
+        kani::assume(wave_signed(&data));
+        let start = u64::from(kani::any::<u8>());
+        let end = u64::from(kani::any::<u8>());
+        let _ = read_wav_range(&mut io::Cursor::new(&data[..]), start, end);
+    }
+
+    /// Writer -> decoder round-trip is exact for representable input,
+    /// proved per encoding. The integer encodings convert symbolic
+    /// ints to `f64`; the float encodings carry the pricier symbolic
+    /// float conversion in isolation.
+    fn round_trip(enc: WavEncoding) {
+        let (bytes, channels, sample_rate, samples) = symbolic_wav(enc);
         let decoded = decode_wav(&bytes).unwrap();
         assert_eq!(decoded.channels, channels);
         assert_eq!(decoded.sample_rate, sample_rate);
         assert_eq!(decoded.samples, samples);
     }
 
-    /// Frame count and range reads agree with the writer-produced
-    /// layout. Everything is concrete except `start`/`end`: the
-    /// whole `u64` range space is then verified exhaustively —
-    /// valid ranges slice exactly, every invalid range errors —
-    /// which symbolic writer params would only sample (and cost
-    /// far more: symbolic `f64` conversion dominates CBMC time).
-    /// Value fidelity is `writer_round_trip_is_exact`'s job.
     #[kani::proof]
     #[kani::unwind(32)]
-    fn header_reads_agree_with_writer_layout() {
+    fn writer_round_trip_pcm_s16() {
+        round_trip(WavEncoding::PcmS16);
+    }
+
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn writer_round_trip_pcm_s24() {
+        round_trip(WavEncoding::PcmS24);
+    }
+
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn writer_round_trip_pcm_s32() {
+        round_trip(WavEncoding::PcmS32);
+    }
+
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn writer_round_trip_float32() {
+        round_trip(WavEncoding::Float32);
+    }
+
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn writer_round_trip_float64() {
+        round_trip(WavEncoding::Float64);
+    }
+
+    /// The concrete 2ch/48kHz/8-frame PcmS16 fixture shared by the
+    /// two header-read proofs.
+    fn fixture_wav() -> (io::Cursor<Vec<u8>>, Vec<f64>, u16) {
         let channels: u16 = 2;
         let samples: Vec<f64> = (0..8 * usize::from(channels))
             .map(|i| (i + 1) as f64)
@@ -400,27 +470,50 @@ mod kani_proofs {
         )
         .unwrap();
         w.write_samples(&samples).unwrap();
-        let bytes = w.finish().unwrap().into_inner();
-        let frames = 8u64;
-        let mut c = io::Cursor::new(&bytes[..]);
-        assert_eq!(wav_frame_count(&mut c).unwrap(), frames);
+        (
+            io::Cursor::new(w.finish().unwrap().into_inner()),
+            samples,
+            channels,
+        )
+    }
+
+    /// Frame count and valid range reads agree with the
+    /// writer-produced layout. Everything is concrete except
+    /// `start`/`end`, restricted here to the valid class
+    /// (`start < end <= total`): the whole valid-range space is
+    /// verified exhaustively — part frames and samples slice exactly.
+    /// `assume` only selects the branch class; every valid (start,
+    /// end) pair is still covered.
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn header_reads_valid_ranges_slice_exact() {
+        let (mut c, samples, channels) = fixture_wav();
+        assert_eq!(wav_frame_count(&mut c).unwrap(), 8);
         // u8-derived bounds keep the solver off unconstrained u64
-        // multiplies while covering every branch: [0,255] spans all
-        // valid ranges plus both invalid classes (start>=end,
-        // end>total).
+        // multiplies while covering every valid pair over 8 frames.
         let start = u64::from(kani::any::<u8>());
         let end = u64::from(kani::any::<u8>());
-        let part = read_wav_range(&mut c, start, end);
+        kani::assume(start < end && end <= 8);
+        let part = read_wav_range(&mut c, start, end).unwrap();
+        assert_eq!(part.frames(), end - start);
         let ch = usize::from(channels);
-        if start < end && end <= frames {
-            let part = part.unwrap();
-            assert_eq!(part.frames(), end - start);
-            assert_eq!(
-                part.samples,
-                samples[start as usize * ch..end as usize * ch].to_vec()
-            );
-        } else {
-            assert!(part.is_err());
-        }
+        assert_eq!(
+            part.samples,
+            samples[start as usize * ch..end as usize * ch].to_vec()
+        );
+    }
+
+    /// The complementary invalid class: `start >= end` or
+    /// `end > total` must error, never panic and never silently
+    /// succeed. Together with `header_reads_valid_ranges_slice_exact`
+    /// this exhausts the [0,255]x[0,255] branch space.
+    #[kani::proof]
+    #[kani::unwind(32)]
+    fn header_reads_invalid_ranges_error() {
+        let (mut c, _samples, _channels) = fixture_wav();
+        let start = u64::from(kani::any::<u8>());
+        let end = u64::from(kani::any::<u8>());
+        kani::assume(!(start < end && end <= 8));
+        assert!(read_wav_range(&mut c, start, end).is_err());
     }
 }
