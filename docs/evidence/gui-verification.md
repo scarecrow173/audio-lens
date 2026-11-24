@@ -36,6 +36,7 @@ relations:
 # 検証記録: GUI
 
 `al-gui`/`al-service`/`ui/` の GUI 統合・parity 検証・実 OS lane・consumer oracle に関する事実記録。
+機能 × lane の個別判定の対応表は `docs/specs/issue-189-native-gui-feature-matrix.md`（Issue #189 AC2）を参照。
 
 ## headless 統合と service_ops
 
