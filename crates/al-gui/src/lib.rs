@@ -5,14 +5,13 @@
 //! Job/Dataset サービスへ橋渡しする。永続・解析ロジックは
 //! ここに置かない(設計: `docs/designs/gui-app-architecture.md`)。
 //!
-//! デフォルト feature は headless(lib + op 層のみ)。`webview`
-//! feature で `ruviform-ui-webview` の wry/tao host binary
-//! `al-gui` が、`gpui` feature で `ruviform-ui-gpui` の
-//! GPUI composition root binary `al-desktop` が有効になる
-//! (Issue #166 AL-G1)。`desktop`/`theme`/`preferences`/`view` は
-//! どちらの backend にも属さない driver-neutral 層。
+//! デフォルト feature は headless(lib + op 層のみ)。`gpui`
+//! feature で `ruviform-ui-gpui` の GPUI composition root
+//! binary `al-desktop` が有効になる(Issue #166 AL-G1)。
+//! `desktop`/`theme`/`preferences`/`view` は backend に属さない
+//! driver-neutral 層。旧 `webview` feature の wry/tao host
+//! binary `al-gui` と埋め込み asset 層は Issue #189 で撤去済み。
 
-pub mod assets;
 pub mod command;
 pub mod desktop;
 pub mod preferences;

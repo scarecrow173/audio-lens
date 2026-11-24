@@ -182,21 +182,6 @@ run = [
   "npm --prefix ui test",
 ]
 
-# Issue #105: al-gui `webview` feature lane。既定 check/lint/test は
-# headless(lib + Service op 層)のまま、実窓 host 依存ターゲットは
-# ここで分離検証する(ruviform-ui-webview 側の同名 task と同一形)。
-[tasks.check-ui-webview]
-description = "al-gui webview feature 型チェック(実窓 host ターゲット含む)"
-run = "cargo check -p al-gui --features webview --all-targets"
-
-[tasks.lint-ui-webview]
-description = "al-gui webview feature lint"
-run = "cargo clippy -p al-gui --all-targets --features webview -- -D warnings"
-
-[tasks.test-ui-webview]
-description = "al-gui webview feature テスト"
-run = "cargo test -p al-gui --features webview"
-
 # Issue #166 AL-G1: al-gui `gpui` feature lane。GPUI backend 依存は
 # feature 内に閉じ込め、既定 check/lint/test は headless のまま
 # 保つ(ruviform-ui-gpui 側の同名 task と同一構造)。実 OS window は
