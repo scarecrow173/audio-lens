@@ -7,14 +7,14 @@
 // 契約(正本は docs/designs/full-ci-ci-summary-issue-158.md +
 // docs/designs/ci-dispatch-only-issue-147.md +
 // docs/designs/ci-os-l1-gpui-desktop.md(Issue #206 で gpui lane
-// 追加・job 集合 14 へ拡張)):
+// 追加・job 集合 14 へ拡張)、Issue #189 で旧 WebView lane 撤去・
+// job 集合 12 へ)):
 // - trigger: workflow_dispatch のみ(Issue #147/#158 最終段階で
 //   pull_request/push を撤去。schedule/workflow_run 等他 trigger も
 //   持たない)。dispatch は inputs.expected_sha を required で持つ。
 // - job 集合は固定: expected-sha, ruviform-access, hygiene,
 //   verify, verify-macos, ui-verify, ui-verify-macos,
-//   webview-verify, webview-verify-macos, gpui-verify,
-//   gpui-verify-macos, gui-real,
+//   gpui-verify, gpui-verify-macos, gui-real,
 //   ci-summary, summary(追加・削除・rename は契約違反)。
 // - lane jobs は needs: [ruviform-access, expected-sha] で
 //   両 preflight の success を `if:` に課す(常時実行)。
@@ -216,8 +216,6 @@ const EXPECTED_JOBS = [
   "verify-macos",
   "ui-verify",
   "ui-verify-macos",
-  "webview-verify",
-  "webview-verify-macos",
   "gpui-verify",
   "gpui-verify-macos",
   "gui-real",
@@ -238,8 +236,6 @@ if (jobs) {
     "verify-macos",
     "ui-verify",
     "ui-verify-macos",
-    "webview-verify",
-    "webview-verify-macos",
     "gpui-verify",
     "gpui-verify-macos",
   ];
@@ -310,8 +306,6 @@ if (jobs) {
     "verify-macos",
     "ui-verify",
     "ui-verify-macos",
-    "webview-verify",
-    "webview-verify-macos",
     "gpui-verify",
     "gpui-verify-macos",
     "gui-real",
@@ -342,7 +336,6 @@ if (jobs) {
     "hygiene",
     "verify",
     "ui-verify",
-    "webview-verify",
     "gpui-verify",
     "gui-real",
   ];
@@ -382,10 +375,6 @@ if (path === WORKFLOW) {
   const specs = [
     [".github/actions/verify/action.yml", "Lint workspace (Linux; mise run lint-full)"],
     [
-      ".github/actions/webview-verify/action.yml",
-      "Lint UI webview feature (Linux-only; mise run lint-ui-webview)",
-    ],
-    [
       ".github/actions/gpui-verify/action.yml",
       "Lint GPUI feature (Linux-only; mise run lint-ui-gpui)",
     ],
@@ -419,18 +408,15 @@ if (path === WORKFLOW) {
         "verify: headless CLI Build/Link missing",
       );
     } else {
-      const suffix = file.includes("webview") ? "webview" : "gpui";
       check(
-        body.includes(`run: mise run check-ui-${suffix}`),
+        body.includes("run: mise run check-ui-gpui"),
         `${file}: OS-specific type-check removed`,
       );
-      check(body.includes(`run: mise run test-ui-${suffix}`), `${file}: OS-specific test removed`);
-      if (suffix === "gpui") {
-        check(
-          body.includes("run: mise run build-ui-gpui"),
-          `${file}: native al-desktop Build/Link removed`,
-        );
-      }
+      check(body.includes("run: mise run test-ui-gpui"), `${file}: OS-specific test removed`);
+      check(
+        body.includes("run: mise run build-ui-gpui"),
+        `${file}: native al-desktop Build/Link removed`,
+      );
     }
   }
 }
