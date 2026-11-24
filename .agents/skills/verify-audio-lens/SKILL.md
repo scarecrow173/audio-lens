@@ -170,8 +170,19 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   with the harness counts, or `not_run`/`unsupported` with the
   reason and provision steps. Environment absence is `not_run` +
   exit 0 — the honest record, not a lane failure (POLICIES §3).
+  Setting `AL_KANI_LOG_DIR=<dir>` additionally writes each harness's
+  raw output to `<dir>/kani-<harness>.txt` and the final JSON
+  verdict to `<dir>/verdict.json`.
   Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
+  Residual run 2026-11-24 (WSL2 Ubuntu, 31GiB envelope, 45min
+  per-harness budget): verdict `not_run` — 1/9 harnesses verified.
+  `detect_format_signature_rules` (unwind 8) passed in 0.63s;
+  `decode_never_panics_on_bounded_input` is envelope-bound (~30.4GiB
+  cbmc RSS, the box's ceiling) and the other 7 are solver-bound
+  (SAT grind past 45min with memory headroom) — larger-budget or
+  dedicated-runner reruns may still reach them. Raw per-harness
+  output and the verdict JSON live in `evidence/al256/residual/`.
 - The proofs encode the documented contract, not the implementation —
   a failure is either a product defect or a modeling error; check the
   counterexample against the `wav.rs` doc comments before acting.

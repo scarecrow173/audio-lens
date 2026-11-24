@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的 (Issue #256)"
 created: "2026-11-20"
-updated: "2026-11-21"
+updated: "2026-11-24"
 owners: []
 relations:
   source:
@@ -265,6 +265,8 @@ Rust 標的へ読み替えないのが、model/product 区別の約束である�
    `kani_proofs` proof を `cargo kani -p al-media --tests
    --harness <name>` で逐次実行し、完了した proof の verdict を
    個別に保持する(`#[test]` proptest は対象外)。
+   `AL_KANI_LOG_DIR` を指定すると、各 harness の raw 出力と最終
+   JSON verdict がその dir に残る(証拠記録用の env-gated 機能)。
 
 provision 手順(WSL2 Ubuntu 内):
 
@@ -272,6 +274,33 @@ provision 手順(WSL2 Ubuntu 内):
 cargo install --locked kani-verifier
 cargo kani setup    # CBMC toolchain を ~/.kani に展開する
 ```
+
+## verdict の実測(2026-11-24 residual run)
+
+WSL2 `Ubuntu`(kani-verifier 0.68.0 + CBMC 6.11.0、envelope
+RAM 31GiB + swap 8GiB・16 vCPU、無競合)で sync commit `342aea7`
+に対して本 lane を実走した(各 harness 45min budget)。verdict
+は `not_run` — **1/9 verified**、fail-closed exit 0。
+
+- `detect_format_signature_rules`(unwind 8)のみ
+  `VERIFICATION: SUCCESSFUL`(169 checks、0.63s)。
+- `decode_never_panics_on_bounded_input` は envelope-bound:
+  cbmc RSS が ~1GiB/min で増大し ~30.4GiB / free 0GiB で budget
+  切れ。31GiB 物理 envelope が原因なので、時間を増やしても
+  この box では verdict が取れない。
+- 残り 7 件は solver-bound: RSS 3.3–11.4GiB で頭打ちの SAT
+  grind で 45min 未収束。メモリ余力が残るため、より大きな
+  budget または専用 runner では verdict が取れる見込みが残る。
+- `VERIFICATION: FAILED` + counterexample は 0 件 —
+  環境起因 fail でも反例 fail でもなく budget 未収束。
+
+各 harness の raw 出力・lane verdict・環境記録は
+`evidence/al256/residual/`、実行台帳は
+`evidence/al256/verification.md` §residual が持つ。harness 除去の
+条件(明示 budget 下での複数試行で再現 + proptest 担保)は
+containers 6 件では未充足のため、本書の harness 構成はそのまま
+維持する。bound 縮小・専用 runner ・除去検討は後続の選択肢として
+evidence に記録した。
 
 ## 検証と再実行
 
