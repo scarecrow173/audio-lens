@@ -1,0 +1,20 @@
+writer_round_trip_pcm_s16 | rc=124 | elapsed=632s | timeout-600s | peakRSS_kb=2198996
+writer_round_trip_pcm_s24 | rc=124 | elapsed=632s | timeout-600s | peakRSS_kb=2164364
+header_reads_valid_ranges_slice_exact | rc=124 | elapsed=947s | timeout-900s | peakRSS_kb=2535236
+writer_round_trip_pcm_s32 | rc=124 | elapsed=631s | timeout-600s | peakRSS_kb=2130108
+writer_round_trip_float32 | rc=124 | elapsed=947s | timeout-900s | peakRSS_kb=2353704
+wav_reads_never_panics_unsigned | rc=124 | elapsed=316s | timeout-300s | peakRSS_kb=1211424
+containers_never_panics_unsigned | rc=124 | elapsed=316s | timeout-300s | peakRSS_kb=843740
+mp4_writer_output_decodes | rc=124 | elapsed=1265s | timeout-1200s | peakRSS_kb=4526300
+truncated_mp4_never_panics | rc=124 | elapsed=948s | timeout-900s | peakRSS_kb=2497792
+detect_format_signature_rules | rc=0 | elapsed=55s | SUCCESSFUL | peakRSS_kb=33768
+truncated_avi_never_panics | rc=124 | elapsed=948s | timeout-900s | peakRSS_kb=2932608
+wav_frame_count_never_panics_signed | rc=124 | elapsed=632s | timeout-600s | peakRSS_kb=2607384
+containers_never_panics_unsigned | rc=124 | elapsed=949s | timeout-900s | peakRSS_kb=2269472
+wav_reads_never_panics_unsigned | rc=124 | elapsed=949s | timeout-900s | peakRSS_kb=3106020
+PAR-QUEUE-DONE
+decode_wav_never_panics_signed | rc=124 | elapsed=1265s | timeout-1200s | peakRSS_kb=3763436
+mutated_mp4_never_panics | rc=124 | elapsed=1266s | timeout-1200s | peakRSS_kb=2370228
+mutated_avi_never_panics | rc=124 | elapsed=1266s | timeout-1200s | peakRSS_kb=2945600
+avi_writer_output_decodes | rc=124 | elapsed=1267s | timeout-1200s | peakRSS_kb=3893440
+read_wav_range_never_panics_signed | rc=124 | elapsed=1267s | timeout-1200s | peakRSS_kb=3592036
