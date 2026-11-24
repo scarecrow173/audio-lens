@@ -217,3 +217,102 @@ capability observation は doc 契約として model が写す。coverage
   Coordinator が再生成する規約。
 - ローカル検証の成功は統合受入ではない — merge 後 main SHA での
   必須 CI 証拠が統合受入の条件(POLICIES §3)。
+
+## residual — Kani lane verdict 回収(2026-11-24)
+
+slice 1-2 で環境起因により verdict が取れなかった 9 harness
+(WAV 3 + containers 6)を、WSL2 が健全な状態で 1 本の lane run に
+通し、per-harness verdict と分類を記録する residual slice。
+covered code(`crates/al-media/src/`)は slice 1-2 と同じ —
+sync commit `342aea7008e377d7dfa51d27eea689d6e1f6c251`
+(本 slice 基点の origin/main tip、product 差分 0)。
+
+### 実行環境
+
+- Windows 11 (x86_64) / Orca worktree
+  `G:\orca\workspaces\audio-lens\al256-kani-residual` /
+  rustc 1.99.1(環境導入、repo は rust を pin しない)/
+  mise 管理 tool: node 26.12.1。`MISE_ENV` 未設定。
+- Kani 実行環境: WSL2 `Ubuntu`(Running — slice 2 の
+  `Wsl/Service/E_UNEXPECTED` は今回未発生、全走行で wsl launch
+  失敗 0)。kani-verifier 0.68.0 + bundled CBMC 6.11.0
+  (`cargo kani --version` 出力)、rustup toolchains:
+  nightly-2026-08-21 + 1.99.0。WSL envelope: RAM 31GiB +
+  swap 8GiB、16 vCPU。全量は `residual/env.txt`。
+- 並行 job: 実行前に他 repo/他 Worker の kani・cbmc process が
+  0 件であることを `ps` で確認 — slice 1 の占有競合は解消済み。
+- budget: `TIMEOUT_MS` 既定値 2700000ms(45min)/harness。
+  `AL_KANI_TIMEOUT_MS` override は不使用。
+
+### runner の最小変更(証拠記録)
+
+`tools/run-formal-kani.mjs` に `AL_KANI_LOG_DIR` を追加。env 指定時
+のみ、各 harness の raw 出力(stdout+stderr と終了 meta)を
+`<dir>/kani-<harness>.txt`、最終 JSON verdict を
+`<dir>/verdict.json` に書き出す。現行 runner は harness 出力の
+tail 8 行だけを JSON details に残して残りを捨てるため、受入条件の
+「各 `cargo kani` 生出力を evidence に保存」と verdict 未発行の
+分類根拠(出力末尾の OOM/exit 兆候)に不足があった — 確定した
+不足に対する最小変更。env-detect・WSL mirror・逐次実行・
+JSON verdict・fail-closed exit の意味論は不変。
+
+### per-harness verdict(正規 lane: `mise run test-formal-kani`)
+
+lane verdict: `not_run` — **1/9 verified**、fail-closed exit 0。
+実行コマンド:
+`AL_KANI_LOG_DIR=evidence/al256/residual mise run test-formal-kani`
+(mirror sync + 逐次 9 harness、全走行 約 6h50m)。
+
+| harness | verdict | 分類 | 根拠(cbmc RSS 観測) |
+| --- | --- | --- | --- |
+| `decode_never_panics_on_bounded_input` | timeout 45min | envelope-bound | RSS が ~1GiB/min で単調増大し、kill 時点で ~30.4GiB / free 0GiB — 31GiB envelope 天井に張り付き |
+| `writer_round_trip_is_exact` | timeout 45min | solver-bound | RSS ~3.4GiB で頭打ち、SAT grind |
+| `header_reads_agree_with_writer_layout` | timeout 45min | solver-bound | RSS ~3.3GiB で頭打ち、SAT grind |
+| `containers_never_panic_on_bounded_input` | timeout 45min | solver-bound | RSS ~11.4GiB、増大鈍化 |
+| `detect_format_signature_rules` | **verified** | — | `VERIFICATION: SUCCESSFUL`、169 checks 0 failed、verify 0.63s — unwind 8 の小 bound は予算内に収まる |
+| `mp4_writer_output_decodes` | timeout 45min | solver-bound | RSS ~8.4GiB、増大鈍化 |
+| `avi_writer_output_decodes` | timeout 45min | solver-bound | RSS ~6.8GiB、ほぼ平坦 |
+| `mutated_mp4_never_panics` | timeout 45min | solver-bound | RSS ~8.3GiB |
+| `mutated_avi_never_panics` | timeout 45min | solver-bound | RSS ~4.8GiB、ほぼ平坦 |
+
+cbmc RSS は走行中の `ps -eo etime,rss,comm` 定期観測による補助証拠
+(canonical = lane の JSON verdict)。各 harness の raw 出力は
+`residual/kani-<harness>.txt`、lane verdict 全量は
+`residual/verdict.json`。timeout 各件は spawnSync の
+ETIMEDOUT/SIGTERM で kill され、runner の `cleanupOrphans` が
+WSL 側の cbmc/kani-driver を掃除した(観測: kill 後 RSS 解放済み)。
+
+### 分類と見通し
+
+- 環境障害ではない: WSL2 は全走行を通じ健全(wsl launch 失敗 0、
+  `E_UNEXPECTED` 未発生)。slice 2 の障害は再現しなかった。
+- `VERIFICATION: FAILED` + counterexample は 0 件 — 検証 fail
+  ではなく budget 未収束の not_run 系。product 意味論への反例
+  指摘はない。
+- envelope-bound(`decode_never_panics_on_bounded_input`):
+  ~31GiB 物理 envelope が原因。時間を増やしても OOM で止まる
+  ため、この box では verdict 取得不能が確定的。solver-bound
+  7 件は SAT instance が 45min 内に解けない grind — メモリ
+  余力が残るため、より大きな budget または専用 runner では
+  verdict が取れる見込みが残る。
+- harness 除去は行わない: 除去条件は「明示 budget 下での複数
+  試行で再現」+「proptest で同一契約を担保」。containers 6 件は
+  slice 2 が env-blocked で今回が初回実走(1 試行のみ)のため
+  確定条件を満たさず、全 timeout は proof 不能ではなく
+  capacity-bound — `verdict が取れる見込みのある harness は
+  残す` 方針どおり全件保持する。timeout 8 件の対象契約は
+  proptest property(`*_never_panics*` 系と writer round-trip 系)
+  で継続担保されている。
+- 本 run で唯一 verified に達したのは unwind 8 の
+  `detect_format_signature_rules` — bound の小さい証明はこの
+  環境でも budget 内に収まる実測。
+
+### 後続の選択肢(本 slice では実施しない)
+
+- bound 縮小(`kani::assume`・入力長・unwind 再設計)は検証の
+  成功条件を弱めるため、正当化できる bound のみ + 残りを
+  proptest が担うことを明記する別判断。本 slice は現行
+  bounds での verdict 取得を記録した。
+- dedicated runner(より大きな envelope / 長 budget)での再実行。
+- containers 6 件の 2 試行目以降で timeout が再現されれば、
+  「複数試行で再現」の除去条件を検討できる。
