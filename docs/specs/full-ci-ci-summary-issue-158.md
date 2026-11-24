@@ -4,7 +4,7 @@ type: "spec"
 status: "approved"
 title: "Issue #158 Full CI 統一: 全実行化・共通 ci-summary Fail-Closed 集約・expected_sha 契約(安全な第一段階)"
 created: "2026-11-05"
-updated: "2026-11-05"
+updated: "2026-11-24"
 owners: []
 relations:
   source:
@@ -90,7 +90,8 @@ Pass とする fail-closed 判定を担い、`workflow_dispatch` に
 - `impact` job・`tools/classify-impact.mjs`・`CI_IMPACT_SELECTIVE`
   env・Shadow Mode・期待集合照合・NotApplicable 処理の撤去。
 - `verify`/`ui-verify`/`webview-verify` の ubuntu/windows legs と
-  `*-macos` legs を全イベントで常時実行する。
+  `*-macos` legs を全イベントで常時実行する(webview-verify
+  lane は Issue #189 で撤去)。
 - 新規 job `expected-sha`: `workflow_dispatch` 時に
   `inputs.expected_sha`(必須・40 hex)と checkout HEAD の一致を
   検証する fail-closed gate。
@@ -100,7 +101,9 @@ Pass とする fail-closed 判定を担い、`workflow_dispatch` に
   skipped/NotRun/unknown)を全て run 失敗にする fail-closed 集約。
   Job Summary に対象 SHA・event・resolved Ruviform SHA・lane/OS
   別結果・検証範囲(Golden/CLI/UI/WebView/gui-real)・Run URL を
-  記録する。
+  記録する(当時の 3 lane は verify/ui-verify/webview-verify。
+  Issue #189 で webview-verify が撤去され、現行は
+  verify/ui-verify/gpui-verify)。
 - Required context `summary` の維持: check 名 `summary` の job を
   残し、PR gate としての判定範囲(macOS legs を含まない現行 scope)
   を変えない。
@@ -144,7 +147,8 @@ Pass とする fail-closed 判定を担い、`workflow_dispatch` に
 
 - [ ] `pull_request`/`push`/`workflow_dispatch` の全イベントで
       verify/ui-verify/webview-verify の ubuntu・windows・macOS legs
-      が実行される(選択実行機構なし)。
+      が実行される(選択実行機構なし。webview-verify は Issue #189
+      で撤去)。
 - [ ] `ci-summary` job が存在し、全必要 job を `always()` で待ち、
       1 job でも非 success なら run が失敗する。
 - [ ] check 名 `summary` が発行され続ける(required context 不死)。

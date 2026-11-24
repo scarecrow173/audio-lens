@@ -74,7 +74,6 @@ ruviform-io-symphonia = { git = "https://github.com/scarecrow173/ruviform.git", 
 # 契約は al-observability が adapter として保持する(AL#138)。
 ruviform-observability = { git = "https://github.com/scarecrow173/ruviform.git", features = ["logging"] }
 ruviform-ui = { git = "https://github.com/scarecrow173/ruviform.git" }
-ruviform-ui-webview = { git = "https://github.com/scarecrow173/ruviform.git" }
 # Issue #166 AL-G2: DTCG 解釈の正本は ruviform-ui-theme (RF#385)。
 # AudioLens は token 文書と mode 選択のみを所有する。
 ruviform-ui-theme = { git = "https://github.com/scarecrow173/ruviform.git" }

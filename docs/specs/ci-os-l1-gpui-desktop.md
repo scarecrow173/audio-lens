@@ -4,7 +4,7 @@ type: "spec"
 status: "approved"
 title: "Issue #206 OS-L1 GPUI Desktop CI 統合: 3OS Native/Headless 検証 lane"
 created: "2026-11-13"
-updated: "2026-11-13"
+updated: "2026-11-24"
 owners:
   - "scarecrow173"
 relations:
@@ -84,8 +84,9 @@ POLICIES.md の OS-L1(対象 OS での Native Build・Link・実行可能な
   (ubuntu/windows matrix + macOS leg)と `ci-summary` /
   互換 `summary` の needs・証跡・fail-closed 集約の更新。
 - `.github/actions/` への GPUI lane composite action 追加
-  (既存 verify/ui-verify/webview-verify と同構造: ruviform
-  access gate・mise・cargo cache・sccache・resolved SHA 証跡)。
+  (当時の既存 verify/ui-verify/webview-verify と同構造: ruviform
+  access gate・mise・cargo cache・sccache・resolved SHA 証跡。
+  webview-verify は Issue #189 で撤去)。
 - Linux runner への GPUI build/runtime 依存(X11/Wayland/
   fontconfig/Vulkan/lavapipe 等)の導入 step。
 - `al-desktop` bin(`required-features = ["gpui"]`)の Native
@@ -104,8 +105,8 @@ POLICIES.md の OS-L1(対象 OS での Native Build・Link・実行可能な
 - 実 OS Window を開く GUI-L2 検証(実入力・実画面)。headless
   `gpui-test` の成功を実 Window 操作の Pass と偽らない。
 - 旧 WebView(`webview` feature・`webview-verify` lane)の撤去 —
-  Issue #189 の責務。本変更は旧 lane を維持したまま独立して
-  CI を利用可能にする。
+  Issue #189 の責務(同 Issue で実施済み)。本変更は旧 lane を
+  維持したまま独立して CI を利用可能にした。
 - `daily-ci.yml`・`ci-issue-tracker*.yml` 等他 workflow、
   `mise.ci.toml`、Ruviform 共通 crate、解析精度 Oracle
   (Golden/LFS/Export/CLI)。
@@ -127,7 +128,8 @@ POLICIES.md の OS-L1(対象 OS での Native Build・Link・実行可能な
   正しく含み、OS 別 NotRun/Skipped/Fail を Pass 扱いしない
   こと。
 - 既存の Golden/LFS/Export/CLI・headless TS・Ruviform resolved
-  SHA 証跡・webview lane が削除・改変されないこと。
+  SHA 証跡・webview lane が削除・改変されないこと(#206 時点の
+  制約。webview lane 自体は後続の Issue #189 で撤去)。
 
 ## Acceptance Criteria
 
@@ -142,7 +144,7 @@ POLICIES.md の OS-L1(対象 OS での Native Build・Link・実行可能な
   更新され、OS 別 NotRun/Skipped/Fail を Pass 扱いしない。
 - [ ] 既存の Golden/LFS/Export/CLI、headless TS、Ruviform SHA
   証跡が削除されず、旧 WebView 撤去 Issue(#189)と独立して
-  CI を利用できる。
+  CI を利用できる(#189 の撤去自体は後続で実施済み)。
 - [ ] `check-full` と `lint-full` の重複コンパイルを計測し、
   同等の型診断/Clippy 保証で省略可能なら整理する(CI 速度
   改善は証拠付き)。

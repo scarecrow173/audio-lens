@@ -4,7 +4,7 @@ type: "spec"
 status: "approved"
 title: "AudioLens 独立 PR/Push CI: 公開/非公開 Git 依存対応と回帰 Gate"
 created: "2026-11-04"
-updated: "2026-11-04"
+updated: "2026-11-24"
 owners: []
 relations:
   source:
@@ -65,9 +65,10 @@ Consumer 回帰を AudioLens 自身の PR/Push で継続検証する。
 - CI 実行に必要な mise ツールへの scope(`--locked` 再現性を維持)。
   開発ツール全量(`apm`/`pipx:serena-agent`)は CI から除外する
 - lane 分離: Rust fmt/check/lint/test(Golden・実メディア LFS
-  fixture を含む)、CLI build + headless 依存境界、`al-gui`
-  `webview` feature、`ui/` npm typecheck/test +
-  `sync-ui-deps --check`、実 Window/OS 試験の not-run 明示
+  fixture を含む)、CLI build + headless 依存境界、`ui/` npm
+  typecheck/test + `sync-ui-deps --check`、実 Window/OS 試験の
+  not-run 明示(当初の `al-gui` `webview` feature lane は
+  Issue #189 で撤去)
 - `cargo fetch --locked` 後に Ruviform Git 依存の resolved SHA
   単一性と UI vendor `REV` 一致を検証する。manifest `rev` 列挙
   方式と lockfile 主体方式(#140)の両方で動くこと
