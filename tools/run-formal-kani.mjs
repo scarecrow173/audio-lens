@@ -24,6 +24,7 @@
 // mirror 更新では target/ だけを保持して source を再展開するため、
 // dep build cache は再実行間で持続する。
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,10 +32,21 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGE = "al-media";
 const TIMEOUT_MS = Number(process.env.AL_KANI_TIMEOUT_MS ?? 45 * 60 * 1000);
 const WSL_MIRROR = "$HOME/.cache/al-formal-kani/src";
+// 証拠記録用: AL_KANI_LOG_DIR が指定された場合のみ、各 harness の
+// raw 出力(stdout+stderr と終了メタ)を <dir>/kani-<harness>.txt に、
+// 最終 JSON verdict を <dir>/verdict.json に書き出す。未指定では
+// 何も書かない — env-detect・mirror・逐次実行・JSON verdict・
+// fail-closed exit の意味論は不変。
+const LOG_DIR = process.env.AL_KANI_LOG_DIR ? path.resolve(process.env.AL_KANI_LOG_DIR) : null;
 
 function verdict(v, reason, extra = {}) {
   const rec = { lane: "test-formal-kani", verdict: v, reason, ...extra };
-  process.stdout.write(`${JSON.stringify(rec)}\n`);
+  const line = `${JSON.stringify(rec)}\n`;
+  process.stdout.write(line);
+  if (LOG_DIR) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+    fs.writeFileSync(path.join(LOG_DIR, "verdict.json"), line);
+  }
   process.exit(v === "fail" ? 1 : 0);
 }
 
@@ -234,12 +246,19 @@ function cleanupOrphans() {
   wslProbe(distro, `pkill -f 'al-formal-kani/src' ; pkill -f 'cargo kani -p ${PACKAGE}' ; true`);
 }
 
+if (LOG_DIR) fs.mkdirSync(LOG_DIR, { recursive: true });
 const results = [];
 for (const harness of HARNESSES) {
   const r = runKani(harness);
   const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
   const timedOut = r.error?.code === "ETIMEDOUT";
   if (timedOut && distro !== "native") cleanupOrphans();
+  if (LOG_DIR) {
+    fs.writeFileSync(
+      path.join(LOG_DIR, `kani-${harness}.txt`),
+      `# exit=${r.status} signal=${r.signal ?? ""} timedOut=${timedOut} error=${r.error?.code ?? ""}\n${out}`,
+    );
+  }
   results.push({
     harness,
     ok: /VERIFICATION:- SUCCESSFUL/.test(out),
