@@ -1,8 +1,8 @@
 {
   "issue": "al#274",
   "spike": "kani-stub",
-  "generated_at": "2026-11-25T10:13:49.688532Z",
-  "status": "ablation_complete_canonical_running",
+  "generated_at": "2026-11-25T10:53:20.208296Z",
+  "status": "completed_all_timeout",
   "sync_commit": "7fd87add13e24858f6677d9c2dea135bf581ebe6",
   "environment": "env.txt",
   "measurement_method": "README.md#環境と実行方法",
@@ -351,7 +351,7 @@
   ],
   "canonical": {
     "command": "AL_KANI_HARNESSES=read_wav_range_never_panics_signed,wav_reads_never_panics_unsigned,mp4_writer_output_decodes AL_KANI_TIMEOUT_MS=1500000 AL_KANI_LOG_DIR=evidence/al274/stub-spike/canonical mise run test-formal-kani",
-    "executed_at_utc": "2026-11-25T09:12Z/2026-11-25T10:11Z",
+    "executed_at_utc": "2026-11-25T08:56Z/2026-11-25T10:11Z",
     "lane_verdict": "not_run",
     "reason": "0/3 harnesses verified; all timed out at 1500000ms; no success/failure verdict in raw logs",
     "results": [
@@ -395,6 +395,29 @@
         "log": "canonical/kani-wav_reads_never_panics_unsigned.txt"
       }
     ],
-    "judgment": "fmt stub removes diagnostic-formatting floor and advances WAV symex, but does not produce verdicts within 1500s/proof; no basis for quantitative whole-lane runtime reduction"
+    "judgment": "fmt stub removes diagnostic-formatting floor and advances WAV symex, but does not produce verdicts within 1500s/proof; no basis for quantitative whole-lane runtime reduction",
+    "executed_at_precision": "approximate minute-level sequential window inferred from three consecutive 1500s timeouts and raw log completion order; exact process start timestamps were not recorded"
+  },
+  "status_reason": "ablation matrix and canonical representative subset both completed execution; every measured harness timed out before a SUCCESSFUL/FAILED verdict, so the spike result is negative for solver-budget reduction",
+  "ablation_reproducibility": {
+    "historical_control_names": [
+      "wav_reads_never_panics_unsigned",
+      "read_wav_range_never_panics_signed",
+      "mp4_writer_output_decodes"
+    ],
+    "current_control_names": [
+      "spike_wav_unsigned_baseline",
+      "spike_wav_range_baseline",
+      "spike_mp4_writer_baseline"
+    ],
+    "reason": "the original controls were recorded before fmt adoption; after adoption the canonical WAV harness names are no longer no-stub controls, so current reproduction uses explicit no-stub spike harnesses with the same proof bodies/input bounds/unwind",
+    "caveat": "historical table rows keep their original job/file names; rerunning the current script writes spike_*_baseline artifacts rather than overwriting the original names"
+  },
+  "pstack_verification": {
+    "runtime": "pass: mise run test al-media plus fmt/check/lint on Windows host",
+    "formal_proptest": "pass: mise run test-formal on Windows host; bounded property tests only, distinct from proof success",
+    "formal_kani": "executed: canonical representative lane verdict not_run because all three harnesses timed out; no SUCCESSFUL/FAILED proof verdict",
+    "review_panel": "not_run: no pstack review panel was executed for this measurement spike; raw evidence and lane outputs are the review basis",
+    "baseline_compile_smoke": "pass for compile reachability: spike_wav_unsigned_baseline, spike_wav_range_baseline, and spike_mp4_writer_baseline all reached CBMC; each then timed out at 120s (exit 124), so no proof verdict is claimed"
   }
 }

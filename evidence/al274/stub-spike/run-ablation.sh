@@ -110,12 +110,14 @@ sync_mirror
 printf 'sync_done=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$CACHE/queue.state"
 rm -f "$CACHE/completed.txt" "$EVIDENCE/results.jsonl"
 
-# Controls first: they use the same proof bodies as the spike variants and
-# therefore replace the non-identical al#274 trial baselines.
+# Controls first: explicit no-stub spike harnesses preserve the pre-adoption
+# baseline even though the canonical WAV harnesses now carry the fmt stub.
+# They use the same proof bodies as the spike variants and therefore replace
+# the non-identical al#274 trial baselines.
 JOBS=(
-  wav_reads_never_panics_unsigned
-  read_wav_range_never_panics_signed
-  mp4_writer_output_decodes
+  spike_wav_unsigned_baseline
+  spike_wav_range_baseline
+  spike_mp4_writer_baseline
   spike_wav_unsigned_fmt
   spike_wav_unsigned_alloc
   spike_wav_unsigned_both

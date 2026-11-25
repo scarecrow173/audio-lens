@@ -36,6 +36,16 @@ baseline として使わず、no-stub control も同じ shared body から同じ
 cap で再測した。12 job(baseline/fmt-only/alloc-only/combined × 代表 3)を
 concurrency 3 で実行した。
 
+再現性に関する補正: 当初の 12 job 実行時点では、WAV/mp4 の canonical
+harness 自身がまだ no-stub だったため、その名前を baseline control に
+使った。最終 head では canonical WAV 2 harness が fmt stub を採用済みなので、
+現在の `run-ablation.sh` は同じ proof body/unwind を持つ明示的な
+`spike_wav_unsigned_baseline`・`spike_wav_range_baseline`・
+`spike_mp4_writer_baseline` を control に使う。したがって保存済み table の
+baseline 行は historical job 名(`wav_reads_never_panics_unsigned` 等)を
+残し、再実行時の output file 名は `spike_*_baseline` になる。両者は同じ
+shared body と入力条件を指すが、byte-for-byte 同じ harness 名ではない。
+
 計測の操作化:
 
 - wall-clock: `run-ablation.sh` が harness job 開始から timeout/後処理
@@ -77,6 +87,14 @@ concurrency 3 で実行した。
 raw log: `ablation/spike_wav_unsigned_fmt.compile-smoke.verbose.log`、
 `ablation/spike_wav_unsigned_alloc.compile-smoke.verbose.log`、
 lowering probe は `ablation/fmt-lowering.probe.txt`。
+
+最終 head で追加した no-stub control 3 harness も compile smoke 済みである。
+`spike_wav_unsigned_baseline`・`spike_wav_range_baseline`・
+`spike_mp4_writer_baseline` はいずれも verbose log に `Checking harness ...`
+を出力して CBMC へ到達し、120s timeout で exit 124 となった。timeout は
+verification 未完了を意味し、compile 失敗ではない。これらは no-stub
+control なので `Stub:` 行は出ない。raw log は
+`ablation/spike_*_baseline.compile-smoke.*`。
 
 ## ablation 結果(補助証拠)
 
@@ -192,11 +210,12 @@ harness には適用しない。
   fallback 測定は不要と判断し、helper には残さなかった。
 - 一時 `spike_` harness は ablation 再現のため残す。canonical runner の
   `HARNESSES` には登録していないため、既定の 21 件全走には混ざらない。
-  ただし mirror 内で `cargo kani --tests` を harness 指定なしに直接実行
-  すると spike も compile/verification 対象になるため、再現は
-  `run-ablation.sh` の個別 `--harness` 指定経由に限る。特に mp4 fmt/both
-  は contract-equivalent でない control なので、それらの結果を product
-  の反例として扱ってはいけない。
+  no-stub control も `spike_*_baseline` として明示し、fmt stub 採用後の
+  canonical WAV harness を control に誤用しないようにした。ただし mirror 内で
+  `cargo kani --tests` を harness 指定なしに直接実行すると spike も
+  compile/verification 対象になるため、再現は `run-ablation.sh` の個別
+  `--harness` 指定経由に限る。特に mp4 fmt/both は contract-equivalent でない
+  control なので、それらの結果を product の反例として扱ってはいけない。
 
 ## canonical 代表 subset(正規 lane)
 
@@ -217,9 +236,11 @@ peak を保証しない(欠測がある旨を結果表に明記する)。
 | wav_reads_never_panics_unsigned | fmt | timeout(1500s) | 13762 | 0/0 | `wav_layout` iteration 16、`decode_samples` まで到達 | `canonical/kani-wav_reads_never_panics_unsigned.txt` |
 | mp4_writer_output_decodes | none | timeout(1500s) | 7150 | 0/0 | `write_mp4` 到達、product/testkit event 285 | `canonical/kani-mp4_writer_output_decodes.txt` |
 
-`*` range の RSS 採取は 09:16UTC に開始したため開始直後の数分を欠く。
-ただし採取開始時点で既に 9566MiB、終了直前まで単調増加で peak は終盤に
-あるため、表中の peak は実用上 harness 後半の値として意味を持つ。
+`*` range の RSS 採取は 09:16UTC に開始した。sequential 実行と timeout
+境界から range harness はおおよそ 08:56–09:21UTC と推定されるため、
+開始後の約 20 分を欠測している。採取開始時点で既に 9566MiB、その後は
+終了直前まで増加して 10324MiB だった。したがって表中の値は観測された
+peak であり、欠測区間を含む全行程 peak を厳密に保証するものではない。
 `VERIFICATION:- FAILED` は 3 件の log に無く、kill 時点はいずれも
 symex の path exploration だった。fmt stub は両 log の header に
 `Stub: std :: fmt :: format -> crate :: kani_stub_models ::
@@ -227,8 +248,6 @@ fmt_format_empty` として出力され、memchr/PadAdapter が canonical raw
 log でも 0 件であることを確認した。
 
 ## 展開見通し / 支配因の再分析
-
-## 展開見通しと推奨
 
 fmt stub は床を完全に取り除くものではないが、WAV no-panic proof では
 診断 formatting 由来の人工負荷を確実に取り除き、symex を product code
@@ -265,6 +284,19 @@ bounds panic machinery、parser branch、RawVec/Layout/capacity 計算であり�
 memory-safety check の無効化は検証弱化なので採用しない。product 側の恒久策
 (lazy diagnostic 化など)は本 slice 外だが、Kani 以外にも保守性利益があるかを
 別途設計判断すべき候補である。
+
+## pstack Verification
+
+本 spike で実行した検証を pstack の区分に沿って記録する。ここでの
+Runtime Verification は実バイナリ/通常 test lane、Formal Verification は
+proptest/Kani lane、review は pstack review panel を指す。
+
+| 種別 | 結果 | 根拠 |
+| --- | --- | --- |
+| Runtime Verification | Pass | `mise run test al-media` が Windows host で exit 0。fmt/check/lint は別途 static/hygiene check として exit 0 |
+| Formal/property lane(proptest) | Pass | `mise run test-formal` が Windows host で exit 0。proptest は bounded property test であり proof 成功とは区別する。property の意味は変更していない |
+| Formal Verification(Kani canonical) | Executed / lane verdict `not_run` | 代表 3 harness を 1500s/proof で実行したが全て timeout。`SUCCESSFUL`/`FAILED` はなく、proof verdict 未取得であることを成功とは記録しない |
+| pstack review panel | NotRun | 本 slice は測定 spike で review panel を実行しなかった。代わりに raw evidence・compile smoke・canonical/mise lane・prek/biome hygiene を残し、review panel 実施を後続の統合判断に委ねる |
 
 ## Honest notes
 

@@ -1787,6 +1787,14 @@ mod kani_proofs {
     // so a fmt stub is not contract-equivalent here, can make the assertion
     // fail if reached, and must never be adopted for this harness.
 
+    // Explicit no-stub control for the ablation script; the canonical
+    // harness name is reserved for the registered proof.
+    #[kani::proof]
+    #[kani::unwind(48)]
+    fn spike_mp4_writer_baseline() {
+        mp4_writer_output_decodes_body();
+    }
+
     #[kani::proof]
     #[kani::unwind(48)]
     #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]

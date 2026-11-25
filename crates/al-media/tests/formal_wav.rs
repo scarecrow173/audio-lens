@@ -438,6 +438,20 @@ mod kani_proofs {
     // Temporary al#274 spike harnesses. They are intentionally not
     // registered in tools/run-formal-kani.mjs: they exist for the ablation
     // matrix and are not additional canonical proof responsibilities.
+    // Explicit no-stub baselines preserve reproducibility now that the
+    // canonical WAV harnesses carry the adopted fmt stub.
+
+    #[kani::proof]
+    #[kani::unwind(16)]
+    fn spike_wav_unsigned_baseline() {
+        wav_reads_never_panics_unsigned_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(40)]
+    fn spike_wav_range_baseline() {
+        read_wav_range_never_panics_signed_body();
+    }
 
     #[kani::proof]
     #[kani::unwind(16)]
