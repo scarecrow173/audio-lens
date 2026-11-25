@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的 (Issue #256)"
 created: "2026-11-20"
-updated: "2026-11-24"
+updated: "2026-11-25"
 owners: []
 relations:
   source:
@@ -105,9 +105,13 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 | `writer_new_rejects_exactly_the_documented_invalid_params` | `WavWriter::new` が channels==0・rate==0・block_align/byte_rate overflow のときに限り失敗する |
 | `write_samples_rejects_exactly_unaligned_lengths` | `write_samples` が frame 境界でない長さに限り失敗する |
 | `mutated_or_truncated_headers_never_panic` | 有効 WAV の header field 上書き・任意位置 truncate で 3 read 入口が panic しない |
-| `kani_proofs::decode_never_panics_on_bounded_input` | 48B の全バイト列で 3 read 入口が panic しない(bounded 網羅) |
-| `kani_proofs::writer_round_trip_is_exact` | symbolic encoding/params の writer 出力が正確に往復する |
-| `kani_proofs::header_reads_agree_with_writer_layout` | writer 出力上で frame count が一致し、u8 由来の任意 range(0..=255 の start/end)について valid なら slice が一致・invalid(start>=end, end>total)ならエラー、の全分岐を網羅する |
+| `kani_proofs::decode_wav_never_panics_signed` | RIFF/WAVE signature を持つ 48B 入力で `decode_wav` が panic しない(al#274 で entry point × signature class に分割) |
+| `kani_proofs::wav_frame_count_never_panics_signed` | 同入力で `wav_frame_count` が panic しない |
+| `kani_proofs::read_wav_range_never_panics_signed` | 同入力 + u8 由来の任意 start/end で `read_wav_range` が panic しない |
+| `kani_proofs::wav_reads_never_panics_unsigned` | signature を持たない入力で 3 read 入口が panic せず早期 reject する — signed 3 proof と合わせて全入力領域を網羅 |
+| `kani_proofs::writer_round_trip_pcm_s16` / `_pcm_s24` / `_pcm_s32` / `_float32` / `_float64` | symbolic params の writer 出力が正確に往復する — encoding 別に 1 proof ずつ(al#274 で 5 択 symbolic encoding を分割) |
+| `kani_proofs::header_reads_valid_ranges_slice_exact` | writer 出力上で frame count が一致し、valid range(`start<end<=total`・u8 由来)の slice が全件一致する |
+| `kani_proofs::header_reads_invalid_ranges_error` | 補集合の invalid range(`start>=end` または `end>total`)が全件エラーになる — 2 proof が合計で [0,255]×[0,255] の分岐空間を網羅する |
 
 proptest 側が覆うのは統計的サンプリング(既定 case 数)の範囲で
 あり、Kani 側は宣言した bound 内の網羅を検証する。両者は同じ
@@ -126,12 +130,19 @@ property 言語の異なる強度の段である。
   write → decode → slice の全経路を通せる)。proptest 側は
   channels 1..=8・rate <= u32::MAX/64・frames 0..=72 の
   ランダム範囲。
-- **unwind bound**: `decode_never_panics_on_bounded_input` は
-  `#[kani::unwind(56)]`、writer 系 2 proof は
-  `#[kani::unwind(32)]`。初版のより大きな bound([u8;128]+
-  unwind160 / 2 frames+unwind64)はこの環境で 45min cap を
-  超過したため、再実行しやすい bound へ縮小した —
-  trade-off の実測は `evidence/al256/` に記録する。
+- **unwind bound**: al#274 で proof を単一責務へ分割し、unwind
+  は各 proof が実際に辿る最悪 loop trip 数に合わせた。
+  no-panic 系は `decode_wav`/`read_wav_range`(signed)が
+  `#[kani::unwind(40)]`(layout walk + data body の sample loop)、
+  `wav_frame_count`(signed)と unsigned 系が
+  `#[kani::unwind(16)]`(layout walk / signature reject のみ)。
+  writer round-trip・header 系は `#[kani::unwind(32)]`。
+  初版のより大きな bound([u8;128]+unwind160 / 2 frames+unwind64)
+  および al#256 の 3 入口結合 proof(unwind 56)はこの環境で
+  45min cap を超過した — trade-off の実測は
+  `evidence/al256/`・`evidence/al274/` に記録する。unwind
+  assertions は有効のままなので、bound 不足は黙って網羅を
+  欠くのではなく FAILED として表れる。
 - **sample の表現可能性**: 整数 encoding は範囲内の整値 f64、
   Float32 は f32 表現値、Float64 は非 NaN の有限範囲値だけを
   往復対象にする(doc 契約は clamp+round / cast を約束し、任意
@@ -176,11 +187,13 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
 | `missing_or_undecodable_auds_is_audio_unavailable` | `auds` なし・非 PCM `auds`・`wb` を持たない `auds` の AVI が `Err` にならず、`audio` None + `audio_unavailable`(capability)+video/timing は健在 |
 | `detect_format_follows_signature_rules` | `RIFF`+`WAVE`/`AVI `・offset 4 `ftyp`→`Mp4`・それ以外/短い入力→`None` の署名規則が doc 契約 model と一致(切り詰め view 含む) |
 | `mutated_or_truncated_containers_never_panic` | writer 生成物への byte 上書き+truncate が panic しない |
-| `kani_proofs::containers_never_panic_on_bounded_input` | 64B の全バイト列で 3 入口が panic しない(bounded 網羅) |
+| `kani_proofs::mp4_never_panics_ftyp_signed` / `avi_never_panics_riff_signed` | `ftyp`/`RIFF`+`AVI ` signature を持つ 64B 入力で `decode_mp4`/`decode_avi` が panic しない(bounded 網羅・al#274 で entry point × signature class に分割。`detect_format` は先頭 <=12B のみ読む近似無料の入口として各 proof に同乗) |
+| `kani_proofs::containers_never_panics_unsigned` | いずれの signature も持たない入力で 3 入口が panic せず早期 reject する — signed 2 proof と合わせて全入力領域を網羅 |
 | `kani_proofs::detect_format_signature_rules` | len<8/8/12 の境界長で署名規則を網羅(RIFF 優先の順序を含む) |
 | `kani_proofs::mp4_writer_output_decodes` | symbolic `soun` パラメータ(channels 1..=2・rate 1..=192000・4 frame s16)の write_mp4 出力が復号+PCM 往復する |
 | `kani_proofs::avi_writer_output_decodes` | concrete video(4x2・2 frame)+symbolic PCM `auds` の write_avi 出力が復号+PCM 往復+両 stream の timing 一致 |
-| `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き+truncate で panic しない |
+| `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き(任意位置・任意値)で panic しない |
+| `kani_proofs::truncated_mp4_never_panics` / `truncated_avi_never_panics` | writer 生成物の任意長 truncate で panic しない — al#274 で mutate と分離。mutate+truncate の結合入力は proptest `mutated_or_truncated_containers_never_panic`(最大 16 箇所編集+truncate)が担保する |
 
 ### bounds・assumptions・model/product の区別
 
@@ -204,9 +217,10 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   observation)。model は emitted field でなく decoder が見る
   declared rate を写す — container の表現限界であり不具合では
   ない。
-- **unwind bound**: decode/format 系 8–80、writer round-trip 系
-  64–96、mutation 系 64–80。WAV 同様、この環境の 45min cap 内に
-  収めるための最小実用 bound。
+- **unwind bound**: al#274 で decode/format 系 8–48、writer
+  round-trip 系 48–64、mutation/truncation 系 64–80。WAV 同様、
+  この環境の 45min cap 内に収めるための最小実用 bound で、
+  unwind assertions 有効のため不足は FAILED として表れる。
 - **model/product 区別**: `skipped_boxes`(minf の非 stbl 子と
   top-level extras が path 記録される)、`pcm_tracks` 所属(宣言
   capability であり復号成功とは独立)、secondary `soun` の
@@ -267,6 +281,9 @@ Rust 標的へ読み替えないのが、model/product 区別の約束である�
    個別に保持する(`#[test]` proptest は対象外)。
    `AL_KANI_LOG_DIR` を指定すると、各 harness の raw 出力と最終
    JSON verdict がその dir に残る(証拠記録用の env-gated 機能)。
+   `AL_KANI_HARNESSES="a,b,c"` で登録名の subset だけを実行できる
+   (al#274 で追加した env-gated 機能 — 未指定は全件で既定挙動
+   不変、未登録名は fail-closed で not_run)。
 
 provision 手順(WSL2 Ubuntu 内):
 
@@ -296,11 +313,10 @@ RAM 31GiB + swap 8GiB・16 vCPU、無競合)で sync commit `342aea7`
 
 各 harness の raw 出力・lane verdict・環境記録は
 `evidence/al256/residual/`、実行台帳は
-`evidence/al256/verification.md` §residual が持つ。harness 除去の
-条件(明示 budget 下での複数試行で再現 + proptest 担保)は
-containers 6 件では未充足のため、本書の harness 構成はそのまま
-維持する。bound 縮小・専用 runner ・除去検討は後続の選択肢として
-evidence に記録した。
+`evidence/al256/verification.md` §residual が持つ。上記 8 件の
+未収束は al#274 で支配要因分析・proof 分割を行った —
+再構成後の harness 構成・verdict は `evidence/al274/` と次節の
+記録を参照。
 
 ## 検証と再実行
 
@@ -311,18 +327,21 @@ evidence に記録した。
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
+  al#274 以降の登録 harness は 21 件(WAV 11 + containers 10)。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
-  `evidence/al256/verification.md` と `actions.jsonl` が持つ。
+  `evidence/al256/verification.md` と `actions.jsonl`、al#274
+  の分析・分割・再実走記録は `evidence/al274/` が持つ。
 
 ## Sources and Relations
 
 - Issue: <https://github.com/scarecrow173/audio-lens/issues/256>
+- 継続 Issue: <https://github.com/scarecrow173/audio-lens/issues/274>(solver-bound 原因調査・budget 削減)
 - 設計正本: `G:/repositry/audio-products/.devin/verify-env-survey/synthesis.md` §4.3
 - 対象コード: `crates/al-media/src/wav.rs`・`crates/al-media/src/mp4.rs`・
   `crates/al-media/src/avi.rs`・`crates/al-media/src/format.rs`・
   `crates/al-media/tests/formal_wav.rs`・
   `crates/al-media/tests/formal_containers.rs`
 - lane runner: `tools/run-formal-kani.mjs`
-- 証拠台帳: `evidence/al256/`
+- 証拠台帳: `evidence/al256/`・`evidence/al274/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節

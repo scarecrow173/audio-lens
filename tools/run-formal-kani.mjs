@@ -179,16 +179,50 @@ if (missing.length > 0) {
 // `mod kani_proofs` blocks in tests/formal_wav.rs and
 // tests/formal_containers.rs.
 const HARNESSES = [
-  "decode_never_panics_on_bounded_input",
-  "writer_round_trip_is_exact",
-  "header_reads_agree_with_writer_layout",
-  "containers_never_panic_on_bounded_input",
+  "decode_wav_never_panics_signed",
+  "wav_frame_count_never_panics_signed",
+  "read_wav_range_never_panics_signed",
+  "wav_reads_never_panics_unsigned",
+  "writer_round_trip_pcm_s16",
+  "writer_round_trip_pcm_s24",
+  "writer_round_trip_pcm_s32",
+  "writer_round_trip_float32",
+  "writer_round_trip_float64",
+  "header_reads_valid_ranges_slice_exact",
+  "header_reads_invalid_ranges_error",
+  "mp4_never_panics_ftyp_signed",
+  "avi_never_panics_riff_signed",
+  "containers_never_panics_unsigned",
   "detect_format_signature_rules",
   "mp4_writer_output_decodes",
   "avi_writer_output_decodes",
   "mutated_mp4_never_panics",
+  "truncated_mp4_never_panics",
   "mutated_avi_never_panics",
+  "truncated_avi_never_panics",
 ];
+
+// AL_KANI_HARNESSES="a,b,c" で登録済み名の subset だけを逐次実行する
+// env-gated な追加(harness 分割・bound 調整の個別試行用)。未指定は
+// 現行どおり全件 — 既定挙動は不変。未登録名は fail-closed で not_run。
+const SUBSET = process.env.AL_KANI_HARNESSES
+  ? new Set(
+      process.env.AL_KANI_HARNESSES.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    )
+  : null;
+if (SUBSET) {
+  const unknown = [...SUBSET].filter((n) => !HARNESSES.includes(n));
+  if (unknown.length > 0) {
+    verdict(
+      "not_run",
+      `unknown harness name(s) in AL_KANI_HARNESSES: ${unknown.join(", ")} ` +
+        `(registered: ${HARNESSES.length})`,
+    );
+  }
+}
+const SELECTED = SUBSET ? HARNESSES.filter((h) => SUBSET.has(h)) : HARNESSES;
 
 // script は base64 で渡す — wsl.exe → bash -lc の入れ子 quoting で
 // 変数展開・$ 記号が壊れるのを避けるため。
@@ -248,7 +282,7 @@ function cleanupOrphans() {
 
 if (LOG_DIR) fs.mkdirSync(LOG_DIR, { recursive: true });
 const results = [];
-for (const harness of HARNESSES) {
+for (const harness of SELECTED) {
   const r = runKani(harness);
   const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
   const timedOut = r.error?.code === "ETIMEDOUT";
@@ -289,7 +323,7 @@ if (stalled.length === 0) {
 }
 verdict(
   "not_run",
-  `${verified.length}/${HARNESSES.length} harness(es) verified; ` +
+  `${verified.length}/${SELECTED.length} harness(es) verified; ` +
     `incomplete: ${stalled.map((r) => `${r.harness}(${r.timedOut ? `timeout ${TIMEOUT_MS}ms` : `exit ${r.status}`})`).join(", ")}`,
   { env: distro, details: results },
 );

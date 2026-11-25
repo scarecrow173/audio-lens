@@ -1650,19 +1650,47 @@ proptest! {
 mod kani_proofs {
     use super::*;
 
-    /// No input byte pattern may panic the three container entry
-    /// points. 64 bytes covers `ftyp` plus a few box headers —
-    /// ISO-BMFF needs ~60B of nesting to reach `stsd`, so this bound
-    /// exercises top-level box walking plus early header validation on
-    /// both formats (a bounded claim, not totality).
-    /// `unwind(80)`: ~8 top-level iterations plus the nested
-    /// chunk/sample loops bounded by the same 64 bytes.
+    /// Inputs that carry neither container signature (no `ftyp` at
+    /// offset 4 and no `RIFF`+`AVI ` pair): `detect_format`,
+    /// `decode_mp4`, and `decode_avi` all reject them early — the
+    /// shallow, cheap half of the no-panic contract. Disjoint from
+    /// the two `*_signed` proofs (al#274 input-domain split).
     #[kani::proof]
-    #[kani::unwind(80)]
-    fn containers_never_panic_on_bounded_input() {
+    #[kani::unwind(16)]
+    fn containers_never_panics_unsigned() {
         let data: [u8; 64] = kani::any();
+        kani::assume(&data[4..8] != b"ftyp");
+        kani::assume(&data[0..4] != b"RIFF" || &data[8..12] != b"AVI ");
         let _ = detect_format(&data);
         let _ = decode_mp4(&data);
+        let _ = decode_avi(&data, &VideoFeatureConfig::default());
+    }
+
+    /// `ftyp`-signed inputs may never panic `decode_mp4` (or
+    /// `detect_format`, which reads only the first <=12 bytes and is
+    /// near-free, so it rides along). 64 bytes covers `ftyp` plus a
+    /// few box headers — ISO-BMFF needs ~60B of nesting to reach
+    /// `stsd`, so this bound exercises top-level box walking plus
+    /// early header validation (a bounded claim, not totality).
+    /// Split per entry point for al#274: the combined 3-entry proof
+    /// was solver-bound at 45min.
+    #[kani::proof]
+    #[kani::unwind(48)]
+    fn mp4_never_panics_ftyp_signed() {
+        let data: [u8; 64] = kani::any();
+        kani::assume(&data[4..8] == b"ftyp");
+        let _ = detect_format(&data);
+        let _ = decode_mp4(&data);
+    }
+
+    /// `RIFF`+`AVI `-signed inputs may never panic `decode_avi`:
+    /// RIFF chunk walking and `strl` parsing stay panic-free.
+    #[kani::proof]
+    #[kani::unwind(48)]
+    fn avi_never_panics_riff_signed() {
+        let data: [u8; 64] = kani::any();
+        kani::assume(&data[0..4] == b"RIFF" && &data[8..12] == b"AVI ");
+        let _ = detect_format(&data);
         let _ = decode_avi(&data, &VideoFeatureConfig::default());
     }
 
@@ -1693,9 +1721,10 @@ mod kani_proofs {
     /// PCM round-trip agrees. channels 1..=2, rate 1..=192000, and four
     /// frames of symbolic s16 keep the sample loop small; the bound
     /// exercises ftyp/moov/stbl/stsd parsing and the PCM path end to
-    /// end. unwind(64) covers the fixed box nesting of this spec shape.
+    /// end. unwind(48) covers the fixed box nesting of this spec shape
+    /// (al#274: 64 was over-provisioned for ~20 reachable iterations).
     #[kani::proof]
-    #[kani::unwind(64)]
+    #[kani::unwind(48)]
     fn mp4_writer_output_decodes() {
         let channels: u16 = kani::any();
         kani::assume((1..=2).contains(&channels));
@@ -1746,10 +1775,10 @@ mod kani_proofs {
     /// `write_avi` output over symbolic PCM audio decodes: first `vids`
     /// metadata, first `auds` PCM, and per-stream `movi_order` timing
     /// agree. Concrete video (4x2, two frames) bounds the DIB feature
-    /// path; symbolic audio is four frames of s16. unwind(96) covers
+    /// path; symbolic audio is four frames of s16. unwind(64) covers
     /// RIFF chunk walking, both strl parsers, and the feature loops.
     #[kani::proof]
-    #[kani::unwind(96)]
+    #[kani::unwind(64)]
     fn avi_writer_output_decodes() {
         let channels: u16 = kani::any();
         kani::assume((1..=2).contains(&channels));
@@ -1781,11 +1810,14 @@ mod kani_proofs {
         assert_eq!(m.timing.len(), 2);
     }
 
-    /// A single symbolic byte overwrite plus a symbolic truncation of
-    /// a writer-produced MP4 may never panic decode or detection. The
-    /// base container is concrete (~500B), so mutation is the only
-    /// symbolic state and the proof stays inside the per-harness
-    /// budget. unwind(64) covers box walking of the surviving prefix.
+    /// A single symbolic byte overwrite of a writer-produced MP4 may
+    /// never panic decode or detection. Split from the combined
+    /// mutate-and-truncate proof for al#274: each proof now covers its
+    /// own corruption dimension fully — every mutation position and
+    /// byte value over the full-length base. The base container is
+    /// concrete (~500B), so the only symbolic state is which byte
+    /// changes to what. unwind(64) covers box walking and the
+    /// mutated-count table loops of the surviving file.
     #[kani::proof]
     #[kani::unwind(64)]
     fn mutated_mp4_never_panics() {
@@ -1794,6 +1826,20 @@ mod kani_proofs {
         let v: u8 = kani::any();
         let i = usize::from(at) % bytes.len();
         bytes[i] = v;
+        let _ = detect_format(&bytes);
+        let _ = decode_mp4(&bytes);
+    }
+
+    /// The truncation dimension: a writer-produced MP4 cut to any
+    /// length never panics decode or detection. Together with
+    /// `mutated_mp4_never_panics` this covers the corruption classes
+    /// separately; inputs that are both mutated and truncated stay
+    /// under the proptest property
+    /// `mutated_or_truncated_containers_never_panic`.
+    #[kani::proof]
+    #[kani::unwind(64)]
+    fn truncated_mp4_never_panics() {
+        let mut bytes = base_mp4();
         let cut: u16 = kani::any();
         bytes.truncate(usize::from(cut) % (bytes.len() + 1));
         let _ = detect_format(&bytes);
@@ -1802,7 +1848,7 @@ mod kani_proofs {
 
     /// Same mutation budget over a writer-produced AVI: RIFF chunk
     /// walking, `hdrl`/`strl` parsing, and `movi` packet reads stay
-    /// panic-free under a corrupted header or truncation.
+    /// panic-free under a single corrupted byte.
     #[kani::proof]
     #[kani::unwind(80)]
     fn mutated_avi_never_panics() {
@@ -1811,6 +1857,15 @@ mod kani_proofs {
         let v: u8 = kani::any();
         let i = usize::from(at) % bytes.len();
         bytes[i] = v;
+        let _ = detect_format(&bytes);
+        let _ = decode_avi(&bytes, &VideoFeatureConfig::default());
+    }
+
+    /// The truncation dimension over the AVI base.
+    #[kani::proof]
+    #[kani::unwind(80)]
+    fn truncated_avi_never_panics() {
+        let mut bytes = base_avi();
         let cut: u16 = kani::any();
         bytes.truncate(usize::from(cut) % (bytes.len() + 1));
         let _ = detect_format(&bytes);
