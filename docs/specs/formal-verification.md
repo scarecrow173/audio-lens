@@ -318,6 +318,83 @@ RAM 31GiB + swap 8GiB・16 vCPU、無競合)で sync commit `342aea7`
 再構成後の harness 構成・verdict は `evidence/al274/` と次節の
 記録を参照。
 
+## stub モデル化の判断記録(al#274、2026-11-25)
+
+al#274 の solver 固定床に対し、test-only の `#[kani::stub]` を代表
+3 proof で計測した。product `crates/al-media/src/` は変更せず、stub
+model は `crates/al-media/tests/kani_stub_models/mod.rs` に閉じる。
+Kani 0.68.0 ではこの attribute が unstable なため、lane runner は
+`cargo kani` に常時 `-Z stubbing` を渡す。これは属性機構を有効化
+するだけで、stub attribute を持たない harness の検証意味論は変えない。
+
+### 採用した stub
+
+- `std::fmt::format -> kani_stub_models::fmt_format_empty` を
+  `wav_reads_never_panics_unsigned` と
+  `read_wav_range_never_panics_signed` に適用した。replacement は
+  空文字列を返すだけで、formatting loop・`PadAdapter`・memchr scan を
+  proof から外す。
+- 採用根拠: 両 proof は decode/read の `Result` を捨て、panic しない
+  ことだけを検証し、`MediaError::reason` の人間向け文字列・error
+  message の内容・formatting 自体の panic/alloc 挙動を property に
+  使わない。したがって診断文字列を空にしても、これらの proof が
+  検証する契約は変わらない。
+- 検証外になるもの: error message の内容、formatting 自体の
+  panic/alloc 挙動、message 長に依存する allocation 挙動。これらは
+  product の parse/write/memory-safety 契約ではなく診断表現の挙動と
+  して分離する。
+
+### 採用しなかった stub
+
+- `std::alloc::handle_alloc_error` を infeasible にする replacement は
+  semantic 上 `--no-malloc-may-fail` と整合するが、ablation では
+  failure endpoint の `rt_error` event を消せただけで、代表 proof の
+  wall-clock・peak RSS・product 側到達を有意に改善しなかった。
+  Layout 計算・capacity overflow・`TryReserveError` 分岐・RawVec grow・
+  pointer validity 計装は残るため採用しない。
+- `mp4_writer_output_decodes` への fmt stub は contract-equivalent
+  ではない。decode 結果の `a.codec == "pcm_s16le"` は `format!` で
+  作られる文字列を直接 assert するため、空文字列化は proof 自体を
+  壊す。
+- `std::fmt::write` fallback は測定・採用しない。compile smoke で
+  `std::fmt::format` 指定が `format!` lowering 先へ実際に解決し、
+  verbose 上 target 経路が消えることを確認できたためである。
+- pointer/slice validity instrumentation(`to_isize`・
+  `same_allocation`)、`memcmp`、tag/codec 文字列、Vec/RawVec private
+  internals は stub しない。これらは memory-safety や parse/write の
+  検証意味論そのものであり、no-op 化は等価モデル化ではなく検証弱化に
+  なる。
+
+### ablation の実測要約
+
+600s cap の baseline/fmt-only/alloc-only/combined matrix(補助証拠)
+では、fmt stub は WAV 2 proof で `memchr`/`PadAdapter` event を 0 にし、
+no-stub control が product/testkit function event 0 件で stdlib 計装内に
+留まったのに対し、`wav_layout` iteration 16–19 まで到達した。一方で
+verdict は 600s では得られず、wall-clock は cap で同じ、unsigned の
+peak RSS は増えた。range では peak RSS が 8471→6744MiB に下がった。
+したがって fmt stub は「診断 formatting の人工的な床」を除去して次の
+支配因へ進めるが、それだけで代表 proof の verdict を取れるほど
+solver 時間を下げるものではない。
+
+採用後の canonical 代表 subset(1500s/proof、2026-11-25)でもこの解釈が
+確認された。fmt stub を採用した WAV 2 proof では `Stub:` 解決と
+`memchr`/`PadAdapter` 0 件が残り、range は `wav_layout` iteration 29、
+unsigned は `decode_samples` まで到達した。しかし両者とも timeout で、
+peak RSS は range 10324MiB・unsigned 13762MiB だった。fmt stub を採用
+しない `mp4_writer_output_decodes` も timeout(peak RSS 7150MiB、
+`write_mp4` 到達)であり、3 件とも `VERIFICATION: SUCCESSFUL` / `FAILED`
+は得られなかった。したがって canonical でも「床は浅い診断経路から
+product 側へ移ったが、verdict が取れるほど solver 時間は下がらない」
+という結論を維持する。
+
+残る支配因は pointer/slice validity instrumentation(`to_isize`・
+`same_allocation`)、slice bounds panic machinery、parser の分岐、
+RawVec/Layout/capacity 計算である。これらは検証対象の安全性・parse
+意味論に属し、等価性を保ったまま `#[kani::stub]` で除去できる候補
+ではない。詳細な計測表・raw log・canonical verdict は
+`evidence/al274/stub-spike/` を参照する。
+
 ## 検証と再実行
 
 正規入口は mise task である。
