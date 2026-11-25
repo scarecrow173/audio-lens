@@ -260,7 +260,7 @@ pointer は win32-SendInput、capture は win32-printwindow backend。
 
 これらの数値・経路保証は GUI の lane ではなく、`scarecrow173/audio-lens#127`
 が所有する独立 Oracle が負う。AL 側で再実装・再検証は行わず、実行可能な
-test・evidence への参照だけを記す（`POLICIES.md` §6 の「AudioLens 独自
+test・evidence への参照だけを記す（`POLICIES.md` §7 の「AudioLens 独自
 Oracle」の運用）。
 
 - f64 fidelity・長尺非回帰・gap→NaN/Validity/Provenance:
