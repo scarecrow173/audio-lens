@@ -137,7 +137,15 @@ run `al-ctl drive --driver real-os` in one).
 
 ## Formal verification
 
-Issue #256 D-layer. Targets so far: the `al-media` WAV codec
+The normative policy is `POLICIES.md` §6; this section is only the
+AudioLens-specific operating procedure. The individual WAV/MP4/AVI proof
+specifications in `docs/specs/formal-verification.md` have not yet been
+migrated to that policy. Their migration is tracked in
+`scarecrow173/audio-lens#274`; until then, treat them as unmigrated
+per-property specifications rather than as the source of a fixed tool
+promotion path.
+
+Targets so far: the `al-media` WAV codec
 (`crates/al-media/src/wav.rs`) and the MP4/AVI container parse
 (`mp4.rs`/`avi.rs`/`format.rs`). Two lanes:
 
@@ -163,34 +171,70 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   Windows). In WSL it first mirrors the cargo-visible source set to
   `~/.cache/al-formal-kani/src` (keeps `target/` for the dep cache;
   no target-dir config or env is touched — artifacts stay in the
-  mirror's default `./target`), then runs each `kani_proofs` proof
-  as its own `cargo kani -p al-media --tests --harness <name>`
-  sequentially, because kani-driver buffers per-harness results
-  until process exit. Output is a JSON verdict record: `pass`/`fail`
-  with the harness counts, or `not_run`/`unsupported` with the
-  reason and provision steps. Environment absence is `not_run` +
-  exit 0 — the honest record, not a lane failure (POLICIES §3).
-  Setting `AL_KANI_LOG_DIR=<dir>` additionally writes each harness's
-  raw output to `<dir>/kani-<harness>.txt` and the final JSON
-  verdict to `<dir>/verdict.json`.
-  Provision inside WSL2:
+  mirror's default `./target`), then runs each registered
+  `kani_proofs` proof as its own `cargo kani -p al-media --tests
+  --harness <name>` sequentially, because kani-driver buffers
+  per-harness results until process exit. Output is a JSON verdict
+  record: `pass`/`fail` with the harness counts, or
+  `not_run`/`unsupported` with the reason and provision steps.
+  Environment absence is `not_run` + exit 0 — the honest record, not
+  a lane failure (POLICIES §3). Setting `AL_KANI_LOG_DIR=<dir>`
+  additionally writes each harness's raw output to
+  `<dir>/kani-<harness>.txt` and the final JSON verdict to
+  `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-  Residual run 2026-11-24 (WSL2 Ubuntu, 31GiB envelope, 45min
-  per-harness budget): verdict `not_run` — 1/9 harnesses verified.
-  `detect_format_signature_rules` (unwind 8) passed in 0.63s;
-  `decode_never_panics_on_bounded_input` is envelope-bound (~30.4GiB
-  cbmc RSS, the box's ceiling) and the other 7 are solver-bound
-  (SAT grind past 45min with memory headroom) — larger-budget or
-  dedicated-runner reruns may still reach them. Raw per-harness
-  output and the verdict JSON live in `evidence/al256/residual/`.
-- The proofs encode the documented contract, not the implementation —
-  a failure is either a product defect or a modeling error; check the
-  counterexample against the `wav.rs` doc comments before acting.
+- The runner's `HARNESSES` array is the registry: 21 harnesses
+  (11 WAV + 10 containers). It always passes `-Z stubbing`; this only
+  enables the attribute mechanism, so harnesses without stub attributes
+  keep the same verification semantics. `AL_KANI_HARNESSES="a,b,c"`
+  selects a comma-separated subset of registered names for a rerun;
+  unregistered names are fail-closed `not_run`, and an unset variable
+  runs all 21.
+- Two registered WAV proofs —
+  `wav_reads_never_panics_unsigned` and
+  `read_wav_range_never_panics_signed` — carry
+  `#[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]`.
+  A successful result for either proof is therefore a conditional
+  guarantee: the proof executes the implementation under that explicit
+  boundary while excluding the panic/allocation behavior of formatted
+  diagnostic-string construction. Do not report it as an unconditional
+  whole-API no-panic proof.
+- Historical note: the 2026-11-24 residual run (`1/9 harnesses
+  verified`, raw output in `evidence/al256/residual/`) predates the
+  21-harness split. The current canonical state after that split and
+  the stub spike is `not_run` — 1/21 verified at a 25-minute
+  per-proof budget: only `detect_format_signature_rules` verified and
+  the other 20 timed out. The PR #276 spike's three representative
+  proofs also all timed out. Current evidence and analysis live in
+  `evidence/al274/` and `evidence/al274/stub-spike/`.
+- These proofs execute the implementation under explicit bounds,
+  assumptions, and stubs; they are not a model substituted for the
+  implementation. When a proof fails or cannot complete, classify the
+  product/model question and the independent invalidity questions
+  separately: product defect, modeling error, invalid stub or
+  assumption, resource limit, or environment. Check concrete
+  counterexamples against the documented contract before changing
+  either side.
 - Mutation evidence lives in the ledger: a deliberately broken variant
   is injected into `crates/al-media/src/`, the failing proptest seed is
   captured, then the edit is reverted — committed product diff stays
-  zero. See `docs/specs/formal-verification.md` for the promotion path
-  and `evidence/al256/` for the recorded runs.
+  zero. Recorded runs are in `evidence/al256/`; current al#274 evidence
+  is in `evidence/al274/`.
+
+Change-impact procedure:
+
+1. Before reusing existing evidence, compare the product or test change
+   with the affected property, input domain, boundary, assumptions,
+   stubs, bounds, and oracle. If correspondence is unclear, the prior
+   result is stale evidence, not a current Pass.
+2. Rerun the affected native properties with `mise run test-formal`.
+   For Kani, use the runner's existing subset selection
+   (`AL_KANI_HARNESSES`) for affected registered harnesses, or the full
+   lane when the boundary/shared dependency impact is broader.
+3. Update the evidence ledger with target SHA, tool versions, execution
+   conditions, guarantee scope, and verdict. Do not advance a verified
+   sync commit until correspondence review and the required reruns are
+   complete.
 
 ## Bench
 
