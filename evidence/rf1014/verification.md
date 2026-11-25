@@ -24,7 +24,7 @@ base SHA: `7b3be0d9a735620a922e09492129364ae959f31a`
 
 ## 手動整合性レビュー
 
-- [x] `POLICIES.md` §6 の転記照合。rf#1014 本文の規範 6 節から、共通原則 10 件と各規範節の本文を構成する 23 行を抽出し、すべてが `POLICIES.md` に完全一致で存在することをスクリプトで確認した（missing 0）。§6 内に canonical 本文以外の規則文を追加していない。見出しと節番号の構造化のみを行った。
+- [x] `POLICIES.md` §6 の転記照合。rf#1014 本文の規範 6 節から、共通原則 10 件と各規範節の本文 12 段落（非空 22 行）を抽出し、すべてが `POLICIES.md` に完全一致で存在することをスクリプトで確認した（missing 0）。§6 内に canonical 本文以外の規則文を追加していない。見出しと節番号の構造化のみを行った。
 - [x] `AGENTS.md` と `.agents/skills/verify-audio-lens/SKILL.md` の有効な案内に、proptest → Kani → TLA+ → Lean を必須の昇格路として扱う記述が残っていない。grep では skill の否定文 `rather than as the source of a fixed tool promotion path` のみが見つかり、利用者へ旧昇格路を送る記述ではないことを確認した。
 - [x] Timeout、OOM、環境不在、exit 0、CI green を Proof Pass と扱う記述が `AGENTS.md` と skill に残っていない。grep で見つかったのは `POLICIES.md` §6.5 の禁止規則だけだった。
 - [x] 未移行の個別検証が `scarecrow173/audio-lens#274` に明示的に紐付けられている。`POLICIES.md` §7 と skill の Formal verification 節の両方に、現行 WAV/MP4/AVI proof 群が未移行であり移行は同 Issue で行う旨を記した。
