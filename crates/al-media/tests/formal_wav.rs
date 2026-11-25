@@ -12,6 +12,9 @@ use al_media::wav::{WavEncoding, WavWriter, read_wav_range, wav_frame_count};
 use al_media::{SampleFormat, decode_wav};
 use proptest::prelude::*;
 
+#[cfg(kani)]
+mod kani_stub_models;
+
 /// Largest sample rate that cannot overflow `byte_rate` for any
 /// reachable `block_align` (8 channels x 8 bytes = 64).
 const RATE_CAP: u32 = u32::MAX / 64;
@@ -355,14 +358,10 @@ mod kani_proofs {
         &data[0..4] == b"RIFF" && &data[8..12] == b"WAVE"
     }
 
-    /// Inputs WITHOUT the RIFF/WAVE signature: every read entry point
-    /// must reject them without a panic. This is the shallow class —
-    /// cheap to verify and disjoint from the three `*_signed` proofs,
-    /// so together they cover the same input domain as the original
-    /// single proof (al#274 input-domain split).
-    #[kani::proof]
-    #[kani::unwind(16)]
-    fn wav_reads_never_panics_unsigned() {
+    /// Shared body of the unsigned shallow WAV probe. The representative
+    /// harness and the temporary spike harnesses differ only in their
+    /// per-harness stub attributes.
+    fn wav_reads_never_panics_unsigned_body() {
         let data: [u8; 48] = kani::any();
         kani::assume(!wave_signed(&data));
         let _ = decode_wav(&data);
@@ -370,6 +369,20 @@ mod kani_proofs {
         let start = u64::from(kani::any::<u8>());
         let end = u64::from(kani::any::<u8>());
         let _ = read_wav_range(&mut io::Cursor::new(&data[..]), start, end);
+    }
+
+    /// Inputs WITHOUT the RIFF/WAVE signature: every read entry point
+    /// must reject them without a panic. This is the shallow class —
+    /// cheap to verify and disjoint from the three `*_signed` proofs,
+    /// so together they cover the same input domain as the original
+    /// single proof (al#274 input-domain split).
+    // The proof discards every Result and never inspects MediaError::reason;
+    // diagnostic text is outside the no-panic contract being proved.
+    #[kani::proof]
+    #[kani::unwind(16)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    fn wav_reads_never_panics_unsigned() {
+        wav_reads_never_panics_unsigned_body();
     }
 
     /// RIFF/WAVE-signed inputs may never panic `decode_wav`. 48 bytes
@@ -398,19 +411,88 @@ mod kani_proofs {
         let _ = wav_frame_count(&mut io::Cursor::new(&data[..]));
     }
 
-    /// `read_wav_range` on signed inputs. u8-derived bounds:
-    /// every branch is decided by start<end / end<=total — values
-    /// past total exit before the (end-start)*block multiply, so
-    /// [0,255] is exhaustive over branch space while unconstrained
-    /// u64 multiplies would dominate the solver.
-    #[kani::proof]
-    #[kani::unwind(40)]
-    fn read_wav_range_never_panics_signed() {
+    /// Shared body of the signed deep range-read probe, factored so the
+    /// spike matrix compares the same formula apart from stub attributes.
+    fn read_wav_range_never_panics_signed_body() {
         let data: [u8; 48] = kani::any();
         kani::assume(wave_signed(&data));
         let start = u64::from(kani::any::<u8>());
         let end = u64::from(kani::any::<u8>());
         let _ = read_wav_range(&mut io::Cursor::new(&data[..]), start, end);
+    }
+
+    /// `read_wav_range` on signed inputs. u8-derived bounds:
+    /// every branch is decided by start<end / end<=total — values
+    /// past total exit before the (end-start)*block multiply, so
+    /// [0,255] is exhaustive over branch space while unconstrained
+    /// u64 multiplies would dominate the solver.
+    // As above, error text is diagnostic payload only; range success/failure
+    // and memory safety do not depend on the formatted string.
+    #[kani::proof]
+    #[kani::unwind(40)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    fn read_wav_range_never_panics_signed() {
+        read_wav_range_never_panics_signed_body();
+    }
+
+    // Temporary al#274 spike harnesses. They are intentionally not
+    // registered in tools/run-formal-kani.mjs: they exist for the ablation
+    // matrix and are not additional canonical proof responsibilities.
+
+    #[kani::proof]
+    #[kani::unwind(16)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    fn spike_wav_unsigned_fmt() {
+        wav_reads_never_panics_unsigned_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(16)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_wav_unsigned_alloc() {
+        wav_reads_never_panics_unsigned_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(16)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_wav_unsigned_both() {
+        wav_reads_never_panics_unsigned_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(40)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    fn spike_wav_range_fmt() {
+        read_wav_range_never_panics_signed_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(40)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_wav_range_alloc() {
+        read_wav_range_never_panics_signed_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(40)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_wav_range_both() {
+        read_wav_range_never_panics_signed_body();
     }
 
     /// Writer -> decoder round-trip is exact for representable input,
