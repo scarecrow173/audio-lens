@@ -155,8 +155,48 @@ canonical lane 側の結果を次節に記録する。
 
 ## Canonical lane 実走
 
-(後続で記録 — `AL_KANI_LOG_DIR=evidence/al274/residual
-mise run test-formal-kani` の verdict.json・per-harness 結果)
+`mise run test-formal-kani`(`node tools/run-formal-kani.mjs`、
+`AL_KANI_TIMEOUT_MS=1500000` = 各 harness 25min、
+`AL_KANI_LOG_DIR=evidence/al274/residual`)を 21 harness 全件で
+実走した。verdict は **`not_run` — 1/21 verified**、fail-closed
+exit 0(`residual/verdict.json`)。trial cap を全て上回る 1500s
+を選んだのは、近接未収束があれば verdict が転じ得る唯一の
+budget だからで、結果は以下の通りだった:
+
+- `detect_format_signature_rules` のみ
+  `VERIFICATION:- SUCCESSFUL`(symex runtime 0.69s — 先頭 <=12B
+  しか読まないため固定床に届かない唯一の入口)。
+- 残り 20 harness は全て 1500s で `ETIMEDOUT` — signed・unsigned・
+  writer round-trip・header・mutation 系を問わず、kill 時点の
+  tail は symex の path-abort(`same_allocation`/`to_isize`
+  系)出力のまま。**25min でも shallow reject 経路を含め
+  どの proof も symex を抜けなかった** — この box の
+  per-proof 固定床は >25min で、al#256 の「45min で 7 件
+  solver-bound」という見積もりは、分割で per-proof の式量が
+  下がっても固定床自体は残ることを意味していた。
+- `VERIFICATION: FAILED`・unwinding-assertion 失敗は 0 件 —
+  rightsizing した bound はどの proof でも足りている
+  (不足なら FAILED として表れる設計)。反例不具合も 0 件。
+- envelope 側は definitive に解消: al#256 で 30.4GiB OOM した
+  3 入口結合 proof に相当する `decode_wav_never_panics_signed`
+  は peak 3.8GiB、lane 全体を通じて cbmc RSS が envelope
+  (31GiB)に近づいた harness は無い — memory-bound 分類は
+  本 slice で解消し、残る制約は純粋に symex 時間のみ。
+
+## 残課題(al#274 の結論として記録)
+
+再構成で「envelope-bound の解消」「proof 責務の単一化による
+失敗時の局所性」「`AL_KANI_HARNESSES` による部分再実行」は
+達成されたが、**この box では 21 件中 20 件が依然
+time-bound**。verdict を取るには以下のいずれかが要る:
+
+1. 専用 runner/より大きな budget(RAM・時間とも余力 —
+   symex のみが支配のため、時間増はそのまま有効)
+2. `#[kani::stub]` 等による fmt/alloc/alloc-error 系 stdlib
+   計装のモデル化(固定床を直接下げる唯一の手段だが、
+   stub の契約等価性の担保が要る)
+3. bounded `not_run` の受理 — proptest 側が同 property の
+   統計カバレッジを持つ(本 slice で non-regression 確認済み)
 
 ## Honest notes
 

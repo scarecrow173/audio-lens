@@ -1,0 +1,176 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "not_run",
+  "reason": "1/21 harness(es) verified; incomplete: decode_wav_never_panics_signed(timeout 1500000ms), wav_frame_count_never_panics_signed(timeout 1500000ms), read_wav_range_never_panics_signed(timeout 1500000ms), wav_reads_never_panics_unsigned(timeout 1500000ms), writer_round_trip_pcm_s16(timeout 1500000ms), writer_round_trip_pcm_s24(timeout 1500000ms), writer_round_trip_pcm_s32(timeout 1500000ms), writer_round_trip_float32(timeout 1500000ms), writer_round_trip_float64(timeout 1500000ms), header_reads_valid_ranges_slice_exact(timeout 1500000ms), header_reads_invalid_ranges_error(timeout 1500000ms), mp4_never_panics_ftyp_signed(timeout 1500000ms), avi_never_panics_riff_signed(timeout 1500000ms), containers_never_panics_unsigned(timeout 1500000ms), mp4_writer_output_decodes(timeout 1500000ms), avi_writer_output_decodes(timeout 1500000ms), mutated_mp4_never_panics(timeout 1500000ms), truncated_mp4_never_panics(timeout 1500000ms), mutated_avi_never_panics(timeout 1500000ms), truncated_avi_never_panics(timeout 1500000ms)",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "decode_wav_never_panics_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.06s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.48s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.87s"
+    },
+    {
+      "harness": "wav_frame_count_never_panics_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "read_wav_range_never_panics_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s"
+    },
+    {
+      "harness": "wav_reads_never_panics_unsigned",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s"
+    },
+    {
+      "harness": "writer_round_trip_pcm_s16",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.38s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "writer_round_trip_pcm_s24",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.60s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s"
+    },
+    {
+      "harness": "writer_round_trip_pcm_s32",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.60s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "writer_round_trip_float32",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.58s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s"
+    },
+    {
+      "harness": "writer_round_trip_float64",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s"
+    },
+    {
+      "harness": "header_reads_valid_ranges_slice_exact",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.96s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s"
+    },
+    {
+      "harness": "header_reads_invalid_ranges_error",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s"
+    },
+    {
+      "harness": "mp4_never_panics_ftyp_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s"
+    },
+    {
+      "harness": "avi_never_panics_riff_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.54s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.46s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s"
+    },
+    {
+      "harness": "containers_never_panics_unsigned",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s"
+    },
+    {
+      "harness": "detect_format_signature_rules",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.71s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.68s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.79s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s"
+    },
+    {
+      "harness": "mp4_writer_output_decodes",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.33s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s"
+    },
+    {
+      "harness": "avi_writer_output_decodes",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "mutated_mp4_never_panics",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "truncated_mp4_never_panics",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.68s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s"
+    },
+    {
+      "harness": "mutated_avi_never_panics",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    },
+    {
+      "harness": "truncated_avi_never_panics",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.72s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    }
+  ]
+}
