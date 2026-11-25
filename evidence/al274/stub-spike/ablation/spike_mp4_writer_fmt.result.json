@@ -1,0 +1,11 @@
+{
+  "harness": "spike_mp4_writer_fmt",
+  "variant_kind": "fmt-only",
+  "cap_s": 600,
+  "wall_clock_s": 663,
+  "exit_code": 124,
+  "peak_rss_kb": 4400676,
+  "verdict": "timeout",
+  "symex": { "verbose_lines": 2506, "event_lines": 2495, "max_unwind_iteration": "48", "tail": "" },
+  "log": "ablation/spike_mp4_writer_fmt.verbose.log"
+}

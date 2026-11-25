@@ -1,0 +1,32 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "not_run",
+  "reason": "0/3 harness(es) verified; incomplete: read_wav_range_never_panics_signed(timeout 1500000ms), wav_reads_never_panics_unsigned(timeout 1500000ms), mp4_writer_output_decodes(timeout 1500000ms)",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "read_wav_range_never_panics_signed",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s"
+    },
+    {
+      "harness": "wav_reads_never_panics_unsigned",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.54s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.60s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.65s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.77s"
+    },
+    {
+      "harness": "mp4_writer_output_decodes",
+      "ok": false,
+      "bad": false,
+      "timedOut": true,
+      "status": null,
+      "tail": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.62s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s"
+    }
+  ]
+}

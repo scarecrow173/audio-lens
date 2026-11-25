@@ -1,0 +1,350 @@
+[
+  {
+    "harness": "wav_reads_never_panics_unsigned",
+    "variant_kind": "baseline-control",
+    "cap_s": 600,
+    "wall_clock_s": 662,
+    "exit_code": 124,
+    "peak_rss_kb": 5958132,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 8175,
+      "event_lines": 8165,
+      "max_unwind_iteration": "17",
+      "tail": "",
+      "product_function_events": 0,
+      "last_product_function": "",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs line 965 column 15 function std::result::Result::<std::ptr::NonNull<[u8]>, std::alloc::AllocError>::map_err::<std::collections::TryReserveError, {closure@decode_wav_never_panics_on_arbitrary_bytes::{closure#1}::alloc::raw_vec::RawVecInner::finish_grow::{closure#0}}> thread 0"
+    },
+    "log": "ablation/wav_reads_never_panics_unsigned.verbose.log",
+    "event_counts": {
+      "to_isize": 2283,
+      "same_allocation": 1041,
+      "padadapter": 145,
+      "memchr": 1124,
+      "alloc_error": 254,
+      "rawvec": 631,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_unsigned_fmt",
+    "variant_kind": "fmt-only",
+    "cap_s": 600,
+    "wall_clock_s": 662,
+    "exit_code": 124,
+    "peak_rss_kb": 8072176,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 1948,
+      "event_lines": 1937,
+      "max_unwind_iteration": "16",
+      "tail": "",
+      "product_function_events": 32,
+      "last_product_function": "al_media::wav::wav_layout::<std::io::Cursor<&[u8]>>",
+      "max_product_loop_iteration": 16,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs line 2177 column 15 function <std::result::Result<al_media::wav::FmtChunk, al_media::MediaError> as std::ops::Try>::branch thread 0"
+    },
+    "log": "ablation/spike_wav_unsigned_fmt.verbose.log",
+    "event_counts": {
+      "to_isize": 228,
+      "same_allocation": 185,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 32,
+      "rawvec": 80,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_unsigned_alloc",
+    "variant_kind": "alloc-only",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 6346544,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 7974,
+      "event_lines": 7963,
+      "max_unwind_iteration": "17",
+      "tail": "",
+      "product_function_events": 0,
+      "last_product_function": "",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs line 965 column 15 function std::result::Result::<std::alloc::Layout, std::alloc::LayoutError>::map_err::<std::collections::TryReserveError, {closure@decode_wav_never_panics_on_arbitrary_bytes::{closure#1}::alloc::raw_vec::layout_array::{closure#0}}> thread 0"
+    },
+    "log": "ablation/spike_wav_unsigned_alloc.verbose.log",
+    "event_counts": {
+      "to_isize": 2295,
+      "same_allocation": 1047,
+      "padadapter": 145,
+      "memchr": 1124,
+      "alloc_error": 0,
+      "rawvec": 639,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_unsigned_both",
+    "variant_kind": "combined",
+    "cap_s": 600,
+    "wall_clock_s": 662,
+    "exit_code": 124,
+    "peak_rss_kb": 8058312,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 1917,
+      "event_lines": 1905,
+      "max_unwind_iteration": "16",
+      "tail": "",
+      "product_function_events": 32,
+      "last_product_function": "al_media::wav::wav_layout::<std::io::Cursor<&[u8]>>",
+      "max_product_loop_iteration": 16,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/result.rs line 2177 column 15 function <std::result::Result<al_media::wav::FmtChunk, al_media::MediaError> as std::ops::Try>::branch thread 0"
+    },
+    "log": "ablation/spike_wav_unsigned_both.verbose.log",
+    "event_counts": {
+      "to_isize": 228,
+      "same_allocation": 185,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 0,
+      "rawvec": 80,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "read_wav_range_never_panics_signed",
+    "variant_kind": "baseline-control",
+    "cap_s": 600,
+    "wall_clock_s": 662,
+    "exit_code": 124,
+    "peak_rss_kb": 8674332,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 17705,
+      "event_lines": 17695,
+      "max_unwind_iteration": "41",
+      "tail": "",
+      "product_function_events": 0,
+      "last_product_function": "",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file library/kani/src/lib.rs line 57 column 1 function <usize as kani::rustc_intrinsics::ToISize>::to_isize thread 0"
+    },
+    "log": "ablation/read_wav_range_never_panics_signed.verbose.log",
+    "event_counts": {
+      "to_isize": 7832,
+      "same_allocation": 2632,
+      "padadapter": 47,
+      "memchr": 5279,
+      "alloc_error": 20,
+      "rawvec": 44,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_range_fmt",
+    "variant_kind": "fmt-only",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 6906104,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2419,
+      "event_lines": 2408,
+      "max_unwind_iteration": "19",
+      "tail": "",
+      "product_function_events": 38,
+      "last_product_function": "al_media::wav::wav_layout::<std::io::Cursor<&[u8]>>",
+      "max_product_loop_iteration": 19,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1162 column 15 function std::option::Option::<&[u8]>::map::<u16, {closure@al_media::wav::read_u16::{closure#0}}> thread 0"
+    },
+    "log": "ablation/spike_wav_range_fmt.verbose.log",
+    "event_counts": {
+      "to_isize": 288,
+      "same_allocation": 229,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 40,
+      "rawvec": 98,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_range_alloc",
+    "variant_kind": "alloc-only",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 6472896,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 13183,
+      "event_lines": 13172,
+      "max_unwind_iteration": "41",
+      "tail": "",
+      "product_function_events": 0,
+      "last_product_function": "",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "Unwinding loop _RNvNtNtCs8xvirJzNMvV_4core5slice6memchr12memchr_naiveCs8DMgk2VNy4k_10formal_wav.0 iteration 28 file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/memchr.rs line 41 column 5 function core::slice::memchr::memchr_naive thread 0"
+    },
+    "log": "ablation/spike_wav_range_alloc.verbose.log",
+    "event_counts": {
+      "to_isize": 5757,
+      "same_allocation": 1941,
+      "padadapter": 47,
+      "memchr": 3958,
+      "alloc_error": 0,
+      "rawvec": 44,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_wav_range_both",
+    "variant_kind": "combined",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 6861808,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2367,
+      "event_lines": 2355,
+      "max_unwind_iteration": "19",
+      "tail": "",
+      "product_function_events": 38,
+      "last_product_function": "al_media::wav::wav_layout::<std::io::Cursor<&[u8]>>",
+      "max_product_loop_iteration": 19,
+      "tail_nonempty": "aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs line 5598 column 9 function core::slice::copy_from_slice_impl::<u8> thread 0"
+    },
+    "log": "ablation/spike_wav_range_both.verbose.log",
+    "event_counts": {
+      "to_isize": 288,
+      "same_allocation": 228,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 0,
+      "rawvec": 98,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "mp4_writer_output_decodes",
+    "variant_kind": "baseline-control",
+    "cap_s": 600,
+    "wall_clock_s": 662,
+    "exit_code": 124,
+    "peak_rss_kb": 4460952,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2557,
+      "event_lines": 2547,
+      "max_unwind_iteration": "48",
+      "tail": "",
+      "product_function_events": 118,
+      "last_product_function": "al_testkit::mp4::write_mp4",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file library/kani/src/lib.rs line 57 column 1 function kani::mem::cbmc::same_allocation thread 0"
+    },
+    "log": "ablation/mp4_writer_output_decodes.verbose.log",
+    "event_counts": {
+      "to_isize": 330,
+      "same_allocation": 766,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 124,
+      "rawvec": 306,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_mp4_writer_fmt",
+    "variant_kind": "fmt-only",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 4400676,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2506,
+      "event_lines": 2495,
+      "max_unwind_iteration": "48",
+      "tail": "",
+      "product_function_events": 112,
+      "last_product_function": "al_testkit::mp4::write_mp4",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file library/kani/src/lib.rs line 57 column 1 function kani::mem::cbmc::same_allocation thread 0"
+    },
+    "log": "ablation/spike_mp4_writer_fmt.verbose.log",
+    "event_counts": {
+      "to_isize": 330,
+      "same_allocation": 720,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 124,
+      "rawvec": 306,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_mp4_writer_alloc",
+    "variant_kind": "alloc-only",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 4401096,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2389,
+      "event_lines": 2378,
+      "max_unwind_iteration": "48",
+      "tail": "",
+      "product_function_events": 113,
+      "last_product_function": "al_testkit::mp4::write_mp4",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file library/kani/src/lib.rs line 57 column 1 function kani::mem::cbmc::same_allocation thread 0"
+    },
+    "log": "ablation/spike_mp4_writer_alloc.verbose.log",
+    "event_counts": {
+      "to_isize": 330,
+      "same_allocation": 726,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 0,
+      "rawvec": 306,
+      "fmt_write": 0
+    }
+  },
+  {
+    "harness": "spike_mp4_writer_both",
+    "variant_kind": "combined",
+    "cap_s": 600,
+    "wall_clock_s": 663,
+    "exit_code": 124,
+    "peak_rss_kb": 4406072,
+    "verdict": "timeout",
+    "symex": {
+      "verbose_lines": 2395,
+      "event_lines": 2383,
+      "max_unwind_iteration": "48",
+      "tail": "",
+      "product_function_events": 113,
+      "last_product_function": "al_testkit::mp4::write_mp4",
+      "max_product_loop_iteration": 0,
+      "tail_nonempty": "aborting path on assume(false) at file library/kani/src/lib.rs line 57 column 1 function kani::mem::cbmc::same_allocation thread 0"
+    },
+    "log": "ablation/spike_mp4_writer_both.verbose.log",
+    "event_counts": {
+      "to_isize": 330,
+      "same_allocation": 731,
+      "padadapter": 0,
+      "memchr": 0,
+      "alloc_error": 0,
+      "rawvec": 306,
+      "fmt_write": 0
+    }
+  }
+]
