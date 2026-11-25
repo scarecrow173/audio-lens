@@ -1,0 +1,16 @@
+{
+  "harness": "read_wav_range_never_panics_signed",
+  "variant_kind": "baseline-control",
+  "cap_s": 600,
+  "wall_clock_s": 662,
+  "exit_code": 124,
+  "peak_rss_kb": 8674332,
+  "verdict": "timeout",
+  "symex": {
+    "verbose_lines": 17705,
+    "event_lines": 17695,
+    "max_unwind_iteration": "41",
+    "tail": ""
+  },
+  "log": "ablation/read_wav_range_never_panics_signed.verbose.log"
+}

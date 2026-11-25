@@ -18,6 +18,9 @@ use al_testkit::media::{AviSpec, AviStreamSpec, MoviPacket, pcm_s16le, write_avi
 use al_testkit::mp4::{Mp4EntrySpec, Mp4Spec, Mp4TableSpec, Mp4TrackSpec, mp4_language, write_mp4};
 use proptest::prelude::*;
 
+#[cfg(kani)]
+mod kani_stub_models;
+
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
@@ -1717,15 +1720,9 @@ mod kani_proofs {
         assert_eq!(detect_format(&full), expected_detect(&full));
     }
 
-    /// `write_mp4` output over symbolic `soun` params decodes and the
-    /// PCM round-trip agrees. channels 1..=2, rate 1..=192000, and four
-    /// frames of symbolic s16 keep the sample loop small; the bound
-    /// exercises ftyp/moov/stbl/stsd parsing and the PCM path end to
-    /// end. unwind(48) covers the fixed box nesting of this spec shape
-    /// (al#274: 64 was over-provisioned for ~20 reachable iterations).
-    #[kani::proof]
-    #[kani::unwind(48)]
-    fn mp4_writer_output_decodes() {
+    /// Shared body of the MP4 writer round-trip probe. The canonical
+    /// harness and temporary spike harnesses share exactly this body.
+    fn mp4_writer_output_decodes_body() {
         let channels: u16 = kani::any();
         kani::assume((1..=2).contains(&channels));
         let rate: u32 = kani::any();
@@ -1770,6 +1767,60 @@ mod kani_proofs {
         assert_eq!(a.channels, channels);
         assert_eq!(a.sample_rate, rate);
         assert_eq!(a.samples, s16);
+    }
+
+    /// `write_mp4` output over symbolic `soun` params decodes and the
+    /// PCM round-trip agrees. channels 1..=2, rate 1..=192000, and four
+    /// frames of symbolic s16 keep the sample loop small; the bound
+    /// exercises ftyp/moov/stbl/stsd parsing and the PCM path end to
+    /// end. unwind(48) covers the fixed box nesting of this spec shape
+    /// (al#274: 64 was over-provisioned for ~20 reachable iterations).
+    #[kani::proof]
+    #[kani::unwind(48)]
+    fn mp4_writer_output_decodes() {
+        mp4_writer_output_decodes_body();
+    }
+
+    // Temporary al#274 spike harnesses (not registered in the canonical
+    // runner). The fmt variants are controls only and must not be read as
+    // valid proofs: this body asserts the `format!`-produced PCM codec name,
+    // so a fmt stub is not contract-equivalent here, can make the assertion
+    // fail if reached, and must never be adopted for this harness.
+
+    // Explicit no-stub control for the ablation script; the canonical
+    // harness name is reserved for the registered proof.
+    #[kani::proof]
+    #[kani::unwind(48)]
+    fn spike_mp4_writer_baseline() {
+        mp4_writer_output_decodes_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(48)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    fn spike_mp4_writer_fmt() {
+        mp4_writer_output_decodes_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(48)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_mp4_writer_alloc() {
+        mp4_writer_output_decodes_body();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(48)]
+    #[kani::stub(std::fmt::format, crate::kani_stub_models::fmt_format_empty)]
+    #[kani::stub(
+        std::alloc::handle_alloc_error,
+        crate::kani_stub_models::handle_alloc_error_infallible
+    )]
+    fn spike_mp4_writer_both() {
+        mp4_writer_output_decodes_body();
     }
 
     /// `write_avi` output over symbolic PCM audio decodes: first `vids`

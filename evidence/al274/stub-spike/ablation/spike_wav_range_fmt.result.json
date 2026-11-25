@@ -1,0 +1,11 @@
+{
+  "harness": "spike_wav_range_fmt",
+  "variant_kind": "fmt-only",
+  "cap_s": 600,
+  "wall_clock_s": 663,
+  "exit_code": 124,
+  "peak_rss_kb": 6906104,
+  "verdict": "timeout",
+  "symex": { "verbose_lines": 2419, "event_lines": 2408, "max_unwind_iteration": "19", "tail": "" },
+  "log": "ablation/spike_wav_range_fmt.verbose.log"
+}

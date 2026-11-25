@@ -1,0 +1,15 @@
+# rustc +nightly-2026-08-21 -Zunpretty=expanded probe (auxiliary)
+# input: fn main() { let x = format!("a{}", 1); println!("{}",x); }
+
+let x =
+    ::alloc::__export::must_use({
+            ::alloc::fmt::format(format_args!("a{0}", 1))
+        });
+{ ::std::io::_print(format_args!("{0}\n", x)); };
+
+# Kani compile-smoke result: #[kani::stub(std::fmt::format, ...)] resolves to
+# the same function item and prints this header before CBMC:
+#   Checking harness kani_proofs::spike_wav_unsigned_fmt...
+#     - Stub: std :: fmt :: format -> crate :: kani_stub_models :: fmt_format_empty
+# The resulting verbose log contains no PadAdapter/core::fmt::write/memchr
+# events, so the high-level format replacement is reached by format! lowering.

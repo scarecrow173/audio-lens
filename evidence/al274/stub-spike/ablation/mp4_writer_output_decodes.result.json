@@ -1,0 +1,11 @@
+{
+  "harness": "mp4_writer_output_decodes",
+  "variant_kind": "baseline-control",
+  "cap_s": 600,
+  "wall_clock_s": 662,
+  "exit_code": 124,
+  "peak_rss_kb": 4460952,
+  "verdict": "timeout",
+  "symex": { "verbose_lines": 2557, "event_lines": 2547, "max_unwind_iteration": "48", "tail": "" },
+  "log": "ablation/mp4_writer_output_decodes.verbose.log"
+}

@@ -254,7 +254,11 @@ if (distro !== "native") {
 }
 
 function runKani(harness) {
-  const kaniArgs = ["kani", "-p", PACKAGE, "--tests", "--harness", harness];
+  // al#274: representative proofs adopted per-harness #[kani::stub] models.
+  // `-Z stubbing` only enables the attribute mechanism; harnesses without
+  // stub attributes keep the same verification semantics, so the lane does
+  // not need a second env-gated mode.
+  const kaniArgs = ["kani", "-p", PACKAGE, "--tests", "--harness", harness, "-Z", "stubbing"];
   if (distro === "native") {
     return spawnSync("cargo", kaniArgs, {
       cwd: repoDir,

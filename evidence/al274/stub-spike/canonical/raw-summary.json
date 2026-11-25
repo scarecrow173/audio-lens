@@ -1,0 +1,50 @@
+[
+  {
+    "harness": "mp4_writer_output_decodes",
+    "timed_out": true,
+    "verification_successful": false,
+    "verification_failed": false,
+    "bytes": 918684,
+    "lines": 5096,
+    "event_lines": 4126,
+    "memchr_events": 0,
+    "padadapter_events": 0,
+    "alloc_rt_error_events": 142,
+    "product_function_events": 285,
+    "max_product_loop_iteration": 0,
+    "last_product_function": "al_testkit::mp4::write_mp4",
+    "log": "canonical/kani-mp4_writer_output_decodes.txt"
+  },
+  {
+    "harness": "read_wav_range_never_panics_signed",
+    "timed_out": true,
+    "verification_successful": false,
+    "verification_failed": false,
+    "bytes": 906536,
+    "lines": 4557,
+    "event_lines": 3586,
+    "memchr_events": 0,
+    "padadapter_events": 0,
+    "alloc_rt_error_events": 58,
+    "product_function_events": 58,
+    "max_product_loop_iteration": 29,
+    "last_product_function": "al_media::wav::wav_layout::<std::io::Cursor<&[u8]>>",
+    "log": "canonical/kani-read_wav_range_never_panics_signed.txt"
+  },
+  {
+    "harness": "wav_reads_never_panics_unsigned",
+    "timed_out": true,
+    "verification_successful": false,
+    "verification_failed": false,
+    "bytes": 524432,
+    "lines": 2987,
+    "event_lines": 2016,
+    "memchr_events": 0,
+    "padadapter_events": 0,
+    "alloc_rt_error_events": 38,
+    "product_function_events": 35,
+    "max_product_loop_iteration": 16,
+    "last_product_function": "al_media::wav::decode_samples",
+    "log": "canonical/kani-wav_reads_never_panics_unsigned.txt"
+  }
+]
