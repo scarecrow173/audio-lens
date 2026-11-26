@@ -183,18 +183,21 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 21 harnesses
-  (11 WAV + 10 containers). It always passes `-Z stubbing`; this only
+- The runner's `HARNESSES` array is the registry: 23 harnesses
+  (13 WAV + 10 containers). It always passes `-Z stubbing`; this only
   enables the attribute mechanism, so harnesses without stub attributes
   keep the same verification semantics. `AL_KANI_HARNESSES="a,b,c"`
-  selects a comma-separated subset of registered names for a rerun;
+  selects a comma-separated subset of registered names for a rerun.
+  `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` selects the two Required
+  WAV-CHUNK-003/WAV-SCAN-004 proofs (`wav_chunk_boundary_step_exact`
+  and `wav_chunk_scan_progress_bounded_exact`);
   `AL_KANI_HARNESS_GROUP="wav-range"` selects the two Required
   WAV-RANGE-008 replacement proofs
   (`wav_range_plan_valid_ranges_exact` and
-  `wav_range_plan_invalid_ranges_error`) registered in
+  `wav_range_plan_invalid_ranges_error`). All four are registered in
   `crates/al-media/src/wav.rs`. The two selection variables are
   mutually exclusive; unregistered names or groups are fail-closed
-  `not_run`, and an unset variable runs all 21. When `/usr/bin/time`
+  `not_run`, and an unset variable runs all 23. When `/usr/bin/time`
   is available the runner wraps each harness with GNU time, records
   elapsed ms and maximum resident set size in the raw log header,
   and copies both into the JSON verdict details.
@@ -230,8 +233,10 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   is injected into `crates/al-media/src/`, the failing proptest seed is
   captured, then the edit is reverted — committed product diff stays
   zero. Recorded runs are in `evidence/al256/`; current al#274 boundary
-  evidence is in `evidence/al274/`, and WAV-RANGE-008 arithmetic
-  mutation evidence is in `evidence/al274-proof-redesign/`.
+  evidence is in `evidence/al274/`, WAV-RANGE-008 arithmetic
+  mutation evidence is in `evidence/al274-proof-redesign/`, and
+  WAV-CHUNK-003/WAV-SCAN-004 boundary/scan mutation evidence is in
+  `evidence/al274-chunk-scan-proof/`.
 
 Change-impact procedure:
 

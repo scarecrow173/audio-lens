@@ -99,6 +99,18 @@ PR #281 の timeout は wide bitvector の nonlinear multiplication monotonicity
 
 runner は `AL_KANI_HARNESS_GROUP="wav-range"` で `wav_range_plan_valid_ranges_exact` と `wav_range_plan_invalid_ranges_error` を選択する。各 harness の elapsed ms、raw log、pass/fail/not_run、`/usr/bin/time -v` が利用できる環境での max RSS を verdict に残す。初期に検討した `block_align` bit width exact finite partition は、constructive decomposition が exact coverage を保ったまま単一 proof で実用予算に入ったため採用しない。
 
+### WAV-CHUNK-003/WAV-SCAN-004 implementation boundary(2026-11-26 chunk/scan slice)
+
+chunk boundary helper の入力は `(offset: u64, file_len: u64, size: u32)` の全数値領域とする。production scan は RIFF size field の制約下で動くが、constructor-admitted RIFF file length domain へ proof を縮めない。full u64 file/offset domain は、boundary arithmetic が total に定義でき、入力を広げる方向で保証を弱めないため採用する。`offset > file_len` は production 到達外だが、total extension として terminal trailing 側へ分類する。
+
+証明対象は 1 回の chunk header interpretation の total correctness である。valid なら `body_start = offset + 8`、`body_end = body_start + size`、odd-sized chunk の pad、`next_offset`、file length 内 containment、少なくとも 8 byte の進行、残余量の厳密な減少、overflow/underflow/panic の不存在を検査する。invalid exact complement は size overflow、chunk extends past end、missing pad、terminal exact complement は header 不足に対応し、1..7 byte の端数を trailing byte 判定へ分類する。I/O、allocation、PCM decode、diagnostic formatting、fmt/data semantic、duplicate 判定、公開 API 全体 no-panic は proof の外に置く。
+
+scan proof の初期 offset は production と同じ 12、`file_len >= 12` は RIFF/WAVE header 確認後に scan へ入る exact constructor precondition とする。small scan model は terminal または invalid に達するまでに高々 3 valid chunk を受理する入力列を対象にし、full u64 file length と full u32 size を保つ。4 valid chunk 以上は未証明領域に残し、bounded model の成功を unbounded scan termination と読み替えない。one-step measure decrease は exact proof の一部とするが、任意回数の帰納的合成を Kani が機械的に証明したとは扱わない。
+
+採用する分解は single-step total correctness proof と finite unrolled small scan model の組合せである。valid/invalid proof family への分割、function contract、loop invariant、verified stub、fmt/alloc stub、`cfg(kani)` による製品実装置換は採用しない。詳細な候補比較、assume 分類、接続条件、coverage は `evidence/al274-chunk-scan-proof/boundary-analysis.md` を正本とする。
+
+production `wav_layout` は scan position helper で header availability/terminal を判定し、header が使える場合だけ 8 byte header を読んで同じ boundary helper へ `(offset, file_len, size)` を渡す。`Advance` の `body_start` を fmt body read、`next_offset` を scan 更新に使い、invalid 分類は呼出側で既存 `MediaError::malformed` 文言へ写像する。chunk id 解釈と duplicate 判定は production loop に残すが、boundary/offset 計算を複製しない。
+
 ### MP4
 
 MP4 は次の層に分ける。

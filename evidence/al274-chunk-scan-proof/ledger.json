@@ -1,0 +1,166 @@
+{
+  "schema": "audio-lens.formal-verification-ledger.al274-chunk-scan-proof.v1",
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/274",
+  "slice": "WAV-CHUNK-003/WAV-SCAN-004 exact proof slice (Range regression only; not the whole Issue)",
+  "branch": "feature/274-chunk-scan-proof",
+  "baseline_origin_main": "b21f774d2bbfe1a74ffa599e3f09e03f13b2ef8b",
+  "pr282_ancestor_confirmed": true,
+  "environment": {
+    "host": "Windows worktree G:/orca/workspaces/audio-lens/al274-chunk-scan-proof",
+    "kani_environment": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0",
+    "solver": "CaDiCaL (Kani/CBMC default; no solver attribute)",
+    "memory_measurement": "/usr/bin/time -v wrapping each cargo kani invocation; not per-solver cgroup isolation"
+  },
+  "input_domain": {
+    "wav_chunk_003": "full numeric domain of offset:u64, file_len:u64, size:u32; no input narrowing assume. offset>file_len is a production-unreachable total extension classified as terminal trailing",
+    "wav_scan_004": "initial offset 12; file_len:u64 with file_len>=12 as exact RIFF/WAVE constructor precondition; chunk sizes are full u32. Small scan model covers inputs that reach terminal/invalid after at most 3 valid chunks; 4+ valid chunks remain outside the bounded model",
+    "riff_constructor_bound": "not assumed. The proof domain is stronger than the constructor-admitted RIFF file length domain"
+  },
+  "assumptions": [
+    {
+      "assumption": "boundary proof has no input narrowing assume",
+      "classification": "total numeric domain"
+    },
+    {
+      "assumption": "scan proof file_len >= 12",
+      "classification": "exact constructor precondition"
+    },
+    {
+      "assumption": "scan proof valid_steps <= 3 after four potential header interpretations",
+      "classification": "small scan model explicit bound"
+    },
+    {
+      "assumption": "one-step measure decrease may be composed mathematically with finite file length",
+      "classification": "human composition only; not machine-proved unbounded termination"
+    }
+  ],
+  "coverage": {
+    "boundary_exact_complement": "Advance iff header available, body_end addition does not overflow, body_end<=file_len, pad-inclusive next_offset does not overflow and stays within file_len. Invalid is the exact header-available complement; Terminal is exact header-unavailable complement. Complete is offset==file_len; otherwise trailing.",
+    "scan_small_model": "four potential symbolic u32 size fields are unrolled. Inputs with 0..3 valid chunks before terminal/invalid are covered exactly within the declared bound, including an invalid fourth header after three valid chunks. Inputs accepting a fourth valid chunk are excluded and remain unproven.",
+    "measure": "every valid step advances by at least 8 bytes and strictly decreases file_len-offset. The finite unrolled model checks transition composition; induction over unbounded chunk count is not claimed as a Kani-proved result."
+  },
+  "proofs": [
+    {
+      "name": "wav_chunk_boundary_step_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 6922,
+      "max_rss_kb": 288164,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    {
+      "name": "wav_chunk_scan_progress_bounded_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 7592,
+      "max_rss_kb": 300376,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    }
+  ],
+  "wav_range_regression": {
+    "verdict": "pass",
+    "raw_dir": "kani-range-regression/",
+    "proofs": [
+      {
+        "name": "wav_range_plan_valid_ranges_exact",
+        "required": true,
+        "verdict": "pass",
+        "raw_marker": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 11339,
+        "max_rss_kb": 284176,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      {
+        "name": "wav_range_plan_invalid_ranges_error",
+        "required": true,
+        "verdict": "pass",
+        "raw_marker": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 4490,
+        "max_rss_kb": 281236,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      }
+    ],
+    "note": "Range proofs were not redesigned or reimplemented; this lane is a regression for the wav.rs change."
+  },
+  "connection_conditions": {
+    "production_helpers": "wav_scan_position and wav_chunk_step in crates/al-media/src/wav.rs",
+    "production_caller": "wav_layout uses wav_scan_position before reading each 8-byte header, passes offset/file_len/size to wav_chunk_step, uses Advance.body_start for fmt reads and Advance.next_offset for scan update",
+    "error_mapping": "internal boundary enum maps to the pre-existing MediaError::malformed strings; public API signatures, error precedence, supported formats, duplicate semantics, normal/error behavior, and f64 precision are unchanged",
+    "true_to_code": "proofs invoke production helpers directly. No cfg(kani) replacement, fmt/alloc stub, Cursor, Read+Seek, Vec decode, writer fixture, or diagnostic formatting is in the proof target"
+  },
+  "unproven_scope": [
+    "seek/read/short reads and I/O errors",
+    "Vec allocation and allocation failure",
+    "PCM decode/conversion/f64 behavior",
+    "diagnostic string formatting",
+    "fmt/data chunk semantics",
+    "duplicate fmt/data and unknown chunk semantics",
+    "RIFF signature/size validation itself",
+    "whole public API no-panic",
+    "machine-proved termination for unlimited chunk counts",
+    "MP4/AVI properties"
+  ],
+  "mutation": {
+    "boundary": {
+      "change": "temporary pad omission: let pad = size & 1 -> let pad = 0",
+      "lane_exit_code": 1,
+      "lane_verdict": "fail",
+      "detected_by": "wav_chunk_boundary_step_exact",
+      "raw_marker": "VERIFICATION:- FAILED",
+      "elapsed_ms": 6567,
+      "max_rss_kb": 287928,
+      "reverted": true,
+      "scan_proof_result": "passed in this mutation lane, showing that the padding oracle belongs primarily to the boundary proof"
+    },
+    "scan": {
+      "change": "temporary progress removal: Advance.next_offset -> offset",
+      "lane_exit_code": 1,
+      "lane_verdict": "fail",
+      "detected_by": ["wav_chunk_boundary_step_exact", "wav_chunk_scan_progress_bounded_exact"],
+      "raw_marker": "VERIFICATION:- FAILED",
+      "scan_elapsed_ms": 5713,
+      "scan_max_rss_kb": 300244,
+      "reverted": true
+    },
+    "post_revert": "mise run test al-media and mise run test-formal passed after complete revert; final wav-chunk-scan lane passed"
+  },
+  "runner": {
+    "groups": {
+      "wav-chunk-scan": ["wav_chunk_boundary_step_exact", "wav_chunk_scan_progress_bounded_exact"],
+      "wav-range": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+    },
+    "registry": "23 harnesses total (13 WAV + 10 containers)",
+    "instrumentation": "per-harness elapsed_ms, raw log, verdict, GNU time max RSS when available",
+    "unchanged_semantics": [
+      "default full lane",
+      "fail-closed unknown selections",
+      "WSL mirror",
+      "target placement",
+      "timeout semantics",
+      "group/subset mutual exclusion"
+    ],
+    "full_lane": "not part of this slice because legacy whole-call proofs have established timeouts; selective assurance groups are the required evidence"
+  },
+  "cost_comparison": {
+    "legacy_trial": "decode_wav_never_panics_signed timeout at 1200s cap/elapsed 1265s/3.8GiB; wav_frame_count_never_panics_signed timeout at 600s cap/elapsed 632s/2.6GiB; wav_reads_never_panics_unsigned timeout at 300s then 900s caps/elapsed 316s/949s and 1.2->3.1GiB (evidence/al274/verification.md)",
+    "legacy_canonical": "al274 canonical lane timed out all three at 1500s/proof. The later fmt-stub canonical representative run recorded wav_reads_never_panics_unsigned peak RSS 13762MiB while still timing out; verdict was not obtained",
+    "new": "wav-chunk-scan final lane total elapsed 14514ms; boundary 6922ms/288164KiB, scan 7592ms/300376KiB",
+    "rerun_cost": "selective wav-chunk-scan lane is seconds-scale in this environment and far below the 10-20 minute design target. This is a limited chunk/scan comparison, not the complete old/new cost matrix"
+  },
+  "proptest_overlap": {
+    "unchanged": [
+      "decode_wav_never_panics_on_arbitrary_bytes",
+      "frame_count_and_range_reads_hold_the_contract",
+      "writer_output_round_trips_losslessly",
+      "mutated_or_truncated_headers_never_panic"
+    ],
+    "added": "terminal_chunk_boundaries_follow_pad_and_exact_end_contract deterministic structural regression",
+    "relationship": "proptest/regression exercise public integration statistically or concretely; Kani proves local pure boundary/scan arithmetic exhaustively within the declared domains"
+  },
+  "legacy_disposition": "No legacy whole-call proof was retired in this slice. Chunk/scan replacement proofs are additive; retire decisions remain for a later slice with coordinator approval and replacement coverage.",
+  "rf_reduction": "Candidate only: a reusable RIFF chunk boundary walker contract may belong in Ruviform after the contract is separated from AudioLens scan/error semantics. No Ruviform issue was filed or updated."
+}
