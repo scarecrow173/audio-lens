@@ -2,7 +2,7 @@
 // と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
 // harness(tests/formal_wav.rs・tests/formal_containers.rs と、
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
-// src/wav.rs)を
+// src/wav.rs、MP4-BOX-002/AVI-CHUNK-001 については src/mp4.rs/src/avi.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -179,7 +179,8 @@ if (missing.length > 0) {
 // finished verdict. TIMEOUT_MS is the per-harness budget (env
 // override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
 // `mod kani_proofs` blocks in tests/formal_wav.rs and
-// tests/formal_containers.rs, and the `mod proofs` block in src/wav.rs.
+// tests/formal_containers.rs, and the `mod proofs` blocks in src/wav.rs,
+// src/mp4.rs, and src/avi.rs.
 const WAV_CHUNK_SCAN_HARNESSES = [
   "wav_chunk_boundary_step_exact",
   "wav_chunk_scan_progress_bounded_exact",
@@ -188,10 +189,12 @@ const WAV_RANGE_HARNESSES = [
   "wav_range_plan_valid_ranges_exact",
   "wav_range_plan_invalid_ranges_error",
 ];
+const MP4_AVI_BOUNDARY_HARNESSES = ["mp4_box_header_step_exact", "avi_chunk_step_exact"];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
   "wav-range": WAV_RANGE_HARNESSES,
+  "mp4-avi-boundary": MP4_AVI_BOUNDARY_HARNESSES,
 };
 
 const HARNESSES = [
@@ -206,6 +209,7 @@ const HARNESSES = [
   "writer_round_trip_float64",
   ...WAV_CHUNK_SCAN_HARNESSES,
   ...WAV_RANGE_HARNESSES,
+  ...MP4_AVI_BOUNDARY_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",
@@ -363,6 +367,17 @@ for (const harness of SELECTED) {
 const verified = results.filter((r) => r.ok).map((r) => r.harness);
 const failedList = results.filter((r) => r.bad);
 const stalled = results.filter((r) => !r.ok && !r.bad);
+const measuredRss = results.map((r) => r.max_rss_kb).filter((v) => typeof v === "number");
+// Additive lane-level cost summary. `details` remains the per-harness
+// array for compatibility; this object only aggregates the selected run.
+const costSummary = {
+  selected_proofs: SELECTED.length,
+  verified_proofs: verified.length,
+  total_elapsed_ms: results.reduce((sum, r) => sum + r.elapsed_ms, 0),
+  max_observed_rss_kb: measuredRss.length > 0 ? Math.max(...measuredRss) : null,
+  rss_measured_proofs: measuredRss.length,
+  peak_memory_measurement: GNU_TIME ? "/usr/bin/time -v" : "unmeasured",
+};
 
 if (failedList.length > 0) {
   verdict(
@@ -370,18 +385,19 @@ if (failedList.length > 0) {
     `${failedList.length} harness(es) failed verification ` +
       `(${verified.length} verified): ` +
       failedList.map((r) => r.harness).join(", "),
-    { env: distro, details: results },
+    { env: distro, details: results, cost_summary: costSummary },
   );
 }
 if (stalled.length === 0) {
   verdict("pass", `all ${verified.length} kani harness(es) verified`, {
     env: distro,
     details: results,
+    cost_summary: costSummary,
   });
 }
 verdict(
   "not_run",
   `${verified.length}/${SELECTED.length} harness(es) verified; ` +
     `incomplete: ${stalled.map((r) => `${r.harness}(${r.timedOut ? `timeout ${TIMEOUT_MS}ms` : `exit ${r.status}`})`).join(", ")}`,
-  { env: distro, details: results },
+  { env: distro, details: results, cost_summary: costSummary },
 );

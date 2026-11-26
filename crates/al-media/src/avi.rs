@@ -153,6 +153,75 @@ pub(crate) struct MoviPacket<'a> {
     pub(crate) body: &'a [u8],
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviChunkBoundaryError {
+    SizeOverflow,
+    ExtendsPastEnd,
+    MissingPad,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct AviChunkAdvance {
+    body_start: u64,
+    body_end: u64,
+    next_offset: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviChunkPosition {
+    HeaderAvailable,
+    End,
+    TrailingBytes,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviChunkStep {
+    Advance(AviChunkAdvance),
+    Invalid(AviChunkBoundaryError),
+    End,
+    TrailingBytes,
+}
+
+fn avi_chunk_position(offset: u64, region_len: u64) -> AviChunkPosition {
+    if offset == region_len {
+        return AviChunkPosition::End;
+    }
+    if offset > region_len || region_len - offset < 8 {
+        return AviChunkPosition::TrailingBytes;
+    }
+    AviChunkPosition::HeaderAvailable
+}
+
+fn avi_chunk_step(offset: u64, region_len: u64, size: u32) -> AviChunkStep {
+    match avi_chunk_position(offset, region_len) {
+        AviChunkPosition::End => return AviChunkStep::End,
+        AviChunkPosition::TrailingBytes => return AviChunkStep::TrailingBytes,
+        AviChunkPosition::HeaderAvailable => {}
+    }
+
+    let body_start = offset + 8;
+    let Some(body_end) = body_start.checked_add(u64::from(size)) else {
+        return AviChunkStep::Invalid(AviChunkBoundaryError::SizeOverflow);
+    };
+    if body_end > region_len {
+        return AviChunkStep::Invalid(AviChunkBoundaryError::ExtendsPastEnd);
+    }
+    // Chunks are word-aligned: an odd size must be followed by a pad
+    // byte — including the last chunk in the region.
+    let pad = u64::from(size & 1);
+    let Some(next_offset) = body_end.checked_add(pad) else {
+        return AviChunkStep::Invalid(AviChunkBoundaryError::MissingPad);
+    };
+    if next_offset > region_len {
+        return AviChunkStep::Invalid(AviChunkBoundaryError::MissingPad);
+    }
+    AviChunkStep::Advance(AviChunkAdvance {
+        body_start,
+        body_end,
+        next_offset,
+    })
+}
+
 /// Iterate `(id, body)` chunk pairs inside a RIFF chunk region.
 ///
 /// Validation mirrors the WAV reader: a chunk body that overruns the
@@ -161,6 +230,8 @@ pub(crate) struct MoviPacket<'a> {
 /// ignored. The iterator stops after the first error.
 struct Chunks<'a> {
     rest: &'a [u8],
+    offset: u64,
+    region_len: u64,
     context: &'static str,
 }
 
@@ -170,6 +241,8 @@ type ChunkItem<'a> = Result<([u8; 4], &'a [u8]), MediaError>;
 fn chunks<'a>(data: &'a [u8], context: &'static str) -> Chunks<'a> {
     Chunks {
         rest: data,
+        offset: 0,
+        region_len: data.len() as u64,
         context,
     }
 }
@@ -177,6 +250,7 @@ fn chunks<'a>(data: &'a [u8], context: &'static str) -> Chunks<'a> {
 impl<'a> Chunks<'a> {
     fn fail(&mut self, msg: impl Into<String>) -> Option<ChunkItem<'a>> {
         self.rest = &[];
+        self.offset = self.region_len;
         Some(Err(MediaError::malformed(format!(
             "{}: {}",
             self.context,
@@ -189,28 +263,37 @@ impl<'a> Iterator for Chunks<'a> {
     type Item = ChunkItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.rest.is_empty() {
-            return None;
-        }
-        if self.rest.len() < 8 {
-            return self.fail("trailing bytes shorter than a chunk header");
+        match avi_chunk_position(self.offset, self.region_len) {
+            AviChunkPosition::End => return None,
+            AviChunkPosition::TrailingBytes => {
+                return self.fail("trailing bytes shorter than a chunk header");
+            }
+            AviChunkPosition::HeaderAvailable => {}
         }
         let id: [u8; 4] = self.rest[..4].try_into().unwrap();
-        let size = u32::from_le_bytes(self.rest[4..8].try_into().unwrap()) as usize;
+        let size = u32::from_le_bytes(self.rest[4..8].try_into().unwrap());
         let name = || String::from_utf8_lossy(&id).into_owned();
-        let Some(body_end) = 8usize.checked_add(size) else {
-            return self.fail(format!("chunk {} size overflows", name()));
+        let advance = match avi_chunk_step(self.offset, self.region_len, size) {
+            AviChunkStep::Advance(advance) => advance,
+            AviChunkStep::Invalid(AviChunkBoundaryError::SizeOverflow) => {
+                return self.fail(format!("chunk {} size overflows", name()));
+            }
+            AviChunkStep::Invalid(AviChunkBoundaryError::ExtendsPastEnd) => {
+                return self.fail(format!("chunk {} body extends past end of region", name()));
+            }
+            AviChunkStep::Invalid(AviChunkBoundaryError::MissingPad) => {
+                return self.fail(format!("missing pad byte after odd-sized chunk {}", name()));
+            }
+            AviChunkStep::End => return None,
+            AviChunkStep::TrailingBytes => {
+                return self.fail("trailing bytes shorter than a chunk header");
+            }
         };
-        if body_end > self.rest.len() {
-            return self.fail(format!("chunk {} body extends past end of region", name()));
-        }
-        // Chunks are word-aligned: an odd size must be followed by a pad
-        // byte — including the last chunk in the region.
-        if body_end + (size % 2) > self.rest.len() {
-            return self.fail(format!("missing pad byte after odd-sized chunk {}", name()));
-        }
-        let body = &self.rest[8..body_end];
-        self.rest = &self.rest[body_end + (size % 2)..];
+        let body_len = (advance.body_end - advance.body_start) as usize;
+        let consumed = (advance.next_offset - self.offset) as usize;
+        let body = &self.rest[8..8 + body_len];
+        self.rest = &self.rest[consumed..];
+        self.offset = advance.next_offset;
         Some(Ok((id, body)))
     }
 }
@@ -1008,5 +1091,160 @@ mod tests {
         push_list(&mut body, b"hdrl", &hdrl);
         push_list(&mut body, b"movi", &movi);
         avi_with_tail(&body)
+    }
+}
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn avi_chunk_step_exact() {
+        let offset: u64 = kani::any();
+        let region_len: u64 = kani::any();
+        let size: u32 = kani::any();
+        let step = avi_chunk_step(offset, region_len, size);
+
+        let end_expected_position = offset == region_len;
+        let header_available = offset < region_len && region_len - offset >= 8;
+        let trailing_expected = !end_expected_position && !header_available;
+        let body_start_expected = offset.checked_add(8);
+        let body_end_expected = if header_available {
+            body_start_expected.and_then(|start| start.checked_add(u64::from(size)))
+        } else {
+            None
+        };
+        let pad = u64::from(size & 1);
+        let next_expected = body_end_expected.and_then(|end| end.checked_add(pad));
+        let valid_expected = header_available
+            && body_end_expected.is_some_and(|end| end <= region_len)
+            && next_expected.is_some_and(|next| next <= region_len);
+        let invalid_expected = header_available && !valid_expected;
+
+        assert_eq!(matches!(step, AviChunkStep::End), end_expected_position);
+        assert_eq!(
+            matches!(step, AviChunkStep::TrailingBytes),
+            trailing_expected
+        );
+        assert_eq!(matches!(step, AviChunkStep::Advance(_)), valid_expected);
+        assert_eq!(matches!(step, AviChunkStep::Invalid(_)), invalid_expected);
+
+        match step {
+            AviChunkStep::Advance(plan) => {
+                assert!(header_available);
+                assert_eq!(plan.body_start, offset + 8);
+                assert_eq!(plan.body_end, plan.body_start + u64::from(size));
+                assert_eq!(plan.next_offset, plan.body_end + pad);
+                assert!(plan.body_end <= region_len);
+                assert!(plan.next_offset <= region_len);
+                assert!(plan.next_offset > offset);
+                assert!(plan.next_offset - offset >= 8);
+                assert!(region_len - plan.next_offset < region_len - offset);
+            }
+            AviChunkStep::Invalid(error) => {
+                assert!(header_available);
+                let size_overflow = header_available && body_end_expected.is_none();
+                let extends_past_end =
+                    header_available && body_end_expected.is_some_and(|end| end > region_len);
+                let missing_pad = header_available
+                    && match body_end_expected {
+                        Some(end) if end <= region_len => match next_expected {
+                            Some(next) => next > region_len,
+                            None => true,
+                        },
+                        _ => false,
+                    };
+                assert_eq!(error == AviChunkBoundaryError::SizeOverflow, size_overflow);
+                assert_eq!(
+                    error == AviChunkBoundaryError::ExtendsPastEnd,
+                    extends_past_end
+                );
+                assert_eq!(error == AviChunkBoundaryError::MissingPad, missing_pad);
+            }
+            AviChunkStep::End => {
+                assert_eq!(offset, region_len);
+            }
+            AviChunkStep::TrailingBytes => {
+                assert!(offset != region_len);
+                assert!(offset > region_len || region_len - offset < 8);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod boundary_tests {
+    use super::*;
+
+    #[test]
+    fn avi_chunk_step_accepts_zero_even_and_odd_sizes_exact_end() {
+        assert_eq!(
+            avi_chunk_step(0, 8, 0),
+            AviChunkStep::Advance(AviChunkAdvance {
+                body_start: 8,
+                body_end: 8,
+                next_offset: 8,
+            })
+        );
+        assert_eq!(
+            avi_chunk_step(0, 12, 4),
+            AviChunkStep::Advance(AviChunkAdvance {
+                body_start: 8,
+                body_end: 12,
+                next_offset: 12,
+            })
+        );
+        assert_eq!(
+            avi_chunk_step(0, 12, 3),
+            AviChunkStep::Advance(AviChunkAdvance {
+                body_start: 8,
+                body_end: 11,
+                next_offset: 12,
+            })
+        );
+    }
+
+    #[test]
+    fn avi_chunk_step_classifies_terminal_invalid_and_large_offsets() {
+        assert_eq!(avi_chunk_step(0, 0, 0), AviChunkStep::End);
+        assert_eq!(avi_chunk_step(12, 12, 0), AviChunkStep::End);
+        assert_eq!(avi_chunk_step(5, 12, 0), AviChunkStep::TrailingBytes);
+        assert_eq!(avi_chunk_step(13, 12, 0), AviChunkStep::TrailingBytes);
+        assert_eq!(
+            avi_chunk_step(0, 12, 5),
+            AviChunkStep::Invalid(AviChunkBoundaryError::ExtendsPastEnd)
+        );
+        assert_eq!(
+            avi_chunk_step(0, 11, 3),
+            AviChunkStep::Invalid(AviChunkBoundaryError::MissingPad)
+        );
+        assert_eq!(
+            avi_chunk_step(u64::MAX - 8, u64::MAX, 1),
+            AviChunkStep::Invalid(AviChunkBoundaryError::SizeOverflow)
+        );
+    }
+
+    #[test]
+    fn chunks_iterator_applies_pad_and_nested_region_offsets() {
+        let mut inner = Vec::new();
+        inner.extend_from_slice(b"JUNK");
+        inner.extend_from_slice(&3u32.to_le_bytes());
+        inner.extend_from_slice(b"abc");
+        inner.push(0);
+        inner.extend_from_slice(b"FREE");
+        inner.extend_from_slice(&0u32.to_le_bytes());
+
+        // Nested LIST iteration starts after the four-byte form type.
+        let mut nested_region = Vec::new();
+        nested_region.extend_from_slice(b"strl");
+        nested_region.extend_from_slice(&inner);
+        let mut iter = chunks(&nested_region[4..], "nested");
+        let (id, body) = iter.next().unwrap().unwrap();
+        assert_eq!(&id, b"JUNK");
+        assert_eq!(body, b"abc");
+        let (id, body) = iter.next().unwrap().unwrap();
+        assert_eq!(&id, b"FREE");
+        assert!(body.is_empty());
+        assert!(iter.next().is_none());
     }
 }
