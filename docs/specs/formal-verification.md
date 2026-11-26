@@ -104,8 +104,10 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 
 ### 検証する property(coverage 記録)
 
-`crates/al-media/tests/formal_wav.rs` 一ファイルに proptest suite
-と `#[cfg(kani)]` bounded proof harness を同居させる。
+`crates/al-media/tests/formal_wav.rs` に proptest suite と従来の
+`#[cfg(kani)]` bounded proof harness を置き、range 算術の local proof
+だけは production helper と同じ `crates/al-media/src/wav.rs` の
+`#[cfg(kani)]` module に置く。
 
 | property | 検証する契約 |
 | --- | --- |
@@ -120,13 +122,37 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 | `kani_proofs::read_wav_range_never_panics_signed` | 同入力 + u8 由来の任意 start/end で `read_wav_range` が panic しない |
 | `kani_proofs::wav_reads_never_panics_unsigned` | signature を持たない入力で 3 read 入口が panic せず早期 reject する — signed 3 proof と合わせて全入力領域を網羅 |
 | `kani_proofs::writer_round_trip_pcm_s16` / `_pcm_s24` / `_pcm_s32` / `_float32` / `_float64` | symbolic params の writer 出力が正確に往復する — encoding 別に 1 proof ずつ(al#274 で 5 択 symbolic encoding を分割) |
-| `kani_proofs::header_reads_valid_ranges_slice_exact` | writer 出力上で frame count が一致し、valid range(`start<end<=total`・u8 由来)の slice が全件一致する |
-| `kani_proofs::header_reads_invalid_ranges_error` | 補集合の invalid range(`start>=end` または `end>total`)が全件エラーになる — 2 proof が合計で [0,255]×[0,255] の分岐空間を網羅する |
+| `wav::proofs::wav_range_plan_valid_ranges_exact` | pure range arithmetic helper について、valid range(`start<end<=total`)で総 frame 数・range frame 数・byte offset・byte length・exclusive byte end が正確で、slice 終端が data extent に収まり、overflow/underflow がない |
+| `wav::proofs::wav_range_plan_invalid_ranges_error` | 同じ helper について、exact complement の invalid range(`start>=end` または `end>total`)が必ず拒否される。valid/invalid 2 proof は同じ symbolic layout・range 入力領域の分岐空間を網羅する |
 
 proptest 側が覆うのは統計的サンプリング(既定 case 数)の範囲で
 あり、Kani 側は宣言した bound 内の網羅を検証する。両者は同じ
 property 言語を別の保証種別で検査する補完関係であり、proptest の
 Pass を Kani の bounded exhaustive proof と同値に扱わない。
+
+range 算術 local proof の検証境界は `WavDataLayout`/`WavRangePlan`
+の pure arithmetic に限る。production `read_wav_range` は同じ helper
+を呼ぶが、proof は seek・read・allocation・PCM decode・error 文字列
+formatting を実行しない。したがって、この 2 proof は公開 API 全体の
+no-panic や I/O short read、allocation 失敗を証明したことにはならない。
+symbolic layout の assume/type invariant は、非 zero `block_align`、
+frame 境界の data length、RIFF u32 size 境界内の data extent、
+`data_len = total_frames * block_align` である。RIFF u32 境界は任意の
+narrowing ではなく、`wav_layout` が受け入れる container の exact invariant
+である。valid proof 側の direct u32 start/end 表現も、valid frame index が
+u32 由来 total に収まることの exact reparameterization であり、u64 public
+入力の valid 空間を狭めない。invalid proof は u64 start/end を直接
+symbolic にする。
+
+2026-11-26 時点の実走では、invalid proof は PASS する一方、valid proof は
+exact な u32×u16 frame/byte multiplication の monotonicity/containment 証明で
+CaDiCaL・Kissat・Bitwuzla・Z3 のいずれも 300 秒 budget を超過し、Required
+NotRun である。shift/add linear expansion、endpoint subtraction、branchless
+mask、assert/assume local lemma decomposition、constructive
+reparameterization を試したが budget 内の `VERIFICATION: SUCCESSFUL` は
+得られなかった。したがって現行 valid proof を PASS 済み assurance として
+扱ってはならない。反復 log・solver 比較・残課題は
+`evidence/al274-wav-range-proof/` を参照する。
 
 ### bounds・assumptions・model/product の区別
 
@@ -147,7 +173,7 @@ Pass を Kani の bounded exhaustive proof と同値に扱わない。
   `#[kani::unwind(40)]`(layout walk + data body の sample loop)、
   `wav_frame_count`(signed)と unsigned 系が
   `#[kani::unwind(16)]`(layout walk / signature reject のみ)。
-  writer round-trip・header 系は `#[kani::unwind(32)]`。
+  writer round-trip 系は `#[kani::unwind(32)]`。
   初版のより大きな bound([u8;128]+unwind160 / 2 frames+unwind64)
   および al#256 の 3 入口結合 proof(unwind 56)はこの環境で
   45min cap を超過した — trade-off の実測は
@@ -418,7 +444,9 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   al#274 以降の登録 harness は 21 件(WAV 11 + containers 10)。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
   `evidence/al256/verification.md` と `actions.jsonl`、al#274
-  の分析・分割・再実走記録は `evidence/al274/` が持つ。
+  の分析・分割・再実走記録は `evidence/al274/`、WAV-RANGE-008
+  local proof の実走・mutation・旧新 cost 比較は
+  `evidence/al274-wav-range-proof/` が持つ。
 
 ## Sources and Relations
 
@@ -430,6 +458,6 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `crates/al-media/tests/formal_wav.rs`・
   `crates/al-media/tests/formal_containers.rs`
 - lane runner: `tools/run-formal-kani.mjs`
-- 証拠台帳: `evidence/al256/`・`evidence/al274/`
+- 証拠台帳: `evidence/al256/`・`evidence/al274/`・`evidence/al274-wav-range-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節

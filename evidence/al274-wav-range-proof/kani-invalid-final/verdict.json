@@ -1,0 +1,17 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "pass",
+  "reason": "all 1 kani harness(es) verified",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "wav_range_plan_invalid_ranges_error",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 3406,
+      "tail": "   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "not_run",
+  "reason": "0/1 harness(es) verified; incomplete: wav_range_plan_valid_ranges_exact(exit 1)",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "wav_range_plan_valid_ranges_exact",
+      "ok": false,
+      "bad": false,
+      "timedOut": false,
+      "status": 1,
+      "elapsed_ms": 6809,
+      "tail": "948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {\n    |              +\n\nFor more information about this error, try `rustc --explain E0061`.\nerror: Failed to execute cargo (exit status: 101). Found 4 compilation errors.\n\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\nerror: could not compile `al-media` (lib test) due to 4 previous errors; 1 warning emitted"
+    }
+  ]
+}
