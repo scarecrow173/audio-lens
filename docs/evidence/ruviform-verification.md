@@ -4,7 +4,7 @@ type: "evidence"
 status: "approved"
 title: "検証記録: Ruviform 移行・pin 更新・契約 API・消費者 oracle"
 created: "2026-11-19"
-updated: "2026-11-19"
+updated: "2026-11-26"
 owners: []
 relations:
   source: []
@@ -75,6 +75,14 @@ Ruviform 依存・pin 更新・契約 API 採用・consumer oracle に関する�
 - Golden 回帰(9 run): 全差分が機械分類に帰属・unexplained 0。分類表に `#117`=stamp `params/ruviform` key、`#170`=stable_id、`#104`=rev 一致の直接検証を追加。
 - `complex_solve_matches_csolve_bit_exact`、records.rs stamp 形状・params 保持・rev 一致、cheap.rs IPD/self_sim `corr0` oracle `to_bits` 一致、normalize stable_id 改ざん検知を追加。
 - `mise run fmt`/`check`/`lint`/`test`(46 suite 全 ok・0 failed)/`build`/`verify-toolchain`(1.99.0)/`check-cli-headless` 全 pass。
+
+## AL#127 ruviform pin 87a7ba8f 追従
+
+- candidate tuple: ruviform `87a7ba8ff3fbe6d4502bea27d152d7f74c105899` / AL pin bump commit `67cc975ec651e502ad863c24db1db104cfe025b3` / lockfile resolved `87a7ba8ff3fbe6d4502bea27d152d7f74c105899`。25 個の ruviform package が単一 SHA に解決され、manifest 非変更を維持。
+- `Cargo.lock` 差分は 25 個の ruviform source fragment と `gpui` 0.2.2 の registry→`scarecrow173/gpui` tag `v0.2.2-rf2`（peeled `b3144f286b942fbb5f478da73db13a826cef054a`）source switch のみ。package 追加・削除や無関係 version bump はなし。
+- 差分評価: `ruviform-audio` ProbeDeck capture push bugfix、`ruviform-plugin-core`/`plugin-host` の wire v5→v9・`Plugin::buses` Option 化、`ruviform-ui` Input/CommandParams、`ruviform-ui-gpui` IMM32/native surface 変更を分類。AL は plugin host/device boundary を消費せず、UI 新 API も未消費。詳細は `evidence/al127/87a7ba8f-verification.md`。
+- 検証: pin guard、`cargo fetch --locked`、analysis/service/CLI/GUI check/test、UI typecheck/test、GPUI check/lint/test/build、real-headless blocked-probe、prek が全て exit 0。`test al-analysis` は rf628 oracle を含む 151 tests pass。`build-ui-gpui` は gpui fork 経由の `al-desktop` Native Build/Link 合格。
+- upstream `87a7ba8f` 自体の covering CI run はなし。ancestor `ab6dc99f` の `ci` run 45749815004・`daily-ci` run 45749786810 は success で、`ab6dc99f..87a7ba8f` は production code 差分なし。interactive real GUI/pixel/IME、macOS/Linux、cross-consumer tuple、upstream main `0fb97d1b` は Deferred/後続。
 
 ## 未検証・制約
 

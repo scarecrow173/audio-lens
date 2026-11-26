@@ -63,5 +63,6 @@ if (after.rev !== sha) {
 }
 console.log(`ruviform resolved: ${before.rev} -> ${after.rev} (${after.packages.length} packages)`);
 console.log(
-  "next: `mise run sync-ui-deps` for ui/vendor, then `mise run verify-ci` + record diffs",
+  "next: `mise run sync-ui-deps`, `mise exec -- cargo fetch --locked`, " +
+    "then `mise run check-ruviform-lock` and `mise run check-ruviform-rev`",
 );
