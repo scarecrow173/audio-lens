@@ -232,6 +232,8 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
 | `kani_proofs::avi_writer_output_decodes` | concrete video(4x2・2 frame)+symbolic PCM `auds` の write_avi 出力が復号+PCM 往復+両 stream の timing 一致 |
 | `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き(任意位置・任意値)で panic しない |
 | `kani_proofs::truncated_mp4_never_panics` / `truncated_avi_never_panics` | writer 生成物の任意長 truncate で panic しない — al#274 で mutate と分離。mutate+truncate の結合入力は proptest `mutated_or_truncated_containers_never_panic`(最大 16 箇所編集+truncate)が担保する |
+| `mp4_box_header_step_exact` | full u64 の box offset/region limit、full u32 size field、full u64 largesize field について、production pure helper が size32/size64(size==1)/size0、truncated header、size/largesize minimum、checked arithmetic、region limit を exact complement へ写すこと。valid box の body_start/body_end/end containment、少なくとも header 分の進行、残余量減少を検証する |
+| `avi_chunk_step_exact` | full u64 の region-relative offset/region length と full u32 chunk size について、production pure helper が empty/exact end、1..7 byte trailing、valid chunk、invalid chunk を exact complement へ写すこと。body_start/body_end/pad-inclusive next offset、region limit、少なくとも 8 byte の進行、残余量減少を検証する |
 
 ### bounds・assumptions・model/product の区別
 
@@ -266,6 +268,22 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   が写す。counterexample が文書化契約に反すれば product defect、
   model が強く読みすぎていれば model error と見分ける方針は
   第 1 標的と同じ。
+- **MP4-BOX-002/AVI-CHUNK-001 exact proof**: `crates/al-media/src/mp4.rs`
+  の production pure helper `mp4_box_boundary_step` と
+  `crates/al-media/src/avi.rs` の production pure helper
+  `avi_chunk_step` を symbolic scalar だけで検査する。input narrowing
+  assume は置かず、MP4 は full u64 offset/limit・full u32 size32・
+  full u64 largesize、AVI は full u64 region-relative offset/region
+  length・full u32 size を対象にする。`at > limit` と
+  `offset > region_len` は production 到達外の total extension であり、
+  それぞれ truncated/trailing 側へ分類する。production `box_header`
+  と `Chunks::next` が同じ helper を呼び、tag/id 解釈と error 文言
+  生成だけを shell に残す。I/O、allocation、`Vec` decode、PCM/video
+  decode、diagnostic formatting、MP4 semantic/sample table、AVI
+  LIST/movi/timing、公開 API 全体 no-panic は保証外である。one-step
+  measure decrease を無制限 scan termination の機械証明と読み替えない。
+  詳細な境界と coverage は
+  `evidence/al274-mp4-avi-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -442,11 +460,16 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 chunk/scan slice 以降の登録 harness は 23 件(WAV 13 +
-  containers 10)。`AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
+  al#274 mp4/avi boundary slice 以降の登録 harness は 25 件(WAV 13 +
+  MP4/AVI boundary 2 + legacy containers 10)。
+  `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
-  WAV-RANGE-008 の 2 proof を選択する。group と subset 指定は排他で、
-  未指定は全件の既定挙動である。
+  WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
+  MP4-BOX-002/AVI-CHUNK-001 の 2 proof を選択する。group と subset
+  指定は排他で、未指定は全件の既定挙動である。lane verdict は
+  per-harness detail に加え、選択 proof 数・verified proof 数・
+  total elapsed ms・max observed RSS KiB・計測可否を持つ additive
+  `cost_summary` を返す。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
   `evidence/al256/verification.md` と `actions.jsonl`、al#274
   の分析・分割・再実走記録は `evidence/al274/` が持つ。
@@ -462,6 +485,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `crates/al-media/tests/formal_containers.rs`
 - lane runner: `tools/run-formal-kani.mjs`
 - 証拠台帳: `evidence/al256/`・`evidence/al274/`・
-  `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`
+  `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`・
+  `evidence/al274-mp4-avi-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節
