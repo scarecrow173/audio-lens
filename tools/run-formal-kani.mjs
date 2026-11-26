@@ -1,6 +1,7 @@
 // Issue #256 (D 層 formal verification): al-media WAV codec(第 1 標的)
 // と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
-// harness(tests/formal_wav.rs・tests/formal_containers.rs)を
+// harness(tests/formal_wav.rs・tests/formal_containers.rs と、
+// WAV-RANGE-008 replacement については src/wav.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -177,7 +178,16 @@ if (missing.length > 0) {
 // finished verdict. TIMEOUT_MS is the per-harness budget (env
 // override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
 // `mod kani_proofs` blocks in tests/formal_wav.rs and
-// tests/formal_containers.rs.
+// tests/formal_containers.rs, and the `mod proofs` block in src/wav.rs.
+const WAV_RANGE_HARNESSES = [
+  "wav_range_plan_valid_ranges_exact",
+  "wav_range_plan_invalid_ranges_error",
+];
+
+const HARNESS_GROUPS = {
+  "wav-range": WAV_RANGE_HARNESSES,
+};
+
 const HARNESSES = [
   "decode_wav_never_panics_signed",
   "wav_frame_count_never_panics_signed",
@@ -188,8 +198,7 @@ const HARNESSES = [
   "writer_round_trip_pcm_s32",
   "writer_round_trip_float32",
   "writer_round_trip_float64",
-  "header_reads_valid_ranges_slice_exact",
-  "header_reads_invalid_ranges_error",
+  ...WAV_RANGE_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",
@@ -202,9 +211,17 @@ const HARNESSES = [
   "truncated_avi_never_panics",
 ];
 
+for (const [group, members] of Object.entries(HARNESS_GROUPS)) {
+  const missing = members.filter((name) => !HARNESSES.includes(name));
+  if (missing.length > 0) {
+    verdict("fail", `harness group ${group} is not covered by registry: ${missing.join(", ")}`);
+  }
+}
+
 // AL_KANI_HARNESSES="a,b,c" で登録済み名の subset だけを逐次実行する
 // env-gated な追加(harness 分割・bound 調整の個別試行用)。未指定は
 // 現行どおり全件 — 既定挙動は不変。未登録名は fail-closed で not_run。
+const GROUP = process.env.AL_KANI_HARNESS_GROUP?.trim() || null;
 const SUBSET = process.env.AL_KANI_HARNESSES
   ? new Set(
       process.env.AL_KANI_HARNESSES.split(",")
@@ -212,6 +229,16 @@ const SUBSET = process.env.AL_KANI_HARNESSES
         .filter(Boolean),
     )
   : null;
+if (GROUP && SUBSET) {
+  verdict("not_run", "AL_KANI_HARNESS_GROUP and AL_KANI_HARNESSES are mutually exclusive");
+}
+if (GROUP && !HARNESS_GROUPS[GROUP]) {
+  verdict(
+    "not_run",
+    `unknown harness group in AL_KANI_HARNESS_GROUP: ${GROUP} ` +
+      `(registered: ${Object.keys(HARNESS_GROUPS).join(", ")})`,
+  );
+}
 if (SUBSET) {
   const unknown = [...SUBSET].filter((n) => !HARNESSES.includes(n));
   if (unknown.length > 0) {
@@ -222,7 +249,11 @@ if (SUBSET) {
     );
   }
 }
-const SELECTED = SUBSET ? HARNESSES.filter((h) => SUBSET.has(h)) : HARNESSES;
+const SELECTED = GROUP
+  ? HARNESS_GROUPS[GROUP]
+  : SUBSET
+    ? HARNESSES.filter((h) => SUBSET.has(h))
+    : HARNESSES;
 
 // script は base64 で渡す — wsl.exe → bash -lc の入れ子 quoting で
 // 変数展開・$ 記号が壊れるのを避けるため。
@@ -253,6 +284,11 @@ if (distro !== "native") {
   }
 }
 
+const GNU_TIME =
+  distro === "native"
+    ? fs.existsSync("/usr/bin/time")
+    : wslProbe(distro, "test -x /usr/bin/time").status === 0;
+
 function runKani(harness) {
   // al#274: representative proofs adopted per-harness #[kani::stub] models.
   // `-Z stubbing` only enables the attribute mechanism; harnesses without
@@ -260,14 +296,18 @@ function runKani(harness) {
   // not need a second env-gated mode.
   const kaniArgs = ["kani", "-p", PACKAGE, "--tests", "--harness", harness, "-Z", "stubbing"];
   if (distro === "native") {
-    return spawnSync("cargo", kaniArgs, {
+    const args = GNU_TIME ? ["/usr/bin/time", "-v", "cargo", ...kaniArgs] : ["cargo", ...kaniArgs];
+    return spawnSync(args[0], args.slice(1), {
       cwd: repoDir,
       encoding: "utf8",
       timeout: TIMEOUT_MS,
       maxBuffer: 64 * 1024 * 1024,
     });
   }
-  const script = `cd "${WSL_MIRROR}" && env -u GIT_DIR -u GIT_WORK_TREE cargo ${kaniArgs.join(" ")}`;
+  const cargoCommand = GNU_TIME
+    ? `/usr/bin/time -v cargo ${kaniArgs.join(" ")}`
+    : `cargo ${kaniArgs.join(" ")}`;
+  const script = `cd "${WSL_MIRROR}" && env -u GIT_DIR -u GIT_WORK_TREE ${cargoCommand}`;
   return spawnSync("wsl.exe", ["-d", distro, "--", "bash", "-lc", b64sh(script)], {
     encoding: "utf8",
     timeout: TIMEOUT_MS,
@@ -287,14 +327,17 @@ function cleanupOrphans() {
 if (LOG_DIR) fs.mkdirSync(LOG_DIR, { recursive: true });
 const results = [];
 for (const harness of SELECTED) {
+  const startedAt = performance.now();
   const r = runKani(harness);
+  const elapsedMs = Math.round(performance.now() - startedAt);
   const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
   const timedOut = r.error?.code === "ETIMEDOUT";
+  const maxRssKb = out.match(/Maximum resident set size \(kbytes\):\s*(\d+)/)?.[1];
   if (timedOut && distro !== "native") cleanupOrphans();
   if (LOG_DIR) {
     fs.writeFileSync(
       path.join(LOG_DIR, `kani-${harness}.txt`),
-      `# exit=${r.status} signal=${r.signal ?? ""} timedOut=${timedOut} error=${r.error?.code ?? ""}\n${out}`,
+      `# exit=${r.status} signal=${r.signal ?? ""} timedOut=${timedOut} error=${r.error?.code ?? ""} elapsed_ms=${elapsedMs} max_rss_kb=${maxRssKb ?? "unmeasured"}\n${out}`,
     );
   }
   results.push({
@@ -303,6 +346,9 @@ for (const harness of SELECTED) {
     bad: /VERIFICATION:- FAILED/.test(out),
     timedOut,
     status: r.status,
+    elapsed_ms: elapsedMs,
+    max_rss_kb: maxRssKb ? Number(maxRssKb) : null,
+    peak_memory_measurement: GNU_TIME ? "/usr/bin/time -v" : "unmeasured",
     tail: out.trim().split(/\r?\n/).slice(-8).join("\n"),
   });
 }
@@ -323,6 +369,7 @@ if (failedList.length > 0) {
 if (stalled.length === 0) {
   verdict("pass", `all ${verified.length} kani harness(es) verified`, {
     env: distro,
+    details: results,
   });
 }
 verdict(

@@ -1,0 +1,146 @@
+{
+  "schema": "audio-lens.formal-verification-ledger.al274-proof-redesign.v1",
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/274",
+  "slice": "WAV-RANGE-008 exact valid-range proof redesign",
+  "branch": "feature/274-range-proof-redesign",
+  "baseline_origin_main": "fb95c86a6a90b7b24255437de67ec923c9d09ad3",
+  "environment": {
+    "host": "Windows 11",
+    "kani_environment": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0",
+    "solver": "CaDiCaL (Kani/CBMC default; no solver attribute)",
+    "memory_measurement": "/usr/bin/time -v wrapping each cargo kani invocation; not per-solver cgroup isolation"
+  },
+  "input_domain": {
+    "layout": "constructor-admitted layout全体。decode可能なWAVEFORMATEX encodingへ絞らない",
+    "block_align": "u16, nonzero production representation",
+    "data_len": "u32-representable, frame-aligned, total_frames=data_len/block_align",
+    "data_extent": "data_offset+data_len <= u32::MAX+8 (exact RIFF file length boundary)",
+    "public_frame_indices": "start_frame/end_frame are full u64",
+    "valid_predicate": "start_frame < end_frame && end_frame <= total_frames",
+    "invalid_predicate": "start_frame >= end_frame || end_frame > total_frames (exact complement)"
+  },
+  "assumptions": [
+    {
+      "assumption": "block_align != 0",
+      "classification": "exact constructor invariant"
+    },
+    {
+      "assumption": "data_len <= u32::MAX",
+      "classification": "exact constructor invariant"
+    },
+    {
+      "assumption": "data_offset <= MAX_RIFF_FILE_LEN - data_len",
+      "classification": "exact constructor invariant"
+    },
+    {
+      "assumption": "valid proof uses positive frame_count32 and end=start+frame_count,total=end+tail within u32",
+      "classification": "exact constructive reparameterization"
+    },
+    {
+      "assumption": "valid proof constructs data_len as start/frame_count/tail byte segment sum",
+      "classification": "exact constructor reparameterization using distributivity; widened u64 arithmetic cannot wrap for these operand widths"
+    },
+    {
+      "assumption": "invalid proof constrains start/end to invalid predicate",
+      "classification": "exact complement branch selection"
+    }
+  ],
+  "coverage": {
+    "valid_reparameterization": "For every constructor-admitted layout and valid range, frame_count=end-start and tail=total-end produce the constructive tuple. data_len=total*block_align equals the three segment sum by integer distributivity. Conversely every constructed tuple is valid and constructor-admitted. No representative-value sampling or concrete fixture narrowing.",
+    "frame_index_domain": "Because valid end<=total_frames and total_frames is derived from u32 data_len/u16 nonzero block_align, end<=u32::MAX. Therefore u64-to-u32 conversion after validation is exact, not narrowing.",
+    "complement": "Valid and invalid predicates are exact Boolean complements over the same full u64 start/end domain."
+  },
+  "proofs": [
+    {
+      "name": "wav_range_plan_valid_ranges_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 10899,
+      "max_rss_kb": 279020,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "properties": [
+        "valid acceptance",
+        "frame_count exactness",
+        "byte_len exactness",
+        "byte_offset exactness",
+        "exclusive byte_end consistency",
+        "data extent containment",
+        "absence of overflow/underflow/panic in helper arithmetic"
+      ]
+    },
+    {
+      "name": "wav_range_plan_invalid_ranges_error",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 4490,
+      "max_rss_kb": 276720,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "properties": [
+        "invalid exact-complement rejection",
+        "compact diagnostic total_frames payload exactness"
+      ]
+    }
+  ],
+  "connection_conditions": {
+    "production_helper": "crates/al-media/src/wav.rs WavDataLayout::range_plan",
+    "production_caller": "read_wav_range calls the same helper before seek/read/decode",
+    "constructor_enforcement": "wav_layout/WavDataLayout::new enforce nonzero block_align, frame alignment, u32 data length, and RIFF extent boundary",
+    "true_to_code": "proof invokes the production helper directly; no cfg(kani) replacement, fmt/alloc stub, Cursor, Vec decode, or writer fixture",
+    "behavior_compatibility": "public API signature, public error kind/text, supported formats, normal/error behavior, and f64 precision are unchanged"
+  },
+  "unproven_scope": [
+    "seek/read/short reads",
+    "I/O errors",
+    "allocation failure",
+    "Vec decode",
+    "PCM conversion",
+    "diagnostic string formatting",
+    "whole public API no-panic"
+  ],
+  "mutation": {
+    "kind": "arithmetic byte_len mutation",
+    "change": "frame_count32 * block_align -> frame_count32 + block_align (temporary)",
+    "lane_exit_code": 1,
+    "lane_verdict": "fail",
+    "detected_by": "wav_range_plan_valid_ranges_exact",
+    "raw_marker": "VERIFICATION:- FAILED",
+    "elapsed_ms": 6671,
+    "max_rss_kb": 279224,
+    "reverted": true,
+    "post_revert": "mise run test al-media, mise run test-formal, and final wav-range lane all passed"
+  },
+  "runner": {
+    "group": "wav-range",
+    "selection": "AL_KANI_HARNESS_GROUP=wav-range; mutually exclusive with AL_KANI_HARNESSES",
+    "registry": "21 harnesses total; wav-range group contains exactly the two Required replacement proofs",
+    "instrumentation": "per-harness elapsed_ms, raw log, verdict, GNU time max RSS when available",
+    "unchanged_semantics": [
+      "default full lane",
+      "fail-closed unknown selections",
+      "WSL mirror",
+      "target placement",
+      "timeout semantics"
+    ]
+  },
+  "cost_comparison": {
+    "pr281": "valid proof timed out at about 300012ms Required NotRun; invalid proof passed in about 3.4-4.5s",
+    "legacy_whole_call": "evidence/al274 records valid 947s timeout/2.5GiB in symex and invalid 631s timeout/5.2GiB in symex",
+    "new": "valid 10899ms/279020KiB and invalid 4490ms/276720KiB; combined 15389ms",
+    "rerun_cost": "wav-range group reruns in seconds-scale local cost, far below the 10-20 minute design budget"
+  },
+  "proptest_overlap": {
+    "frame_count_and_range_reads_hold_the_contract": "unchanged",
+    "writer_output_round_trips_losslessly": "unchanged",
+    "relationship": "proptest exercises full public I/O/decode paths statistically; Kani proves local pure arithmetic exhaustively over constructor-admitted layout"
+  },
+  "legacy_disposition": {
+    "header_reads_valid_ranges_slice_exact": "retired after replacement wav-range group passed",
+    "header_reads_invalid_ranges_error": "retired after replacement wav-range group passed",
+    "spike_harnesses": "none added to canonical registry"
+  },
+  "rf_reduction": "No new Ruviform reduction issue was filed. The arithmetic/range planning contract is currently AudioLens-local because its constructor invariants are tied to the WAV parser boundary."
+}
