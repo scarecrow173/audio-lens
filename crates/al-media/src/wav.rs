@@ -166,14 +166,109 @@ pub(crate) fn decode_samples(
     Ok((sample_format, codec.to_owned(), samples))
 }
 
+/// Byte extent and frame layout of the WAV `data` chunk. The
+/// constructor owns the layout invariants range arithmetic relies on:
+/// a non-zero frame size, frame-aligned data, the RIFF u32 size
+/// boundary, and a representable end offset. It performs no I/O,
+/// allocation, decoding, or diagnostic formatting.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct WavDataLayout {
+    data_offset: u64,
+    data_len: u64,
+    block_align: u16,
+    total_frames: u64,
+}
+
+impl WavDataLayout {
+    /// RIFF stores the file size minus its eight-byte header in a u32.
+    /// Every chunk body accepted by `wav_layout` therefore ends within
+    /// this exact container boundary.
+    const MAX_RIFF_FILE_LEN: u64 = u32::MAX as u64 + 8;
+
+    fn new(data_offset: u64, data_len: u64, block_align: u16) -> Option<Self> {
+        let data_end = data_offset.checked_add(data_len)?;
+        if block_align == 0 || data_len > u32::MAX as u64 || data_end > Self::MAX_RIFF_FILE_LEN {
+            return None;
+        }
+        let block = u32::from(block_align);
+        let data_len32 = data_len as u32;
+        if !data_len32.is_multiple_of(block) {
+            return None;
+        }
+        Some(Self {
+            data_offset,
+            data_len,
+            block_align,
+            total_frames: u64::from(data_len32 / block),
+        })
+    }
+
+    /// Plan the byte range for frames `[start_frame, end_frame)`.
+    /// Validity is decided before any frame/byte multiplication; with
+    /// the layout invariants above, every multiplication and addition
+    /// in the valid path is provably inside u64.
+    fn range_plan(
+        &self,
+        start_frame: u64,
+        end_frame: u64,
+    ) -> Result<WavRangePlan, WavRangePlanError> {
+        if start_frame >= end_frame || end_frame > self.total_frames {
+            return Err(WavRangePlanError {
+                total_frames: self.total_frames,
+            });
+        }
+        // Valid frames are bounded by `total_frames`, which is derived
+        // from the u32 RIFF data length, so these narrowing conversions
+        // are exact. The widening product helper keeps the public u64
+        // frame indexes and byte offsets without a narrowing u32 product.
+        let start32 = start_frame as u32;
+        let end32 = end_frame as u32;
+        let frame_count32 = end32 - start32;
+        let frame_count = u64::from(frame_count32);
+        // Endpoint products avoid a distributivity step in both production
+        // arithmetic and its proof. In the valid domain,
+        // `end * block - start * block` is exactly `(end - start) * block`.
+        let block = u64::from(self.block_align);
+        let start_bytes = u64::from(start32) * block;
+        let end_bytes = u64::from(end32) * block;
+        let byte_len = end_bytes - start_bytes;
+        let byte_offset = self.data_offset + start_bytes;
+        let byte_end = self.data_offset + end_bytes;
+        Ok(WavRangePlan {
+            total_frames: self.total_frames,
+            frame_count,
+            byte_offset,
+            byte_len,
+            byte_end,
+        })
+    }
+}
+
+/// Pure arithmetic result for a valid frame range. `byte_end` is the
+/// exclusive end of the sample slice inside the `data` chunk.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct WavRangePlan {
+    total_frames: u64,
+    frame_count: u64,
+    byte_offset: u64,
+    byte_len: u64,
+    byte_end: u64,
+}
+
+/// Range rejection without its human-readable diagnostic payload. The
+/// caller maps this compact error into the existing `MediaError`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct WavRangePlanError {
+    total_frames: u64,
+}
+
 /// Located WAV structure: parsed `fmt ` plus the `data` chunk's byte
 /// range, so sample decoding can target a sub-range without holding
 /// the whole file.
 #[derive(Debug)]
 pub(crate) struct WavLayout {
     pub(crate) fmt: FmtChunk,
-    data_offset: u64,
-    data_len: u64,
+    data: WavDataLayout,
 }
 
 /// Walk RIFF chunk headers from a seekable source. Only the `fmt `
@@ -263,14 +358,9 @@ pub(crate) fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaEr
         return Err(MediaError::malformed("fmt declares zero sample rate"));
     }
     let (data_offset, data_len) = pcm.ok_or_else(|| MediaError::malformed("missing data chunk"))?;
-    if fmt.block_align == 0 || !data_len.is_multiple_of(u64::from(fmt.block_align)) {
-        return Err(MediaError::malformed("data chunk ends mid-frame"));
-    }
-    Ok(WavLayout {
-        fmt,
-        data_offset,
-        data_len,
-    })
+    let data = WavDataLayout::new(data_offset, data_len, fmt.block_align)
+        .ok_or_else(|| MediaError::malformed("data chunk ends mid-frame"))?;
+    Ok(WavLayout { fmt, data })
 }
 
 fn decoded(fmt: &FmtChunk, body: &[u8]) -> Result<DecodedAudio, MediaError> {
@@ -297,14 +387,15 @@ pub(crate) fn decode_waveformatex(
 /// Decode a RIFF/WAVE file into pre-normalization PCM.
 pub fn decode_wav(data: &[u8]) -> Result<DecodedAudio, MediaError> {
     let layout = wav_layout(&mut io::Cursor::new(data))?;
-    let body = &data[layout.data_offset as usize..(layout.data_offset + layout.data_len) as usize];
+    let data_end = layout.data.data_offset + layout.data.data_len;
+    let body = &data[layout.data.data_offset as usize..data_end as usize];
     decoded(&layout.fmt, body)
 }
 
 /// Number of PCM frames in the file, from the header alone.
 pub fn wav_frame_count<R: Read + Seek>(r: &mut R) -> Result<u64, MediaError> {
     let layout = wav_layout(r)?;
-    Ok(layout.data_len / u64::from(layout.fmt.block_align))
+    Ok(layout.data.total_frames)
 }
 
 /// Decode frames `[start_frame, end_frame)` without loading the whole
@@ -315,20 +406,112 @@ pub fn read_wav_range<R: Read + Seek>(
     end_frame: u64,
 ) -> Result<DecodedAudio, MediaError> {
     let layout = wav_layout(r)?;
-    let block = u64::from(layout.fmt.block_align);
-    let total = layout.data_len / block;
-    if start_frame >= end_frame || end_frame > total {
-        return Err(MediaError::malformed(format!(
-            "frame range [{start_frame}, {end_frame}) outside {total} frames"
-        )));
-    }
-    let byte_len = (end_frame - start_frame) * block;
-    r.seek(SeekFrom::Start(layout.data_offset + start_frame * block))
+    let plan = layout
+        .data
+        .range_plan(start_frame, end_frame)
+        .map_err(|err| {
+            MediaError::malformed(format!(
+                "frame range [{start_frame}, {end_frame}) outside {} frames",
+                err.total_frames
+            ))
+        })?;
+    r.seek(SeekFrom::Start(plan.byte_offset))
         .map_err(|e| MediaError::malformed(format!("cannot seek WAV data: {e}")))?;
-    let mut buf = vec![0u8; byte_len as usize];
+    let mut buf = vec![0u8; plan.byte_len as usize];
     r.read_exact(&mut buf)
         .map_err(|e| MediaError::malformed(format!("cannot read WAV data: {e}")))?;
     decoded(&layout.fmt, &buf)
+}
+
+/// Local Kani proofs for the WAV range arithmetic helper. These proofs
+/// deliberately contain only symbolic scalars and the production helper:
+/// no writer fixture, `Cursor`, `Read + Seek`, `Vec` decoding, fmt stub,
+/// or allocation enters the verified boundary. The two range predicates
+/// are exact complements over the same input space.
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    /// Symbolic data layout constrained only by the invariants
+    /// `wav_layout` establishes before production code calls the range
+    /// planner. `block_align` stays a u16 because that is the production
+    /// representation; offsets, lengths, and frame indexes stay u64.
+    /// The RIFF u32 size boundary is not an arbitrary narrowing: it is
+    /// the exact container invariant enforced by `WavDataLayout::new`.
+    ///
+    /// Frames are parameterized constructively as `data_len = total *
+    /// block_align`. For frame-aligned data this is an exact
+    /// reparameterization of every constructor-admitted layout, and it
+    /// keeps the proof focused on the range arithmetic instead of the
+    /// constructor's division circuit.
+    fn symbolic_data_layout() -> WavDataLayout {
+        let data_offset: u64 = kani::any();
+        let total_frames32: u32 = kani::any();
+        let block_align: u16 = kani::any();
+        kani::assume(block_align != 0);
+        let data_len = u64::from(total_frames32) * u64::from(block_align);
+        kani::assume(data_len <= u32::MAX as u64);
+        kani::assume(data_offset <= WavDataLayout::MAX_RIFF_FILE_LEN - data_len);
+        WavDataLayout {
+            data_offset,
+            data_len,
+            block_align,
+            total_frames: u64::from(total_frames32),
+        }
+    }
+
+    /// Valid ranges (`start < end <= total`) produce the exact frame
+    /// count, endpoint-derived byte length, byte offset, and exclusive
+    /// byte end, and the slice remains inside the data extent. The production multiplications
+    /// and additions remain subject to Kani's arithmetic checks, so overflow
+    /// freedom is part of the proof rather than an assumption.
+    #[kani::proof]
+    fn wav_range_plan_valid_ranges_exact() {
+        let data = symbolic_data_layout();
+        // Valid public u64 end frames are bounded by the u32-derived
+        // total, so u32 start/end symbols exactly represent every valid
+        // range. This is an exact reparameterization, not a narrowing of
+        // the accepted input space.
+        let start32: u32 = kani::any();
+        let end32: u32 = kani::any();
+        kani::assume(start32 < end32);
+        let start_frame = u64::from(start32);
+        let end_frame = u64::from(end32);
+        kani::assume(end_frame <= data.total_frames);
+
+        let plan = match data.range_plan(start_frame, end_frame) {
+            Ok(plan) => plan,
+            Err(_) => unreachable!("valid ranges must be accepted"),
+        };
+
+        assert!(plan.total_frames == data.total_frames);
+        assert!(plan.frame_count == end_frame - start_frame);
+        assert!(plan.frame_count == u64::from(end32 - start32));
+        let start_bytes = u64::from(start32) * u64::from(data.block_align);
+        let end_bytes = u64::from(end32) * u64::from(data.block_align);
+        assert!(plan.byte_len == end_bytes - start_bytes);
+        assert!(plan.byte_offset == data.data_offset + start_bytes);
+        assert!(plan.byte_end == data.data_offset + end_bytes);
+        assert!(plan.byte_end == plan.byte_offset + plan.byte_len);
+        assert!(plan.byte_end <= data.data_offset + data.data_len);
+    }
+
+    /// The exact complement of the valid-range predicate is always
+    /// rejected: empty ranges (`start >= end`) and ranges past the total
+    /// frame count (`end > total`) cannot produce a byte plan.
+    #[kani::proof]
+    fn wav_range_plan_invalid_ranges_error() {
+        let data = symbolic_data_layout();
+        let start_frame: u64 = kani::any();
+        let end_frame: u64 = kani::any();
+        kani::assume(start_frame >= end_frame || end_frame > data.total_frames);
+
+        let err = match data.range_plan(start_frame, end_frame) {
+            Err(err) => err,
+            Ok(_) => unreachable!("invalid ranges must be rejected"),
+        };
+        assert!(err.total_frames == data.total_frames);
+    }
 }
 
 /// Output encoding for [`WavWriter`].
@@ -536,6 +719,42 @@ mod tests {
             out.extend_from_slice(&s.to_le_bytes());
         }
         out
+    }
+
+    #[test]
+    fn wav_range_plan_valid_tail_range_is_exact() {
+        let data = WavDataLayout::new(44, 16, 4).unwrap();
+        let plan = data.range_plan(2, 4).unwrap();
+        assert_eq!(plan.total_frames, 4);
+        assert_eq!(plan.frame_count, 2);
+        assert_eq!(plan.byte_offset, 52);
+        assert_eq!(plan.byte_len, 8);
+        assert_eq!(plan.byte_end, 60);
+    }
+
+    #[test]
+    fn wav_range_plan_rejects_empty_and_out_of_range() {
+        let data = WavDataLayout::new(44, 16, 4).unwrap();
+        assert!(data.range_plan(2, 2).is_err());
+        assert!(data.range_plan(2, 5).is_err());
+    }
+
+    #[test]
+    fn wav_data_layout_rejects_unaligned_or_unrepresentable_extents() {
+        assert!(WavDataLayout::new(44, 5, 4).is_none());
+        assert!(WavDataLayout::new(44, 4, 0).is_none());
+        assert!(WavDataLayout::new(u64::MAX, 1, 1).is_none());
+    }
+
+    #[test]
+    fn wav_range_plan_handles_riff_extent_boundary_without_overflow() {
+        let data = WavDataLayout::new(WavDataLayout::MAX_RIFF_FILE_LEN - 16, 16, 8).unwrap();
+        let plan = data.range_plan(1, 2).unwrap();
+        assert_eq!(plan.frame_count, 1);
+        assert_eq!(plan.byte_offset, WavDataLayout::MAX_RIFF_FILE_LEN - 8);
+        assert_eq!(plan.byte_len, 8);
+        assert_eq!(plan.byte_end, WavDataLayout::MAX_RIFF_FILE_LEN);
+        assert!(data.range_plan(u64::MAX - 1, u64::MAX).is_err());
     }
 
     #[test]

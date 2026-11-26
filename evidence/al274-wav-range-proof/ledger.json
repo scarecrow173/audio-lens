@@ -1,0 +1,103 @@
+{
+  "issue": "audio-lens#274",
+  "slice": "WAV-RANGE-008 representative local proof",
+  "implementation_state": "failed-required-valid-proof-not-run",
+  "baseline": {
+    "initial_origin_main": "17b98e3ca95b790a9e977f9a2ecb6ed87bed3532",
+    "merged_origin_main": "fb95c86a6a90b7b24255437de67ec923c9d09ad3",
+    "boundary_baseline": "evidence/al274-boundary/classification.json"
+  },
+  "property": {
+    "id": "WAV-RANGE-008",
+    "requirement_state": "Required",
+    "required_assurance": "Bounded Exhaustive local",
+    "granularity": "range arithmetic helper",
+    "method": "Kani local + proptest integration",
+    "execution_budget": "proof 5分以内・4GiB未満",
+    "current_verdict": "NotRun(valid proof timeout); invalid proof Pass",
+    "unproven_scope": [
+      "実 I/O short read",
+      "seek/read error",
+      "allocation 失敗",
+      "PCM decode",
+      "diagnostic formatting",
+      "公開 API 全体 no-panic",
+      "valid range arithmetic within budget"
+    ],
+    "connection_conditions": "WavDataLayout constructor invariants hold and production read_wav_range calls WavDataLayout::range_plan"
+  },
+  "input_domain": {
+    "block_align": "u16 nonzero production representation",
+    "frame_indexes": "u64 public start/end; valid proof exactly reparameterized as direct u32 start/end because valid end <= u32-derived total",
+    "invalid_frame_indexes": "u64 symbolic directly",
+    "data_offset": "u64 symbolic within exact RIFF file boundary",
+    "data_len": "constructed as total_frames32 * block_align and constrained to u32 RIFF data boundary",
+    "assume": [
+      "block_align != 0",
+      "frame-aligned constructed data length",
+      "data_len <= u32::MAX",
+      "data_offset + data_len <= u32::MAX + 8",
+      "valid or invalid exact complement range predicate"
+    ]
+  },
+  "proofs": [
+    {
+      "name": "wav_range_plan_valid_ranges_exact",
+      "requirement_state": "Required",
+      "verdict": "NotRun",
+      "reason": "timeout 300012ms in final canonical subset",
+      "elapsed_ms": 300012,
+      "raw_log": "evidence/al274-wav-range-proof/kani/kani-wav_range_plan_valid_ranges_exact.txt",
+      "solver": "CaDiCaL(default)"
+    },
+    {
+      "name": "wav_range_plan_invalid_ranges_error",
+      "requirement_state": "Required",
+      "verdict": "Pass",
+      "elapsed_ms": 4579,
+      "post_revert_elapsed_ms": 3406,
+      "verification_time_seconds": 0.06818947,
+      "raw_log": "evidence/al274-wav-range-proof/kani/kani-wav_range_plan_invalid_ranges_error.txt",
+      "solver": "CaDiCaL(default)"
+    }
+  ],
+  "replaced_legacy_proofs": {
+    "removed": ["header_reads_valid_ranges_slice_exact", "header_reads_invalid_ranges_error"],
+    "note": "replacement was implemented, but because valid replacement is NotRun this slice must not be treated as completed assurance replacement",
+    "proptest_overlap_retained": [
+      "frame_count_and_range_reads_hold_the_contract",
+      "writer_output_round_trips_losslessly"
+    ]
+  },
+  "mutation": {
+    "performed": "WavRangePlanError.total_frames changed from self.total_frames to 0 temporarily",
+    "command": "AL_KANI_HARNESSES=\"wav_range_plan_invalid_ranges_error\" AL_KANI_TIMEOUT_MS=300000 AL_KANI_LOG_DIR=evidence/al274-wav-range-proof/mutation-kani mise run test-formal-kani",
+    "exit_code": 1,
+    "detected_by": "wav_range_plan_invalid_ranges_error",
+    "elapsed_ms": 4279,
+    "verification_time_seconds": 0.09302156,
+    "reverted": true,
+    "post_revert_pass": "evidence/al274-wav-range-proof/kani-invalid-final/verdict.json"
+  },
+  "cost_comparison": {
+    "legacy_valid": "trial 900s timeout/peak about 2.5GiB; canonical 1500s timeout",
+    "legacy_invalid": "trial 600s timeout/peak about 5.2GiB; canonical 1500s timeout",
+    "new_valid": "300012ms timeout; peak memory NotRun/unmeasured",
+    "new_invalid": "Pass elapsed 4579ms/3406ms; raw verification time 0.06818947s",
+    "peak_memory": "unmeasured; not claimed as within 4GiB"
+  },
+  "rf_return": {
+    "candidate": "none",
+    "issue_created": false
+  },
+  "remaining_work": [
+    "sound solver/contract decomposition for exact multiplication monotonicity/containment",
+    "systematic peak memory measurement",
+    "WAV-CHUNK-003/WAV-SCAN-004",
+    "MP4/AVI required proofs",
+    "runner assurance pack schema/Daily CI integration",
+    "whole mutation matrix",
+    "retired/superseded ledger schema integration"
+  ],
+  "docs_index": "not edited; Coordinator integrates index updates"
+}

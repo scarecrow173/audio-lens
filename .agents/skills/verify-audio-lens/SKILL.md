@@ -184,7 +184,11 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
 - The runner's `HARNESSES` array is the registry: 21 harnesses
-  (11 WAV + 10 containers). It always passes `-Z stubbing`; this only
+  (11 WAV + 10 containers). The WAV count includes the two local range
+  arithmetic proofs `wav_range_plan_valid_ranges_exact` and
+  `wav_range_plan_invalid_ranges_error` in `crates/al-media/src/wav.rs`;
+  they replace the retired whole-call header range proofs. It always
+  passes `-Z stubbing`; this only
   enables the attribute mechanism, so harnesses without stub attributes
   keep the same verification semantics. `AL_KANI_HARNESSES="a,b,c"`
   selects a comma-separated subset of registered names for a rerun;
@@ -207,6 +211,23 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   the other 20 timed out. The PR #276 spike's three representative
   proofs also all timed out. Current evidence and analysis live in
   `evidence/al274/` and `evidence/al274/stub-spike/`.
+- The two WAV range arithmetic proofs are local Bounded Exhaustive
+  proofs over the production `WavDataLayout::range_plan` helper. Their
+  boundary is symbolic scalar arithmetic only: they do not prove public
+  API-wide no-panic, real I/O short reads, allocation failure, PCM
+  decode, or diagnostic formatting. Their assumptions are the exact WAV
+  layout invariants (non-zero block align, frame-aligned data, RIFF u32
+  container boundary, and `data_len = total_frames * block_align`); the
+  valid proof's direct u32 start/end parameterization is an exact
+  reparameterization of valid u64 ranges, while the invalid proof keeps
+  u64 start/end symbolic directly. Use the existing subset rerun:
+  `AL_KANI_HARNESSES="wav_range_plan_valid_ranges_exact,wav_range_plan_invalid_ranges_error" AL_KANI_TIMEOUT_MS=300000 mise run test-formal-kani`.
+  Current 2026-11-26 evidence is split: the invalid proof passes, but
+  the valid proof is Required NotRun because exact u32×u16 multiplication
+  monotonicity/containment exceeded the 300-second budget across
+  CaDiCaL/Kissat/Bitwuzla/Z3 and several linear/decomposed formulations.
+  Do not report the valid proof as Pass until `evidence/al274-wav-range-proof/`
+  records a raw `VERIFICATION: SUCCESSFUL` within budget.
 - These proofs execute the implementation under explicit bounds,
   assumptions, and stubs; they are not a model substituted for the
   implementation. When a proof fails or cannot complete, classify the
@@ -232,9 +253,11 @@ Change-impact procedure:
    (`AL_KANI_HARNESSES`) for affected registered harnesses, or the full
    lane when the boundary/shared dependency impact is broader.
 3. Update the evidence ledger with target SHA, tool versions, execution
-   conditions, guarantee scope, and verdict. Do not advance a verified
-   sync commit until correspondence review and the required reruns are
-   complete.
+   conditions, guarantee scope, and verdict. WAV-RANGE-008 range-proof
+   evidence belongs in `evidence/al274-wav-range-proof/`; keep
+   `evidence/al274-boundary/` as the read-only baseline. Do not advance
+   a verified sync commit until correspondence review and the required
+   reruns are complete.
 
 ## Bench
 

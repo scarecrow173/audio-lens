@@ -1,6 +1,6 @@
 // Issue #256 (D 層 formal verification): al-media WAV codec(第 1 標的)
 // と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
-// harness(tests/formal_wav.rs・tests/formal_containers.rs)を
+// harness(src/wav.rs・tests/formal_wav.rs・tests/formal_containers.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -163,7 +163,8 @@ if (missing.length > 0) {
   verdict(
     "not_run",
     `kani-verifier (env: ${distro}) lacks ${missing.join("/")}; ` +
-      `harnesses live under ${PACKAGE}/tests/formal_wav.rs ` +
+      `harnesses live under ${PACKAGE}/src/wav.rs, ` +
+      `${PACKAGE}/tests/formal_wav.rs, ` +
       `and ${PACKAGE}/tests/formal_containers.rs ` +
       "and cannot be reached",
   );
@@ -176,8 +177,8 @@ if (missing.length > 0) {
 // mid-run loses completed proofs. Per-harness runs keep every
 // finished verdict. TIMEOUT_MS is the per-harness budget (env
 // override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
-// `mod kani_proofs` blocks in tests/formal_wav.rs and
-// tests/formal_containers.rs.
+// `mod proofs` block in src/wav.rs and the `mod kani_proofs` blocks in
+// tests/formal_wav.rs and tests/formal_containers.rs.
 const HARNESSES = [
   "decode_wav_never_panics_signed",
   "wav_frame_count_never_panics_signed",
@@ -188,8 +189,8 @@ const HARNESSES = [
   "writer_round_trip_pcm_s32",
   "writer_round_trip_float32",
   "writer_round_trip_float64",
-  "header_reads_valid_ranges_slice_exact",
-  "header_reads_invalid_ranges_error",
+  "wav_range_plan_valid_ranges_exact",
+  "wav_range_plan_invalid_ranges_error",
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",
@@ -287,14 +288,16 @@ function cleanupOrphans() {
 if (LOG_DIR) fs.mkdirSync(LOG_DIR, { recursive: true });
 const results = [];
 for (const harness of SELECTED) {
+  const startedAt = performance.now();
   const r = runKani(harness);
+  const elapsedMs = Math.round(performance.now() - startedAt);
   const out = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
   const timedOut = r.error?.code === "ETIMEDOUT";
   if (timedOut && distro !== "native") cleanupOrphans();
   if (LOG_DIR) {
     fs.writeFileSync(
       path.join(LOG_DIR, `kani-${harness}.txt`),
-      `# exit=${r.status} signal=${r.signal ?? ""} timedOut=${timedOut} error=${r.error?.code ?? ""}\n${out}`,
+      `# exit=${r.status} signal=${r.signal ?? ""} timedOut=${timedOut} error=${r.error?.code ?? ""} elapsed_ms=${elapsedMs}\n${out}`,
     );
   }
   results.push({
@@ -303,6 +306,7 @@ for (const harness of SELECTED) {
     bad: /VERIFICATION:- FAILED/.test(out),
     timedOut,
     status: r.status,
+    elapsed_ms: elapsedMs,
     tail: out.trim().split(/\r?\n/).slice(-8).join("\n"),
   });
 }
@@ -323,6 +327,7 @@ if (failedList.length > 0) {
 if (stalled.length === 0) {
   verdict("pass", `all ${verified.length} kani harness(es) verified`, {
     env: distro,
+    details: results,
   });
 }
 verdict(
