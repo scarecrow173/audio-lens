@@ -238,6 +238,89 @@ struct WavRangePlanError {
     total_frames: u64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WavScanTerminal {
+    Complete,
+    TrailingBytes,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WavScanPosition {
+    HeaderAvailable,
+    Terminal(WavScanTerminal),
+}
+
+fn wav_scan_position(offset: u64, file_len: u64) -> WavScanPosition {
+    if offset == file_len {
+        return WavScanPosition::Terminal(WavScanTerminal::Complete);
+    }
+    if offset > file_len || file_len - offset < 8 {
+        return WavScanPosition::Terminal(WavScanTerminal::TrailingBytes);
+    }
+    WavScanPosition::HeaderAvailable
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WavChunkBoundaryError {
+    SizeOverflow,
+    ExtendsPastEnd,
+    MissingPad,
+}
+
+impl WavChunkBoundaryError {
+    fn message(self) -> &'static str {
+        match self {
+            Self::SizeOverflow => "chunk size overflow",
+            Self::ExtendsPastEnd => "chunk extends past end of file",
+            Self::MissingPad => "missing pad byte after odd-sized chunk",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct WavChunkAdvance {
+    body_start: u64,
+    body_end: u64,
+    next_offset: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WavChunkStep {
+    Advance(WavChunkAdvance),
+    Invalid(WavChunkBoundaryError),
+    Terminal(WavScanTerminal),
+}
+
+fn wav_chunk_step(offset: u64, file_len: u64, size: u32) -> WavChunkStep {
+    match wav_scan_position(offset, file_len) {
+        WavScanPosition::Terminal(terminal) => return WavChunkStep::Terminal(terminal),
+        WavScanPosition::HeaderAvailable => {}
+    }
+
+    let body_start = offset + 8;
+    let size = u64::from(size);
+    let Some(body_end) = body_start.checked_add(size) else {
+        return WavChunkStep::Invalid(WavChunkBoundaryError::SizeOverflow);
+    };
+    if body_end > file_len {
+        return WavChunkStep::Invalid(WavChunkBoundaryError::ExtendsPastEnd);
+    }
+    // An odd-sized chunk must be followed by its word-alignment pad
+    // byte — including the last chunk.
+    let pad = size & 1;
+    let Some(next_offset) = body_end.checked_add(pad) else {
+        return WavChunkStep::Invalid(WavChunkBoundaryError::MissingPad);
+    };
+    if next_offset > file_len {
+        return WavChunkStep::Invalid(WavChunkBoundaryError::MissingPad);
+    }
+    WavChunkStep::Advance(WavChunkAdvance {
+        body_start,
+        body_end,
+        next_offset,
+    })
+}
+
 /// Located WAV structure: parsed `fmt ` plus the `data` chunk's byte
 /// range, so sample decoding can target a sub-range without holding
 /// the whole file.
@@ -276,24 +359,33 @@ pub(crate) fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaEr
     let mut fmt: Option<FmtChunk> = None;
     let mut pcm: Option<(u64, u64)> = None;
     let mut offset = 12u64;
-    while offset + 8 <= file_len {
+    loop {
+        match wav_scan_position(offset, file_len) {
+            WavScanPosition::Terminal(WavScanTerminal::Complete) => break,
+            WavScanPosition::Terminal(WavScanTerminal::TrailingBytes) => {
+                return Err(MediaError::malformed(
+                    "trailing bytes after last RIFF chunk",
+                ));
+            }
+            WavScanPosition::HeaderAvailable => {}
+        }
+
         let mut h = [0u8; 8];
         read_at(r, offset, &mut h)?;
-        let size = u64::from(u32::from_le_bytes(h[4..8].try_into().unwrap()));
-        let body_start = offset + 8;
-        let body_end = body_start
-            .checked_add(size)
-            .ok_or_else(|| MediaError::malformed("chunk size overflow"))?;
-        if body_end > file_len {
-            return Err(MediaError::malformed("chunk extends past end of file"));
-        }
-        // An odd-sized chunk must be followed by its word-alignment pad
-        // byte — including the last chunk.
-        if body_end + (size % 2) > file_len {
-            return Err(MediaError::malformed(
-                "missing pad byte after odd-sized chunk",
-            ));
-        }
+        let size = u32::from_le_bytes(h[4..8].try_into().unwrap());
+        let step = match wav_chunk_step(offset, file_len, size) {
+            WavChunkStep::Advance(step) => step,
+            WavChunkStep::Invalid(error) => {
+                return Err(MediaError::malformed(error.message()));
+            }
+            WavChunkStep::Terminal(WavScanTerminal::Complete) => break,
+            WavChunkStep::Terminal(WavScanTerminal::TrailingBytes) => {
+                return Err(MediaError::malformed(
+                    "trailing bytes after last RIFF chunk",
+                ));
+            }
+        };
+        let body_len = step.body_end - step.body_start;
         match &h[0..4] {
             // Duplicate fmt/data are rejected rather than silently
             // last-wins: dropping an earlier `data` chunk would discard
@@ -302,28 +394,22 @@ pub(crate) fn wav_layout<R: Read + Seek>(r: &mut R) -> Result<WavLayout, MediaEr
                 if fmt.is_some() {
                     return Err(MediaError::malformed("duplicate fmt chunk"));
                 }
-                if size > MAX_FMT_BYTES {
+                if body_len > MAX_FMT_BYTES {
                     return Err(MediaError::malformed("fmt chunk unreasonably large"));
                 }
-                let mut body = vec![0u8; size as usize];
-                read_at(r, body_start, &mut body)?;
+                let mut body = vec![0u8; body_len as usize];
+                read_at(r, step.body_start, &mut body)?;
                 fmt = Some(parse_fmt(&body)?);
             }
             b"data" => {
                 if pcm.is_some() {
                     return Err(MediaError::malformed("duplicate data chunk"));
                 }
-                pcm = Some((body_start, size));
+                pcm = Some((step.body_start, body_len));
             }
             _ => {}
         }
-        // Chunks are word-aligned: an odd size is followed by a pad byte.
-        offset = body_end + (size % 2);
-    }
-    if offset != file_len {
-        return Err(MediaError::malformed(
-            "trailing bytes after last RIFF chunk",
-        ));
+        offset = step.next_offset;
     }
 
     let fmt = fmt.ok_or_else(|| MediaError::malformed("missing fmt chunk"))?;
@@ -416,6 +502,197 @@ mod proofs {
             data_len,
             block_align,
             total_frames: u64::from(total_frames32),
+        }
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    enum ScanModelOutcome {
+        Complete {
+            valid_steps: u8,
+            final_offset: u64,
+        },
+        TrailingBytes {
+            valid_steps: u8,
+            final_offset: u64,
+        },
+        Invalid {
+            valid_steps: u8,
+            error: WavChunkBoundaryError,
+        },
+        NeedsMore {
+            valid_steps: u8,
+            next_offset: u64,
+        },
+    }
+
+    fn scan_model(file_len: u64, sizes: [u32; 4]) -> ScanModelOutcome {
+        let mut offset = 12u64;
+        let mut valid_steps = 0u8;
+        for size in sizes {
+            match wav_scan_position(offset, file_len) {
+                WavScanPosition::Terminal(WavScanTerminal::Complete) => {
+                    return ScanModelOutcome::Complete {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+                WavScanPosition::Terminal(WavScanTerminal::TrailingBytes) => {
+                    return ScanModelOutcome::TrailingBytes {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+                WavScanPosition::HeaderAvailable => {}
+            }
+
+            match wav_chunk_step(offset, file_len, size) {
+                WavChunkStep::Advance(step) => {
+                    assert!(step.next_offset > offset);
+                    assert!(step.next_offset - offset >= 8);
+                    assert!(step.next_offset <= file_len);
+                    assert!(file_len - step.next_offset < file_len - offset);
+                    offset = step.next_offset;
+                    valid_steps += 1;
+                }
+                WavChunkStep::Invalid(error) => {
+                    return ScanModelOutcome::Invalid { valid_steps, error };
+                }
+                WavChunkStep::Terminal(WavScanTerminal::Complete) => {
+                    return ScanModelOutcome::Complete {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+                WavChunkStep::Terminal(WavScanTerminal::TrailingBytes) => {
+                    return ScanModelOutcome::TrailingBytes {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+            }
+        }
+        ScanModelOutcome::NeedsMore {
+            valid_steps,
+            next_offset: offset,
+        }
+    }
+
+    #[kani::proof]
+    fn wav_chunk_boundary_step_exact() {
+        let offset: u64 = kani::any();
+        let file_len: u64 = kani::any();
+        let size: u32 = kani::any();
+        let step = wav_chunk_step(offset, file_len, size);
+
+        let size64 = u64::from(size);
+        let header_available = offset < file_len && file_len - offset >= 8;
+        let body_end = if header_available {
+            (offset + 8).checked_add(size64)
+        } else {
+            None
+        };
+        let valid_expected = header_available
+            && match body_end {
+                Some(end) if end <= file_len => match end.checked_add(size64 & 1) {
+                    Some(next) => next <= file_len,
+                    None => false,
+                },
+                _ => false,
+            };
+
+        assert_eq!(matches!(step, WavChunkStep::Advance(_)), valid_expected);
+        assert_eq!(
+            matches!(step, WavChunkStep::Invalid(_)),
+            header_available && !valid_expected
+        );
+        assert_eq!(matches!(step, WavChunkStep::Terminal(_)), !header_available);
+
+        match step {
+            WavChunkStep::Advance(plan) => {
+                assert!(header_available);
+                assert_eq!(plan.body_start, offset + 8);
+                assert_eq!(plan.body_end, plan.body_start + size64);
+                assert_eq!(plan.next_offset, plan.body_end + (size64 & 1));
+                assert!(plan.body_end <= file_len);
+                assert!(plan.next_offset <= file_len);
+                assert!(plan.next_offset > offset);
+                assert!(plan.next_offset - offset >= 8);
+                assert!(file_len - plan.next_offset < file_len - offset);
+            }
+            WavChunkStep::Invalid(error) => {
+                assert!(header_available);
+                let extends = match body_end {
+                    Some(end) => end > file_len,
+                    None => false,
+                };
+                let missing_pad = match body_end {
+                    Some(end) if end <= file_len => match end.checked_add(size64 & 1) {
+                        Some(next) => next > file_len,
+                        None => true,
+                    },
+                    _ => false,
+                };
+                assert_eq!(
+                    error == WavChunkBoundaryError::SizeOverflow,
+                    body_end.is_none()
+                );
+                assert_eq!(error == WavChunkBoundaryError::ExtendsPastEnd, extends);
+                assert_eq!(error == WavChunkBoundaryError::MissingPad, missing_pad);
+            }
+            WavChunkStep::Terminal(WavScanTerminal::Complete) => {
+                assert_eq!(offset, file_len);
+            }
+            WavChunkStep::Terminal(WavScanTerminal::TrailingBytes) => {
+                assert!(offset != file_len);
+                assert!(offset > file_len || file_len - offset < 8);
+            }
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(6)]
+    fn wav_chunk_scan_progress_bounded_exact() {
+        let file_len: u64 = kani::any();
+        kani::assume(file_len >= 12);
+        let sizes = [kani::any(), kani::any(), kani::any(), kani::any()];
+        let outcome = scan_model(file_len, sizes);
+        let valid_steps = match outcome {
+            ScanModelOutcome::Complete { valid_steps, .. }
+            | ScanModelOutcome::TrailingBytes { valid_steps, .. }
+            | ScanModelOutcome::Invalid { valid_steps, .. }
+            | ScanModelOutcome::NeedsMore { valid_steps, .. } => valid_steps,
+        };
+        kani::assume(valid_steps <= 3);
+
+        match outcome {
+            ScanModelOutcome::Complete {
+                valid_steps,
+                final_offset,
+            } => {
+                assert!(valid_steps <= 3);
+                assert_eq!(final_offset, file_len);
+            }
+            ScanModelOutcome::TrailingBytes {
+                valid_steps,
+                final_offset,
+            } => {
+                assert!(valid_steps <= 3);
+                assert!(final_offset < file_len);
+                let remaining = file_len - final_offset;
+                assert!(remaining > 0 && remaining < 8);
+            }
+            ScanModelOutcome::Invalid { valid_steps, error } => {
+                assert!(valid_steps <= 3);
+                assert!(matches!(
+                    error,
+                    WavChunkBoundaryError::SizeOverflow
+                        | WavChunkBoundaryError::ExtendsPastEnd
+                        | WavChunkBoundaryError::MissingPad
+                ));
+            }
+            ScanModelOutcome::NeedsMore { .. } => {
+                unreachable!("small scan bound excludes scans with four valid chunks")
+            }
         }
     }
 
@@ -722,6 +999,128 @@ mod tests {
         assert_eq!(plan.byte_offset, WavDataLayout::MAX_RIFF_FILE_LEN - 8);
         assert_eq!(plan.byte_len, 8);
         assert_eq!(plan.byte_end, WavDataLayout::MAX_RIFF_FILE_LEN);
+    }
+
+    fn chunk_advance(offset: u64, file_len: u64, size: u32) -> WavChunkAdvance {
+        match wav_chunk_step(offset, file_len, size) {
+            WavChunkStep::Advance(step) => step,
+            step => panic!("expected chunk advance, got {step:?}"),
+        }
+    }
+
+    #[test]
+    fn wav_chunk_step_accepts_zero_even_and_odd_sizes() {
+        let zero = chunk_advance(12, 20, 0);
+        assert_eq!(zero.body_start, 20);
+        assert_eq!(zero.body_end, 20);
+        assert_eq!(zero.next_offset, 20);
+
+        let even = chunk_advance(12, 22, 2);
+        assert_eq!(even.body_start, 20);
+        assert_eq!(even.body_end, 22);
+        assert_eq!(even.next_offset, 22);
+
+        let odd = chunk_advance(12, 24, 3);
+        assert_eq!(odd.body_start, 20);
+        assert_eq!(odd.body_end, 23);
+        assert_eq!(odd.next_offset, 24);
+    }
+
+    #[test]
+    fn wav_chunk_step_classifies_terminal_and_invalid_boundaries() {
+        assert_eq!(
+            wav_chunk_step(20, 20, 0),
+            WavChunkStep::Terminal(WavScanTerminal::Complete)
+        );
+        assert_eq!(
+            wav_chunk_step(13, 20, 0),
+            WavChunkStep::Terminal(WavScanTerminal::TrailingBytes)
+        );
+        assert_eq!(
+            wav_chunk_step(21, 20, 0),
+            WavChunkStep::Terminal(WavScanTerminal::TrailingBytes)
+        );
+        assert_eq!(
+            wav_chunk_step(12, 23, 4),
+            WavChunkStep::Invalid(WavChunkBoundaryError::ExtendsPastEnd)
+        );
+        assert_eq!(
+            wav_chunk_step(12, 23, 3),
+            WavChunkStep::Invalid(WavChunkBoundaryError::MissingPad)
+        );
+        assert_eq!(
+            wav_chunk_step(u64::MAX - 8, u64::MAX, 2),
+            WavChunkStep::Invalid(WavChunkBoundaryError::SizeOverflow)
+        );
+    }
+
+    #[test]
+    fn wav_chunk_step_handles_u32_size_and_large_offsets() {
+        let max_size_end = 20 + u64::from(u32::MAX) + 1;
+        let max_size = chunk_advance(12, max_size_end, u32::MAX);
+        assert_eq!(max_size.body_start, 20);
+        assert_eq!(max_size.body_end, max_size_end - 1);
+        assert_eq!(max_size.next_offset, max_size_end);
+
+        let large = chunk_advance(u64::MAX - 16, u64::MAX, 4);
+        assert_eq!(large.body_start, u64::MAX - 8);
+        assert_eq!(large.body_end, u64::MAX - 4);
+        assert_eq!(large.next_offset, u64::MAX - 4);
+        assert!(large.next_offset > u64::MAX - 16);
+    }
+
+    #[test]
+    fn decode_skips_multiple_unknown_chunks_with_padding() {
+        let wav = make_wav(1, 48000, 16, &[1, 2]);
+        let mut with_unknown = Vec::new();
+        with_unknown.extend_from_slice(&wav[..36]);
+        with_unknown.extend_from_slice(b"junk");
+        with_unknown.extend_from_slice(&0u32.to_le_bytes());
+        with_unknown.extend_from_slice(b"test");
+        with_unknown.extend_from_slice(&3u32.to_le_bytes());
+        with_unknown.extend_from_slice(b"abc");
+        with_unknown.push(0);
+        with_unknown.extend_from_slice(&wav[36..]);
+        let riff = (with_unknown.len() - 8) as u32;
+        with_unknown[4..8].copy_from_slice(&riff.to_le_bytes());
+
+        let audio = decode_wav(&with_unknown).unwrap();
+        assert_eq!(audio.channels, 1);
+        assert_eq!(audio.samples, vec![1.0, 2.0]);
+    }
+
+    #[test]
+    fn missing_pad_and_trailing_errors_keep_their_public_text() {
+        let mut missing_pad = Vec::new();
+        missing_pad.extend_from_slice(b"RIFF");
+        missing_pad.extend_from_slice(&39u32.to_le_bytes());
+        missing_pad.extend_from_slice(b"WAVE");
+        missing_pad.extend_from_slice(b"fmt ");
+        missing_pad.extend_from_slice(&16u32.to_le_bytes());
+        missing_pad.extend_from_slice(&1u16.to_le_bytes());
+        missing_pad.extend_from_slice(&1u16.to_le_bytes());
+        missing_pad.extend_from_slice(&8000u32.to_le_bytes());
+        missing_pad.extend_from_slice(&8000u32.to_le_bytes());
+        missing_pad.extend_from_slice(&1u16.to_le_bytes());
+        missing_pad.extend_from_slice(&8u16.to_le_bytes());
+        missing_pad.extend_from_slice(b"data");
+        missing_pad.extend_from_slice(&3u32.to_le_bytes());
+        missing_pad.extend_from_slice(&[0u8, 128, 255]);
+        let err = decode_wav(&missing_pad).unwrap_err();
+        assert!(matches!(
+            err,
+            MediaError::Malformed { ref reason } if reason == "missing pad byte after odd-sized chunk"
+        ));
+
+        let mut trailing = make_wav(1, 48000, 16, &[1, 2]);
+        trailing.extend_from_slice(&[0xAA; 5]);
+        let riff = (trailing.len() - 8) as u32;
+        trailing[4..8].copy_from_slice(&riff.to_le_bytes());
+        let err = decode_wav(&trailing).unwrap_err();
+        assert!(matches!(
+            err,
+            MediaError::Malformed { ref reason } if reason == "trailing bytes after last RIFF chunk"
+        ));
     }
 
     #[test]

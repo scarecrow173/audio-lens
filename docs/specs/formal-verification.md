@@ -122,6 +122,8 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 | `kani_proofs::writer_round_trip_pcm_s16` / `_pcm_s24` / `_pcm_s32` / `_float32` / `_float64` | symbolic params の writer 出力が正確に往復する — encoding 別に 1 proof ずつ(al#274 で 5 択 symbolic encoding を分割) |
 | `wav_range_plan_valid_ranges_exact` | constructor-admitted WAV data layout 全域と valid public u64 frame index について、受理・frame count・byte offset/byte length/exclusive byte end・data extent containment・算術安全性を検証する。input は start/frame_count/tail constructive decomposition で exact に表す |
 | `wav_range_plan_invalid_ranges_error` | invalid exact complement(`start>=end` または `end>total`)を full u64 frame index で全件拒否し、compact error payload の total frames が一致することを検証する。valid proof と分岐空間が exact complement である |
+| `wav_chunk_boundary_step_exact` | full u64 の chunk offset/file length と full u32 の chunk size について、boundary helper が全入力を valid/invalid/terminal の exact complement へ写すこと、`body_start`/`body_end`/pad/next offset/file length containment/少なくとも 8 byte の進行/残余量減少/算術安全性を検証する |
+| `wav_chunk_scan_progress_bounded_exact` | 初期 offset 12・`file_len>=12` の scan model で、terminal exact end と trailing bytes、valid step の単調増加と残余量減少、invalid 終端を検証する。small scan bound は高々 3 valid chunk で、full u64 file length と full u32 size 列を保ち、4 valid chunk 以上は未証明領域に残す |
 
 proptest 側が覆うのは統計的サンプリング(既定 case 数)の範囲で
 あり、Kani 側は宣言した bound 内の網羅を検証する。両者は同じ
@@ -178,6 +180,20 @@ Pass を Kani の bounded exhaustive proof と同値に扱わない。
   この local proof の保証外である。writer fixture を使う旧
   `header_reads_valid_ranges_slice_exact` / `header_reads_invalid_ranges_error`
   は exact replacement が Pass した後に retire した。
+- **WAV-CHUNK-003/WAV-SCAN-004 exact proof**: `crates/al-media/src/wav.rs`
+  の production pure helper `wav_scan_position` / `wav_chunk_step` を
+  symbolic scalar だけで検査する。boundary proof は input narrowing
+  assume を置かず、full u64 offset/file length と full u32 size の
+  全数値領域を対象にする。`offset > file_len` は production 到達外の
+  total extension であり、terminal trailing 側へ分類する。scan proof
+  の `file_len>=12` は RIFF/WAVE header 確認後に scan へ入る exact
+  constructor precondition、高々 3 valid chunk は small scan model の
+  明示 bound である。bounded model の成功を unbounded scan termination
+  と読み替えず、one-step measure decrease と finite unrolled model の
+  役割を分ける。I/O、allocation、PCM decode、diagnostic formatting、
+  fmt/data semantic、duplicate 判定、公開 API 全体 no-panic は保証外
+  である。詳細な境界と coverage は
+  `evidence/al274-chunk-scan-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: `WavEncoding` は PcmU8/PcmS8 を emit でき
   ない(decode-only)ため、writer 起点の round-trip は 5 encoding
   に限る。PcmU8 の decode は mutated/structured 入力側の
@@ -426,7 +442,11 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 以降の登録 harness は 21 件(WAV 11 + containers 10)。
+  al#274 chunk/scan slice 以降の登録 harness は 23 件(WAV 13 +
+  containers 10)。`AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
+  WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
+  WAV-RANGE-008 の 2 proof を選択する。group と subset 指定は排他で、
+  未指定は全件の既定挙動である。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
   `evidence/al256/verification.md` と `actions.jsonl`、al#274
   の分析・分割・再実走記録は `evidence/al274/` が持つ。
@@ -441,6 +461,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `crates/al-media/tests/formal_wav.rs`・
   `crates/al-media/tests/formal_containers.rs`
 - lane runner: `tools/run-formal-kani.mjs`
-- 証拠台帳: `evidence/al256/`・`evidence/al274/`
+- 証拠台帳: `evidence/al256/`・`evidence/al274/`・
+  `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節

@@ -98,6 +98,51 @@ fn base_wav() -> Vec<u8> {
     w.finish().unwrap().into_inner()
 }
 
+fn wav_with_terminal_chunk(
+    declared_size: u32,
+    body_len: usize,
+    include_pad: bool,
+    trailing: &[u8],
+) -> Vec<u8> {
+    let mut bytes = base_wav();
+    bytes.extend_from_slice(b"junk");
+    bytes.extend_from_slice(&declared_size.to_le_bytes());
+    bytes.extend_from_slice(&vec![0x55; body_len]);
+    if include_pad {
+        bytes.push(0);
+    }
+    bytes.extend_from_slice(trailing);
+    let riff = (bytes.len() - 8) as u32;
+    bytes[4..8].copy_from_slice(&riff.to_le_bytes());
+    bytes
+}
+
+#[test]
+fn terminal_chunk_boundaries_follow_pad_and_exact_end_contract() {
+    for (size, pad) in [(0u32, false), (2, false), (3, true)] {
+        let bytes = wav_with_terminal_chunk(size, size as usize, pad, &[]);
+        assert!(
+            decode_wav(&bytes).is_ok(),
+            "valid terminal chunk size={size} must decode"
+        );
+    }
+
+    let missing_pad = wav_with_terminal_chunk(3, 3, false, &[]);
+    assert!(decode_wav(&missing_pad).is_err());
+
+    let extends = wav_with_terminal_chunk(8, 0, false, &[]);
+    assert!(decode_wav(&extends).is_err());
+
+    for trailing_len in 1..8usize {
+        let trailing = vec![0xAA; trailing_len];
+        let bytes = wav_with_terminal_chunk(0, 0, false, &trailing);
+        assert!(
+            decode_wav(&bytes).is_err(),
+            "{trailing_len} trailing byte(s) must be rejected"
+        );
+    }
+}
+
 proptest! {
     /// The decode contract: `Ok` or `Err(MediaError)`, never a panic.
     /// A panic here is the bug this suite guards.

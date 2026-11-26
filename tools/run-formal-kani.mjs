@@ -1,7 +1,8 @@
 // Issue #256 (D 層 formal verification): al-media WAV codec(第 1 標的)
 // と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
 // harness(tests/formal_wav.rs・tests/formal_containers.rs と、
-// WAV-RANGE-008 replacement については src/wav.rs)を
+// WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
+// src/wav.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -179,12 +180,17 @@ if (missing.length > 0) {
 // override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
 // `mod kani_proofs` blocks in tests/formal_wav.rs and
 // tests/formal_containers.rs, and the `mod proofs` block in src/wav.rs.
+const WAV_CHUNK_SCAN_HARNESSES = [
+  "wav_chunk_boundary_step_exact",
+  "wav_chunk_scan_progress_bounded_exact",
+];
 const WAV_RANGE_HARNESSES = [
   "wav_range_plan_valid_ranges_exact",
   "wav_range_plan_invalid_ranges_error",
 ];
 
 const HARNESS_GROUPS = {
+  "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
   "wav-range": WAV_RANGE_HARNESSES,
 };
 
@@ -198,6 +204,7 @@ const HARNESSES = [
   "writer_round_trip_pcm_s32",
   "writer_round_trip_float32",
   "writer_round_trip_float64",
+  ...WAV_CHUNK_SCAN_HARNESSES,
   ...WAV_RANGE_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
