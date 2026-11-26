@@ -1,0 +1,263 @@
+---
+id: "DESIGN-al274FormalVerificationBoundary"
+type: "design"
+status: "draft"
+title: "Issue #274 media parser の Property 起点形式的検証境界設計"
+created: "2026-11-26"
+updated: "2026-11-26"
+owners: []
+relations:
+  source: []
+  changes:
+    added: []
+    modified: []
+    deleted: []
+    renamed: []
+    moved: []
+    generated: []
+  implements: []
+  implemented-by: []
+  depends-on:
+    - "docs/specs/formal-verification.md"
+  blocks: []
+  supersedes: []
+  superseded-by: []
+  related:
+    - "docs/specs/formal-verification.md"
+  refines: []
+  refined-by: []
+  derives-from:
+    - "POLICIES.md"
+    - ".agents/skills/verify-audio-lens/SKILL.md"
+  derived-by: []
+  verifies: []
+  verified-by: []
+  references:
+    - "evidence/al274/verification.md"
+    - "evidence/al274/residual/verdict.json"
+    - "evidence/al274/stub-spike/README.md"
+    - "evidence/al274-boundary/proof-inventory.json"
+    - "evidence/al274-boundary/classification.json"
+  defers: []
+  deferred-by: []
+---
+
+# Issue #274 media parser の Property 起点形式的検証境界設計
+
+## Context
+
+Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API 名ではなく製品上重要な Property から再設計することである。本書は proof 実装前の verification boundary/ledger 設計 slice であり、`crates/`、`tools/`、mise 実行意味論は変更しない。
+
+現行 inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱う。canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。
+
+分類と target structure の machine-readable 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision を記述する。proof 実装、runner 変更、lazy diagnostic 実装、Kani 再計測、Required 検証の実走は後続 slice に残す。
+
+## 設計原則
+
+1. **Property と製品リスクを先に定義する。** 「API X が panic しない」ではなく、chunk 範囲外を読まない、走査が進行して終了する、Range 計算が overflow しない、PCM conversion が音を変えない、writer/reader の解釈が一致する、という検証単位に分解する。
+2. **要求状態と verdict を分離する。** Required/Deferred/NotApplicable と Pass/Fail/NotRun/Unsupported を独立に記録する。現行 timeout は NotRun であり、未証明領域として管理する。
+3. **保証種別を混ぜない。** proptest の Property Tested、Kani bounded exhaustive、固定長 integration proof、mutation detection evidence を同じ保証として扱わない。bounded proof を無制限入力や公開 API 全体 no-panic の証明と読み替えない。
+4. **True to the Code に接続する。** pure helper/model の proof は、実装がその helper を呼ぶこと、呼出側事前条件を満たすこと、事後条件から上位契約を導くことを接続条件として記録する。
+5. **CI は Daily Full CI 集約・非ブロッキングを前提にする。** PR 必須の blocking Kani lane は新設しない。ただし Required proof の NotRun は、対応する機能 slice の最終受入を止める。
+
+## 現行 inventory の要点
+
+| 集合 | 件数 | 現行の意味 | 設計上の扱い |
+| --- | ---: | --- | --- |
+| canonical Kani proof | 21 | runner に登録された正式 proof 集合。1 Pass、20 timeout | target structure と照合して分類。現行形の whole-call symbolic proof は Required proof としない |
+| spike Kani harness | 12 | stub ablation の再現資産。runner 未登録 | canonical・集計・証跡から分離して維持。新規 assurance pack に混ぜない |
+| proptest | 13 | 常時実行できる統計的 property test。既存証跡では 13/13 Pass | whole-parser integration・round-trip・corruption coverage の primary assurance として維持する |
+
+現行 proof の主な問題は、parser、allocation、診断 formatting、testkit writer、container decode を一つの symbolic end-to-end proof に入れていることである。残存支配因は pointer/slice validity instrumentation、Vec/RawVec、slice bounds panic machinery、parser branch、fmt machinery であり、メモリ封じ込めよりも symex 時間と固定 proof floor が問題である。
+
+## 推奨 target verification structure
+
+詳細な Property 一覧、必要保証、粒度、境界、手法、実行予算、接続条件、未証明領域は `evidence/al274-boundary/classification.json` の `target_verification_structure` を正本とする。ここでは構造だけを示す。表中の要求状態は Required/Deferred/NotApplicable の厳密な語彙とし、proptest primary で Kani 側が Deferred/NotApplicable な配分は手法列と `assurance_allocation` に記録する。
+
+### WAV
+
+WAV は次の層に分ける。
+
+| 層 | 代表 Property | 推奨手法 | 要求状態 |
+| --- | --- | --- | --- |
+| 形式判定・RIFF header | signature、RIFF size/length 整合 | Kani local proof + proptest | Required |
+| chunk walker | chunk boundary、padding、scan progress/termination | Kani local proof + structural mutation proptest | Required |
+| layout/PCM | format tag、bits、channels、rate、block_align、byte_rate、PCM conversion、writer encode | Kani local proof + round-trip proptest | Required |
+| Range 計算 | frame count、valid/invalid range、byte offset、sample slice exactness | Kani local proof + integration proptest | Required |
+| writer/header | parameter gate、block_align/byte_rate overflow、header field、padding/backpatch | proptest primary + selective local/concrete proof | Required |
+| end-to-end | writer/reader round-trip、corruption no-panic | proptest primary。whole-call Kani は Deferred | Required |
+
+チャンク境界、走査進行性、Range 計算は独立した局所 proof として設計する。これらは公開 API 全体 no-panic ではない。たとえば Range proof の成功は、`read_wav_range` が range helper の事前条件を満たし、slice index を正しく計算することを示すだけであり、layout walk、I/O、allocation、PCM decode、diagnostic の安全性を示さない。
+
+### MP4
+
+MP4 は次の層に分ける。
+
+| 層 | 代表 Property | 推奨手法 | 要求状態 |
+| --- | --- | --- | --- |
+| signature | detect_format の MP4 判定 | Kani local proof + proptest | Required |
+| box walker | size32/size64/size0、overflow、limit、child scan progress | Kani local proof | Required |
+| sample table | stts/ctts/stsc/stsz/stco の offset/count/time arithmetic | Kani local proof + round-trip proptest | Required |
+| PCM declaration/extraction | codec classification、sample width/endian/sign conversion | proptest + Kani local/concrete matrix | Required |
+| structural facts | required box、skipped boxes、declared facts | proptest primary | Required |
+| partial ingest | compressed/missing audio を error にしない | proptest primary | Required |
+| end-to-end | writer/reader round-trip、corruption no-panic | proptest primary。whole-call Kani は Deferred | Required |
+
+### AVI
+
+AVI は次の層に分ける。
+
+| 層 | 代表 Property | 推奨手法 | 要求状態 |
+| --- | --- | --- | --- |
+| RIFF/LIST walker | chunk/LIST boundary、padding、region limit | Kani local proof | Required |
+| stream declaration | strh/strf の kind/scale/rate/start/format | proptest primary + selective local matrix | Required |
+| movi packet | NNdc/NNwb id、stream number、kind、body boundary | Kani local proof | Required |
+| timing | movi_order の累積、remainder、stream 独立 clock | Kani local proof + integration proptest | Required |
+| PCM | WAVEFORMATEX validation/conversion | Kani local proof + proptest。WAV と共有可能なら接続条件を記録 | Required |
+| video/partial ingest | video metadata、missing/undecodable auds | proptest primary | Required or NotApplicable |
+| end-to-end | writer/reader round-trip、corruption no-panic | proptest primary。whole-call Kani は Deferred | Required |
+
+## canonical 21 proof の disposition 要約
+
+- **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。
+- **Required replacement NotRun:** `header_reads_valid_ranges_slice_exact`、`header_reads_invalid_ranges_error`。現行 fixture whole-read proof ではなく、Range arithmetic の局所 proof に置き換える。
+- **再構成（Deferred）:** WAV/container whole-call no-panic、MP4/AVI writer symbolic end-to-end proof。対応する local property または proptest primary assurance へ分解する。
+- **廃止/統合（Deferred）:** unsigned early reject、mutation-only/truncation-only whole-parser proof。signature/boundary proof と proptest coverage に統合する。
+
+現行 proof をすぐ削除しない。代替となる Required local proof が Pass し、proptest/未証明領域の対応が ledger 化されるまでは legacy inventory として残し、Required proof の計算対象から外す。これは現行 timeout を隠すためではなく、保証の空白を無断で作らないためである。
+
+## fmt Stub と入力領域の監査
+
+既存 stub evidence は read-only 引用とし、新たな Kani 計測は行わない。
+
+- WAV の `wav_reads_never_panics_unsigned` と `read_wav_range_never_panics_signed` には `std::fmt::format` の empty stub がある。memchr/PadAdapter を除去して product 側到達は進んだが、1500 秒/proof でも verdict を返さなかった。
+- fmt stub を維持できるのは、Result と error reason 文字列を検査しない proof に限る。formatting 自体の panic/alloc 挙動、message 長依存 allocation、diagnostic 内容は保証範囲から除外される。したがって、成功しても公開 API の無条件 no-panic ではなく、条件付き bounded guarantee である。
+- MP4 writer proof では codec assertion が `format!` 生成文字列を使うため、fmt stub は contract-equivalent ではない。spike の fmt/both は cost mechanism の control であり、product 反例や採用根拠として扱わない。
+- alloc-error stub は failure endpoint の event を減らしたが wall-clock/RSS/到達深度を有意に改善しなかった。採用しない。
+- memory-safety instrumentation、slice bounds、pointer validity は stub しない。これらを外すと検証対象の安全性そのものを弱める。
+- WAV Range proof の u8 由来 [0,255] は 8frame fixture の分岐代表には有効だが、公開 u64 API 全域ではない。valid/invalid pair の分割自体は補集合で coverage を落とさない一方、fixture 外への一般化はできない。
+- mutation-only/truncation-only 分割は per-proof 分岐を減らすが、mutation+truncation の複合入力は proptest に依存する。proptest を形式的網羅と同値に扱わない。
+- MP4 signed と AVI signed は RIFF size field が偶然 `ftyp` になる入力で重複し得る。unsigned との union coverage は失われないが、「厳密に disjoint な 3 分割」という表現は正確ではない。
+
+## Boundary design options
+
+### Option A: assurance pack（推奨）
+
+proptest 13 件を常時実行 baseline に保ち、Kani は signature、PCM conversion、chunk/box boundary、scan progress、Range/timing arithmetic など小さい local proof の assurance pack に再構成する。whole-call symbolic proof は代替が揃うまで legacy inventory に残し、Required proof から外す。
+
+| 評価軸 | 評価 |
+| --- | --- |
+| 保証範囲 | 高リスクの境界/算術/変換に形式的保証を集中できる。whole API no-panic は proptest primary で明示的に残る |
+| 検出能力 | off-by-one、overflow、padding、scan 停滞、PCM sign/width、Range boundary、timing remainder に強い。multi-edit corruption や広い writer matrix は proptest に残る |
+| 実行コスト | 目標は各 proof 10 分以内・4GiB 未満。小型化で 1500 秒 timeout の fixed floor を避けやすい |
+| 再実行コスト | property 単位選択で 10〜20 分を目標にできる。Daily Full CI の sequential pack は 60 分以内を設計上限にする |
+| CI 適合 | Daily Full CI 集約・非ブロッキングに適合する。PR 必須 blocking lane を作らない |
+| 実装 prerequisite | parser の純粋算術/ walker / conversion を小さな責務へ切り出すか、True to the Code を保つ proof model が必要。固定長 sink は検証支援として有用 |
+| 移行コスト | 中。proof と少量の責務整理が必要。製品契約や入出力形式は変えない |
+| 残留リスク | helper/model と実装の接続条件を誤ると形式的保証が製品コードに届かない。whole API no-panic は未証明として残る |
+
+### Option B: 現行 whole-call proof の戦術改良
+
+runner 分割、unwind 調整、bounded input、lazy diagnostic、fmt/alloc stub、並列実行などで現行 21 proof を残しながら verdict を取りに行く。
+
+| 評価軸 | 評価 |
+| --- | --- |
+| 保証範囲 | 成功すれば広い統合範囲を直接主張できる。ただし bounded かつ stub 条件付きであれば公開 API 全体 no-panic ではない |
+| 検出能力 | 統合経路の interaction defect は拾える。原因局所性は低い |
+| 実行コスト | 現行 20/21 が 1500 秒 timeout。支配因は instrumentation と allocation/parser branch であり、戦術改良だけで実用予算に入る確証はない |
+| 再実行コスト | 高い。小変更でも whole-call proof の再計測が必要になる |
+| CI 適合 | Daily 集約でも時間とメモリの変動が大きい。PR blocking には不適 |
+| 実装 prerequisite | lazy diagnostic や runner 改善が必要。製品実装の診断設計に踏み込む |
+| 移行コスト | 低〜中。既存 harness を残せるが、検証意味論の整理は必要 |
+| 残留リスク | timeout が続く限り形式保証は増えない。fmt stub を広げると保証範囲を狭める |
+
+### Option C: proptest primary + mutation/golden evidence 中心
+
+Kani は `detect_format` 級の small pure proof に限定し、parser 安全性と round-trip は proptest、mutation detection、golden/regression で支える。
+
+| 評価軸 | 評価 |
+| --- | --- |
+| 保証範囲 | 統計的 coverage は広いが、boundary arithmetic の形式的網羅はない |
+| 検出能力 | corruption/round-trip/facts には強い。rare boundary の保証は seed/generator 依存 |
+| 実行コスト | 最も低い。常時 lane を維持できる |
+| 再実行コスト | 低い |
+| CI 適合 | 最も適合する |
+| 実装 prerequisite | 小さい。既存 test を維持・強化するだけでよい |
+| 移行コスト | 低い |
+| 残留リスク | Issue #274 が求める chunk boundary、scan progress、Range 計算の形式的保証を満たさない。formal verification assurance pack 優先のユーザー指定に反する |
+
+## 旧新の保証範囲・コスト比較
+
+新構成は未実装であり、以下の新規側数値は実測ではなく設計予算である。旧構成の数値は `evidence/al274/` の read-only 引用であり、canonical 1500 秒/proof と ablation 600 秒 cap を混同しない。
+
+| 比較対象 | 旧/現行構成 | 推奨 target structure | 保証範囲の変化 | 再実行コストの変化 |
+| --- | --- | --- | --- | --- |
+| signature 判定 | `detect_format_signature_rules` は Pass。symex 約0.69秒。len 7/8/12 の代表境界のみ | len 0,7,8,11,12,13 と RIFF/ftyp 競合を small local proof で維持。proof 2分以内・4GiB未満 | 代表長だけの主張から boundary matrix へ拡張。prefix-only 性質の接続条件を明示 | 現行と同じく低コストを維持する設計 |
+| WAV/container whole-call no-panic | 20件の大半が 1500秒 timeout。代表 peak は unsigned 13762MiB、range 10324MiB、MP4 writer 7150MiB。形式保証は未取得 | chunk/box boundary、scan progress、Range/timing arithmetic の local proof。各 proof 10分以内・4GiB未満を予算化。whole-call no-panic は Deferred | bounded whole API の未成証明を、未証明のまま小さい高リスク Property の Required proof に置き換える。局所 proof を全 API no-panic へ転用しない | 対象 Property だけを選択実行でき、10〜20分を目標にする。Daily sequential pack は60分以内を上限にする |
+| writer round-trip | WAV/MP4/AVI の symbolic end-to-end は timeout。mp4 writer は trial 1200秒/約4.5GiB、avi writer は 1200秒/約3.9GiB でも未収束 | round-trip は proptest primary。PCM conversion、header/serialization、sample extraction を local proof または concrete matrix に分離 | 任意 symbolic end-to-end の主張は下げるが、数値変換・header・table arithmetic の説明責任を強める。製品契約は変更しない | 変更箇所に応じて小さい proof/proptest を選べる。全 end-to-end symbolic proof の常時再計測を避ける |
+| mutation/truncation | mutation-only/truncation-only whole-parser proof は 900〜1200秒 trial でも timeout。複合入力は従来から proptest | walker boundary proof + proptest multi-edit/truncate coverage。whole-parser corruption proof は Deferred/統合 | corruption dimension を形式的に網羅する主張を縮小し、walker 境界を形式化、複合 corruption は Property Tested として明示 | walker/property 単位で再実行可能。proptest は現行 lane 内に留める |
+
+この比較は「新構成の方が保証が常に広い」という意味ではない。旧構成が取得できていなかった保証を成功扱いせず、製品リスクの高い局所 Property に必要な保証を集中させ、残りを Property Tested/Deferred/未証明として明示する点が変更である。
+
+## 推奨案
+
+**Option A を推奨する。** 理由は、現行 timeout の支配因が proof 面積である一方、製品リスクは boundary/scan/range/timing/PCM conversion に集中しているためである。小さい proof は失敗時の原因局所性が高く、固定長 sink や concrete matrix と組み合わせれば再実行コストも制御できる。`ruviform#806` で有効だったのは単なる harness 削減ではなく、local proof、exact gate、固定長 sink、proptest との union coverage を ledger で正直に管理した点である。AudioLens でも同じ原則を採用する。
+
+Option B は完全には捨てない。lazy diagnostic や runner 改善は assurance pack の cost を下げる補助手段になり得る。ただし、現行 whole-call proof を Required proof の中心に据える案は採用しない。Option C は baseline として必要だが、形式的保証を増やす案ではない。
+
+## formal verification assurance pack を優先する理由
+
+assurance pack は「21 proof を全部通す」ことではなく、製品リスクごとに必要な保証種別を選び、Required proof を小さく Pass させる構成である。これにより、次の効果を期待する。
+
+- timeout の whole-call proof を成功扱いしないまま、未証明領域を Property 単位で管理できる。
+- boundary/scan/range の代表的 local proof を実用予算内に設計できる。
+- proptest との overlap を保証の重複ではなく補完として記録できる。
+- Daily Full CI で再実行可能な assurance pack に集約し、PR の lint/test hygiene を長時間 Kani で止めない。
+- mutation detection evidence を、mutation を入れる位置と検出すべき oracle に対応付けられる。
+
+## mutation detection evidence の設計
+
+本 slice では新規 mutation を実行しない。後続実装 slice では、変更または新規追加する検証ごとに次を記録する。
+
+| 検証 | 代表的 mutation | 期待する検出 |
+| --- | --- | --- |
+| WAV chunk boundary proof/test | `body_end` の off-by-one、padding の有無反転、size overflow | Err、拒否、または boundary assertion failure になる |
+| WAV scan progress proof/test | offset を進めない、pad を二重に進める | progress/termination assertion failure または structural test failure になる |
+| WAV Range proof/test | `end > total` を許す、`start*block_align` で wrap する | invalid range Err または arithmetic assertion failure になる |
+| PCM conversion proof/test | sign extension、bit width、endian、clamp/round/cast を壊す | conversion equality/range oracle failure になる |
+| MP4 box walker proof/test | size32/size64/size0 の limit を 1 byte ずらす | Err または scan/boundary assertion failure になる |
+| AVI movi timing proof/test | remainder 処理、stream 別累積、dwStart offset を壊す | timing oracle failure になる |
+
+mutation が検出されなかった場合は、mutation が不適切か、oracle が弱いか、対象 Property の保証が不足しているかを区別して ledger に記録する。mutation survival を test fail と同義にせず、検出不能理由を残す。
+
+## RF 還元判定
+
+候補はあるが、本 slice では新規 Issue 起票や既存 Issue 更新を行わない。`ruviform#1015` が PCM WAV backend、`cfg(kani)` 診断置換、共通検証支援の再評価を既に担当しており、重複 Issue を作るべきではない。AudioLens 側で共有価値がある候補は次の通りである。
+
+- 固定長 `Write+Seek` sink / `KaniSink` の test-only 検証支援。
+- RIFF chunk boundary walker と WAVEFORMATEX/PCM conversion の検証済み共通契約。
+- diagnostic error payload を検証対象から分離する設計知見。`cfg(kani)` 置換ではなく lazy diagnostic/contract 型の再設計として評価する。
+
+Cross-repo Issue の起票または更新が必要と判断した場合は、実施前に Coordinator へ確認する。本 slice は不要と判断し、確認も実施していない。
+
+## ユーザーへ返す open decision
+
+1. **pure helper への責務抽出をどこまで行うか。** True to the Code を最も強くするには実装から純粋算術/walker を切り出す。一方、製品コードの refactor を最小化するなら test-side model を作る。後者は接続条件が弱い。推奨は「小さい責務抽出を優先し、製品契約を変えない範囲で行う」である。
+2. **lazy diagnostic を独立した製品改善として採用するか。** Kani を通すためだけに診断実装を変えるべきではない。診断コスト自体が製品上も問題なら別 Issue で採用し、proof では diagnostic 契約を明示する。
+3. **固定長 sink/concrete matrix をどこまで使うか。** writer round-trip の symbolic end-to-end を維持するより、serialization/pcm conversion を symbolic local proof にし、integration は concrete matrix に寄せる案を推奨する。採用範囲は実装 slice で決める。
+4. **実行予算の確定値。** 本書では各 local proof 10 分以内・4GiB 未満、選択実行 10〜20 分、Daily sequential pack 60 分以内を設計予算とする。実測後に厳しすぎる/緩すぎる場合は証跡付きで調整する。
+5. **現行 legacy proof の retire 条件。** 代替 Required proof が Pass し、proptest と未証明領域の対応表が更新された時点で廃止/統合する。それまでは registry から外さないか、外す場合も NotRun/Deferred を明示するかを決める。
+
+## 後続 slice に残す作業
+
+- Required local proof の実装と実走。
+- runner 変更、登録 schema、assurance pack の選択実行。
+- lazy diagnostic の製品設計と実装（採用する場合）。
+- 新規/変更検証の mutation detection evidence。
+- Kani 再計測と peak memory/runtime の比較。
+- Required 検証の Pass 化と未証明領域の最終管理。
+- audio-lens#278 での文書責務分離と docs index 整備。
+
+## 完了時の検証境界
+
+本 slice は設計/ledger slice である。ローカル検証は lease 内ファイルの markdown/JSON/照合に比例させ、`mise run fmt` と `mise exec -- prek run --all-files` を canonical hygiene とする。`mise run check al-media`、`lint`、`test`、`test-formal`、`test-formal-kani` はコード変更を伴わないため NotApplicable とし、補助証拠と混同しない。統合検証は merge 後の対象 SHA に対する CI 証拠で確認する。

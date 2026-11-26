@@ -1,0 +1,1341 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-26",
+  "baseline": {
+    "origin_main": "c91b8ce20c90733fa21098451cb768a74425884d",
+    "head": "c91b8ce20c90733fa21098451cb768a74425884d",
+    "note": "行番号は inventory 作成時 HEAD c91b8ce のもの。runner/test code を正本とし、docs/specs は正本にしない。"
+  },
+  "inventory_sources": [
+    "tools/run-formal-kani.mjs:181-203 (HARNESSES)",
+    "crates/al-media/tests/formal_wav.rs",
+    "crates/al-media/tests/formal_containers.rs",
+    "POLICIES.md §3/§6",
+    "evidence/al274/verification.md",
+    "evidence/al274/residual/verdict.json",
+    "evidence/al274/stub-spike/README.md",
+    "evidence/al274/stub-spike/ablation/table.md",
+    "evidence/al274/stub-spike/canonical/verdict.json"
+  ],
+  "separation_rules": {
+    "canonical": "HARNESSES 登録 21 件のみ",
+    "spike": "spike_ prefix 12 件は ablation 再現用で canonical に混ぜない",
+    "proptest": "proptest 13 件は Property Tested であり Kani Bounded Exhaustive と同一視しない",
+    "verdict": "Timeout/環境不足/exit 0/CI green を Proof Pass としない。要求状態と verdict を分離する"
+  },
+  "counts": {
+    "canonical": 21,
+    "spike": 12,
+    "proptest": 13
+  },
+  "canonical_proofs": [
+    {
+      "name": "decode_wav_never_panics_signed",
+      "family": "wav-read-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 397
+      },
+      "entry_points": ["decode_wav"],
+      "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
+      "required_guarantee": "公開 API 全体 no-panic を局所 proof で代替しない。chunk boundary・scan progress・range 計算は Required の局所形式保証、whole-call bounded no-panic は Deferred とする。",
+      "input_state_domain": "48byte 固定の symbolic byte 列 (signed)",
+      "bounds": {
+        "input": "input=[u8;48], start/end は u8 由来 [0,255]。48byte 以外・長尺入力・u64 全域は対象外",
+        "unwind": 40
+      },
+      "assumptions": ["wave_signed(data)"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "decode_wav_never_panics_on_arbitrary_bytes",
+        "frame_count_and_range_reads_hold_the_contract",
+        "mutated_or_truncated_headers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / peak 約3.8GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "stdlib pointer/slice validity、slice bounds panic machinery、RawVec/Layout/capacity が残存支配因",
+        "bounded proof を任意長 API 全体の証明と読み違える危険がある"
+      ],
+      "new_verification": "whole-call harness は廃止/統合候補。chunk boundary、scan progress、range arithmetic を独立 proof に切り出す"
+    },
+    {
+      "name": "wav_frame_count_never_panics_signed",
+      "family": "wav-read-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 408
+      },
+      "entry_points": ["wav_frame_count"],
+      "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
+      "required_guarantee": "公開 API 全体 no-panic を局所 proof で代替しない。chunk boundary・scan progress・range 計算は Required の局所形式保証、whole-call bounded no-panic は Deferred とする。",
+      "input_state_domain": "48byte 固定の symbolic byte 列 (signed)",
+      "bounds": {
+        "input": "input=[u8;48], start/end は u8 由来 [0,255]。48byte 以外・長尺入力・u64 全域は対象外",
+        "unwind": 16
+      },
+      "assumptions": ["wave_signed(data)"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "decode_wav_never_panics_on_arbitrary_bytes",
+        "frame_count_and_range_reads_hold_the_contract",
+        "mutated_or_truncated_headers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / peak 約2.6GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "stdlib pointer/slice validity、slice bounds panic machinery、RawVec/Layout/capacity が残存支配因",
+        "bounded proof を任意長 API 全体の証明と読み違える危険がある"
+      ],
+      "new_verification": "whole-call harness は廃止/統合候補。chunk boundary、scan progress、range arithmetic を独立 proof に切り出す"
+    },
+    {
+      "name": "read_wav_range_never_panics_signed",
+      "family": "wav-read-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 434
+      },
+      "entry_points": ["read_wav_range"],
+      "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
+      "required_guarantee": "公開 API 全体 no-panic を局所 proof で代替しない。chunk boundary・scan progress・range 計算は Required の局所形式保証、whole-call bounded no-panic は Deferred とする。",
+      "input_state_domain": "48byte 固定の symbolic byte 列 (signed)",
+      "bounds": {
+        "input": "input=[u8;48], start/end は u8 由来 [0,255]。48byte 以外・長尺入力・u64 全域は対象外",
+        "unwind": 40
+      },
+      "assumptions": ["wave_signed(data)"],
+      "stubs": [
+        {
+          "original": "std::fmt::format",
+          "replacement": "kani_stub_models::fmt_format_empty",
+          "status": "adopted_conditional",
+          "validity": "Result と error reason 文字列を見ない proof に限る。formatting 自体の panic/alloc 挙動と message 長依存 allocation を除外する",
+          "effect": "memchr/PadAdapter を除去し到達を進めるが verdict には至らなかった"
+        }
+      ],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "decode_wav_never_panics_on_arbitrary_bytes",
+        "frame_count_and_range_reads_hold_the_contract",
+        "mutated_or_truncated_headers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout / 観測 peak 10324MiB(欠測あり); trial 1200s timeout / 約3.6GiB; ablation 600s timeout 8471MiB baseline / 6744MiB fmt",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"]
+      },
+      "audit": [
+        "fmt stub 付き proof が成功しても条件付き保証であり、公開 API 全体の無条件 no-panic と記録できない"
+      ],
+      "residual_risks": [
+        "stdlib pointer/slice validity、slice bounds panic machinery、RawVec/Layout/capacity が残存支配因",
+        "bounded proof を任意長 API 全体の証明と読み違える危険がある"
+      ],
+      "new_verification": "whole-call harness は廃止/統合候補。chunk boundary、scan progress、range arithmetic を独立 proof に切り出す"
+    },
+    {
+      "name": "wav_reads_never_panics_unsigned",
+      "family": "wav-read-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 384
+      },
+      "entry_points": ["decode_wav", "wav_frame_count", "read_wav_range"],
+      "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
+      "required_guarantee": "公開 API 全体 no-panic を局所 proof で代替しない。chunk boundary・scan progress・range 計算は Required の局所形式保証、whole-call bounded no-panic は Deferred とする。",
+      "input_state_domain": "48byte 固定の symbolic byte 列 (unsigned)",
+      "bounds": {
+        "input": "input=[u8;48], start/end は u8 由来 [0,255]。48byte 以外・長尺入力・u64 全域は対象外",
+        "unwind": 16
+      },
+      "assumptions": ["!wave_signed(data)"],
+      "stubs": [
+        {
+          "original": "std::fmt::format",
+          "replacement": "kani_stub_models::fmt_format_empty",
+          "status": "adopted_conditional",
+          "validity": "Result と error reason 文字列を見ない proof に限る。formatting 自体の panic/alloc 挙動と message 長依存 allocation を除外する",
+          "effect": "memchr/PadAdapter を除去し到達を進めるが verdict には至らなかった"
+        }
+      ],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "decode_wav_never_panics_on_arbitrary_bytes",
+        "frame_count_and_range_reads_hold_the_contract",
+        "mutated_or_truncated_headers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout / peak 13762MiB; trial 900s timeout / 約3.1GiB; ablation 600s timeout 5818MiB baseline / 7883MiB fmt",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "unsigned 48byte bounded input の no-panic(Bounded Exhaustive)",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"]
+      },
+      "audit": [
+        "fmt stub 付き proof が成功しても条件付き保証であり、公開 API 全体の無条件 no-panic と記録できない"
+      ],
+      "residual_risks": [
+        "stdlib pointer/slice validity、slice bounds panic machinery、RawVec/Layout/capacity が残存支配因",
+        "bounded proof を任意長 API 全体の証明と読み違える危険がある"
+      ],
+      "new_verification": "whole-call harness は廃止/統合候補。chunk boundary、scan progress、range arithmetic を独立 proof に切り出す"
+    },
+    {
+      "name": "writer_round_trip_pcm_s16",
+      "family": "wav-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 526
+      },
+      "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
+      "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
+      "required_guarantee": "representable input の厳密往復は proptest primary。PCM conversion・writer parameter/header arithmetic を Required の局所形式保証にする",
+      "input_state_domain": "pcm_s16 固定。channels 1..=4/rate 1..=192000/1 frame/representable sample",
+      "bounds": {
+        "input": "1 frame のみ。multi-frame、分割 write、NaN、範囲外 f64、PcmU8/PcmS8 を含まない",
+        "unwind": 32
+      },
+      "assumptions": [
+        "channels/rate は有効空間",
+        "整数は範囲内の整値、float は非 NaN（Infinity は残る）"
+      ],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "writer_output_round_trips_losslessly",
+        "writer_new_rejects_exactly_the_documented_invalid_params",
+        "write_samples_rejects_exactly_unaligned_lengths"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.2GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-frame",
+          "分割 write",
+          "clamp/round が効く範囲外入力",
+          "NaN",
+          "PcmU8/PcmS8"
+        ]
+      },
+      "audit": [
+        "sample generator は NaN のみ除外し Infinity を含む。spec の「有限範囲値」という表現は現行 generator と一致しない",
+        "整数 round-trip は範囲内の整値だけを使い、writer の clamp+round 契約を検出しない"
+      ],
+      "residual_risks": [
+        "representable input の往復が通っても clamp/round/NaN/Infinity 方針を保証しない"
+      ],
+      "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
+    },
+    {
+      "name": "writer_round_trip_pcm_s24",
+      "family": "wav-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 532
+      },
+      "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
+      "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
+      "required_guarantee": "representable input の厳密往復は proptest primary。PCM conversion・writer parameter/header arithmetic を Required の局所形式保証にする",
+      "input_state_domain": "pcm_s24 固定。channels 1..=4/rate 1..=192000/1 frame/representable sample",
+      "bounds": {
+        "input": "1 frame のみ。multi-frame、分割 write、NaN、範囲外 f64、PcmU8/PcmS8 を含まない",
+        "unwind": 32
+      },
+      "assumptions": [
+        "channels/rate は有効空間",
+        "整数は範囲内の整値、float は非 NaN（Infinity は残る）"
+      ],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "writer_output_round_trips_losslessly",
+        "writer_new_rejects_exactly_the_documented_invalid_params",
+        "write_samples_rejects_exactly_unaligned_lengths"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.2GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-frame",
+          "分割 write",
+          "clamp/round が効く範囲外入力",
+          "NaN",
+          "PcmU8/PcmS8"
+        ]
+      },
+      "audit": [
+        "sample generator は NaN のみ除外し Infinity を含む。spec の「有限範囲値」という表現は現行 generator と一致しない",
+        "整数 round-trip は範囲内の整値だけを使い、writer の clamp+round 契約を検出しない"
+      ],
+      "residual_risks": [
+        "representable input の往復が通っても clamp/round/NaN/Infinity 方針を保証しない"
+      ],
+      "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
+    },
+    {
+      "name": "writer_round_trip_pcm_s32",
+      "family": "wav-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 538
+      },
+      "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
+      "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
+      "required_guarantee": "representable input の厳密往復は proptest primary。PCM conversion・writer parameter/header arithmetic を Required の局所形式保証にする",
+      "input_state_domain": "pcm_s32 固定。channels 1..=4/rate 1..=192000/1 frame/representable sample",
+      "bounds": {
+        "input": "1 frame のみ。multi-frame、分割 write、NaN、範囲外 f64、PcmU8/PcmS8 を含まない",
+        "unwind": 32
+      },
+      "assumptions": [
+        "channels/rate は有効空間",
+        "整数は範囲内の整値、float は非 NaN（Infinity は残る）"
+      ],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "writer_output_round_trips_losslessly",
+        "writer_new_rejects_exactly_the_documented_invalid_params",
+        "write_samples_rejects_exactly_unaligned_lengths"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.1GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-frame",
+          "分割 write",
+          "clamp/round が効く範囲外入力",
+          "NaN",
+          "PcmU8/PcmS8"
+        ]
+      },
+      "audit": [
+        "sample generator は NaN のみ除外し Infinity を含む。spec の「有限範囲値」という表現は現行 generator と一致しない",
+        "整数 round-trip は範囲内の整値だけを使い、writer の clamp+round 契約を検出しない"
+      ],
+      "residual_risks": [
+        "representable input の往復が通っても clamp/round/NaN/Infinity 方針を保証しない"
+      ],
+      "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
+    },
+    {
+      "name": "writer_round_trip_float32",
+      "family": "wav-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 544
+      },
+      "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
+      "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
+      "required_guarantee": "representable input の厳密往復は proptest primary。PCM conversion・writer parameter/header arithmetic を Required の局所形式保証にする",
+      "input_state_domain": "float32 固定。channels 1..=4/rate 1..=192000/1 frame/representable sample",
+      "bounds": {
+        "input": "1 frame のみ。multi-frame、分割 write、NaN、範囲外 f64、PcmU8/PcmS8 を含まない",
+        "unwind": 32
+      },
+      "assumptions": [
+        "channels/rate は有効空間",
+        "整数は範囲内の整値、float は非 NaN（Infinity は残る）"
+      ],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "writer_output_round_trips_losslessly",
+        "writer_new_rejects_exactly_the_documented_invalid_params",
+        "write_samples_rejects_exactly_unaligned_lengths"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.4GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-frame",
+          "分割 write",
+          "clamp/round が効く範囲外入力",
+          "NaN",
+          "PcmU8/PcmS8"
+        ]
+      },
+      "audit": [
+        "sample generator は NaN のみ除外し Infinity を含む。spec の「有限範囲値」という表現は現行 generator と一致しない",
+        "整数 round-trip は範囲内の整値だけを使い、writer の clamp+round 契約を検出しない"
+      ],
+      "residual_risks": [
+        "representable input の往復が通っても clamp/round/NaN/Infinity 方針を保証しない"
+      ],
+      "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
+    },
+    {
+      "name": "writer_round_trip_float64",
+      "family": "wav-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 550
+      },
+      "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
+      "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
+      "required_guarantee": "representable input の厳密往復は proptest primary。PCM conversion・writer parameter/header arithmetic を Required の局所形式保証にする",
+      "input_state_domain": "float64 固定。channels 1..=4/rate 1..=192000/1 frame/representable sample",
+      "bounds": {
+        "input": "1 frame のみ。multi-frame、分割 write、NaN、範囲外 f64、PcmU8/PcmS8 を含まない",
+        "unwind": 32
+      },
+      "assumptions": [
+        "channels/rate は有効空間",
+        "整数は範囲内の整値、float は非 NaN（Infinity は残る）"
+      ],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "writer_output_round_trips_losslessly",
+        "writer_new_rejects_exactly_the_documented_invalid_params",
+        "write_samples_rejects_exactly_unaligned_lengths"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-frame",
+          "分割 write",
+          "clamp/round が効く範囲外入力",
+          "NaN",
+          "PcmU8/PcmS8"
+        ]
+      },
+      "audit": [
+        "sample generator は NaN のみ除外し Infinity を含む。spec の「有限範囲値」という表現は現行 generator と一致しない",
+        "整数 round-trip は範囲内の整値だけを使い、writer の clamp+round 契約を検出しない"
+      ],
+      "residual_risks": [
+        "representable input の往復が通っても clamp/round/NaN/Infinity 方針を保証しない"
+      ],
+      "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
+    },
+    {
+      "name": "header_reads_valid_ranges_slice_exact",
+      "family": "wav-header-range",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 585
+      },
+      "entry_points": ["wav_frame_count", "read_wav_range"],
+      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
+      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
+      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "bounds": {
+        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
+        "unwind": 32
+      },
+      "assumptions": ["start < end && end <= 8"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "frame_count_and_range_reads_hold_the_contract",
+        "writer_output_round_trips_losslessly"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.5GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "valid range の frame 数と sample slice 一致",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+      },
+      "audit": [
+        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
+      ],
+      "residual_risks": [
+        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+      ],
+      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する"
+    },
+    {
+      "name": "header_reads_invalid_ranges_error",
+      "family": "wav-header-range",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 608
+      },
+      "entry_points": ["wav_frame_count", "read_wav_range"],
+      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
+      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
+      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "bounds": {
+        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
+        "unwind": 32
+      },
+      "assumptions": ["!(start < end && end <= 8)"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "frame_count_and_range_reads_hold_the_contract",
+        "writer_output_round_trips_losslessly"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約5.2GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "invalid range が必ず Err",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+      },
+      "audit": [
+        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
+      ],
+      "residual_risks": [
+        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+      ],
+      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する"
+    },
+    {
+      "name": "mp4_never_panics_ftyp_signed",
+      "family": "container-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1682
+      },
+      "entry_points": ["detect_format", "decode_mp4"],
+      "old_contract": "decode_mp4/decode_avi/detect_format は任意入力で panic しない。旧 combined proof から入口×signature class に分割した",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。形式的 Required は box/chunk boundary・scan progress・timing arithmetic の局所 proof とし、whole-parser bounded proof は Deferred",
+      "input_state_domain": "64byte 固定で bytes[4..8]==ftyp",
+      "bounds": {
+        "input": "input=[u8;64]。64byte 以外・深い nesting・実尺 container は対象外",
+        "unwind": 48
+      },
+      "assumptions": ["data[4..8] == ftyp"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "container_decoders_never_panic_on_arbitrary_bytes",
+        "mutated_or_truncated_containers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "mp4-signed 64byte bounded input no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "64byte 外の入力",
+          "深い nested box/list",
+          "実尺 container",
+          "allocation/formatting 全体"
+        ]
+      },
+      "audit": [
+        "unsigned は signed 両方と disjoint。mp4-signed と avi-signed は RIFF size field が偶然 ftyp になる入力で重複し得る。union coverage は失われないが厳密な disjoint 分割ではない"
+      ],
+      "residual_risks": ["walker の局所性質を証明せず全 parser を展開するため symex 固定床が高い"],
+      "new_verification": "box_header/child_boxes/RIFF chunk walker の boundary/progress proof に再構成する"
+    },
+    {
+      "name": "avi_never_panics_riff_signed",
+      "family": "container-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1693
+      },
+      "entry_points": ["detect_format", "decode_avi"],
+      "old_contract": "decode_mp4/decode_avi/detect_format は任意入力で panic しない。旧 combined proof から入口×signature class に分割した",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。形式的 Required は box/chunk boundary・scan progress・timing arithmetic の局所 proof とし、whole-parser bounded proof は Deferred",
+      "input_state_domain": "64byte 固定で RIFF+AVI signature",
+      "bounds": {
+        "input": "input=[u8;64]。64byte 以外・深い nesting・実尺 container は対象外",
+        "unwind": 48
+      },
+      "assumptions": ["data[0..4] == RIFF && data[8..12] == AVI "],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "container_decoders_never_panic_on_arbitrary_bytes",
+        "mutated_or_truncated_containers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "avi-signed 64byte bounded input no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "64byte 外の入力",
+          "深い nested box/list",
+          "実尺 container",
+          "allocation/formatting 全体"
+        ]
+      },
+      "audit": [
+        "unsigned は signed 両方と disjoint。mp4-signed と avi-signed は RIFF size field が偶然 ftyp になる入力で重複し得る。union coverage は失われないが厳密な disjoint 分割ではない"
+      ],
+      "residual_risks": ["walker の局所性質を証明せず全 parser を展開するため symex 固定床が高い"],
+      "new_verification": "box_header/child_boxes/RIFF chunk walker の boundary/progress proof に再構成する"
+    },
+    {
+      "name": "containers_never_panics_unsigned",
+      "family": "container-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1663
+      },
+      "entry_points": ["detect_format", "decode_mp4", "decode_avi"],
+      "old_contract": "decode_mp4/decode_avi/detect_format は任意入力で panic しない。旧 combined proof から入口×signature class に分割した",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。形式的 Required は box/chunk boundary・scan progress・timing arithmetic の局所 proof とし、whole-parser bounded proof は Deferred",
+      "input_state_domain": "64byte 固定で ftyp を持たず RIFF+AVI でもない",
+      "bounds": {
+        "input": "input=[u8;64]。64byte 以外・深い nesting・実尺 container は対象外",
+        "unwind": 16
+      },
+      "assumptions": ["data[4..8] != ftyp", "!(data[0..4] == RIFF && data[8..12] == AVI )"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "container_decoders_never_panic_on_arbitrary_bytes",
+        "mutated_or_truncated_containers_never_panic"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.3GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "unsigned 64byte bounded input no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "64byte 外の入力",
+          "深い nested box/list",
+          "実尺 container",
+          "allocation/formatting 全体"
+        ]
+      },
+      "audit": [
+        "unsigned は signed 両方と disjoint。mp4-signed と avi-signed は RIFF size field が偶然 ftyp になる入力で重複し得る。union coverage は失われないが厳密な disjoint 分割ではない"
+      ],
+      "residual_risks": ["walker の局所性質を証明せず全 parser を展開するため symex 固定床が高い"],
+      "new_verification": "box_header/child_boxes/RIFF chunk walker の boundary/progress proof に再構成する"
+    },
+    {
+      "name": "detect_format_signature_rules",
+      "family": "format-detection",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1707
+      },
+      "entry_points": ["detect_format"],
+      "old_contract": "detect_format の signature rule を len<8/8/12 境界で網羅",
+      "required_guarantee": "形式判定は誤検出/未検出で後段を誤配線する。small pure property なので Required Kani proof に適合する",
+      "input_state_domain": "len 7/8/12 の完全 symbolic byte 配列",
+      "bounds": {
+        "input": "len 7/8/12 の代表境界のみ。0..6/9..11/13以上を個別には含まない",
+        "unwind": 8
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": ["detect_format_follows_signature_rules"],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "canonical 1500s/proof lane で唯一 VERIFICATION SUCCESSFUL",
+        "cost_evidence": "Pass: canonical で唯一 VERIFICATION SUCCESSFUL。symex 約0.69s。当初 residual 169 checks/0.63s、trial wall-clock 55s",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "len 7/8/12 の signature rule",
+        "acquired": "代表境界 len 7/8/12 の bounded exhaustive proof 取得成功。他長さへの一般化は未証明",
+        "exclusions": ["len 0..6/9..11/13以上の個別入力", "prefix-only 性質の接続証明"]
+      },
+      "audit": [
+        "detect_format は先頭 12byte だけを見る実装だが、現行 proof は代表長だけの主張として記録する"
+      ],
+      "residual_risks": [],
+      "new_verification": "len 0,7,8,11,12,13 と RIFF/ftyp 競合を boundary matrix + symbolic tag bytes に再構成する"
+    },
+    {
+      "name": "mp4_writer_output_decodes",
+      "family": "mp4-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1780
+      },
+      "entry_points": ["write_mp4", "detect_format", "decode_mp4"],
+      "old_contract": "write_mp4 出力の facts/timing/PCM round-trip",
+      "required_guarantee": "writer/reader 整合は Required の Property Tested 保証。Kani は concrete matrix・固定長 sink・小さな serialization/PCM proof へ再構成し、symbolic end-to-end は Deferred",
+      "input_state_domain": "single soun track/sowt PCM16/channels 1..=2/rate 1..=192000/4frame",
+      "bounds": {
+        "input": "single track/uniform table/limited PCM shape",
+        "unwind": 48
+      },
+      "assumptions": ["channels/rate は有効空間"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": ["mp4_writer_output_round_trips_through_decode"],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout / peak 7150MiB; trial 1200s timeout / 約4.5GiB; ablation baseline 600s timeout / 4356MiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "writer 生成 byte 列が decode に受理され PCM/metadata が一致",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "multi-track",
+          "compressed audio",
+          "ctts/edit list",
+          "non-uniform sample table"
+        ]
+      },
+      "audit": [
+        "fmt stub は codec==\"pcm_s16le\" が format! 生成文字列を検査するため contract-equivalent ではない。spike fmt/both は mechanism control であり canonical proof に採用しない"
+      ],
+      "residual_risks": [
+        "writer/testkit/parser/allocation/formatting を同時に展開し、失敗時の原因局所性が低い"
+      ],
+      "new_verification": "writer parameter/serialization/pcm extraction を assurance pack に分解し、end-to-end は proptest primary + 少数 concrete matrix"
+    },
+    {
+      "name": "avi_writer_output_decodes",
+      "family": "avi-writer-roundtrip",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1833
+      },
+      "entry_points": ["write_avi", "detect_format", "decode_avi"],
+      "old_contract": "write_avi 出力の video/audio/timing round-trip",
+      "required_guarantee": "writer/reader 整合は Required の Property Tested 保証。Kani は concrete matrix・固定長 sink・小さな serialization/PCM proof へ再構成し、symbolic end-to-end は Deferred",
+      "input_state_domain": "concrete 4x2/2frame video + symbolic PCM auds channels 1..=2/rate 1..=192000/4frame",
+      "bounds": {
+        "input": "concrete video shape。missing/non-PCM audio、複数 stream、interleave、非 DIB を含まない",
+        "unwind": 64
+      },
+      "assumptions": ["channels/rate は有効空間"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": ["avi_writer_output_round_trips_through_decode"],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約3.9GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "writer 生成 byte 列が decode に受理され PCM/metadata が一致",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "non-PCM/missing auds",
+          "multi-stream/interleave",
+          "video compression variants"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "writer/testkit/parser/allocation/formatting を同時に展開し、失敗時の原因局所性が低い"
+      ],
+      "new_verification": "writer parameter/serialization/pcm extraction を assurance pack に分解し、end-to-end は proptest primary + 少数 concrete matrix"
+    },
+    {
+      "name": "mutated_mp4_never_panics",
+      "family": "mp4-corruption-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1874
+      },
+      "entry_points": ["detect_format", "decode_mp4"],
+      "old_contract": "mutated_mp4/truncated_mp4 を corruption dimension 別に分割",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。Kani は walker/boundary proof へ統合し、whole-parser corruption proof は Deferred/統合候補",
+      "input_state_domain": "writer-produced concrete base MP4 に対し 1byte overwrite(u16 modulo len, byte u8)",
+      "bounds": {
+        "input": "concrete base のみ。mutation+truncation 複合、複数 edit、別 fixture、実尺入力は対象外",
+        "unwind": 64
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "mutated_or_truncated_containers_never_panic",
+        "container_decoders_never_panic_on_arbitrary_bytes"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約2.4GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "mp4 concrete base の mutated corruption class no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "mutation+truncation 複合",
+          "複数 edit",
+          "writer-generated 以外の構造",
+          "実尺入力"
+        ]
+      },
+      "audit": [
+        "mutation-only/truncation-only 分割は分岐を減らすが、複合 corruption は proptest に依存する"
+      ],
+      "residual_risks": [],
+      "new_verification": "chunk/box walker の境界 proof に統合する"
+    },
+    {
+      "name": "truncated_mp4_never_panics",
+      "family": "mp4-corruption-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1892
+      },
+      "entry_points": ["detect_format", "decode_mp4"],
+      "old_contract": "mutated_mp4/truncated_mp4 を corruption dimension 別に分割",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。Kani は walker/boundary proof へ統合し、whole-parser corruption proof は Deferred/統合候補",
+      "input_state_domain": "writer-produced concrete base MP4 に対し truncate(u16 modulo len+1)",
+      "bounds": {
+        "input": "concrete base のみ。mutation+truncation 複合、複数 edit、別 fixture、実尺入力は対象外",
+        "unwind": 64
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "mutated_or_truncated_containers_never_panic",
+        "container_decoders_never_panic_on_arbitrary_bytes"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.5GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "mp4 concrete base の truncated corruption class no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "mutation+truncation 複合",
+          "複数 edit",
+          "writer-generated 以外の構造",
+          "実尺入力"
+        ]
+      },
+      "audit": [
+        "mutation-only/truncation-only 分割は分岐を減らすが、複合 corruption は proptest に依存する"
+      ],
+      "residual_risks": [],
+      "new_verification": "chunk/box walker の境界 proof に統合する"
+    },
+    {
+      "name": "mutated_avi_never_panics",
+      "family": "avi-corruption-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1905
+      },
+      "entry_points": ["detect_format", "decode_avi"],
+      "old_contract": "mutated_avi/truncated_avi を corruption dimension 別に分割",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。Kani は walker/boundary proof へ統合し、whole-parser corruption proof は Deferred/統合候補",
+      "input_state_domain": "writer-produced concrete base AVI に対し 1byte overwrite(u16 modulo len, byte u8)",
+      "bounds": {
+        "input": "concrete base のみ。mutation+truncation 複合、複数 edit、別 fixture、実尺入力は対象外",
+        "unwind": 80
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "mutated_or_truncated_containers_never_panic",
+        "container_decoders_never_panic_on_arbitrary_bytes"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約2.9GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "avi concrete base の mutated corruption class no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "mutation+truncation 複合",
+          "複数 edit",
+          "writer-generated 以外の構造",
+          "実尺入力"
+        ]
+      },
+      "audit": [
+        "mutation-only/truncation-only 分割は分岐を減らすが、複合 corruption は proptest に依存する"
+      ],
+      "residual_risks": [],
+      "new_verification": "chunk/box walker の境界 proof に統合する"
+    },
+    {
+      "name": "truncated_avi_never_panics",
+      "family": "avi-corruption-no-panic",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1918
+      },
+      "entry_points": ["detect_format", "decode_avi"],
+      "old_contract": "mutated_avi/truncated_avi を corruption dimension 別に分割",
+      "required_guarantee": "破損入力安全性は Required だが主保証は proptest。Kani は walker/boundary proof へ統合し、whole-parser corruption proof は Deferred/統合候補",
+      "input_state_domain": "writer-produced concrete base AVI に対し truncate(u16 modulo len+1)",
+      "bounds": {
+        "input": "concrete base のみ。mutation+truncation 複合、複数 edit、別 fixture、実尺入力は対象外",
+        "unwind": 80
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "mutated_or_truncated_containers_never_panic",
+        "container_decoders_never_panic_on_arbitrary_bytes"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.9GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "avi concrete base の truncated corruption class no-panic",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": [
+          "mutation+truncation 複合",
+          "複数 edit",
+          "writer-generated 以外の構造",
+          "実尺入力"
+        ]
+      },
+      "audit": [
+        "mutation-only/truncation-only 分割は分岐を減らすが、複合 corruption は proptest に依存する"
+      ],
+      "residual_risks": [],
+      "new_verification": "chunk/box walker の境界 proof に統合する"
+    }
+  ],
+  "spike_proofs": [
+    {
+      "name": "spike_wav_unsigned_baseline",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 446
+      },
+      "runner_registered": false,
+      "purpose": "control: no stub, unsigned body",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_range_baseline",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 452
+      },
+      "runner_registered": false,
+      "purpose": "control: no stub, range body",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_unsigned_fmt",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 459
+      },
+      "runner_registered": false,
+      "purpose": "fmt-only ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_unsigned_alloc",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 469
+      },
+      "runner_registered": false,
+      "purpose": "alloc-only ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_unsigned_both",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 480
+      },
+      "runner_registered": false,
+      "purpose": "fmt+alloc ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_range_fmt",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 487
+      },
+      "runner_registered": false,
+      "purpose": "fmt-only ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_range_alloc",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 497
+      },
+      "runner_registered": false,
+      "purpose": "alloc-only ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_wav_range_both",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 508
+      },
+      "runner_registered": false,
+      "purpose": "fmt+alloc ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_mp4_writer_baseline",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1794
+      },
+      "runner_registered": false,
+      "purpose": "control: no stub, mp4 writer body",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_mp4_writer_fmt",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1801
+      },
+      "runner_registered": false,
+      "purpose": "fmt-only control。contract-equivalent ではない",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_mp4_writer_alloc",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1811
+      },
+      "runner_registered": false,
+      "purpose": "alloc-only ablation",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    },
+    {
+      "name": "spike_mp4_writer_both",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1822
+      },
+      "runner_registered": false,
+      "purpose": "fmt+alloc control。contract-equivalent ではない",
+      "separation": "ablation 再現用の一時資産。canonical HARNESSES に登録せず、実行・集計で canonical と混ぜない。mp4 fmt/both は product 反例として扱わない",
+      "evidence": "evidence/al274/stub-spike/"
+    }
+  ],
+  "proptests": [
+    {
+      "name": "decode_wav_never_panics_on_arbitrary_bytes",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 105
+      },
+      "family": "WAV",
+      "contract": "任意 0..=4096byte で decode_wav が panic しない",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-read-no-panic",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "frame_count_and_range_reads_hold_the_contract",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 115
+      },
+      "family": "WAV",
+      "contract": "frame count/full decode/range read の整合",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-header-range",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "writer_output_round_trips_losslessly",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 163
+      },
+      "family": "WAV",
+      "contract": "5 encoding・channels/rate/frame/分割 write の exact round-trip",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-writer-roundtrip",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "writer_new_rejects_exactly_the_documented_invalid_params",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 218
+      },
+      "family": "WAV",
+      "contract": "WavWriter::new の invalid parameter 判定",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-writer-params",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "write_samples_rejects_exactly_unaligned_lengths",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 235
+      },
+      "family": "WAV",
+      "contract": "frame 非整列長だけを拒否",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-writer-params",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "mutated_or_truncated_headers_never_panic",
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 249
+      },
+      "family": "WAV",
+      "contract": "mutation/truncation header で panic しない",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "wav-corruption-no-panic",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "container_decoders_never_panic_on_arbitrary_bytes",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1184
+      },
+      "family": "containers",
+      "contract": "任意 0..=4096byte で MP4/AVI/detect が panic しない",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "container-no-panic",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "mp4_writer_output_round_trips_through_decode",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1199
+      },
+      "family": "MP4",
+      "contract": "write_mp4 出力の facts/timing/pcm/integrity round-trip",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "mp4-writer-roundtrip",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "avi_writer_output_round_trips_through_decode",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1398
+      },
+      "family": "AVI",
+      "contract": "write_avi 出力の video/audio/movi_order timing round-trip",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "avi-writer-roundtrip",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "compressed_audio_is_an_observation_not_an_error",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1478
+      },
+      "family": "MP4",
+      "contract": "compressed-only soun が capability observation",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "mp4-partial-ingest",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "missing_or_undecodable_auds_is_audio_unavailable",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1537
+      },
+      "family": "AVI",
+      "contract": "missing/non-PCM/empty auds が audio_unavailable",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "avi-partial-ingest",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "detect_format_follows_signature_rules",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1592
+      },
+      "family": "containers",
+      "contract": "detect_format が signature/truncated view model と一致",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "format-detection",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    },
+    {
+      "name": "mutated_or_truncated_containers_never_panic",
+      "location": {
+        "file": "crates/al-media/tests/formal_containers.rs",
+        "line": 1621
+      },
+      "family": "containers",
+      "contract": "MP4/AVI への multi-edit+truncate で panic しない",
+      "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
+      "overlap": "container-corruption-no-panic",
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+    }
+  ]
+}

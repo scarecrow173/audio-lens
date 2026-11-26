@@ -2,9 +2,9 @@
 id: "SPEC-034FormalVerification256"
 type: "spec"
 status: "proposed"
-title: "formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的 (Issue #256)"
+title: "formal verification (D 層) 導入: Property 起点の手法選択と WAV codec / MP4・AVI container 標的 (Issue #256)"
 created: "2026-11-20"
-updated: "2026-11-25"
+updated: "2026-11-26"
 owners: []
 relations:
   source:
@@ -50,17 +50,26 @@ relations:
   deferred-by: []
 ---
 
-# formal verification (D 層) 導入: 昇格路と WAV codec / MP4・AVI container 標的
+# formal verification (D 層) 導入: Property 起点の手法選択と WAV codec / MP4・AVI container 標的
 
 Issue #256。検証環境の理想形(`.devin/verify-env-survey/synthesis.md`
 §1)が置く 7 層のうち、D 層は「高コストバグ領域への形式的検証」
-を担う。本文書は D 層の設計(器の選択規則と昇格路)と、第 1 標的
-WAV codec・第 2 標的 MP4/AVI container parse の検証構成・bounds・
+を担う。本文書は D 層の設計(器の選択規則)と、第 1 標的
+WAV codec・第 2 標的 MP4/AVI container parse の現行検証構成・bounds・
 assumptions・coverage 記録をまとめた正本である。実行記録
 (コマンド・exit code・verdict 表・変異 fail 証拠)は
 `evidence/al256/` の台帳が持つ。
 
-## 器の選択規則と昇格路
+なお、POLICIES.md §6 が採用する Property 起点の方針では、proptest、
+Kani、TLA+、Lean は固定された昇格路ではなく、Property・保証種別・
+実行予算に応じて選ぶ補完的な手法である。Issue #274 における現行
+inventory と target verification structure は
+`docs/designs/al274-formal-verification-boundary.md` と
+`evidence/al274-boundary/` が保持し、本文書の旧「昇格路」表現は
+未移行の記述として読み替える。文書責務の全面再構成は audio-lens#278
+に残す。
+
+## 器の選択規則
 
 採用する規則は pstack `create-formal-verification-skill` の
 「問いが器を選ぶ」である。テストは書いたケースだけを調べ、
@@ -75,11 +84,12 @@ assumptions・coverage 記録をまとめた正本である。実行記録
 | 全サイズで成立する証明が要る性質 | Lean 4 | 解析数学の不変量・baseline compare の決定性 — 文書化された promise に限る |
 | 並行 interleaving(実コード・共有状態) | loom | RT 境界の lock-free 構造があれば。現状候補少なめ |
 
-昇格路は proptest → Kani → TLA+ → Lean とする。proptest で property
-を先に言語化し、同じ property を Kani で bounded 網羅化する順が
-自然であり、proptest 側は toolchain 追加なしに常時 `cargo test`
-で回る最も安い網羅的手段として残る。状態機械には op 列生成の
-property test を TLA+ 着手前の段として置く。
+proptest、Kani、TLA+、Lean の間に固定の昇格順は設けない。proptest
+は toolchain 追加なしに常時 `cargo test` で回る統計的 property
+検査として残し、Kani は宣言した bound 内の網羅が必要で実行予算に
+収まる Property に使う。状態機械やイベント順序は TLA+、全サイズの
+数学的性質は Lean を検討する。各 Property の必要保証・粒度・境界・
+実行予算は POLICIES.md §6 と Issue #274 の ledger に従って決める。
 
 ## 第 1 標的: WAV codec (`crates/al-media/src/wav.rs`)
 
@@ -115,7 +125,8 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 
 proptest 側が覆うのは統計的サンプリング(既定 case 数)の範囲で
 あり、Kani 側は宣言した bound 内の網羅を検証する。両者は同じ
-property 言語の異なる強度の段である。
+property 言語を別の保証種別で検査する補完関係であり、proptest の
+Pass を Kani の bounded exhaustive proof と同値に扱わない。
 
 ### bounds・assumptions・model/product の区別
 
@@ -144,10 +155,10 @@ property 言語の異なる強度の段である。
   assertions は有効のままなので、bound 不足は黙って網羅を
   欠くのではなく FAILED として表れる。
 - **sample の表現可能性**: 整数 encoding は範囲内の整値 f64、
-  Float32 は f32 表現値、Float64 は非 NaN の有限範囲値だけを
-  往復対象にする(doc 契約は clamp+round / cast を約束し、任意
-  値の厳密往復は約束しない)。NaN は `!=` が成立しないため除外
-  する。
+  Float32 は f32 表現値、Float64 は非 NaN 値だけを往復対象にする
+  (doc 契約は clamp+round / cast を約束し、任意値の厳密往復は
+  約束しない)。現行 generator は NaN のみを除外し、Infinity を
+  除外しない。NaN は `!=` が成立しないため除外する。
 - **model/product 区別**: 検証が写すのは wav.rs の文書化契約で
   あり、product 意味論が正本である。fail が出たとき、
   counterexample が文書化契約に反すれば product defect、検証側が
@@ -236,7 +247,7 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   未生成)。free/mdat 先頭 MP4 の `detect_format` 非認識は
   signature-rule property の分岐に依存する。
 
-## 昇格路: 第 2 標的以降の候補
+## 手法適合候補: 第 2 標的以降(固定昇格路ではない)
 
 | 器 | 候補標的 | 根拠 |
 | --- | --- | --- |
