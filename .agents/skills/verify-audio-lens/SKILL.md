@@ -183,24 +183,31 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 23 harnesses
-  (13 WAV + 10 containers). It always passes `-Z stubbing`; this only
-  enables the attribute mechanism, so harnesses without stub attributes
-  keep the same verification semantics. `AL_KANI_HARNESSES="a,b,c"`
-  selects a comma-separated subset of registered names for a rerun.
-  `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` selects the two Required
-  WAV-CHUNK-003/WAV-SCAN-004 proofs (`wav_chunk_boundary_step_exact`
-  and `wav_chunk_scan_progress_bounded_exact`);
+- The runner's `HARNESSES` array is the registry: 25 harnesses
+  (13 WAV + 2 MP4/AVI boundary + 10 legacy containers). It always passes
+  `-Z stubbing`; this only enables the attribute mechanism, so harnesses
+  without stub attributes keep the same verification semantics.
+  `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
+  registered names for a rerun. `AL_KANI_HARNESS_GROUP="wav-chunk-scan"`
+  selects the two Required WAV-CHUNK-003/WAV-SCAN-004 proofs
+  (`wav_chunk_boundary_step_exact` and
+  `wav_chunk_scan_progress_bounded_exact`);
   `AL_KANI_HARNESS_GROUP="wav-range"` selects the two Required
-  WAV-RANGE-008 replacement proofs
-  (`wav_range_plan_valid_ranges_exact` and
-  `wav_range_plan_invalid_ranges_error`). All four are registered in
-  `crates/al-media/src/wav.rs`. The two selection variables are
-  mutually exclusive; unregistered names or groups are fail-closed
-  `not_run`, and an unset variable runs all 23. When `/usr/bin/time`
-  is available the runner wraps each harness with GNU time, records
-  elapsed ms and maximum resident set size in the raw log header,
-  and copies both into the JSON verdict details.
+  WAV-RANGE-008 replacement proofs (`wav_range_plan_valid_ranges_exact`
+  and `wav_range_plan_invalid_ranges_error`);
+  `AL_KANI_HARNESS_GROUP="mp4-avi-boundary"` selects the two Required
+  MP4-BOX-002/AVI-CHUNK-001 proofs (`mp4_box_header_step_exact` and
+  `avi_chunk_step_exact`). The WAV proofs are registered in
+  `crates/al-media/src/wav.rs`; the MP4/AVI boundary proofs are
+  registered in `crates/al-media/src/mp4.rs` and
+  `crates/al-media/src/avi.rs`. The two selection variables are mutually
+  exclusive; unregistered names or groups are fail-closed `not_run`,
+  and an unset variable runs all 25. When `/usr/bin/time` is available
+  the runner wraps each harness with GNU time, records elapsed ms and
+  maximum resident set size in the raw log header, copies both into the
+  JSON verdict details, and adds a lane-level `cost_summary` with the
+  selected/verified proof counts, total elapsed ms, maximum observed RSS,
+  and measurement availability.
 - Two registered WAV proofs —
   `wav_reads_never_panics_unsigned` and
   `read_wav_range_never_panics_signed` — carry

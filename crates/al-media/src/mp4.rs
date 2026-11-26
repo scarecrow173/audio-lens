@@ -65,6 +65,79 @@ fn fourcc_text(tag: &[u8; 4]) -> String {
         .to_string()
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mp4BoxBoundaryError {
+    TruncatedHeader,
+    TruncatedLargeSizeHeader,
+    LargeSizeSmallerThanHeader,
+    SizeSmallerThanHeader,
+    SizeOverflow,
+    ExtendsPastEnd,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Mp4BoxBoundaryAdvance {
+    header_len: u64,
+    body_start: u64,
+    body_end: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mp4BoxBoundaryStep {
+    Advance(Mp4BoxBoundaryAdvance),
+    Invalid(Mp4BoxBoundaryError),
+}
+
+fn mp4_box_base_header_available(at: u64, limit: u64) -> bool {
+    at.checked_add(8).is_some_and(|end| end <= limit)
+}
+
+fn mp4_box_large_header_available(at: u64, limit: u64) -> bool {
+    at.checked_add(16).is_some_and(|end| end <= limit)
+}
+
+fn mp4_box_boundary_valid(
+    at: u64,
+    limit: u64,
+    header_len: u64,
+    body_len: u64,
+) -> Mp4BoxBoundaryStep {
+    let body_start = at + header_len;
+    let Some(body_end) = body_start.checked_add(body_len) else {
+        return Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::SizeOverflow);
+    };
+    if body_end > limit {
+        return Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::ExtendsPastEnd);
+    }
+    Mp4BoxBoundaryStep::Advance(Mp4BoxBoundaryAdvance {
+        header_len,
+        body_start,
+        body_end,
+    })
+}
+
+fn mp4_box_boundary_step(at: u64, limit: u64, size32: u32, largesize: u64) -> Mp4BoxBoundaryStep {
+    if !mp4_box_base_header_available(at, limit) {
+        return Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::TruncatedHeader);
+    }
+    match size32 {
+        0 => mp4_box_boundary_valid(at, limit, 8, (limit - at) - 8),
+        1 => {
+            if !mp4_box_large_header_available(at, limit) {
+                return Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::TruncatedLargeSizeHeader);
+            }
+            if largesize < 16 {
+                return Mp4BoxBoundaryStep::Invalid(
+                    Mp4BoxBoundaryError::LargeSizeSmallerThanHeader,
+                );
+            }
+            mp4_box_boundary_valid(at, limit, 16, largesize - 16)
+        }
+        s if s < 8 => Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::SizeSmallerThanHeader),
+        s => mp4_box_boundary_valid(at, limit, 8, u64::from(s) - 8),
+    }
+}
+
 /// A box header within `data[at..limit]`.
 struct BoxHeader {
     tag: [u8; 4],
@@ -82,52 +155,54 @@ fn box_header(
     limit: usize,
     context: &str,
 ) -> Result<BoxHeader, MediaError> {
-    if at + 8 > limit {
+    let at64 = at as u64;
+    let limit64 = limit as u64;
+    if !mp4_box_base_header_available(at64, limit64) {
         return Err(MediaError::malformed(format!(
             "{context}: truncated box header"
         )));
     }
-    let size = be_u32(data, at)? as u64;
+    let size32 = be_u32(data, at)?;
     let tag: [u8; 4] = data[at + 4..at + 8].try_into().unwrap();
-    let (header, body_len) = match size {
-        0 => (8u64, (limit - at) as u64 - 8),
-        1 => {
-            if at + 16 > limit {
-                return Err(MediaError::malformed(format!(
-                    "{context}: truncated largesize box header"
-                )));
-            }
-            let large = be_u64(data, at + 8)?;
-            if large < 16 {
-                return Err(MediaError::malformed(format!(
+    let largesize = if size32 == 1 && mp4_box_large_header_available(at64, limit64) {
+        be_u64(data, at + 8)?
+    } else {
+        0
+    };
+    let step = mp4_box_boundary_step(at64, limit64, size32, largesize);
+    let advance = match step {
+        Mp4BoxBoundaryStep::Advance(advance) => advance,
+        Mp4BoxBoundaryStep::Invalid(error) => {
+            let message = match error {
+                Mp4BoxBoundaryError::TruncatedHeader => {
+                    format!("{context}: truncated box header")
+                }
+                Mp4BoxBoundaryError::TruncatedLargeSizeHeader => {
+                    format!("{context}: truncated largesize box header")
+                }
+                Mp4BoxBoundaryError::LargeSizeSmallerThanHeader => format!(
                     "{context}: box {} largesize smaller than header",
                     fourcc_text(&tag)
-                )));
-            }
-            (16u64, large - 16)
+                ),
+                Mp4BoxBoundaryError::SizeSmallerThanHeader => format!(
+                    "{context}: box {} size smaller than header",
+                    fourcc_text(&tag)
+                ),
+                Mp4BoxBoundaryError::SizeOverflow => {
+                    format!("{context}: box size overflows")
+                }
+                Mp4BoxBoundaryError::ExtendsPastEnd => format!(
+                    "{context}: box {} extends past end of region",
+                    fourcc_text(&tag)
+                ),
+            };
+            return Err(MediaError::malformed(message));
         }
-        s if s < 8 => {
-            return Err(MediaError::malformed(format!(
-                "{context}: box {} size smaller than header",
-                fourcc_text(&tag)
-            )));
-        }
-        s => (8u64, s - 8),
     };
-    let body_start = at + header as usize;
-    let body_end = body_start
-        .checked_add(body_len as usize)
-        .ok_or_else(|| MediaError::malformed(format!("{context}: box size overflows")))?;
-    if body_end > limit {
-        return Err(MediaError::malformed(format!(
-            "{context}: box {} extends past end of region",
-            fourcc_text(&tag)
-        )));
-    }
     Ok(BoxHeader {
         tag,
-        body_start,
-        body_end,
+        body_start: advance.body_start as usize,
+        body_end: advance.body_end as usize,
     })
 }
 
@@ -1428,4 +1503,208 @@ fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
         timing,
         integrity,
     })
+}
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    fn expected_total_size(at: u64, limit: u64, size32: u32, largesize: u64) -> Option<u64> {
+        if !mp4_box_base_header_available(at, limit) {
+            return None;
+        }
+        match size32 {
+            0 => Some(limit - at),
+            1 => {
+                if !mp4_box_large_header_available(at, limit) || largesize < 16 {
+                    None
+                } else {
+                    Some(largesize)
+                }
+            }
+            s if s < 8 => None,
+            s => Some(u64::from(s)),
+        }
+    }
+
+    #[kani::proof]
+    fn mp4_box_header_step_exact() {
+        let at: u64 = kani::any();
+        let limit: u64 = kani::any();
+        let size32: u32 = kani::any();
+        let largesize: u64 = kani::any();
+        let step = mp4_box_boundary_step(at, limit, size32, largesize);
+
+        let base_available = mp4_box_base_header_available(at, limit);
+        let large_available =
+            base_available && size32 == 1 && mp4_box_large_header_available(at, limit);
+        let truncated_large = base_available && size32 == 1 && !large_available;
+        let large_too_small = large_available && largesize < 16;
+        let size_too_small = base_available && size32 != 0 && size32 != 1 && size32 < 8;
+        let form_valid = base_available && !truncated_large && !large_too_small && !size_too_small;
+        let total_size = expected_total_size(at, limit, size32, largesize);
+        let end_expected = if form_valid {
+            total_size.and_then(|total| at.checked_add(total))
+        } else {
+            None
+        };
+        let valid_expected = form_valid && end_expected.is_some_and(|end| end <= limit);
+
+        assert_eq!(
+            matches!(step, Mp4BoxBoundaryStep::Advance(_)),
+            valid_expected
+        );
+        assert_eq!(
+            matches!(step, Mp4BoxBoundaryStep::Invalid(_)),
+            !valid_expected
+        );
+
+        match step {
+            Mp4BoxBoundaryStep::Advance(plan) => {
+                let header_len = u64::from(size32 == 1) * 8 + 8;
+                assert!(form_valid);
+                assert_eq!(plan.header_len, header_len);
+                assert_eq!(plan.body_start, at + header_len);
+                assert_eq!(plan.body_end, end_expected.unwrap());
+                assert_eq!(
+                    plan.body_end - plan.body_start,
+                    total_size.unwrap() - header_len
+                );
+                assert!(plan.body_start <= plan.body_end);
+                assert!(plan.body_end <= limit);
+                assert!(plan.body_end > at);
+                assert!(plan.body_end - at >= header_len);
+                assert!(limit - plan.body_end < limit - at);
+                if size32 == 0 {
+                    assert_eq!(plan.body_end, limit);
+                }
+                if size32 == 1 {
+                    assert_eq!(plan.body_end, at + largesize);
+                }
+                if size32 >= 8 {
+                    assert_eq!(plan.body_end, at + u64::from(size32));
+                }
+            }
+            Mp4BoxBoundaryStep::Invalid(error) => {
+                let size_overflow = form_valid && end_expected.is_none();
+                let extends_past_end = form_valid && end_expected.is_some_and(|end| end > limit);
+                assert_eq!(
+                    error == Mp4BoxBoundaryError::TruncatedHeader,
+                    !base_available
+                );
+                assert_eq!(
+                    error == Mp4BoxBoundaryError::TruncatedLargeSizeHeader,
+                    truncated_large
+                );
+                assert_eq!(
+                    error == Mp4BoxBoundaryError::LargeSizeSmallerThanHeader,
+                    large_too_small
+                );
+                assert_eq!(
+                    error == Mp4BoxBoundaryError::SizeSmallerThanHeader,
+                    size_too_small
+                );
+                assert_eq!(error == Mp4BoxBoundaryError::SizeOverflow, size_overflow);
+                assert_eq!(
+                    error == Mp4BoxBoundaryError::ExtendsPastEnd,
+                    extends_past_end
+                );
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mp4_box_boundary_accepts_size32_size0_and_largesize_exact_end() {
+        assert_eq!(
+            mp4_box_boundary_step(0, 20, 20, 0),
+            Mp4BoxBoundaryStep::Advance(Mp4BoxBoundaryAdvance {
+                header_len: 8,
+                body_start: 8,
+                body_end: 20,
+            })
+        );
+        assert_eq!(
+            mp4_box_boundary_step(4, 20, 0, 0),
+            Mp4BoxBoundaryStep::Advance(Mp4BoxBoundaryAdvance {
+                header_len: 8,
+                body_start: 12,
+                body_end: 20,
+            })
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 24, 1, 24),
+            Mp4BoxBoundaryStep::Advance(Mp4BoxBoundaryAdvance {
+                header_len: 16,
+                body_start: 16,
+                body_end: 24,
+            })
+        );
+    }
+
+    #[test]
+    fn mp4_box_boundary_rejects_exact_invalid_complement() {
+        assert_eq!(
+            mp4_box_boundary_step(8, 15, 8, 0),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::TruncatedHeader)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 15, 1, 16),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::TruncatedLargeSizeHeader)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 24, 7, 0),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::SizeSmallerThanHeader)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 24, 1, 15),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::LargeSizeSmallerThanHeader)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 20, 21, 0),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::ExtendsPastEnd)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(0, 24, 1, 25),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::ExtendsPastEnd)
+        );
+    }
+
+    #[test]
+    fn mp4_box_boundary_handles_large_offset_arithmetic() {
+        assert_eq!(
+            mp4_box_boundary_step(u64::MAX - 10, u64::MAX, 20, 0),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::SizeOverflow)
+        );
+        assert_eq!(
+            mp4_box_boundary_step(u64::MAX - 16, u64::MAX, 1, 18),
+            Mp4BoxBoundaryStep::Invalid(Mp4BoxBoundaryError::SizeOverflow)
+        );
+    }
+
+    #[test]
+    fn production_box_header_uses_boundary_layout_and_error_mapping() {
+        let mut data = Vec::new();
+        data.extend_from_slice(&12u32.to_be_bytes());
+        data.extend_from_slice(b"free");
+        data.extend_from_slice(&[0u8; 4]);
+        let header = box_header(&data, 0, data.len(), "test").unwrap();
+        assert_eq!((header.body_start, header.body_end), (8, 12));
+
+        let mut small = Vec::new();
+        small.extend_from_slice(&7u32.to_be_bytes());
+        small.extend_from_slice(b"free");
+        let err = match box_header(&small, 0, small.len(), "test") {
+            Ok(_) => panic!("expected malformed error"),
+            Err(err) => err,
+        };
+        let MediaError::Malformed { reason } = err else {
+            panic!("expected malformed error")
+        };
+        assert_eq!(reason, "test: box free size smaller than header");
+    }
 }
