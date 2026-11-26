@@ -86,6 +86,8 @@ Directory: `docs/designs`
 | DESIGN-034AasyGL3izivzyzZjS0j | 映像フレーム特徴と A/V 同期設計 | approved | [video-features.md](./video-features.md) |
 | DESIGN-HzMSjoqoRH2ibQWn8inlUp | al-gui webview host の driver-neutral API 移行の設計 | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |
 
+| DESIGN-al274FormalVerificationBoundary | Issue #274 media parser の Property 起点形式的検証境界設計 | draft | [al274-formal-verification-boundary.md](./al274-formal-verification-boundary.md) |
+
 ## Settled <!-- doc-suite:settled-index -->
 
 | ID | Title | Status | File |
