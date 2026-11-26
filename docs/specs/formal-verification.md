@@ -120,8 +120,8 @@ checked_add・範囲照合で任意入力への耐性を意図して書かれて
 | `kani_proofs::read_wav_range_never_panics_signed` | 同入力 + u8 由来の任意 start/end で `read_wav_range` が panic しない |
 | `kani_proofs::wav_reads_never_panics_unsigned` | signature を持たない入力で 3 read 入口が panic せず早期 reject する — signed 3 proof と合わせて全入力領域を網羅 |
 | `kani_proofs::writer_round_trip_pcm_s16` / `_pcm_s24` / `_pcm_s32` / `_float32` / `_float64` | symbolic params の writer 出力が正確に往復する — encoding 別に 1 proof ずつ(al#274 で 5 択 symbolic encoding を分割) |
-| `kani_proofs::header_reads_valid_ranges_slice_exact` | writer 出力上で frame count が一致し、valid range(`start<end<=total`・u8 由来)の slice が全件一致する |
-| `kani_proofs::header_reads_invalid_ranges_error` | 補集合の invalid range(`start>=end` または `end>total`)が全件エラーになる — 2 proof が合計で [0,255]×[0,255] の分岐空間を網羅する |
+| `wav_range_plan_valid_ranges_exact` | constructor-admitted WAV data layout 全域と valid public u64 frame index について、受理・frame count・byte offset/byte length/exclusive byte end・data extent containment・算術安全性を検証する。input は start/frame_count/tail constructive decomposition で exact に表す |
+| `wav_range_plan_invalid_ranges_error` | invalid exact complement(`start>=end` または `end>total`)を full u64 frame index で全件拒否し、compact error payload の total frames が一致することを検証する。valid proof と分岐空間が exact complement である |
 
 proptest 側が覆うのは統計的サンプリング(既定 case 数)の範囲で
 あり、Kani 側は宣言した bound 内の網羅を検証する。両者は同じ
@@ -167,6 +167,17 @@ Pass を Kani の bounded exhaustive proof と同値に扱わない。
   「countable だが decodable でない」ファイルが存在しうる —
   これは不具合ではなく契約の形であり、suite はその区別を
   property として固定している。
+- **WAV-RANGE-008 exact proof**: `crates/al-media/src/wav.rs` の
+  production pure helper `WavDataLayout::range_plan` を symbolic
+  scalar だけで検査する。input domain は decode 可能 encoding に
+  絞らない constructor-admitted layout 全体である。valid proof は
+  `end = start + frame_count`、`total = end + tail`、
+  `data_len = start*block_align + frame_count*block_align + tail*block_align`
+  という exact constructive decomposition を使う。I/O、allocation、
+  PCM decode、diagnostic formatting、公開 API 全体 no-panic は
+  この local proof の保証外である。writer fixture を使う旧
+  `header_reads_valid_ranges_slice_exact` / `header_reads_invalid_ranges_error`
+  は exact replacement が Pass した後に retire した。
 - **coverage の残り**: `WavEncoding` は PcmU8/PcmS8 を emit でき
   ない(decode-only)ため、writer 起点の round-trip は 5 encoding
   に限る。PcmU8 の decode は mutated/structured 入力側の

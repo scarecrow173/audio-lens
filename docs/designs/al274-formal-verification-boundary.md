@@ -50,7 +50,7 @@ Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API �
 
 現行 inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱う。canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。
 
-分類と target structure の machine-readable 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision を記述する。proof 実装、runner 変更、lazy diagnostic 実装、Kani 再計測、Required 検証の実走は後続 slice に残す。
+分類と target structure の machine-readable 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision を記述する。proof 実装、runner 変更、lazy diagnostic 実装、Kani 再計測、Required 検証の実走は後続 slice に残す。WAV-RANGE-008 については、2026-11-26 の再設計 slice で local proof・runner group・実走証跡を `evidence/al274-proof-redesign/` に追加した。
 
 ## 設計原則
 
@@ -88,6 +88,16 @@ WAV は次の層に分ける。
 | end-to-end | writer/reader round-trip、corruption no-panic | proptest primary。whole-call Kani は Deferred | Required |
 
 チャンク境界、走査進行性、Range 計算は独立した局所 proof として設計する。これらは公開 API 全体 no-panic ではない。たとえば Range proof の成功は、`read_wav_range` が range helper の事前条件を満たし、slice index を正しく計算することを示すだけであり、layout walk、I/O、allocation、PCM decode、diagnostic の安全性を示さない。
+
+### WAV-RANGE-008 implementation boundary(2026-11-26 再設計)
+
+PR #281 は exact valid-range proof が 300012ms timeout で Required NotRun だった。再設計 slice では、range arithmetic の exact input domain を constructor-admitted layout 全体に置き、decode 可能な encoding へ絞らない。layout invariant は、非 zero `block_align`、u32 data length、frame-aligned data、`total_frames = data_len / block_align`、data extent が RIFF file length `u32::MAX + 8` に収まることである。public frame index は u64 全域とし、valid predicate `start < end && end <= total_frames` の下で u32 start/end へ zero-extension するのは exact reparameterization として扱う。
+
+proof 対象は valid range の受理、frame count、byte offset、byte length、exclusive byte end、data extent 内 containment、overflow/underflow/panic の不存在、および invalid exact complement の拒否である。I/O short read、allocation、PCM decode、diagnostic formatting、公開 API 全体 no-panic は対象外に残す。compact error payload の `total_frames` は proof に含めるが、人間向け formatting は含めない。
+
+PR #281 の timeout は wide bitvector の nonlinear multiplication monotonicity/containment に集中した。最終案では endpoint product form を捨て、production helper を constructor-faithful count product form にする。valid input は `start32`、正の `frame_count32`、`tail_frames32` で構成し、`end = start + frame_count`、`total = end + tail` とする。data length は 3 つの byte segment `start * block_align`、`frame_count * block_align`、`tail * block_align` の和として表す。これは constructor invariant と整数の distributivity による exact reparameterization であり、代表値 sampling ではない。containment は nonlinear monotonicity ではなく linear segment equality `byte_end + tail_bytes = data_offset + data_len` で検査する。詳細な候補比較と coverage 証明は `evidence/al274-proof-redesign/boundary-analysis.md` を正本とする。
+
+runner は `AL_KANI_HARNESS_GROUP="wav-range"` で `wav_range_plan_valid_ranges_exact` と `wav_range_plan_invalid_ranges_error` を選択する。各 harness の elapsed ms、raw log、pass/fail/not_run、`/usr/bin/time -v` が利用できる環境での max RSS を verdict に残す。初期に検討した `block_align` bit width exact finite partition は、constructive decomposition が exact coverage を保ったまま単一 proof で実用予算に入ったため採用しない。
 
 ### MP4
 
@@ -250,7 +260,7 @@ Cross-repo Issue の起票または更新が必要と判断した場合は、実
 
 ## 後続 slice に残す作業
 
-- Required local proof の実装と実走。
+- WAV-CHUNK-003/WAV-SCAN-004、MP4/AVI を含む残り Required local proof の実装と実走。
 - runner 変更、登録 schema、assurance pack の選択実行。
 - lazy diagnostic の製品設計と実装（採用する場合）。
 - 新規/変更検証の mutation detection evidence。

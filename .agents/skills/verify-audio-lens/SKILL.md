@@ -188,8 +188,16 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   enables the attribute mechanism, so harnesses without stub attributes
   keep the same verification semantics. `AL_KANI_HARNESSES="a,b,c"`
   selects a comma-separated subset of registered names for a rerun;
-  unregistered names are fail-closed `not_run`, and an unset variable
-  runs all 21.
+  `AL_KANI_HARNESS_GROUP="wav-range"` selects the two Required
+  WAV-RANGE-008 replacement proofs
+  (`wav_range_plan_valid_ranges_exact` and
+  `wav_range_plan_invalid_ranges_error`) registered in
+  `crates/al-media/src/wav.rs`. The two selection variables are
+  mutually exclusive; unregistered names or groups are fail-closed
+  `not_run`, and an unset variable runs all 21. When `/usr/bin/time`
+  is available the runner wraps each harness with GNU time, records
+  elapsed ms and maximum resident set size in the raw log header,
+  and copies both into the JSON verdict details.
 - Two registered WAV proofs —
   `wav_reads_never_panics_unsigned` and
   `read_wav_range_never_panics_signed` — carry
@@ -205,8 +213,11 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   the stub spike is `not_run` — 1/21 verified at a 25-minute
   per-proof budget: only `detect_format_signature_rules` verified and
   the other 20 timed out. The PR #276 spike's three representative
-  proofs also all timed out. Current evidence and analysis live in
-  `evidence/al274/` and `evidence/al274/stub-spike/`.
+  proofs also all timed out. That inventory evidence and analysis live in
+  `evidence/al274/` and `evidence/al274/stub-spike/`. The legacy
+  whole-call range proofs were retired only after the exact
+  replacement wav-range group passed; current WAV-RANGE-008 evidence
+  lives in `evidence/al274-proof-redesign/`.
 - These proofs execute the implementation under explicit bounds,
   assumptions, and stubs; they are not a model substituted for the
   implementation. When a proof fails or cannot complete, classify the
@@ -218,8 +229,9 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
 - Mutation evidence lives in the ledger: a deliberately broken variant
   is injected into `crates/al-media/src/`, the failing proptest seed is
   captured, then the edit is reverted — committed product diff stays
-  zero. Recorded runs are in `evidence/al256/`; current al#274 evidence
-  is in `evidence/al274/`.
+  zero. Recorded runs are in `evidence/al256/`; current al#274 boundary
+  evidence is in `evidence/al274/`, and WAV-RANGE-008 arithmetic
+  mutation evidence is in `evidence/al274-proof-redesign/`.
 
 Change-impact procedure:
 
