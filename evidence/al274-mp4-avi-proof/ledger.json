@@ -1,0 +1,173 @@
+{
+  "schema": "audio-lens.formal-verification-ledger.al274-mp4-avi-proof.v1",
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/274",
+  "slice": "MP4-BOX-002/AVI-CHUNK-001 exact proof slice (not the whole Issue)",
+  "branch": "feature/274-mp4-avi-proof",
+  "baseline_origin_main": "244c9736bc9b00cac05963bd4e861d3becf37fb4",
+  "pr283_ancestor_confirmed": true,
+  "environment": {
+    "host": "Windows worktree G:/orca/workspaces/audio-lens/al274-mp4avi-proof",
+    "kani_environment": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0",
+    "solver": "CaDiCaL (Kani/CBMC default; no solver attribute)",
+    "memory_measurement": "/usr/bin/time -v wrapping each cargo kani invocation; not per-solver cgroup isolation"
+  },
+  "input_domain": {
+    "mp4_box_002": "full numeric domain of at:u64, limit:u64, size32:u32, largesize:u64; no input narrowing assume. at>limit is a production-unreachable total extension classified as truncated base header. largesize is an exact reparameterization and is unobserved unless size32==1",
+    "avi_chunk_001": "full numeric domain of offset:u64, region_len:u64, size:u32; no input narrowing assume. offset>region_len is a production-unreachable total extension classified as trailing bytes"
+  },
+  "assumptions": [
+    {
+      "assumption": "no input narrowing assume in either proof",
+      "classification": "total numeric domain"
+    },
+    {
+      "assumption": "largesize symbolic for all inputs",
+      "classification": "exact reparameterization; unobserved when size32!=1"
+    },
+    {
+      "assumption": "one-step measure decrease may be composed mathematically with finite region length",
+      "classification": "human composition only; not machine-proved unbounded termination"
+    }
+  ],
+  "coverage": {
+    "mp4_exact_complement": "Advance iff base header is available, form-specific size constraints hold, body end addition does not overflow, and end<=limit. Invalid is the exact complement split into truncated base/largesize header, size smaller than header, largesize smaller than 16, size overflow, and region overrun with production precedence",
+    "avi_exact_complement": "End iff offset==region_len. TrailingBytes is the exact header-unavailable non-end complement. Advance iff header available, body end addition does not overflow, body end<=region_len, and pad-inclusive next offset<=region_len. Invalid is the exact header-available complement split into size overflow, body overrun, and missing pad with production precedence",
+    "scan_termination": "single-step strict progress and measure decrease are machine-checked. finite/unbounded scan synthesis is not claimed"
+  },
+  "proofs": [
+    {
+      "name": "mp4_box_header_step_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 12251,
+      "max_rss_kb": 293580,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    {
+      "name": "avi_chunk_step_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 6119,
+      "max_rss_kb": 294528,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    }
+  ],
+  "lane_cost_summary": {
+    "selected_proofs": 2,
+    "verified_proofs": 2,
+    "total_elapsed_ms": 18370,
+    "max_observed_rss_kb": 294528,
+    "rss_measured_proofs": 2,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  },
+  "wav_regressions": {
+    "wav-chunk-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-chunk-scan-regression/",
+      "proofs": [
+        { "name": "wav_chunk_boundary_step_exact", "elapsed_ms": 6083, "max_rss_kb": 291768 },
+        {
+          "name": "wav_chunk_scan_progress_bounded_exact",
+          "elapsed_ms": 7496,
+          "max_rss_kb": 304400
+        }
+      ],
+      "note": "WAV proofs were not redesigned or reimplemented"
+    },
+    "wav-range": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-range-regression/",
+      "proofs": [
+        { "name": "wav_range_plan_valid_ranges_exact", "elapsed_ms": 10796, "max_rss_kb": 288672 },
+        { "name": "wav_range_plan_invalid_ranges_error", "elapsed_ms": 4668, "max_rss_kb": 285844 }
+      ],
+      "note": "WAV proofs were not redesigned or reimplemented"
+    }
+  },
+  "connection_conditions": {
+    "mp4": "production box_header reads size32/largesize/tag and delegates boundary arithmetic to mp4_box_boundary_step. top-level scan and every nested child_boxes path use box_header. Internal enum maps to pre-existing MediaError::malformed strings",
+    "avi": "production Chunks::next uses avi_chunk_position/avi_chunk_step for RIFF body, hdrl, strl, and movi nested regions. Valid results drive body slice, pad-inclusive remainder, and next offset. Internal enum maps to pre-existing MediaError::malformed strings",
+    "true_to_code": "proofs invoke production helpers directly. No cfg(kani) replacement, fmt/alloc stub, Cursor, writer fixture, Vec decode, full parser, or diagnostic formatting is in the proof target",
+    "public_contract": "public API signatures, public error kinds/text, error precedence, supported formats, normal/error behavior, f64 precision, and partial ingest/capability semantics are unchanged"
+  },
+  "unproven_scope": [
+    "MP4 semantic box type, duplicate/required boxes, skipped box path, sample table, PCM declaration/extraction, writer round-trip",
+    "AVI LIST form type semantics, stream declaration, movi packet id/kind, timing cumulative clock, PCM/video decode, writer round-trip",
+    "I/O, allocation, Vec decode, diagnostic formatting, public API whole no-panic",
+    "MP4-SCAN-003 finite/unbounded scan, AVI multi-chunk scan synthesis, machine-proved unbounded scan termination",
+    "signature reconstruction and writer/corruption whole-call proofs"
+  ],
+  "mutation": {
+    "mp4": {
+      "change": "temporary size0 off-by-one: body length (limit-at)-8 -> (limit-at)-7",
+      "lane_exit_code": 1,
+      "lane_verdict": "fail",
+      "detected_by": "mp4_box_header_step_exact",
+      "raw_marker": "VERIFICATION:- FAILED",
+      "elapsed_ms": 11320,
+      "max_rss_kb": 293404,
+      "reverted": true,
+      "other_proof": "avi_chunk_step_exact passed"
+    },
+    "avi": {
+      "change": "temporary pad omission: pad size&1 -> 0",
+      "lane_exit_code": 1,
+      "lane_verdict": "fail",
+      "detected_by": "avi_chunk_step_exact",
+      "raw_marker": "VERIFICATION:- FAILED",
+      "elapsed_ms": 5539,
+      "max_rss_kb": 294696,
+      "reverted": true,
+      "other_proof": "mp4_box_header_step_exact passed"
+    },
+    "post_revert": "final mp4-avi-boundary lane passed; al-media tests and formal proptest lane are rerun after revert"
+  },
+  "runner": {
+    "groups": {
+      "mp4-avi-boundary": ["mp4_box_header_step_exact", "avi_chunk_step_exact"],
+      "wav-chunk-scan": ["wav_chunk_boundary_step_exact", "wav_chunk_scan_progress_bounded_exact"],
+      "wav-range": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+    },
+    "registry": "25 harnesses total (13 WAV + 2 MP4/AVI boundary + 10 legacy containers)",
+    "cost_summary": "additive top-level cost_summary; per-harness details array remains unchanged",
+    "unchanged_semantics": [
+      "default full lane",
+      "fail-closed unknown selections",
+      "WSL mirror",
+      "target placement",
+      "timeout semantics",
+      "group/subset mutual exclusion"
+    ],
+    "full_lane": "not part of this slice because legacy whole-call proofs have established timeouts; selective assurance groups are the required evidence"
+  },
+  "cost_comparison": {
+    "legacy_trial": "mp4_writer 1200s cap timeout/1265s/4.5GiB; avi_writer 1200s/1267s/3.9GiB; mutated_mp4 1200s/1266s/2.4GiB; mutated_avi 1200s/1266s/2.9GiB; truncated_mp4 900s/948s/2.5GiB; truncated_avi 900s/948s/2.9GiB (evidence/al274/verification.md)",
+    "legacy_canonical": "1500s/proof lane timed out the corresponding whole-call proofs; SIGTERM means GNU-time max RSS was not emitted in canonical raw logs. mp4 writer canonical fmt-stub representative also timed out with separately sampled RSS evidence in evidence/al274/stub-spike",
+    "new": "mp4-avi-boundary final lane total elapsed 18370ms; mp4 12251ms/293580KiB, avi 6119ms/294528KiB",
+    "scope": "limited MP4/AVI boundary comparison only; not the complete old/new cost matrix and not an equivalence of guarantee scope"
+  },
+  "proptest_overlap": {
+    "unchanged": [
+      "container_decoders_never_panics_on_arbitrary_bytes",
+      "mp4_writer_output_round_trips_through_decode",
+      "avi_writer_output_round_trips_through_decode",
+      "mutated_or_truncated_containers_never_panic"
+    ],
+    "added": "small deterministic helper/production regression tests inside mp4.rs and avi.rs only; formal_containers.rs unchanged",
+    "relationship": "proptest exercises public integration statistically; Kani proves local pure boundary arithmetic exhaustively within the declared scalar domains"
+  },
+  "legacy_disposition": "No legacy whole-call/container proof was retired in this slice. Retire decisions remain for a later slice with coordinator approval and replacement coverage.",
+  "heavy_property_remainders": {
+    "MP4-SCAN-003": "needs finite scan synthesis or measure/contract decomposition; unbounded scan termination remains heavier",
+    "MP4-TABLE-005": "stts/ctts/stsc/stsz/stco accumulation, Vec expansion, and cross-table consistency require separate arithmetic boundaries",
+    "MP4-PCM": "declaration/extraction includes codec matrix, width/endian/sign conversion, and data-layer observations",
+    "AVI-MOVI-003": "stream id/kind and nested movi boundary need semantic tag decomposition on top of chunk walker",
+    "AVI-TIME-004": "u128 division, remainder, dwStart, and multi-stream/packet accumulation require independent arithmetic models",
+    "AVI-PCM": "WAVEFORMATEX validation and PCM conversion need shared-or-container-specific boundary design"
+  },
+  "rf_reduction": "Candidates only: reusable ISO-BMFF box boundary walker and RIFF chunk boundary walker contracts may belong in Ruviform after separation from AudioLens scan/error semantics. No Ruviform issue was filed or updated."
+}
