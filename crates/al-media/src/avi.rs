@@ -214,6 +214,137 @@ fn avi_movi_scan_step(decision: MoviEntryDecision) -> MoviScanStep {
     }
 }
 
+trait AviStreamTypeView {
+    fn fcc_type(&self) -> [u8; 4];
+}
+
+impl AviStreamTypeView for StreamHead {
+    fn fcc_type(&self) -> [u8; 4] {
+        self.fcc_type
+    }
+}
+
+impl AviStreamTypeView for [u8; 4] {
+    fn fcc_type(&self) -> [u8; 4] {
+        *self
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviStreamTypeClass {
+    Audio,
+    Video,
+    Other,
+}
+
+fn avi_stream_type_class(fcc_type: [u8; 4]) -> AviStreamTypeClass {
+    if &fcc_type == b"auds" {
+        AviStreamTypeClass::Audio
+    } else if &fcc_type == b"vids" {
+        AviStreamTypeClass::Video
+    } else {
+        AviStreamTypeClass::Other
+    }
+}
+
+fn avi_stream_type_at<T: AviStreamTypeView>(streams: &[T], stream_no: usize) -> Option<[u8; 4]> {
+    streams.get(stream_no).map(|stream| stream.fcc_type())
+}
+
+fn avi_stream_type_class_at<T: AviStreamTypeView>(
+    streams: &[T],
+    stream_no: usize,
+) -> Option<AviStreamTypeClass> {
+    avi_stream_type_at(streams, stream_no).map(avi_stream_type_class)
+}
+
+fn avi_first_stream_of_class<T: AviStreamTypeView>(
+    streams: &[T],
+    class: AviStreamTypeClass,
+) -> Option<usize> {
+    streams
+        .iter()
+        .position(|stream| avi_stream_type_class(stream.fcc_type()) == class)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviPacketKindRole {
+    AudioPayload,
+    VideoFrame,
+    NonPayload,
+}
+
+fn avi_packet_kind_role(kind: [u8; 2]) -> AviPacketKindRole {
+    if &kind == b"wb" {
+        AviPacketKindRole::AudioPayload
+    } else if matches!(&kind, b"db" | b"dc") {
+        AviPacketKindRole::VideoFrame
+    } else {
+        AviPacketKindRole::NonPayload
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviPacketStreamMeaning {
+    AudioPayload,
+    AudioTimelineOnly,
+    VideoFrame,
+    VideoTimelineOnly,
+    NoTimelineSlot,
+}
+
+fn avi_packet_stream_meaning<T: AviStreamTypeView>(
+    streams: &[T],
+    stream_no: usize,
+    kind: [u8; 2],
+) -> AviPacketStreamMeaning {
+    match avi_stream_type_class_at(streams, stream_no) {
+        Some(AviStreamTypeClass::Audio) => {
+            if avi_packet_kind_role(kind) == AviPacketKindRole::AudioPayload {
+                AviPacketStreamMeaning::AudioPayload
+            } else {
+                AviPacketStreamMeaning::AudioTimelineOnly
+            }
+        }
+        Some(AviStreamTypeClass::Video) => {
+            if avi_packet_kind_role(kind) == AviPacketKindRole::VideoFrame {
+                AviPacketStreamMeaning::VideoFrame
+            } else {
+                AviPacketStreamMeaning::VideoTimelineOnly
+            }
+        }
+        _ => AviPacketStreamMeaning::NoTimelineSlot,
+    }
+}
+
+fn avi_packet_owns_timeline_slot<T: AviStreamTypeView>(streams: &[T], stream_no: usize) -> bool {
+    matches!(
+        avi_stream_type_class_at(streams, stream_no),
+        Some(AviStreamTypeClass::Audio | AviStreamTypeClass::Video)
+    )
+}
+
+fn avi_packet_is_selected_audio_payload<T: AviStreamTypeView>(
+    streams: &[T],
+    stream_no: usize,
+    kind: [u8; 2],
+    selected_stream: usize,
+) -> bool {
+    stream_no == selected_stream
+        && avi_packet_stream_meaning(streams, stream_no, kind)
+            == AviPacketStreamMeaning::AudioPayload
+}
+
+fn avi_packet_is_selected_video_frame<T: AviStreamTypeView>(
+    streams: &[T],
+    stream_no: usize,
+    kind: [u8; 2],
+    selected_stream: usize,
+) -> bool {
+    stream_no == selected_stream
+        && avi_packet_stream_meaning(streams, stream_no, kind) == AviPacketStreamMeaning::VideoFrame
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AviChunkBoundaryError {
     SizeOverflow,
@@ -438,7 +569,7 @@ fn packet_ticks(
     packets
         .iter()
         .map(|p| match streams.get(p.stream_no) {
-            Some(head) if matches!(&head.fcc_type, b"vids" | b"auds") => {
+            Some(head) if avi_packet_owns_timeline_slot(streams, p.stream_no) => {
                 let t = next[p.stream_no];
                 next[p.stream_no] = t
                     .checked_add(tick_advance(
@@ -472,10 +603,10 @@ fn stream_timings(
         .iter()
         .enumerate()
         .filter_map(|(i, s)| {
-            let clock = match &s.fcc_type {
-                b"auds" => ClockKind::Audio,
-                b"vids" => ClockKind::Video,
-                _ => return None,
+            let clock = match avi_stream_type_class(s.fcc_type) {
+                AviStreamTypeClass::Audio => ClockKind::Audio,
+                AviStreamTypeClass::Video => ClockKind::Video,
+                AviStreamTypeClass::Other => return None,
             };
             // Audio packets are irregularly sized by design; only video
             // frames have a meaningful nominal interval (dwScale ticks).
@@ -648,11 +779,16 @@ pub(crate) fn decode_layout(
     let (audio, audio_unavailable, audio_failure) = if !audio_requested {
         (None, None, None)
     } else {
-        match streams.iter().position(|s| &s.fcc_type == b"auds") {
+        match avi_first_stream_of_class(&streams, AviStreamTypeClass::Audio) {
             Some(audio_idx) => {
                 let mut audio_pcm: Vec<u8> = Vec::new();
                 for p in &movi_packets {
-                    if p.stream_no == audio_idx && &p.kind == b"wb" {
+                    if avi_packet_is_selected_audio_payload(
+                        &streams,
+                        p.stream_no,
+                        p.kind,
+                        audio_idx,
+                    ) {
                         audio_pcm.extend_from_slice(p.body);
                     }
                 }
@@ -683,14 +819,14 @@ pub(crate) fn decode_layout(
         }
     };
 
-    let vidx = streams.iter().position(|s| &s.fcc_type == b"vids");
+    let vidx = avi_first_stream_of_class(&streams, AviStreamTypeClass::Video);
     // A corrupt/truncated video `strf` degrades like the audio path:
     // `video` metadata is dropped and `extract_features` records an
     // explicit `unavailable` — it is not a fatal container error.
     let video = vidx.and_then(|vidx| {
         let counted = movi_packets
             .iter()
-            .filter(|p| p.stream_no == vidx && matches!(&p.kind, b"db" | b"dc"))
+            .filter(|p| avi_packet_is_selected_video_frame(&streams, p.stream_no, p.kind, vidx))
             .count() as u64;
         video_info(&streams[vidx], counted).ok()
     });
@@ -703,7 +839,9 @@ pub(crate) fn decode_layout(
         let frames: Vec<VideoFrame<'_>> = movi_packets
             .iter()
             .enumerate()
-            .filter(|(_, p)| p.stream_no == vidx && matches!(&p.kind, b"db" | b"dc"))
+            .filter(|(_, p)| {
+                avi_packet_is_selected_video_frame(&streams, p.stream_no, p.kind, vidx)
+            })
             .map(|(i, p)| VideoFrame {
                 time_ticks: ticks[i].unwrap_or(0),
                 body: p.body,
@@ -1655,11 +1793,359 @@ mod proofs {
         assert_eq!(actual.packet_tags, expected.packet_tags);
         assert_eq!(actual.stop, expected.stop);
     }
+
+    const STREAM_TYPE_COUNT: usize = 3;
+    type SymbolicStreamTypeTable = [[u8; 4]; STREAM_TYPE_COUNT];
+
+    fn expected_stream_type_class(fcc_type: [u8; 4]) -> AviStreamTypeClass {
+        if fcc_type == *b"auds" {
+            AviStreamTypeClass::Audio
+        } else if fcc_type == *b"vids" {
+            AviStreamTypeClass::Video
+        } else {
+            AviStreamTypeClass::Other
+        }
+    }
+
+    fn assert_stream_type_class_exact(fcc_type: [u8; 4]) {
+        let actual = avi_stream_type_class(fcc_type);
+        let expected = expected_stream_type_class(fcc_type);
+        assert_eq!(actual, expected);
+        assert_eq!(actual == AviStreamTypeClass::Audio, fcc_type == *b"auds");
+        assert_eq!(actual == AviStreamTypeClass::Video, fcc_type == *b"vids");
+        assert_eq!(
+            actual == AviStreamTypeClass::Other,
+            fcc_type != *b"auds" && fcc_type != *b"vids"
+        );
+        assert_eq!(
+            (actual == AviStreamTypeClass::Audio) as u8
+                + (actual == AviStreamTypeClass::Video) as u8
+                + (actual == AviStreamTypeClass::Other) as u8,
+            1
+        );
+    }
+
+    fn expected_first_stream_of_class(
+        stream_types: &SymbolicStreamTypeTable,
+        class: AviStreamTypeClass,
+    ) -> Option<usize> {
+        if expected_stream_type_class(stream_types[0]) == class {
+            Some(0)
+        } else if expected_stream_type_class(stream_types[1]) == class {
+            Some(1)
+        } else if expected_stream_type_class(stream_types[2]) == class {
+            Some(2)
+        } else {
+            None
+        }
+    }
+
+    fn assert_first_stream_selection(
+        stream_types: &SymbolicStreamTypeTable,
+        class: AviStreamTypeClass,
+    ) {
+        let actual = avi_first_stream_of_class(&stream_types[..], class);
+        let expected = expected_first_stream_of_class(stream_types, class);
+        assert_eq!(actual, expected);
+        let classes = [
+            expected_stream_type_class(stream_types[0]),
+            expected_stream_type_class(stream_types[1]),
+            expected_stream_type_class(stream_types[2]),
+        ];
+        match actual {
+            Some(0) => assert_eq!(classes[0], class),
+            Some(1) => {
+                assert_ne!(classes[0], class);
+                assert_eq!(classes[1], class);
+            }
+            Some(2) => {
+                assert_ne!(classes[0], class);
+                assert_ne!(classes[1], class);
+                assert_eq!(classes[2], class);
+            }
+            None => {
+                assert_ne!(classes[0], class);
+                assert_ne!(classes[1], class);
+                assert_ne!(classes[2], class);
+            }
+            Some(_) => unreachable!("fixed three-stream table selection is in range or absent"),
+        }
+    }
+
+    fn expected_packet_kind_role(kind: [u8; 2]) -> AviPacketKindRole {
+        if kind == *b"wb" {
+            AviPacketKindRole::AudioPayload
+        } else if kind == *b"db" || kind == *b"dc" {
+            AviPacketKindRole::VideoFrame
+        } else {
+            AviPacketKindRole::NonPayload
+        }
+    }
+
+    fn expected_packet_stream_meaning(
+        stream_types: &SymbolicStreamTypeTable,
+        stream_no: usize,
+        kind: [u8; 2],
+    ) -> AviPacketStreamMeaning {
+        if stream_no >= STREAM_TYPE_COUNT {
+            return AviPacketStreamMeaning::NoTimelineSlot;
+        }
+        match expected_stream_type_class(stream_types[stream_no]) {
+            AviStreamTypeClass::Audio => {
+                if kind == *b"wb" {
+                    AviPacketStreamMeaning::AudioPayload
+                } else {
+                    AviPacketStreamMeaning::AudioTimelineOnly
+                }
+            }
+            AviStreamTypeClass::Video => {
+                if kind == *b"db" || kind == *b"dc" {
+                    AviPacketStreamMeaning::VideoFrame
+                } else {
+                    AviPacketStreamMeaning::VideoTimelineOnly
+                }
+            }
+            AviStreamTypeClass::Other => AviPacketStreamMeaning::NoTimelineSlot,
+        }
+    }
+
+    #[kani::proof]
+    fn avi_stream_kind_classification_bounded_exact() {
+        let stream_types: SymbolicStreamTypeTable = [kani::any(), kani::any(), kani::any()];
+        let stream_no: usize = kani::any();
+        let kind: [u8; 2] = kani::any();
+
+        assert_stream_type_class_exact(stream_types[0]);
+        assert_stream_type_class_exact(stream_types[1]);
+        assert_stream_type_class_exact(stream_types[2]);
+
+        let in_range = stream_no < STREAM_TYPE_COUNT;
+        let actual_type = avi_stream_type_at(&stream_types[..], stream_no);
+        let actual_class_at = avi_stream_type_class_at(&stream_types[..], stream_no);
+        assert_eq!(actual_type.is_some(), in_range);
+        assert_eq!(actual_class_at.is_some(), in_range);
+        let expected_class_at = if in_range {
+            let expected_type = stream_types[stream_no];
+            assert_eq!(actual_type, Some(expected_type));
+            let expected_class = expected_stream_type_class(expected_type);
+            assert_eq!(actual_class_at, Some(expected_class));
+            Some(expected_class)
+        } else {
+            assert_eq!(actual_type, None);
+            assert_eq!(actual_class_at, None);
+            None
+        };
+
+        assert_first_stream_selection(&stream_types, AviStreamTypeClass::Audio);
+        assert_first_stream_selection(&stream_types, AviStreamTypeClass::Video);
+
+        let actual_kind_role = avi_packet_kind_role(kind);
+        let expected_kind_role = expected_packet_kind_role(kind);
+        assert_eq!(actual_kind_role, expected_kind_role);
+        assert_eq!(
+            actual_kind_role == AviPacketKindRole::AudioPayload,
+            kind == *b"wb"
+        );
+        assert_eq!(
+            actual_kind_role == AviPacketKindRole::VideoFrame,
+            kind == *b"db" || kind == *b"dc"
+        );
+        assert_eq!(
+            actual_kind_role == AviPacketKindRole::NonPayload,
+            kind != *b"wb" && kind != *b"db" && kind != *b"dc"
+        );
+        assert_eq!(
+            (actual_kind_role == AviPacketKindRole::AudioPayload) as u8
+                + (actual_kind_role == AviPacketKindRole::VideoFrame) as u8
+                + (actual_kind_role == AviPacketKindRole::NonPayload) as u8,
+            1
+        );
+
+        let actual_meaning = avi_packet_stream_meaning(&stream_types[..], stream_no, kind);
+        let expected_meaning = expected_packet_stream_meaning(&stream_types, stream_no, kind);
+        assert_eq!(actual_meaning, expected_meaning);
+        assert_eq!(
+            actual_meaning == AviPacketStreamMeaning::AudioPayload,
+            expected_class_at == Some(AviStreamTypeClass::Audio) && kind == *b"wb"
+        );
+        assert_eq!(
+            actual_meaning == AviPacketStreamMeaning::AudioTimelineOnly,
+            expected_class_at == Some(AviStreamTypeClass::Audio) && kind != *b"wb"
+        );
+        assert_eq!(
+            actual_meaning == AviPacketStreamMeaning::VideoFrame,
+            expected_class_at == Some(AviStreamTypeClass::Video)
+                && (kind == *b"db" || kind == *b"dc")
+        );
+        assert_eq!(
+            actual_meaning == AviPacketStreamMeaning::VideoTimelineOnly,
+            expected_class_at == Some(AviStreamTypeClass::Video)
+                && kind != *b"db"
+                && kind != *b"dc"
+        );
+        assert_eq!(
+            actual_meaning == AviPacketStreamMeaning::NoTimelineSlot,
+            expected_class_at.is_none() || expected_class_at == Some(AviStreamTypeClass::Other)
+        );
+        assert_eq!(
+            (actual_meaning == AviPacketStreamMeaning::AudioPayload) as u8
+                + (actual_meaning == AviPacketStreamMeaning::AudioTimelineOnly) as u8
+                + (actual_meaning == AviPacketStreamMeaning::VideoFrame) as u8
+                + (actual_meaning == AviPacketStreamMeaning::VideoTimelineOnly) as u8
+                + (actual_meaning == AviPacketStreamMeaning::NoTimelineSlot) as u8,
+            1
+        );
+
+        let actual_owner = avi_packet_owns_timeline_slot(&stream_types[..], stream_no);
+        assert_eq!(
+            actual_owner,
+            expected_meaning != AviPacketStreamMeaning::NoTimelineSlot
+        );
+
+        let first_audio = avi_first_stream_of_class(&stream_types[..], AviStreamTypeClass::Audio);
+        if let Some(audio_idx) = first_audio {
+            let actual_selected =
+                avi_packet_is_selected_audio_payload(&stream_types[..], stream_no, kind, audio_idx);
+            assert_eq!(
+                actual_selected,
+                stream_no == audio_idx && expected_meaning == AviPacketStreamMeaning::AudioPayload
+            );
+        } else {
+            assert_ne!(expected_meaning, AviPacketStreamMeaning::AudioPayload);
+        }
+
+        let first_video = avi_first_stream_of_class(&stream_types[..], AviStreamTypeClass::Video);
+        if let Some(video_idx) = first_video {
+            let actual_selected =
+                avi_packet_is_selected_video_frame(&stream_types[..], stream_no, kind, video_idx);
+            assert_eq!(
+                actual_selected,
+                stream_no == video_idx && expected_meaning == AviPacketStreamMeaning::VideoFrame
+            );
+        } else {
+            assert_ne!(expected_meaning, AviPacketStreamMeaning::VideoFrame);
+        }
+    }
 }
 
 #[cfg(test)]
 mod boundary_tests {
     use super::*;
+
+    fn classification_stream_head(fcc_type: [u8; 4], scale: u32) -> StreamHead {
+        StreamHead {
+            fcc_type,
+            scale,
+            rate: 1,
+            start: 0,
+            length: 0,
+            sample_size: 0,
+            format: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn stream_kind_classification_covers_lookup_selection_payload_and_ownership() {
+        let types = [*b"xxxx", *b"auds", *b"vids"];
+        assert_eq!(avi_stream_type_at(&types, 0), Some(*b"xxxx"));
+        assert_eq!(avi_stream_type_at(&types, 1), Some(*b"auds"));
+        assert_eq!(avi_stream_type_at(&types, 2), Some(*b"vids"));
+        assert_eq!(avi_stream_type_at(&types, 3), None);
+        assert_eq!(avi_stream_type_at(&types, usize::MAX), None);
+        assert_eq!(
+            avi_first_stream_of_class(&types, AviStreamTypeClass::Audio),
+            Some(1)
+        );
+        assert_eq!(
+            avi_first_stream_of_class(&types, AviStreamTypeClass::Video),
+            Some(2)
+        );
+        assert_eq!(
+            avi_first_stream_of_class(&types, AviStreamTypeClass::Other),
+            Some(0)
+        );
+
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 1, *b"wb"),
+            AviPacketStreamMeaning::AudioPayload
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 1, *b"zz"),
+            AviPacketStreamMeaning::AudioTimelineOnly
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 2, *b"db"),
+            AviPacketStreamMeaning::VideoFrame
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 2, *b"dc"),
+            AviPacketStreamMeaning::VideoFrame
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 2, *b"pc"),
+            AviPacketStreamMeaning::VideoTimelineOnly
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 0, *b"wb"),
+            AviPacketStreamMeaning::NoTimelineSlot
+        );
+        assert_eq!(
+            avi_packet_stream_meaning(&types, 3, *b"wb"),
+            AviPacketStreamMeaning::NoTimelineSlot
+        );
+        assert!(avi_packet_owns_timeline_slot(&types, 1));
+        assert!(avi_packet_owns_timeline_slot(&types, 2));
+        assert!(!avi_packet_owns_timeline_slot(&types, 0));
+        assert!(!avi_packet_owns_timeline_slot(&types, 3));
+
+        assert!(avi_packet_is_selected_audio_payload(&types, 1, *b"wb", 1));
+        assert!(!avi_packet_is_selected_audio_payload(&types, 2, *b"wb", 1));
+        assert!(!avi_packet_is_selected_audio_payload(&types, 1, *b"pc", 1));
+        assert!(avi_packet_is_selected_video_frame(&types, 2, *b"db", 2));
+        assert!(avi_packet_is_selected_video_frame(&types, 2, *b"dc", 2));
+        assert!(!avi_packet_is_selected_video_frame(&types, 2, *b"pc", 2));
+        assert!(!avi_packet_is_selected_video_frame(&types, 1, *b"db", 2));
+    }
+
+    #[test]
+    fn packet_ticks_track_existing_media_streams_and_skip_missing_or_other_streams() {
+        let streams = vec![
+            classification_stream_head(*b"auds", 2),
+            classification_stream_head(*b"xxxx", 7),
+            classification_stream_head(*b"vids", 3),
+        ];
+        let bodies = [[1u8], [2u8], [3u8], [4u8], [5u8]];
+        let packets = [
+            MoviPacket {
+                stream_no: 0,
+                kind: *b"zz",
+                body: &bodies[0],
+            },
+            MoviPacket {
+                stream_no: 1,
+                kind: *b"wb",
+                body: &bodies[1],
+            },
+            MoviPacket {
+                stream_no: 2,
+                kind: *b"pc",
+                body: &bodies[2],
+            },
+            MoviPacket {
+                stream_no: 3,
+                kind: *b"wb",
+                body: &bodies[3],
+            },
+            MoviPacket {
+                stream_no: 0,
+                kind: *b"db",
+                body: &bodies[4],
+            },
+        ];
+
+        let ticks = packet_ticks(&streams, &packets).unwrap();
+        assert_eq!(ticks, vec![Some(0), None, Some(0), None, Some(2)]);
+    }
 
     #[test]
     fn avi_movi_packet_tag_preserves_decimal_stream_and_kind_order() {

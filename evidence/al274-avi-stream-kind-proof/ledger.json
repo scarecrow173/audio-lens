@@ -1,0 +1,251 @@
+{
+  "schema_version": "al274-stream-kind-proof-v1",
+  "issue": "scarecrow173/audio-lens#274",
+  "slice": "AVI stream existence/kind classification bounded exact proof",
+  "branch": "feature/274-avi-stream-kind-proof",
+  "baseline_origin_main": "ef7ef452b9247791866bd65f3b987088502b26d1",
+  "baseline_check": "git merge-base --is-ancestor ef7ef452b9247791866bd65f3b987088502b26d1 HEAD exited 0; final fetch confirmed origin/main remained the same commit",
+  "environment": {
+    "host": "Windows worktree",
+    "kani_lane_env": "WSL2 Ubuntu",
+    "rustc": "1.99.1",
+    "node": "v26.12.1",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0"
+  },
+  "input_domain": {
+    "stream_types": "fixed [[u8; 4]; 3]; each stream type covers all 2^32 bit patterns",
+    "stream_no": "full usize machine integer domain; not narrowed to production tag range 0..=99",
+    "kind": "full [u8; 2]; all 2^16 bit patterns",
+    "table_length": "N=3 is explicit bounded model scope, not kani::assume input narrowing; minimum covering leading/middle/trailing selection, mixed auds/vids/other, and in/out-of-range lookup",
+    "production_reparameterization": "type-only table preserves hdrl order; scale/rate/start/length/sample_size/format are unobserved by the classification core"
+  },
+  "assumptions": [],
+  "assume_classification": "No kani::assume and no input narrowing. Fixed table length is explicit bounded model scope. No unwind depth reduction or unwinding-check disabling.",
+  "coverage": {
+    "lookup_existence": "lookup exists exactly for stream_no < 3 and preserves type bytes",
+    "type_class": "exact auds/exact vids/other are disjoint and exhaustive",
+    "first_selection": "first auds/vids equal first table-order match or absence without skipping earlier non-matches",
+    "kind_role": "exact wb only audio payload; exact db/dc only video frames; all other kinds non-payload",
+    "packet_meaning": "existing auds+wb audio payload, existing vids+db/dc video frame, other existing media packets timeline-only, missing/other streams no timeline slot",
+    "timeline_ownership": "existing auds/vids own slots for every kind including pc/unknown; missing/other streams do not",
+    "selected_attribution": "selected first-stream payload membership equals stream number equality plus payload role",
+    "oracle_independence": "expected oracle classifies raw bytes directly and does not call production classification helpers",
+    "arithmetic_safety": "overflow/underflow/panic freedom over the full symbolic input domain"
+  },
+  "production_connection": [
+    "packet_ticks uses avi_packet_owns_timeline_slot",
+    "stream_timings uses avi_stream_type_class",
+    "first auds/vids selection uses avi_first_stream_of_class",
+    "audio PCM concatenation uses avi_packet_is_selected_audio_payload",
+    "video frame count/extraction uses avi_packet_is_selected_video_frame",
+    "proof instantiates the same generic lightweight fcc_type view over a type-only table"
+  ],
+  "proofs": [
+    {
+      "name": "avi_stream_kind_classification_bounded_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 13249,
+      "max_rss_kb": 500528,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "raw_log": "kani/kani-avi_stream_kind_classification_bounded_exact.txt",
+      "verdict_json": "kani/verdict.json"
+    }
+  ],
+  "lane_cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 1,
+    "total_elapsed_ms": 13249,
+    "max_observed_rss_kb": 500528,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  },
+  "initial_lane_before_mutation": {
+    "verdict": "pass",
+    "elapsed_ms": 18740,
+    "max_rss_kb": 500340,
+    "raw_dir": "kani-initial/",
+    "note": "initial cold-cache pass retained as auxiliary evidence; final canonical lane is kani/ after mutation revert"
+  },
+  "mutation": {
+    "description": "temporary production mutation included pc in the video-frame kind role: db/dc -> db/dc/pc",
+    "expected_detection": "avi-stream-kind proof must fail; boundary-only/tag-only/entry/scan-only failures are not accepted as stream-kind oracle evidence",
+    "verdict": "fail",
+    "raw_marker": "VERIFICATION:- FAILED",
+    "failed_check": "assertion failed: actual_kind_role == expected_kind_role",
+    "elapsed_ms": 13812,
+    "max_rss_kb": 525360,
+    "raw_dir": "mutation-stream-kind-kani/",
+    "revert": "mutation reverted exactly; final avi-stream-kind lane, mise run test al-media, and mise run test-formal passed after revert"
+  },
+  "regressions": {
+    "avi-movi-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-avi-movi-scan-regression/",
+      "proofs": [
+        {
+          "name": "avi_movi_scan_collection_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 10197,
+          "max_rss_kb": 311244
+        }
+      ],
+      "note": "existing proof was not redesigned or reimplemented"
+    },
+    "avi-movi-composition": {
+      "verdict": "pass",
+      "raw_dir": "kani-avi-movi-composition-regression/",
+      "proofs": [
+        {
+          "name": "avi_movi_entry_decision_exact",
+          "verdict": "pass",
+          "elapsed_ms": 5334,
+          "max_rss_kb": 304080
+        }
+      ],
+      "note": "existing proof was not redesigned or reimplemented"
+    },
+    "avi-movi-tag": {
+      "verdict": "pass",
+      "raw_dir": "kani-avi-movi-tag-regression/",
+      "proofs": [
+        {
+          "name": "avi_movi_packet_tag_exact",
+          "verdict": "pass",
+          "elapsed_ms": 4866,
+          "max_rss_kb": 297232
+        }
+      ],
+      "note": "existing proof was not redesigned or reimplemented"
+    },
+    "mp4-avi-boundary": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-avi-boundary-regression/",
+      "proofs": [
+        {
+          "name": "mp4_box_header_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 9784,
+          "max_rss_kb": 306368
+        },
+        {
+          "name": "avi_chunk_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 6096,
+          "max_rss_kb": 304220
+        }
+      ],
+      "note": "existing proofs were not redesigned or reimplemented"
+    },
+    "mp4-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-scan-regression/",
+      "proofs": [
+        {
+          "name": "mp4_box_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 19392,
+          "max_rss_kb": 308888
+        }
+      ],
+      "note": "existing proof was not redesigned or reimplemented"
+    },
+    "wav-chunk-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-chunk-scan-regression/",
+      "proofs": [
+        {
+          "name": "wav_chunk_boundary_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 5980,
+          "max_rss_kb": 302192
+        },
+        {
+          "name": "wav_chunk_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 7229,
+          "max_rss_kb": 314740
+        }
+      ],
+      "note": "existing proofs were not redesigned or reimplemented"
+    },
+    "wav-range": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-range-regression/",
+      "proofs": [
+        {
+          "name": "wav_range_plan_valid_ranges_exact",
+          "verdict": "pass",
+          "elapsed_ms": 10537,
+          "max_rss_kb": 298348
+        },
+        {
+          "name": "wav_range_plan_invalid_ranges_error",
+          "verdict": "pass",
+          "elapsed_ms": 4616,
+          "max_rss_kb": 295656
+        }
+      ],
+      "note": "existing proofs were not redesigned or reimplemented"
+    }
+  },
+  "unproven_scope": {
+    "avi_movi_003_remainder": "unbounded iteration termination, N+1 or longer entry sequences, real Vec<MoviPacket> accumulation, body slice/lifetime composition, nested walker composition, packet body boundary plus tag composition at iterator scale",
+    "stream_declaration": "longer stream tables, dynamic Vec<StreamHead>, strh/strf byte layout, strl ordering, missing strh declaration correspondence, format payload validation, AVI-STREAM-002",
+    "avi_time_004": "dwStart offset, u128 division, remainder, independent stream clocks, multi-packet accumulation",
+    "avi_pcm": "WAVEFORMATEX validation and PCM conversion",
+    "integration": "scan collection composition, Chunks iterator, I/O, allocation, real Vec decode, diagnostic formatting, public API whole-call no-panic, writer round-trip, corruption whole-call proof, partial ingest behavior",
+    "other_containers": "MP4-TABLE-005, MP4-PCM, signature reconstruction, and all MP4 properties outside regression proofs"
+  },
+  "limited_cost_comparison": {
+    "scope": "AVI movi/container walk related legacy whole-call proofs only; not the complete old/new cost matrix. Legacy numbers are read-only citations from evidence/al274-avi-movi-scan-proof/ledger.json",
+    "legacy": [
+      {
+        "proof": "avi_writer_output_decodes",
+        "trial": "1200s cap timeout, elapsed 1267s, peak 3.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "mutated_avi_never_panics",
+        "trial": "1200s cap timeout, elapsed 1266s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "truncated_avi_never_panics",
+        "trial": "900s cap timeout, elapsed 948s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      }
+    ],
+    "local_avi_proofs": {
+      "avi_stream_kind_classification_bounded_exact": "final lane 13249ms / 500528KiB; initial cold-cache lane 18740ms / 500340KiB",
+      "avi_movi_scan_collection_bounded_exact": "regression lane 10197ms / 311244KiB",
+      "avi_movi_entry_decision_exact": "regression lane 5334ms / 304080KiB",
+      "avi_movi_packet_tag_exact": "regression lane 4866ms / 297232KiB"
+    },
+    "comparison_note": "The legacy proofs include writer fixtures, container decode, allocation, formatting, and parser-wide branches and did not produce a formal pass. The new proof is narrower: fixed three-stream table plus one packet classification only. Lower rerun cost is not evidence of equivalent assurance."
+  },
+  "proptest_overlap": {
+    "unchanged": [
+      "container_decoders_never_panic_on_arbitrary_bytes",
+      "mutated_or_truncated_containers_never_panic",
+      "avi_writer_output_round_trips_through_decode",
+      "missing_or_undecodable_auds_is_audio_unavailable",
+      "compressed_audio_is_an_observation_not_an_error"
+    ],
+    "added": "small deterministic avi.rs regressions for classification lookup/selection/payload/ownership and packet_ticks missing/other/unknown-kind behavior; formal_containers.rs unchanged",
+    "relationship": "proptest exercises public integration statistically; Kani proves fixed three-stream table plus one packet classification exhaustively over the full symbolic input domain"
+  },
+  "legacy_disposition": "No legacy whole-call/container proof was retired in this slice. Retire decisions remain for a later slice with coordinator approval and replacement coverage.",
+  "heavy_property_remainders": {
+    "AVI-MOVI-003 remainder": "unbounded iteration termination, N+1 or longer sequences, real Vec accumulation, body slice composition, nested walker composition, and dynamic stream table composition remain",
+    "AVI-STREAM-002": "strh/strf byte layout and declaration validation/correspondence require independent design",
+    "AVI-TIME-004": "u128 division, remainder, dwStart, and multi-stream/packet accumulation require independent arithmetic models",
+    "AVI-PCM": "WAVEFORMATEX validation and PCM conversion need shared-or-container-specific boundary design",
+    "MP4-TABLE-005": "sample table accumulation, Vec expansion, and cross-table consistency require separate arithmetic boundaries",
+    "MP4-PCM": "codec matrix, width/endian/sign conversion, and data-layer observations remain",
+    "signature_reconstruction": "small but marginal because detect_format_signature_rules already passes"
+  },
+  "rf_reduction": "Candidate only: RIFF/AVI stream type/kind classification may become a reusable contract after separation from AudioLens stream/timing semantics. No Ruviform issue was filed or updated."
+}
