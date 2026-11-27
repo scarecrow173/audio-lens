@@ -2065,7 +2065,7 @@ mod proofs {
     }
 
     #[kani::proof]
-    #[kani::unwind(4)]
+    #[kani::unwind(5)]
     fn avi_strh_presence_bounded_exact() {
         let selectors: [u8; 3] = kani::any();
         let entries = [selectors[0] % 3, selectors[1] % 3, selectors[2] % 3];

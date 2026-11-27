@@ -35,8 +35,9 @@ oracle は raw selector の最初の `Invalid` と `Valid` の有無から期待
   これは代表入力への限定であり、任意の tag・長さ・payload への
   exact reparameterization ではない。全 tag 分類と全 `usize` の長さ
   述語は既存の別 proof に残す。
-- 走査ループの unwind bound は 4 とし、unwinding assertions を有効に
-  する。`Chunks` の構造エラーを含む全順位、任意長の `strl`、複数
+- unwind bound は 5 とし、固定 3 entry の走査と 4 byte の tag 比較を
+  対象にして unwinding assertions を有効にする。`Chunks` の構造
+  エラーを含む全順位、任意長の `strl`、複数
   `strl` の合成、実 stream table 蓄積、全宣言対応、`movi`、timing、
   PCM、公開 API 全体の no-panic は証明しない。
 - 独立した合成 RIFF の実パーサーテストで、不在時の空 stream table、
