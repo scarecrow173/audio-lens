@@ -1,0 +1,19 @@
+# sha=957d4f90ee4ac014a94641f3b7baa2fb21cb0720 avi_mutant_blob=c8370bd8408871c2a12a04d3d9dbef4c9fd13f8a utc=2026-11-27T18:38:59Z
+diff --git a/crates/al-media/src/avi.rs b/crates/al-media/src/avi.rs
+index 5a46409..c8370bd 100644
+--- a/crates/al-media/src/avi.rs
++++ b/crates/al-media/src/avi.rs
+@@ -614,7 +614,7 @@ fn avi_strh_presence_step(
+     head: &mut StreamHead,
+ ) -> Result<bool, MediaError> {
+     if class == AviStrlEntryClass::Strh {
+-        parse_strh(body, head)?;
++        parse_strh(body, head).or_else(|error| if has_strh { Ok(()) } else { Err(error) })?;
+         Ok(true)
+     } else {
+         Ok(has_strh)
+$ AL_KANI_HARNESS_GROUP=avi-strh-presence AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-strh-presence-proof/kani-mutation mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"fail","reason":"1 harness(es) failed verification (0 verified): avi_strh_presence_bounded_exact","env":"Ubuntu","details":[{"harness":"avi_strh_presence_bounded_exact","ok":false,"bad":true,"timedOut":false,"status":1,"elapsed_ms":16589,"max_rss_kb":416280,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 138208\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 1"}],"cost_summary":{"selected_proofs":1,"verified_proofs":0,"total_elapsed_ms":16589,"max_observed_rss_kb":416280,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+[test-formal-kani] ERROR task failed
+# exit=1 wall_ms=18933

@@ -1,0 +1,6 @@
+ts	phase	decision	why	evidence	result
+2026-11-27T18:34:29Z	start	最新 main を基点に strh presence に限定する	既存の declaration や strf capture と別の契約だから	bd7bda931a9080b0e6233005016358f919922b11	main と一致
+2026-11-27T18:34:30Z	design	実 parse_strh に通す固定 3 entry と独立 oracle を採用する	長さ述語だけでは後続エラーの見落としを検出できない	boundary-analysis.md	実装前に予算と除外を決定
+2026-11-27T18:40:16Z	verification	unwind bound を 4 から 5 に上げる	4 byte の tag 比較に対する memcmp の unwind assertion が失敗した	kani-initial-lane.txt / before-mutation-lane.txt	assertions は有効のまま変異前 Pass
+2026-11-27T18:40:17Z	mutation	正常 strh の後だけ parse_strh の失敗を無視する	既存 presence で後続エラーを隠すと oracle が失敗することを確認する	mutation-lane.txt / final-formal.txt	assertion fail、無変異 blob に復元
+2026-11-27T18:42:22Z	validation	変異を戻して4つの Kani group と Windows native を再実行する	proof と実パーサーの接続を別々に確認する	final-formal.txt / final-native.txt	Kani 6/6、native 208/208、proptest 14/14

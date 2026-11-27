@@ -1,0 +1,515 @@
+# sha=957d4f90ee4ac014a94641f3b7baa2fb21cb0720 utc=2026-11-27T18:40:15Z
+
+Microsoft Windows [Version 10.0.26300.9974]
+
+$ mise run fmt
+[fmt] $ cargo fmt --all -- --check
+# exit=0
+
+$ mise run check al-media
+[check] $ cargo check --locked --all-targets -p al-media
+mbx[cache]: moved the existing target/ directory under the managed root (255.0 MiB logical)
+   Compiling autocfg v1.5.1
+    Checking strength_reduce v0.2.4
+    Checking bitflags v2.13.2
+    Checking lazy_static v1.5.1
+    Checking bytemuck v1.25.2
+    Checking log v0.4.35
+    Checking smallvec v1.16.4
+   Compiling proc-macro2 v1.0.107
+    Checking regex-lite v0.1.9
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+    Checking once_cell v1.21.4
+    Checking windows-link v0.2.1
+    Checking rand_core v0.10.1
+   Compiling serde_core v1.0.229
+    Checking cfg-if v1.0.5
+   Compiling num-traits v0.2.19
+   Compiling getrandom v0.4.3
+    Checking ruviform-media-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+    Checking extended v0.1.0
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-core)
+    Checking windows-sys v0.61.2
+    Checking itoa v1.0.18
+    Checking pin-project-lite v0.2.17
+    Checking tracing-core v0.1.36
+    Checking fastrand v2.5.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-core\src\lib.rs
+    Checking memchr v2.8.3
+    Checking wait-timeout v0.2.1
+    Checking quick-error v1.2.3
+    Checking ruviform-io-file v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+    Checking bit-vec v0.10.2
+    Checking fnv v1.0.7
+    Checking cpufeatures v0.3.1
+    Checking rand_xorshift v0.5.0
+    Checking core_detect v1.0.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-file\src\lib.rs
+    Checking unarray v0.1.4
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-core\src\lib.rs
+    Checking ruviform-video-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+    Checking ruviform-audio-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-file\src\lib.rs
+    Checking bit-set v0.11.1
+    Checking regex-syntax v0.8.11
+    Checking al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-testkit)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-video-core\src\lib.rs
+    Checking chacha20 v0.10.2
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-audio-core\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-video-core\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-audio-core\src\lib.rs
+    Checking ruviform-media-io v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-io\src\lib.rs
+    Checking tempfile v3.27.0
+    Checking rand v0.10.3
+    Checking num-integer v0.1.47
+    Checking num-complex v0.4.6
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+    Checking rusty-fork v0.3.1
+    Checking transpose v0.2.3
+    Checking primal-check v0.3.4
+   Compiling serde_derive v1.0.229
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-io\src\lib.rs
+    Checking ruviform-io-avi v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling tracing-attributes v0.1.31
+    Checking proptest v1.12.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-avi\src\lib.rs
+    Checking rustfft v6.4.1
+    Checking symphonia-core v0.6.1
+    Checking tracing v0.1.44
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-avi\src\lib.rs
+    Checking al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-job)
+    Checking symphonia-metadata v0.6.1
+    Checking symphonia-codec-pcm v0.6.1
+    Checking symphonia-codec-adpcm v0.6.1
+    Checking symphonia-common v0.6.1
+    Checking symphonia-format-riff v0.6.1
+    Checking symphonia-format-isomp4 v0.6.1
+    Checking symphonia-codec-aac v0.6.1
+    Checking symphonia-bundle-flac v0.6.1
+    Checking symphonia-format-ogg v0.6.1
+    Checking symphonia-codec-vorbis v0.6.1
+    Checking symphonia-format-mkv v0.6.1
+    Checking symphonia v0.6.1
+    Checking ruviform-io-symphonia v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-symphonia\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-symphonia\src\lib.rs
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-media)
+mbx[progress]: 15s elapsed; 87 hits, 0 misses, 0 bypassed, 0 not looked up; ~1m 9s compiler work saved
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.21s
+mbx[cache]: 87 hits, 10 misses; 0 B downloaded, 0 B uploaded, 1.0 MiB stored locally
+mbx[savings]: 10.8 TiB logical of target/ was waiting for checkouts that are never coming back. it has stopped waiting.
+# exit=0
+
+$ mise run lint al-media
+[lint] $ if [ "$#" -lt 1 ]; then
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-core)
+    Checking al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-testkit)
+    Checking al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-job)
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.90s
+mbx[cache]: 5 hits, 10 misses; 0 B downloaded, 0 B uploaded, 1.0 MiB stored locally
+mbx[savings]: has saved 5d 4h across 8443 builds. this line is the only thanks it needs.
+# exit=0
+
+$ mise run test al-media
+[test] $ cargo test --locked -p al-media
+   Compiling strength_reduce v0.2.4
+   Compiling bitflags v2.13.2
+   Compiling lazy_static v1.5.1
+   Compiling smallvec v1.16.4
+   Compiling bytemuck v1.25.2
+   Compiling log v0.4.35
+   Compiling regex-lite v0.1.9
+   Compiling once_cell v1.21.4
+   Compiling serde_core v1.0.229
+   Compiling rand_core v0.10.1
+   Compiling windows-link v0.2.1
+   Compiling ruviform-media-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling cfg-if v1.0.5
+   Compiling num-traits v0.2.19
+   Compiling serde v1.0.229
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling extended v0.1.0
+   Compiling serde_json v1.0.154
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling pin-project-lite v0.2.17
+   Compiling tracing-core v0.1.36
+   Compiling windows-sys v0.61.2
+   Compiling fastrand v2.5.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-core\src\lib.rs
+   Compiling getrandom v0.4.3
+   Compiling num-integer v0.1.47
+   Compiling num-complex v0.4.6
+   Compiling serde_derive v1.0.229
+   Compiling tracing-attributes v0.1.31
+   Compiling quick-error v1.2.3
+   Compiling fnv v1.0.7
+   Compiling bit-vec v0.10.2
+   Compiling cpufeatures v0.3.1
+   Compiling wait-timeout v0.2.1
+   Compiling ruviform-io-file v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling rand_xorshift v0.5.0
+   Compiling core_detect v1.0.0
+   Compiling transpose v0.2.3
+   Compiling primal-check v0.3.4
+   Compiling tempfile v3.27.0
+   Compiling bit-set v0.11.1
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-file\src\lib.rs
+   Compiling chacha20 v0.10.2
+   Compiling rand v0.10.3
+   Compiling unarray v0.1.4
+   Compiling regex-syntax v0.8.11
+   Compiling al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-testkit)
+   Compiling rustfft v6.4.1
+   Compiling rusty-fork v0.3.1
+   Compiling symphonia-core v0.6.1
+   Compiling proptest v1.12.0
+   Compiling ruviform-audio-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling ruviform-video-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-audio-core\src\lib.rs
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-video-core\src\lib.rs
+   Compiling symphonia-metadata v0.6.1
+   Compiling symphonia-codec-pcm v0.6.1
+   Compiling symphonia-codec-adpcm v0.6.1
+   Compiling tracing v0.1.44
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-core\src\lib.rs
+   Compiling ruviform-media-io v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-video-core\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-file\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-audio-core\src\lib.rs
+   Compiling symphonia-common v0.6.1
+   Compiling symphonia-format-riff v0.6.1
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-io\src\lib.rs
+   Compiling symphonia-bundle-flac v0.6.1
+   Compiling symphonia-format-ogg v0.6.1
+   Compiling symphonia-format-mkv v0.6.1
+   Compiling symphonia-format-isomp4 v0.6.1
+   Compiling symphonia-codec-vorbis v0.6.1
+   Compiling symphonia-codec-aac v0.6.1
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-core)
+   Compiling symphonia v0.6.1
+   Compiling al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-job)
+   Compiling ruviform-io-avi v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+   Compiling ruviform-io-symphonia v0.1.0 (https://github.com/scarecrow173/ruviform.git#87a7ba8f)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-avi\src\lib.rs
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-symphonia\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-media-io\src\lib.rs
+   Compiling al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-strh-presence\crates\al-media)
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-avi\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\87a7ba8\crates\ruviform-io-symphonia\src\lib.rs
+mbx[progress]: 15s elapsed; 71 hits, 8 misses, 0 bypassed, 0 not looked up; ~1m 43s compiler work saved
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.02s
+     Running unittests src\lib.rs (target\debug\deps\al_media-bfff9d314c976de1.exe)
+
+running 120 tests
+test avi::boundary_tests::avi_chunk_step_accepts_zero_even_and_odd_sizes_exact_end ... ok
+test avi::boundary_tests::avi_chunk_step_classifies_terminal_invalid_and_large_offsets ... ok
+test avi::boundary_tests::avi_movi_packet_tag_rejects_non_digit_prefix_regardless_of_kind ... ok
+test avi::boundary_tests::avi_movi_packet_tag_preserves_decimal_stream_and_kind_order ... ok
+test avi::boundary_tests::packet_ticks_track_existing_media_streams_and_skip_missing_or_other_streams ... ok
+test avi::boundary_tests::video_strf_declaration_height_uses_signed_bit_pattern_abs ... ok
+test avi::boundary_tests::video_strf_declaration_rejects_short_bodies ... ok
+test avi::boundary_tests::strh_declaration_extracts_le_fields_and_ignores_unobserved_and_trailing_bytes ... ok
+test avi::boundary_tests::strh_declaration_rejects_short_bodies ... ok
+test avi::boundary_tests::chunks_iterator_applies_pad_and_nested_region_offsets ... ok
+test avi::boundary_tests::stream_kind_classification_covers_lookup_selection_payload_and_ownership ... ok
+test avi::boundary_tests::video_strf_declaration_extracts_le_fields_and_ignores_unobserved_and_trailing_bytes ... ok
+test avi::tests::empty_last_strf_overwrites_earlier_capture ... ok
+test avi::tests::chunk_body_overrunning_region_is_malformed ... ok
+test avi::tests::exact_rec_movi_list_is_input_unavailable ... ok
+test avi::tests::compressed_vids_is_explicit_unavailable ... ok
+test avi::tests::derived_timestamps_keep_dwstart_offset ... ok
+test avi::tests::empty_wb_is_unavailable_only_when_audio_is_requested ... ok
+test avi::tests::missing_and_empty_strf_materialize_as_empty_format ... ok
+test avi::tests::missing_pad_byte_is_malformed ... ok
+test avi::tests::movi_entry_decision_non_list_packet_ignores_list_type_view ... ok
+test avi::tests::movi_first_reject_determines_error_and_stops_scan ... ok
+test avi::tests::movi_packet_tags_preserve_stream_and_opaque_kind ... ok
+test avi::tests::movi_scan_collection_preserves_packet_order_across_ignores ... ok
+test avi::tests::non_rec_movi_list_exact_complement_is_ignored_before_packets ... ok
+test avi::tests::only_first_auds_stream_is_decoded ... ok
+test avi::tests::non_frame_vids_chunks_dont_desync_frame_indices ... ok
+test avi::tests::short_movi_list_is_malformed ... ok
+test avi::tests::short_strh_errors_even_after_valid_strh ... ok
+test avi::tests::strf_capture_preserves_last_exact_body_across_non_strf_entries ... ok
+test avi::tests::strf_without_strh_does_not_push_stream ... ok
+test avi::tests::trailing_garbage_is_malformed ... ok
+test avi::tests::truncated_movi_is_malformed ... ok
+test avi::tests::two_valid_strh_entries_add_one_stream ... ok
+test avi::tests::unsupported_audio_codec_is_partial_ingest_not_error ... ok
+test avi::tests::riff_size_mismatch_is_malformed ... ok
+test dictionary::tests::annotate_matches_codec_only ... ok
+test dictionary::tests::annotate_with_unmatched_fields_returns_empty ... ok
+test dictionary::tests::annotations_are_data_only ... ok
+test avi::tests::truncated_video_strf_degrades_instead_of_failing_demux ... ok
+test dictionary::tests::bundled_dictionary_loads ... ok
+test avi::tests::short_audio_strf_degrades_instead_of_failing_demux ... ok
+test format::tests::detects_avi_signature ... ok
+test format::tests::detects_mp4_ftyp_signature ... ok
+test format::tests::detects_wav_signature ... ok
+test format::tests::mp4_without_leading_ftyp_is_not_detected ... ok
+test format::tests::length_thresholds_follow_signature_rules ... ok
+test format::tests::riff_form_type_wins_over_ftyp_without_fallback ... ok
+test format::tests::short_input_is_not_detected ... ok
+test avi::tests::valid_chunks_then_cut_off_is_malformed ... ok
+test format::tests::trailing_bytes_do_not_change_detection ... ok
+test format::tests::unknown_signature_is_not_detected ... ok
+test mp4::tests::child_boxes_scan_empty_exact_end_zero_body_and_multiple_boxes ... ok
+test mp4::tests::child_boxes_scan_rejects_trailing_and_first_invalid_box ... ok
+test dictionary::tests::loaded_dictionary_records_content_hash ... ok
+test mp4::tests::child_boxes_scan_size0_terminal_and_largesize_valid_step ... ok
+test mp4::tests::mp4_box_boundary_accepts_size32_size0_and_largesize_exact_end ... ok
+test mp4::tests::mp4_box_boundary_handles_large_offset_arithmetic ... ok
+test mp4::tests::mp4_box_boundary_rejects_exact_invalid_complement ... ok
+test mp4::tests::production_box_header_uses_boundary_layout_and_error_mapping ... ok
+test ruviform_backend::tests::backend_id_is_ruviform ... ok
+test timing::tests::clocks_stay_separate ... ok
+test timing::tests::constant_sequence_has_no_anomalies ... ok
+test timing::tests::drift_is_reported_against_nominal ... ok
+test timing::tests::duplicate_pts_is_recorded ... ok
+test timing::tests::empty_sequence_is_an_explicit_empty_result ... ok
+test timing::tests::gap_is_recorded_as_discontinuity_and_drop ... ok
+test timing::tests::sustained_vfr_slowdown_is_not_a_drop ... ok
+test timing::tests::timestamp_source_drives_observation ... ok
+test ruviform_backend::tests::ruviform_decodes_wav_pcm ... ok
+test timing::tests::vfr_sequence_keeps_interval_distribution ... ok
+test video::tests::a16c_length_mismatch_truncates_via_zip ... ok
+test video::tests::a16c_luma_diff_series_is_bit_exact ... ok
+test video::tests::a16c_zero_pixel_degenerate_series_is_pinned ... ok
+test video::tests::bottom_up_and_top_down_decode_identically ... ok
+test video::tests::artifact_serializes_status_tag ... ok
+test video::tests::compressed_or_odd_dib_is_unavailable_not_decoded ... ok
+test video::tests::luma_planes_are_recycled_after_previous_frame_comparison ... ok
+test video::tests::known_frames_produce_known_features_and_events ... ok
+test video::tests::invalid_roi_config_is_explicit ... ok
+test video::tests::padded_24bpp_rows_decode ... ok
+test video::tests::roi_coordinates_follow_display_rows_with_padding ... ok
+test video::tests::roi_tracks_local_step_on_stream_clock ... ok
+test video::tests::thirtytwo_bpp_decodes ... ok
+test video::tests::thumbnails_decode_rgb_in_top_down_order ... ok
+test wav::tests::decode_skips_multiple_unknown_chunks_with_padding ... ok
+test wav::tests::decodes_16bit_stereo ... ok
+test wav::tests::decodes_8bit_unsigned_offset_binary ... ok
+test wav::tests::float32_round_trip_keeps_native_scale ... ok
+test wav::tests::integer_encode_clamps_to_range ... ok
+test wav::tests::missing_pad_and_trailing_errors_keep_their_public_text ... ok
+test wav::tests::range_read_matches_full_decode ... ok
+test wav::tests::range_read_rejects_out_of_range ... ok
+test wav::tests::rejects_data_chunk_ending_mid_frame ... ok
+test wav::tests::rejects_duplicate_data_chunk ... ok
+test wav::tests::rejects_duplicate_fmt_chunk ... ok
+test wav::tests::rejects_inconsistent_block_align ... ok
+test wav::tests::rejects_inconsistent_riff_size ... ok
+test wav::tests::rejects_misaligned_sample_count_and_bad_params ... ok
+test wav::tests::rejects_missing_fmt ... ok
+test wav::tests::rejects_missing_pad_byte_at_eof ... ok
+test wav::tests::rejects_non_riff ... ok
+test wav::tests::rejects_trailing_bytes_after_last_chunk ... ok
+test wav::tests::rejects_truncated_chunk ... ok
+test wav::tests::rejects_zero_sample_rate ... ok
+test wav::tests::s16_encode_decodes_back_exactly ... ok
+test wav::tests::s24_and_s32_round_trip ... ok
+test wav::tests::wav_chunk_step_accepts_zero_even_and_odd_sizes ... ok
+test wav::tests::wav_chunk_step_classifies_terminal_and_invalid_boundaries ... ok
+test wav::tests::wav_chunk_step_handles_u32_size_and_large_offsets ... ok
+test wav::tests::wav_data_layout_rejects_unaligned_or_unrepresentable_extents ... ok
+test wav::tests::wav_range_plan_handles_riff_extent_boundary_without_overflow ... ok
+test wav::tests::wav_range_plan_rejects_empty_and_out_of_range ... ok
+test wav::tests::wav_range_plan_valid_tail_range_is_exact ... ok
+test wav::tests::waveformatex_declaration_extracts_le_fields_and_ignores_trailing_bytes ... ok
+test wav::tests::waveformatex_declaration_rejects_short_bodies ... ok
+test wav::tests::waveformatex_structural_extraction_does_not_apply_codec_layout_validation ... ok
+test avi::tests::missing_audio_stream_is_partial_ingest_not_error ... ok
+test avi::tests::packet_timing_is_observed_per_stream_clock ... ok
+test avi::tests::roundtrip_decodes_audio_and_video_meta ... ok
+
+test result: ok. 120 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\aac.rs (target\debug\deps\aac-dae2ecc72a6abb20.exe)
+
+running 6 tests
+test undecodable_mp4_audio_records_attempts_without_failing ... ok
+test pcm_mp4_decodes_via_ruviform_native_pcm ... ok
+test multi_track_mp4_selects_first_decodable_audio ... ok
+test aac_lc_mono_mp4_decodes_audio_via_ruviform ... ok
+test aac_lc_mp4_decodes_audio_via_ruviform ... ok
+test ingest_stage_writes_decoded_pcm_for_aac_mp4 ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\formal_containers.rs (target\debug\deps\formal_containers-7fe44fcee5061f33.exe)
+
+running 7 tests
+test detect_format_follows_signature_rules ... ok
+test missing_or_undecodable_auds_is_audio_unavailable ... ok
+test mutated_or_truncated_containers_never_panic ... ok
+test compressed_audio_is_an_observation_not_an_error ... ok
+test avi_writer_output_round_trips_through_decode ... ok
+test mp4_writer_output_round_trips_through_decode ... ok
+test container_decoders_never_panic_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests\formal_wav.rs (target\debug\deps\formal_wav-1f29e7270127782c.exe)
+
+running 7 tests
+test terminal_chunk_boundaries_follow_pad_and_exact_end_contract ... ok
+test write_samples_rejects_exactly_unaligned_lengths ... ok
+test mutated_or_truncated_headers_never_panic ... ok
+test writer_new_rejects_exactly_the_documented_invalid_params ... ok
+test writer_output_round_trips_losslessly ... ok
+test frame_count_and_range_reads_hold_the_contract ... ok
+test decode_wav_never_panics_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests\golden.rs (target\debug\deps\golden-1164c6886ff275ba.exe)
+
+running 12 tests
+test case_vfr_stts_mp4 ... ok
+test case_ctts_reorder_mp4 ... ok
+test case_known_av_offset_mp4 ... ok
+test case_pcm_roundtrip_mp4 ... ok
+test case_dup_frame_chunk_avi ... ok
+test case_drop_frame_avi ... ok
+test case_known_av_offset_avi ... ok
+test case_vfr_packets_avi ... ok
+test case_av_drift_avi ... ok
+test case_cfr_timestamps_avi ... ok
+test case_cfr_timestamps_mp4 ... ok
+test case_compressed_only_mp4_ingest ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\ingest.rs (target\debug\deps\ingest-2b7f4b45abb411ac.exe)
+
+running 10 tests
+test timing_observation_serializes_with_annotations_separately ... ok
+test unpinned_input_via_struct_literal_is_rejected ... ok
+test malformed_avi_fails_explicitly ... ok
+test input_changed_after_creation_fails_explicitly ... ok
+test unknown_format_fails_explicitly ... ok
+test ingest_wav_produces_pcm_and_metadata_artifacts ... ok
+test same_input_reproduces_same_hash ... ok
+test resume_reuses_completed_ingest_artifacts ... ok
+test avi_with_undecodable_audio_still_ingests_observations ... ok
+test ingest_avi_produces_pcm_metadata_and_video_facts ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests\mp4.rs (target\debug\deps\mp4-fe4397c24933fef2.exe)
+
+running 29 tests
+test missing_moov_is_malformed ... ok
+test fragmented_mp4_fails_explicitly ... ok
+test malformed_sample_table_fails ... ok
+test ctts_reorder_keeps_dts_series_clean_and_records_pts ... ok
+test lpcm_v2_flags_select_endianness ... ok
+test detects_mp4_and_decodes_track_metadata ... ok
+test ipcm_decodes_via_pcmc_flags ... ok
+test mid_sample_pcm_data_is_integrity_observation_not_failure ... ok
+test first_pcm_decodable_soun_track_wins ... ok
+test multi_chunk_sample_map_locates_pcm ... ok
+test empty_complete_sample_table_remains_valid ... ok
+test compressed_soun_is_an_integrity_observation_not_a_failure ... ok
+test no_leading_ftyp_is_input_unavailable ... ok
+test oversized_sample_count_is_malformed_not_an_alloc_bomb ... ok
+test signed_8bit_pcm_decodes_as_pcm_s8 ... ok
+test incomplete_pcm_frame_is_local_malformed_in_direct_and_registry ... ok
+test stss_sync_samples_are_recorded ... ok
+test sample_past_eof_is_structural_failure_for_all_codecs ... ok
+test stts_decode_order_timing_is_recovered ... ok
+test unknown_boxes_are_skipped_and_recorded ... ok
+test unsupported_pcm_width_is_integrity_observation_not_failure ... ok
+test excessive_mapped_bytes_are_structural_for_all_codecs ... ok
+test vfr_stts_is_observed_without_nominal_fps ... ok
+test sowt_and_twos_decode_with_correct_endianness ... ok
+test zero_rate_pcm_failure_is_malformed_in_direct_and_registry_results ... ok
+test nondecoded_tracks_validate_chunk_mapping_in_direct_and_registry_probe ... ok
+test compressed_only_mp4_completes_with_metadata_and_no_pcm ... ok
+test failed_input_does_not_block_other_inputs ... ok
+test ingest_mp4_produces_pcm_metadata_and_timing_artifacts ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests\registry.rs (target\debug\deps\registry-fe03221a9d9b816f.exe)
+
+running 13 tests
+test native_registry_resolves_and_corruption_errors_at_the_backend ... ok
+test zero_block_align_is_malformed_instead_of_panicking ... ok
+test unknown_format_is_capability_failure_and_corruption_is_fatal ... ok
+test nested_rec_list_is_explicitly_unsupported_in_direct_and_probe ... ok
+test native_registry_preserves_pcm_and_records_selection ... ok
+test probe_is_pinned_and_does_not_decode_bad_payloads ... ok
+test first_avi_audio_stream_is_the_only_decoded_stream ... ok
+test timing_only_skips_pcm_and_pixel_decode_and_arbitrary_selection_is_rejected ... ok
+test avi_clock_range_is_a_structural_boundary_in_direct_and_probe ... ok
+test avi_audio_errors_are_typed_and_independent_clocks_survive ... ok
+test unaligned_audio_packets_keep_fractional_ticks_across_packets ... ok
+test all_wav_native_widths_preserve_scale_and_nonfinite_float_values ... ok
+test mp4_keeps_existing_pcm_and_compressed_tracks_are_timing_only ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\ruviform_deps.rs (target\debug\deps\ruviform_deps-6f8ea215d6c0f6a6.exe)
+
+running 4 tests
+test audio_core_buffer_types ... ok
+test media_core_timebase_types ... ok
+test video_core_frame_types ... ok
+test media_io_boundary_types ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests al_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+mbx[cache]: 71 hits, 10 misses, 1 bypassed; 0 B downloaded, 0 B uploaded, 544.8 MiB stored locally
+mbx[savings]: 71 compilations replayed from cache. rustc's services were not required. (1m 43s saved)
+# exit=0
+
+$ mise run test-formal
+[test-formal] $ cargo test --locked -p al-media --test formal_wav --test formal_containers
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running tests\formal_containers.rs (target\debug\deps\formal_containers-7fe44fcee5061f33.exe)
+
+running 7 tests
+test detect_format_follows_signature_rules ... ok
+test mutated_or_truncated_containers_never_panic ... ok
+test missing_or_undecodable_auds_is_audio_unavailable ... ok
+test compressed_audio_is_an_observation_not_an_error ... ok
+test avi_writer_output_round_trips_through_decode ... ok
+test mp4_writer_output_round_trips_through_decode ... ok
+test container_decoders_never_panic_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests\formal_wav.rs (target\debug\deps\formal_wav-1f29e7270127782c.exe)
+
+running 7 tests
+test terminal_chunk_boundaries_follow_pad_and_exact_end_contract ... ok
+test write_samples_rejects_exactly_unaligned_lengths ... ok
+test mutated_or_truncated_headers_never_panic ... ok
+test writer_new_rejects_exactly_the_documented_invalid_params ... ok
+test writer_output_round_trips_losslessly ... ok
+test frame_count_and_range_reads_hold_the_contract ... ok
+test decode_wav_never_panics_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+# exit=0
+
+$ mise exec -- node --check tools/run-formal-kani.mjs
+# exit=0

@@ -53,6 +53,6 @@ runner の timeout 600 秒は診断用の停止上限であり、予算とは別
 `avi-wb-concatenation` も選択できる。wall time と per-harness elapsed、
 最大 RSS、実行環境と exit を分けて報告する。
 
-`parse_strh` が失敗した場合にエラーを返さず直前の presence を返す変異を
-入れる。oracle の比較が失敗することを確認し、元の blob と一致するまで
-復元して同じ group を再実行する。
+すでに presence が `true` の場合だけ `parse_strh` の失敗を無視する
+変異を入れる。oracle の比較が失敗することを確認し、元の blob と
+一致するまで復元して同じ group を再実行する。

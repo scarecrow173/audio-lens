@@ -1,0 +1,51 @@
+$ mise exec -- prek run --all-files
+trim trailing whitespace.................................................Failed
+- hook id: trailing-whitespace
+- description: Trims trailing whitespace
+- exit code: 1
+- files were modified by this hook
+
+  Fixing evidence/al274-avi-strh-presence-proof/kani-before-mutation/kani-avi_strh_presence_bounded_exact.txt
+  Fixing evidence/al274-avi-strh-presence-proof/kani-mutation/kani-avi_strh_presence_bounded_exact.txt
+  Fixing evidence/al274-avi-strh-presence-proof/avi-strf-capture/kani-avi_strf_materialize_bounded_exact.txt
+  Fixing evidence/al274-avi-strh-presence-proof/kani-initial/kani-avi_strh_presence_bounded_exact.txt
+  Fixing evidence/al274-avi-strh-presence-proof/avi-strh-presence/kani-avi_strh_presence_bounded_exact.txt
+  Fixing evidence/al274-avi-strh-presence-proof/avi-wb-concatenation/kani-avi_audio_wb_concatenation_bounded_exact.txt
+fix end of files.........................................................Passed
+mixed line ending........................................................Failed
+- hook id: mixed-line-ending
+- description: Replaces or checks mixed line endings
+- exit code: 1
+- files were modified by this hook
+
+  Fixing evidence/al274-avi-strh-presence-proof/final-native.txt
+  Fixing evidence/al274-avi-strh-presence-proof/environment.txt
+fix utf-8 byte order marker..............................................Passed
+check yaml...............................................................Passed
+check toml...............................................................Passed
+detect private key.......................................................Passed
+check illegal windows names..........................(no files to check)Skipped
+biome check --write......................................................Failed
+- hook id: biome-check
+- files were modified by this hook
+
+  Checked 20 files in 72ms. No fixes applied.
+  Checked 20 files in 122ms. No fixes applied.
+  Checked 20 files in 39ms. No fixes applied.
+  Checked 20 files in 56ms. No fixes applied.
+  Checked 20 files in 27ms. Fixed 1 file.
+  Checked 20 files in 30ms. No fixes applied.
+  Checked 20 files in 63ms. Fixed 1 file.
+  Checked 20 files in 51ms. No fixes applied.
+  Checked 20 files in 39ms. No fixes applied.
+  Checked 20 files in 58ms. Fixed 1 file.
+  Checked 20 files in 52ms. Fixed 1 file.
+  Checked 20 files in 70ms. No fixes applied.
+  Checked 20 files in 31ms. No fixes applied.
+  Checked 20 files in 52ms. Fixed 1 file.
+  Checked 20 files in 37ms. Fixed 2 files.
+  Checked 20 files in 67ms. No fixes applied.
+actionlint (changed workflows)...........................................Passed
+check-ci-workflow........................................................Passed
+check-ci-tracker-workflows...............................................Passed
+# exit=1

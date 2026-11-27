@@ -1,0 +1,6 @@
+# sha=fbf9e1478fc73a1ca1246dfc5a8289265c3ab7b6 avi_blob=21082a5805f72ff672898624804df005f2b1be00 utc=2026-11-27T18:36:42Z
+$ AL_KANI_HARNESS_GROUP=avi-strh-presence AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-strh-presence-proof/kani-initial mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"fail","reason":"1 harness(es) failed verification (0 verified): avi_strh_presence_bounded_exact","env":"Ubuntu","details":[{"harness":"avi_strh_presence_bounded_exact","ok":false,"bad":true,"timedOut":false,"status":1,"elapsed_ms":21523,"max_rss_kb":465508,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 859912\n\tFile system outputs: 178712\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 1"}],"cost_summary":{"selected_proofs":1,"verified_proofs":0,"total_elapsed_ms":21523,"max_observed_rss_kb":465508,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+[test-formal-kani] ERROR task failed
+# exit=1 wall_ms=23972

@@ -1,0 +1,65 @@
+{
+  "issue": 274,
+  "branch": "feature/274-avi-strh-presence",
+  "base_sha": "bd7bda931a9080b0e6233005016358f919922b11",
+  "verification_subject_sha": "957d4f90ee4ac014a94641f3b7baa2fb21cb0720",
+  "verified_sync_commit": "957d4f90ee4ac014a94641f3b7baa2fb21cb0720",
+  "property": "AVI-STREAM-002: strh presence or first invalid entry within one strl",
+  "assurance": "Bounded Exhaustive",
+  "requirement": "Required",
+  "boundary_design": "boundary-analysis.md",
+  "input_domain": {
+    "entry_count": 3,
+    "classes": ["Other", "Valid", "Invalid"],
+    "encoding": "Independent u8 selectors modulo 3",
+    "other_tags": ["strf", "JUNK"],
+    "valid_body_bytes": 48,
+    "invalid_body_bytes": 47,
+    "strh_body_contents": "Fixed zero-filled bytes"
+  },
+  "assumptions": [],
+  "unwinding_assertions": "Enabled; unwind bound 5",
+  "stubs": [],
+  "execution": {
+    "runner": "tools/run-formal-kani.mjs via mise run test-formal-kani",
+    "group": "avi-strh-presence",
+    "harness": "avi_strh_presence_bounded_exact",
+    "registry_size": 39,
+    "environment": "environment.txt",
+    "timeout_ms": 600000,
+    "design_budget_ms": 120000,
+    "rss_ceiling_kib_exclusive": 4194304
+  },
+  "formal": {
+    "required": "avi-strh-presence/verdict.json",
+    "regressions": [
+      "avi-strh-declaration/verdict.json",
+      "avi-strf-capture/verdict.json",
+      "avi-wb-concatenation/verdict.json"
+    ],
+    "commands": "final-formal.txt",
+    "all_harnesses": "NotRun: unselected legacy and other proof groups are outside this slice"
+  },
+  "mutation": {
+    "dir": "kani-mutation",
+    "edit": "Ignore parse_strh failure only if a previous strh has already set presence",
+    "exit": 1,
+    "lane_verdict": "fail",
+    "raw_result": "VERIFICATION:- FAILED",
+    "failed_checks": ["strh presence or first invalid entry"],
+    "restore_blob": "5a46409b4ce5e76b97f74dcc2f0c622e38433543"
+  },
+  "runtime": {
+    "commands": "final-native.txt",
+    "hygiene": "prek.txt",
+    "fixtures": [
+      "strf_without_strh_does_not_push_stream",
+      "two_valid_strh_entries_add_one_stream",
+      "short_strh_errors_even_after_valid_strh"
+    ]
+  },
+  "integrated_ci": {
+    "result": "NotRun",
+    "reason": "Awaiting Daily CI evidence for the post-merge main SHA"
+  }
+}
