@@ -138,11 +138,42 @@ fn mp4_box_boundary_step(at: u64, limit: u64, size32: u32, largesize: u64) -> Mp
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mp4ScanTerminal {
+    Complete,
+    TrailingBytes,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mp4ScanPosition {
+    HeaderAvailable,
+    Terminal(Mp4ScanTerminal),
+}
+
+fn mp4_scan_position(at: u64, end: u64) -> Mp4ScanPosition {
+    if at == end {
+        return Mp4ScanPosition::Terminal(Mp4ScanTerminal::Complete);
+    }
+    if at > end || end - at < 8 {
+        return Mp4ScanPosition::Terminal(Mp4ScanTerminal::TrailingBytes);
+    }
+    Mp4ScanPosition::HeaderAvailable
+}
+
+fn mp4_box_scan_next_offset(advance: Mp4BoxBoundaryAdvance) -> u64 {
+    advance.body_end
+}
+
+fn mp4_truncated_box_header_error(context: &str) -> MediaError {
+    MediaError::malformed(format!("{context}: truncated box header"))
+}
+
 /// A box header within `data[at..limit]`.
 struct BoxHeader {
     tag: [u8; 4],
     body_start: usize,
     body_end: usize,
+    next_offset: usize,
 }
 
 /// Read one box header. `size == 1` selects the 64-bit largesize form;
@@ -158,9 +189,7 @@ fn box_header(
     let at64 = at as u64;
     let limit64 = limit as u64;
     if !mp4_box_base_header_available(at64, limit64) {
-        return Err(MediaError::malformed(format!(
-            "{context}: truncated box header"
-        )));
+        return Err(mp4_truncated_box_header_error(context));
     }
     let size32 = be_u32(data, at)?;
     let tag: [u8; 4] = data[at + 4..at + 8].try_into().unwrap();
@@ -203,6 +232,7 @@ fn box_header(
         tag,
         body_start: advance.body_start as usize,
         body_end: advance.body_end as usize,
+        next_offset: mp4_box_scan_next_offset(advance) as usize,
     })
 }
 
@@ -215,9 +245,16 @@ fn child_boxes(
 ) -> Result<Vec<BoxHeader>, MediaError> {
     let mut out = Vec::new();
     let mut at = start;
-    while at < end {
+    loop {
+        match mp4_scan_position(at as u64, end as u64) {
+            Mp4ScanPosition::Terminal(Mp4ScanTerminal::Complete) => break,
+            Mp4ScanPosition::Terminal(Mp4ScanTerminal::TrailingBytes) => {
+                return Err(mp4_truncated_box_header_error(context));
+            }
+            Mp4ScanPosition::HeaderAvailable => {}
+        }
         let h = box_header(data, at, end, context)?;
-        at = h.body_end;
+        at = h.next_offset;
         out.push(h);
     }
     Ok(out)
@@ -1279,9 +1316,16 @@ fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
     let mut skipped = Vec::new();
     let mut moov_seen = false;
     let mut at = 0usize;
-    while at < data.len() {
+    loop {
+        match mp4_scan_position(at as u64, data.len() as u64) {
+            Mp4ScanPosition::Terminal(Mp4ScanTerminal::Complete) => break,
+            Mp4ScanPosition::Terminal(Mp4ScanTerminal::TrailingBytes) => {
+                return Err(mp4_truncated_box_header_error("file"));
+            }
+            Mp4ScanPosition::HeaderAvailable => {}
+        }
         let h = box_header(data, at, data.len(), "file")?;
-        at = h.body_end;
+        at = h.next_offset;
         match &h.tag {
             b"ftyp" => {
                 if brands.is_some() {
@@ -1527,6 +1571,96 @@ mod proofs {
         }
     }
 
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    enum ScanModelOutcome {
+        Complete {
+            valid_steps: u8,
+            final_offset: u64,
+        },
+        TrailingBytes {
+            valid_steps: u8,
+            final_offset: u64,
+        },
+        Invalid {
+            valid_steps: u8,
+            error: Mp4BoxBoundaryError,
+        },
+        NeedsMore {
+            valid_steps: u8,
+            next_offset: u64,
+        },
+    }
+
+    fn expected_scan_position(offset: u64, end: u64) -> Mp4ScanPosition {
+        if offset == end {
+            return Mp4ScanPosition::Terminal(Mp4ScanTerminal::Complete);
+        }
+        if offset > end || end - offset < 8 {
+            return Mp4ScanPosition::Terminal(Mp4ScanTerminal::TrailingBytes);
+        }
+        Mp4ScanPosition::HeaderAvailable
+    }
+
+    fn scan_model(
+        start: u64,
+        end: u64,
+        sizes32: [u32; 4],
+        largesizes: [u64; 4],
+    ) -> ScanModelOutcome {
+        let mut offset = start;
+        let mut valid_steps = 0u8;
+        for index in 0..4 {
+            assert!(offset <= end);
+            let position = mp4_scan_position(offset, end);
+            assert_eq!(position, expected_scan_position(offset, end));
+            match position {
+                Mp4ScanPosition::Terminal(Mp4ScanTerminal::Complete) => {
+                    return ScanModelOutcome::Complete {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+                Mp4ScanPosition::Terminal(Mp4ScanTerminal::TrailingBytes) => {
+                    return ScanModelOutcome::TrailingBytes {
+                        valid_steps,
+                        final_offset: offset,
+                    };
+                }
+                Mp4ScanPosition::HeaderAvailable => {}
+            }
+
+            match mp4_box_boundary_step(offset, end, sizes32[index], largesizes[index]) {
+                Mp4BoxBoundaryStep::Advance(advance) => {
+                    let next_offset = mp4_box_scan_next_offset(advance);
+                    assert_eq!(next_offset, advance.body_end);
+                    assert!(advance.body_start <= advance.body_end);
+                    assert!(advance.body_end <= end);
+                    assert!(next_offset > offset);
+                    assert!(
+                        next_offset
+                            .checked_sub(offset)
+                            .is_some_and(|progress| progress >= 8)
+                    );
+                    assert!(next_offset <= end);
+                    let remaining_before = end - offset;
+                    assert!(
+                        end.checked_sub(next_offset)
+                            .is_some_and(|remaining| remaining < remaining_before)
+                    );
+                    offset = next_offset;
+                    valid_steps += 1;
+                }
+                Mp4BoxBoundaryStep::Invalid(error) => {
+                    return ScanModelOutcome::Invalid { valid_steps, error };
+                }
+            }
+        }
+        ScanModelOutcome::NeedsMore {
+            valid_steps,
+            next_offset: offset,
+        }
+    }
+
     #[kani::proof]
     fn mp4_box_header_step_exact() {
         let at: u64 = kani::any();
@@ -1609,6 +1743,62 @@ mod proofs {
                     error == Mp4BoxBoundaryError::ExtendsPastEnd,
                     extends_past_end
                 );
+            }
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(6)]
+    fn mp4_box_scan_progress_bounded_exact() {
+        let start: u64 = kani::any();
+        let end: u64 = kani::any();
+        kani::assume(start <= end);
+        let sizes32: [u32; 4] = [kani::any(), kani::any(), kani::any(), kani::any()];
+        let largesizes: [u64; 4] = [kani::any(), kani::any(), kani::any(), kani::any()];
+        let outcome = scan_model(start, end, sizes32, largesizes);
+        let valid_steps = match outcome {
+            ScanModelOutcome::Complete { valid_steps, .. }
+            | ScanModelOutcome::TrailingBytes { valid_steps, .. }
+            | ScanModelOutcome::Invalid { valid_steps, .. }
+            | ScanModelOutcome::NeedsMore { valid_steps, .. } => valid_steps,
+        };
+        kani::assume(valid_steps <= 3);
+
+        match outcome {
+            ScanModelOutcome::Complete {
+                valid_steps,
+                final_offset,
+            } => {
+                assert!(valid_steps <= 3);
+                assert_eq!(final_offset, end);
+                if start == end {
+                    assert_eq!(valid_steps, 0);
+                    assert_eq!(final_offset, start);
+                }
+            }
+            ScanModelOutcome::TrailingBytes {
+                valid_steps,
+                final_offset,
+            } => {
+                assert!(valid_steps <= 3);
+                assert!(final_offset < end);
+                let remaining = end - final_offset;
+                assert!(remaining > 0 && remaining < 8);
+            }
+            ScanModelOutcome::Invalid { valid_steps, error } => {
+                assert!(valid_steps <= 3);
+                assert!(matches!(
+                    error,
+                    Mp4BoxBoundaryError::TruncatedHeader
+                        | Mp4BoxBoundaryError::TruncatedLargeSizeHeader
+                        | Mp4BoxBoundaryError::LargeSizeSmallerThanHeader
+                        | Mp4BoxBoundaryError::SizeSmallerThanHeader
+                        | Mp4BoxBoundaryError::SizeOverflow
+                        | Mp4BoxBoundaryError::ExtendsPastEnd
+                ));
+            }
+            ScanModelOutcome::NeedsMore { .. } => {
+                unreachable!("small scan bound excludes scans with four valid boxes")
             }
         }
     }
@@ -1706,5 +1896,105 @@ mod tests {
             panic!("expected malformed error")
         };
         assert_eq!(reason, "test: box free size smaller than header");
+    }
+
+    fn size32_box(tag: &[u8; 4], body: &[u8]) -> Vec<u8> {
+        let mut out = Vec::new();
+        out.extend_from_slice(&((8 + body.len()) as u32).to_be_bytes());
+        out.extend_from_slice(tag);
+        out.extend_from_slice(body);
+        out
+    }
+
+    fn largesize_box(tag: &[u8; 4], body: &[u8]) -> Vec<u8> {
+        let mut out = Vec::new();
+        out.extend_from_slice(&1u32.to_be_bytes());
+        out.extend_from_slice(tag);
+        out.extend_from_slice(&((16 + body.len()) as u64).to_be_bytes());
+        out.extend_from_slice(body);
+        out
+    }
+
+    fn child_boxes_error(data: &[u8], start: usize, end: usize) -> String {
+        match child_boxes(data, start, end, "test") {
+            Ok(_) => panic!("expected malformed error"),
+            Err(MediaError::Malformed { reason }) => reason,
+            Err(_) => panic!("expected malformed error"),
+        }
+    }
+
+    #[test]
+    fn child_boxes_scan_empty_exact_end_zero_body_and_multiple_boxes() {
+        let empty = Vec::new();
+        assert!(child_boxes(&empty, 0, 0, "test").unwrap().is_empty());
+
+        let mut data = Vec::new();
+        data.extend_from_slice(&size32_box(b"free", &[]));
+        data.extend_from_slice(&size32_box(b"skip", &[1, 2, 3, 4]));
+        let boxes = child_boxes(&data, 0, data.len(), "test").unwrap();
+        assert_eq!(boxes.len(), 2);
+        assert_eq!(
+            (boxes[0].body_start, boxes[0].body_end, boxes[0].next_offset),
+            (8, 8, 8)
+        );
+        assert_eq!(
+            (boxes[1].body_start, boxes[1].body_end, boxes[1].next_offset),
+            (16, 20, 20)
+        );
+    }
+
+    #[test]
+    fn child_boxes_scan_size0_terminal_and_largesize_valid_step() {
+        let mut size0 = Vec::new();
+        size0.extend_from_slice(&0u32.to_be_bytes());
+        size0.extend_from_slice(b"free");
+        size0.extend_from_slice(&[1, 2, 3, 4]);
+        let boxes = child_boxes(&size0, 0, size0.len(), "test").unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!((boxes[0].body_start, boxes[0].body_end), (8, 12));
+        assert_eq!(boxes[0].next_offset, size0.len());
+
+        let mut data = largesize_box(b"free", &[1, 2, 3, 4]);
+        data.extend_from_slice(&size32_box(b"skip", &[]));
+        let boxes = child_boxes(&data, 0, data.len(), "test").unwrap();
+        assert_eq!(boxes.len(), 2);
+        assert_eq!(
+            (boxes[0].body_start, boxes[0].body_end, boxes[0].next_offset),
+            (16, 20, 20)
+        );
+        assert_eq!(
+            (boxes[1].body_start, boxes[1].body_end, boxes[1].next_offset),
+            (28, 28, 28)
+        );
+    }
+
+    #[test]
+    fn child_boxes_scan_rejects_trailing_and_first_invalid_box() {
+        for trailing in 1..8 {
+            let mut data = size32_box(b"free", &[]);
+            data.extend_from_slice(&vec![0u8; trailing]);
+            assert_eq!(
+                child_boxes_error(&data, 0, data.len()),
+                "test: truncated box header"
+            );
+        }
+
+        let mut invalid_then_valid = Vec::new();
+        invalid_then_valid.extend_from_slice(&7u32.to_be_bytes());
+        invalid_then_valid.extend_from_slice(b"free");
+        invalid_then_valid.extend_from_slice(&size32_box(b"skip", &[]));
+        assert_eq!(
+            child_boxes_error(&invalid_then_valid, 0, invalid_then_valid.len()),
+            "test: box free size smaller than header"
+        );
+
+        let mut overrun = Vec::new();
+        overrun.extend_from_slice(&20u32.to_be_bytes());
+        overrun.extend_from_slice(b"free");
+        overrun.extend_from_slice(&[0u8; 4]);
+        assert_eq!(
+            child_boxes_error(&overrun, 0, overrun.len()),
+            "test: box free extends past end of region"
+        );
     }
 }
