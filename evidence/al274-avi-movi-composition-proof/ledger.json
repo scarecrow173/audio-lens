@@ -1,0 +1,254 @@
+{
+  "schema": "audio-lens.formal-verification-ledger.al274-avi-movi-composition-proof.v1",
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/274",
+  "slice": "AVI-MOVI-003 movi entry composition exact proof slice (not the whole Issue and not all of AVI-MOVI-003)",
+  "branch": "feature/274-avi-movi-composition-proof",
+  "baseline_origin_main": "0f3ebbf248fc2c398749456b674342506d789fcf",
+  "pr286_ancestor_confirmed": true,
+  "environment": {
+    "host": "Windows worktree G:/orca/workspaces/audio-lens/al274-avi-movi-composition",
+    "kani_environment": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0",
+    "solver": "CaDiCaL (Kani/CBMC default; no solver attribute)",
+    "memory_measurement": "/usr/bin/time -v wrapping each cargo kani invocation; not per-solver cgroup isolation"
+  },
+  "input_domain": {
+    "chunk_id": "full [u8;4] chunk id; all 2^32 bit patterns. LIST/non-LIST, digit/non-digit prefixes, known/unknown/opaque kind suffixes, and non-ASCII bytes are not sampled or narrowed",
+    "list_type_view": "full Option<[u8;4]>; None means fewer than 4 body bytes are available for a direct child LIST, and Some(bytes) exactly represents the first 4 body bytes when the body length is at least 4. All 2^32 byte patterns are symbolic",
+    "production_reparameterization": "production observes only the presence/absence of the first four bytes of a LIST body for this decision; body tail bytes, padding, chunk size, and offsets are outside the decision-core input rather than narrowed symbolic inputs",
+    "non_list_total_extension": "for non-LIST ids the production loop passes None or the input is unobserved; the proof keeps the symbolic Option domain and verifies that the decision does not depend on it",
+    "excluded_inputs": "none within the entry decision input domain. Outer RIFF/LIST structure, multiple entries, body slices, stream declarations, packet payload interpretation, and timing inputs are outside this sub-boundary"
+  },
+  "assumptions": [],
+  "assume_classification": "No kani::assume and no input narrowing. Constructing Option<[u8;4]> symbolically is exact reparameterization of the observed body-prefix interface. Equality/inequality branches in assertions are exact complement checks, not assumptions.",
+  "coverage": {
+    "short_list": "id==LIST and list_type_view==None iff RejectShortListType",
+    "rec_list": "id==LIST and list_type_view==Some exact bytes rec plus trailing space iff RejectRecList; byte order, case, and trailing space are exact",
+    "non_rec_list_ignore": "id==LIST and any Some byte complement of exact rec plus trailing space iff Ignore",
+    "packet": "id!=LIST and avi_movi_packet_tag(id) is Some iff Packet(tag)",
+    "non_list_ignore": "id!=LIST and avi_movi_packet_tag(id) is None iff Ignore",
+    "exact_complement": "exactly one of Packet/Ignore/RejectShortListType/RejectRecList holds for every input",
+    "tag_preservation": "packet tags preserve stream_no=(id[0]-b'0')*10+(id[1]-b'0'), 0<=stream_no<=99, and kind byte order",
+    "arithmetic_safety": "the helper is checked for overflow/underflow/panic freedom over the full symbolic input domain",
+    "production_connection": "the production movi loop calls avi_movi_entry_decision with the same inner chunk id returned by Chunks::next and a LIST-only body-prefix view; shell error mapping, boundary walking, body slices, and Vec collection remain outside the helper",
+    "boundary_connection": "packet body boundary/padding remains the separate AVI-CHUNK-001 layer proved by avi_chunk_step_exact in PR #284; digit/kind arithmetic remains the AVI-MOVI-003 tag layer proved in PR #286"
+  },
+  "proofs": [
+    {
+      "name": "avi_movi_entry_decision_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 3914,
+      "max_rss_kb": 245116,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "raw_log": "kani/kani-avi_movi_entry_decision_exact.txt",
+      "verdict_json": "kani/verdict.json"
+    }
+  ],
+  "lane_cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 1,
+    "total_elapsed_ms": 3914,
+    "max_observed_rss_kb": 245116,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  },
+  "initial_lane_before_mutation": {
+    "verdict": "pass",
+    "elapsed_ms": 9458,
+    "max_rss_kb": 316100,
+    "raw_dir": "kani-initial/",
+    "note": "initial cold-cache pass retained as auxiliary evidence; final canonical lane is kani/ after mutation revert"
+  },
+  "mutation": {
+    "description": "temporary production mutation changed the LIST short-type arm in avi_movi_entry_decision from RejectShortListType to Ignore",
+    "expected_detection": "avi-movi-composition proof must fail; generic boundary-only/tag-only failures or diagnostic-payload-only mutations are not accepted as composition oracle evidence",
+    "verdict": "fail",
+    "raw_marker": "VERIFICATION:- FAILED",
+    "failed_check": "assertion failed: matches!(decision, MoviEntryDecision::RejectShortListType) == short_expected",
+    "elapsed_ms": 5935,
+    "max_rss_kb": 245716,
+    "raw_dir": "mutation-composition-kani/",
+    "revert": "mutation reverted exactly; final avi-movi-composition lane, mise run test al-media, and mise run test-formal passed after revert"
+  },
+  "regressions": {
+    "avi-movi-tag": {
+      "verdict": "pass",
+      "raw_dir": "kani-avi-movi-tag-regression/",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 4720,
+        "max_observed_rss_kb": 290216,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "avi_movi_packet_tag_exact",
+          "verdict": "pass",
+          "elapsed_ms": 4720,
+          "max_rss_kb": 290216
+        }
+      ],
+      "note": "PR #286 proof was not redesigned or reimplemented"
+    },
+    "mp4-avi-boundary": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-avi-boundary-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 15999,
+        "max_observed_rss_kb": 299020,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "mp4_box_header_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 9965,
+          "max_rss_kb": 299020
+        },
+        {
+          "name": "avi_chunk_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 6034,
+          "max_rss_kb": 296940
+        }
+      ],
+      "note": "PR #284 proofs were not redesigned or reimplemented"
+    },
+    "mp4-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-scan-regression/",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 20154,
+        "max_observed_rss_kb": 301612,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "mp4_box_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 20154,
+          "max_rss_kb": 301612
+        }
+      ],
+      "note": "PR #285 proof was not redesigned or reimplemented"
+    },
+    "wav-chunk-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-chunk-scan-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 13989,
+        "max_observed_rss_kb": 305820,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "wav_chunk_boundary_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 6393,
+          "max_rss_kb": 294464
+        },
+        {
+          "name": "wav_chunk_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 7596,
+          "max_rss_kb": 305820
+        }
+      ],
+      "note": "PR #283 proofs were not redesigned or reimplemented"
+    },
+    "wav-range": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-range-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 15025,
+        "max_observed_rss_kb": 290656,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "wav_range_plan_valid_ranges_exact",
+          "verdict": "pass",
+          "elapsed_ms": 10611,
+          "max_rss_kb": 290656
+        },
+        {
+          "name": "wav_range_plan_invalid_ranges_error",
+          "verdict": "pass",
+          "elapsed_ms": 4414,
+          "max_rss_kb": 288536
+        }
+      ],
+      "note": "PR #282 proofs were not redesigned or reimplemented"
+    }
+  },
+  "unproven_scope": {
+    "avi_movi_003_remainder": "finite movi iteration and termination, multiple-entry ordering, Vec<MoviPacket> accumulation, body slice/lifetime composition, nested non-rec LIST contents, rec/OpenDML structural interpretation, outer hdrl/movi scan, missing movi, Chunks iterator error precedence and diagnostic text, stream declaration correspondence, stream existence, kind validity/meaning classification, packet body payload interpretation, and packet body boundary plus tag composition at iterator scale",
+    "avi_time_004": "dwStart offset, u128 division, remainder, independent stream clocks, multi-packet accumulation",
+    "avi_pcm": "WAVEFORMATEX validation and PCM conversion",
+    "integration": "I/O, allocation, Vec decode, diagnostic formatting, public API whole-call no-panic, writer round-trip, corruption whole-call proof, partial ingest behavior",
+    "other_containers": "MP4-TABLE-005, MP4-PCM, signature reconstruction, and all MP4 properties outside regression proofs"
+  },
+  "limited_cost_comparison": {
+    "scope": "AVI movi/container walk related legacy whole-call proofs only; not the complete old/new cost matrix",
+    "legacy": [
+      {
+        "proof": "avi_writer_output_decodes",
+        "trial": "1200s cap timeout, elapsed 1267s, peak 3.9GiB",
+        "canonical_1500s": "timeout; /usr/bin/time max RSS unavailable because SIGTERM"
+      },
+      {
+        "proof": "mutated_avi_never_panics",
+        "trial": "1200s cap timeout, elapsed 1266s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "truncated_avi_never_panics",
+        "trial": "900s cap timeout, elapsed 948s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      }
+    ],
+    "local_avi_proofs": {
+      "avi_movi_entry_decision_exact": "final lane 3914ms / 245116KiB; initial cold-cache lane 9458ms / 316100KiB",
+      "avi_movi_packet_tag_exact": "regression lane 4720ms / 290216KiB"
+    },
+    "comparison_note": "The legacy proofs include writer fixtures, container decode, allocation, formatting, and parser-wide branches and did not produce a formal pass. The new proof is narrower: one direct-child entry semantic decision only. The lower rerun cost is not evidence of equivalent assurance."
+  },
+  "proptest_overlap": {
+    "unchanged": [
+      "container_decoders_never_panic_on_arbitrary_bytes",
+      "mutated_or_truncated_containers_never_panic",
+      "avi_writer_output_round_trips_through_decode",
+      "missing_or_undecodable_auds_is_audio_unavailable",
+      "compressed_audio_is_an_observation_not_an_error"
+    ],
+    "added": "small deterministic avi.rs regressions for exact rec rejection, short movi LIST malformed, exact-complement non-rec LIST ignore followed by packet collection, and non-LIST packet/ignore independence from list_type_view; formal_containers.rs unchanged",
+    "relationship": "proptest exercises public integration statistically; Kani proves one direct-child movi entry decision exhaustively over the full [u8;4] plus Option<[u8;4]> interface"
+  },
+  "legacy_disposition": "No legacy whole-call/container proof was retired in this slice. Retire decisions remain for a later slice with coordinator approval and replacement coverage.",
+  "heavy_property_remainders": {
+    "AVI-MOVI-003 remainder": "finite iteration/termination, Vec accumulation, body slice composition, nested walker composition, stream existence, and kind validity remain; likely needs staged composition boundaries on top of avi_chunk_step, avi_movi_packet_tag_exact, and this entry decision proof rather than a direct whole-iterator proof",
+    "AVI-TIME-004": "u128 division, remainder, dwStart, and multi-stream/packet accumulation require independent arithmetic models",
+    "AVI-PCM": "WAVEFORMATEX validation and PCM conversion need shared-or-container-specific boundary design",
+    "MP4-TABLE-005": "stts/ctts/stsc/stsz/stco accumulation, Vec expansion, and cross-table consistency require separate arithmetic boundaries",
+    "MP4-PCM": "declaration/extraction includes codec matrix, width/endian/sign conversion, and data-layer observations",
+    "signature_reconstruction": "small but marginal because detect_format_signature_rules already passes; separate cost/benefit decision remains"
+  },
+  "rf_reduction": "Candidate only: RIFF/AVI movi direct-child entry classification may become a reusable contract after separation from AudioLens error/stream semantics. No Ruviform issue was filed or updated."
+}

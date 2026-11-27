@@ -1,0 +1,1704 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=9458 max_rss_kb=316100
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness avi::proofs::avi_movi_entry_decision_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/9797010546221a8c/out/al_media-9797010546221a8c__RNvNtNtCsagM2MKksdvB_8al_media3avi6proofs29avi_movi_entry_decision_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file crates/al-media/src/lib.rs line 0 column 0 function avi::avi_movi_entry_decision thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 633 column 5 function std::option::Option::<[u8; 4]>::is_some thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 633 column 5 function std::option::Option::<[u8; 4]>::is_some thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 633 column 5 function std::option::Option::<avi::MoviPacketTag>::is_some thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 633 column 5 function std::option::Option::<avi::MoviPacketTag>::is_some thread 0
+aborting path on assume(false) at file crates/al-media/src/avi.rs line 1335 column 5 function avi::proofs::avi_movi_entry_decision_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Runtime Symex: 0.0881927s
+size of program expression: 3510 steps
+slicing removed 1919 assignments
+Generated 561 VCC(s), 83 remaining after simplification
+Runtime Postprocess Equation: 0.0010649s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.00786949s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 8.103e-06s
+Solving with CaDiCaL 3.0.0
+6905 variables, 13772 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.000538404s
+Runtime decision procedure: 0.00881054s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+6906 variables, 13773 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.000666253s
+Runtime decision procedure: 0.000851223s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+6907 variables, 13774 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00555321s
+Runtime decision procedure: 0.00572127s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+6908 variables, 13775 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 0.00575969s
+Runtime decision procedure: 0.00585232s
+
+RESULTS:
+Check 1: memcmp.precondition.1
+	 - Status: SUCCESS
+	 - Description: "memcmp region 1 readable"
+	 - Location: <builtin-library-memcmp>:19 in function memcmp
+
+Check 2: memcmp.precondition.2
+	 - Status: SUCCESS
+	 - Description: "memcpy region 2 readable"
+	 - Location: <builtin-library-memcmp>:21 in function memcmp
+
+Check 3: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 4: avi::avi_movi_packet_tag.assertion.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:163:9 in function avi::avi_movi_packet_tag
+
+Check 5: avi::avi_movi_packet_tag.assertion.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:163:36 in function avi::avi_movi_packet_tag
+
+Check 6: avi::avi_movi_packet_tag.assertion.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:166:33 in function avi::avi_movi_packet_tag
+
+Check 7: avi::avi_movi_packet_tag.assertion.4
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/avi.rs:166:33 in function avi::avi_movi_packet_tag
+
+Check 8: avi::avi_movi_packet_tag.assertion.5
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/avi.rs:166:21 in function avi::avi_movi_packet_tag
+
+Check 9: avi::avi_movi_packet_tag.assertion.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:166:66 in function avi::avi_movi_packet_tag
+
+Check 10: avi::avi_movi_packet_tag.assertion.7
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/avi.rs:166:66 in function avi::avi_movi_packet_tag
+
+Check 11: avi::avi_movi_packet_tag.assertion.8
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/avi.rs:166:21 in function avi::avi_movi_packet_tag
+
+Check 12: avi::avi_movi_packet_tag.assertion.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:169:16 in function avi::avi_movi_packet_tag
+
+Check 13: avi::avi_movi_packet_tag.assertion.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:169:23 in function avi::avi_movi_packet_tag
+
+Check 14: std::option::Option::<[u8; 4]>::is_some.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:633:5 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 15: std::option::Option::<avi::MoviPacketTag>::is_some.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:633:5 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 16: avi::avi_movi_entry_decision.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/lib.rs:0:0 in function avi::avi_movi_entry_decision
+
+Check 17: avi::proofs::avi_movi_entry_decision_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::RejectShortListType) == short_expected"
+	 - Location: crates/al-media/src/avi.rs:1350:9 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 18: avi::proofs::avi_movi_entry_decision_exact.assertion.2
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::RejectRecList) == rec_expected"
+	 - Location: crates/al-media/src/avi.rs:1354:9 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 19: avi::proofs::avi_movi_entry_decision_exact.assertion.3
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::Packet(_)) == packet_expected"
+	 - Location: crates/al-media/src/avi.rs:1358:9 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 20: avi::proofs::avi_movi_entry_decision_exact.assertion.4
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::Ignore) == ignore_expected"
+	 - Location: crates/al-media/src/avi.rs:1362:9 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 21: avi::proofs::avi_movi_entry_decision_exact.assertion.5
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/avi.rs:1367:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 22: avi::proofs::avi_movi_entry_decision_exact.assertion.6
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/avi.rs:1367:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 23: avi::proofs::avi_movi_entry_decision_exact.assertion.7
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/avi.rs:1367:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 24: avi::proofs::avi_movi_entry_decision_exact.assertion.8
+	 - Status: SUCCESS
+	 - Description: "assertion failed: short_expected as u8 + rec_expected as u8 + packet_expected as u8 +
+ignore_expected as u8 == 1"
+	 - Location: crates/al-media/src/avi.rs:1366:9 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 25: avi::proofs::avi_movi_entry_decision_exact.assertion.9
+	 - Status: SUCCESS
+	 - Description: "assertion failed: !matches!(decision, MoviEntryDecision::Packet(_))"
+	 - Location: crates/al-media/src/avi.rs:1375:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 26: avi::proofs::avi_movi_entry_decision_exact.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/avi.rs:1335:5 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 27: avi::proofs::avi_movi_entry_decision_exact.assertion.10
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::RejectRecList) == list_type == *b"rec ""
+	 - Location: crates/al-media/src/avi.rs:1377:17 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 28: avi::proofs::avi_movi_entry_decision_exact.assertion.11
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(decision, MoviEntryDecision::Ignore) == list_type != *b"rec ""
+	 - Location: crates/al-media/src/avi.rs:1381:17 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 29: avi::proofs::avi_movi_entry_decision_exact.assertion.12
+	 - Status: SUCCESS
+	 - Description: "assertion failed: !is_list"
+	 - Location: crates/al-media/src/avi.rs:1389:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 30: avi::proofs::avi_movi_entry_decision_exact.assertion.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1390:21 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 31: avi::proofs::avi_movi_entry_decision_exact.assertion.14
+	 - Status: SUCCESS
+	 - Description: "assertion failed: id[0].is_ascii_digit()"
+	 - Location: crates/al-media/src/avi.rs:1390:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 32: avi::proofs::avi_movi_entry_decision_exact.assertion.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1391:21 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 33: avi::proofs::avi_movi_entry_decision_exact.assertion.16
+	 - Status: SUCCESS
+	 - Description: "assertion failed: id[1].is_ascii_digit()"
+	 - Location: crates/al-media/src/avi.rs:1391:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 34: avi::proofs::avi_movi_entry_decision_exact.assertion.17
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1392:36 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 35: avi::proofs::avi_movi_entry_decision_exact.assertion.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1393:36 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 36: avi::proofs::avi_movi_entry_decision_exact.assertion.19
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/avi.rs:1394:46 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 37: avi::proofs::avi_movi_entry_decision_exact.assertion.20
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/avi.rs:1394:46 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 38: avi::proofs::avi_movi_entry_decision_exact.assertion.21
+	 - Status: SUCCESS
+	 - Description: "assertion failed: packet_tag.stream_no == tens * 10 + ones"
+	 - Location: crates/al-media/src/avi.rs:1394:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 39: avi::proofs::avi_movi_entry_decision_exact.assertion.22
+	 - Status: SUCCESS
+	 - Description: "assertion failed: packet_tag.stream_no <= 99"
+	 - Location: crates/al-media/src/avi.rs:1395:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 40: avi::proofs::avi_movi_entry_decision_exact.assertion.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1396:24 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 41: avi::proofs::avi_movi_entry_decision_exact.assertion.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1396:44 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 42: avi::proofs::avi_movi_entry_decision_exact.assertion.25
+	 - Status: SUCCESS
+	 - Description: "assertion failed: packet_tag.kind[0] == id[2]"
+	 - Location: crates/al-media/src/avi.rs:1396:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 43: avi::proofs::avi_movi_entry_decision_exact.assertion.26
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1397:24 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 44: avi::proofs::avi_movi_entry_decision_exact.assertion.27
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1397:44 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 45: avi::proofs::avi_movi_entry_decision_exact.assertion.28
+	 - Status: SUCCESS
+	 - Description: "assertion failed: packet_tag.kind[1] == id[3]"
+	 - Location: crates/al-media/src/avi.rs:1397:13 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 46: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 47: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 48: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 49: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 50: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 51: std::option::Option::<[u8; 4]>::is_some.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<[u8; 4]>::is_some
+
+Check 52: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 53: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 54: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 55: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 56: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 57: std::option::Option::<avi::MoviPacketTag>::is_some.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<avi::MoviPacketTag>::is_some
+
+Check 58: core::num::<impl u8>::is_ascii_digit.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 59: core::num::<impl u8>::is_ascii_digit.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 60: core::num::<impl u8>::is_ascii_digit.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 61: core::num::<impl u8>::is_ascii_digit.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 62: core::num::<impl u8>::is_ascii_digit.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 63: core::num::<impl u8>::is_ascii_digit.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 64: core::num::<impl u8>::is_ascii_digit.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 65: core::num::<impl u8>::is_ascii_digit.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 66: core::num::<impl u8>::is_ascii_digit.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 67: core::num::<impl u8>::is_ascii_digit.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 68: core::num::<impl u8>::is_ascii_digit.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 69: core::num::<impl u8>::is_ascii_digit.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/mod.rs:963:25 in function core::num::<impl u8>::is_ascii_digit
+
+Check 70: avi::avi_movi_packet_tag.array_bounds.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:166:33 in function avi::avi_movi_packet_tag
+
+Check 71: avi::avi_movi_packet_tag.array_bounds.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:166:66 in function avi::avi_movi_packet_tag
+
+Check 72: avi::avi_movi_packet_tag.array_bounds.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:169:16 in function avi::avi_movi_packet_tag
+
+Check 73: avi::avi_movi_packet_tag.array_bounds.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:169:23 in function avi::avi_movi_packet_tag
+
+Check 74: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 75: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 76: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 77: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 78: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 79: avi::proofs::avi_movi_entry_decision_exact.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:1341:47 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 80: avi::proofs::avi_movi_entry_decision_exact.array_bounds.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1392:36 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 81: avi::proofs::avi_movi_entry_decision_exact.array_bounds.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1393:36 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 82: avi::proofs::avi_movi_entry_decision_exact.array_bounds.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1396:24 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 83: avi::proofs::avi_movi_entry_decision_exact.array_bounds.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1396:44 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 84: avi::proofs::avi_movi_entry_decision_exact.array_bounds.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1397:24 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 85: avi::proofs::avi_movi_entry_decision_exact.array_bounds.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:1397:44 in function avi::proofs::avi_movi_entry_decision_exact
+
+Check 86: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 87: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 88: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 89: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 90: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 91: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 92: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 93: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 94: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 95: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 96: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 97: std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq for &[u8; 4]>::eq
+
+Check 98: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 99: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 100: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 101: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 102: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 103: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 104: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 105: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 106: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 107: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 108: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 109: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 110: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 111: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 112: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 113: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 114: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 115: <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<[u8; 4]> as std::cmp::PartialEq>::eq
+
+Check 116: memcmp.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 117: memcmp.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 118: memcmp.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 119: memcmp.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 120: memcmp.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 121: memcmp.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 122: memcmp.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 123: memcmp.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 124: memcmp.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 125: memcmp.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 126: memcmp.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 127: memcmp.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+
+SUMMARY:
+ ** 0 of 127 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 0.66538465s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-core v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-core)
+   Compiling al-testkit v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-testkit)
+   Compiling al-job v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-job)
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.49s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.48s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+	Command being timed: "cargo kani -p al-media --tests --harness avi_movi_entry_decision_exact -Z stubbing"
+	User time (seconds): 5.63
+	System time (seconds): 1.71
+	Percent of CPU this job got: 78%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.36
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 316100
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 5059
+	Minor (reclaiming a frame) page faults: 285623
+	Voluntary context switches: 13535
+	Involuntary context switches: 88
+	Swaps: 0
+	File system inputs: 853184
+	File system outputs: 146112
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

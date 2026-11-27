@@ -46,11 +46,11 @@ relations:
 
 ## Context
 
-Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API 名ではなく製品上重要な Property から再設計することである。本書はもともと proof 実装前の verification boundary/ledger 設計 slice の正本であり、後続 implementation slice の境界差分を追記する。WAV-RANGE-008、WAV-CHUNK-003/WAV-SCAN-004、MP4-BOX-002/AVI-CHUNK-001、MP4-SCAN-003、AVI-MOVI-003 tag identity の implementation slice では `crates/`、`tools/`、runner registry を変更済みである。ただし `evidence/al274-boundary/` は baseline のまま読み、ここへ遡って書き換えない。
+Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API 名ではなく製品上重要な Property から再設計することである。本書はもともと proof 実装前の verification boundary/ledger 設計 slice の正本であり、後続 implementation slice の境界差分を追記する。WAV-RANGE-008、WAV-CHUNK-003/WAV-SCAN-004、MP4-BOX-002/AVI-CHUNK-001、MP4-SCAN-003、AVI-MOVI-003 tag identity、AVI-MOVI-003 movi entry composition の implementation slice では `crates/`、`tools/`、runner registry を変更済みである。ただし `evidence/al274-boundary/` は baseline のまま読み、ここへ遡って書き換えない。
 
-設計 slice 時点の inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。その baseline では正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱った。baseline canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。implementation slice 後の registry 正本は引き続き runner の HARNESSES であり、AVI movi tag slice 時点では 27 件である。
+設計 slice 時点の inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。その baseline では正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱った。baseline canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。implementation slice 後の registry 正本は引き続き runner の HARNESSES であり、AVI movi composition slice 時点では 28 件である。
 
-分類と target structure の baseline 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision、および後続 implementation slice で確定した境界差分を記述する。WAV-RANGE-008 については 2026-11-26 の再設計 slice で local proof・runner group・実走証跡を `evidence/al274-proof-redesign/` に追加し、WAV-CHUNK-003/WAV-SCAN-004 については `evidence/al274-chunk-scan-proof/` に追加した。MP4-BOX-002/AVI-CHUNK-001 の境界と実走証跡は `evidence/al274-mp4-avi-proof/` に、MP4-SCAN-003 の境界と実走証跡は `evidence/al274-mp4-scan-proof/` に、AVI-MOVI-003 tag identity の境界と実走証跡は `evidence/al274-avi-movi-tag-proof/` に追加する。lazy diagnostic 実装、残り Required proof、完全な cost matrix は後続 slice に残す。
+分類と target structure の baseline 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision、および後続 implementation slice で確定した境界差分を記述する。WAV-RANGE-008 については 2026-11-26 の再設計 slice で local proof・runner group・実走証跡を `evidence/al274-proof-redesign/` に追加し、WAV-CHUNK-003/WAV-SCAN-004 については `evidence/al274-chunk-scan-proof/` に追加した。MP4-BOX-002/AVI-CHUNK-001 の境界と実走証跡は `evidence/al274-mp4-avi-proof/` に、MP4-SCAN-003 の境界と実走証跡は `evidence/al274-mp4-scan-proof/` に、AVI-MOVI-003 tag identity の境界と実走証跡は `evidence/al274-avi-movi-tag-proof/` に、AVI-MOVI-003 movi entry composition の境界と実走証跡は `evidence/al274-avi-movi-composition-proof/` に追加する。lazy diagnostic 実装、残り Required proof、完全な cost matrix は後続 slice に残す。
 
 ## 設計原則
 
@@ -174,6 +174,18 @@ proof は 1 回の tag interpretation の total correctness を対象にする�
 production `movi` loop は `Chunks::next` が返した同じ inner chunk id を `avi_movi_packet_tag` へ渡し、digit 判定、stream number 計算、kind 抽出を複製しない。`Chunks::next` の boundary/offset 計算は既存どおり `avi_chunk_step` を使い、body slice、padding、error precedence、`MediaError` 文言生成、OpenDML `rec ` rejection、`Vec<MoviPacket>` 収集は shell に残す。tag proof Pass を nested movi walker 全体、AVI-MOVI-003 全体、AVI-TIME-004 の機械証明と読み替えない。
 
 runner は `AL_KANI_HARNESS_GROUP="avi-movi-tag"` で `avi_movi_packet_tag_exact` を選択する。registry は 27 件となる。MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV range の各 group は regression として再実行し、それらの proof 設計は変更しない。legacy proof を含む全件 lane はこの slice の必須検証にしない。
+
+### AVI-MOVI-003 movi entry composition implementation boundary(2026-11-27 avi movi composition slice)
+
+movi entry composition proof の input domain は full `[u8; 4]` chunk id と exact list-type view `Option<[u8; 4]>` とする。`None` は direct child LIST body length 4 未満、`Some(bytes)` は body length 4 以上の先頭 4 byte を表す exact reparameterization である。body tail、padding、chunk size、offset はこの decision core が観測しない入力なのでモデル化しない。`id != LIST` に symbolic list-type view を渡すのは production 到達外または unobserved の total extension であり、decision が list-type view に依存しないことを coverage を落とさず検査する。input narrowing assume は置かない。
+
+proof は 1 entry の semantic decision の total correctness を対象にする。exact `LIST` かつ list type 不在なら short-list reject、exact `rec ` なら rec-list reject、`rec ` の byte complement なら ignore、`LIST` 以外なら list-type view に依存せず digit tag 受理時だけ packet、それ以外は ignore とする。packet/ignore/short-list reject/rec-list reject の exact complement、stream number 0..=99 と kind byte preservation、overflow/underflow/panic の不存在を検査する。packet body boundaryは PR #284 の `avi_chunk_step_exact`、tag digit/kind arithmetic は PR #286 の `avi_movi_packet_tag_exact` が担う別層である。
+
+採用する分解は single total correctness entry decision proof である。LIST/non-LIST exact complement family、bounded finite unrolled movi scan proof、combined chunk boundary + entry composition proof、direct movi iterator/full nested composition proof、AVI-TIME-004 accumulation proof は採用しない。finite iteration、entry ordering、`Vec<MoviPacket>` accumulation、body slice/lifetime、nested walker 全体をこの proof の保証と読み替えない。詳細な候補比較、assume 分類、接続条件、coverage は `evidence/al274-avi-movi-composition-proof/boundary-analysis.md` を正本とする。
+
+production `movi` loop は `Chunks::next` が返した同じ inner chunk id と、`LIST` のときだけ body から作った list-type viewを `avi_movi_entry_decision` へ渡す。loop shell は short list type と exact `rec ` を現行どおり `MediaError` へ写像し、boundary/offset 計算、body slice、padding、iterator error precedence、`Vec<MoviPacket>` 収集を残す。decision helper は error 文言や `MediaError` を構築せず decision/tag だけを返す。公開 API、error precedence、正常/異常系の振る舞い、stream/timing/video/audio 解釈を変えない。
+
+runner は `AL_KANI_HARNESS_GROUP="avi-movi-composition"` で `avi_movi_entry_decision_exact` を選択する。registry は 28 件となる。AVI movi tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV range の各 group は regression として再実行し、それらの proof 設計は変更しない。legacy proof を含む全件 lane はこの slice の必須検証にしない。
 
 ## canonical 21 proof の disposition 要約
 
