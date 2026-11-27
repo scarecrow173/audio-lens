@@ -143,6 +143,39 @@ pub(crate) struct StreamHead {
     pub(crate) format: Vec<u8>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AviStrlEntryClass {
+    Strh,
+    Strf,
+    Ignore,
+}
+
+fn avi_strl_entry_class(id: [u8; 4]) -> AviStrlEntryClass {
+    if &id == b"strh" {
+        AviStrlEntryClass::Strh
+    } else if &id == b"strf" {
+        AviStrlEntryClass::Strf
+    } else {
+        AviStrlEntryClass::Ignore
+    }
+}
+
+fn avi_strf_capture_step<T: Copy>(
+    capture: Option<T>,
+    class: AviStrlEntryClass,
+    body: T,
+) -> Option<T> {
+    if class == AviStrlEntryClass::Strf {
+        Some(body)
+    } else {
+        capture
+    }
+}
+
+fn avi_strf_materialize(capture: Option<&[u8]>) -> Vec<u8> {
+    capture.map_or_else(Vec::new, <[u8]>::to_vec)
+}
+
 const STRH_HEADER_LEN: usize = 48;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -750,18 +783,18 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                             format: Vec::new(),
                         };
                         let mut has_strh = false;
+                        let mut strf_capture: Option<&[u8]> = None;
                         for inner in chunks(&sbody[4..], "strl list") {
                             let (cid, cbody) = inner?;
-                            match &cid {
-                                b"strh" => {
-                                    parse_strh(cbody, &mut head)?;
-                                    has_strh = true;
-                                }
-                                b"strf" => head.format = cbody.to_vec(),
-                                _ => {}
+                            let class = avi_strl_entry_class(cid);
+                            if class == AviStrlEntryClass::Strh {
+                                parse_strh(cbody, &mut head)?;
+                                has_strh = true;
                             }
+                            strf_capture = avi_strf_capture_step(strf_capture, class, cbody);
                         }
                         if has_strh {
+                            head.format = avi_strf_materialize(strf_capture);
                             streams.push(head);
                         }
                     }
@@ -1457,6 +1490,84 @@ mod tests {
         }
     }
 
+    fn avi_with_strl_entries(entries: &[u8]) -> Vec<u8> {
+        let mut hdrl = Vec::new();
+        push_list(&mut hdrl, b"strl", entries);
+        let mut body = Vec::new();
+        push_list(&mut body, b"hdrl", &hdrl);
+        push_list(&mut body, b"movi", &[]);
+        avi_with_tail(&body)
+    }
+
+    #[test]
+    fn strf_capture_preserves_last_exact_body_across_non_strf_entries() {
+        let mut entries = Vec::new();
+        push_chunk(
+            &mut entries,
+            b"strh",
+            &strh_body(b"auds", 2, 96_000, 0, 0, 2),
+        );
+        push_chunk(&mut entries, b"strf", &[0x10, 0x11]);
+        push_chunk(&mut entries, b"JUNK", &[0xff]);
+        push_chunk(&mut entries, b"strf", &[0x20, 0x21]);
+        push_chunk(&mut entries, b"strX", &[0x99, 0x98]);
+        push_chunk(&mut entries, b"strF", &[0x97, 0x96]);
+        let bytes = avi_with_strl_entries(&entries);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert_eq!(layout.streams.len(), 1);
+        assert_eq!(layout.streams[0].format, vec![0x20, 0x21]);
+    }
+
+    #[test]
+    fn empty_last_strf_overwrites_earlier_capture() {
+        let mut entries = Vec::new();
+        push_chunk(
+            &mut entries,
+            b"strh",
+            &strh_body(b"auds", 2, 96_000, 0, 0, 2),
+        );
+        push_chunk(&mut entries, b"strf", &[0x10, 0x11]);
+        push_chunk(&mut entries, b"strf", &[]);
+        let bytes = avi_with_strl_entries(&entries);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert_eq!(layout.streams.len(), 1);
+        assert!(layout.streams[0].format.is_empty());
+    }
+
+    #[test]
+    fn missing_and_empty_strf_materialize_as_empty_format() {
+        let mut missing = Vec::new();
+        push_chunk(
+            &mut missing,
+            b"strh",
+            &strh_body(b"auds", 2, 96_000, 0, 0, 2),
+        );
+        let missing_bytes = avi_with_strl_entries(&missing);
+        let missing_layout = avi_layout(&missing_bytes).unwrap();
+
+        let mut empty = missing.clone();
+        push_chunk(&mut empty, b"strf", &[]);
+        let empty_bytes = avi_with_strl_entries(&empty);
+        let empty_layout = avi_layout(&empty_bytes).unwrap();
+
+        assert_eq!(missing_layout.streams.len(), 1);
+        assert!(missing_layout.streams[0].format.is_empty());
+        assert_eq!(empty_layout.streams.len(), 1);
+        assert!(empty_layout.streams[0].format.is_empty());
+    }
+
+    #[test]
+    fn strf_without_strh_does_not_push_stream() {
+        let mut entries = Vec::new();
+        push_chunk(&mut entries, b"strf", &[0x10, 0x11]);
+        let bytes = avi_with_strl_entries(&entries);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert!(layout.streams.is_empty());
+    }
+
     #[test]
     fn compressed_vids_is_explicit_unavailable() {
         // MJPG-compressed vids: metadata and timing are recorded, and
@@ -1934,6 +2045,156 @@ mod proofs {
             fields.compression,
             u32::from_le_bytes([prefix[16], prefix[17], prefix[18], prefix[19]])
         );
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    struct ExpectedStrfCapture {
+        len_selector: u8,
+        payload_storage: [u8; 2],
+    }
+
+    type SymbolicStrfCaptureEntry = (u8, ExpectedStrfCapture);
+    const STRF_CAPTURE_ENTRY_COUNT: usize = 3;
+
+    fn strf_capture_class(selector: u8) -> AviStrlEntryClass {
+        match selector % 3 {
+            0 => AviStrlEntryClass::Strh,
+            1 => AviStrlEntryClass::Strf,
+            _ => AviStrlEntryClass::Ignore,
+        }
+    }
+
+    fn strf_capture_payload_len(selector: u8) -> usize {
+        usize::from(selector % 3)
+    }
+
+    fn expected_capture_payload(capture: &ExpectedStrfCapture) -> &[u8] {
+        match strf_capture_payload_len(capture.len_selector) {
+            0 => &capture.payload_storage[..0],
+            1 => &capture.payload_storage[..1],
+            _ => &capture.payload_storage[..2],
+        }
+    }
+
+    fn expected_strl_entry_class(id: [u8; 4]) -> AviStrlEntryClass {
+        if id == *b"strh" {
+            AviStrlEntryClass::Strh
+        } else if id == *b"strf" {
+            AviStrlEntryClass::Strf
+        } else {
+            AviStrlEntryClass::Ignore
+        }
+    }
+
+    #[kani::proof]
+    fn avi_strl_entry_classification_exact() {
+        let id: [u8; 4] = kani::any();
+        let actual = avi_strl_entry_class(id);
+        let expected = expected_strl_entry_class(id);
+        assert_eq!(actual, expected);
+        assert_eq!(actual == AviStrlEntryClass::Strh, id == *b"strh");
+        assert_eq!(actual == AviStrlEntryClass::Strf, id == *b"strf");
+        assert_eq!(
+            actual == AviStrlEntryClass::Ignore,
+            id != *b"strh" && id != *b"strf"
+        );
+        assert_eq!(
+            (actual == AviStrlEntryClass::Strh) as u8
+                + (actual == AviStrlEntryClass::Strf) as u8
+                + (actual == AviStrlEntryClass::Ignore) as u8,
+            1
+        );
+    }
+
+    fn symbolic_capture_entry() -> SymbolicStrfCaptureEntry {
+        (
+            kani::any(),
+            ExpectedStrfCapture {
+                len_selector: kani::any(),
+                payload_storage: kani::any(),
+            },
+        )
+    }
+
+    fn expected_entry_capture(entry: SymbolicStrfCaptureEntry) -> Option<ExpectedStrfCapture> {
+        if strf_capture_class(entry.0) == AviStrlEntryClass::Strf {
+            Some(entry.1)
+        } else {
+            None
+        }
+    }
+
+    fn expected_capture_through_0(
+        entries: &[SymbolicStrfCaptureEntry; STRF_CAPTURE_ENTRY_COUNT],
+    ) -> Option<ExpectedStrfCapture> {
+        expected_entry_capture(entries[0])
+    }
+
+    fn expected_capture_through_1(
+        entries: &[SymbolicStrfCaptureEntry; STRF_CAPTURE_ENTRY_COUNT],
+    ) -> Option<ExpectedStrfCapture> {
+        if strf_capture_class(entries[1].0) == AviStrlEntryClass::Strf {
+            Some(entries[1].1)
+        } else {
+            expected_capture_through_0(entries)
+        }
+    }
+
+    fn expected_capture_through_2(
+        entries: &[SymbolicStrfCaptureEntry; STRF_CAPTURE_ENTRY_COUNT],
+    ) -> Option<ExpectedStrfCapture> {
+        if strf_capture_class(entries[2].0) == AviStrlEntryClass::Strf {
+            Some(entries[2].1)
+        } else {
+            expected_capture_through_1(entries)
+        }
+    }
+
+    #[kani::proof]
+    fn avi_strf_capture_ordering_bounded_exact() {
+        let entries = [
+            symbolic_capture_entry(),
+            symbolic_capture_entry(),
+            symbolic_capture_entry(),
+        ];
+        let first = avi_strf_capture_step(None, strf_capture_class(entries[0].0), entries[0].1);
+        let second = avi_strf_capture_step(first, strf_capture_class(entries[1].0), entries[1].1);
+        let third = avi_strf_capture_step(second, strf_capture_class(entries[2].0), entries[2].1);
+
+        assert_eq!(first, expected_capture_through_0(&entries));
+        assert_eq!(second, expected_capture_through_1(&entries));
+        assert_eq!(third, expected_capture_through_2(&entries));
+    }
+
+    fn assert_capture_bytes_exact(actual: &[u8], expected: &[u8]) {
+        assert_eq!(actual.len(), expected.len());
+        if actual.len() == expected.len() && expected.len() >= 1 {
+            assert_eq!(actual[0], expected[0]);
+        }
+        if actual.len() == expected.len() && expected.len() == 2 {
+            assert_eq!(actual[1], expected[1]);
+        }
+    }
+
+    #[kani::proof]
+    fn avi_strf_materialize_bounded_exact() {
+        let present: bool = kani::any();
+        let len_selector: u8 = kani::any();
+        let payload_storage: [u8; 2] = kani::any();
+        let capture_payload = ExpectedStrfCapture {
+            len_selector,
+            payload_storage,
+        };
+        let payload = expected_capture_payload(&capture_payload);
+        let capture = if present { Some(payload) } else { None };
+        let materialized = avi_strf_materialize(capture);
+
+        assert_eq!(capture.is_some(), present);
+        if present {
+            assert_capture_bytes_exact(&materialized, payload);
+        } else {
+            assert!(materialized.is_empty());
+        }
     }
 
     const STREAM_TYPE_COUNT: usize = 3;
