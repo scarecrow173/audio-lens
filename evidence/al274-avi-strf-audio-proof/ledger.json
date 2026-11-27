@@ -1,0 +1,193 @@
+{
+  "schema": "al274-proof-ledger/v1",
+  "issue": "scarecrow173/audio-lens#274",
+  "slice": "AVI-STREAM-002 audio strf WAVEFORMATEX declaration validation bounded exact proof slice (narrow sub-boundary only)",
+  "branch": "feature/274-avi-strf-audio-proof",
+  "base": {
+    "origin_main": "af20701ba3ed64efc4964c9c1faaea18139eb6cb",
+    "merge_base_is_ancestor": true
+  },
+  "environment": {
+    "worktree_os": "Windows host path G:/orca/workspaces/audio-lens/al274-strf-audio",
+    "canonical_lane_os": "Windows for mise fmt/check/lint/test/proptest; Ubuntu (WSL2) for Kani execution",
+    "kani_measurement": "/usr/bin/time -v"
+  },
+  "input_domain": {
+    "body_len": "full symbolic usize; no kani::assume and no narrowing",
+    "prefix": "full symbolic fixed [u8; 16] WAVEFORMATEX prefix",
+    "trailing_bytes": "excluded as exact reparameterization because the production use site copies only bytes 0..16 into the fixed-prefix helper after acceptance; cbSize/extension bytes cannot affect the extraction result",
+    "unobserved_prefix_bytes": "none; all bytes 0..16 feed at least one proven declaration field",
+    "classification": "bounded fixed-layout model over finite machine integer and byte domains; not representative sampling"
+  },
+  "assumptions": {
+    "kani_assume": [],
+    "input_narrowing": false,
+    "unwinding_checks_disabled": false,
+    "prove_safety_only": false,
+    "cfg_substitution": false
+  },
+  "properties": {
+    "length_exact_complement": "for every usize body_len, acceptance is exactly body_len >= 16 and rejection is exactly body_len < 16",
+    "format_tag": "little-endian u16 at bytes 0..2",
+    "channels": "little-endian u16 at bytes 2..4",
+    "sample_rate": "little-endian u32 at bytes 4..8",
+    "byte_rate": "little-endian u32 at bytes 8..12",
+    "block_align": "little-endian u16 at bytes 12..14",
+    "bits_per_sample": "little-endian u16 at bytes 14..16",
+    "arithmetic": "no overflow/underflow/panic in the length predicate and fixed-prefix extraction helper",
+    "no_new_value_rejection": "unsupported format tags, zero channels/sample rate/block align, and inconsistent block align/byte rate are not newly rejected in this structural extraction boundary"
+  },
+  "production_connection": {
+    "helpers": ["waveformatex_accepts_body_len", "waveformatex_declaration_fields"],
+    "use_site": "crates/al-media/src/wav.rs parse_fmt; AVI first auds path uses avi_layout strf copy -> StreamHead.format -> decode_waveformatex -> parse_fmt; decoder probe also uses parse_fmt read-only",
+    "shell_gap": "copying an arbitrary Vec body into the fixed 16-byte prefix is outside the local proof shell; no test-side duplicate of offsets/endianness is used"
+  },
+  "proof": {
+    "harness": "avi_audio_strf_declaration_bounded_exact",
+    "group": "avi-strf-audio-declaration",
+    "requirement": "Required",
+    "verdict": "pass",
+    "environment": "Ubuntu",
+    "elapsed_ms": 4265,
+    "max_rss_kb": 249568,
+    "cost_summary": {
+      "selected_proofs": 1,
+      "verified_proofs": 1,
+      "total_elapsed_ms": 4265,
+      "max_observed_rss_kb": 249568,
+      "rss_measured_proofs": 1,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    "raw_log": "evidence/al274-avi-strf-audio-proof/kani/kani-avi_audio_strf_declaration_bounded_exact.txt",
+    "verdict_json": "evidence/al274-avi-strf-audio-proof/kani/verdict.json",
+    "initial_pre_mutation_pass": "10957ms / 299952KiB before the mutation experiment; overwritten final lane is the canonical post-revert result"
+  },
+  "mutation": {
+    "change": "production sample_rate little-endian input bytes shifted from offsets 4..8 to 5..9",
+    "diagnostic_only": false,
+    "reverted": true,
+    "verdict": "fail",
+    "detected_by": "avi_audio_strf_declaration_bounded_exact",
+    "failing_assertion": "assertion failed: fields.sample_rate == u32::from_le_bytes([prefix[4], prefix[5], prefix[6], prefix[7]])",
+    "elapsed_ms": 6667,
+    "max_rss_kb": 249160,
+    "raw_log": "evidence/al274-avi-strf-audio-proof/mutation-audio-strf-declaration-kani/kani-avi_audio_strf_declaration_bounded_exact.txt",
+    "verdict_json": "evidence/al274-avi-strf-audio-proof/mutation-audio-strf-declaration-kani/verdict.json"
+  },
+  "regressions": {
+    "avi-strf-declaration": {
+      "verdict": "pass",
+      "total_elapsed_ms": 5873,
+      "max_observed_rss_kb": 299896,
+      "proofs": 1
+    },
+    "avi-strh-declaration": {
+      "verdict": "pass",
+      "total_elapsed_ms": 10457,
+      "max_observed_rss_kb": 302784,
+      "proofs": 1
+    },
+    "avi-stream-kind": {
+      "verdict": "pass",
+      "total_elapsed_ms": 23225,
+      "max_observed_rss_kb": 500144,
+      "proofs": 1
+    },
+    "avi-movi-scan": {
+      "verdict": "pass",
+      "total_elapsed_ms": 15527,
+      "max_observed_rss_kb": 315424,
+      "proofs": 1
+    },
+    "avi-movi-composition": {
+      "verdict": "pass",
+      "total_elapsed_ms": 26802,
+      "max_observed_rss_kb": 306272,
+      "proofs": 1
+    },
+    "avi-movi-tag": {
+      "verdict": "pass",
+      "total_elapsed_ms": 24995,
+      "max_observed_rss_kb": 299176,
+      "proofs": 1
+    },
+    "mp4-avi-boundary": {
+      "verdict": "pass",
+      "total_elapsed_ms": 43495,
+      "max_observed_rss_kb": 308308,
+      "proofs": 2
+    },
+    "mp4-scan": {
+      "verdict": "pass",
+      "total_elapsed_ms": 23269,
+      "max_observed_rss_kb": 311424,
+      "proofs": 1
+    },
+    "wav-chunk-scan": {
+      "verdict": "pass",
+      "total_elapsed_ms": 13614,
+      "max_observed_rss_kb": 315052,
+      "proofs": 2
+    },
+    "wav-range": {
+      "verdict": "pass",
+      "total_elapsed_ms": 16341,
+      "max_observed_rss_kb": 300560,
+      "proofs": 2
+    }
+  },
+  "cost_comparison": {
+    "scope": "limited local comparison only; not a complete old/new cost matrix",
+    "legacy_read_only_evidence": {
+      "avi_writer_output_decodes": "trial 1200s cap timeout / 1267s / 3.9GiB; 1500s canonical timeout/RSS unavailable",
+      "mutated_avi_never_panics": "1200s / 1266s / 2.9GiB",
+      "truncated_avi_never_panics": "900s / 948s / 2.9GiB"
+    },
+    "new_proof": "4265ms / 249568KiB",
+    "regression_elapsed_total_ms": 203598,
+    "selective_elapsed_total_ms_including_new_proof": 207863,
+    "measurement": "/usr/bin/time -v; all Kani runs measured"
+  },
+  "unproven_scope": [
+    "arbitrary-length body slice composition",
+    "actual Vec<StreamHead> and strl traversal",
+    "strf presence/existence/copy/ordering/last-wins and missing-vs-empty distinction",
+    "strh/strf declaration correspondence",
+    "first auds selection and wb packet scan/concatenation",
+    "WAVEFORMATEX codec/layout semantic validation in sample_layout",
+    "PCM sample decode and mid-frame semantics",
+    "partial ingest/capability upper integration and probe integration",
+    "public API-wide no-panic, I/O, allocation, diagnostic formatting",
+    "MP4, writer round-trip, AVI-TIME-004, AVI-PCM, MP4-TABLE-005, MP4-PCM"
+  ],
+  "runner_strategy": {
+    "single_bounded_exact_proof": true,
+    "rejected_decompositions": [
+      "direct parse_fmt dynamic slice proof",
+      "length-gate-only",
+      "field-decode-only",
+      "valid/invalid length family",
+      "semantic validation proof",
+      "strf shell presence/capture proof",
+      "combined audio+video proof",
+      "direct avi_layout/strl composition proof",
+      "full AVI-STREAM-002/AVI-TIME-004/AVI-PCM/MP4-TABLE-005 proof"
+    ],
+    "reason": "single pure fixed-layout boundary closes length rejection and exact field mapping without Vec, iterator, payload scan, codec matrix, I/O, or allocation complexity"
+  },
+  "proptest_overlap": {
+    "formal_wav": "7/7 pass",
+    "formal_containers": "7/7 pass",
+    "deterministic_regressions": "WAVEFORMATEX short/exact/trailing/no-semantic-validation tests and AVI short audio strf degrade test pass; proptest semantics were not weakened"
+  },
+  "legacy_disposition": "legacy whole-call proofs remain legacy inventory; no retire decision in this slice",
+  "rf_reuse": {
+    "candidate": false,
+    "reason": "WAVEFORMATEX fixed-prefix layout is an AudioLens media-parser boundary concern; no new reusable Ruviform contract was identified. No Issue was filed"
+  },
+  "branch_ci": {
+    "status": "Unsupported",
+    "manual_dispatch": false,
+    "post_push_observation": "gh run list --branch feature/274-avi-strf-audio-proof returned no runs and gh pr checks 292 reported no checks; .github/workflows/ci.yml is workflow_dispatch-only, so no automatic branch CI exists without manual dispatch"
+  }
+}

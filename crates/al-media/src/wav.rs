@@ -58,6 +58,23 @@ pub(crate) struct FmtChunk {
     pub(crate) bits_per_sample: u16,
 }
 
+const WAVEFORMATEX_HEADER_LEN: usize = 16;
+
+fn waveformatex_accepts_body_len(body_len: usize) -> bool {
+    body_len >= WAVEFORMATEX_HEADER_LEN
+}
+
+fn waveformatex_declaration_fields(prefix: &[u8; WAVEFORMATEX_HEADER_LEN]) -> FmtChunk {
+    FmtChunk {
+        format_tag: u16::from_le_bytes([prefix[0], prefix[1]]),
+        channels: u16::from_le_bytes([prefix[2], prefix[3]]),
+        sample_rate: u32::from_le_bytes([prefix[4], prefix[5], prefix[6], prefix[7]]),
+        byte_rate: u32::from_le_bytes([prefix[8], prefix[9], prefix[10], prefix[11]]),
+        block_align: u16::from_le_bytes([prefix[12], prefix[13]]),
+        bits_per_sample: u16::from_le_bytes([prefix[14], prefix[15]]),
+    }
+}
+
 pub(crate) fn read_u16(data: &[u8], at: usize) -> Result<u16, MediaError> {
     data.get(at..at + 2)
         .map(|b| u16::from_le_bytes([b[0], b[1]]))
@@ -71,17 +88,12 @@ pub(crate) fn read_u32(data: &[u8], at: usize) -> Result<u32, MediaError> {
 }
 
 pub(crate) fn parse_fmt(chunk: &[u8]) -> Result<FmtChunk, MediaError> {
-    if chunk.len() < 16 {
+    if !waveformatex_accepts_body_len(chunk.len()) {
         return Err(MediaError::malformed("fmt chunk shorter than 16 bytes"));
     }
-    Ok(FmtChunk {
-        format_tag: read_u16(chunk, 0)?,
-        channels: read_u16(chunk, 2)?,
-        sample_rate: read_u32(chunk, 4)?,
-        byte_rate: read_u32(chunk, 8)?,
-        block_align: read_u16(chunk, 12)?,
-        bits_per_sample: read_u16(chunk, 14)?,
-    })
+    let mut prefix = [0u8; WAVEFORMATEX_HEADER_LEN];
+    prefix.copy_from_slice(&chunk[..WAVEFORMATEX_HEADER_LEN]);
+    Ok(waveformatex_declaration_fields(&prefix))
 }
 
 pub(crate) fn sample_layout(fmt: &FmtChunk) -> Result<(SampleFormat, String, usize), MediaError> {
@@ -756,6 +768,39 @@ mod proofs {
         };
         assert!(err.total_frames == data.total_frames);
     }
+
+    #[kani::proof]
+    fn avi_audio_strf_declaration_bounded_exact() {
+        let body_len: usize = kani::any();
+        let prefix: [u8; WAVEFORMATEX_HEADER_LEN] = kani::any();
+
+        let accepted = waveformatex_accepts_body_len(body_len);
+        assert_eq!(accepted, body_len >= WAVEFORMATEX_HEADER_LEN);
+        assert_eq!(!accepted, body_len < WAVEFORMATEX_HEADER_LEN);
+
+        let fields = waveformatex_declaration_fields(&prefix);
+        assert_eq!(
+            fields.format_tag,
+            u16::from_le_bytes([prefix[0], prefix[1]])
+        );
+        assert_eq!(fields.channels, u16::from_le_bytes([prefix[2], prefix[3]]));
+        assert_eq!(
+            fields.sample_rate,
+            u32::from_le_bytes([prefix[4], prefix[5], prefix[6], prefix[7]])
+        );
+        assert_eq!(
+            fields.byte_rate,
+            u32::from_le_bytes([prefix[8], prefix[9], prefix[10], prefix[11]])
+        );
+        assert_eq!(
+            fields.block_align,
+            u16::from_le_bytes([prefix[12], prefix[13]])
+        );
+        assert_eq!(
+            fields.bits_per_sample,
+            u16::from_le_bytes([prefix[14], prefix[15]])
+        );
+    }
 }
 
 /// Output encoding for [`WavWriter`].
@@ -963,6 +1008,69 @@ mod tests {
             out.extend_from_slice(&s.to_le_bytes());
         }
         out
+    }
+
+    #[test]
+    fn waveformatex_declaration_rejects_short_bodies() {
+        for len in [0usize, 1, WAVEFORMATEX_HEADER_LEN - 1] {
+            let body = vec![0xaa; len];
+            let err = parse_fmt(&body).unwrap_err();
+            match err {
+                MediaError::Malformed { reason } => {
+                    assert_eq!(reason, "fmt chunk shorter than 16 bytes");
+                }
+                _ => panic!("short WAVEFORMATEX body must be malformed"),
+            }
+        }
+        assert!(!waveformatex_accepts_body_len(WAVEFORMATEX_HEADER_LEN - 1));
+        assert!(waveformatex_accepts_body_len(WAVEFORMATEX_HEADER_LEN));
+    }
+
+    #[test]
+    fn waveformatex_declaration_extracts_le_fields_and_ignores_trailing_bytes() {
+        let mut body = Vec::new();
+        body.extend_from_slice(&0xbeef_u16.to_le_bytes());
+        body.extend_from_slice(&0x0102_u16.to_le_bytes());
+        body.extend_from_slice(&0x0102_0304_u32.to_le_bytes());
+        body.extend_from_slice(&0xa0b0_c0d0_u32.to_le_bytes());
+        body.extend_from_slice(&0x1122_u16.to_le_bytes());
+        body.extend_from_slice(&0x3344_u16.to_le_bytes());
+        body.extend_from_slice(&[0xaa, 0x55, 0xff]);
+
+        let fmt = parse_fmt(&body).unwrap();
+        assert_eq!(fmt.format_tag, 0xbeef);
+        assert_eq!(fmt.channels, 0x0102);
+        assert_eq!(fmt.sample_rate, 0x0102_0304);
+        assert_eq!(fmt.byte_rate, 0xa0b0_c0d0);
+        assert_eq!(fmt.block_align, 0x1122);
+        assert_eq!(fmt.bits_per_sample, 0x3344);
+
+        let exact = parse_fmt(&body[..WAVEFORMATEX_HEADER_LEN]).unwrap();
+        assert_eq!(exact.format_tag, fmt.format_tag);
+        assert_eq!(exact.channels, fmt.channels);
+        assert_eq!(exact.sample_rate, fmt.sample_rate);
+        assert_eq!(exact.byte_rate, fmt.byte_rate);
+        assert_eq!(exact.block_align, fmt.block_align);
+        assert_eq!(exact.bits_per_sample, fmt.bits_per_sample);
+    }
+
+    #[test]
+    fn waveformatex_structural_extraction_does_not_apply_codec_layout_validation() {
+        let mut body = Vec::new();
+        body.extend_from_slice(&0xffff_u16.to_le_bytes());
+        body.extend_from_slice(&0u16.to_le_bytes());
+        body.extend_from_slice(&0u32.to_le_bytes());
+        body.extend_from_slice(&1u32.to_le_bytes());
+        body.extend_from_slice(&0u16.to_le_bytes());
+        body.extend_from_slice(&99u16.to_le_bytes());
+
+        let fmt = parse_fmt(&body).unwrap();
+        assert_eq!(fmt.format_tag, 0xffff);
+        assert_eq!(fmt.channels, 0);
+        assert_eq!(fmt.sample_rate, 0);
+        assert_eq!(fmt.byte_rate, 1);
+        assert_eq!(fmt.block_align, 0);
+        assert_eq!(fmt.bits_per_sample, 99);
     }
 
     #[test]
