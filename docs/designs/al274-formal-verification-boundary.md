@@ -4,7 +4,7 @@ type: "design"
 status: "draft"
 title: "Issue #274 media parser の Property 起点形式的検証境界設計"
 created: "2026-11-26"
-updated: "2026-11-26"
+updated: "2026-11-27"
 owners: []
 relations:
   source: []
@@ -46,11 +46,11 @@ relations:
 
 ## Context
 
-Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API 名ではなく製品上重要な Property から再設計することである。本書はもともと proof 実装前の verification boundary/ledger 設計 slice の正本であり、後続 implementation slice の境界差分を追記する。WAV-RANGE-008、WAV-CHUNK-003/WAV-SCAN-004、MP4-BOX-002/AVI-CHUNK-001 の implementation slice では `crates/`、`tools/`、runner registry を変更済みである。ただし `evidence/al274-boundary/` は baseline のまま読み、ここへ遡って書き換えない。
+Issue #274 の対象は WAV/MP4/AVI parser の形式的検証を、公開 API 名ではなく製品上重要な Property から再設計することである。本書はもともと proof 実装前の verification boundary/ledger 設計 slice の正本であり、後続 implementation slice の境界差分を追記する。WAV-RANGE-008、WAV-CHUNK-003/WAV-SCAN-004、MP4-BOX-002/AVI-CHUNK-001、MP4-SCAN-003 の implementation slice では `crates/`、`tools/`、runner registry を変更済みである。ただし `evidence/al274-boundary/` は baseline のまま読み、ここへ遡って書き換えない。
 
-設計 slice 時点の inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。その baseline では正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱った。baseline canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。implementation slice 後の registry 正本は引き続き runner の HARNESSES であり、MP4/AVI boundary slice 時点では 25 件である。
+設計 slice 時点の inventory は `evidence/al274-boundary/proof-inventory.json` / `.md` に台帳化した。その baseline では正本は `tools/run-formal-kani.mjs` の HARNESSES と `crates/al-media/tests/formal_wav.rs` / `formal_containers.rs` であり、canonical 21 proof、一時 spike 12 proof、proptest 13 件を別集合として扱った。baseline canonical のうち `detect_format_signature_rules` だけが Pass で、残り 20 件は 1500 秒/proof lane で timeout である。timeout、環境不足、exit 0、CI green は Proof Pass とみなさない。implementation slice 後の registry 正本は引き続き runner の HARNESSES であり、MP4 scan slice 時点では 26 件である。
 
-分類と target structure の baseline 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision、および後続 implementation slice で確定した境界差分を記述する。WAV-RANGE-008 については 2026-11-26 の再設計 slice で local proof・runner group・実走証跡を `evidence/al274-proof-redesign/` に追加し、WAV-CHUNK-003/WAV-SCAN-004 については `evidence/al274-chunk-scan-proof/` に追加した。MP4-BOX-002/AVI-CHUNK-001 の境界と実走証跡は `evidence/al274-mp4-avi-proof/` に追加する。lazy diagnostic 実装、残り Required proof、完全な cost matrix は後続 slice に残す。
+分類と target structure の baseline 正本は `evidence/al274-boundary/classification.json` / `.md` である。本書はその設計判断、比較、推奨案、ユーザーへ返す open decision、および後続 implementation slice で確定した境界差分を記述する。WAV-RANGE-008 については 2026-11-26 の再設計 slice で local proof・runner group・実走証跡を `evidence/al274-proof-redesign/` に追加し、WAV-CHUNK-003/WAV-SCAN-004 については `evidence/al274-chunk-scan-proof/` に追加した。MP4-BOX-002/AVI-CHUNK-001 の境界と実走証跡は `evidence/al274-mp4-avi-proof/` に、MP4-SCAN-003 の境界と実走証跡は `evidence/al274-mp4-scan-proof/` に追加する。lazy diagnostic 実装、残り Required proof、完全な cost matrix は後続 slice に残す。
 
 ## 設計原則
 
@@ -152,6 +152,16 @@ AVI boundary helper の入力は `(offset: u64, region_len: u64, size: u32)` の
 production `box_header` は size32/largesize/tag の byte 読取と error 文言生成だけを shell に残し、boundary arithmetic を `mp4_box_boundary_step` へ委譲する。top-level file scan と全 nested `child_boxes` は既存どおり `box_header` を通る。production `Chunks::next` は region-relative offset/region length/size を `avi_chunk_step` へ渡し、valid 結果から body slice・pad を含む remainder・次 offset を導く。RIFF body、`hdrl`、`strl`、`movi` の nested region は同じ iterator を使う。tag/id 解釈や `MediaError` 文言生成は shell に残し、boundary/offset 計算を複製しない。
 
 runner は `AL_KANI_HARNESS_GROUP="mp4-avi-boundary"` で `mp4_box_header_step_exact` と `avi_chunk_step_exact` を選択する。registry は 25 件となり、per-harness elapsed ms/raw log/pass/fail/not_run/max RSS に加えて、選択 proof 数、verified proof 数、total elapsed ms、max observed RSS KiB、計測可否を持つ additive `cost_summary` を verdict に残す。既定全件挙動、fail-closed、WSL mirror、target 配置、timeout 意味論、group/subset 排他意味論は変えない。legacy proof を含む全件 lane はこの slice の必須検証にしない。
+
+### MP4-SCAN-003 implementation boundary(2026-11-27 mp4 scan slice)
+
+MP4 scan proof の input domain は `start<=end` の constructor/caller precondition を持つ full u64 region と、高々 4 回分の full u32 size32/full u64 largesize 列である。`start<=end` は private scan caller の invariant であり、top-level scan、length check 済みの sample entry/stsd、valid box body range 以外からは scan へ入らない。`start>end` は production 到達外の total extension として scan position helper では trailing 側へ分類するが、proof domainには含めない。`largesize` は size32==1 の branch でだけ観測される exact reparameterization である。
+
+small scan model は terminal または invalid に達するまでに高々 3 valid box を受理する入力列を exact に覆う。4 件目の symbolic header は 3 valid box 後の invalid を含めるために使い、4 valid box 以上を受理する列は未証明領域に残す。proof は empty region の即時 complete、exact end と 1..7 byte trailing の区別、valid step の `next_offset=body_end`、少なくとも header 分の strict progress、残余量減少、first invalid 終端、boundary containment、checked arithmetic を検査する。bounded model の成功を無制限 scan termination の機械証明と読み替えない。
+
+採用する分解は finite unrolled scan model に、最小の production scan position/next-offset transition helper を接続する構成である。production top-level scan と nested `child_boxes` は `mp4_scan_position` で terminal を判定し、`box_header` が返す valid box の `next_offset` は `mp4_box_scan_next_offset` から導く。tag 解釈、error 文言生成、`Vec<BoxHeader>` 収集は shell に残し、boundary/offset 計算を複製しない。single-step measure のみ、direct `child_boxes` proof、function contract/loop invariant は採用しない。詳細な候補比較、assume 分類、接続条件、coverage は `evidence/al274-mp4-scan-proof/boundary-analysis.md` を正本とする。
+
+runner は `AL_KANI_HARNESS_GROUP="mp4-scan"` で `mp4_box_scan_progress_bounded_exact` を選択する。registry は 26 件となる。MP4/AVI boundary、WAV chunk/scan、WAV range の各 group は regression として再実行し、それらの proof 設計は変更しない。
 
 ## canonical 21 proof の disposition 要約
 

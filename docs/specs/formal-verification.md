@@ -233,6 +233,7 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
 | `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き(任意位置・任意値)で panic しない |
 | `kani_proofs::truncated_mp4_never_panics` / `truncated_avi_never_panics` | writer 生成物の任意長 truncate で panic しない — al#274 で mutate と分離。mutate+truncate の結合入力は proptest `mutated_or_truncated_containers_never_panic`(最大 16 箇所編集+truncate)が担保する |
 | `mp4_box_header_step_exact` | full u64 の box offset/region limit、full u32 size field、full u64 largesize field について、production pure helper が size32/size64(size==1)/size0、truncated header、size/largesize minimum、checked arithmetic、region limit を exact complement へ写すこと。valid box の body_start/body_end/end containment、少なくとも header 分の進行、残余量減少を検証する |
+| `mp4_box_scan_progress_bounded_exact` | `start<=end` の constructor precondition を持つ full u64 region と、高々 4 回分の full u32 size32/full u64 largesize 列について、terminal exact end・1..7 byte trailing・valid step の strict progress/残余量減少・first invalid 終端を検証する。small scan bound は高々 3 valid box で、4 valid box 以上は未証明領域に残す |
 | `avi_chunk_step_exact` | full u64 の region-relative offset/region length と full u32 chunk size について、production pure helper が empty/exact end、1..7 byte trailing、valid chunk、invalid chunk を exact complement へ写すこと。body_start/body_end/pad-inclusive next offset、region limit、少なくとも 8 byte の進行、残余量減少を検証する |
 
 ### bounds・assumptions・model/product の区別
@@ -284,6 +285,24 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   measure decrease を無制限 scan termination の機械証明と読み替えない。
   詳細な境界と coverage は
   `evidence/al274-mp4-avi-proof/boundary-analysis.md` を正本とする。
+- **MP4-SCAN-003 exact proof**: `crates/al-media/src/mp4.rs` の
+  production scan helper `mp4_scan_position` / `mp4_box_scan_next_offset`
+  と production pure helper `mp4_box_boundary_step` を symbolic scalar
+  だけで検査する。input domain は `start<=end` の constructor/caller
+  precondition を持つ full u64 region と、高々 4 回分の full u32
+  size32/full u64 largesize 列である。`largesize` は size32==1 の
+  branch でだけ観測される exact reparameterization であり、
+  size32!=1 への coverage 制限ではない。small scan model は terminal
+  または invalid に達するまでに高々 3 valid box を受理する入力列を
+  exact に覆い、4 valid box 以上を受理する列は未証明領域に残す。
+  production top-level scan と nested `child_boxes` は同じ scan
+  position/transition helper を使い、tag 解釈・error 文言生成・
+  `Vec<BoxHeader>` 収集だけを shell に残す。I/O、allocation、`Vec`
+  decode、PCM decode、diagnostic formatting、MP4 semantic/sample table、
+  deep nesting/多数 box scan、writer round-trip、AVI、公開 API 全体
+  no-panic は保証外である。bounded model の成功を無制限 scan
+  termination の機械証明と読み替えない。詳細な境界と coverage は
+  `evidence/al274-mp4-scan-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -460,12 +479,13 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 mp4/avi boundary slice 以降の登録 harness は 25 件(WAV 13 +
-  MP4/AVI boundary 2 + legacy containers 10)。
+  al#274 mp4 scan slice 以降の登録 harness は 26 件(WAV 13 +
+  MP4 scan 1 + MP4/AVI boundary 2 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
-  MP4-BOX-002/AVI-CHUNK-001 の 2 proof を選択する。group と subset
+  MP4-BOX-002/AVI-CHUNK-001 の 2 proof、`"mp4-scan"` は MP4-SCAN-003
+  の 1 proof を選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
@@ -486,6 +506,6 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
 - lane runner: `tools/run-formal-kani.mjs`
 - 証拠台帳: `evidence/al256/`・`evidence/al274/`・
   `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`・
-  `evidence/al274-mp4-avi-proof/`
+  `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節
