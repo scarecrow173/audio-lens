@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 28 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 29 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -203,12 +203,14 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   selects the Required AVI-MOVI-003 tag identity proof
   (`avi_movi_packet_tag_exact`); `AL_KANI_HARNESS_GROUP="avi-movi-composition"`
   selects the Required AVI-MOVI-003 movi entry composition proof
-  (`avi_movi_entry_decision_exact`). The WAV proofs are registered in
-  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag proofs are
+  (`avi_movi_entry_decision_exact`); `AL_KANI_HARNESS_GROUP="avi-movi-scan"`
+  selects the Required AVI-MOVI-003 movi scan collection proof
+  (`avi_movi_scan_collection_bounded_exact`). The WAV proofs are registered in
+  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 28. When `/usr/bin/time` is available
+  and an unset variable runs all 29. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
@@ -249,8 +251,10 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   evidence is in `evidence/al274/`, WAV-RANGE-008 arithmetic
   mutation evidence is in `evidence/al274-proof-redesign/`, and
   WAV-CHUNK-003/WAV-SCAN-004 boundary/scan mutation evidence is in
-  `evidence/al274-chunk-scan-proof/`, and AVI movi entry composition
-  mutation evidence is in `evidence/al274-avi-movi-composition-proof/`.
+  `evidence/al274-chunk-scan-proof/`, AVI movi entry composition
+  mutation evidence is in `evidence/al274-avi-movi-composition-proof/`,
+  and AVI movi scan collection mutation evidence is in
+  `evidence/al274-avi-movi-scan-proof/`.
 
 Change-impact procedure:
 

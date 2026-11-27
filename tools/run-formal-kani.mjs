@@ -3,7 +3,7 @@
 // harness(tests/formal_wav.rs・tests/formal_containers.rs と、
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
-// tag identity/movi entry composition については src/mp4.rs/src/avi.rs)を
+// tag identity/movi entry composition/movi scan collection については src/mp4.rs/src/avi.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -194,6 +194,7 @@ const MP4_AVI_BOUNDARY_HARNESSES = ["mp4_box_header_step_exact", "avi_chunk_step
 const MP4_SCAN_HARNESSES = ["mp4_box_scan_progress_bounded_exact"];
 const AVI_MOVI_TAG_HARNESSES = ["avi_movi_packet_tag_exact"];
 const AVI_MOVI_COMPOSITION_HARNESSES = ["avi_movi_entry_decision_exact"];
+const AVI_MOVI_SCAN_HARNESSES = ["avi_movi_scan_collection_bounded_exact"];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
@@ -202,6 +203,7 @@ const HARNESS_GROUPS = {
   "mp4-scan": MP4_SCAN_HARNESSES,
   "avi-movi-tag": AVI_MOVI_TAG_HARNESSES,
   "avi-movi-composition": AVI_MOVI_COMPOSITION_HARNESSES,
+  "avi-movi-scan": AVI_MOVI_SCAN_HARNESSES,
 };
 
 const HARNESSES = [
@@ -220,6 +222,7 @@ const HARNESSES = [
   ...MP4_SCAN_HARNESSES,
   ...AVI_MOVI_TAG_HARNESSES,
   ...AVI_MOVI_COMPOSITION_HARNESSES,
+  ...AVI_MOVI_SCAN_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",

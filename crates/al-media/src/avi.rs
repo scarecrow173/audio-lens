@@ -193,6 +193,28 @@ fn avi_movi_entry_decision(id: [u8; 4], list_type_view: Option<[u8; 4]>) -> Movi
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MoviScanReject {
+    ShortListType,
+    RecList,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MoviScanStep {
+    Collect(MoviPacketTag),
+    Skip,
+    Stop(MoviScanReject),
+}
+
+fn avi_movi_scan_step(decision: MoviEntryDecision) -> MoviScanStep {
+    match decision {
+        MoviEntryDecision::Packet(tag) => MoviScanStep::Collect(tag),
+        MoviEntryDecision::Ignore => MoviScanStep::Skip,
+        MoviEntryDecision::RejectShortListType => MoviScanStep::Stop(MoviScanReject::ShortListType),
+        MoviEntryDecision::RejectRecList => MoviScanStep::Stop(MoviScanReject::RecList),
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AviChunkBoundaryError {
     SizeOverflow,
     ExtendsPastEnd,
@@ -563,20 +585,20 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                         } else {
                             None
                         };
-                        match avi_movi_entry_decision(cid, list_type_view) {
-                            MoviEntryDecision::RejectShortListType => {
+                        match avi_movi_scan_step(avi_movi_entry_decision(cid, list_type_view)) {
+                            MoviScanStep::Stop(MoviScanReject::ShortListType) => {
                                 return Err(MediaError::malformed(
                                     "movi LIST shorter than list type",
                                 ));
                             }
-                            MoviEntryDecision::RejectRecList => {
+                            MoviScanStep::Stop(MoviScanReject::RecList) => {
                                 return Err(MediaError::input_unavailable(
                                     "OpenDML/nested rec LIST is not supported",
                                 ));
                             }
-                            MoviEntryDecision::Ignore => {}
+                            MoviScanStep::Skip => {}
                             // Chunk ids are `NNdb`/`NNdc` (video) / `NNwb` (audio).
-                            MoviEntryDecision::Packet(tag) => {
+                            MoviScanStep::Collect(tag) => {
                                 movi_packets.push(MoviPacket {
                                     stream_no: tag.stream_no,
                                     kind: tag.kind,
@@ -1146,6 +1168,61 @@ mod tests {
     }
 
     #[test]
+    fn movi_scan_collection_preserves_packet_order_across_ignores() {
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"02wb", &[2u8]);
+        push_chunk(&mut movi, b"JUNK", &[9u8]);
+        push_list(&mut movi, b"zzzz", b"tail");
+        push_chunk(&mut movi, b"00db", &[0u8, 1]);
+        push_chunk(&mut movi, b"a0wb", &[8u8]);
+        push_chunk(&mut movi, b"01pc", &[1u8]);
+        let bytes = avi_with_movi_entries(&movi);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert_eq!(layout.packets.len(), 3);
+        assert_eq!(layout.packets[0].stream_no, 2);
+        assert_eq!(layout.packets[0].kind, *b"wb");
+        assert_eq!(layout.packets[0].body, &[2u8]);
+        assert_eq!(layout.packets[1].stream_no, 0);
+        assert_eq!(layout.packets[1].kind, *b"db");
+        assert_eq!(layout.packets[1].body, &[0u8, 1]);
+        assert_eq!(layout.packets[2].stream_no, 1);
+        assert_eq!(layout.packets[2].kind, *b"pc");
+        assert_eq!(layout.packets[2].body, &[1u8]);
+    }
+
+    #[test]
+    fn movi_first_reject_determines_error_and_stops_scan() {
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"00wb", &[1u8]);
+        push_chunk(&mut movi, b"LIST", b"rec");
+        push_list(&mut movi, b"rec ", &[]);
+        push_chunk(&mut movi, b"01wb", &[2u8]);
+        let bytes = avi_with_movi_entries(&movi);
+        let e = avi_layout(&bytes).err().unwrap();
+        match e {
+            MediaError::Malformed { reason } => {
+                assert_eq!(reason, "movi LIST shorter than list type");
+            }
+            other => panic!("expected malformed short LIST, got {other:?}"),
+        }
+
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"00wb", &[1u8]);
+        push_list(&mut movi, b"rec ", &[]);
+        push_chunk(&mut movi, b"LIST", b"rec");
+        push_chunk(&mut movi, b"01wb", &[2u8]);
+        let bytes = avi_with_movi_entries(&movi);
+        let e = avi_layout(&bytes).err().unwrap();
+        match e {
+            MediaError::InputUnavailable { reason } => {
+                assert_eq!(reason, "OpenDML/nested rec LIST is not supported");
+            }
+            other => panic!("expected input unavailable rec LIST, got {other:?}"),
+        }
+    }
+
+    #[test]
     fn movi_entry_decision_non_list_packet_ignores_list_type_view() {
         for list_type_view in [None, Some(*b"rec "), Some(*b"zzzz")] {
             assert_eq!(
@@ -1396,6 +1473,187 @@ mod proofs {
             assert_eq!(packet_tag.kind[0], id[2]);
             assert_eq!(packet_tag.kind[1], id[3]);
         }
+    }
+
+    type SymbolicMoviEntry = ([u8; 4], Option<[u8; 4]>);
+    const SCAN_ENTRY_COUNT: usize = 3;
+    const EMPTY_MOVI_TAG: MoviPacketTag = MoviPacketTag {
+        stream_no: 0,
+        kind: [0, 0],
+    };
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    struct MoviScanCollectionOutcome {
+        scanned_entries: u8,
+        packet_count: u8,
+        packet_tags: [MoviPacketTag; SCAN_ENTRY_COUNT],
+        stop: Option<MoviScanReject>,
+    }
+
+    fn empty_scan_collection_outcome() -> MoviScanCollectionOutcome {
+        MoviScanCollectionOutcome {
+            scanned_entries: 0,
+            packet_count: 0,
+            packet_tags: [EMPTY_MOVI_TAG; SCAN_ENTRY_COUNT],
+            stop: None,
+        }
+    }
+
+    fn store_scan_packet(outcome: &mut MoviScanCollectionOutcome, tag: MoviPacketTag) {
+        match outcome.packet_count {
+            0 => outcome.packet_tags[0] = tag,
+            1 => outcome.packet_tags[1] = tag,
+            2 => outcome.packet_tags[2] = tag,
+            _ => unreachable!("three scan entries cannot produce more than three packets"),
+        }
+        outcome.packet_count += 1;
+    }
+
+    fn apply_production_scan_entry(
+        outcome: &mut MoviScanCollectionOutcome,
+        entry: SymbolicMoviEntry,
+    ) {
+        outcome.scanned_entries += 1;
+        let decision = avi_movi_entry_decision(entry.0, entry.1);
+        match avi_movi_scan_step(decision) {
+            MoviScanStep::Collect(tag) => store_scan_packet(outcome, tag),
+            MoviScanStep::Skip => {}
+            MoviScanStep::Stop(reject) => outcome.stop = Some(reject),
+        }
+    }
+
+    fn production_scan_collection_model(
+        entries: [SymbolicMoviEntry; SCAN_ENTRY_COUNT],
+    ) -> MoviScanCollectionOutcome {
+        let mut outcome = empty_scan_collection_outcome();
+        apply_production_scan_entry(&mut outcome, entries[0]);
+        if outcome.stop.is_some() {
+            return outcome;
+        }
+        apply_production_scan_entry(&mut outcome, entries[1]);
+        if outcome.stop.is_some() {
+            return outcome;
+        }
+        apply_production_scan_entry(&mut outcome, entries[2]);
+        outcome
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    enum ExpectedMoviScanEntry {
+        Collect(MoviPacketTag),
+        Skip,
+        Stop(MoviScanReject),
+    }
+
+    fn expected_movi_scan_entry(
+        id: [u8; 4],
+        list_type_view: Option<[u8; 4]>,
+    ) -> ExpectedMoviScanEntry {
+        if id == *b"LIST" {
+            return match list_type_view {
+                None => ExpectedMoviScanEntry::Stop(MoviScanReject::ShortListType),
+                Some(list_type) if list_type == *b"rec " => {
+                    ExpectedMoviScanEntry::Stop(MoviScanReject::RecList)
+                }
+                Some(_) => ExpectedMoviScanEntry::Skip,
+            };
+        }
+        if id[0].is_ascii_digit() && id[1].is_ascii_digit() {
+            let stream_no =
+                usize::from(id[0].wrapping_sub(b'0')) * 10 + usize::from(id[1].wrapping_sub(b'0'));
+            return ExpectedMoviScanEntry::Collect(MoviPacketTag {
+                stream_no,
+                kind: [id[2], id[3]],
+            });
+        }
+        ExpectedMoviScanEntry::Skip
+    }
+
+    fn apply_expected_scan_entry(
+        outcome: &mut MoviScanCollectionOutcome,
+        entry: ExpectedMoviScanEntry,
+    ) {
+        outcome.scanned_entries += 1;
+        match entry {
+            ExpectedMoviScanEntry::Collect(tag) => store_scan_packet(outcome, tag),
+            ExpectedMoviScanEntry::Skip => {}
+            ExpectedMoviScanEntry::Stop(reject) => outcome.stop = Some(reject),
+        }
+    }
+
+    fn expected_scan_collection(
+        entries: [ExpectedMoviScanEntry; SCAN_ENTRY_COUNT],
+    ) -> MoviScanCollectionOutcome {
+        let mut outcome = empty_scan_collection_outcome();
+        apply_expected_scan_entry(&mut outcome, entries[0]);
+        if outcome.stop.is_some() {
+            return outcome;
+        }
+        apply_expected_scan_entry(&mut outcome, entries[1]);
+        if outcome.stop.is_some() {
+            return outcome;
+        }
+        apply_expected_scan_entry(&mut outcome, entries[2]);
+        outcome
+    }
+
+    fn decision_matches_expected_entry(
+        decision: MoviEntryDecision,
+        expected: ExpectedMoviScanEntry,
+    ) -> bool {
+        match (decision, expected) {
+            (MoviEntryDecision::Packet(actual), ExpectedMoviScanEntry::Collect(expected)) => {
+                actual == expected
+            }
+            (MoviEntryDecision::Ignore, ExpectedMoviScanEntry::Skip) => true,
+            (
+                MoviEntryDecision::RejectShortListType,
+                ExpectedMoviScanEntry::Stop(MoviScanReject::ShortListType),
+            ) => true,
+            (
+                MoviEntryDecision::RejectRecList,
+                ExpectedMoviScanEntry::Stop(MoviScanReject::RecList),
+            ) => true,
+            _ => false,
+        }
+    }
+
+    #[kani::proof]
+    fn avi_movi_scan_collection_bounded_exact() {
+        let entries: [SymbolicMoviEntry; SCAN_ENTRY_COUNT] = [
+            (kani::any(), kani::any()),
+            (kani::any(), kani::any()),
+            (kani::any(), kani::any()),
+        ];
+        let production_decisions = [
+            avi_movi_entry_decision(entries[0].0, entries[0].1),
+            avi_movi_entry_decision(entries[1].0, entries[1].1),
+            avi_movi_entry_decision(entries[2].0, entries[2].1),
+        ];
+        let expected_entries = [
+            expected_movi_scan_entry(entries[0].0, entries[0].1),
+            expected_movi_scan_entry(entries[1].0, entries[1].1),
+            expected_movi_scan_entry(entries[2].0, entries[2].1),
+        ];
+        assert!(decision_matches_expected_entry(
+            production_decisions[0],
+            expected_entries[0]
+        ));
+        assert!(decision_matches_expected_entry(
+            production_decisions[1],
+            expected_entries[1]
+        ));
+        assert!(decision_matches_expected_entry(
+            production_decisions[2],
+            expected_entries[2]
+        ));
+
+        let actual = production_scan_collection_model(entries);
+        let expected = expected_scan_collection(expected_entries);
+        assert_eq!(actual.scanned_entries, expected.scanned_entries);
+        assert_eq!(actual.packet_count, expected.packet_count);
+        assert_eq!(actual.packet_tags, expected.packet_tags);
+        assert_eq!(actual.stop, expected.stop);
     }
 }
 
