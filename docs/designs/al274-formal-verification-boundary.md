@@ -155,7 +155,7 @@ runner は `AL_KANI_HARNESS_GROUP="mp4-avi-boundary"` で `mp4_box_header_step_e
 
 ### MP4-SCAN-003 implementation boundary(2026-11-27 mp4 scan slice)
 
-MP4 scan proof の input domain は `start<=end` の constructor/caller precondition を持つ full u64 region と、高々 4 回分の full u32 size32/full u64 largesize 列である。`start<=end` は private scan caller の invariant であり、top-level scan、length check 済みの sample entry/stsd、valid box body range 以外からは scan へ入らない。`start>end` は production 到達外の total extension として scan position helper では trailing 側へ分類するが、proof domainには含めない。`largesize` は size32==1 の branch でだけ観測される exact reparameterization である。
+MP4 scan proof の input domain は `start<=end` の constructor/caller precondition を持つ full u64 region と、高々 4 回分の full u32 size32/full u64 largesize 列である。`start<=end` は private scan caller の invariant であり、top-level scan、length check 済みの sample entry/stsd、valid box body range 以外からは scan へ入らない。`start>end` は production 到達外の total extension として scan position helper では trailing 側へ分類するが、proof domain には含めない。`largesize` は size32==1 の branch でだけ観測される exact reparameterization である。
 
 small scan model は terminal または invalid に達するまでに高々 3 valid box を受理する入力列を exact に覆う。4 件目の symbolic header は 3 valid box 後の invalid を含めるために使い、4 valid box 以上を受理する列は未証明領域に残す。proof は empty region の即時 complete、exact end と 1..7 byte trailing の区別、valid step の `next_offset=body_end`、少なくとも header 分の strict progress、残余量減少、first invalid 終端、boundary containment、checked arithmetic を検査する。bounded model の成功を無制限 scan termination の機械証明と読み替えない。
 

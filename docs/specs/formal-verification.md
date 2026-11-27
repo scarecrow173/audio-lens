@@ -4,7 +4,7 @@ type: "spec"
 status: "proposed"
 title: "formal verification (D 層) 導入: Property 起点の手法選択と WAV codec / MP4・AVI container 標的 (Issue #256)"
 created: "2026-11-20"
-updated: "2026-11-26"
+updated: "2026-11-27"
 owners: []
 relations:
   source:

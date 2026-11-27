@@ -91,8 +91,6 @@ scan composition の True to the Code と mutation oracle を強めるため、t
 
 ### function contract / loop invariant / unbounded termination decomposition（不採用）
 
-### function contract / loop invariant / unbounded termination decomposition（不採用）
-
 多数 box や無制限 scan に強い案だが、contract/loop invariant の unstable flag、proof-for-contract registry、runner 意味論の追加管理を伴う。今回の対象は高々 3 valid box の bounded exact proofであり、最初の Required proof としては過剰である。採用しない。将来採用する場合は proof-for-contract も Required proof として registry と canonical lane に含める。
 
 ### direct `child_boxes` proof（不採用）
