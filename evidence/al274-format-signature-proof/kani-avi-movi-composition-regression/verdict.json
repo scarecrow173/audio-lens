@@ -1,0 +1,27 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "pass",
+  "reason": "all 1 kani harness(es) verified",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "avi_movi_entry_decision_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 5351,
+      "max_rss_kb": 307256,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 288\n\tFile system outputs: 55600\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 1,
+    "total_elapsed_ms": 5351,
+    "max_observed_rss_kb": 307256,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

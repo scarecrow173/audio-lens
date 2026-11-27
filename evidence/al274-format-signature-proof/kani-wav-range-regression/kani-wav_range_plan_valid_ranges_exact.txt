@@ -1,0 +1,1321 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=10995 max_rss_kb=301132
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness wav::proofs::wav_range_plan_valid_ranges_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/90f248db1b13694f/out/al_media-90f248db1b13694f__RNvNtNtCsagM2MKksdvB_8al_media3wav6proofs33wav_range_plan_valid_ranges_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+aborting path on assume(false) at file crates/al-media/src/wav.rs line 744 column 26 function wav::proofs::wav_range_plan_valid_ranges_exact thread 0
+aborting path on assume(false) at file crates/al-media/src/wav.rs line 746 column 23 function wav::proofs::wav_range_plan_valid_ranges_exact thread 0
+Runtime Symex: 0.0224781s
+size of program expression: 1270 steps
+slicing removed 555 assignments
+Generated 82 VCC(s), 52 remaining after simplification
+Runtime Postprocess Equation: 0.000291892s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.0127733s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 2.2594e-05s
+Solving with CaDiCaL 3.0.0
+10917 variables, 54949 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00127185s
+Runtime decision procedure: 0.0143928s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+10918 variables, 54950 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.0716303s
+Runtime decision procedure: 0.0719025s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+10919 variables, 54951 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.000952921s
+Runtime decision procedure: 0.00112788s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+10920 variables, 54952 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 5.81032s
+Runtime decision procedure: 5.8105s
+
+RESULTS:
+Check 1: wav::WavDataLayout::range_plan.assertion.1
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/wav.rs:222:29 in function wav::WavDataLayout::range_plan
+
+Check 2: wav::WavDataLayout::range_plan.assertion.2
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/wav.rs:225:27 in function wav::WavDataLayout::range_plan
+
+Check 3: wav::WavDataLayout::range_plan.assertion.3
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/wav.rs:226:24 in function wav::WavDataLayout::range_plan
+
+Check 4: wav::WavDataLayout::range_plan.assertion.4
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 5: wav::WavDataLayout::range_plan.assertion.5
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:228:24 in function wav::WavDataLayout::range_plan
+
+Check 6: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:721:21 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 7: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.2
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:723:23 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 8: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.3
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/wav.rs:729:27 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 9: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.4
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/wav.rs:730:27 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 10: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.5
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/wav.rs:731:26 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 11: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.6
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:732:24 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 12: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.7
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:732:24 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 13: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.8
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/wav.rs:734:37 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 14: wav::proofs::wav_range_plan_valid_ranges_exact.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/wav.rs:744:26 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 15: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.9
+	 - Status: SUCCESS
+	 - Description: "internal error: entered unreachable code: valid ranges must be accepted"
+	 - Location: crates/al-media/src/wav.rs:746:23 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 16: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.10
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.total_frames == data.total_frames"
+	 - Location: crates/al-media/src/wav.rs:749:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 17: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.11
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.frame_count == u64::from(frame_count32)"
+	 - Location: crates/al-media/src/wav.rs:750:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 18: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.12
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.byte_len == frame_bytes"
+	 - Location: crates/al-media/src/wav.rs:751:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 19: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.13
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:752:37 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 20: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.14
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.byte_offset == data.data_offset + start_bytes"
+	 - Location: crates/al-media/src/wav.rs:752:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 21: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.15
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:753:34 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 22: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.16
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.byte_end == plan.byte_offset + plan.byte_len"
+	 - Location: crates/al-media/src/wav.rs:753:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 23: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.17
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:754:17 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 24: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.18
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:754:47 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 25: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.19
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.byte_end + tail_bytes == data.data_offset + data.data_len"
+	 - Location: crates/al-media/src/wav.rs:754:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 26: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.20
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/wav.rs:755:34 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 27: wav::proofs::wav_range_plan_valid_ranges_exact.assertion.21
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.byte_end <= data.data_offset + data.data_len"
+	 - Location: crates/al-media/src/wav.rs:755:9 in function wav::proofs::wav_range_plan_valid_ranges_exact
+
+Check 28: wav::WavDataLayout::range_plan.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 29: wav::WavDataLayout::range_plan.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 30: wav::WavDataLayout::range_plan.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 31: wav::WavDataLayout::range_plan.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 32: wav::WavDataLayout::range_plan.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 33: wav::WavDataLayout::range_plan.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/wav.rs:215:52 in function wav::WavDataLayout::range_plan
+
+Check 34: wav::WavDataLayout::range_plan.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 35: wav::WavDataLayout::range_plan.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 36: wav::WavDataLayout::range_plan.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 37: wav::WavDataLayout::range_plan.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 38: wav::WavDataLayout::range_plan.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 39: wav::WavDataLayout::range_plan.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/wav.rs:217:31 in function wav::WavDataLayout::range_plan
+
+Check 40: wav::WavDataLayout::range_plan.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 41: wav::WavDataLayout::range_plan.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 42: wav::WavDataLayout::range_plan.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 43: wav::WavDataLayout::range_plan.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 44: wav::WavDataLayout::range_plan.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 45: wav::WavDataLayout::range_plan.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/wav.rs:224:31 in function wav::WavDataLayout::range_plan
+
+Check 46: wav::WavDataLayout::range_plan.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 47: wav::WavDataLayout::range_plan.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 48: wav::WavDataLayout::range_plan.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 49: wav::WavDataLayout::range_plan.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 50: wav::WavDataLayout::range_plan.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 51: wav::WavDataLayout::range_plan.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/wav.rs:227:27 in function wav::WavDataLayout::range_plan
+
+Check 52: wav::WavDataLayout::range_plan.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+Check 53: wav::WavDataLayout::range_plan.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+Check 54: wav::WavDataLayout::range_plan.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+Check 55: wav::WavDataLayout::range_plan.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+Check 56: wav::WavDataLayout::range_plan.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+Check 57: wav::WavDataLayout::range_plan.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/wav.rs:230:27 in function wav::WavDataLayout::range_plan
+
+
+SUMMARY:
+ ** 0 of 57 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 6.1898494s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.75s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+	Command being timed: "cargo kani -p al-media --tests --harness wav_range_plan_valid_ranges_exact -Z stubbing"
+	User time (seconds): 9.87
+	System time (seconds): 1.01
+	Percent of CPU this job got: 93%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:11.58
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 301132
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 199470
+	Voluntary context switches: 3543
+	Involuntary context switches: 148
+	Swaps: 0
+	File system inputs: 1328
+	File system outputs: 54888
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

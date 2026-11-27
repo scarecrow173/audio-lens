@@ -1,0 +1,27 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "fail",
+  "reason": "1 harness(es) failed verification (0 verified): format_signature_detection_bounded_exact",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "format_signature_detection_bounded_exact",
+      "ok": false,
+      "bad": true,
+      "timedOut": false,
+      "status": 1,
+      "elapsed_ms": 7150,
+      "max_rss_kb": 367324,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 640\n\tFile system outputs: 129808\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 1"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 0,
+    "total_elapsed_ms": 7150,
+    "max_observed_rss_kb": 367324,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

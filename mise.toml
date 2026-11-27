@@ -245,7 +245,8 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # MP4 scan 1 件 + MP4/AVI boundary 2 件 + AVI movi tag 1 件 +
 # AVI movi composition 1 件 + AVI movi scan 1 件 + AVI stream kind 1 件 +
 # AVI strh declaration 1 件 + AVI video strf declaration 1 件 +
-# AVI audio strf declaration 1 件 + legacy containers 10 件の計 33 件。
+# AVI audio strf declaration 1 件 + format signature 1 件 +
+# legacy containers 10 件の計 34 件。
 # runner は全 harness に `-Z stubbing`
 # を渡して stub attribute 機構を有効化するが、stub attribute を
 # 持たない harness の検証意味論は変わらない。
@@ -266,7 +267,8 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # extraction/validation の 1 proof、`"avi-strf-declaration"` は AVI video
 # strf BITMAPINFOHEADER declaration field extraction/validation の 1 proof、
 # `"avi-strf-audio-declaration"` は AVI audio strf WAVEFORMATEX declaration
-# field extraction/validation の 1 proof を選択する。
+# field extraction/validation の 1 proof、`"format-signature"` は
+# container format signature detection の 1 proof を選択する。
 # group と subset 指定は排他。
 # WSL では source mirror(~/.cache/al-formal-kani/src)経由で各
 # kani_proofs harness を逐次実行(kani-driver は harness 結果を
@@ -276,7 +278,7 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # (環境不在は lane 失敗ではない — POLICIES §3)。実走して
 # verification 結果が出れば pass/fail で exit 0/1 の fail-closed。
 [tasks.test-formal-kani]
-description = "al-media WAV+MP4/AVI Kani bounded proofs via env-detect (33 harnesses, Issue #256/#274)"
+description = "al-media WAV+MP4/AVI Kani bounded proofs via env-detect (34 harnesses, Issue #256/#274)"
 run = "node tools/run-formal-kani.mjs"
 
 [tasks.verify-full]

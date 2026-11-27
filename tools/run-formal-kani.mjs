@@ -5,7 +5,8 @@
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
 // tag identity/movi entry composition/movi scan collection/stream kind
 // classification/strh declaration/strf declaration については src/mp4.rs/src/avi.rs、
-// audio strf WAVEFORMATEX declaration については src/wav.rs)を
+// audio strf WAVEFORMATEX declaration については src/wav.rs、
+// format signature detection については src/format.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -183,7 +184,7 @@ if (missing.length > 0) {
 // override: AL_KANI_TIMEOUT_MS). Keep this list in sync with the
 // `mod kani_proofs` blocks in tests/formal_wav.rs and
 // tests/formal_containers.rs, and the `mod proofs` blocks in src/wav.rs,
-// src/mp4.rs, and src/avi.rs.
+// src/mp4.rs, src/avi.rs, and src/format.rs.
 const WAV_CHUNK_SCAN_HARNESSES = [
   "wav_chunk_boundary_step_exact",
   "wav_chunk_scan_progress_bounded_exact",
@@ -201,6 +202,7 @@ const AVI_STREAM_KIND_HARNESSES = ["avi_stream_kind_classification_bounded_exact
 const AVI_STRH_DECLARATION_HARNESSES = ["avi_strh_declaration_bounded_exact"];
 const AVI_STRF_DECLARATION_HARNESSES = ["avi_video_strf_declaration_bounded_exact"];
 const AVI_STRF_AUDIO_DECLARATION_HARNESSES = ["avi_audio_strf_declaration_bounded_exact"];
+const FORMAT_SIGNATURE_HARNESSES = ["format_signature_detection_bounded_exact"];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
@@ -214,6 +216,7 @@ const HARNESS_GROUPS = {
   "avi-strh-declaration": AVI_STRH_DECLARATION_HARNESSES,
   "avi-strf-declaration": AVI_STRF_DECLARATION_HARNESSES,
   "avi-strf-audio-declaration": AVI_STRF_AUDIO_DECLARATION_HARNESSES,
+  "format-signature": FORMAT_SIGNATURE_HARNESSES,
 };
 
 const HARNESSES = [
@@ -237,6 +240,7 @@ const HARNESSES = [
   ...AVI_STRH_DECLARATION_HARNESSES,
   ...AVI_STRF_DECLARATION_HARNESSES,
   ...AVI_STRF_AUDIO_DECLARATION_HARNESSES,
+  ...FORMAT_SIGNATURE_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",

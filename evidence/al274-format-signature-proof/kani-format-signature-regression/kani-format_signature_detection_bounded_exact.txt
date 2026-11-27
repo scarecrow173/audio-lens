@@ -1,0 +1,3020 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=8885 max_rss_kb=365012
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: Found the following unsupported constructs:
+             - caller_location (1)
+             - foreign function (1)
+
+         Verification will fail if one or more of these constructs is reachable.
+         See https://model-checking.github.io/kani/rust-feature-support.html for more details.
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness format::proofs::format_signature_detection_bounded_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/6c133b542b0321a5/out/al_media-6c133b542b0321a5__RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 1 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 2 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 3 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 4 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 5 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Unwinding loop _RNvNtNtCsagM2MKksdvB_8al_media6format6proofs40format_signature_detection_bounded_exact.0 iteration 6 file crates/al-media/src/format.rs line 226 column 9 function format::proofs::format_signature_detection_bounded_exact thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq thread 0
+Runtime Symex: 1.34771s
+size of program expression: 41016 steps
+slicing removed 30725 assignments
+Generated 3092 VCC(s), 83 remaining after simplification
+Runtime Postprocess Equation: 0.0291972s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.136458s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 1.2264e-05s
+Solving with CaDiCaL 3.0.0
+146366 variables, 169868 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00452904s
+Runtime decision procedure: 0.143529s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+146367 variables, 169869 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00324828s
+Runtime decision procedure: 0.00399841s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+146368 variables, 169870 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.0665301s
+Runtime decision procedure: 0.067114s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+146369 variables, 169871 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.0121053s
+Runtime decision procedure: 0.0129445s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+146370 variables, 169872 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 0.0416962s
+Runtime decision procedure: 0.0420608s
+
+RESULTS:
+Check 1: std::option::Option::<usize>::map::<usize, {closure@std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>]>::next::{closure#0}}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1162:15 in function std::option::Option::<usize>::map::<usize, {closure@std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>]>::next::{closure#0}}>
+
+Check 2: <usize as std::slice::SliceIndex<[std::mem::MaybeUninit<usize>]>>::get_unchecked.assume.1
+	 - Status: SUCCESS
+	 - Description: "Rust intrinsic assumption failed"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:218:13 in function <usize as std::slice::SliceIndex<[std::mem::MaybeUninit<usize>]>>::get_unchecked
+
+Check 3: core::slice::index::slice_index_fail::do_panic::runtime.assertion.1
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:41:9 in function core::slice::index::slice_index_fail::do_panic::runtime
+
+Check 4: core::num::<impl usize>::abs_diff.assertion.1
+	 - Status: UNREACHABLE
+	 - Description: "attempt to subtract with overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:3182:21 in function core::num::<impl usize>::abs_diff
+
+Check 5: core::num::<impl usize>::abs_diff.assertion.2
+	 - Status: UNREACHABLE
+	 - Description: "attempt to subtract with overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:3184:21 in function core::num::<impl usize>::abs_diff
+
+Check 6: core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked_mut::<std::ops::index_range::IndexRange>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:693:18 in function core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked_mut::<std::ops::index_range::IndexRange>
+
+Check 7: core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked_mut::<std::ops::index_range::IndexRange>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:693:18 in function core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked_mut::<std::ops::index_range::IndexRange>
+
+Check 8: kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "Offset in bytes overflows isize"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>
+
+Check 9: kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "Offset result address must equal original pointer address plus offset"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>
+
+Check 10: kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>.safety_check.3
+	 - Status: SUCCESS
+	 - Description: "Offset result and original pointer must point to the same allocation"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<std::mem::MaybeUninit<usize>, *mut std::mem::MaybeUninit<usize>, usize>
+
+Check 11: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:405:5 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index
+
+Check 12: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:411:22 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index
+
+Check 13: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:411:22 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index
+
+Check 14: core::slice::index::slice_index_fail::do_panic::runtime.assertion.3
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:69:5 in function core::slice::index::slice_index_fail::do_panic::runtime
+
+Check 15: core::num::<impl usize>::checked_sub.arithmetic_overflow.1
+	 - Status: SUCCESS
+	 - Description: "attempt to compute `unchecked_sub` which would overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:1096:31 in function core::num::<impl usize>::checked_sub
+
+Check 16: std::ops::index_range::IndexRange::len.arithmetic_overflow.1
+	 - Status: SUCCESS
+	 - Description: "attempt to compute `unchecked_sub` which would overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:18 in function std::ops::index_range::IndexRange::len
+
+Check 17: format::proofs::format_signature_detection_bounded_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual == expected"
+	 - Location: crates/al-media/src/format.rs:193:9 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 18: format::proofs::format_signature_detection_bounded_exact.assertion.2
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual == None"
+	 - Location: crates/al-media/src/format.rs:195:13 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 19: format::proofs::format_signature_detection_bounded_exact.assertion.3
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual == if &prefix[4..8] == b"ftyp" { Some(MediaFormat::Mp4) } else { None }"
+	 - Location: crates/al-media/src/format.rs:197:13 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 20: format::proofs::format_signature_detection_bounded_exact.assertion.4
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual ==
+match &prefix[8..12]
+{
+    b"WAVE" => Some(MediaFormat::Wav), b"AVI " => Some(MediaFormat::Avi), _ =>
+    None,
+}"
+	 - Location: crates/al-media/src/format.rs:206:13 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 21: format::proofs::format_signature_detection_bounded_exact.assertion.5
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual == if &prefix[4..8] == b"ftyp" { Some(MediaFormat::Mp4) } else { None }"
+	 - Location: crates/al-media/src/format.rs:215:13 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 22: format::proofs::format_signature_detection_bounded_exact.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/format.rs:226:20 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 23: format::proofs::format_signature_detection_bounded_exact.assertion.6
+	 - Status: SUCCESS
+	 - Description: "assertion failed: detect_format(&input[..len]) == contract_detect_format(&input[..len])"
+	 - Location: crates/al-media/src/format.rs:227:13 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 24: format::proofs::format_signature_detection_bounded_exact.assertion.7
+	 - Status: SUCCESS
+	 - Description: "assertion failed: detect_format(&input[..12]) == detect_format(&input[..13])"
+	 - Location: crates/al-media/src/format.rs:232:9 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 25: std::array::equality::<impl std::cmp::PartialEq<[u8; 4]> for [u8]>::eq.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/equality.rs:49:15 in function std::array::equality::<impl std::cmp::PartialEq<[u8; 4]> for [u8]>::eq
+
+Check 26: core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic::runtime.assertion.1
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:5589:9 in function core::slice::copy_from_slice_impl::len_mismatch_fail::do_panic::runtime
+
+Check 27: core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked::<usize>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:647:18 in function core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked::<usize>
+
+Check 28: core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked::<usize>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:647:18 in function core::slice::<impl [std::mem::MaybeUninit<usize>]>::get_unchecked::<usize>
+
+Check 29: std::fmt::Arguments::<'_>::from_str.assertion.1
+	 - Status: UNREACHABLE
+	 - Description: "attempt to shift left with overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/fmt/mod.rs:820:38 in function std::fmt::Arguments::<'_>::from_str
+
+Check 30: core::slice::index::slice_index_fail::do_panic::runtime.assertion.2
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:59:9 in function core::slice::index::slice_index_fail::do_panic::runtime
+
+Check 31: std::ptr::drop_in_place::<[usize]>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:843:24 in function std::ptr::drop_in_place::<[usize]>
+
+Check 32: std::ptr::drop_in_place::<[usize]>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:843:24 in function std::ptr::drop_in_place::<[usize]>
+
+Check 33: std::ptr::const_ptr::<impl *const ()>::is_aligned_to.assertion.1
+	 - Status: UNREACHABLE
+	 - Description: "attempt to subtract with overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:1360:23 in function std::ptr::const_ptr::<impl *const ()>::is_aligned_to
+
+Check 34: std::ptr::const_ptr::<impl *const ()>::is_aligned_to.assertion.2
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/const_ptr.rs:1357:13 in function std::ptr::const_ptr::<impl *const ()>::is_aligned_to
+
+Check 35: core::ub_checks::maybe_is_nonoverlapping::runtime.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/intrinsics/mod.rs:2628:9 in function core::ub_checks::maybe_is_nonoverlapping::runtime
+
+Check 36: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 37: core::slice::index::slice_index_fail::do_panic::runtime.assertion.4
+	 - Status: SUCCESS
+	 - Description: "This is a placeholder message; Kani doesn't support message formatted at runtime"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:50:9 in function core::slice::index::slice_index_fail::do_panic::runtime
+
+Check 38: kani::mem::cbmc::same_allocation.unsupported_construct.1
+	 - Status: SUCCESS
+	 - Description: "Kani does not support reasoning about pointer to unallocated memory"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::mem::cbmc::same_allocation
+
+Check 39: memcmp.precondition.1
+	 - Status: SUCCESS
+	 - Description: "memcmp region 1 readable"
+	 - Location: <builtin-library-memcmp>:19 in function memcmp
+
+Check 40: memcmp.precondition.2
+	 - Status: SUCCESS
+	 - Description: "memcpy region 2 readable"
+	 - Location: <builtin-library-memcmp>:21 in function memcmp
+
+Check 41: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:419:5 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut
+
+Check 42: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:425:22 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut
+
+Check 43: <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/index.rs:425:22 in function <std::ops::Range<usize> as std::slice::SliceIndex<[u8]>>::index_mut
+
+Check 44: core::panicking::panic_nounwind_fmt::runtime.unsupported_construct.1
+	 - Status: SUCCESS
+	 - Description: "call to foreign "Rust" function `_RNvCskSgPeDzUGbv_7___rustc17rust_begin_unwind` is not currently supported by Kani. Please post your example at https://github.com/model-checking/kani/issues/new/choose"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panicking.rs:110:17 in function core::panicking::panic_nounwind_fmt::runtime
+
+Check 45: std::ptr::copy_nonoverlapping::<u8>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "`src` must be properly aligned"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 46: std::ptr::copy_nonoverlapping::<u8>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "`dst` must be properly aligned"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 47: std::ptr::copy_nonoverlapping::<u8>.arithmetic_overflow.1
+	 - Status: SUCCESS
+	 - Description: "copy_nonoverlapping: attempt to compute number in bytes which would overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 48: core::num::<impl usize>::unchecked_add.arithmetic_overflow.1
+	 - Status: SUCCESS
+	 - Description: "attempt to compute `unchecked_add` which would overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:1013:17 in function core::num::<impl usize>::unchecked_add
+
+Check 49: kani::rustc_intrinsics::offset::<u8, *const u8, usize>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "Offset in bytes overflows isize"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *const u8, usize>
+
+Check 50: kani::rustc_intrinsics::offset::<u8, *const u8, usize>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "Offset result address must equal original pointer address plus offset"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *const u8, usize>
+
+Check 51: kani::rustc_intrinsics::offset::<u8, *const u8, usize>.safety_check.3
+	 - Status: SUCCESS
+	 - Description: "Offset result and original pointer must point to the same allocation"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *const u8, usize>
+
+Check 52: kani::rustc_intrinsics::offset::<u8, *mut u8, usize>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "Offset in bytes overflows isize"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *mut u8, usize>
+
+Check 53: kani::rustc_intrinsics::offset::<u8, *mut u8, usize>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "Offset result address must equal original pointer address plus offset"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *mut u8, usize>
+
+Check 54: kani::rustc_intrinsics::offset::<u8, *mut u8, usize>.safety_check.3
+	 - Status: SUCCESS
+	 - Description: "Offset result and original pointer must point to the same allocation"
+	 - Location: library/kani/src/lib.rs:57:1 in function kani::rustc_intrinsics::offset::<u8, *mut u8, usize>
+
+Check 55: std::ptr::drop_in_place::<std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>; 6]>>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:843:24 in function std::ptr::drop_in_place::<std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>; 6]>>
+
+Check 56: std::ptr::drop_in_place::<std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>; 6]>>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:843:24 in function std::ptr::drop_in_place::<std::array::iter::iter_inner::PolymorphicIter<[std::mem::MaybeUninit<usize>; 6]>>
+
+Check 57: std::panic::Location::<'_>::caller.unsupported_construct.1
+	 - Status: SUCCESS
+	 - Description: "caller_location is not currently supported by Kani. Please post your example at https://github.com/model-checking/kani/issues/374"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panic/location.rs:181:9 in function std::panic::Location::<'_>::caller
+
+Check 58: core::slice::<impl [u8]>::as_array::<4>.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "misaligned pointer to reference cast: address must be a multiple of its type's alignment"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:858:31 in function core::slice::<impl [u8]>::as_array::<4>
+
+Check 59: core::slice::<impl [u8]>::as_array::<4>.safety_check.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:858:31 in function core::slice::<impl [u8]>::as_array::<4>
+
+Check 60: <usize as kani::rustc_intrinsics::ToISize>::to_isize.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: library/kani_core/src/models.rs:203:17 in function <usize as kani::rustc_intrinsics::ToISize>::to_isize
+
+Check 61: <usize as kani::rustc_intrinsics::ToISize>::to_isize.safety_check.1
+	 - Status: SUCCESS
+	 - Description: "Offset value overflows isize"
+	 - Location: library/kani/src/lib.rs:57:1 in function <usize as kani::rustc_intrinsics::ToISize>::to_isize
+
+Check 62: <usize as kani::rustc_intrinsics::ToISize>::to_isize.assertion.1
+	 - Status: SUCCESS
+	 - Description: "internal error: entered unreachable code"
+	 - Location: library/kani/src/lib.rs:57:1 in function <usize as kani::rustc_intrinsics::ToISize>::to_isize
+
+Check 63: core::slice::<impl [u8]>::as_array::<4>.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/slice/mod.rs:861:13 in function core::slice::<impl [u8]>::as_array::<4>
+
+Check 64: memcpy.pointer.1
+	 - Status: SUCCESS
+	 - Description: "same object violation in (const unsigned char *)(void *)src >= (const unsigned char *)(void *)dst + (signed long int)(count * sizeof(unsigned char) /*1*/ )"
+	 - Location: <builtin-library-memcpy>:33 in function memcpy
+
+Check 65: memcpy.pointer.2
+	 - Status: SUCCESS
+	 - Description: "same object violation in (const unsigned char *)(void *)dst >= (const unsigned char *)(void *)src + (signed long int)(count * sizeof(unsigned char) /*1*/ )"
+	 - Location: <builtin-library-memcpy>:34 in function memcpy
+
+Check 66: std::ptr::copy_nonoverlapping::<u8>.precondition_instance.1
+	 - Status: SUCCESS
+	 - Description: "memcpy src/dst overlap"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 67: std::ptr::copy_nonoverlapping::<u8>.precondition_instance.2
+	 - Status: SUCCESS
+	 - Description: "memcpy source region readable"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 68: std::ptr::copy_nonoverlapping::<u8>.precondition_instance.3
+	 - Status: SUCCESS
+	 - Description: "memcpy destination region writeable"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:574:14 in function std::ptr::copy_nonoverlapping::<u8>
+
+Check 69: std::ptr::read::<usize>.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 70: std::ptr::read::<usize>.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 71: std::ptr::read::<usize>.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 72: std::ptr::read::<usize>.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 73: std::ptr::read::<usize>.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 74: std::ptr::read::<usize>.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:1756:9 in function std::ptr::read::<usize>
+
+Check 75: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 76: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 77: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 78: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 79: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 80: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:61:21 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 81: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 82: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 83: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 84: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 85: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 86: std::ops::index_range::IndexRange::next_unchecked.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:63:9 in function std::ops::index_range::IndexRange::next_unchecked
+
+Check 87: std::ops::index_range::IndexRange::end.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 88: std::ops::index_range::IndexRange::end.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 89: std::ops::index_range::IndexRange::end.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 90: std::ops::index_range::IndexRange::end.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 91: std::ops::index_range::IndexRange::end.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 92: std::ops::index_range::IndexRange::end.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:45:9 in function std::ops::index_range::IndexRange::end
+
+Check 93: std::ops::index_range::IndexRange::len.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 94: std::ops::index_range::IndexRange::len.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 95: std::ops::index_range::IndexRange::len.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 96: std::ops::index_range::IndexRange::len.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 97: std::ops::index_range::IndexRange::len.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 98: std::ops::index_range::IndexRange::len.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:51 in function std::ops::index_range::IndexRange::len
+
+Check 99: std::ops::index_range::IndexRange::len.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 100: std::ops::index_range::IndexRange::len.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 101: std::ops::index_range::IndexRange::len.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 102: std::ops::index_range::IndexRange::len.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 103: std::ops::index_range::IndexRange::len.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 104: std::ops::index_range::IndexRange::len.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:52:61 in function std::ops::index_range::IndexRange::len
+
+Check 105: std::ops::index_range::IndexRange::start.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 106: std::ops::index_range::IndexRange::start.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 107: std::ops::index_range::IndexRange::start.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 108: std::ops::index_range::IndexRange::start.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 109: std::ops::index_range::IndexRange::start.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 110: std::ops::index_range::IndexRange::start.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:40:9 in function std::ops::index_range::IndexRange::start
+
+Check 111: format::signature_format_from_prefix.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 112: format::signature_format_from_prefix.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 113: format::signature_format_from_prefix.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 114: format::signature_format_from_prefix.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 115: format::signature_format_from_prefix.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 116: format::signature_format_from_prefix.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 117: format::signature_format_from_prefix.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 118: format::signature_format_from_prefix.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 119: format::signature_format_from_prefix.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 120: format::signature_format_from_prefix.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 121: format::signature_format_from_prefix.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 122: format::signature_format_from_prefix.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 123: format::signature_format_from_prefix.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 124: format::signature_format_from_prefix.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 125: format::signature_format_from_prefix.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 126: format::signature_format_from_prefix.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 127: format::signature_format_from_prefix.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 128: format::signature_format_from_prefix.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 129: format::signature_format_from_prefix.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 130: format::signature_format_from_prefix.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 131: format::signature_format_from_prefix.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 132: format::signature_format_from_prefix.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 133: format::signature_format_from_prefix.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 134: format::signature_format_from_prefix.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 135: format::signature_format_from_prefix.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 136: format::signature_format_from_prefix.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 137: format::signature_format_from_prefix.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 138: format::signature_format_from_prefix.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 139: format::signature_format_from_prefix.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 140: format::signature_format_from_prefix.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 141: format::signature_format_from_prefix.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 142: format::signature_format_from_prefix.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 143: format::signature_format_from_prefix.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 144: format::signature_format_from_prefix.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 145: format::signature_format_from_prefix.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 146: format::signature_format_from_prefix.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 147: format::signature_format_from_prefix.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 148: format::signature_format_from_prefix.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 149: format::signature_format_from_prefix.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 150: format::signature_format_from_prefix.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 151: format::signature_format_from_prefix.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 152: format::signature_format_from_prefix.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:24:16 in function format::signature_format_from_prefix
+
+Check 153: format::signature_format_from_prefix.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:27:18 in function format::signature_format_from_prefix
+
+Check 154: format::signature_format_from_prefix.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:33:5 in function format::signature_format_from_prefix
+
+Check 155: format::proofs::contract_detect_format.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 156: format::proofs::contract_detect_format.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 157: format::proofs::contract_detect_format.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 158: format::proofs::contract_detect_format.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 159: format::proofs::contract_detect_format.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 160: format::proofs::contract_detect_format.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 161: format::proofs::contract_detect_format.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 162: format::proofs::contract_detect_format.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 163: format::proofs::contract_detect_format.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 164: format::proofs::contract_detect_format.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 165: format::proofs::contract_detect_format.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 166: format::proofs::contract_detect_format.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 167: format::proofs::contract_detect_format.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 168: format::proofs::contract_detect_format.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 169: format::proofs::contract_detect_format.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 170: format::proofs::contract_detect_format.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 171: format::proofs::contract_detect_format.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 172: format::proofs::contract_detect_format.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 173: format::proofs::contract_detect_format.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 174: format::proofs::contract_detect_format.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 175: format::proofs::contract_detect_format.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 176: format::proofs::contract_detect_format.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 177: format::proofs::contract_detect_format.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 178: format::proofs::contract_detect_format.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 179: format::proofs::contract_detect_format.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 180: format::proofs::contract_detect_format.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 181: format::proofs::contract_detect_format.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 182: format::proofs::contract_detect_format.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 183: format::proofs::contract_detect_format.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 184: format::proofs::contract_detect_format.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 185: format::proofs::contract_detect_format.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 186: format::proofs::contract_detect_format.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 187: format::proofs::contract_detect_format.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 188: format::proofs::contract_detect_format.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 189: format::proofs::contract_detect_format.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 190: format::proofs::contract_detect_format.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 191: format::proofs::contract_detect_format.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 192: format::proofs::contract_detect_format.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 193: format::proofs::contract_detect_format.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 194: format::proofs::contract_detect_format.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 195: format::proofs::contract_detect_format.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 196: format::proofs::contract_detect_format.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:173:20 in function format::proofs::contract_detect_format
+
+Check 197: format::proofs::contract_detect_format.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:176:22 in function format::proofs::contract_detect_format
+
+Check 198: format::proofs::contract_detect_format.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:182:9 in function format::proofs::contract_detect_format
+
+Check 199: format::proofs::contract_signature_format.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 200: format::proofs::contract_signature_format.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 201: format::proofs::contract_signature_format.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 202: format::proofs::contract_signature_format.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 203: format::proofs::contract_signature_format.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 204: format::proofs::contract_signature_format.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 205: format::proofs::contract_signature_format.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 206: format::proofs::contract_signature_format.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 207: format::proofs::contract_signature_format.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 208: format::proofs::contract_signature_format.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 209: format::proofs::contract_signature_format.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 210: format::proofs::contract_signature_format.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 211: format::proofs::contract_signature_format.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 212: format::proofs::contract_signature_format.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 213: format::proofs::contract_signature_format.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 214: format::proofs::contract_signature_format.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 215: format::proofs::contract_signature_format.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 216: format::proofs::contract_signature_format.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 217: format::proofs::contract_signature_format.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 218: format::proofs::contract_signature_format.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 219: format::proofs::contract_signature_format.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 220: format::proofs::contract_signature_format.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 221: format::proofs::contract_signature_format.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 222: format::proofs::contract_signature_format.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 223: format::proofs::contract_signature_format.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 224: format::proofs::contract_signature_format.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 225: format::proofs::contract_signature_format.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 226: format::proofs::contract_signature_format.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 227: format::proofs::contract_signature_format.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 228: format::proofs::contract_signature_format.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 229: format::proofs::contract_signature_format.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 230: format::proofs::contract_signature_format.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 231: format::proofs::contract_signature_format.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 232: format::proofs::contract_signature_format.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 233: format::proofs::contract_signature_format.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 234: format::proofs::contract_signature_format.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 235: format::proofs::contract_signature_format.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 236: format::proofs::contract_signature_format.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 237: format::proofs::contract_signature_format.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 238: format::proofs::contract_signature_format.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 239: format::proofs::contract_signature_format.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 240: format::proofs::contract_signature_format.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:159:20 in function format::proofs::contract_signature_format
+
+Check 241: format::proofs::contract_signature_format.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:162:22 in function format::proofs::contract_signature_format
+
+Check 242: format::proofs::contract_signature_format.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:168:9 in function format::proofs::contract_signature_format
+
+Check 243: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:202:21 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 244: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 245: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 246: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 247: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 248: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 249: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 250: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 251: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 252: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 253: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 254: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 255: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 256: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 257: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 258: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 259: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 260: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 261: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 262: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 263: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 264: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 265: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 266: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 267: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 268: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 269: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 270: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 271: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 272: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 273: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 274: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 275: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 276: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 277: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 278: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 279: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 280: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 281: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 282: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 283: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 284: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 285: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:208:17 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 286: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:211:26 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 287: format::proofs::format_signature_detection_bounded_exact.pointer_dereference.45
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:220:21 in function format::proofs::format_signature_detection_bounded_exact
+
+Check 288: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 289: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 290: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 291: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 292: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 293: <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/exact_size.rs:156:9 in function <&mut std::ops::index_range::IndexRange as std::iter::ExactSizeIterator>::len
+
+Check 294: std::array::equality::<impl std::cmp::PartialEq<[u8; 4]> for [u8]>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/array/equality.rs:49:15 in function std::array::equality::<impl std::cmp::PartialEq<[u8; 4]> for [u8]>::eq
+
+Check 295: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 296: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 297: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 298: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 299: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 300: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 301: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 302: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 303: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 304: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 305: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 306: <format::MediaFormat as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/format.rs:7:30 in function <format::MediaFormat as std::cmp::PartialEq>::eq
+
+Check 307: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 308: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 309: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 310: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 311: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 312: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:15:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 313: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 314: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 315: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 316: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 317: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 318: <std::ops::index_range::IndexRange as std::clone::Clone>::clone.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/index_range.rs:16:5 in function <std::ops::index_range::IndexRange as std::clone::Clone>::clone
+
+Check 319: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 320: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 321: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 322: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 323: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 324: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:27 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 325: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 326: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 327: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 328: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 329: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 330: std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2399:34 in function std::cmp::impls::<impl std::cmp::PartialEq<&[u8; 4]> for &[u8]>::eq
+
+Check 331: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 332: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 333: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 334: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 335: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 336: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:50 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 337: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 338: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 339: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 340: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 341: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 342: std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/cmp.rs:2192:59 in function std::cmp::impls::<impl std::cmp::PartialOrd for usize>::lt
+
+Check 343: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 344: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 345: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 346: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 347: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 348: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 349: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 350: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 351: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 352: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 353: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 354: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 355: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 356: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 357: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 358: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 359: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 360: <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<format::MediaFormat> as std::cmp::PartialEq>::eq
+
+Check 361: memcmp.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 362: memcmp.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 363: memcmp.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 364: memcmp.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 365: memcmp.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 366: memcmp.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 367: memcmp.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 368: memcmp.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 369: memcmp.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 370: memcmp.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 371: memcmp.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 372: memcmp.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+
+SUMMARY:
+ ** 0 of 372 failed (4 unreachable)
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 2.2818084s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.88s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.36s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+	Command being timed: "cargo kani -p al-media --tests --harness format_signature_detection_bounded_exact -Z stubbing"
+	User time (seconds): 5.76
+	System time (seconds): 1.35
+	Percent of CPU this job got: 74%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.52
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 365012
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 3436
+	Minor (reclaiming a frame) page faults: 235929
+	Voluntary context switches: 8563
+	Involuntary context switches: 81
+	Swaps: 0
+	File system inputs: 667904
+	File system outputs: 130168
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
