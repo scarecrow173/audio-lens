@@ -227,7 +227,8 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
 | `mutated_or_truncated_containers_never_panic` | writer 生成物への byte 上書き+truncate が panic しない |
 | `kani_proofs::mp4_never_panics_ftyp_signed` / `avi_never_panics_riff_signed` | `ftyp`/`RIFF`+`AVI ` signature を持つ 64B 入力で `decode_mp4`/`decode_avi` が panic しない(bounded 網羅・al#274 で entry point × signature class に分割。`detect_format` は先頭 <=12B のみ読む近似無料の入口として各 proof に同乗) |
 | `kani_proofs::containers_never_panics_unsigned` | いずれの signature も持たない入力で 3 入口が panic せず早期 reject する — signed 2 proof と合わせて全入力領域を網羅 |
-| `kani_proofs::detect_format_signature_rules` | len<8/8/12 の境界長で署名規則を網羅(RIFF 優先の順序を含む) |
+| `kani_proofs::detect_format_signature_rules` | len<8/8/12 の境界長で署名規則を網羅(RIFF 優先の順序を含む)。legacy inventory として残し、この slice では retire しない |
+| `format_signature_detection_bounded_exact` | full `usize` length と symbolic fixed 12-byte prefix について、production decision helper が len `<8`/`8..11`/`>=12`、exact `RIFF`/`WAVE`/`AVI `/`ftyp`、RIFF precedence、unknown RIFF form non-fallback、`None` complement を exact に写すこと。同じ harness で len 0,7,8,11,12,13 の public `detect_format` shell matrix と len 12/13 trailing non-dependence を接続する |
 | `kani_proofs::mp4_writer_output_decodes` | symbolic `soun` パラメータ(channels 1..=2・rate 1..=192000・4 frame s16)の write_mp4 出力が復号+PCM 往復する |
 | `kani_proofs::avi_writer_output_decodes` | concrete video(4x2・2 frame)+symbolic PCM `auds` の write_avi 出力が復号+PCM 往復+両 stream の timing 一致 |
 | `kani_proofs::mutated_mp4_never_panics` / `mutated_avi_never_panics` | writer 生成物への 1 byte 上書き(任意位置・任意値)で panic しない |
@@ -631,10 +632,10 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 avi audio strf declaration slice 以降の登録 harness は 33 件(WAV 13 +
+  al#274 format signature slice 以降の登録 harness は 34 件(WAV 13 +
   MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
   AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI video strf declaration 1 +
-  AVI audio strf declaration 1 + legacy containers 10)。
+  AVI audio strf declaration 1 + format signature 1 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
@@ -647,7 +648,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   の 1 proof、`"avi-strf-declaration"` は AVI video `strf` BITMAPINFOHEADER
   declaration field extraction/validation の 1 proof、
   `"avi-strf-audio-declaration"` は AVI audio `strf` WAVEFORMATEX declaration
-  field extraction/validation の 1 proofを選択する。group と subset
+  field extraction/validation の 1 proof、`"format-signature"` は container
+  format signature detection の 1 proofを選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive

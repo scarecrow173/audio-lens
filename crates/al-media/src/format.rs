@@ -14,6 +14,25 @@ pub enum MediaFormat {
     Mp4,
 }
 
+const FORMAT_SIGNATURE_PREFIX_LEN: usize = 12;
+
+fn signature_format_from_prefix(
+    len: usize,
+    prefix: &[u8; FORMAT_SIGNATURE_PREFIX_LEN],
+) -> Option<MediaFormat> {
+    if len >= 12 && &prefix[0..4] == b"RIFF" {
+        return match &prefix[8..12] {
+            b"WAVE" => Some(MediaFormat::Wav),
+            b"AVI " => Some(MediaFormat::Avi),
+            _ => None,
+        };
+    }
+    if len >= 8 && &prefix[4..8] == b"ftyp" {
+        return Some(MediaFormat::Mp4);
+    }
+    None
+}
+
 /// Detect the container format from the leading bytes of `data`.
 ///
 /// Returns `None` when no known signature matches. Callers must treat that
@@ -24,17 +43,10 @@ pub enum MediaFormat {
 /// (legal ISO-BMFF without an `ftyp`) stay `None` — we do not attempt
 /// MP4 observation on containers we cannot positively identify.
 pub fn detect_format(data: &[u8]) -> Option<MediaFormat> {
-    if data.len() >= 12 && &data[0..4] == b"RIFF" {
-        return match &data[8..12] {
-            b"WAVE" => Some(MediaFormat::Wav),
-            b"AVI " => Some(MediaFormat::Avi),
-            _ => None,
-        };
-    }
-    if data.len() >= 8 && &data[4..8] == b"ftyp" {
-        return Some(MediaFormat::Mp4);
-    }
-    None
+    let mut prefix = [0u8; FORMAT_SIGNATURE_PREFIX_LEN];
+    let captured = data.len().min(FORMAT_SIGNATURE_PREFIX_LEN);
+    prefix[..captured].copy_from_slice(&data[..captured]);
+    signature_format_from_prefix(data.len(), &prefix)
 }
 
 #[cfg(test)]
@@ -87,5 +99,136 @@ mod tests {
     fn short_input_is_not_detected() {
         assert_eq!(detect_format(b"RIFF"), None);
         assert_eq!(detect_format(&[]), None);
+    }
+
+    #[test]
+    fn length_thresholds_follow_signature_rules() {
+        let mut seven = vec![0u8; 7];
+        seven[4..7].copy_from_slice(b"fty");
+        assert_eq!(detect_format(&seven), None);
+
+        for len in [8usize, 11, 12, 13] {
+            let mut bytes = vec![0u8; len];
+            bytes[4..8].copy_from_slice(b"ftyp");
+            assert_eq!(detect_format(&bytes), Some(MediaFormat::Mp4), "len={len}");
+        }
+
+        let twelve = vec![0u8; 12];
+        assert_eq!(detect_format(&twelve), None);
+    }
+
+    #[test]
+    fn riff_form_type_wins_over_ftyp_without_fallback() {
+        for len in [12usize, 13] {
+            let mut bytes = vec![0u8; len];
+            bytes[0..4].copy_from_slice(b"RIFF");
+            bytes[4..8].copy_from_slice(b"ftyp");
+            bytes[8..12].copy_from_slice(b"WEBP");
+            assert_eq!(detect_format(&bytes), None, "len={len}");
+        }
+
+        for len in [8usize, 11] {
+            let mut bytes = vec![0u8; len];
+            bytes[0..4].copy_from_slice(b"RIFF");
+            bytes[4..8].copy_from_slice(b"ftyp");
+            assert_eq!(detect_format(&bytes), Some(MediaFormat::Mp4), "len={len}");
+        }
+    }
+
+    #[test]
+    fn trailing_bytes_do_not_change_detection() {
+        for trailing in [0u8, b'X', 0xff] {
+            let mut bytes = vec![0u8; 13];
+            bytes[0..4].copy_from_slice(b"RIFF");
+            bytes[8..12].copy_from_slice(b"WAVE");
+            bytes[12] = trailing;
+            assert_eq!(detect_format(&bytes), Some(MediaFormat::Wav));
+        }
+    }
+}
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    fn contract_signature_format(
+        len: usize,
+        prefix: &[u8; FORMAT_SIGNATURE_PREFIX_LEN],
+    ) -> Option<MediaFormat> {
+        if len >= 12 && &prefix[0..4] == b"RIFF" {
+            return match &prefix[8..12] {
+                b"WAVE" => Some(MediaFormat::Wav),
+                b"AVI " => Some(MediaFormat::Avi),
+                _ => None,
+            };
+        }
+        if len >= 8 && &prefix[4..8] == b"ftyp" {
+            return Some(MediaFormat::Mp4);
+        }
+        None
+    }
+
+    fn contract_detect_format(data: &[u8]) -> Option<MediaFormat> {
+        if data.len() >= 12 && &data[0..4] == b"RIFF" {
+            return match &data[8..12] {
+                b"WAVE" => Some(MediaFormat::Wav),
+                b"AVI " => Some(MediaFormat::Avi),
+                _ => None,
+            };
+        }
+        if data.len() >= 8 && &data[4..8] == b"ftyp" {
+            return Some(MediaFormat::Mp4);
+        }
+        None
+    }
+
+    #[kani::proof]
+    #[kani::unwind(16)]
+    fn format_signature_detection_bounded_exact() {
+        let len: usize = kani::any();
+        let prefix: [u8; FORMAT_SIGNATURE_PREFIX_LEN] = kani::any();
+        let actual = signature_format_from_prefix(len, &prefix);
+        let expected = contract_signature_format(len, &prefix);
+
+        assert_eq!(actual, expected);
+        if len < 8 {
+            assert_eq!(actual, None);
+        } else if len < 12 {
+            assert_eq!(
+                actual,
+                if &prefix[4..8] == b"ftyp" {
+                    Some(MediaFormat::Mp4)
+                } else {
+                    None
+                }
+            );
+        } else if &prefix[0..4] == b"RIFF" {
+            assert_eq!(
+                actual,
+                match &prefix[8..12] {
+                    b"WAVE" => Some(MediaFormat::Wav),
+                    b"AVI " => Some(MediaFormat::Avi),
+                    _ => None,
+                }
+            );
+        } else {
+            assert_eq!(
+                actual,
+                if &prefix[4..8] == b"ftyp" {
+                    Some(MediaFormat::Mp4)
+                } else {
+                    None
+                }
+            );
+        }
+
+        let input: [u8; 13] = kani::any();
+        for len in [0usize, 7, 8, 11, 12, 13] {
+            assert_eq!(
+                detect_format(&input[..len]),
+                contract_detect_format(&input[..len])
+            );
+        }
+        assert_eq!(detect_format(&input[..12]), detect_format(&input[..13]));
     }
 }

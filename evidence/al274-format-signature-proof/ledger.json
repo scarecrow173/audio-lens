@@ -1,0 +1,210 @@
+{
+  "schema": "al274-proof-ledger/v1",
+  "issue": "scarecrow173/audio-lens#274",
+  "slice": "container format signature detection bounded exact proof slice (narrow decision boundary only)",
+  "branch": "feature/274-format-signature-proof",
+  "base": {
+    "origin_main": "0e15ee44916f6b45918e072a19a04c449169ce7d",
+    "merge_base_is_ancestor": true,
+    "latest_main_required_merge": false,
+    "final_fetch_origin_main": "0e15ee44916f6b45918e072a19a04c449169ce7d"
+  },
+  "environment": {
+    "worktree_os": "Windows host path G:/orca/workspaces/audio-lens/al274-format-signature",
+    "canonical_lane_os": "Windows for mise fmt/check/lint/test/proptest; Ubuntu (WSL2) for Kani execution",
+    "rust_toolchain": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "kani_measurement": "/usr/bin/time -v"
+  },
+  "input_domain": {
+    "length": "full symbolic usize machine integer domain; no narrowing assume",
+    "prefix": "fixed symbolic [u8; 12]; every byte independently full 8-bit domain",
+    "length_classes": ["len < 8", "8 <= len < 12", "len >= 12"],
+    "public_shell_matrix_lengths": [0, 7, 8, 11, 12, 13],
+    "trailing_bytes": "index 12 and later are outside the maximum observed signature prefix; production helper cannot observe them by type. len 12/13 shell equality is proved as connection evidence, but arbitrary-length shell copy composition remains unproven scope",
+    "short_input_fillers": "prefix positions beyond len remain symbolic in the proof, so accidental filler observation is rejected rather than assumed away"
+  },
+  "assumptions": {
+    "kani_assume": "none",
+    "input_narrowing": "none",
+    "stubs": "none",
+    "unwinding_assertions_disabled": false,
+    "unwind_attribute": 16,
+    "bounds_are_exact_reparameterization": true
+  },
+  "properties": {
+    "short_length_complement": "len < 8 always returns None",
+    "mp4_mid_length": "8 <= len < 12 maps exact offset 4..8 ftyp to Mp4 and everything else to None",
+    "riff_exact_mapping": "len >= 12 with exact RIFF maps exact WAVE to Wav, exact AVI-with-trailing-space to Avi, and all other form types to None",
+    "riff_precedence": "len >= 12 RIFF does not fall back to Mp4 even when offset 4..8 is ftyp",
+    "non_riff_mp4": "len >= 12 non-RIFF maps exact offset 4..8 ftyp to Mp4",
+    "tag_exactness": "byte order, case, offsets, and AVI trailing space are exact",
+    "none_complement": "Wav/Avi/Mp4/None form the exact complement in every length class",
+    "shell_connection": "public detect_format agrees with an independent contract oracle at len 0,7,8,11,12,13 and len 12/13 trailing bytes do not change the result",
+    "safety": "no overflow, underflow, panic, or invalid indexing in the decision boundary"
+  },
+  "production_connection": {
+    "production_helper": "crates/al-media/src/format.rs::signature_format_from_prefix",
+    "public_shell": "crates/al-media/src/format.rs::detect_format captures at most the first 12 bytes with zero filler and passes the original input length plus fixed prefix to the production helper",
+    "proof_calls_production_helper": true,
+    "proof_calls_public_shell": true,
+    "oracle_is_independent": true,
+    "api_contract_changed": false,
+    "signature_semantics_changed": false,
+    "shell_gap": "arbitrary-length public input shell copy composition is outside the local exact proof; representative public shell matrix is machine-checked but is not the full input-length proof"
+  },
+  "proof": {
+    "harness": "format_signature_detection_bounded_exact",
+    "group": "format-signature",
+    "requirement": "Required",
+    "verdict": "pass",
+    "environment": "Ubuntu",
+    "elapsed_ms": 12792,
+    "max_rss_kb": 431084,
+    "post_revert_regression_elapsed_ms": 8885,
+    "post_revert_regression_max_rss_kb": 365012,
+    "cost_summary": {
+      "selected_proofs": 1,
+      "verified_proofs": 1,
+      "total_elapsed_ms": 12792,
+      "max_observed_rss_kb": 431084,
+      "rss_measured_proofs": 1,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    "raw_log": "evidence/al274-format-signature-proof/kani/kani-format_signature_detection_bounded_exact.txt",
+    "verdict_json": "evidence/al274-format-signature-proof/kani/verdict.json",
+    "post_revert_raw_log": "evidence/al274-format-signature-proof/kani-format-signature-regression/kani-format_signature_detection_bounded_exact.txt",
+    "post_revert_verdict_json": "evidence/al274-format-signature-proof/kani-format-signature-regression/verdict.json"
+  },
+  "mutation": {
+    "change": "production RIFF branch temporarily fell through for unknown RIFF form types, allowing len >= 12 RIFF+ftyp input to be detected as Mp4 instead of preserving unknown-form None",
+    "diagnostic_only": false,
+    "targets_signature_semantics": true,
+    "reverted": true,
+    "verdict": "fail",
+    "detected_by": "format_signature_detection_bounded_exact",
+    "failing_assertions": [
+      "assertion failed: actual == expected",
+      "assertion failed: detect_format(&input[..len]) == contract_detect_format(&input[..len])"
+    ],
+    "elapsed_ms": 7150,
+    "max_rss_kb": 367324,
+    "raw_log": "evidence/al274-format-signature-proof/kani-mutation-riff-fallback/kani-format_signature_detection_bounded_exact.txt",
+    "verdict_json": "evidence/al274-format-signature-proof/kani-mutation-riff-fallback/verdict.json"
+  },
+  "regressions": {
+    "canonical": [
+      {
+        "command": "mise run fmt",
+        "exit": 0
+      },
+      {
+        "command": "mise run check al-media",
+        "exit": 0
+      },
+      {
+        "command": "mise run lint al-media",
+        "exit": 0
+      },
+      {
+        "command": "mise run test al-media",
+        "exit": 0,
+        "result": "unit 113/113 and all integration/doc suites pass"
+      },
+      {
+        "command": "mise run test-formal",
+        "exit": 0,
+        "result": "formal_wav 7/7 and formal_containers 7/7 pass"
+      },
+      {
+        "command": "mise exec -- node --check tools/run-formal-kani.mjs",
+        "exit": 0,
+        "classification": "auxiliary"
+      },
+      {
+        "command": "mise exec -- prek run --all-files",
+        "exit": 0,
+        "result": "pass; no auto-fix residue"
+      }
+    ],
+    "kani_groups": {
+      "format-signature": "pass; 1/1; 8885 ms; max RSS 365012 KiB",
+      "wav-chunk-scan": "pass; 2/2; 13526 ms; max RSS 316112 KiB",
+      "wav-range": "pass; 2/2; 16060 ms; max RSS 301132 KiB",
+      "mp4-avi-boundary": "pass; 2/2; 17195 ms; max RSS 309740 KiB",
+      "mp4-scan": "pass; 1/1; 19104 ms; max RSS 312220 KiB",
+      "avi-movi-tag": "pass; 1/1; 4723 ms; max RSS 300668 KiB",
+      "avi-movi-composition": "pass; 1/1; 5351 ms; max RSS 307256 KiB",
+      "avi-movi-scan": "pass; 1/1; 9158 ms; max RSS 316364 KiB",
+      "avi-stream-kind": "pass; 1/1; 14452 ms; max RSS 499760 KiB",
+      "avi-strh-declaration": "pass; 1/1; 5540 ms; max RSS 303768 KiB",
+      "avi-strf-declaration": "pass; 1/1; 5114 ms; max RSS 301248 KiB",
+      "avi-strf-audio-declaration": "pass; 1/1; 5018 ms; max RSS 301796 KiB"
+    },
+    "regression_group_total_elapsed_ms": 124126,
+    "legacy_signature_subset": {
+      "harness": "detect_format_signature_rules",
+      "verdict": "pass",
+      "elapsed_ms": 6168,
+      "max_rss_kb": 341736,
+      "raw_log": "evidence/al274-format-signature-proof/kani-legacy-detect-format-signature-rules/kani-detect_format_signature_rules.txt"
+    }
+  },
+  "cost_comparison": {
+    "scope": "limited, not an equivalence proof or complete cost matrix",
+    "new_proof_post_revert": "8885 ms / 365012 KiB",
+    "legacy_signature_subset": "6168 ms / 341736 KiB",
+    "comparison": "the legacy proof covered representative len 7/8/12 only; the new proof adds full usize length scalar, full 12-byte prefix bit domain, exact precedence/complement, and public shell matrix while remaining in the same small-proof cost class"
+  },
+  "unproven_scope": [
+    "arbitrary-length public input shell copy composition beyond the fixed boundary matrix",
+    "caller dispatch, probe integration, decode integration, and backend selection",
+    "decode_mp4/decode_avi/decode_wav and all container parser correctness",
+    "MP4 box scan, sample table, PCM declaration/extraction, timing, writer round-trip",
+    "AVI chunk/movi/stream declaration correspondence, timing, PCM, writer round-trip",
+    "WAV chunk/layout/PCM/range/writer behavior",
+    "partial ingest/capability observation and corruption/mutation/truncation whole-parser safety",
+    "public API-wide no-panic, I/O, allocation, diagnostic formatting",
+    "recognition of MP4 files leading with free/wide/styp/mdat/moov; the current contract intentionally returns None"
+  ],
+  "runner_strategy": {
+    "single_bounded_exact_proof": true,
+    "proof_family_split": "not needed; decision proof and shell matrix fit one practical harness",
+    "rejected_decompositions": [
+      "direct public API fixed-length matrix only",
+      "length-gate-only",
+      "tag-only",
+      "valid/invalid family or length enumeration",
+      "legacy harness rewrite",
+      "decode dispatch or whole-container signature proof",
+      "MP4 recognition semantics expansion",
+      "MP4-TABLE-005/AVI-TIME-004/PCM heavy proofs"
+    ],
+    "registry_count": 34,
+    "group": "format-signature",
+    "fail_closed_unknown_names_or_groups": true,
+    "group_and_subset_exclusive": true,
+    "default_all_harnesses_unchanged": true,
+    "wsl_mirror_and_target_layout_unchanged": true
+  },
+  "proptest_overlap": {
+    "existing_property_kept": "detect_format_follows_signature_rules remains in crates/al-media/tests/formal_containers.rs",
+    "relationship": "the formal proof covers the pure decision core exactly; proptest covers public integration statistically",
+    "unit_regressions_added": [
+      "length thresholds 7/8/11/12/13",
+      "RIFF+ftyp competition and unknown RIFF non-fallback",
+      "trailing byte non-dependence"
+    ],
+    "no_weakening": true
+  },
+  "legacy_disposition": "legacy detect_format_signature_rules remains registered legacy inventory; no retire or deletion decision in this slice",
+  "rf_reuse": {
+    "issue_created": false,
+    "candidate": "generic fixed magic-byte prefix decision proof shape may be reusable",
+    "reason_not_promoted": "the contract is still coupled to AudioLens MediaFormat, RIFF precedence, unknown-form non-fallback, leading-ftyp-only recognition, and None interpretation; no independently proven reusable contract exists yet"
+  },
+  "branch_ci": {
+    "status": "Pending post-push observation",
+    "manual_dispatch": false,
+    "post_push_observation": "not yet observed when this ledger was first written"
+  }
+}

@@ -1,0 +1,1572 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=10348 max_rss_kb=309740
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness mp4::proofs::mp4_box_header_step_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/a708c28cc3ec2868/out/al_media-a708c28cc3ec2868__RNvNtNtCsagM2MKksdvB_8al_media3mp46proofs25mp4_box_header_step_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:92:35: 92:40}> thread 0
+aborting path on assume(false) at file crates/al-media/src/mp4.rs line 99 column 1 function mp4::mp4_box_boundary_valid thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:96:36: 96:41}> thread 0
+aborting path on assume(false) at file crates/al-media/src/mp4.rs line 99 column 1 function mp4::mp4_box_boundary_valid thread 0
+aborting path on assume(false) at file crates/al-media/src/mp4.rs line 99 column 1 function mp4::mp4_box_boundary_valid thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:92:35: 92:40}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:96:36: 96:41}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:92:35: 92:40}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:96:36: 96:41}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1541 column 15 function std::option::Option::<u64>::and_then::<u64, {closure@crates/al-media/src/mp4.rs:1681:33: 1681:40}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1685:69: 1685:74}> thread 0
+aborting path on assume(false) at file crates/al-media/src/mp4.rs line 1696 column 15 function mp4::proofs::mp4_box_header_step_exact thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 633 column 5 function std::option::Option::<u64>::is_some thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 660 column 15 function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1724:79: 1724:84}> thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1012 column 15 function std::option::Option::<u64>::unwrap thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2248 column 5 function std::option::unwrap_failed thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1014 column 21 function std::option::Option::<u64>::unwrap thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1012 column 15 function std::option::Option::<u64>::unwrap thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2248 column 5 function std::option::unwrap_failed thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1014 column 21 function std::option::Option::<u64>::unwrap thread 0
+Runtime Symex: 0.130804s
+size of program expression: 6191 steps
+slicing removed 3790 assignments
+Generated 242 VCC(s), 106 remaining after simplification
+Runtime Postprocess Equation: 0.00243273s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.0215435s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 8.012e-06s
+Solving with CaDiCaL 3.0.0
+20781 variables, 53964 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00360096s
+Runtime decision procedure: 0.0258958s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20782 variables, 53965 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.229651s
+Runtime decision procedure: 0.230079s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20783 variables, 53966 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.105216s
+Runtime decision procedure: 0.106219s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20784 variables, 53967 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.048878s
+Runtime decision procedure: 0.0495909s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20785 variables, 53968 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.0403828s
+Runtime decision procedure: 0.0411559s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20786 variables, 53969 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.490654s
+Runtime decision procedure: 0.491295s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+20787 variables, 53970 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 3.62478s
+Runtime decision procedure: 3.62496s
+
+RESULTS:
+Check 1: std::option::unwrap_failed.assertion.1
+	 - Status: SUCCESS
+	 - Description: "called `Option::unwrap()` on a `None` value"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2248:5 in function std::option::unwrap_failed
+
+Check 2: std::option::Option::<u64>::is_some.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:633:5 in function std::option::Option::<u64>::is_some
+
+Check 3: core::num::<impl u64>::checked_add.arithmetic_overflow.1
+	 - Status: SUCCESS
+	 - Description: "attempt to compute `unchecked_add` which would overflow"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/num/uint_macros.rs:942:31 in function core::num::<impl u64>::checked_add
+
+Check 4: mp4::proofs::mp4_box_header_step_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(step, Mp4BoxBoundaryStep::Advance(_)) == valid_expected"
+	 - Location: crates/al-media/src/mp4.rs:1687:9 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 5: mp4::proofs::mp4_box_header_step_exact.assertion.2
+	 - Status: SUCCESS
+	 - Description: "assertion failed: matches!(step, Mp4BoxBoundaryStep::Invalid(_)) == !valid_expected"
+	 - Location: crates/al-media/src/mp4.rs:1691:9 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 6: mp4::proofs::mp4_box_header_step_exact.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/mp4.rs:1696:15 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 7: mp4::proofs::mp4_box_header_step_exact.assertion.3
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::TruncatedHeader == !base_available"
+	 - Location: crates/al-media/src/mp4.rs:1725:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 8: mp4::proofs::mp4_box_header_step_exact.assertion.4
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::TruncatedLargeSizeHeader == truncated_large"
+	 - Location: crates/al-media/src/mp4.rs:1729:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 9: mp4::proofs::mp4_box_header_step_exact.assertion.5
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::LargeSizeSmallerThanHeader == large_too_small"
+	 - Location: crates/al-media/src/mp4.rs:1733:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 10: mp4::proofs::mp4_box_header_step_exact.assertion.6
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::SizeSmallerThanHeader == size_too_small"
+	 - Location: crates/al-media/src/mp4.rs:1737:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 11: mp4::proofs::mp4_box_header_step_exact.assertion.7
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::SizeOverflow == size_overflow"
+	 - Location: crates/al-media/src/mp4.rs:1741:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 12: mp4::proofs::mp4_box_header_step_exact.assertion.8
+	 - Status: SUCCESS
+	 - Description: "assertion failed: error == Mp4BoxBoundaryError::ExtendsPastEnd == extends_past_end"
+	 - Location: crates/al-media/src/mp4.rs:1742:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 13: mp4::proofs::mp4_box_header_step_exact.assertion.9
+	 - Status: SUCCESS
+	 - Description: "attempt to multiply with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1698:34 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 14: mp4::proofs::mp4_box_header_step_exact.assertion.10
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1698:34 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 15: mp4::proofs::mp4_box_header_step_exact.assertion.11
+	 - Status: SUCCESS
+	 - Description: "assertion failed: form_valid"
+	 - Location: crates/al-media/src/mp4.rs:1699:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 16: mp4::proofs::mp4_box_header_step_exact.assertion.12
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.header_len == header_len"
+	 - Location: crates/al-media/src/mp4.rs:1700:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 17: mp4::proofs::mp4_box_header_step_exact.assertion.13
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1701:45 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 18: mp4::proofs::mp4_box_header_step_exact.assertion.14
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_start == at + header_len"
+	 - Location: crates/al-media/src/mp4.rs:1701:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 19: mp4::proofs::mp4_box_header_step_exact.assertion.15
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end == end_expected.unwrap()"
+	 - Location: crates/al-media/src/mp4.rs:1702:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 20: mp4::proofs::mp4_box_header_step_exact.assertion.16
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1704:21 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 21: mp4::proofs::mp4_box_header_step_exact.assertion.17
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1705:21 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 22: mp4::proofs::mp4_box_header_step_exact.assertion.18
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end - plan.body_start == total_size.unwrap() - header_len"
+	 - Location: crates/al-media/src/mp4.rs:1703:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 23: mp4::proofs::mp4_box_header_step_exact.assertion.19
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_start <= plan.body_end"
+	 - Location: crates/al-media/src/mp4.rs:1707:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 24: mp4::proofs::mp4_box_header_step_exact.assertion.20
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end <= limit"
+	 - Location: crates/al-media/src/mp4.rs:1708:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 25: mp4::proofs::mp4_box_header_step_exact.assertion.21
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end > at"
+	 - Location: crates/al-media/src/mp4.rs:1709:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 26: mp4::proofs::mp4_box_header_step_exact.assertion.22
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1710:25 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 27: mp4::proofs::mp4_box_header_step_exact.assertion.23
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end - at >= header_len"
+	 - Location: crates/al-media/src/mp4.rs:1710:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 28: mp4::proofs::mp4_box_header_step_exact.assertion.24
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1711:25 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 29: mp4::proofs::mp4_box_header_step_exact.assertion.25
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1711:49 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 30: mp4::proofs::mp4_box_header_step_exact.assertion.26
+	 - Status: SUCCESS
+	 - Description: "assertion failed: limit - plan.body_end < limit - at"
+	 - Location: crates/al-media/src/mp4.rs:1711:17 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 31: mp4::proofs::mp4_box_header_step_exact.assertion.27
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end == limit"
+	 - Location: crates/al-media/src/mp4.rs:1713:21 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 32: mp4::proofs::mp4_box_header_step_exact.assertion.28
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1716:47 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 33: mp4::proofs::mp4_box_header_step_exact.assertion.29
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end == at + largesize"
+	 - Location: crates/al-media/src/mp4.rs:1716:21 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 34: mp4::proofs::mp4_box_header_step_exact.assertion.30
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1719:47 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 35: mp4::proofs::mp4_box_header_step_exact.assertion.31
+	 - Status: SUCCESS
+	 - Description: "assertion failed: plan.body_end == at + u64::from(size32)"
+	 - Location: crates/al-media/src/mp4.rs:1719:21 in function mp4::proofs::mp4_box_header_step_exact
+
+Check 36: std::option::Option::<u64>::unwrap.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1012:15 in function std::option::Option::<u64>::unwrap
+
+Check 37: std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:92:35: 92:40}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:660:15 in function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:92:35: 92:40}>
+
+Check 38: std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:96:36: 96:41}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:660:15 in function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:96:36: 96:41}>
+
+Check 39: std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1724:79: 1724:84}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:660:15 in function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1724:79: 1724:84}>
+
+Check 40: mp4::mp4_box_boundary_step.assertion.1
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:137:51 in function mp4::mp4_box_boundary_step
+
+Check 41: mp4::mp4_box_boundary_step.assertion.2
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:134:51 in function mp4::mp4_box_boundary_step
+
+Check 42: mp4::mp4_box_boundary_step.assertion.3
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:124:51 in function mp4::mp4_box_boundary_step
+
+Check 43: mp4::mp4_box_boundary_step.assertion.4
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:124:51 in function mp4::mp4_box_boundary_step
+
+Check 44: std::option::Option::<u64>::and_then::<u64, {closure@crates/al-media/src/mp4.rs:1681:33: 1681:40}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1541:15 in function std::option::Option::<u64>::and_then::<u64, {closure@crates/al-media/src/mp4.rs:1681:33: 1681:40}>
+
+Check 45: mp4::proofs::expected_total_size.assertion.1
+	 - Status: SUCCESS
+	 - Description: "attempt to subtract with overflow"
+	 - Location: crates/al-media/src/mp4.rs:1561:23 in function mp4::proofs::expected_total_size
+
+Check 46: mp4::mp4_box_boundary_valid.assertion.1
+	 - Status: SUCCESS
+	 - Description: "attempt to add with overflow"
+	 - Location: crates/al-media/src/mp4.rs:105:22 in function mp4::mp4_box_boundary_valid
+
+Check 47: mp4::mp4_box_boundary_valid.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/mp4.rs:99:1 in function mp4::mp4_box_boundary_valid
+
+Check 48: std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1685:69: 1685:74}>.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:660:15 in function std::option::Option::<u64>::is_some_and::<{closure@crates/al-media/src/mp4.rs:1685:69: 1685:74}>
+
+Check 49: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 50: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 51: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 52: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 53: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 54: mp4::mp4_box_base_header_available::{closure#0}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:92:48 in function mp4::mp4_box_base_header_available::{closure#0}
+
+Check 55: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 56: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 57: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 58: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 59: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 60: mp4::mp4_box_large_header_available::{closure#0}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:96:49 in function mp4::mp4_box_large_header_available::{closure#0}
+
+Check 61: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 62: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 63: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 64: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 65: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 66: mp4::proofs::mp4_box_header_step_exact::{closure#0}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1681:41 in function mp4::proofs::mp4_box_header_step_exact::{closure#0}
+
+Check 67: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 68: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 69: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 70: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 71: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 72: mp4::proofs::mp4_box_header_step_exact::{closure#2}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1724:91 in function mp4::proofs::mp4_box_header_step_exact::{closure#2}
+
+Check 73: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 74: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 75: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 76: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 77: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 78: mp4::proofs::mp4_box_header_step_exact::{closure#1}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1685:82 in function mp4::proofs::mp4_box_header_step_exact::{closure#1}
+
+Check 79: std::option::Option::<u64>::is_some.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 80: std::option::Option::<u64>::is_some.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 81: std::option::Option::<u64>::is_some.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 82: std::option::Option::<u64>::is_some.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 83: std::option::Option::<u64>::is_some.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 84: std::option::Option::<u64>::is_some.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:634:18 in function std::option::Option::<u64>::is_some
+
+Check 85: mp4::mp4_box_boundary_step.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:136:14 in function mp4::mp4_box_boundary_step
+
+Check 86: mp4::mp4_box_boundary_step.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:136:14 in function mp4::mp4_box_boundary_step
+
+Check 87: mp4::proofs::expected_total_size.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1569:18 in function mp4::proofs::expected_total_size
+
+Check 88: mp4::proofs::expected_total_size.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1569:18 in function mp4::proofs::expected_total_size
+
+Check 89: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 90: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 91: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 92: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 93: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 94: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 95: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 96: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 97: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 98: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 99: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+Check 100: <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:68:30 in function <mp4::Mp4BoxBoundaryError as std::cmp::PartialEq>::eq
+
+
+SUMMARY:
+ ** 0 of 100 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 5.344676s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.83s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.22s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s
+	Command being timed: "cargo kani -p al-media --tests --harness mp4_box_header_step_exact -Z stubbing"
+	User time (seconds): 9.23
+	System time (seconds): 1.05
+	Percent of CPU this job got: 104%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.86
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 309740
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 204881
+	Voluntary context switches: 5489
+	Involuntary context switches: 110
+	Swaps: 0
+	File system inputs: 880
+	File system outputs: 56064
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
