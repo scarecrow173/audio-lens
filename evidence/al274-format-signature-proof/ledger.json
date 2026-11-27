@@ -203,8 +203,8 @@
     "reason_not_promoted": "the contract is still coupled to AudioLens MediaFormat, RIFF precedence, unknown-form non-fallback, leading-ftyp-only recognition, and None interpretation; no independently proven reusable contract exists yet"
   },
   "branch_ci": {
-    "status": "Pending post-push observation",
+    "status": "Unsupported",
     "manual_dispatch": false,
-    "post_push_observation": "not yet observed when this ledger was first written"
+    "post_push_observation": "after PR #293 creation, gh run list --branch feature/274-format-signature-proof returned no runs and gh pr checks 293 reported no checks; .github/workflows/ci.yml is workflow_dispatch-only, so no automatic branch CI exists without manual dispatch"
   }
 }

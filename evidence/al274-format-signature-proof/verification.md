@@ -50,7 +50,7 @@ regression group の合計 solver wall/elapsed は 124,126 ms、legacy signature
 
 ## Branch CI
 
-push 後に read-only で確認し、結果を記録する。`.github/workflows/ci.yml` が manual dispatch-only の既存構成なら、manual dispatch は実行せず Unsupported として記録する。
+PR #293 作成後に `gh run list --branch feature/274-format-signature-proof --limit 10` と `gh pr checks 293` を read-only で確認したが、run/check は 0 件だった。`.github/workflows/ci.yml` は `workflow_dispatch` のみを trigger に持ち automatic branch CI がないため、manual dispatch を使わない条件では branch CI は **Unsupported** と記録する。manual dispatch は実行していない。main 検証は Daily CI に委譲する。
 
 ## ファイル
 

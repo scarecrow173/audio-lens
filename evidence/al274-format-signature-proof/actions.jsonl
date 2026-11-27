@@ -10,3 +10,5 @@
 {"ts":"2026-11-27T14:05:00Z","action":"documentation-sync","result":"updated formal spec, boundary design, verify skill, mise task count/group, runner registry/group, verification.md, ledger.json, and actions.jsonl; did not edit generated docs index files"}
 {"ts":"2026-11-27T14:06:00Z","action":"latest-main-check","result":"git fetch origin main before final verification showed origin/main still 0e15ee44916f6b45918e072a19a04c449169ce7d; no merge required"}
 {"ts":"2026-11-27T14:10:00Z","action":"canonical-hygiene","command":"mise exec -- prek run --all-files","exit":0,"result":"pass; no auto-fix residue; output captured in prek.txt"}
+{"ts":"2026-11-27T14:15:00Z","action":"push-and-pr","result":"pushed feature/274-format-signature-proof and opened PR #293: https://github.com/scarecrow173/audio-lens/pull/293"}
+{"ts":"2026-11-27T14:16:00Z","action":"branch-ci-read-only","result":"gh run list --branch feature/274-format-signature-proof returned no runs and gh pr checks 293 reported no checks; ci.yml is workflow_dispatch-only, so branch CI is Unsupported without manual dispatch; no manual dispatch was run"}
