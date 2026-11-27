@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 30 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 31 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -207,12 +207,14 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   selects the Required AVI-MOVI-003 movi scan collection proof
   (`avi_movi_scan_collection_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-stream-kind"`
   selects the Required AVI stream existence/kind classification proof
-  (`avi_stream_kind_classification_bounded_exact`). The WAV proofs are registered in
-  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan proofs are
+  (`avi_stream_kind_classification_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-strh-declaration"`
+  selects the Required AVI `strh` declaration field extraction/validation proof
+  (`avi_strh_declaration_bounded_exact`). The WAV proofs are registered in
+  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 30. When `/usr/bin/time` is available
+  and an unset variable runs all 31. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
@@ -257,7 +259,9 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   mutation evidence is in `evidence/al274-avi-movi-composition-proof/`,
   and AVI movi scan collection mutation evidence is in
   `evidence/al274-avi-movi-scan-proof/`, and AVI stream existence/kind
-  classification mutation evidence is in `evidence/al274-avi-stream-kind-proof/`.
+  classification mutation evidence is in `evidence/al274-avi-stream-kind-proof/`,
+  and AVI strh declaration mutation evidence is in
+  `evidence/al274-avi-strh-declaration-proof/`.
 
 Change-impact procedure:
 
