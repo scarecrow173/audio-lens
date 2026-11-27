@@ -258,6 +258,34 @@ proof は exact `strh`/exact `strf`/otherの disjoint exhaustive分類、exact `
 
 runner は `AL_KANI_HARNESS_GROUP="avi-strf-capture"` で `avi_strl_entry_classification_exact`、`avi_strf_capture_ordering_bounded_exact`、`avi_strf_materialize_bounded_exact` を選択する。registryは 37 件となる。format signature、AVI audio/video `strf` declaration、AVI `strh` declaration、AVI stream kind、AVI movi scan/composition/tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV rangeの各 groupは regressionとして再実行し、それらの proof設計は変更しない。legacy proofを含む全件 laneはこの sliceの必須検証にしない。
 
+### AVI first-audio `wb` 連結の implementation boundary
+
+PR #295/#296 の `strf` capture は format を供給する。この slice はそれと
+独立に、最初の `auds` に属する exact `wb` body を mux 順に連結する。
+body の混入・欠落・順序違いは `decode_waveformatex` の入力を変え、
+`IngestResult` の PCM や availability/provenance に現れる。
+
+固定 3 stream と固定 3 packet を取る。各 body は 0〜2 byte で、実在 byte
+は全 bit pattern を取る。PR #289 の first selection と payload predicate
+の exactness により、type class、index 0/1/2/out-of-range、`wb`/non-`wb`
+に再パラメータ化できる。各 selector は全射で `kani::assume` は使わない。
+proof は本番の first selection と `avi_selected_audio_pcm` を呼び、独立
+oracle の寄与長と prefix offset で全出力 byte と安全性を検査する。
+
+`decode_layout` は選択済み音声の連結を helper に委ね、空の場合の unavailable、
+非空の場合の decode 入力、audio 非要求時の bypass を維持する。映像と timing
+は変更しない。walker と error mapping は構造と runtime test で接続し、
+局所 Pass を動的 table/collection、任意長 copy、一般の `Vec` growth、
+missing-vs-empty の製品意味論、declaration correspondence、映像/時刻、
+PCM、MP4、公開 API 全体の証明には転用しない。
+
+`AL_KANI_HARNESS_GROUP="avi-wb-concatenation"` は
+`avi_audio_wb_concatenation_bounded_exact` を選択する。現行 registry は 38 件。
+`strf` capture を含む既存の 13 group は回帰として再実行し、legacy 全件
+lane は対象外とする。実行予算、除外・重い後続 Property、分解比較は
+[境界分析](../../evidence/al274-avi-wb-concatenation-proof/boundary-analysis.md)、
+結果は同ディレクトリの `verification.md` と ledger に記録する。
+
 ## canonical 21 proof の disposition 要約
 
 - **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。

@@ -1,0 +1,38 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "pass",
+  "reason": "all 2 kani harness(es) verified",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "wav_chunk_boundary_step_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 8337,
+      "max_rss_kb": 308784,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 288\n\tFile system outputs: 56080\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "harness": "wav_chunk_scan_progress_bounded_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 11172,
+      "max_rss_kb": 319516,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 288\n\tFile system outputs: 58616\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 2,
+    "verified_proofs": 2,
+    "total_elapsed_ms": 19509,
+    "max_observed_rss_kb": 319516,
+    "rss_measured_proofs": 2,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

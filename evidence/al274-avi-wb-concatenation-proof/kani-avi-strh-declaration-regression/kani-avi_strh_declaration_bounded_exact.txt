@@ -1,0 +1,2341 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=7899 max_rss_kb=307372
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness avi::proofs::avi_strh_declaration_bounded_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/8e0588d4b44a83ec/out/al_media-8e0588d4b44a83ec__RNvNtNtCsagM2MKksdvB_8al_media3avi6proofs34avi_strh_declaration_bounded_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Runtime Symex: 0.0476554s
+size of program expression: 1766 steps
+slicing removed 800 assignments
+Generated 354 VCC(s), 64 remaining after simplification
+Runtime Postprocess Equation: 0.000427828s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.00313852s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 5.901e-06s
+Solving with CaDiCaL 3.0.0
+3179 variables, 6704 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.000251081s
+Runtime decision procedure: 0.00373072s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+3180 variables, 6705 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 0.0031903s
+Runtime decision procedure: 0.00332669s
+
+RESULTS:
+Check 1: memcmp.precondition.1
+	 - Status: SUCCESS
+	 - Description: "memcmp region 1 readable"
+	 - Location: <builtin-library-memcmp>:19 in function memcmp
+
+Check 2: memcmp.precondition.2
+	 - Status: SUCCESS
+	 - Description: "memcpy region 2 readable"
+	 - Location: <builtin-library-memcmp>:21 in function memcmp
+
+Check 3: avi::avi_strh_declaration_fields.assertion.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 4: avi::avi_strh_declaration_fields.assertion.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 5: avi::avi_strh_declaration_fields.assertion.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 6: avi::avi_strh_declaration_fields.assertion.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 7: avi::avi_strh_declaration_fields.assertion.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 8: avi::avi_strh_declaration_fields.assertion.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 9: avi::avi_strh_declaration_fields.assertion.7
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 10: avi::avi_strh_declaration_fields.assertion.8
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 11: avi::avi_strh_declaration_fields.assertion.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 12: avi::avi_strh_declaration_fields.assertion.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 13: avi::avi_strh_declaration_fields.assertion.11
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 14: avi::avi_strh_declaration_fields.assertion.12
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 15: avi::avi_strh_declaration_fields.assertion.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 16: avi::avi_strh_declaration_fields.assertion.14
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 17: avi::avi_strh_declaration_fields.assertion.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 18: avi::avi_strh_declaration_fields.assertion.16
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 19: avi::avi_strh_declaration_fields.assertion.17
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 20: avi::avi_strh_declaration_fields.assertion.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 21: avi::avi_strh_declaration_fields.assertion.19
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 22: avi::avi_strh_declaration_fields.assertion.20
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 23: avi::avi_strh_declaration_fields.assertion.21
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 24: avi::avi_strh_declaration_fields.assertion.22
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 25: avi::avi_strh_declaration_fields.assertion.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 26: avi::avi_strh_declaration_fields.assertion.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 27: avi::proofs::avi_strh_declaration_bounded_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "assertion failed: accepted == body_len >= STRH_HEADER_LEN"
+	 - Location: crates/al-media/src/avi.rs:2027:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 28: avi::proofs::avi_strh_declaration_bounded_exact.assertion.2
+	 - Status: SUCCESS
+	 - Description: "assertion failed: !accepted == body_len < STRH_HEADER_LEN"
+	 - Location: crates/al-media/src/avi.rs:2028:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 29: avi::proofs::avi_strh_declaration_bounded_exact.assertion.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:14 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 30: avi::proofs::avi_strh_declaration_bounded_exact.assertion.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:25 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 31: avi::proofs::avi_strh_declaration_bounded_exact.assertion.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:36 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 32: avi::proofs::avi_strh_declaration_bounded_exact.assertion.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:47 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 33: avi::proofs::avi_strh_declaration_bounded_exact.assertion.7
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.fcc_type == [prefix[0], prefix[1], prefix[2], prefix[3]]"
+	 - Location: crates/al-media/src/avi.rs:2031:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 34: avi::proofs::avi_strh_declaration_bounded_exact.assertion.8
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 35: avi::proofs::avi_strh_declaration_bounded_exact.assertion.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 36: avi::proofs::avi_strh_declaration_bounded_exact.assertion.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 37: avi::proofs::avi_strh_declaration_bounded_exact.assertion.11
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 38: avi::proofs::avi_strh_declaration_bounded_exact.assertion.12
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.scale ==
+u32::from_le_bytes([prefix[20], prefix[21], prefix[22], prefix[23]])"
+	 - Location: crates/al-media/src/avi.rs:2035:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 39: avi::proofs::avi_strh_declaration_bounded_exact.assertion.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 40: avi::proofs::avi_strh_declaration_bounded_exact.assertion.14
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 41: avi::proofs::avi_strh_declaration_bounded_exact.assertion.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 42: avi::proofs::avi_strh_declaration_bounded_exact.assertion.16
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 43: avi::proofs::avi_strh_declaration_bounded_exact.assertion.17
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.rate ==
+u32::from_le_bytes([prefix[24], prefix[25], prefix[26], prefix[27]])"
+	 - Location: crates/al-media/src/avi.rs:2039:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 44: avi::proofs::avi_strh_declaration_bounded_exact.assertion.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 45: avi::proofs::avi_strh_declaration_bounded_exact.assertion.19
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 46: avi::proofs::avi_strh_declaration_bounded_exact.assertion.20
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 47: avi::proofs::avi_strh_declaration_bounded_exact.assertion.21
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 48: avi::proofs::avi_strh_declaration_bounded_exact.assertion.22
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.start ==
+u32::from_le_bytes([prefix[28], prefix[29], prefix[30], prefix[31]])"
+	 - Location: crates/al-media/src/avi.rs:2043:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 49: avi::proofs::avi_strh_declaration_bounded_exact.assertion.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 50: avi::proofs::avi_strh_declaration_bounded_exact.assertion.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 51: avi::proofs::avi_strh_declaration_bounded_exact.assertion.25
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 52: avi::proofs::avi_strh_declaration_bounded_exact.assertion.26
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 53: avi::proofs::avi_strh_declaration_bounded_exact.assertion.27
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.length ==
+u32::from_le_bytes([prefix[32], prefix[33], prefix[34], prefix[35]])"
+	 - Location: crates/al-media/src/avi.rs:2047:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 54: avi::proofs::avi_strh_declaration_bounded_exact.assertion.28
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 55: avi::proofs::avi_strh_declaration_bounded_exact.assertion.29
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 56: avi::proofs::avi_strh_declaration_bounded_exact.assertion.30
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 57: avi::proofs::avi_strh_declaration_bounded_exact.assertion.31
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 58: avi::proofs::avi_strh_declaration_bounded_exact.assertion.32
+	 - Status: SUCCESS
+	 - Description: "assertion failed: fields.sample_size ==
+u32::from_le_bytes([prefix[44], prefix[45], prefix[46], prefix[47]])"
+	 - Location: crates/al-media/src/avi.rs:2051:9 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 59: avi::avi_strh_declaration_fields.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 60: avi::avi_strh_declaration_fields.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 61: avi::avi_strh_declaration_fields.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 62: avi::avi_strh_declaration_fields.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 63: avi::avi_strh_declaration_fields.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 64: avi::avi_strh_declaration_fields.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 65: avi::avi_strh_declaration_fields.array_bounds.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:20 in function avi::avi_strh_declaration_fields
+
+Check 66: avi::avi_strh_declaration_fields.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 67: avi::avi_strh_declaration_fields.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 68: avi::avi_strh_declaration_fields.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 69: avi::avi_strh_declaration_fields.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 70: avi::avi_strh_declaration_fields.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 71: avi::avi_strh_declaration_fields.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 72: avi::avi_strh_declaration_fields.array_bounds.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:31 in function avi::avi_strh_declaration_fields
+
+Check 73: avi::avi_strh_declaration_fields.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 74: avi::avi_strh_declaration_fields.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 75: avi::avi_strh_declaration_fields.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 76: avi::avi_strh_declaration_fields.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 77: avi::avi_strh_declaration_fields.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 78: avi::avi_strh_declaration_fields.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 79: avi::avi_strh_declaration_fields.array_bounds.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:42 in function avi::avi_strh_declaration_fields
+
+Check 80: avi::avi_strh_declaration_fields.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 81: avi::avi_strh_declaration_fields.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 82: avi::avi_strh_declaration_fields.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 83: avi::avi_strh_declaration_fields.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 84: avi::avi_strh_declaration_fields.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 85: avi::avi_strh_declaration_fields.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 86: avi::avi_strh_declaration_fields.array_bounds.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:197:53 in function avi::avi_strh_declaration_fields
+
+Check 87: avi::avi_strh_declaration_fields.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 88: avi::avi_strh_declaration_fields.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 89: avi::avi_strh_declaration_fields.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 90: avi::avi_strh_declaration_fields.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 91: avi::avi_strh_declaration_fields.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 92: avi::avi_strh_declaration_fields.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 93: avi::avi_strh_declaration_fields.array_bounds.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:36 in function avi::avi_strh_declaration_fields
+
+Check 94: avi::avi_strh_declaration_fields.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 95: avi::avi_strh_declaration_fields.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 96: avi::avi_strh_declaration_fields.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 97: avi::avi_strh_declaration_fields.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 98: avi::avi_strh_declaration_fields.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 99: avi::avi_strh_declaration_fields.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 100: avi::avi_strh_declaration_fields.array_bounds.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:48 in function avi::avi_strh_declaration_fields
+
+Check 101: avi::avi_strh_declaration_fields.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 102: avi::avi_strh_declaration_fields.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 103: avi::avi_strh_declaration_fields.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 104: avi::avi_strh_declaration_fields.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 105: avi::avi_strh_declaration_fields.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 106: avi::avi_strh_declaration_fields.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 107: avi::avi_strh_declaration_fields.array_bounds.7
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:60 in function avi::avi_strh_declaration_fields
+
+Check 108: avi::avi_strh_declaration_fields.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 109: avi::avi_strh_declaration_fields.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 110: avi::avi_strh_declaration_fields.pointer_dereference.45
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 111: avi::avi_strh_declaration_fields.pointer_dereference.46
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 112: avi::avi_strh_declaration_fields.pointer_dereference.47
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 113: avi::avi_strh_declaration_fields.pointer_dereference.48
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 114: avi::avi_strh_declaration_fields.array_bounds.8
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:198:72 in function avi::avi_strh_declaration_fields
+
+Check 115: avi::avi_strh_declaration_fields.pointer_dereference.49
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 116: avi::avi_strh_declaration_fields.pointer_dereference.50
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 117: avi::avi_strh_declaration_fields.pointer_dereference.51
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 118: avi::avi_strh_declaration_fields.pointer_dereference.52
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 119: avi::avi_strh_declaration_fields.pointer_dereference.53
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 120: avi::avi_strh_declaration_fields.pointer_dereference.54
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 121: avi::avi_strh_declaration_fields.array_bounds.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:35 in function avi::avi_strh_declaration_fields
+
+Check 122: avi::avi_strh_declaration_fields.pointer_dereference.55
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 123: avi::avi_strh_declaration_fields.pointer_dereference.56
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 124: avi::avi_strh_declaration_fields.pointer_dereference.57
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 125: avi::avi_strh_declaration_fields.pointer_dereference.58
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 126: avi::avi_strh_declaration_fields.pointer_dereference.59
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 127: avi::avi_strh_declaration_fields.pointer_dereference.60
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 128: avi::avi_strh_declaration_fields.array_bounds.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:47 in function avi::avi_strh_declaration_fields
+
+Check 129: avi::avi_strh_declaration_fields.pointer_dereference.61
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 130: avi::avi_strh_declaration_fields.pointer_dereference.62
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 131: avi::avi_strh_declaration_fields.pointer_dereference.63
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 132: avi::avi_strh_declaration_fields.pointer_dereference.64
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 133: avi::avi_strh_declaration_fields.pointer_dereference.65
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 134: avi::avi_strh_declaration_fields.pointer_dereference.66
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 135: avi::avi_strh_declaration_fields.array_bounds.11
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:59 in function avi::avi_strh_declaration_fields
+
+Check 136: avi::avi_strh_declaration_fields.pointer_dereference.67
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 137: avi::avi_strh_declaration_fields.pointer_dereference.68
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 138: avi::avi_strh_declaration_fields.pointer_dereference.69
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 139: avi::avi_strh_declaration_fields.pointer_dereference.70
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 140: avi::avi_strh_declaration_fields.pointer_dereference.71
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 141: avi::avi_strh_declaration_fields.pointer_dereference.72
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 142: avi::avi_strh_declaration_fields.array_bounds.12
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:199:71 in function avi::avi_strh_declaration_fields
+
+Check 143: avi::avi_strh_declaration_fields.pointer_dereference.73
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 144: avi::avi_strh_declaration_fields.pointer_dereference.74
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 145: avi::avi_strh_declaration_fields.pointer_dereference.75
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 146: avi::avi_strh_declaration_fields.pointer_dereference.76
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 147: avi::avi_strh_declaration_fields.pointer_dereference.77
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 148: avi::avi_strh_declaration_fields.pointer_dereference.78
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 149: avi::avi_strh_declaration_fields.array_bounds.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:36 in function avi::avi_strh_declaration_fields
+
+Check 150: avi::avi_strh_declaration_fields.pointer_dereference.79
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 151: avi::avi_strh_declaration_fields.pointer_dereference.80
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 152: avi::avi_strh_declaration_fields.pointer_dereference.81
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 153: avi::avi_strh_declaration_fields.pointer_dereference.82
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 154: avi::avi_strh_declaration_fields.pointer_dereference.83
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 155: avi::avi_strh_declaration_fields.pointer_dereference.84
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 156: avi::avi_strh_declaration_fields.array_bounds.14
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:48 in function avi::avi_strh_declaration_fields
+
+Check 157: avi::avi_strh_declaration_fields.pointer_dereference.85
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 158: avi::avi_strh_declaration_fields.pointer_dereference.86
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 159: avi::avi_strh_declaration_fields.pointer_dereference.87
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 160: avi::avi_strh_declaration_fields.pointer_dereference.88
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 161: avi::avi_strh_declaration_fields.pointer_dereference.89
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 162: avi::avi_strh_declaration_fields.pointer_dereference.90
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 163: avi::avi_strh_declaration_fields.array_bounds.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:60 in function avi::avi_strh_declaration_fields
+
+Check 164: avi::avi_strh_declaration_fields.pointer_dereference.91
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 165: avi::avi_strh_declaration_fields.pointer_dereference.92
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 166: avi::avi_strh_declaration_fields.pointer_dereference.93
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 167: avi::avi_strh_declaration_fields.pointer_dereference.94
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 168: avi::avi_strh_declaration_fields.pointer_dereference.95
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 169: avi::avi_strh_declaration_fields.pointer_dereference.96
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 170: avi::avi_strh_declaration_fields.array_bounds.16
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:200:72 in function avi::avi_strh_declaration_fields
+
+Check 171: avi::avi_strh_declaration_fields.pointer_dereference.97
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 172: avi::avi_strh_declaration_fields.pointer_dereference.98
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 173: avi::avi_strh_declaration_fields.pointer_dereference.99
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 174: avi::avi_strh_declaration_fields.pointer_dereference.100
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 175: avi::avi_strh_declaration_fields.pointer_dereference.101
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 176: avi::avi_strh_declaration_fields.pointer_dereference.102
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 177: avi::avi_strh_declaration_fields.array_bounds.17
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:37 in function avi::avi_strh_declaration_fields
+
+Check 178: avi::avi_strh_declaration_fields.pointer_dereference.103
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 179: avi::avi_strh_declaration_fields.pointer_dereference.104
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 180: avi::avi_strh_declaration_fields.pointer_dereference.105
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 181: avi::avi_strh_declaration_fields.pointer_dereference.106
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 182: avi::avi_strh_declaration_fields.pointer_dereference.107
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 183: avi::avi_strh_declaration_fields.pointer_dereference.108
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 184: avi::avi_strh_declaration_fields.array_bounds.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:49 in function avi::avi_strh_declaration_fields
+
+Check 185: avi::avi_strh_declaration_fields.pointer_dereference.109
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 186: avi::avi_strh_declaration_fields.pointer_dereference.110
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 187: avi::avi_strh_declaration_fields.pointer_dereference.111
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 188: avi::avi_strh_declaration_fields.pointer_dereference.112
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 189: avi::avi_strh_declaration_fields.pointer_dereference.113
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 190: avi::avi_strh_declaration_fields.pointer_dereference.114
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 191: avi::avi_strh_declaration_fields.array_bounds.19
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:61 in function avi::avi_strh_declaration_fields
+
+Check 192: avi::avi_strh_declaration_fields.pointer_dereference.115
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 193: avi::avi_strh_declaration_fields.pointer_dereference.116
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 194: avi::avi_strh_declaration_fields.pointer_dereference.117
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 195: avi::avi_strh_declaration_fields.pointer_dereference.118
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 196: avi::avi_strh_declaration_fields.pointer_dereference.119
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 197: avi::avi_strh_declaration_fields.pointer_dereference.120
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 198: avi::avi_strh_declaration_fields.array_bounds.20
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:201:73 in function avi::avi_strh_declaration_fields
+
+Check 199: avi::avi_strh_declaration_fields.pointer_dereference.121
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 200: avi::avi_strh_declaration_fields.pointer_dereference.122
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 201: avi::avi_strh_declaration_fields.pointer_dereference.123
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 202: avi::avi_strh_declaration_fields.pointer_dereference.124
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 203: avi::avi_strh_declaration_fields.pointer_dereference.125
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 204: avi::avi_strh_declaration_fields.pointer_dereference.126
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 205: avi::avi_strh_declaration_fields.array_bounds.21
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:42 in function avi::avi_strh_declaration_fields
+
+Check 206: avi::avi_strh_declaration_fields.pointer_dereference.127
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 207: avi::avi_strh_declaration_fields.pointer_dereference.128
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 208: avi::avi_strh_declaration_fields.pointer_dereference.129
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 209: avi::avi_strh_declaration_fields.pointer_dereference.130
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 210: avi::avi_strh_declaration_fields.pointer_dereference.131
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 211: avi::avi_strh_declaration_fields.pointer_dereference.132
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 212: avi::avi_strh_declaration_fields.array_bounds.22
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:54 in function avi::avi_strh_declaration_fields
+
+Check 213: avi::avi_strh_declaration_fields.pointer_dereference.133
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 214: avi::avi_strh_declaration_fields.pointer_dereference.134
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 215: avi::avi_strh_declaration_fields.pointer_dereference.135
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 216: avi::avi_strh_declaration_fields.pointer_dereference.136
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 217: avi::avi_strh_declaration_fields.pointer_dereference.137
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 218: avi::avi_strh_declaration_fields.pointer_dereference.138
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 219: avi::avi_strh_declaration_fields.array_bounds.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:66 in function avi::avi_strh_declaration_fields
+
+Check 220: avi::avi_strh_declaration_fields.pointer_dereference.139
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 221: avi::avi_strh_declaration_fields.pointer_dereference.140
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 222: avi::avi_strh_declaration_fields.pointer_dereference.141
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 223: avi::avi_strh_declaration_fields.pointer_dereference.142
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 224: avi::avi_strh_declaration_fields.pointer_dereference.143
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 225: avi::avi_strh_declaration_fields.pointer_dereference.144
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 226: avi::avi_strh_declaration_fields.array_bounds.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:202:78 in function avi::avi_strh_declaration_fields
+
+Check 227: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:14 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 228: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:25 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 229: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:36 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 230: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2033:47 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 231: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 232: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 233: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.7
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 234: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.8
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2037:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 235: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 236: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 237: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.11
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 238: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.12
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2041:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 239: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 240: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.14
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 241: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 242: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.16
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2045:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 243: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.17
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 244: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 245: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.19
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 246: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.20
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2049:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 247: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.21
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:33 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 248: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.22
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:45 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 249: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:57 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 250: avi::proofs::avi_strh_declaration_bounded_exact.array_bounds.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/avi.rs:2053:69 in function avi::proofs::avi_strh_declaration_bounded_exact
+
+Check 251: memcmp.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 252: memcmp.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 253: memcmp.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 254: memcmp.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 255: memcmp.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 256: memcmp.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 257: memcmp.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 258: memcmp.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 259: memcmp.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 260: memcmp.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 261: memcmp.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 262: memcmp.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+
+SUMMARY:
+ ** 0 of 262 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 0.9243234s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.80s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.37s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+	Command being timed: "cargo kani -p al-media --tests --harness avi_strh_declaration_bounded_exact -Z stubbing"
+	User time (seconds): 6.59
+	System time (seconds): 1.31
+	Percent of CPU this job got: 88%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:08.91
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 307372
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 201571
+	Voluntary context switches: 7789
+	Involuntary context switches: 106
+	Swaps: 0
+	File system inputs: 288
+	File system outputs: 55936
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

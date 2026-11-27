@@ -1,0 +1,9 @@
+checked_sha=bcfbb84dd04415105edec49e6511ce0f3fb53fb0
+
+$ gh run list --branch feature/274-avi-wb-concatenation-proof --commit bcfbb84dd04415105edec49e6511ce0f3fb53fb0 --limit 10 --json databaseId,event,headSha,status,conclusion,url
+[]
+exit=0
+
+$ gh pr checks 297
+no checks reported on the 'feature/274-avi-wb-concatenation-proof' branch
+exit=1

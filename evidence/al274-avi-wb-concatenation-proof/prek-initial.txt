@@ -1,0 +1,47 @@
+trim trailing whitespace.................................................Failed
+- hook id: trailing-whitespace
+- description: Trims trailing whitespace
+- exit code: 1
+- files were modified by this hook
+
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-avi-stream-kind-regression/kani-avi_stream_kind_classification_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/mutation-wb-concatenation-kani/kani-avi_audio_wb_concatenation_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-format-signature-regression/kani-format_signature_detection_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani/kani-avi_audio_wb_concatenation_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-initial/kani-avi_audio_wb_concatenation_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-static-oracle/kani-avi_audio_wb_concatenation_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-mp4-scan-regression/kani-mp4_box_scan_progress_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression/kani-wav_chunk_scan_progress_bounded_exact.txt
+  Fixing evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-capture-regression/kani-avi_strf_materialize_bounded_exact.txt
+fix end of files.........................................................Passed
+mixed line ending........................................................Passed
+fix utf-8 byte order marker..............................................Passed
+check yaml...............................................................Passed
+check toml...............................................................Passed
+detect private key.......................................................Passed
+check illegal windows names..........................(no files to check)Skipped
+biome check --write......................................................Failed
+- hook id: biome-check
+- files were modified by this hook
+
+  Checked 20 files in 91ms. Fixed 3 files.
+  Checked 20 files in 67ms. Fixed 1 file.
+  Checked 20 files in 95ms. No fixes applied.
+  Checked 20 files in 75ms. No fixes applied.
+  Checked 20 files in 88ms. Fixed 2 files.
+  Checked 20 files in 92ms. Fixed 1 file.
+  Checked 20 files in 52ms. Fixed 2 files.
+  Checked 20 files in 44ms. No fixes applied.
+  Checked 19 files in 52ms. Fixed 1 file.
+  Checked 19 files in 79ms. Fixed 1 file.
+  Checked 19 files in 118ms. Fixed 1 file.
+  Checked 19 files in 82ms. No fixes applied.
+  Checked 19 files in 96ms. No fixes applied.
+  Checked 19 files in 102ms. Fixed 1 file.
+  Checked 19 files in 81ms. Fixed 3 files.
+  Checked 19 files in 95ms. Fixed 2 files.
+actionlint (changed workflows)...........................................Passed
+check-ci-workflow........................................................Passed
+check-ci-tracker-workflows...............................................Passed
+
+exit=1
