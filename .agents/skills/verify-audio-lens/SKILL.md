@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 37 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 38 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -217,18 +217,32 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   selects the Required container format signature detection proof
   (`format_signature_detection_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-strf-capture"`
   selects the Required AVI `strf` capture presence/copy/ordering proofs
-  (`avi_strl_entry_classification_exact`, `avi_strf_capture_ordering_bounded_exact`, and `avi_strf_materialize_bounded_exact`). The WAV proofs and the audio strf declaration proof are registered in
+  (`avi_strl_entry_classification_exact`, `avi_strf_capture_ordering_bounded_exact`, and `avi_strf_materialize_bounded_exact`);
+  `AL_KANI_HARNESS_GROUP="avi-wb-concatenation"` selects
+  `avi_audio_wb_concatenation_bounded_exact`. The WAV proofs and the audio strf declaration proof are registered in
   `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`; the format signature proof is registered in
   `crates/al-media/src/format.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 37. When `/usr/bin/time` is available
+  and an unset variable runs all 38. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
   selected/verified proof counts, total elapsed ms, maximum observed RSS,
   and measurement availability.
+- For a change to AVI audio selection or append order, run
+  `AL_KANI_HARNESS_GROUP=avi-wb-concatenation AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`
+  and check both the verdict and the raw proof result. Unlike the `strf`
+  capture proof (PR #295/#296), this proof checks the PCM body supplied to
+  `decode_waveformatex`, which can affect `IngestResult.audio` and stream
+  availability/provenance. It calls the production selection and append loop
+  for 3 streams and 3 packets, 0–2 bytes per body, using exact class/index/kind
+  equivalence classes and no input assumptions. The parser/walker, dynamic
+  tables and buffers, arbitrary-length copy, missing/empty product behavior,
+  full declaration correspondence, timing, video, and PCM semantics are not
+  proved. Rerun the native fixtures for the decode-shell connection and see
+  `evidence/al274-avi-wb-concatenation-proof/` for the boundary and mutation.
 - Two registered WAV proofs —
   `wav_reads_never_panics_unsigned` and
   `read_wav_range_never_panics_signed` — carry

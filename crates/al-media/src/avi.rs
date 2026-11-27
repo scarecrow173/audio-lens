@@ -421,6 +421,20 @@ fn avi_packet_is_selected_audio_payload<T: AviStreamTypeView>(
             == AviPacketStreamMeaning::AudioPayload
 }
 
+fn avi_selected_audio_pcm<T: AviStreamTypeView>(
+    streams: &[T],
+    packets: &[MoviPacket<'_>],
+    selected_stream: usize,
+) -> Vec<u8> {
+    let mut pcm = Vec::new();
+    for p in packets {
+        if avi_packet_is_selected_audio_payload(streams, p.stream_no, p.kind, selected_stream) {
+            pcm.extend_from_slice(p.body);
+        }
+    }
+    pcm
+}
+
 fn avi_packet_is_selected_video_frame<T: AviStreamTypeView>(
     streams: &[T],
     stream_no: usize,
@@ -873,17 +887,7 @@ pub(crate) fn decode_layout(
     } else {
         match avi_first_stream_of_class(&streams, AviStreamTypeClass::Audio) {
             Some(audio_idx) => {
-                let mut audio_pcm: Vec<u8> = Vec::new();
-                for p in &movi_packets {
-                    if avi_packet_is_selected_audio_payload(
-                        &streams,
-                        p.stream_no,
-                        p.kind,
-                        audio_idx,
-                    ) {
-                        audio_pcm.extend_from_slice(p.body);
-                    }
-                }
+                let audio_pcm = avi_selected_audio_pcm(&streams, &movi_packets, audio_idx);
                 // An auds stream with no wb payloads is undecodable input,
                 // not a zero-length decode.
                 match if audio_pcm.is_empty() {
@@ -1197,17 +1201,39 @@ mod tests {
     }
 
     #[test]
+    fn empty_wb_is_unavailable_only_when_audio_is_requested() {
+        let avi = audio_only_avi(1, &[]);
+        let m = decode(&avi).unwrap();
+        assert!(m.audio.is_none());
+        assert_eq!(
+            m.audio_unavailable.as_deref(),
+            Some("AVI audio stream: decode/input unavailable: audio stream carries no wb packets")
+        );
+
+        let layout = avi_layout(&avi).unwrap();
+        let m = decode_layout(layout, &VideoFeatureConfig::default(), false, false).unwrap();
+        assert!(m.audio.is_none());
+        assert!(m.audio_unavailable.is_none());
+        assert!(m.audio_failure.is_none());
+    }
+
+    #[test]
     fn only_first_auds_stream_is_decoded() {
         // Stream 0: video. Stream 1: mono s16 audio (the one to decode).
         // Stream 2: stereo s16 audio — its packets must never leak into
         // stream 1's PCM.
-        let audio_a: Vec<u8> = (0..40i16).flat_map(|v| (v + 100).to_le_bytes()).collect();
+        let audio_a: Vec<u8> = (0..41i16).flat_map(|v| (v + 100).to_le_bytes()).collect();
         let audio_b: Vec<u8> = (0..80i16).flat_map(|v| (v - 500).to_le_bytes()).collect();
-        let m = decode(&multi_stream_avi(&audio_a, &audio_b)).unwrap();
+        let m = decode(&multi_stream_avi(
+            &audio_a,
+            &audio_b,
+            &[(b"01zz", &[0xfe, 0x7f]), (b"01wb", &[])],
+        ))
+        .unwrap();
         let audio = m.audio.expect("PCM decoded");
 
         assert_eq!(audio.channels, 1);
-        let expected: Vec<f64> = (0..40i16).map(|v| f64::from(v + 100)).collect();
+        let expected: Vec<f64> = (0..41i16).map(|v| f64::from(v + 100)).collect();
         assert_eq!(audio.samples, expected);
         // Stream 2's packets keep their own timing entry, never PCM.
         let s2 = m.timing.iter().find(|t| t.stream == 2).unwrap();
@@ -1246,7 +1272,7 @@ mod tests {
         // stream 1's two wb packets sit at 0 and len(first) ticks.
         let audio_a: Vec<u8> = (0..40i16).flat_map(|v| (v + 100).to_le_bytes()).collect();
         let half = audio_a.len() / 2;
-        let m2 = decode(&multi_stream_avi(&audio_a, &[7u8; 32])).unwrap();
+        let m2 = decode(&multi_stream_avi(&audio_a, &[7u8; 32], &[])).unwrap();
         let a1 = m2.timing.iter().find(|t| t.stream == 1).unwrap();
         assert_eq!(a1.observation.timestamp_count, 2);
         assert_eq!(a1.observation.intervals, vec![half as i64]);
@@ -1603,7 +1629,11 @@ mod tests {
 
     /// Two-audio-stream AVI (video + mono auds + stereo auds) with
     /// stream 1's audio split across two interleaved `01wb` packets.
-    fn multi_stream_avi(audio_a: &[u8], audio_b: &[u8]) -> Vec<u8> {
+    fn multi_stream_avi(
+        audio_a: &[u8],
+        audio_b: &[u8],
+        interleaved: &[(&[u8; 4], &[u8])],
+    ) -> Vec<u8> {
         let half = audio_a.len() / 2;
         let mut hdrl = Vec::new();
         let mut vstrl = Vec::new();
@@ -1629,6 +1659,9 @@ mod tests {
         push_chunk(&mut movi, b"00db", &[0u8; 4]);
         push_chunk(&mut movi, b"01wb", &audio_a[..half]);
         push_chunk(&mut movi, b"02wb", audio_b);
+        for &(id, body) in interleaved {
+            push_chunk(&mut movi, id, body);
+        }
         push_chunk(&mut movi, b"00db", &[0u8; 4]);
         push_chunk(&mut movi, b"01wb", &audio_a[half..]);
         let mut body = Vec::new();
@@ -2428,6 +2461,72 @@ mod proofs {
         } else {
             assert_ne!(expected_meaning, AviPacketStreamMeaning::VideoFrame);
         }
+    }
+
+    #[kani::proof]
+    fn avi_audio_wb_concatenation_bounded_exact() {
+        let stream_types = kani::any::<[u8; 3]>().map(|selector| match selector % 3 {
+            0 => *b"auds",
+            1 => *b"vids",
+            _ => *b"xxxx",
+        });
+        let stream_nos = kani::any::<[u8; 3]>().map(|selector| usize::from(selector % 4));
+        let kinds =
+            kani::any::<[u8; 3]>().map(|selector| if selector % 2 == 0 { *b"wb" } else { *b"zz" });
+        let lengths = kani::any::<[u8; 3]>().map(|selector| usize::from(selector % 3));
+        let bodies: [[u8; 2]; 3] = kani::any();
+        let packet = |i: usize| MoviPacket {
+            stream_no: stream_nos[i],
+            kind: kinds[i],
+            body: match lengths[i] {
+                0 => &[],
+                1 => &bodies[i][..1],
+                _ => &bodies[i],
+            },
+        };
+        let packets = [packet(0), packet(1), packet(2)];
+
+        let actual_stream = avi_first_stream_of_class(&stream_types, AviStreamTypeClass::Audio);
+        let actual = match actual_stream {
+            Some(index) => avi_selected_audio_pcm(&stream_types, &packets, index),
+            None => Vec::new(),
+        };
+
+        let expected_stream = match stream_types.map(|id| id == *b"auds") {
+            [true, _, _] => Some(0),
+            [false, true, _] => Some(1),
+            [false, false, true] => Some(2),
+            _ => None,
+        };
+        assert!(actual_stream == expected_stream, "first audio stream");
+
+        let selected_len = |i: usize| {
+            if expected_stream == Some(stream_nos[i]) && kinds[i] == *b"wb" {
+                lengths[i]
+            } else {
+                0
+            }
+        };
+        let (a, b, c) = (selected_len(0), selected_len(1), selected_len(2));
+        assert!(actual.len() == a + b + c, "concatenated payload length");
+
+        let assert_copy = |offset: usize, len: usize, body: [u8; 2]| {
+            if len >= 1 {
+                assert!(
+                    actual.get(offset).copied() == Some(body[0]),
+                    "first selected payload byte and order"
+                );
+            }
+            if len == 2 {
+                assert!(
+                    actual.get(offset + 1).copied() == Some(body[1]),
+                    "second selected payload byte and order"
+                );
+            }
+        };
+        assert_copy(0, a, bodies[0]);
+        assert_copy(a, b, bodies[1]);
+        assert_copy(a + b, c, bodies[2]);
     }
 }
 
