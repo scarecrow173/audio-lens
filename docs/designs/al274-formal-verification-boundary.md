@@ -280,11 +280,33 @@ missing-vs-empty の製品意味論、declaration correspondence、映像/時刻
 PCM、MP4、公開 API 全体の証明には転用しない。
 
 `AL_KANI_HARNESS_GROUP="avi-wb-concatenation"` は
-`avi_audio_wb_concatenation_bounded_exact` を選択する。現行 registry は 38 件。
+`avi_audio_wb_concatenation_bounded_exact` を選択する。この追加時点の registry は 38 件。
 `strf` capture を含む既存の 13 group は回帰として再実行し、legacy 全件
 lane は対象外とする。実行予算、除外・重い後続 Property、分解比較は
 [境界分析](../../evidence/al274-avi-wb-concatenation-proof/boundary-analysis.md)、
 結果は同ディレクトリの `verification.md` と ledger に記録する。
+
+### AVI-STREAM-002 `strh` presence と最初のエラー
+
+一つの `strl` に正常な `strh` が一件以上あり、走査を完了した場合だけ
+stream を一件追加する。短い `strh` があれば、先行する正常な `strh` が
+あってもその位置で失敗する。`avi_layout` は tag 分類後の `parse_strh` と
+presence 更新を `avi_strh_presence_step` に委ねる。構造エラーの伝播、
+`strf` capture、走査後の `streams.push` は従来の順序のまま残す。
+
+局所 proof はこの step を単一 `strl` の固定 3 entry で合成する。
+各 entry は `Other`（空の `strf` または `JUNK`）、48 byte の正常な
+`strh`、47 byte の不正な `strh` のいずれかとし、ヘッダーはゼロ埋め
+とする。独立 oracle は最初の不正 entry の位置、またはエラーがない
+場合の正常 entry の有無を返す。任意長の nested walker、複数 `strl`、
+全宣言の対応、timing、PCM、公開 API 全体の no-panic は証明対象外。
+実パーサーテストは stream table と既存の malformed エラーを確認する。
+
+`AL_KANI_HARNESS_GROUP="avi-strh-presence"` は
+`avi_strh_presence_bounded_exact` を選択する。registry は 39 件。
+予算、除外、変異は
+[境界分析](../../evidence/al274-avi-strh-presence-proof/boundary-analysis.md)、
+実行と Sync Commit は同ディレクトリの証跡に記録する。
 
 ## canonical 21 proof の disposition 要約
 

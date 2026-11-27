@@ -1,0 +1,27 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "fail",
+  "reason": "1 harness(es) failed verification (0 verified): avi_strh_presence_bounded_exact",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "avi_strh_presence_bounded_exact",
+      "ok": false,
+      "bad": true,
+      "timedOut": false,
+      "status": 1,
+      "elapsed_ms": 16589,
+      "max_rss_kb": 416280,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 138208\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 1"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 0,
+    "total_elapsed_ms": 16589,
+    "max_observed_rss_kb": 416280,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

@@ -498,6 +498,19 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   first `vids`/映像 extraction、timing、PCM、MP4、writer、corruption、
   公開 API 全体の no-panic は未証明。詳細は
   [境界分析](../../evidence/al274-avi-wb-concatenation-proof/boundary-analysis.md)。
+- **AVI-STREAM-002 `strh` presence と最初の不正 entry の位置**:
+  Required の bounded exhaustive proof。固定 3 entry の各位置に
+  `Other`（空の `strf` または `JUNK`）、正常な 48 byte の `strh`、
+  不正な 47 byte の `strh` を独立に割り当てる。production の tag
+  分類と `parse_strh` を含む presence step の合成を使い、最初の不正
+  entry で止まることと、失敗しない場合に正常な `strh` の有無が
+  presence に一致することを独立 oracle で照合する。assume・Stub は
+  なく、unwinding assertions は有効とする。実パーサーテストは
+  stream table への追加の有無、短い `strh` の既存エラー、後続の
+  構造エラーより先に返ることを確認する。任意の tag、長さ、payload、
+  実 walker、任意個数の `strl`、全宣言対応、timing、PCM、公開 API
+  全体の no-panic には拡張しない。詳細は
+  [境界分析](../../evidence/al274-avi-strh-presence-proof/boundary-analysis.md)。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -674,11 +687,11 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 AVI `wb` concatenation slice 以降の登録 harness は 38 件(WAV 13 +
+  登録 harness は 39 件(WAV 13 +
   MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
   AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI video strf declaration 1 +
   AVI audio strf declaration 1 + format signature 1 + AVI strf capture 3 +
-  AVI `wb` concatenation 1 + legacy containers 10)。
+  AVI `wb` concatenation 1 + AVI `strh` presence 1 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
@@ -694,7 +707,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   field extraction/validation の 1 proof、`"format-signature"` は container
   format signature detection の 1 proof、`"avi-strf-capture"` は AVI `strf` capture
   presence/copy/ordering の 3 proof、`"avi-wb-concatenation"` は AVI
-  first-audio `wb` selection/order/copy の 1 proof を選択する。group と subset
+  first-audio `wb` selection/order/copy の 1 proof、`"avi-strh-presence"` は
+  AVI `strh` presence と最初の不正 entry の位置の 1 proof を選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
@@ -702,6 +716,9 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
 - `AL_KANI_HARNESS_GROUP=avi-wb-concatenation AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`:
   この局所契約の再実行。`AL_KANI_LOG_DIR` で raw log と verdict を保持し、
   exit 0 だけでなく `pass` と `VERIFICATION:- SUCCESSFUL` を確認する。
+- `AL_KANI_HARNESS_GROUP=avi-strh-presence AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`:
+  `strh` presence の局所契約を再実行する。変更時は `avi-strh-declaration`、
+  `avi-strf-capture`、`avi-wb-concatenation` と native parser test も確認する。
 - 変異 fail 証拠・実行環境・sync commit SHA・verdict 表は
   `evidence/al256/verification.md` と `actions.jsonl`、al#274
   の分析・分割・再実走記録は `evidence/al274/` が持つ。
@@ -724,6 +741,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `evidence/al274-avi-strh-declaration-proof/`・
   `evidence/al274-avi-strf-declaration-proof2/`・
   `evidence/al274-avi-strf-audio-proof/`・
-  `evidence/al274-avi-strf-capture-proof/`
+  `evidence/al274-avi-strf-capture-proof/`・
+  `evidence/al274-avi-wb-concatenation-proof/`・
+  `evidence/al274-avi-strh-presence-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節
