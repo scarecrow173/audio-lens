@@ -50,7 +50,7 @@ production capture reducerは generic tokenに対する helperとして実装さ
 
 ## Branch CI
 
-PR作成後に branch head SHAのCIを read-onlyで確認し、結果または Unsupported 理由を `actions.jsonl` と PR本文に記録する。manual dispatchは行わない。
+`.github/workflows/ci.yml` は `workflow_dispatch` のみを triggerに持ち、PR作成/更新や branch pushでは起動しない。したがって manual dispatchを使わない条件では branch CIは **Unsupported** であり、main検証は Daily CIに委譲する。manual dispatchは実行していない。
 
 ## ファイル
 
