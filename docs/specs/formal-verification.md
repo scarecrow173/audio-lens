@@ -321,6 +321,31 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   Pass を AVI-MOVI-003 全体や AVI-TIME-004 の機械証明と読み替えない。
   詳細な境界と coverage は
   `evidence/al274-avi-movi-tag-proof/boundary-analysis.md` を正本とする。
+- **AVI-MOVI-003 movi entry composition exact proof**: `crates/al-media/src/avi.rs`
+  の production pure helper `avi_movi_entry_decision` を symbolic full
+  `[u8; 4]` chunk id と exact list-type view `Option<[u8; 4]>` だけで
+  検査する。`None` は direct child LIST body length 4 未満、
+  `Some(bytes)` は body length 4 以上の先頭 4 byte を表す exact
+  reparameterization であり、input narrowing assume は置かない。
+  exact `LIST` かつ list type 不在なら short-list reject、exact `rec `
+  なら rec-list reject、`rec ` の byte complement なら ignore、
+  `LIST` 以外なら list-type view に依存せず digit tag 受理時だけ
+  packet、それ以外は ignore とする。packet/ignore/short-list reject/
+  rec-list reject の exact complement、stream number 0..=99、kind byte
+  preservation、overflow/underflow/panic の不存在を検査する。
+  production `movi` loop は `Chunks::next` が返した同じ inner chunk id
+  と、`LIST` のときだけ body から作った list-type viewをこの helper
+  へ渡し、short/rec/packet/ignore 判定を複製しない。loop shell は
+  現行どおり `MediaError` 文言へ写像し、boundary/offset 計算、body
+  slice、padding、iterator error precedence、`Vec<MoviPacket>` 収集を
+  残す。finite iteration、entry ordering、`Vec` accumulation、body
+  slice/lifetime、outer RIFF/LIST walker、stream declaration、stream
+  existence、kind validity matrix、packet body payload、timing
+  accumulation、PCM/video decode、I/O、allocation、diagnostic
+  formatting、公開 API 全体 no-panic、writer round-trip、MP4 は保証外
+  である。entry composition proof Pass を AVI-MOVI-003 全体や
+  AVI-TIME-004 の機械証明と読み替えない。詳細な境界と coverage は
+  `evidence/al274-avi-movi-composition-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -497,13 +522,15 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 avi movi tag slice 以降の登録 harness は 27 件(WAV 13 +
-  MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + legacy containers 10)。
+  al#274 avi movi composition slice 以降の登録 harness は 28 件(WAV 13 +
+  MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
+  legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
   MP4-BOX-002/AVI-CHUNK-001 の 2 proof、`"mp4-scan"` は MP4-SCAN-003
-  の 1 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof
+  の 1 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof、
+  `"avi-movi-composition"` は AVI-MOVI-003 movi entry composition の 1 proof
   を選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
@@ -526,6 +553,6 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
 - 証拠台帳: `evidence/al256/`・`evidence/al274/`・
   `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`・
   `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`・
-  `evidence/al274-avi-movi-tag-proof/`
+  `evidence/al274-avi-movi-tag-proof/`・`evidence/al274-avi-movi-composition-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節
