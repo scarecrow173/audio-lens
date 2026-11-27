@@ -32,7 +32,7 @@ use crate::timing::{ClockKind, TimingObservation, observe_timing};
 use crate::video::{
     self, VideoFeatureArtifact, VideoFeatureConfig, VideoFrame, VideoThumbs, codec_fourcc,
 };
-use crate::wav::{DecodedAudio, decode_waveformatex, read_u16, read_u32};
+use crate::wav::{DecodedAudio, decode_waveformatex, read_u32};
 
 /// Video stream facts declared by the container (no frame decode).
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -167,6 +167,32 @@ fn avi_strh_declaration_fields(prefix: &[u8; STRH_HEADER_LEN]) -> StrhDeclaratio
         start: u32::from_le_bytes([prefix[28], prefix[29], prefix[30], prefix[31]]),
         length: u32::from_le_bytes([prefix[32], prefix[33], prefix[34], prefix[35]]),
         sample_size: u32::from_le_bytes([prefix[44], prefix[45], prefix[46], prefix[47]]),
+    }
+}
+
+const VIDEO_STRF_HEADER_LEN: usize = 40;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct VideoStrfDeclarationFields {
+    width: u32,
+    height: u32,
+    bits_per_pixel: u16,
+    compression: u32,
+}
+
+fn avi_video_strf_accepts_body_len(body_len: usize) -> bool {
+    body_len >= VIDEO_STRF_HEADER_LEN
+}
+
+fn avi_video_strf_declaration_fields(
+    prefix: &[u8; VIDEO_STRF_HEADER_LEN],
+) -> VideoStrfDeclarationFields {
+    let height_bits = u32::from_le_bytes([prefix[8], prefix[9], prefix[10], prefix[11]]);
+    VideoStrfDeclarationFields {
+        width: u32::from_le_bytes([prefix[4], prefix[5], prefix[6], prefix[7]]),
+        height: (height_bits as i32).unsigned_abs(),
+        bits_per_pixel: u16::from_le_bytes([prefix[14], prefix[15]]),
+        compression: u32::from_le_bytes([prefix[16], prefix[17], prefix[18], prefix[19]]),
     }
 }
 
@@ -536,19 +562,22 @@ fn parse_strh(body: &[u8], head: &mut StreamHead) -> Result<(), MediaError> {
 
 fn video_info(head: &StreamHead, movi_frames: u64) -> Result<VideoInfo, MediaError> {
     let bih = &head.format;
-    if bih.len() < 40 {
+    if !avi_video_strf_accepts_body_len(bih.len()) {
         return Err(MediaError::malformed(
             "video strf shorter than BITMAPINFOHEADER",
         ));
     }
+    let mut prefix = [0u8; VIDEO_STRF_HEADER_LEN];
+    prefix.copy_from_slice(&bih[..VIDEO_STRF_HEADER_LEN]);
+    let fields = avi_video_strf_declaration_fields(&prefix);
     let (scale, rate) = (head.scale, head.rate);
     let fps = (scale > 0).then(|| rate as f64 / scale as f64);
     let frames = u64::from(head.length).max(movi_frames);
     Ok(VideoInfo {
-        codec: codec_fourcc(read_u32(bih, 16)?),
-        width: read_u32(bih, 4)?,
-        height: (read_u32(bih, 8)? as i32).unsigned_abs(),
-        bits_per_pixel: read_u16(bih, 14)?,
+        codec: codec_fourcc(fields.compression),
+        width: fields.width,
+        height: fields.height,
+        bits_per_pixel: fields.bits_per_pixel,
         frames,
         fps,
         duration_secs: fps.map(|f| if f > 0.0 { frames as f64 / f } else { 0.0 }),
@@ -1201,7 +1230,7 @@ mod tests {
     }
 
     /// BITMAPINFOHEADER body for uncompressed-video fixtures.
-    fn bih(width: i32, height: i32, bpp: u16, compression: u32) -> Vec<u8> {
+    pub(super) fn bih(width: i32, height: i32, bpp: u16, compression: u32) -> Vec<u8> {
         let mut b = vec![0u8; 40];
         b[4..8].copy_from_slice(&width.to_le_bytes());
         b[8..12].copy_from_slice(&height.to_le_bytes());
@@ -1860,6 +1889,32 @@ mod proofs {
         );
     }
 
+    #[kani::proof]
+    fn avi_video_strf_declaration_bounded_exact() {
+        let body_len: usize = kani::any();
+        let prefix: [u8; VIDEO_STRF_HEADER_LEN] = kani::any();
+
+        let accepted = avi_video_strf_accepts_body_len(body_len);
+        assert_eq!(accepted, body_len >= VIDEO_STRF_HEADER_LEN);
+        assert_eq!(!accepted, body_len < VIDEO_STRF_HEADER_LEN);
+
+        let fields = avi_video_strf_declaration_fields(&prefix);
+        let height_bits = u32::from_le_bytes([prefix[8], prefix[9], prefix[10], prefix[11]]);
+        assert_eq!(
+            fields.width,
+            u32::from_le_bytes([prefix[4], prefix[5], prefix[6], prefix[7]])
+        );
+        assert_eq!(fields.height, (height_bits as i32).unsigned_abs());
+        assert_eq!(
+            fields.bits_per_pixel,
+            u16::from_le_bytes([prefix[14], prefix[15]])
+        );
+        assert_eq!(
+            fields.compression,
+            u32::from_le_bytes([prefix[16], prefix[17], prefix[18], prefix[19]])
+        );
+    }
+
     const STREAM_TYPE_COUNT: usize = 3;
     type SymbolicStreamTypeTable = [[u8; 4]; STREAM_TYPE_COUNT];
 
@@ -2096,7 +2151,7 @@ mod proofs {
 
 #[cfg(test)]
 mod boundary_tests {
-    use super::tests::strh_body;
+    use super::tests::{bih, strh_body};
     use super::*;
 
     fn classification_stream_head(fcc_type: [u8; 4], scale: u32) -> StreamHead {
@@ -2223,6 +2278,62 @@ mod boundary_tests {
         assert_eq!(exact_head.start, head.start);
         assert_eq!(exact_head.length, head.length);
         assert_eq!(exact_head.sample_size, head.sample_size);
+    }
+
+    #[test]
+    fn video_strf_declaration_rejects_short_bodies() {
+        for len in [0usize, 1, VIDEO_STRF_HEADER_LEN - 1] {
+            let mut head = classification_stream_head(*b"vids", 1);
+            head.format = vec![0xaa; len];
+            let err = video_info(&head, 0).unwrap_err();
+            match err {
+                MediaError::Malformed { reason } => {
+                    assert_eq!(reason, "video strf shorter than BITMAPINFOHEADER");
+                }
+                _ => panic!("short video strf body must be malformed"),
+            }
+        }
+        assert!(!avi_video_strf_accepts_body_len(VIDEO_STRF_HEADER_LEN - 1));
+        assert!(avi_video_strf_accepts_body_len(VIDEO_STRF_HEADER_LEN));
+    }
+
+    #[test]
+    fn video_strf_declaration_extracts_le_fields_and_ignores_unobserved_and_trailing_bytes() {
+        let compression = u32::from_le_bytes(*b"XVID");
+        let mut body = bih(640, -480, 24, compression);
+        for (index, byte) in body.iter_mut().enumerate() {
+            if (0..4).contains(&index) || (12..14).contains(&index) || index >= 20 {
+                *byte = 0xa5u8.wrapping_add(index as u8);
+            }
+        }
+        body.extend_from_slice(&[0x5a, 0xff, 0x01]);
+
+        let mut head = classification_stream_head(*b"vids", 1);
+        head.rate = 30;
+        head.length = 7;
+        head.format = body.clone();
+        let info = video_info(&head, 3).unwrap();
+        assert_eq!(info.codec, "XVID");
+        assert_eq!(info.width, 640);
+        assert_eq!(info.height, 480);
+        assert_eq!(info.bits_per_pixel, 24);
+        assert_eq!(info.frames, 7);
+        assert_eq!(info.fps, Some(30.0));
+
+        let mut exact_head = classification_stream_head(*b"vids", 1);
+        exact_head.rate = head.rate;
+        exact_head.length = head.length;
+        exact_head.format = body[..VIDEO_STRF_HEADER_LEN].to_vec();
+        let exact_info = video_info(&exact_head, 3).unwrap();
+        assert_eq!(exact_info, info);
+    }
+
+    #[test]
+    fn video_strf_declaration_height_uses_signed_bit_pattern_abs() {
+        let mut head = classification_stream_head(*b"vids", 1);
+        head.format = bih(1, i32::MIN, 32, 0);
+        let info = video_info(&head, 0).unwrap();
+        assert_eq!(info.height, i32::MIN.unsigned_abs());
     }
 
     #[test]

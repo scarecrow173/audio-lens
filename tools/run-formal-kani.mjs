@@ -4,7 +4,7 @@
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
 // tag identity/movi entry composition/movi scan collection/stream kind
-// classification/strh declaration については src/mp4.rs/src/avi.rs)を
+// classification/strh declaration/strf declaration については src/mp4.rs/src/avi.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -198,6 +198,7 @@ const AVI_MOVI_COMPOSITION_HARNESSES = ["avi_movi_entry_decision_exact"];
 const AVI_MOVI_SCAN_HARNESSES = ["avi_movi_scan_collection_bounded_exact"];
 const AVI_STREAM_KIND_HARNESSES = ["avi_stream_kind_classification_bounded_exact"];
 const AVI_STRH_DECLARATION_HARNESSES = ["avi_strh_declaration_bounded_exact"];
+const AVI_STRF_DECLARATION_HARNESSES = ["avi_video_strf_declaration_bounded_exact"];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
@@ -209,6 +210,7 @@ const HARNESS_GROUPS = {
   "avi-movi-scan": AVI_MOVI_SCAN_HARNESSES,
   "avi-stream-kind": AVI_STREAM_KIND_HARNESSES,
   "avi-strh-declaration": AVI_STRH_DECLARATION_HARNESSES,
+  "avi-strf-declaration": AVI_STRF_DECLARATION_HARNESSES,
 };
 
 const HARNESSES = [
@@ -230,6 +232,7 @@ const HARNESSES = [
   ...AVI_MOVI_SCAN_HARNESSES,
   ...AVI_STREAM_KIND_HARNESSES,
   ...AVI_STRH_DECLARATION_HARNESSES,
+  ...AVI_STRF_DECLARATION_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",
