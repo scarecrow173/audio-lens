@@ -994,6 +994,27 @@ mod tests {
     }
 
     #[test]
+    fn short_audio_strf_degrades_instead_of_failing_demux() {
+        let frame = vec![7u8; 64 * 48 * 3];
+        let audio: Vec<u8> = (0..96i16)
+            .flat_map(|v| (v % 20 - 10).to_le_bytes())
+            .collect();
+        let mut spec = AviSpec::cfr(64, 48, 10, vec![frame; 2], audio, 1, 48_000);
+        spec.streams[1].format = vec![0u8; 15];
+        let m = decode(&write_avi(&spec)).unwrap();
+        assert!(m.audio.is_none());
+        assert!(
+            m.audio_unavailable
+                .as_deref()
+                .is_some_and(|r| r.contains("fmt chunk shorter than 16 bytes"))
+        );
+        assert!(m.video.is_some());
+        assert!(m.video_features.is_some());
+        assert!(m.timing.iter().any(|t| t.stream_type == "auds"));
+        assert!(m.timing.iter().any(|t| t.stream_type == "vids"));
+    }
+
+    #[test]
     fn missing_audio_stream_is_partial_ingest_not_error() {
         let mut spec_bytes = fixture();
         // Corrupt the audio stream's fccType so no 'auds' stream exists.
