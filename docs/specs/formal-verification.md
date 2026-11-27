@@ -456,6 +456,30 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   audio strf declaration proof Passを AVI-STREAM-002全体や AVI-TIME-004、
   AVI-PCMの機械証明と読み替えない。詳細な境界と coverageは
   `evidence/al274-avi-strf-audio-proof/boundary-analysis.md` を正本とする。
+- **AVI-STREAM-002 `strf` capture presence/copy/ordering bounded exact proof**:
+  `crates/al-media/src/avi.rs` の production entry classification/capture/
+  materialize helperを、full id classification proof、固定 3 件の symbolic
+  class selector付き entry列の ordering proof、presence/payloadの materialize proofで検査する。
+  各 payloadは full `u8` length selector、
+  full `[u8; 2]` payload storageを独立に取り、selectorの剰余写像で
+  payload length `{0,1,2}` を作る。length/id/order/byteを制限する
+  input narrowing assumeは置かない。proofは exact `strh`/exact `strf`/otherの
+  disjoint exhaustive分類、exact `strf`だけの capture更新、no `strf`の
+  absence、empty bodyを含む presence、複数 `strf` の last-write-wins、
+  non-`strf` non-interference、materialize後の length/content/byte order保存、
+  overflow/underflow/panicの不存在を検査する。production `avi_layout` の
+  inner loopは全 entryを scan orderで同じ capture helperへ通し、loop外で
+  `head.format` を一度だけ materializeする。capture seam内部では missingと
+  empty `strf`を区別できるが、materialize後は現行どおりどちらも empty `Vec`
+  であり、missing-vs-empty product semanticsは未証明の設計残件である。
+  4件以上の entry列、len 3以上の copy、任意長 body slice、実 `Vec` growth、
+  `Chunks` iterator、error precedence、missing `strh` filter、実
+  `Vec<StreamHead>` accumulation、full declaration correspondence、decode
+  correctness、first stream selection、`wb` scan/concatenation、PCM、timing、
+  I/O、allocation、diagnostic formatting、公開 API全体 no-panic、MP4は保証外である。
+  capture proof Passを AVI-STREAM-002全体や AVI parser correctnessの機械証明と
+  読み替えない。詳細な境界と coverageは
+  `evidence/al274-avi-strf-capture-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -632,10 +656,10 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 format signature slice 以降の登録 harness は 34 件(WAV 13 +
+  al#274 AVI strf capture slice 以降の登録 harness は 37 件(WAV 13 +
   MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
   AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI video strf declaration 1 +
-  AVI audio strf declaration 1 + format signature 1 + legacy containers 10)。
+  AVI audio strf declaration 1 + format signature 1 + AVI strf capture 3 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
@@ -649,7 +673,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   declaration field extraction/validation の 1 proof、
   `"avi-strf-audio-declaration"` は AVI audio `strf` WAVEFORMATEX declaration
   field extraction/validation の 1 proof、`"format-signature"` は container
-  format signature detection の 1 proofを選択する。group と subset
+  format signature detection の 1 proof、`"avi-strf-capture"` は AVI `strf` capture
+  presence/copy/ordering の 3 proofを選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
@@ -675,6 +700,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `evidence/al274-avi-movi-scan-proof/`・`evidence/al274-avi-stream-kind-proof/`・
   `evidence/al274-avi-strh-declaration-proof/`・
   `evidence/al274-avi-strf-declaration-proof2/`・
-  `evidence/al274-avi-strf-audio-proof/`
+  `evidence/al274-avi-strf-audio-proof/`・
+  `evidence/al274-avi-strf-capture-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節

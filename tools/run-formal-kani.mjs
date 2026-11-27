@@ -4,7 +4,7 @@
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
 // tag identity/movi entry composition/movi scan collection/stream kind
-// classification/strh declaration/strf declaration については src/mp4.rs/src/avi.rs、
+// classification/strh declaration/strf declaration/strf capture については src/mp4.rs/src/avi.rs、
 // audio strf WAVEFORMATEX declaration については src/wav.rs、
 // format signature detection については src/format.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
@@ -203,6 +203,11 @@ const AVI_STRH_DECLARATION_HARNESSES = ["avi_strh_declaration_bounded_exact"];
 const AVI_STRF_DECLARATION_HARNESSES = ["avi_video_strf_declaration_bounded_exact"];
 const AVI_STRF_AUDIO_DECLARATION_HARNESSES = ["avi_audio_strf_declaration_bounded_exact"];
 const FORMAT_SIGNATURE_HARNESSES = ["format_signature_detection_bounded_exact"];
+const AVI_STRF_CAPTURE_HARNESSES = [
+  "avi_strl_entry_classification_exact",
+  "avi_strf_capture_ordering_bounded_exact",
+  "avi_strf_materialize_bounded_exact",
+];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
@@ -217,6 +222,7 @@ const HARNESS_GROUPS = {
   "avi-strf-declaration": AVI_STRF_DECLARATION_HARNESSES,
   "avi-strf-audio-declaration": AVI_STRF_AUDIO_DECLARATION_HARNESSES,
   "format-signature": FORMAT_SIGNATURE_HARNESSES,
+  "avi-strf-capture": AVI_STRF_CAPTURE_HARNESSES,
 };
 
 const HARNESSES = [
@@ -241,6 +247,7 @@ const HARNESSES = [
   ...AVI_STRF_DECLARATION_HARNESSES,
   ...AVI_STRF_AUDIO_DECLARATION_HARNESSES,
   ...FORMAT_SIGNATURE_HARNESSES,
+  ...AVI_STRF_CAPTURE_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",

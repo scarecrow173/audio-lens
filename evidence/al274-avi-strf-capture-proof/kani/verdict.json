@@ -1,0 +1,49 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "pass",
+  "reason": "all 3 kani harness(es) verified",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "avi_strl_entry_classification_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 5496,
+      "max_rss_kb": 303052,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 110520\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "harness": "avi_strf_capture_ordering_bounded_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 4950,
+      "max_rss_kb": 304612,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 55432\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    },
+    {
+      "harness": "avi_strf_materialize_bounded_exact",
+      "ok": true,
+      "bad": false,
+      "timedOut": false,
+      "status": 0,
+      "elapsed_ms": 6419,
+      "max_rss_kb": 435460,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 76112\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 3,
+    "verified_proofs": 3,
+    "total_elapsed_ms": 16865,
+    "max_observed_rss_kb": 435460,
+    "rss_measured_proofs": 3,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 34 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 37 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -215,13 +215,15 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   selects the Required AVI audio `strf` WAVEFORMATEX declaration field extraction/validation proof
   (`avi_audio_strf_declaration_bounded_exact`); `AL_KANI_HARNESS_GROUP="format-signature"`
   selects the Required container format signature detection proof
-  (`format_signature_detection_bounded_exact`). The WAV proofs and the audio strf declaration proof are registered in
+  (`format_signature_detection_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-strf-capture"`
+  selects the Required AVI `strf` capture presence/copy/ordering proofs
+  (`avi_strl_entry_classification_exact`, `avi_strf_capture_ordering_bounded_exact`, and `avi_strf_materialize_bounded_exact`). The WAV proofs and the audio strf declaration proof are registered in
   `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`; the format signature proof is registered in
   `crates/al-media/src/format.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 34. When `/usr/bin/time` is available
+  and an unset variable runs all 37. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
@@ -271,7 +273,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `evidence/al274-avi-strh-declaration-proof/`, AVI video strf declaration mutation evidence is in
   `evidence/al274-avi-strf-declaration-proof2/`, and AVI audio strf declaration mutation evidence is in
   `evidence/al274-avi-strf-audio-proof/`, and container format signature
-  detection mutation evidence is in `evidence/al274-format-signature-proof/`.
+  detection mutation evidence is in `evidence/al274-format-signature-proof/`, and AVI `strf`
+  capture mutation evidence is in `evidence/al274-avi-strf-capture-proof/`.
 
 Change-impact procedure:
 
