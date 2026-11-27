@@ -607,6 +607,20 @@ fn parse_strh(body: &[u8], head: &mut StreamHead) -> Result<(), MediaError> {
     Ok(())
 }
 
+fn avi_strh_presence_step(
+    has_strh: bool,
+    class: AviStrlEntryClass,
+    body: &[u8],
+    head: &mut StreamHead,
+) -> Result<bool, MediaError> {
+    if class == AviStrlEntryClass::Strh {
+        parse_strh(body, head)?;
+        Ok(true)
+    } else {
+        Ok(has_strh)
+    }
+}
+
 fn video_info(head: &StreamHead, movi_frames: u64) -> Result<VideoInfo, MediaError> {
     let bih = &head.format;
     if !avi_video_strf_accepts_body_len(bih.len()) {
@@ -801,10 +815,7 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                         for inner in chunks(&sbody[4..], "strl list") {
                             let (cid, cbody) = inner?;
                             let class = avi_strl_entry_class(cid);
-                            if class == AviStrlEntryClass::Strh {
-                                parse_strh(cbody, &mut head)?;
-                                has_strh = true;
-                            }
+                            has_strh = avi_strh_presence_step(has_strh, class, cbody, &mut head)?;
                             strf_capture = avi_strf_capture_step(strf_capture, class, cbody);
                         }
                         if has_strh {
@@ -1588,10 +1599,45 @@ mod tests {
     fn strf_without_strh_does_not_push_stream() {
         let mut entries = Vec::new();
         push_chunk(&mut entries, b"strf", &[0x10, 0x11]);
+        push_chunk(&mut entries, b"strH", &[0; 48]);
         let bytes = avi_with_strl_entries(&entries);
         let layout = avi_layout(&bytes).unwrap();
 
         assert!(layout.streams.is_empty());
+    }
+
+    #[test]
+    fn two_valid_strh_entries_add_one_stream() {
+        let mut entries = Vec::new();
+        let mut header = [0; 48];
+        header[..4].copy_from_slice(b"vids");
+        push_chunk(&mut entries, b"strh", &header);
+        header[..4].copy_from_slice(b"auds");
+        push_chunk(&mut entries, b"strh", &header);
+        let bytes = avi_with_strl_entries(&entries);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert_eq!(layout.streams.len(), 1);
+        assert_eq!(layout.streams[0].fcc_type, *b"auds");
+    }
+
+    #[test]
+    fn short_strh_errors_even_after_valid_strh() {
+        for preceding_valid in [false, true] {
+            let mut entries = Vec::new();
+            push_chunk(&mut entries, b"strf", &[0x10, 0x11]);
+            if preceding_valid {
+                push_chunk(&mut entries, b"strh", &[0; 48]);
+            }
+            push_chunk(&mut entries, b"strh", &[0; 47]);
+            entries.extend_from_slice(b"JUNK\x04\0\0\0");
+            let bytes = avi_with_strl_entries(&entries);
+
+            assert!(matches!(
+                avi_layout(&bytes),
+                Err(MediaError::Malformed { reason }) if reason == "strh chunk shorter than 48 bytes"
+            ));
+        }
     }
 
     #[test]
@@ -2016,6 +2062,47 @@ mod proofs {
         assert_eq!(actual.packet_count, expected.packet_count);
         assert_eq!(actual.packet_tags, expected.packet_tags);
         assert_eq!(actual.stop, expected.stop);
+    }
+
+    #[kani::proof]
+    #[kani::unwind(4)]
+    fn avi_strh_presence_bounded_exact() {
+        let selectors: [u8; 3] = kani::any();
+        let entries = [selectors[0] % 3, selectors[1] % 3, selectors[2] % 3];
+        let body = [0u8; 48];
+        let actual = (|| {
+            let mut head = StreamHead {
+                fcc_type: [0; 4],
+                scale: 0,
+                rate: 0,
+                start: 0,
+                length: 0,
+                sample_size: 0,
+                format: Vec::new(),
+            };
+            let mut present = false;
+            for (index, entry) in entries.into_iter().enumerate() {
+                let (tag, bytes) = match entry {
+                    1 => (*b"strh", &body[..]),
+                    2 => (*b"strh", &body[..47]),
+                    _ if kani::any::<bool>() => (*b"strf", &body[..0]),
+                    _ => (*b"JUNK", &body[..0]),
+                };
+                present =
+                    avi_strh_presence_step(present, avi_strl_entry_class(tag), bytes, &mut head)
+                        .map_err(|_| index)?;
+            }
+            Ok(present)
+        })();
+
+        let expected = match entries {
+            [2, _, _] => Err(0),
+            [_, 2, _] => Err(1),
+            [_, _, 2] => Err(2),
+            [1, _, _] | [_, 1, _] | [_, _, 1] => Ok(true),
+            _ => Ok(false),
+        };
+        assert!(actual == expected, "strh presence or first invalid entry");
     }
 
     #[kani::proof]
