@@ -171,6 +171,28 @@ fn avi_movi_packet_tag(id: [u8; 4]) -> Option<MoviPacketTag> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MoviEntryDecision {
+    Packet(MoviPacketTag),
+    Ignore,
+    RejectShortListType,
+    RejectRecList,
+}
+
+fn avi_movi_entry_decision(id: [u8; 4], list_type_view: Option<[u8; 4]>) -> MoviEntryDecision {
+    if &id == b"LIST" {
+        return match list_type_view {
+            None => MoviEntryDecision::RejectShortListType,
+            Some(list_type) if &list_type == b"rec " => MoviEntryDecision::RejectRecList,
+            Some(_) => MoviEntryDecision::Ignore,
+        };
+    }
+    match avi_movi_packet_tag(id) {
+        Some(tag) => MoviEntryDecision::Packet(tag),
+        None => MoviEntryDecision::Ignore,
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AviChunkBoundaryError {
     SizeOverflow,
     ExtendsPastEnd,
@@ -536,25 +558,31 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                     movi_found = true;
                     for inner in chunks(&body[4..], "movi list") {
                         let (cid, cbody) = inner?;
-                        if &cid == b"LIST" {
-                            if cbody.len() < 4 {
+                        let list_type_view = if &cid == b"LIST" {
+                            cbody.get(..4).map(|bytes| bytes.try_into().unwrap())
+                        } else {
+                            None
+                        };
+                        match avi_movi_entry_decision(cid, list_type_view) {
+                            MoviEntryDecision::RejectShortListType => {
                                 return Err(MediaError::malformed(
                                     "movi LIST shorter than list type",
                                 ));
                             }
-                            if &cbody[..4] == b"rec " {
+                            MoviEntryDecision::RejectRecList => {
                                 return Err(MediaError::input_unavailable(
                                     "OpenDML/nested rec LIST is not supported",
                                 ));
                             }
-                        }
-                        // Chunk ids are `NNdb`/`NNdc` (video) / `NNwb` (audio).
-                        if let Some(tag) = avi_movi_packet_tag(cid) {
-                            movi_packets.push(MoviPacket {
-                                stream_no: tag.stream_no,
-                                kind: tag.kind,
-                                body: cbody,
-                            });
+                            MoviEntryDecision::Ignore => {}
+                            // Chunk ids are `NNdb`/`NNdc` (video) / `NNwb` (audio).
+                            MoviEntryDecision::Packet(tag) => {
+                                movi_packets.push(MoviPacket {
+                                    stream_no: tag.stream_no,
+                                    kind: tag.kind,
+                                    body: cbody,
+                                });
+                            }
                         }
                     }
                 }
@@ -1066,6 +1094,74 @@ mod tests {
         assert_eq!(layout.packets[1].body, &[5u8, 6]);
     }
 
+    fn avi_with_movi_entries(entries: &[u8]) -> Vec<u8> {
+        let mut body = Vec::new();
+        push_list(&mut body, b"movi", entries);
+        avi_with_tail(&body)
+    }
+
+    #[test]
+    fn exact_rec_movi_list_is_input_unavailable() {
+        let mut movi = Vec::new();
+        push_list(&mut movi, b"rec ", &[]);
+        let bytes = avi_with_movi_entries(&movi);
+        let e = avi_layout(&bytes).err().unwrap();
+        match e {
+            MediaError::InputUnavailable { reason } => {
+                assert_eq!(reason, "OpenDML/nested rec LIST is not supported");
+            }
+            other => panic!("expected input unavailable, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn short_movi_list_is_malformed() {
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"LIST", b"rec");
+        let bytes = avi_with_movi_entries(&movi);
+        let e = avi_layout(&bytes).err().unwrap();
+        match e {
+            MediaError::Malformed { reason } => {
+                assert_eq!(reason, "movi LIST shorter than list type");
+            }
+            other => panic!("expected malformed, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn non_rec_movi_list_exact_complement_is_ignored_before_packets() {
+        for list_type in [b"Rec ", b"recX", b"rec\0"] {
+            let mut movi = Vec::new();
+            push_list(&mut movi, list_type, b"tail");
+            push_chunk(&mut movi, b"zzwb", &[1u8]);
+            push_chunk(&mut movi, b"00wb", &[2u8, 3]);
+            let bytes = avi_with_movi_entries(&movi);
+            let layout = avi_layout(&bytes).unwrap();
+
+            assert_eq!(layout.packets.len(), 1);
+            assert_eq!(layout.packets[0].stream_no, 0);
+            assert_eq!(layout.packets[0].kind, *b"wb");
+            assert_eq!(layout.packets[0].body, &[2u8, 3]);
+        }
+    }
+
+    #[test]
+    fn movi_entry_decision_non_list_packet_ignores_list_type_view() {
+        for list_type_view in [None, Some(*b"rec "), Some(*b"zzzz")] {
+            assert_eq!(
+                avi_movi_entry_decision(*b"99pc", list_type_view),
+                MoviEntryDecision::Packet(MoviPacketTag {
+                    stream_no: 99,
+                    kind: *b"pc",
+                })
+            );
+            assert_eq!(
+                avi_movi_entry_decision(*b"a0wb", list_type_view),
+                MoviEntryDecision::Ignore
+            );
+        }
+    }
+
     #[test]
     fn compressed_vids_is_explicit_unavailable() {
         // MJPG-compressed vids: metadata and timing are recorded, and
@@ -1232,6 +1328,73 @@ mod proofs {
             assert_eq!(tag.kind[1], id[3]);
         } else {
             assert!(!first_digit || !second_digit);
+        }
+    }
+
+    #[kani::proof]
+    fn avi_movi_entry_decision_exact() {
+        let id: [u8; 4] = kani::any();
+        let list_type_view: Option<[u8; 4]> = kani::any();
+        let decision = avi_movi_entry_decision(id, list_type_view);
+
+        let is_list = id == *b"LIST";
+        let rec_view = list_type_view == Some(*b"rec ");
+        let short_expected = is_list && list_type_view.is_none();
+        let rec_expected = is_list && rec_view;
+        let list_ignore_expected = is_list && list_type_view.is_some() && !rec_view;
+        let tag = avi_movi_packet_tag(id);
+        let packet_expected = !is_list && tag.is_some();
+        let non_list_ignore_expected = !is_list && tag.is_none();
+        let ignore_expected = list_ignore_expected || non_list_ignore_expected;
+
+        assert_eq!(
+            matches!(decision, MoviEntryDecision::RejectShortListType),
+            short_expected
+        );
+        assert_eq!(
+            matches!(decision, MoviEntryDecision::RejectRecList),
+            rec_expected
+        );
+        assert_eq!(
+            matches!(decision, MoviEntryDecision::Packet(_)),
+            packet_expected
+        );
+        assert_eq!(
+            matches!(decision, MoviEntryDecision::Ignore),
+            ignore_expected
+        );
+        assert_eq!(
+            short_expected as u8
+                + rec_expected as u8
+                + packet_expected as u8
+                + ignore_expected as u8,
+            1
+        );
+
+        if is_list {
+            assert!(!matches!(decision, MoviEntryDecision::Packet(_)));
+            if let Some(list_type) = list_type_view {
+                assert_eq!(
+                    matches!(decision, MoviEntryDecision::RejectRecList),
+                    list_type == *b"rec "
+                );
+                assert_eq!(
+                    matches!(decision, MoviEntryDecision::Ignore),
+                    list_type != *b"rec "
+                );
+            }
+        }
+
+        if let MoviEntryDecision::Packet(packet_tag) = decision {
+            assert!(!is_list);
+            assert!(id[0].is_ascii_digit());
+            assert!(id[1].is_ascii_digit());
+            let tens = usize::from(id[0].wrapping_sub(b'0'));
+            let ones = usize::from(id[1].wrapping_sub(b'0'));
+            assert_eq!(packet_tag.stream_no, tens * 10 + ones);
+            assert!(packet_tag.stream_no <= 99);
+            assert_eq!(packet_tag.kind[0], id[2]);
+            assert_eq!(packet_tag.kind[1], id[3]);
         }
     }
 }
