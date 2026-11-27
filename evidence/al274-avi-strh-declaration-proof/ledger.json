@@ -1,0 +1,343 @@
+{
+  "issue": "audio-lens#274",
+  "slice": "AVI-STREAM-002 strh declaration field extraction/validation bounded exact proof",
+  "base": {
+    "origin_main_at_start": "a5770e48cec99b09da9765df0a8d1aa2f6af614d",
+    "branch": "feature/274-avi-strh-declaration-proof",
+    "baseline_check": "git merge-base --is-ancestor a5770e48cec99b09da9765df0a8d1aa2f6af614d HEAD exited 0 at branch creation; final fetch result recorded in verification.md/PR body"
+  },
+  "scope": {
+    "in_scope": [
+      "48 byte 未満 strh body の reject / 48 byte 以上の accept exact complement",
+      "受理 body 先頭 48 byte の fcc_type byte 順序保持",
+      "offset 20/24/28/32/44 の little-endian u32 decode",
+      "StrhDeclarationFields という 5 u32 + fcc_type の field view への写像",
+      "この extraction/validation 計算の overflow/underflow/panic 不存在"
+    ],
+    "out_of_scope": [
+      "Chunks iterator / hdrl,strl LIST 走査",
+      "has_strh による stream 収集と missing strh declaration correspondence",
+      "strf parsing / WAVEFORMATEX / BITMAPINFOHEADER validation",
+      "StreamHead.format Vec と任意長 body slice/lifetime composition",
+      "timing accumulation, packet_ticks, PCM/video decode",
+      "partial ingest, writer/corruption whole-call proof, I/O, allocation, diagnostic formatting",
+      "公開 API 全体 no-panic, MP4, signature 再構成"
+    ]
+  },
+  "input_domain": {
+    "body_len": "full usize machine integer domain, no narrowing assume",
+    "prefix": "fixed [u8;48], every byte symbolic, all bit patterns",
+    "trailing_bytes": "not represented because production helper takes fixed prefix and cannot observe bytes after offset 48; exact reparameterization for accepted lengths",
+    "unobserved_prefix_bytes": "offsets 4..20 and 36..44 remain symbolic; non-dependence is checked because assertions constrain only observed outputs and helper type has no output carrying those bytes"
+  },
+  "assumptions": {
+    "input_narrowing": "none",
+    "kani_assume": "none",
+    "unwinding_assertions": "not disabled",
+    "solver_or_runner_weakening": "none"
+  },
+  "properties": {
+    "reject_accept_complement": "accepted == body_len >= 48 and !accepted == body_len < 48",
+    "fcc_type": "output equals prefix[0..4] in order",
+    "u32_fields": "scale/rate/start/length/sample_size equal little-endian u32 at offsets 20/24/28/32/44",
+    "field_view_coverage": "StrhDeclarationFields contains exactly fcc_type plus the five production-observed u32 fields; proof asserts every field",
+    "safety": "Kani standard checks verify no overflow/underflow/panic in this local computation"
+  },
+  "production_connection": {
+    "helpers": ["avi_strh_accepts_body_len", "avi_strh_declaration_fields"],
+    "parse_path": "avi_layout strl loop -> parse_strh -> length predicate + copy fixed prefix -> extraction helper -> StreamHead assignment",
+    "true_to_the_code": "proof calls the same production length predicate and extraction helper used by parse_strh; no test-side duplicate of offsets/endian/length gate",
+    "behavior_preserved": [
+      "body shorter than 48 remains malformed with existing message",
+      "trailing bytes and unobserved fields remain ignored",
+      "error precedence and public API unchanged"
+    ]
+  },
+  "proof": {
+    "harness": "avi_strh_declaration_bounded_exact",
+    "group": "avi-strh-declaration",
+    "requirement": "Required",
+    "verdict": "pass",
+    "environment": "Ubuntu",
+    "elapsed_ms": 6379,
+    "max_rss_kb": 249424,
+    "cost_summary": {
+      "selected_proofs": 1,
+      "verified_proofs": 1,
+      "total_elapsed_ms": 6379,
+      "max_observed_rss_kb": 249424,
+      "rss_measured_proofs": 1,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    "raw_log": "evidence/al274-avi-strh-declaration-proof/kani/kani-avi_strh_declaration_bounded_exact.txt",
+    "verdict_json": "evidence/al274-avi-strh-declaration-proof/kani/verdict.json"
+  },
+  "mutation": {
+    "change": "scale little-endian input bytes shifted from offsets 20..24 to 21..25",
+    "reverted": true,
+    "verdict": "fail",
+    "detected_by": "avi_strh_declaration_bounded_exact",
+    "failing_assertion": "fields.scale == u32::from_le_bytes([prefix[20], prefix[21], prefix[22], prefix[23]])",
+    "elapsed_ms": 6357,
+    "max_rss_kb": 249824,
+    "raw_log": "evidence/al274-avi-strh-declaration-proof/mutation-strh-declaration-kani/kani-avi_strh_declaration_bounded_exact.txt"
+  },
+  "regressions": {
+    "avi-stream-kind": {
+      "dir": "kani-avi-stream-kind-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 14554,
+        "max_observed_rss_kb": 499888,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "avi_stream_kind_classification_bounded_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 14554,
+          "max_rss_kb": 499888
+        }
+      ]
+    },
+    "avi-movi-scan": {
+      "dir": "kani-avi-movi-scan-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 8357,
+        "max_observed_rss_kb": 313780,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "avi_movi_scan_collection_bounded_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 8357,
+          "max_rss_kb": 313780
+        }
+      ]
+    },
+    "avi-movi-composition": {
+      "dir": "kani-avi-movi-composition-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 5075,
+        "max_observed_rss_kb": 304768,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "avi_movi_entry_decision_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 5075,
+          "max_rss_kb": 304768
+        }
+      ]
+    },
+    "avi-movi-tag": {
+      "dir": "kani-avi-movi-tag-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 5045,
+        "max_observed_rss_kb": 297792,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "avi_movi_packet_tag_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 5045,
+          "max_rss_kb": 297792
+        }
+      ]
+    },
+    "mp4-avi-boundary": {
+      "dir": "kani-mp4-avi-boundary-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 15935,
+        "max_observed_rss_kb": 306632,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "mp4_box_header_step_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 9725,
+          "max_rss_kb": 306632
+        },
+        {
+          "harness": "avi_chunk_step_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 6210,
+          "max_rss_kb": 304492
+        }
+      ]
+    },
+    "mp4-scan": {
+      "dir": "kani-mp4-scan-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 19950,
+        "max_observed_rss_kb": 309120,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "mp4_box_scan_progress_bounded_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 19950,
+          "max_rss_kb": 309120
+        }
+      ]
+    },
+    "wav-chunk-scan": {
+      "dir": "kani-wav-chunk-scan-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 14369,
+        "max_observed_rss_kb": 314852,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "wav_chunk_boundary_step_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 6703,
+          "max_rss_kb": 302340
+        },
+        {
+          "harness": "wav_chunk_scan_progress_bounded_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 7666,
+          "max_rss_kb": 314852
+        }
+      ]
+    },
+    "wav-range": {
+      "dir": "kani-wav-range-regression",
+      "verdict": "pass",
+      "environment": "Ubuntu",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 15509,
+        "max_observed_rss_kb": 298688,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "harnesses": [
+        {
+          "harness": "wav_range_plan_valid_ranges_exact",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 10801,
+          "max_rss_kb": 298688
+        },
+        {
+          "harness": "wav_range_plan_invalid_ranges_error",
+          "ok": true,
+          "bad": false,
+          "timedOut": false,
+          "elapsed_ms": 4708,
+          "max_rss_kb": 295984
+        }
+      ]
+    }
+  },
+  "limited_cost_comparison": {
+    "scope": "AVI declaration/container-walk related legacy whole-call proofs plus existing local AVI proofs only; not the complete old/new cost matrix",
+    "legacy": [
+      {
+        "proof": "avi_writer_output_decodes",
+        "trial": "1200s cap timeout, elapsed 1267s, peak 3.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "mutated_avi_never_panics",
+        "trial": "1200s cap timeout, elapsed 1266s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "truncated_avi_never_panics",
+        "trial": "900s cap timeout, elapsed 948s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      }
+    ],
+    "local_avi_proofs": {
+      "avi_strh_declaration_bounded_exact": "final lane 6379ms / 249424KiB",
+      "avi_stream_kind_classification_bounded_exact": "regression lane 14554ms / 499888KiB",
+      "avi_movi_scan_collection_bounded_exact": "regression lane 8357ms / 313780KiB",
+      "avi_movi_entry_decision_exact": "regression lane 5075ms / 304768KiB",
+      "avi_movi_packet_tag_exact": "regression lane 5045ms / 297792KiB"
+    },
+    "comparison_note": "Legacy whole-call proofs include writer fixtures, container decode, allocation, formatting, parser-wide branches, and did not produce a formal pass. The new proof is narrower fixed-prefix declaration extraction/validation only; lower rerun cost is not evidence of equivalent assurance."
+  },
+  "proptest_overlap": "existing mutation/truncation/no-panic property tests remain unchanged and pass; deterministic unit tests cover short rejection, exact field decode, and trailing-byte irrelevance concretely",
+  "legacy_proof_disposition": "no legacy proof retired in this slice; selective groups are used because the all-proof lane already has known timeouts",
+  "heavy_properties_not_selected": [
+    "strf payload / full AVI-STREAM-002 declaration validation",
+    "strl ordering and missing strh declaration correspondence",
+    "AVI-TIME-004 u128 division/remainder/multi-stream accumulation",
+    "AVI-PCM codec/format conversion matrix",
+    "MP4-TABLE-005 multi-table accumulation/cross-table consistency",
+    "MP4-PCM",
+    "dynamic Vec/longer stream tables",
+    "nested walker composition",
+    "signature reconstruction"
+  ],
+  "rf_reuse_judgement": "no new Ruviform issue filed; fixed AVI strh layout remains format-specific parser knowledge and no new reusable generic contract was established in this slice",
+  "environment": {
+    "host": "Windows worktree",
+    "kani_lane_env": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0"
+  }
+}

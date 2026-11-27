@@ -143,6 +143,33 @@ pub(crate) struct StreamHead {
     pub(crate) format: Vec<u8>,
 }
 
+const STRH_HEADER_LEN: usize = 48;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct StrhDeclarationFields {
+    fcc_type: [u8; 4],
+    scale: u32,
+    rate: u32,
+    start: u32,
+    length: u32,
+    sample_size: u32,
+}
+
+fn avi_strh_accepts_body_len(body_len: usize) -> bool {
+    body_len >= STRH_HEADER_LEN
+}
+
+fn avi_strh_declaration_fields(prefix: &[u8; STRH_HEADER_LEN]) -> StrhDeclarationFields {
+    StrhDeclarationFields {
+        fcc_type: [prefix[0], prefix[1], prefix[2], prefix[3]],
+        scale: u32::from_le_bytes([prefix[20], prefix[21], prefix[22], prefix[23]]),
+        rate: u32::from_le_bytes([prefix[24], prefix[25], prefix[26], prefix[27]]),
+        start: u32::from_le_bytes([prefix[28], prefix[29], prefix[30], prefix[31]]),
+        length: u32::from_le_bytes([prefix[32], prefix[33], prefix[34], prefix[35]]),
+        sample_size: u32::from_le_bytes([prefix[44], prefix[45], prefix[46], prefix[47]]),
+    }
+}
+
 /// One packet inside the `movi` list, tagged with its stream.
 #[derive(Debug)]
 pub(crate) struct MoviPacket<'a> {
@@ -492,15 +519,18 @@ impl<'a> Iterator for Chunks<'a> {
 
 fn parse_strh(body: &[u8], head: &mut StreamHead) -> Result<(), MediaError> {
     // The fixed AVISTREAMHEADER spans dwSampleSize at offset 44.
-    if body.len() < 48 {
+    if !avi_strh_accepts_body_len(body.len()) {
         return Err(MediaError::malformed("strh chunk shorter than 48 bytes"));
     }
-    head.fcc_type.copy_from_slice(&body[..4]);
-    head.scale = read_u32(body, 20)?;
-    head.rate = read_u32(body, 24)?;
-    head.start = read_u32(body, 28)?;
-    head.length = read_u32(body, 32)?;
-    head.sample_size = read_u32(body, 44)?;
+    let mut prefix = [0u8; STRH_HEADER_LEN];
+    prefix.copy_from_slice(&body[..STRH_HEADER_LEN]);
+    let fields = avi_strh_declaration_fields(&prefix);
+    head.fcc_type = fields.fcc_type;
+    head.scale = fields.scale;
+    head.rate = fields.rate;
+    head.start = fields.start;
+    head.length = fields.length;
+    head.sample_size = fields.sample_size;
     Ok(())
 }
 
@@ -967,7 +997,7 @@ mod tests {
         out
     }
 
-    fn strh_body(
+    pub(super) fn strh_body(
         fcc: &[u8; 4],
         scale: u32,
         rate: u32,
@@ -1794,6 +1824,42 @@ mod proofs {
         assert_eq!(actual.stop, expected.stop);
     }
 
+    #[kani::proof]
+    fn avi_strh_declaration_bounded_exact() {
+        let body_len: usize = kani::any();
+        let prefix: [u8; STRH_HEADER_LEN] = kani::any();
+
+        let accepted = avi_strh_accepts_body_len(body_len);
+        assert_eq!(accepted, body_len >= STRH_HEADER_LEN);
+        assert_eq!(!accepted, body_len < STRH_HEADER_LEN);
+
+        let fields = avi_strh_declaration_fields(&prefix);
+        assert_eq!(
+            fields.fcc_type,
+            [prefix[0], prefix[1], prefix[2], prefix[3]]
+        );
+        assert_eq!(
+            fields.scale,
+            u32::from_le_bytes([prefix[20], prefix[21], prefix[22], prefix[23]])
+        );
+        assert_eq!(
+            fields.rate,
+            u32::from_le_bytes([prefix[24], prefix[25], prefix[26], prefix[27]])
+        );
+        assert_eq!(
+            fields.start,
+            u32::from_le_bytes([prefix[28], prefix[29], prefix[30], prefix[31]])
+        );
+        assert_eq!(
+            fields.length,
+            u32::from_le_bytes([prefix[32], prefix[33], prefix[34], prefix[35]])
+        );
+        assert_eq!(
+            fields.sample_size,
+            u32::from_le_bytes([prefix[44], prefix[45], prefix[46], prefix[47]])
+        );
+    }
+
     const STREAM_TYPE_COUNT: usize = 3;
     type SymbolicStreamTypeTable = [[u8; 4]; STREAM_TYPE_COUNT];
 
@@ -2030,6 +2096,7 @@ mod proofs {
 
 #[cfg(test)]
 mod boundary_tests {
+    use super::tests::strh_body;
     use super::*;
 
     fn classification_stream_head(fcc_type: [u8; 4], scale: u32) -> StreamHead {
@@ -2105,6 +2172,57 @@ mod boundary_tests {
         assert!(avi_packet_is_selected_video_frame(&types, 2, *b"dc", 2));
         assert!(!avi_packet_is_selected_video_frame(&types, 2, *b"pc", 2));
         assert!(!avi_packet_is_selected_video_frame(&types, 1, *b"db", 2));
+    }
+
+    #[test]
+    fn strh_declaration_rejects_short_bodies() {
+        for len in [0usize, 1, STRH_HEADER_LEN - 1] {
+            let body = vec![0xaa; len];
+            let mut head = classification_stream_head([0; 4], 0);
+            let err = parse_strh(&body, &mut head).unwrap_err();
+            match err {
+                MediaError::Malformed { reason } => {
+                    assert_eq!(reason, "strh chunk shorter than 48 bytes");
+                }
+                _ => panic!("short strh body must be malformed"),
+            }
+        }
+    }
+
+    #[test]
+    fn strh_declaration_extracts_le_fields_and_ignores_unobserved_and_trailing_bytes() {
+        let fcc = [0x74, 0x00, 0xff, 0x73];
+        let mut body = strh_body(
+            &fcc,
+            0x0102_0304,
+            0x0506_0708,
+            0x090a_0b0c,
+            0x0d0e_0f10,
+            0x1112_1314,
+        );
+        for (index, byte) in body.iter_mut().enumerate() {
+            if (4..20).contains(&index) || (36..44).contains(&index) || index >= STRH_HEADER_LEN {
+                *byte = 0xa5u8.wrapping_add(index as u8);
+            }
+        }
+
+        let mut head = classification_stream_head([0; 4], 0);
+        parse_strh(&body, &mut head).unwrap();
+        assert_eq!(head.fcc_type, fcc);
+        assert_eq!(head.scale, 0x0102_0304);
+        assert_eq!(head.rate, 0x0506_0708);
+        assert_eq!(head.start, 0x090a_0b0c);
+        assert_eq!(head.length, 0x0d0e_0f10);
+        assert_eq!(head.sample_size, 0x1112_1314);
+
+        let mut exact_head = classification_stream_head([0; 4], 0);
+        parse_strh(&body[..STRH_HEADER_LEN], &mut exact_head).unwrap();
+        assert_eq!(exact_head.fcc_type, head.fcc_type);
+        assert_eq!(exact_head.scale, head.scale);
+        assert_eq!(exact_head.rate, head.rate);
+        assert_eq!(exact_head.start, head.start);
+        assert_eq!(exact_head.length, head.length);
+        assert_eq!(exact_head.sample_size, head.sample_size);
     }
 
     #[test]
