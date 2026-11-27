@@ -186,8 +186,8 @@
     "reason": "WAVEFORMATEX fixed-prefix layout is an AudioLens media-parser boundary concern; no new reusable Ruviform contract was identified. No Issue was filed"
   },
   "branch_ci": {
-    "status_at_evidence_commit": "NotRun before push",
+    "status": "Unsupported",
     "manual_dispatch": false,
-    "post_push_observation": "to be recorded in actions.jsonl and PR body if available"
+    "post_push_observation": "gh run list --branch feature/274-avi-strf-audio-proof returned no runs and gh pr checks 292 reported no checks; .github/workflows/ci.yml is workflow_dispatch-only, so no automatic branch CI exists without manual dispatch"
   }
 }

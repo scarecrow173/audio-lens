@@ -46,7 +46,7 @@ regression group の合計 solver wall/elapsed は 203598 ms、新規 proof を�
 
 ## Branch CI
 
-ローカル evidence 作成時点では branch 未 push のため branch CI は NotRun。push 後は manual dispatch を行わず、branch head SHA に対応する CI run を read-only で確認し、結果は PR 本文と `actions.jsonl` に記録する。確認できない場合は NotRun/Unsupported と理由を記録する。main 検証は Daily CI に委譲する。
+push 後に `gh run list --branch feature/274-avi-strf-audio-proof --limit 10` と `gh pr checks 292` を read-only で確認したが、run/check は 0 件だった。`.github/workflows/ci.yml` は `workflow_dispatch` のみを trigger に持ち、automatic branch CI は構成されていないため、manual dispatch を使わない条件では branch CI は Unsupported と記録する。main 検証は Daily CI に委譲する。
 
 ## ファイル
 
