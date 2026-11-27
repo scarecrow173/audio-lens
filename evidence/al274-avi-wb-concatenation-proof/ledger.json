@@ -1,0 +1,445 @@
+{
+  "issue": 274,
+  "branch": "feature/274-avi-wb-concatenation-proof",
+  "base_sha": "70e979044adb1a829bcd5ae4baed54629653f714",
+  "required_ancestors": [
+    "04c7f1b7ab16ca9965bf4603ec9bade66302c036",
+    "70e979044adb1a829bcd5ae4baed54629653f714"
+  ],
+  "verification_subject_sha": "cf284b1924c9a7520d716e2be851b49284ebbd97",
+  "property": "First auds, exact wb only, mux order, length/content/byte order, and non-selected non-interference",
+  "assurance": "Bounded Exhaustive",
+  "requirement": "Required",
+  "boundary_design": "boundary-analysis.md",
+  "input_domain": {
+    "stream_count": 3,
+    "packet_count": 3,
+    "stream_types": ["auds", "vids", "other"],
+    "packet_stream_index_classes": ["0", "1", "2", "out-of-range"],
+    "packet_kind_classes": ["wb", "non-wb"],
+    "body_lengths_bytes": [0, 1, 2],
+    "body_contents": "Every bit pattern of each present byte, independent across and within packets",
+    "encoding": "Independent u8 selectors modulo 3, 4, 2 or 3. Each quotient is surjective; absent storage bytes have no effect.",
+    "exactness": "PR #289 proves selection/predicate for full type/index/kind domains. The production loop observes only that predicate and copies the original body bytes. Fixed arrays retain table/packet order; this quotient is for audio selection only."
+  },
+  "assumptions": [],
+  "unwinding_assertions": "Enabled; no unwind override",
+  "stubs": [],
+  "production_connection": {
+    "seam": [
+      "avi_first_stream_of_class",
+      "avi_selected_audio_pcm",
+      "avi_packet_is_selected_audio_payload"
+    ],
+    "scope": "The proof invokes the entire production loop on a fixed MoviPacket slice and its real Vec<u8> output. The independent oracle derives first auds and offsets from raw model inputs, checking total length and both potential bytes of every selected body.",
+    "shell_gap": "The walker/collection, request flags, unavailable mapping and PCM decode remain outside Kani. decode_layout calls the proven loop in the selected audio branch, writes no further PCM bytes, and passes the output unmodified to decode_waveformatex if nonempty.",
+    "runtime_fixture": [
+      "only_first_auds_stream_is_decoded",
+      "empty_wb_is_unavailable_only_when_audio_is_requested"
+    ],
+    "consumer_impact": "PCM goes to AviMedia.audio and IngestResult.audio; decode failures affect stream availability/provenance. This refactor does not change public API, selection, empty/no-wb degradation, audio-request bypass, video/timing or error semantics."
+  },
+  "unproven": [
+    "Stream table or packet sequence longer than 3, payload length above 2, arbitrary-length slice copy, general Vec growth/allocation",
+    "Dynamic stream or packet accumulation, unbounded scan, nested Chunks/LIST walker, chunk padding and corruption/truncation whole-parser no-panic",
+    "Full AVI-STREAM-002 declaration correspondence, missing strh filter and error precedence, strf capture/materialization composition",
+    "Empty wb/no wb availability mapping as a product theorem, request flags, partial ingest and diagnostic formatting",
+    "Dynamic first auds/vids selection, video frame extraction, AVI-TIME-004, AVI-PCM, MP4-TABLE-005/MP4-PCM, WAV-PCM/Writer, format signature",
+    "I/O, writer round-trip and public API whole-call correctness/no-panic"
+  ],
+  "execution": {
+    "runner": "tools/run-formal-kani.mjs via mise run test-formal-kani",
+    "group": "avi-wb-concatenation",
+    "harness": "avi_audio_wb_concatenation_bounded_exact",
+    "registry_size": 38,
+    "environment": "Windows x64 host and Ubuntu WSL2 (Linux 6.6.87.2-microsoft-standard-WSL2)",
+    "tools": "mise 2026.11.2, rustc 1.99.1 (native), Kani 0.68.0, CBMC 6.11.0 with default CaDiCaL",
+    "timeout_ms": 600000,
+    "design_budget_ms": 120000,
+    "rss_ceiling_kib_exclusive": 4194304,
+    "measurement": "Sequential groups in existing WSL mirror. Runner elapsed excludes preparation; command wall time includes it. Peak is max per-harness GNU time -v RSS, not sum or host memory.",
+    "all_harnesses": "NotRun by scope: reused assurance groups, not the known legacy timeout lane"
+  },
+  "attempts": {
+    "initial": {
+      "dir": "kani-initial",
+      "classification": "Resource Limit: oracle symex loop over-expansion; aborted with SIGTERM; not a product counterexample",
+      "elapsed_ms": 198840,
+      "peak_rss_kib": 938108
+    },
+    "static_oracle": {
+      "dir": "kani-static-oracle",
+      "result": "Pass",
+      "elapsed_ms": 39613,
+      "peak_rss_kib": 823084
+    }
+  },
+  "mutation": {
+    "dir": "mutation-wb-concatenation-kani",
+    "edit": "for p in packets -> for p in packets.iter().rev()",
+    "exit": 1,
+    "lane_verdict": "fail",
+    "raw_result": "VERIFICATION:- FAILED",
+    "failed_checks": [
+      "first selected payload byte and order",
+      "second selected payload byte and order"
+    ],
+    "elapsed_ms": 49697,
+    "wall_ms": 52919,
+    "peak_rss_kib": 893232,
+    "restore_blob": "b7455dff70b565d9bffe0421c2bdb96f21f96c72"
+  },
+  "runtime_and_proptest_overlap": "Unchanged formal_wav/formal_containers round-trip, mutation, truncation, no-panic and partial ingestion are Runtime Verification only. The AVI unit fixtures connect the proof seam to actual decoded samples and unavailable handling.",
+  "legacy": {
+    "disposition": "Unchanged registry; no retire/supersede and no equivalent guarantee claimed.",
+    "sources": [
+      "../al274/verification.md",
+      "../al274/residual/verdict.json",
+      "../al274-avi-strf-capture-proof/ledger.json"
+    ],
+    "canonical": "All three below timed out at 1500 s/proof; no individual canonical peak RSS was recorded in that runner. Trial peaks are sampled during symex.",
+    "trial": [
+      {
+        "harness": "avi_writer_output_decodes",
+        "timeout_s": 1200,
+        "wall_s": 1267,
+        "rss_gib": 3.9
+      },
+      {
+        "harness": "mutated_avi_never_panics",
+        "timeout_s": 1200,
+        "wall_s": 1266,
+        "rss_gib": 2.9
+      },
+      {
+        "harness": "truncated_avi_never_panics",
+        "timeout_s": 900,
+        "wall_s": 948,
+        "rss_gib": 2.9
+      }
+    ]
+  },
+  "followups": "Baseline ledger schema integration, Daily CI assurance pack, full mutation/cost matrix, heavyweight proof composition and docs responsibility split (#278). Docs index belongs to Coordinator.",
+  "ruviform": "No candidate; selection is AVI-specific and the append uses std Vec. No issue updates.",
+  "verified_sync_commit": "cf284b1924c9a7520d716e2be851b49284ebbd97",
+  "runtime": {
+    "environment": "Windows x64",
+    "exit": 0,
+    "dir": "final-canonical.txt",
+    "unit_tests": 118,
+    "formal_wav": 7,
+    "formal_containers": 7
+  },
+  "formal": {
+    "required": {
+      "group": "avi-wb-concatenation",
+      "command": "AL_KANI_HARNESS_GROUP=avi-wb-concatenation AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani mise run test-formal-kani",
+      "exit": 0,
+      "verdict": "pass",
+      "dir": "kani",
+      "wall_ms": 45262,
+      "elapsed_ms": 41666,
+      "peak_rss_kib": 822924,
+      "proofs": [
+        {
+          "harness": "avi_audio_wb_concatenation_bounded_exact",
+          "raw_log": "kani/kani-avi_audio_wb_concatenation_bounded_exact.txt",
+          "raw_result": "VERIFICATION:- SUCCESSFUL",
+          "elapsed_ms": 41666,
+          "peak_rss_kib": 822924
+        }
+      ]
+    },
+    "regressions": [
+      {
+        "group": "avi-strf-capture",
+        "command": "AL_KANI_HARNESS_GROUP=avi-strf-capture AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-capture-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-strf-capture-regression",
+        "wall_ms": 31954,
+        "elapsed_ms": 28116,
+        "peak_rss_kib": 435160,
+        "proofs": [
+          {
+            "harness": "avi_strl_entry_classification_exact",
+            "raw_log": "kani-avi-strf-capture-regression/kani-avi_strl_entry_classification_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 9388,
+            "peak_rss_kib": 303628
+          },
+          {
+            "harness": "avi_strf_capture_ordering_bounded_exact",
+            "raw_log": "kani-avi-strf-capture-regression/kani-avi_strf_capture_ordering_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 7976,
+            "peak_rss_kib": 305176
+          },
+          {
+            "harness": "avi_strf_materialize_bounded_exact",
+            "raw_log": "kani-avi-strf-capture-regression/kani-avi_strf_materialize_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 10752,
+            "peak_rss_kib": 435160
+          }
+        ]
+      },
+      {
+        "group": "format-signature",
+        "command": "AL_KANI_HARNESS_GROUP=format-signature AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-format-signature-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-format-signature-regression",
+        "wall_ms": 13463,
+        "elapsed_ms": 10797,
+        "peak_rss_kib": 435704,
+        "proofs": [
+          {
+            "harness": "format_signature_detection_bounded_exact",
+            "raw_log": "kani-format-signature-regression/kani-format_signature_detection_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 10797,
+            "peak_rss_kib": 435704
+          }
+        ]
+      },
+      {
+        "group": "avi-strf-audio-declaration",
+        "command": "AL_KANI_HARNESS_GROUP=avi-strf-audio-declaration AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-audio-declaration-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-strf-audio-declaration-regression",
+        "wall_ms": 12906,
+        "elapsed_ms": 6209,
+        "peak_rss_kib": 305824,
+        "proofs": [
+          {
+            "harness": "avi_audio_strf_declaration_bounded_exact",
+            "raw_log": "kani-avi-strf-audio-declaration-regression/kani-avi_audio_strf_declaration_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 6209,
+            "peak_rss_kib": 305824
+          }
+        ]
+      },
+      {
+        "group": "avi-strf-declaration",
+        "command": "AL_KANI_HARNESS_GROUP=avi-strf-declaration AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-declaration-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-strf-declaration-regression",
+        "wall_ms": 14105,
+        "elapsed_ms": 6214,
+        "peak_rss_kib": 304664,
+        "proofs": [
+          {
+            "harness": "avi_video_strf_declaration_bounded_exact",
+            "raw_log": "kani-avi-strf-declaration-regression/kani-avi_video_strf_declaration_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 6214,
+            "peak_rss_kib": 304664
+          }
+        ]
+      },
+      {
+        "group": "avi-strh-declaration",
+        "command": "AL_KANI_HARNESS_GROUP=avi-strh-declaration AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-strh-declaration-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-strh-declaration-regression",
+        "wall_ms": 10342,
+        "elapsed_ms": 7899,
+        "peak_rss_kib": 307372,
+        "proofs": [
+          {
+            "harness": "avi_strh_declaration_bounded_exact",
+            "raw_log": "kani-avi-strh-declaration-regression/kani-avi_strh_declaration_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 7899,
+            "peak_rss_kib": 307372
+          }
+        ]
+      },
+      {
+        "group": "avi-stream-kind",
+        "command": "AL_KANI_HARNESS_GROUP=avi-stream-kind AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-stream-kind-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-stream-kind-regression",
+        "wall_ms": 22375,
+        "elapsed_ms": 19985,
+        "peak_rss_kib": 500020,
+        "proofs": [
+          {
+            "harness": "avi_stream_kind_classification_bounded_exact",
+            "raw_log": "kani-avi-stream-kind-regression/kani-avi_stream_kind_classification_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 19985,
+            "peak_rss_kib": 500020
+          }
+        ]
+      },
+      {
+        "group": "avi-movi-scan",
+        "command": "AL_KANI_HARNESS_GROUP=avi-movi-scan AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-scan-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-movi-scan-regression",
+        "wall_ms": 13587,
+        "elapsed_ms": 11124,
+        "peak_rss_kib": 319760,
+        "proofs": [
+          {
+            "harness": "avi_movi_scan_collection_bounded_exact",
+            "raw_log": "kani-avi-movi-scan-regression/kani-avi_movi_scan_collection_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 11124,
+            "peak_rss_kib": 319760
+          }
+        ]
+      },
+      {
+        "group": "avi-movi-composition",
+        "command": "AL_KANI_HARNESS_GROUP=avi-movi-composition AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-composition-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-movi-composition-regression",
+        "wall_ms": 21367,
+        "elapsed_ms": 17735,
+        "peak_rss_kib": 310584,
+        "proofs": [
+          {
+            "harness": "avi_movi_entry_decision_exact",
+            "raw_log": "kani-avi-movi-composition-regression/kani-avi_movi_entry_decision_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 17735,
+            "peak_rss_kib": 310584
+          }
+        ]
+      },
+      {
+        "group": "avi-movi-tag",
+        "command": "AL_KANI_HARNESS_GROUP=avi-movi-tag AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-tag-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-avi-movi-tag-regression",
+        "wall_ms": 51079,
+        "elapsed_ms": 25442,
+        "peak_rss_kib": 304052,
+        "proofs": [
+          {
+            "harness": "avi_movi_packet_tag_exact",
+            "raw_log": "kani-avi-movi-tag-regression/kani-avi_movi_packet_tag_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 25442,
+            "peak_rss_kib": 304052
+          }
+        ]
+      },
+      {
+        "group": "mp4-avi-boundary",
+        "command": "AL_KANI_HARNESS_GROUP=mp4-avi-boundary AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-mp4-avi-boundary-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-mp4-avi-boundary-regression",
+        "wall_ms": 27313,
+        "elapsed_ms": 20520,
+        "peak_rss_kib": 313388,
+        "proofs": [
+          {
+            "harness": "mp4_box_header_step_exact",
+            "raw_log": "kani-mp4-avi-boundary-regression/kani-mp4_box_header_step_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 12786,
+            "peak_rss_kib": 313388
+          },
+          {
+            "harness": "avi_chunk_step_exact",
+            "raw_log": "kani-mp4-avi-boundary-regression/kani-avi_chunk_step_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 7734,
+            "peak_rss_kib": 310776
+          }
+        ]
+      },
+      {
+        "group": "mp4-scan",
+        "command": "AL_KANI_HARNESS_GROUP=mp4-scan AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-mp4-scan-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-mp4-scan-regression",
+        "wall_ms": 27640,
+        "elapsed_ms": 25119,
+        "peak_rss_kib": 316280,
+        "proofs": [
+          {
+            "harness": "mp4_box_scan_progress_bounded_exact",
+            "raw_log": "kani-mp4-scan-regression/kani-mp4_box_scan_progress_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 25119,
+            "peak_rss_kib": 316280
+          }
+        ]
+      },
+      {
+        "group": "wav-chunk-scan",
+        "command": "AL_KANI_HARNESS_GROUP=wav-chunk-scan AL_KANI_TIMEOUT_MS=600000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-wav-chunk-scan-regression",
+        "wall_ms": 22572,
+        "elapsed_ms": 19509,
+        "peak_rss_kib": 319516,
+        "proofs": [
+          {
+            "harness": "wav_chunk_boundary_step_exact",
+            "raw_log": "kani-wav-chunk-scan-regression/kani-wav_chunk_boundary_step_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 8337,
+            "peak_rss_kib": 308784
+          },
+          {
+            "harness": "wav_chunk_scan_progress_bounded_exact",
+            "raw_log": "kani-wav-chunk-scan-regression/kani-wav_chunk_scan_progress_bounded_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 11172,
+            "peak_rss_kib": 319516
+          }
+        ]
+      },
+      {
+        "group": "wav-range",
+        "command": "AL_KANI_HARNESS_GROUP=wav-range AL_KANI_TIMEOUT_MS=300000 AL_KANI_LOG_DIR=evidence/al274-avi-wb-concatenation-proof/kani-wav-range-regression mise run test-formal-kani",
+        "exit": 0,
+        "verdict": "pass",
+        "dir": "kani-wav-range-regression",
+        "wall_ms": 21860,
+        "elapsed_ms": 18978,
+        "peak_rss_kib": 304736,
+        "proofs": [
+          {
+            "harness": "wav_range_plan_valid_ranges_exact",
+            "raw_log": "kani-wav-range-regression/kani-wav_range_plan_valid_ranges_exact.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 13611,
+            "peak_rss_kib": 304736
+          },
+          {
+            "harness": "wav_range_plan_invalid_ranges_error",
+            "raw_log": "kani-wav-range-regression/kani-wav_range_plan_invalid_ranges_error.txt",
+            "raw_result": "VERIFICATION:- SUCCESSFUL",
+            "elapsed_ms": 5367,
+            "peak_rss_kib": 302464
+          }
+        ]
+      }
+    ],
+    "regression_total": {
+      "groups": 13,
+      "proofs": 18,
+      "wall_ms": 290563,
+      "elapsed_ms": 217647,
+      "peak_rss_kib": 500020
+    }
+  }
+}
