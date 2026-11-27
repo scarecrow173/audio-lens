@@ -2,8 +2,8 @@
 // と MP4/AVI container parse(第 2 標的)の #[cfg(kani)] bounded proof
 // harness(tests/formal_wav.rs・tests/formal_containers.rs と、
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
-// src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001 については
-// src/mp4.rs/src/avi.rs)を
+// src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
+// tag identity については src/mp4.rs/src/avi.rs)を
 // `cargo kani` で実行する lane runner。`mise run test-formal-kani`
 // 経由で呼ぶ。
 //
@@ -192,12 +192,14 @@ const WAV_RANGE_HARNESSES = [
 ];
 const MP4_AVI_BOUNDARY_HARNESSES = ["mp4_box_header_step_exact", "avi_chunk_step_exact"];
 const MP4_SCAN_HARNESSES = ["mp4_box_scan_progress_bounded_exact"];
+const AVI_MOVI_TAG_HARNESSES = ["avi_movi_packet_tag_exact"];
 
 const HARNESS_GROUPS = {
   "wav-chunk-scan": WAV_CHUNK_SCAN_HARNESSES,
   "wav-range": WAV_RANGE_HARNESSES,
   "mp4-avi-boundary": MP4_AVI_BOUNDARY_HARNESSES,
   "mp4-scan": MP4_SCAN_HARNESSES,
+  "avi-movi-tag": AVI_MOVI_TAG_HARNESSES,
 };
 
 const HARNESSES = [
@@ -214,6 +216,7 @@ const HARNESSES = [
   ...WAV_RANGE_HARNESSES,
   ...MP4_AVI_BOUNDARY_HARNESSES,
   ...MP4_SCAN_HARNESSES,
+  ...AVI_MOVI_TAG_HARNESSES,
   "mp4_never_panics_ftyp_signed",
   "avi_never_panics_riff_signed",
   "containers_never_panics_unsigned",

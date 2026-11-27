@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 26 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 27 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -199,12 +199,14 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   MP4-BOX-002/AVI-CHUNK-001 proofs (`mp4_box_header_step_exact` and
   `avi_chunk_step_exact`); `AL_KANI_HARNESS_GROUP="mp4-scan"` selects
   the Required MP4-SCAN-003 proof
-  (`mp4_box_scan_progress_bounded_exact`). The WAV proofs are registered in
-  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary proofs are
+  (`mp4_box_scan_progress_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-movi-tag"`
+  selects the Required AVI-MOVI-003 tag identity proof
+  (`avi_movi_packet_tag_exact`). The WAV proofs are registered in
+  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 26. When `/usr/bin/time` is available
+  and an unset variable runs all 27. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the

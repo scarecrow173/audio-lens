@@ -1,0 +1,224 @@
+{
+  "schema": "audio-lens.formal-verification-ledger.al274-avi-movi-tag-proof.v1",
+  "issue": "https://github.com/scarecrow173/audio-lens/issues/274",
+  "slice": "AVI-MOVI-003 tag identity exact proof slice (not the whole Issue and not all of AVI-MOVI-003)",
+  "branch": "feature/274-avi-movi-tag-proof",
+  "baseline_origin_main": "2849d98cdee0f150a9276e7fe91c2ebd5fec50ff",
+  "pr285_ancestor_confirmed": true,
+  "environment": {
+    "host": "Windows worktree G:/orca/workspaces/audio-lens/al274-avi-movi-tag",
+    "kani_environment": "WSL2 Ubuntu",
+    "kani": "0.68.0",
+    "cbmc": "6.11.0",
+    "solver": "CaDiCaL (Kani/CBMC default; no solver attribute)",
+    "memory_measurement": "/usr/bin/time -v wrapping each cargo kani invocation; not per-solver cgroup isolation"
+  },
+  "input_domain": {
+    "avi_movi_003_tag_identity": "full [u8;4] chunk id; all 2^32 bit patterns. ASCII digit prefixes, non-digit prefixes, known/unknown/opaque kind suffixes, and non-ASCII kind bytes are not sampled or narrowed",
+    "production_representation": "the symbolic array is the same [u8;4] chunk id representation returned by production Chunks::next and passed by the movi loop",
+    "excluded_inputs": "none within the tag input domain. Packet body bytes, chunk sizes, nested LIST structure, stream declarations, and timing inputs are outside this sub-boundary rather than narrowed tag inputs"
+  },
+  "assumptions": [],
+  "assume_classification": "No kani::assume and no input narrowing. Branching on digit/non-digit inside the proof is exact complement branch selection, not an assumption. Kind bytes are opaque because that is the current production contract.",
+  "coverage": {
+    "acceptance_exact_complement": "accepted iff id[0] and id[1] are both ASCII digits; rejected otherwise regardless of id[2]/id[3]",
+    "stream_number_exactness": "accepted tags satisfy stream_no=(id[0]-b'0')*10+(id[1]-b'0') and 0<=stream_no<=99",
+    "kind_preservation": "accepted tags preserve kind[0]==id[2] and kind[1]==id[3] in order, including unknown/opaque/non-ASCII suffix bytes",
+    "arithmetic_safety": "digit subtraction and decimal composition are checked for overflow/underflow/panic freedom over the full input domain",
+    "production_connection": "the production movi loop calls avi_movi_packet_tag with the same inner chunk id returned by Chunks::next and does not duplicate digit classification, stream number arithmetic, or kind extraction",
+    "boundary_connection": "packet body boundary/padding remains the separate AVI-CHUNK-001 layer proved by avi_chunk_step_exact in PR #284; this slice does not reprove or weaken that layer"
+  },
+  "proofs": [
+    {
+      "name": "avi_movi_packet_tag_exact",
+      "required": true,
+      "verdict": "pass",
+      "raw_marker": "VERIFICATION:- SUCCESSFUL",
+      "elapsed_ms": 3869,
+      "max_rss_kb": 245780,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "raw_log": "kani/kani-avi_movi_packet_tag_exact.txt",
+      "verdict_json": "kani/verdict.json"
+    }
+  ],
+  "lane_cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 1,
+    "total_elapsed_ms": 3869,
+    "max_observed_rss_kb": 245780,
+    "rss_measured_proofs": 1,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  },
+  "initial_lane_before_mutation": {
+    "verdict": "pass",
+    "elapsed_ms": 9514,
+    "max_rss_kb": 315484,
+    "raw_dir": "kani-initial/",
+    "note": "initial cold-cache pass retained as auxiliary evidence; final canonical lane is kani/ after mutation revert"
+  },
+  "mutation": {
+    "description": "temporary production mutation swapped the stream number tens and ones digits in avi_movi_packet_tag",
+    "expected_detection": "avi-movi-tag proof must fail; generic boundary-only failures or diagnostic-payload-only mutations are not accepted as tag oracle evidence",
+    "verdict": "fail",
+    "raw_marker": "VERIFICATION:- FAILED",
+    "failed_check": "assertion failed: tag.stream_no == tens * 10 + ones",
+    "elapsed_ms": 5987,
+    "max_rss_kb": 246160,
+    "raw_dir": "mutation-tag-kani/",
+    "revert": "mutation reverted exactly; final avi-movi-tag lane, mise run test al-media, and mise run test-formal passed after revert"
+  },
+  "regressions": {
+    "mp4-avi-boundary": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-avi-boundary-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 17933,
+        "max_observed_rss_kb": 298512,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "mp4_box_header_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 10717,
+          "max_rss_kb": 298512
+        },
+        {
+          "name": "avi_chunk_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 7216,
+          "max_rss_kb": 297064
+        }
+      ],
+      "note": "PR #284 proofs were not redesigned or reimplemented"
+    },
+    "mp4-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-mp4-scan-regression/",
+      "cost_summary": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 21473,
+        "max_observed_rss_kb": 301844,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "mp4_box_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 21473,
+          "max_rss_kb": 301844
+        }
+      ],
+      "note": "PR #285 proof was not redesigned or reimplemented"
+    },
+    "wav-chunk-scan": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-chunk-scan-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 14354,
+        "max_observed_rss_kb": 306084,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "wav_chunk_boundary_step_exact",
+          "verdict": "pass",
+          "elapsed_ms": 6429,
+          "max_rss_kb": 294628
+        },
+        {
+          "name": "wav_chunk_scan_progress_bounded_exact",
+          "verdict": "pass",
+          "elapsed_ms": 7925,
+          "max_rss_kb": 306084
+        }
+      ],
+      "note": "PR #283 proofs were not redesigned or reimplemented"
+    },
+    "wav-range": {
+      "verdict": "pass",
+      "raw_dir": "kani-wav-range-regression/",
+      "cost_summary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 16322,
+        "max_observed_rss_kb": 291280,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "proofs": [
+        {
+          "name": "wav_range_plan_valid_ranges_exact",
+          "verdict": "pass",
+          "elapsed_ms": 11337,
+          "max_rss_kb": 291280
+        },
+        {
+          "name": "wav_range_plan_invalid_ranges_error",
+          "verdict": "pass",
+          "elapsed_ms": 4985,
+          "max_rss_kb": 288992
+        }
+      ],
+      "note": "PR #282 proofs were not redesigned or reimplemented"
+    }
+  },
+  "unproven_scope": {
+    "avi_movi_003_remainder": "nested movi/list composition, rec/OpenDML semantics, stream declaration correspondence, stream existence, kind validity/meaning classification, packet body boundary plus tag composition, and Vec<MoviPacket> collection",
+    "avi_time_004": "dwStart offset, u128 division, remainder, independent stream clocks, multi-packet accumulation",
+    "avi_pcm": "WAVEFORMATEX validation and PCM conversion",
+    "integration": "I/O, allocation, Vec decode, diagnostic formatting, public API whole-call no-panic, writer round-trip, corruption whole-call proof, partial ingest behavior",
+    "other_containers": "MP4-TABLE-005, MP4-PCM, signature reconstruction, and all MP4 properties outside regression proofs"
+  },
+  "limited_cost_comparison": {
+    "scope": "AVI movi/container walk related legacy whole-call proofs only; not the complete old/new cost matrix",
+    "legacy": [
+      {
+        "proof": "avi_writer_output_decodes",
+        "trial": "1200s cap timeout, elapsed 1267s, peak 3.9GiB",
+        "canonical_1500s": "timeout; /usr/bin/time max RSS unavailable because SIGTERM"
+      },
+      {
+        "proof": "mutated_avi_never_panics",
+        "trial": "1200s cap timeout, elapsed 1266s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      },
+      {
+        "proof": "truncated_avi_never_panics",
+        "trial": "900s cap timeout, elapsed 948s, peak 2.9GiB",
+        "canonical_1500s": "timeout; max RSS unavailable"
+      }
+    ],
+    "new_proof": "avi_movi_packet_tag_exact final lane 3869ms / 245780KiB; initial cold-cache lane 9514ms / 315484KiB",
+    "comparison_note": "The legacy proofs include writer fixtures, container decode, allocation, formatting, and parser-wide branches and did not produce a formal pass. The new proof is narrower: scalar tag identity only. The lower reruns cost is not evidence of equivalent assurance."
+  },
+  "proptest_overlap": {
+    "unchanged": [
+      "container_decoders_never_panic_on_arbitrary_bytes",
+      "mutated_or_truncated_containers_never_panic",
+      "avi_writer_output_round_trips_through_decode",
+      "missing_or_undecodable_auds_is_audio_unavailable",
+      "compressed_audio_is_an_observation_not_an_error"
+    ],
+    "added": "small deterministic avi.rs regressions for 00wb/99dc digit boundaries, non-digit first/second prefixes, unknown/opaque suffixes, kind byte order, non-frame pc preservation, and production movi loop connection; formal_containers.rs unchanged",
+    "relationship": "proptest exercises public integration statistically; Kani proves scalar movi tag identity exhaustively over the full [u8;4] domain"
+  },
+  "legacy_disposition": "No legacy whole-call/container proof was retired in this slice. Retire decisions remain for a later slice with coordinator approval and replacement coverage.",
+  "heavy_property_remainders": {
+    "AVI-MOVI-003 remainder": "nested movi/list composition, stream existence, kind validity, packet body boundary and tag composition; likely needs composition boundaries on top of avi_chunk_step and this tag proof rather than a direct whole-iterator proof",
+    "AVI-TIME-004": "u128 division, remainder, dwStart, and multi-stream/packet accumulation require independent arithmetic models",
+    "AVI-PCM": "WAVEFORMATEX validation and PCM conversion need shared-or-container-specific boundary design",
+    "MP4-TABLE-005": "stts/ctts/stsc/stsz/stco accumulation, Vec expansion, and cross-table consistency require separate arithmetic boundaries",
+    "MP4-PCM": "declaration/extraction includes codec matrix, width/endian/sign conversion, and data-layer observations",
+    "signature_reconstruction": "small but marginal because detect_format_signature_rules already passes; separate cost/benefit decision remains"
+  },
+  "rf_reduction": "Candidate only: RIFF/AVI movi tag interpretation may become a reusable contract after separation from AudioLens stream/error semantics. No Ruviform issue was filed or updated."
+}

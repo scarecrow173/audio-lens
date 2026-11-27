@@ -84,7 +84,7 @@ Directory: `docs/specs`
 | SPEC-034yYlGk2ZJyVWRZif4yP3 | 検証戦略とゴールデンFixture | proposed | [validation-strategy.md](./validation-strategy.md) |
 | SPEC-034yYlFytDPfSSaZovUrRo | 映像タイミングとAV同期 | proposed | [video-av-timing.md](./video-av-timing.md) |
 | SPEC-KeMjbsfCWwN7IG007JihND | al-gui webview host の driver-neutral API 移行（CI webview-verify 修正）(Issue #176) | approved | [webview-host-api-migration.md](./webview-host-api-migration.md) |
-| SPEC-034FormalVerification256 | formal verification (D 層) 導入: 昇格路と第 1 標的 WAV codec (Issue #256) | proposed | [formal-verification.md](./formal-verification.md) |
+| SPEC-034FormalVerification256 | formal verification (D 層) 導入: Property 起点の手法選択と WAV codec / MP4・AVI container 標的 (Issue #256) | proposed | [formal-verification.md](./formal-verification.md) |
 
 ## Settled <!-- doc-suite:settled-index -->
 
