@@ -50,7 +50,7 @@ production capture reducerは generic tokenに対する helperとして実装さ
 
 ## Branch CI
 
-`.github/workflows/ci.yml` は `workflow_dispatch` のみを triggerに持ち、PR作成/更新や branch pushでは起動しない。したがって manual dispatchを使わない条件では branch CIは **Unsupported** であり、main検証は Daily CIに委譲する。manual dispatchは実行していない。
+PR #295 作成後、branch head `4e8615f8efd8cbeecf2796d584798375029beb77` に対して `gh run list --branch feature/274-avi-strf-capture-proof --limit 10` は runを返さず、`gh pr checks 295` は `no checks reported` を返した。`.github/workflows/ci.yml` は `workflow_dispatch` のみを triggerに持ち、PR作成/更新や branch pushでは起動しない。したがって manual dispatchを使わない条件では branch CIは **Unsupported** であり、main検証は Daily CIに委譲する。manual dispatchは実行していない。
 
 ## ファイル
 
