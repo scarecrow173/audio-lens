@@ -127,4 +127,11 @@ Coordinator が統合時に整備する。
 
 ## Branch CI
 
-対象 branch SHA の read-only 確認結果は、push 後にこの節へ追記する。
+[PR #297](https://github.com/scarecrow173/audio-lens/pull/297) 作成後、
+branch head `bcfbb84dd04415105edec49e6511ce0f3fb53fb0` に対して
+`gh run list --branch … --commit …` は `[]`（exit 0）、
+`gh pr checks 297` は `no checks reported`（exit 1）だった。
+raw output は [branch-ci.txt](branch-ci.txt)。Full CI は manual dispatch
+のみ、Daily CI は `main` 向けのため、branch CI は **Unsupported**。
+manual dispatch は実行していない。この証跡だけを足した最終 head の
+再照合は PR 本文に記載する。

@@ -441,5 +441,12 @@
       "elapsed_ms": 217647,
       "peak_rss_kib": 500020
     }
+  },
+  "branch_ci": {
+    "pr": "https://github.com/scarecrow173/audio-lens/pull/297",
+    "checked_sha": "bcfbb84dd04415105edec49e6511ce0f3fb53fb0",
+    "result": "Unsupported",
+    "reason": "No branch push or PR trigger for Full CI; Daily checks main. No manual dispatch.",
+    "raw_log": "branch-ci.txt"
   }
 }
