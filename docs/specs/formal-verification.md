@@ -408,6 +408,27 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   全体 no-panic、MP4は保証外である。strh declaration proof Passを AVI-STREAM-002
   全体や AVI-TIME-004 の機械証明と読み替えない。詳細な境界と coverageは
   `evidence/al274-avi-strh-declaration-proof/boundary-analysis.md` を正本とする。
+- **AVI-STREAM-002 video `strf` BITMAPINFOHEADER declaration field extraction/validation bounded exact proof**:
+  `crates/al-media/src/avi.rs` の production length predicateと fixed-prefix
+  extraction helperを、full `usize` body length scalarと fixed `[u8; 40]`
+  symbolic prefixで検査する。input narrowing assumeは置かない。fixed prefixは
+  受理 bodyの先頭 40 byteが取りうる全 bit patternを覆い、40 byte以降の
+  trailing payloadは helperが型上観測しない exact reparameterizationで除外する。
+  proof は `body_len < 40` local rejection / `body_len >= 40` extraction の
+  exact complement、width offset 4..8、height bit pattern offset 8..12、
+  bits per pixel offset 14..16、compression offset 16..20 の little-endian decode、
+  height の signed/`unsigned_abs` metadata semantics、declaration field viewの
+  completeness、overflow/underflow/panic の不存在を検査する。production `avi_layout`
+  は `strf` bodyを `StreamHead.format` へ opaque copyし、first `vids` metadata use site
+  の `video_info` は同じ length predicateと extraction helperを使って `VideoInfo` へ写す。
+  `strf` presence/existence/copy/ordering、missing `strf` と empty `strf` の区別、
+  `strl` ordering/missing `strh`を含む declaration correspondence、audio
+  WAVEFORMATEX parsing/validation、BITMAPINFOHEADER decode suitability validation、
+  codec string rendering、任意長 body slice composition、実 `Vec<StreamHead>`、timing
+  accumulation、PCM/video decode、I/O、allocation、diagnostic formatting、公開 API
+  全体 no-panic、MP4は保証外である。strf declaration proof Passを AVI-STREAM-002
+  全体や AVI-TIME-004 の機械証明と読み替えない。詳細な境界と coverageは
+  `evidence/al274-avi-strf-declaration-proof2/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -584,9 +605,9 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 avi strh declaration slice 以降の登録 harness は 31 件(WAV 13 +
+  al#274 avi strf declaration slice 以降の登録 harness は 32 件(WAV 13 +
   MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
-  AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + legacy containers 10)。
+  AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI strf declaration 1 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
@@ -596,7 +617,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `"avi-movi-scan"` は AVI-MOVI-003 movi scan collection の 1 proof、
   `"avi-stream-kind"` は AVI stream existence/kind classification の 1 proof、
   `"avi-strh-declaration"` は AVI `strh` declaration field extraction/validation
-  の 1 proofを選択する。group と subset
+  の 1 proof、`"avi-strf-declaration"` は AVI video `strf` BITMAPINFOHEADER
+  declaration field extraction/validation の 1 proofを選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
@@ -620,6 +642,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`・
   `evidence/al274-avi-movi-tag-proof/`・`evidence/al274-avi-movi-composition-proof/`・
   `evidence/al274-avi-movi-scan-proof/`・`evidence/al274-avi-stream-kind-proof/`・
-  `evidence/al274-avi-strh-declaration-proof/`
+  `evidence/al274-avi-strh-declaration-proof/`・
+  `evidence/al274-avi-strf-declaration-proof2/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節
