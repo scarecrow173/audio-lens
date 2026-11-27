@@ -240,6 +240,14 @@ proof は 1 回の WAVEFORMATEX declaration field extraction/validationの total
 
 runner は `AL_KANI_HARNESS_GROUP="avi-strf-audio-declaration"` で `avi_audio_strf_declaration_bounded_exact` を選択する。registryは 33 件となる。AVI video strf declaration、AVI strh declaration、AVI stream kind、AVI movi scan/composition/tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV rangeの各 groupは regressionとして再実行し、それらの proof設計は変更しない。legacy proofを含む全件 laneはこの sliceの必須検証にしない。
 
+### Container format signature detection implementation boundary（2026-11-27 format signature slice）
+
+format signature detection proof の input domain は full `usize` input length scalar と fixed `[u8; 12]` symbolic prefix の組合せである。length scalar は machine integer domain 全体を取り、`len < 8`、`8 <= len < 12`、`len >= 12` の exact complement を検査する。fixed prefix は signature decision が観測する最大領域である先頭 12 byte の全 bit pattern を覆う。12 byte 以降の trailing byte は production helper が型上観測しないためモデル化せず、これは representative sampling や input narrowing ではなく exact reparameterization である。short input では prefix 内の未供給位置を symbolic filler のまま残し、実長さ未満の byteを偶然観測する実装を拒否する。input narrowing assume、fmt/alloc stub、`cfg(kani)` による製品置換は使わない。
+
+proof は `signature_format_from_prefix` の total correctnessを対象にし、length gate、exact `RIFF`/`WAVE`/`AVI `/`ftyp` byte mapping、RIFF precedence、unknown RIFF form non-fallback、`None` complement、trailing/filler byte non-dependence、算術/indexing 安全性を検査する。public `detect_format` は先頭最大 12 byteを zero-filled fixed prefix へ captureし、元の input lengthとともに同じ production helperへ渡す。proof側は filler を symbolic に保つため、zero-filled shell はその reachable subsetとして含まれる。proof は len 0/7/8/11/12/13 の public shell matrixでこの接続を検査するが、任意長 public input shell copy の完全合成、caller dispatch/probe/decode integration、MP4/AVI/WAV parser correctness、container semantic validation、PCM、timing、writer round-trip、corruption no-panic、I/O、allocation、diagnostic formatting、public API 全体 no-panicは未証明領域に残す。leading `free`/`wide`/`styp`/`mdat`/`moov` の MP4 recognition拡張は現行契約変更なので行わない。
+
+runner は `AL_KANI_HARNESS_GROUP="format-signature"` で `format_signature_detection_bounded_exact` を選択する。registryは 34 件となる。legacy `detect_format_signature_rules` は削除せず、signature subset regressionとして実行する。AVI audio/video `strf` declaration、AVI `strh` declaration、AVI stream kind、AVI movi scan/composition/tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV rangeの各 groupは regressionとして再実行し、それらの proof設計は変更しない。legacy proofを含む全件 laneはこの sliceの必須検証にしない。詳細な候補比較、exact reparameterization根拠、assume分類、接続条件、coverageは `evidence/al274-format-signature-proof/boundary-analysis.md` を正本とする。
+
 ## canonical 21 proof の disposition 要約
 
 - **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。
@@ -373,7 +381,7 @@ Cross-repo Issue の起票または更新が必要と判断した場合は、実
 
 ## 後続 slice に残す作業
 
-- WAV-CHUNK-003/WAV-SCAN-004 は PR #283、MP4-BOX-002/AVI-CHUNK-001 は PR #284、MP4-SCAN-003 bounded scan は PR #285、AVI-MOVI-003 tag identity は PR #286、AVI-MOVI-003 movi entry composition は PR #287、AVI-MOVI-003 movi scan collection は PR #288、AVI stream existence/kind classification は PR #289、AVI-STREAM-002 `strh` declaration field extraction/validation は PR #290、AVI-STREAM-002 video `strf` BITMAPINFOHEADER declaration field extraction/validation は PR #291、AVI-STREAM-002 audio `strf` WAVEFORMATEX declaration field extraction/validation は本 sliceで実装・実走済みである。残り Required local proof の実装と実走。
+- WAV-CHUNK-003/WAV-SCAN-004 は PR #283、MP4-BOX-002/AVI-CHUNK-001 は PR #284、MP4-SCAN-003 bounded scan は PR #285、AVI-MOVI-003 tag identity は PR #286、AVI-MOVI-003 movi entry composition は PR #287、AVI-MOVI-003 movi scan collection は PR #288、AVI stream existence/kind classification は PR #289、AVI-STREAM-002 `strh` declaration field extraction/validation は PR #290、AVI-STREAM-002 video `strf` BITMAPINFOHEADER declaration field extraction/validation は PR #291、AVI-STREAM-002 audio `strf` WAVEFORMATEX declaration field extraction/validation は PR #292、container format signature detection は PR #293で実装・実走済みである。残り Required local proof の実装と実走。
 - AVI-MOVI-003 の unbounded iteration termination、N+1 件以上の entry 列、実 `Vec<MoviPacket>` accumulation、body slice/lifetime composition、nested movi/list walker 全体、longer stream table/dynamic `Vec`、declaration correspondence、packet body boundary と tag の完全合成、MP4-TABLE-005（`stts`/`ctts`/`stsc`/`stsz`/`stco` 累積と `Vec` 展開）、MP4-PCM、AVI-TIME-004（u128 除算・remainder・複数 stream/packet 累積）、AVI-PCM。
 - runner 登録 schema、assurance pack、選択実行の Daily CI 集約。
 - lazy diagnostic の製品設計と実装（採用する場合）。
