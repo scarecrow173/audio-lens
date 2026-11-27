@@ -199,6 +199,16 @@ production `movi` loop は `avi_movi_scan_step` を通して decision を collec
 
 runner は `AL_KANI_HARNESS_GROUP="avi-movi-scan"` で `avi_movi_scan_collection_bounded_exact` を選択する。registry は 29 件となる。AVI movi composition、AVI movi tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV range の各 group は regression として再実行し、それらの proof 設計は変更しない。legacy proof を含む全件 lane はこの slice の必須検証にしない。
 
+### AVI stream existence/kind classification implementation boundary(2026-11-27 avi stream kind slice)
+
+stream existence/kind classification proof の input domain は固定 3 件の declared stream type table `[[u8; 4]; 3]`、full `usize` stream number、full `[u8; 2]` kind とする。各 stream type は全 2^32 bit pattern、kind は全 2^16 bit pattern、stream number は machine integer domain 全体を symbolic に扱い、input narrowing assume は置かない。production tag proof が `stream_no <= 99` を保証していても 0..=99 へ縮めない。N=3 固定は input narrowing ではなく bounded model の明示的 scope であり、leading/middle/trailing position、mixed `auds`/`vids`/other、in-range/out-of-range lookup を 1 つの finite composition で覆う最小値である。より長い stream table、任意長 `Vec<StreamHead>`、strl ordering、missing `strh` を含む declaration correspondence は未証明領域に残す。
+
+proof は 1 packet の post-scan stream/kind classification の total correctness を対象にする。lookup existence が `stream_no < 3` と一致し、lookup が type byte を保存し、exact `auds`/exact `vids`/other が complement であり、first `auds`/first `vids` が table 順の最初の一致または absence と一致し、exact `wb` だけが audio payload kind、exact `db`/`dc` だけが video frame kind、実在 `auds`/`vids` packet が kind に関係なく timeline slot owner、missing/other stream packet が owner でないこと、selected first stream への payload 帰属が stream number equality と payload role の conjunction と一致すること、overflow/underflow/panic がないことを検査する。unknown kind は reject せず opaque に保持し、`pc` は video frame ではないが `vids` timeline slot を消費する現行契約を変えない。
+
+採用する分解は fixed-table stream existence/kind classification proof である。production 側では lightweight `fcc_type` view を介する pure helper/predicate 群に分類規則を集約し、`packet_ticks`、`stream_timings`、first `auds`/`vids` selection、audio `wb` filter、video `db`/`dc` count/extraction filter が同じ規則を使う。proof は `StreamHead.format`、payload bytes、body slice、`Vec` accumulation、iterator、allocation、I/O を入力に持たず、type-only table は production `streams` と同じ hdrl 順の exact reparameterization である。`scale`/`rate`/`start`/`length`/`sample_size`/`strf` payload は classification core が観測しない入力として除外する。scalar predicate-only proof、小 proof family、scan collection 合成、direct layout/real Vec composition、AVI-STREAM-002 declaration validation、AVI-TIME-004 accumulation は採用しない。詳細な候補比較、assume 分類、接続条件、coverage は `evidence/al274-avi-stream-kind-proof/boundary-analysis.md` を正本とする。
+
+runner は `AL_KANI_HARNESS_GROUP="avi-stream-kind"` で `avi_stream_kind_classification_bounded_exact` を選択する。registry は 30 件となる。AVI movi scan/composition/tag、MP4/AVI boundary、MP4 scan、WAV chunk/scan、WAV range の各 group は regression として再実行し、それらの proof 設計は変更しない。legacy proof を含む全件 lane はこの slice の必須検証にしない。
+
 ## canonical 21 proof の disposition 要約
 
 - **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。
@@ -333,7 +343,7 @@ Cross-repo Issue の起票または更新が必要と判断した場合は、実
 ## 後続 slice に残す作業
 
 - WAV-CHUNK-003/WAV-SCAN-004 は PR #283、MP4-BOX-002/AVI-CHUNK-001 は PR #284、MP4-SCAN-003 bounded scan は PR #285、AVI-MOVI-003 tag identity は PR #286、AVI-MOVI-003 movi entry composition は PR #287、AVI-MOVI-003 movi scan collection は本 slice で実装・実走済みである。残り Required local proof の実装と実走。
-- AVI-MOVI-003 の unbounded iteration termination、N+1 件以上の entry 列、実 `Vec<MoviPacket>` accumulation、body slice/lifetime composition、nested movi/list walker 全体、stream existence、kind validity、packet body boundary と tag の完全合成、MP4-TABLE-005（`stts`/`ctts`/`stsc`/`stsz`/`stco` 累積と `Vec` 展開）、MP4-PCM、AVI-TIME-004（u128 除算・remainder・複数 stream/packet 累積）、AVI-PCM。
+- AVI-MOVI-003 の unbounded iteration termination、N+1 件以上の entry 列、実 `Vec<MoviPacket>` accumulation、body slice/lifetime composition、nested movi/list walker 全体、longer stream table/dynamic `Vec`、declaration correspondence、packet body boundary と tag の完全合成、MP4-TABLE-005（`stts`/`ctts`/`stsc`/`stsz`/`stco` 累積と `Vec` 展開）、MP4-PCM、AVI-TIME-004（u128 除算・remainder・複数 stream/packet 累積）、AVI-PCM。
 - runner 登録 schema、assurance pack、選択実行の Daily CI 集約。
 - lazy diagnostic の製品設計と実装（採用する場合）。
 - 全体 mutation matrix と完全な旧新 cost matrix。MP4/AVI boundary slice の mutation/cost 比較は `evidence/al274-mp4-avi-proof/` に限定証拠として記録済み。
