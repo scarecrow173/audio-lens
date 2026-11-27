@@ -303,6 +303,24 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   no-panic は保証外である。bounded model の成功を無制限 scan
   termination の機械証明と読み替えない。詳細な境界と coverage は
   `evidence/al274-mp4-scan-proof/boundary-analysis.md` を正本とする。
+- **AVI-MOVI-003 tag identity exact proof**: `crates/al-media/src/avi.rs`
+  の production pure helper `avi_movi_packet_tag` を symbolic full
+  `[u8; 4]` chunk id だけで検査する。input narrowing assume は置かず、
+  digit prefix、kind byte、unknown/opaque suffix、non-digit prefix を
+  全 2^32 bit pattern で扱う。先頭 2 byte が両方 ASCII digit のとき
+  だけ受理し、`stream_no=(id[0]-b'0')*10+(id[1]-b'0')`、stream number
+  0..=99、kind byte の順序保持、受理/非受理の exact complement、
+  overflow/underflow/panic の不存在を検査する。production `movi` loop
+  は `Chunks::next` が返した同じ inner chunk id をこの helper へ渡し、
+  digit 判定・stream number 計算・kind 抽出を複製しない。packet body
+  boundary と padding は PR #284 の `avi_chunk_step` proof が担う別層
+  であり、nested `movi` LIST/`rec ` semantics、stream declaration、
+  stream existence、kind validity matrix、timing accumulation、PCM/video
+  decode、I/O、allocation、`Vec` decode、diagnostic formatting、公開
+  API 全体 no-panic、writer round-trip、MP4 は保証外である。tag proof
+  Pass を AVI-MOVI-003 全体や AVI-TIME-004 の機械証明と読み替えない。
+  詳細な境界と coverage は
+  `evidence/al274-avi-movi-tag-proof/boundary-analysis.md` を正本とする。
 - **coverage の残り**: sample table は単一 chunk の uniform 形のみ
   (multi-chunk `stsc`・複数 `stts` run・`elst`/`edts`・配列形
   `stsz` は未生成)。`fpcm`/`fl32`/`fl64`/`in24`/`in32` の PCM
@@ -479,13 +497,14 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  al#274 mp4 scan slice 以降の登録 harness は 26 件(WAV 13 +
-  MP4 scan 1 + MP4/AVI boundary 2 + legacy containers 10)。
+  al#274 avi movi tag slice 以降の登録 harness は 27 件(WAV 13 +
+  MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + legacy containers 10)。
   `AL_KANI_HARNESS_GROUP="wav-chunk-scan"` は
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
   MP4-BOX-002/AVI-CHUNK-001 の 2 proof、`"mp4-scan"` は MP4-SCAN-003
-  の 1 proof を選択する。group と subset
+  の 1 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof
+  を選択する。group と subset
   指定は排他で、未指定は全件の既定挙動である。lane verdict は
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
@@ -506,6 +525,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
 - lane runner: `tools/run-formal-kani.mjs`
 - 証拠台帳: `evidence/al256/`・`evidence/al274/`・
   `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`・
-  `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`
+  `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`・
+  `evidence/al274-avi-movi-tag-proof/`
 - 関連 skill: `.agents/skills/verify-audio-lens/SKILL.md` の
   Formal verification 節

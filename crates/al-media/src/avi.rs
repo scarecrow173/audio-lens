@@ -154,6 +154,23 @@ pub(crate) struct MoviPacket<'a> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct MoviPacketTag {
+    stream_no: usize,
+    kind: [u8; 2],
+}
+
+fn avi_movi_packet_tag(id: [u8; 4]) -> Option<MoviPacketTag> {
+    if !id[0].is_ascii_digit() || !id[1].is_ascii_digit() {
+        return None;
+    }
+    let stream_no = usize::from(id[0] - b'0') * 10 + usize::from(id[1] - b'0');
+    Some(MoviPacketTag {
+        stream_no,
+        kind: [id[2], id[3]],
+    })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AviChunkBoundaryError {
     SizeOverflow,
     ExtendsPastEnd,
@@ -532,15 +549,13 @@ pub(crate) fn avi_layout(data: &[u8]) -> Result<AviLayout<'_>, MediaError> {
                             }
                         }
                         // Chunk ids are `NNdb`/`NNdc` (video) / `NNwb` (audio).
-                        if !cid[0].is_ascii_digit() || !cid[1].is_ascii_digit() {
-                            continue;
+                        if let Some(tag) = avi_movi_packet_tag(cid) {
+                            movi_packets.push(MoviPacket {
+                                stream_no: tag.stream_no,
+                                kind: tag.kind,
+                                body: cbody,
+                            });
                         }
-                        let stream_no = ((cid[0] - b'0') as usize) * 10 + (cid[1] - b'0') as usize;
-                        movi_packets.push(MoviPacket {
-                            stream_no,
-                            kind: [cid[2], cid[3]],
-                            body: cbody,
-                        });
                     }
                 }
                 _ => {}
@@ -1025,6 +1040,33 @@ mod tests {
     }
 
     #[test]
+    fn movi_packet_tags_preserve_stream_and_opaque_kind() {
+        let mut hdrl = Vec::new();
+        let mut vstrl = Vec::new();
+        push_chunk(&mut vstrl, b"strh", &strh_body(b"vids", 1, 10, 0, 1, 0));
+        push_chunk(&mut vstrl, b"strf", &bih(2, 1, 24, 0));
+        push_list(&mut hdrl, b"strl", &vstrl);
+        let mut movi = Vec::new();
+        push_chunk(&mut movi, b"99zz", &[7u8, 8]);
+        push_chunk(&mut movi, b"a0wb", &[1u8, 2]);
+        push_chunk(&mut movi, b"0awb", &[3u8, 4]);
+        push_chunk(&mut movi, b"00pc", &[5u8, 6]);
+        let mut body = Vec::new();
+        push_list(&mut body, b"hdrl", &hdrl);
+        push_list(&mut body, b"movi", &movi);
+        let bytes = avi_with_tail(&body);
+        let layout = avi_layout(&bytes).unwrap();
+
+        assert_eq!(layout.packets.len(), 2);
+        assert_eq!(layout.packets[0].stream_no, 99);
+        assert_eq!(layout.packets[0].kind, *b"zz");
+        assert_eq!(layout.packets[0].body, &[7u8, 8]);
+        assert_eq!(layout.packets[1].stream_no, 0);
+        assert_eq!(layout.packets[1].kind, *b"pc");
+        assert_eq!(layout.packets[1].body, &[5u8, 6]);
+    }
+
+    #[test]
     fn compressed_vids_is_explicit_unavailable() {
         // MJPG-compressed vids: metadata and timing are recorded, and
         // video_features says `unavailable` instead of failing.
@@ -1170,11 +1212,89 @@ mod proofs {
             }
         }
     }
+
+    #[kani::proof]
+    fn avi_movi_packet_tag_exact() {
+        let id: [u8; 4] = kani::any();
+        let tag = avi_movi_packet_tag(id);
+        let first_digit = id[0].is_ascii_digit();
+        let second_digit = id[1].is_ascii_digit();
+        let accepted_expected = first_digit && second_digit;
+
+        assert_eq!(tag.is_some(), accepted_expected);
+        assert_eq!(tag.is_none(), !accepted_expected);
+        if let Some(tag) = tag {
+            let tens = usize::from(id[0].wrapping_sub(b'0'));
+            let ones = usize::from(id[1].wrapping_sub(b'0'));
+            assert_eq!(tag.stream_no, tens * 10 + ones);
+            assert!(tag.stream_no <= 99);
+            assert_eq!(tag.kind[0], id[2]);
+            assert_eq!(tag.kind[1], id[3]);
+        } else {
+            assert!(!first_digit || !second_digit);
+        }
+    }
 }
 
 #[cfg(test)]
 mod boundary_tests {
     use super::*;
+
+    #[test]
+    fn avi_movi_packet_tag_preserves_decimal_stream_and_kind_order() {
+        assert_eq!(
+            avi_movi_packet_tag(*b"00wb"),
+            Some(MoviPacketTag {
+                stream_no: 0,
+                kind: *b"wb",
+            })
+        );
+        assert_eq!(
+            avi_movi_packet_tag(*b"99dc"),
+            Some(MoviPacketTag {
+                stream_no: 99,
+                kind: *b"dc",
+            })
+        );
+        assert_eq!(
+            avi_movi_packet_tag(*b"09pc"),
+            Some(MoviPacketTag {
+                stream_no: 9,
+                kind: *b"pc",
+            })
+        );
+        assert_eq!(
+            avi_movi_packet_tag(*b"42az"),
+            Some(MoviPacketTag {
+                stream_no: 42,
+                kind: *b"az",
+            })
+        );
+        assert_eq!(
+            avi_movi_packet_tag(*b"42za"),
+            Some(MoviPacketTag {
+                stream_no: 42,
+                kind: *b"za",
+            })
+        );
+        assert_eq!(
+            avi_movi_packet_tag([b'4', b'2', 0xff, b'z']),
+            Some(MoviPacketTag {
+                stream_no: 42,
+                kind: [0xff, b'z'],
+            })
+        );
+    }
+
+    #[test]
+    fn avi_movi_packet_tag_rejects_non_digit_prefix_regardless_of_kind() {
+        assert_eq!(avi_movi_packet_tag(*b"a0wb"), None);
+        assert_eq!(avi_movi_packet_tag(*b"0awb"), None);
+        assert_eq!(avi_movi_packet_tag(*b"/0db"), None);
+        assert_eq!(avi_movi_packet_tag(*b"0:dc"), None);
+        assert_eq!(avi_movi_packet_tag(*b"a0pc"), None);
+        assert_eq!(avi_movi_packet_tag(*b"0azz"), None);
+    }
 
     #[test]
     fn avi_chunk_step_accepts_zero_even_and_odd_sizes_exact_end() {
