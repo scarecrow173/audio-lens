@@ -1,0 +1,13 @@
+# aborted materialization chunks3/len2 unwind(5) trial
+
+`mp4_chunk_map_chunks3_len2_bounded_exact` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:13 elapsed: CBMC RSS 451,416 KiB, `--unwind 5`.
+- 01:06 elapsed: CBMC RSS 1,112,876 KiB.
+- 01:39 elapsed: CBMC RSS 1,385,304 KiB.
+- 02:09 elapsed: CBMC RSS 1,598,320 KiB.
+- 04:31 elapsed: CBMC RSS 20,350,692 KiB.
+
+The harness still constructed `sizes` through four conditional `Vec::push` branches. That puts symbolic vector-length shape splitting in front of the already nested sample expansion. The next trial keeps the same symbolic `sizes_len` 0..4 and full u32 values but constructs a fixed four-element copy and applies `truncate(sizes_len)`, removing avoidable push-branch shape splitting. Production code, input domain, oracle, and assertions are unchanged.

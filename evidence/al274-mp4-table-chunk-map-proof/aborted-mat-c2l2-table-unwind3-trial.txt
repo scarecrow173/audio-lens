@@ -1,0 +1,12 @@
+# aborted chunks2/len2 table-selector unwind(3) trial
+
+`mp4_chunk_map_chunks2_len2_bounded_exact` using a four-entry shape lookup table was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:07 elapsed: CBMC RSS 401,968 KiB, `--unwind 3`.
+- 00:13 elapsed: CBMC RSS 560,636 KiB.
+- 00:21 elapsed: CBMC RSS 773,760 KiB.
+- 00:30 elapsed: CBMC RSS 3,554,032 KiB.
+
+With chunks 0..2 and spc 1..2, the maximum total is four, so the small/large partition and lookup table are unnecessary. The next trial removes symbolic table indexing and directly generates the two independent spc values in 1..2. This covers the same four-shape exact finite domain with less constructor machinery.

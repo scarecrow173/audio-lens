@@ -1,0 +1,11 @@
+# aborted combined lower-bound diagnostic trial
+
+The combined lower-bound diagnostic (exact vector length, fixed spc `(1,1)`, small numeric representatives, static oracle) was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:12 elapsed: CBMC RSS 443,688 KiB, `--unwind 3`.
+- 00:27 elapsed: CBMC RSS 695,808 KiB.
+- 00:50 elapsed: CBMC RSS 4,626,496 KiB.
+
+Even this reduced two-chunk/two-sample shape is not practical in the verifier/machine budget. The next spike measures the minimum positive materialization shape (one chunk, one sample, unwind 2).

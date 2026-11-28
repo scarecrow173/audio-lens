@@ -1,0 +1,5 @@
+[lint] $ if [ "$#" -lt 1 ]; then
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.75s
+mbx[cache]: 0 hits, 10 misses; 0 B downloaded, 0 B uploaded, 1.0 MiB stored locally
+mbx[savings]: every checkout believes it owns 670.8 GiB of outputs. the disk keeps one copy and says nothing.

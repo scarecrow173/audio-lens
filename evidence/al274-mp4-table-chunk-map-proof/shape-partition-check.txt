@@ -1,0 +1,6 @@
+chunks2 len2 small count 6 all total<=4 True
+chunks2 len2 large count 10 all total>4 True
+chunks2 len2 disjoint True union exact True missing [] extra []
+chunks3 len2 small count 4 all total<=4 True
+chunks3 len2 large count 28 all total>4 True
+chunks3 len2 disjoint True union exact True missing [] extra []

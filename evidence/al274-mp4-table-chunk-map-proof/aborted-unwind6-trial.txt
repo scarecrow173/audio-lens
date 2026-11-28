@@ -1,0 +1,11 @@
+# aborted unwind(6) dynamic-shape trial
+
+The second mp4-table-chunk-map lane attempt was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:18 elapsed: CBMC RSS 723,484 KiB, `mp4_stsc_chunk_samples_bounded_exact`, `--unwind 6`.
+- 00:56 elapsed: CBMC RSS 1,444,040 KiB.
+- 01:42 elapsed: CBMC RSS 17,764,508 KiB.
+
+The RSS jump shows a structural symex/solver explosion, not a linearly scalable proof cost. The harness made both `stsc.len` and `chunks` symbolic and therefore exposed dynamic vector shapes plus nested expansion loops in one formula. It was stopped immediately after crossing the 4 GiB design ceiling. No verdict was drawn from this run. The redesign keeps the declared bounded input domain and exact oracle but splits vector length/chunk count into static constructor cases instead of narrowing inputs with assumptions.

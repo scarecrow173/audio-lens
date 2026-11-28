@@ -114,7 +114,7 @@ open draft PR #281 は main に統合されていないが、WAV-RANGE-008 の r
 
 ## main 統合済み proof slice 群の知見
 
-PR #282 以降、WAV range、chunk scan、format signature、MP4 box/scan/PCM declaration、AVI chunk/movi/stream/strf/wb/timing arithmetic の local proof が段階的に統合された。現行 registry には 42 件の canonical harness があり、baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 23 件である。`header_reads_valid_ranges_slice_exact` と `header_reads_invalid_ranges_error` は WAV-RANGE-008 の exact replacement へ置き換えられて退役した。
+PR #282 以降、WAV range、chunk scan、format signature、MP4 box/scan/table chunk-map/PCM declaration、AVI chunk/movi/stream/strf/wb/timing arithmetic の local proof が段階的に統合された。現行 registry には 56 件の canonical harness があり、baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 37 件である。`header_reads_valid_ranges_slice_exact` と `header_reads_invalid_ranges_error` は WAV-RANGE-008 の exact replacement へ置き換えられて退役した。
 
 主な local proof の最新の非 mutation pass evidence は、概ね次の範囲にある。
 
@@ -140,6 +140,10 @@ PR #282 以降、WAV range、chunk scan、format signature、MP4 box/scan/PCM de
 WAV/MP4 scan、AVI movi collection、strh presence、strf capture、wb concatenation では、任意長ではなく 3 要素程度の small model を使う。これは証明の弱さではなく、bounded exactness の明示的な境界である。
 
 small modelで証明できるのは、step semantics、strict progress、first error stop、ordering、collect/skip/stop の組合せである。証明できないのは、無制限 iteration termination、4件以上の列、実 `Vec` の任意長 accumulation、深い nested walker である。この残りを未証明として残すことが、bounded proof を公開 API 全体へ誤用しない鍵である。
+
+MP4 table chunk-map slice では、`stsc.len` や chunk 数を symbolic にした dynamic vector shape が solver/symex メモリを爆発させた。入力値域を狭める代わりに、length/chunk/shape を const な structural split に分け、union が同じ cross product を覆う形が有効だった。また `#[kani::unwind]` を実到達反復より大きく取ると、到達不能な追加 iteration の guarded `Vec::push` が分岐を増やす。unwinding assertion を残したまま、最大反復へ合わせた最小 bound を使う。
+
+同じ slice の direct multi-chunk materialization は、input bitwidth、oracle、Vec length、shape を個別に絞った診断でも 2chunk×2sample で memory budget を超えた。これを製品反例と混同せず、behavior-preserving な production seam として chunk 単位 helper を抽出し、helper exact proof と最小 end-to-end composition proof に分解した。multi-chunk end-to-end materialization は Pass を主張せず explicit residual NotRun に残す。
 
 ### AVI の partial proof は Property 全体 Pass にしない
 
@@ -168,7 +172,7 @@ mutation evidence が重要なのは、proof が単に何も検査していな�
 
 ## spike harness と正式 proof の分離
 
-`spike_` 12 件は runner registryの canonical 42 件に含まれない。spike は ablation、solver 実験、no-stub baseline、stub 組合せの比較に使う。正式 proof と同じ表に混ぜると、採用済み保証と実験結果の区別が失われる。
+`spike_` 12 件は runner registryの canonical 56 件に含まれない。spike は ablation、solver 実験、no-stub baseline、stub 組合せの比較に使う。正式 proof と同じ表に混ぜると、採用済み保証と実験結果の区別が失われる。
 
 分離の運用は次である。
 
@@ -202,7 +206,7 @@ AL#274 で採用された方向は、whole-call proof を直ちに捨てるの�
 ## 今後に残る論点
 
 - PR #281 で観測された valid proof timeout のような非線形 bitvector 算術に対し、Property 分解・lemma・solver のどれで解くか。
-- MP4 sample table、MP4 PCM extraction、WAV PCM/layout/writer、AVI timing accumulation、AVI PCM decode の Required proof 実装。
+- MP4 sample table の残り（stts/ctts、より大きな table、parser integration）、MP4 PCM extraction、WAV PCM/layout/writer、AVI timing accumulation、AVI PCM decode の Required proof 実装。
 - 任意長 scan/iteration、nested walker、dynamic Vec/copy を small model からどう拡張するか。
 - Lean 等の強い手法の導入可否。対象は任意長・任意回数の算術不変条件に限定して評価する。
 - legacy whole-call proof を registry から物理削除する時期。代替 assurance と requirement state の整理が先である。

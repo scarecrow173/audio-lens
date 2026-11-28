@@ -718,24 +718,43 @@ fn chunk_samples(stsc: &[(u32, u32, u32)], chunks: usize) -> Result<Vec<(u32, u3
 }
 
 /// Build the sample → file-offset map from the sample table.
+fn append_chunk_samples(
+    samples: &mut Vec<(u64, u32, u32)>,
+    sizes: &[u32],
+    idx: &mut usize,
+    chunk_offset: u64,
+    spc: u32,
+    sd: u32,
+) -> Result<(), MediaError> {
+    let mut offset = chunk_offset;
+    for _ in 0..spc {
+        let Some(&size) = sizes.get(*idx) else {
+            return Err(MediaError::malformed(
+                "stsc declares more samples than stsz",
+            ));
+        };
+        samples.push((offset, size, sd));
+        offset = offset
+            .checked_add(u64::from(size))
+            .ok_or_else(|| MediaError::malformed("chunk offset overflows"))?;
+        *idx += 1;
+    }
+    Ok(())
+}
+
 fn build_chunk_map(table: &SampleTable) -> Result<ChunkMap, MediaError> {
     let per_chunk = chunk_samples(&table.stsc, table.chunk_offsets.len())?;
     let mut samples = Vec::with_capacity(table.sizes.len());
     let mut idx = 0usize;
     for (chunk_i, &(spc, sd)) in per_chunk.iter().enumerate() {
-        let mut offset = table.chunk_offsets[chunk_i];
-        for _ in 0..spc {
-            let Some(&size) = table.sizes.get(idx) else {
-                return Err(MediaError::malformed(
-                    "stsc declares more samples than stsz",
-                ));
-            };
-            samples.push((offset, size, sd));
-            offset = offset
-                .checked_add(u64::from(size))
-                .ok_or_else(|| MediaError::malformed("chunk offset overflows"))?;
-            idx += 1;
-        }
+        append_chunk_samples(
+            &mut samples,
+            &table.sizes,
+            &mut idx,
+            table.chunk_offsets[chunk_i],
+            spc,
+            sd,
+        )?;
     }
     if idx != table.sizes.len() {
         return Err(MediaError::malformed(
@@ -1820,6 +1839,280 @@ mod proofs {
         }
     }
 
+    const CHUNK_MAP_MAX_CHUNKS: usize = 3;
+    const CHUNK_MAP_MAX_SAMPLES: usize = 4;
+    const CHUNK_MAP_MAX_SAMPLES_PER_CHUNK_PROOF: usize = 2;
+
+    fn symbolic_stsc_entry() -> (u32, u32, u32) {
+        (
+            u32::from(kani::any::<u8>() % 6),
+            u32::from(kani::any::<u8>() % 5),
+            u32::from(kani::any::<u8>() % 3),
+        )
+    }
+
+    fn expected_stsc_valid_len1(chunks: usize, entry: (u32, u32, u32)) -> bool {
+        chunks > 0 && entry.0 == 1 && entry.1 != 0 && entry.2 != 0
+    }
+
+    fn expected_stsc_valid_len2(
+        chunks: usize,
+        first: (u32, u32, u32),
+        second: (u32, u32, u32),
+    ) -> bool {
+        chunks > 0
+            && first.0 == 1
+            && first.1 != 0
+            && first.2 != 0
+            && second.0 > first.0
+            && second.0 as usize <= chunks
+            && second.1 != 0
+            && second.2 != 0
+    }
+
+    fn expected_len2_assignment(
+        first: (u32, u32, u32),
+        second: (u32, u32, u32),
+        first_chunk: usize,
+    ) -> (u32, u32) {
+        if first_chunk >= second.0 as usize {
+            (second.1, second.2)
+        } else {
+            (first.1, first.2)
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(5)]
+    fn mp4_stsc_chunk_samples_len0_bounded_exact() {
+        for chunks in 0..=CHUNK_MAP_MAX_CHUNKS {
+            let actual = chunk_samples(&[], chunks);
+            assert_eq!(actual.is_ok(), chunks == 0);
+            assert_eq!(actual.is_err(), chunks != 0);
+            if let Ok(per_chunk) = actual {
+                assert!(per_chunk.is_empty());
+            }
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(5)]
+    fn mp4_stsc_chunk_samples_len1_bounded_exact() {
+        let entry = symbolic_stsc_entry();
+        let stsc = vec![entry];
+        for chunks in 0..=CHUNK_MAP_MAX_CHUNKS {
+            let actual = chunk_samples(&stsc, chunks);
+            let valid = expected_stsc_valid_len1(chunks, entry);
+            assert_eq!(actual.is_ok(), valid);
+            assert_eq!(actual.is_err(), !valid);
+            if let Ok(per_chunk) = actual {
+                assert_eq!(per_chunk.len(), chunks);
+                for chunk_i in 0..chunks {
+                    assert_eq!(per_chunk[chunk_i], (entry.1, entry.2));
+                }
+            }
+        }
+    }
+
+    fn verify_len2_chunks<const CHUNKS: usize>() {
+        let first = symbolic_stsc_entry();
+        let second = symbolic_stsc_entry();
+        let stsc = vec![first, second];
+        let actual = chunk_samples(&stsc, CHUNKS);
+        let valid = expected_stsc_valid_len2(CHUNKS, first, second);
+        assert_eq!(actual.is_ok(), valid);
+        assert_eq!(actual.is_err(), !valid);
+        if let Ok(per_chunk) = actual {
+            assert_eq!(per_chunk.len(), CHUNKS);
+            for chunk_i in 0..CHUNKS {
+                assert_eq!(
+                    per_chunk[chunk_i],
+                    expected_len2_assignment(first, second, chunk_i + 1)
+                );
+            }
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(3)]
+    fn mp4_stsc_chunk_samples_len2_chunks0_bounded_exact() {
+        verify_len2_chunks::<0>();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(3)]
+    fn mp4_stsc_chunk_samples_len2_chunks1_bounded_exact() {
+        verify_len2_chunks::<1>();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(3)]
+    fn mp4_stsc_chunk_samples_len2_chunks2_bounded_exact() {
+        verify_len2_chunks::<2>();
+    }
+
+    #[kani::proof]
+    #[kani::unwind(4)]
+    fn mp4_stsc_chunk_samples_len2_chunks3_bounded_exact() {
+        verify_len2_chunks::<3>();
+    }
+
+    fn append_test_sizes<const LEN: usize>(storage: [u32; 2]) -> Vec<u32> {
+        let mut sizes = Vec::new();
+        if LEN >= 1 {
+            sizes.push(storage[0]);
+        }
+        if LEN >= 2 {
+            sizes.push(storage[1]);
+        }
+        sizes
+    }
+
+    fn symbolic_append_input() -> (u64, [u32; 2], u32) {
+        (
+            kani::any(),
+            kani::any(),
+            1 + u32::from(kani::any::<u8>() % 2),
+        )
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_helper_spc1_len0_reject_bounded_exact() {
+        let (offset, storage, sd) = symbolic_append_input();
+        let sizes = append_test_sizes::<0>(storage);
+        let mut samples = Vec::new();
+        let mut idx = 0usize;
+        let actual = append_chunk_samples(&mut samples, &sizes, &mut idx, offset, 1, sd);
+        assert!(actual.is_err());
+        assert_eq!(idx, 0);
+        assert!(samples.is_empty());
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_helper_spc1_len1_bounded_exact() {
+        let (offset, storage, sd) = symbolic_append_input();
+        let sizes = append_test_sizes::<1>(storage);
+        let mut samples = Vec::new();
+        let mut idx = 0usize;
+        let actual = append_chunk_samples(&mut samples, &sizes, &mut idx, offset, 1, sd);
+        let after = u128::from(offset) + u128::from(storage[0]);
+        let overflow = after > u128::from(u64::MAX);
+        assert_eq!(actual.is_ok(), !overflow);
+        assert_eq!(actual.is_err(), overflow);
+        assert_eq!(samples.len(), 1);
+        assert_eq!(samples[0], (offset, storage[0], sd));
+        assert_eq!(idx, if overflow { 0 } else { 1 });
+    }
+
+    #[kani::proof]
+    #[kani::unwind(3)]
+    fn mp4_chunk_map_helper_spc2_len1_reject_bounded_exact() {
+        let (offset, storage, sd) = symbolic_append_input();
+        let sizes = append_test_sizes::<1>(storage);
+        let mut samples = Vec::new();
+        let mut idx = 0usize;
+        let actual = append_chunk_samples(&mut samples, &sizes, &mut idx, offset, 2, sd);
+        let after = u128::from(offset) + u128::from(storage[0]);
+        let overflow = after > u128::from(u64::MAX);
+        assert!(actual.is_err());
+        assert_eq!(samples.len(), 1);
+        assert_eq!(samples[0], (offset, storage[0], sd));
+        assert_eq!(idx, if overflow { 0 } else { 1 });
+    }
+
+    #[kani::proof]
+    #[kani::unwind(3)]
+    fn mp4_chunk_map_helper_spc2_len2_bounded_exact() {
+        let (offset, storage, sd) = symbolic_append_input();
+        let sizes = append_test_sizes::<2>(storage);
+        let mut samples = Vec::new();
+        let mut idx = 0usize;
+        let actual = append_chunk_samples(&mut samples, &sizes, &mut idx, offset, 2, sd);
+        let after1 = u128::from(offset) + u128::from(storage[0]);
+        let overflow1 = after1 > u128::from(u64::MAX);
+        let midpoint = after1 as u64;
+        let after2 = u128::from(midpoint) + u128::from(storage[1]);
+        let overflow2 = after2 > u128::from(u64::MAX);
+        let accept = !overflow1 && !overflow2;
+        assert_eq!(actual.is_ok(), accept);
+        assert_eq!(actual.is_err(), !accept);
+        assert_eq!(samples.len(), if overflow1 { 1 } else { 2 });
+        assert_eq!(samples[0], (offset, storage[0], sd));
+        if !overflow1 {
+            assert_eq!(samples[1], (midpoint, storage[1], sd));
+        }
+        assert_eq!(
+            idx,
+            if overflow1 {
+                0
+            } else if overflow2 {
+                1
+            } else {
+                2
+            }
+        );
+    }
+
+    fn sample_table(
+        sizes: Vec<u32>,
+        chunk_offsets: Vec<u64>,
+        stsc: Vec<(u32, u32, u32)>,
+    ) -> SampleTable {
+        SampleTable {
+            dts: Vec::new(),
+            cts_offsets: None,
+            sizes,
+            chunk_offsets,
+            stsc,
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_end_to_end_empty_bounded_exact() {
+        let table = sample_table(Vec::new(), Vec::new(), Vec::new());
+        let actual = build_chunk_map(&table).expect("empty tables have an empty chunk map");
+        assert!(actual.samples.is_empty());
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_end_to_end_single_sample_bounded_exact() {
+        let offset: u64 = kani::any();
+        let size: u32 = kani::any();
+        let sd = 1 + u32::from(kani::any::<u8>() % 2);
+        let table = sample_table(vec![size], vec![offset], vec![(1, 1, sd)]);
+        let actual = build_chunk_map(&table);
+        let overflow = u128::from(offset) + u128::from(size) > u128::from(u64::MAX);
+        assert_eq!(actual.is_ok(), !overflow);
+        assert_eq!(actual.is_err(), overflow);
+        if let Ok(map) = actual {
+            assert_eq!(map.samples.len(), 1);
+            assert_eq!(map.samples[0], (offset, size, sd));
+        }
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_end_to_end_short_sizes_reject_bounded_exact() {
+        let offset: u64 = kani::any();
+        let sd = 1 + u32::from(kani::any::<u8>() % 2);
+        let table = sample_table(Vec::new(), vec![offset], vec![(1, 1, sd)]);
+        assert!(build_chunk_map(&table).is_err());
+    }
+
+    #[kani::proof]
+    #[kani::unwind(2)]
+    fn mp4_chunk_map_end_to_end_overlong_sizes_reject_bounded_exact() {
+        let offset: u64 = kani::any();
+        let sizes: [u32; 2] = kani::any();
+        let sd = 1 + u32::from(kani::any::<u8>() % 2);
+        let table = sample_table(sizes.to_vec(), vec![offset], vec![(1, 1, sd)]);
+        assert!(build_chunk_map(&table).is_err());
+    }
+
     fn symbolic_sound_entry() -> SoundEntry {
         let format: [u8; 4] = kani::any();
         let channels: u16 = kani::any();
@@ -2133,6 +2426,55 @@ mod tests {
             child_boxes_error(&overrun, 0, overrun.len()),
             "test: box free extends past end of region"
         );
+    }
+
+    #[test]
+    fn chunk_samples_expand_valid_runs_and_reject_invalid_complement() {
+        let valid = vec![(1, 2, 1), (3, 1, 2)];
+        assert_eq!(
+            chunk_samples(&valid, 3).unwrap(),
+            vec![(2, 1), (2, 1), (1, 2)]
+        );
+        assert!(chunk_samples(&[], 0).unwrap().is_empty());
+        for (stsc, chunks) in [
+            (vec![], 1),
+            (vec![(2, 1, 1)], 3),
+            (vec![(1, 0, 1)], 1),
+            (vec![(1, 1, 0)], 1),
+            (vec![(1, 1, 1), (1, 1, 1)], 2),
+            (vec![(1, 1, 1), (3, 1, 1)], 2),
+        ] {
+            assert!(chunk_samples(&stsc, chunks).is_err());
+        }
+    }
+
+    #[test]
+    fn build_chunk_map_accumulates_offsets_and_rejects_count_or_overflow() {
+        let table = || SampleTable {
+            dts: Vec::new(),
+            cts_offsets: None,
+            sizes: vec![2, 3, 4],
+            chunk_offsets: vec![100, 200],
+            stsc: vec![(1, 2, 1), (2, 1, 2)],
+        };
+        let map = build_chunk_map(&table()).unwrap();
+        assert_eq!(map.samples, vec![(100, 2, 1), (102, 3, 1), (200, 4, 2)]);
+
+        let mut short_sizes = table();
+        short_sizes.sizes.pop();
+        assert!(build_chunk_map(&short_sizes).is_err());
+        let mut long_sizes = table();
+        long_sizes.sizes.push(1);
+        assert!(build_chunk_map(&long_sizes).is_err());
+
+        let overflow = SampleTable {
+            dts: Vec::new(),
+            cts_offsets: None,
+            sizes: vec![1, 1],
+            chunk_offsets: vec![u64::MAX],
+            stsc: vec![(1, 2, 1)],
+        };
+        assert!(build_chunk_map(&overflow).is_err());
     }
 
     fn sound_entry(format: &[u8; 4], bits: u16, channels: u16, sample_rate: u32) -> SoundEntry {

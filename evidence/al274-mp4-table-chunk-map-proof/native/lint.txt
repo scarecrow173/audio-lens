@@ -1,0 +1,8 @@
+[lint] $ if [ "$#" -lt 1 ]; then
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media)
+mbx[progress]: 15s elapsed; 0 hits, 0 misses, 0 bypassed, 0 not looked up; ~0s compiler work saved
+mbx[progress]: 30s elapsed; 0 hits, 0 misses, 0 bypassed, 0 not looked up; ~0s compiler work saved
+mbx[progress]: 45s elapsed; 0 hits, 2 misses, 0 bypassed, 8 not looked up; ~0s compiler work saved
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 47.89s
+mbx[cache]: 0 hits, 2 misses, 8 not looked up, 10 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: 20.0 TiB logical tidied away. you may continue not thinking about it.

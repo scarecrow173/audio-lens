@@ -1,0 +1,119 @@
+{
+  "issue": 274,
+  "branch": "feature/274-mp4-table-chunk-map-proof",
+  "base_sha": "0e89c27690e7ab0e046d4ba48547969eeed3c213",
+  "merged_origin_main_sha": "9b4a3545f95ea1cef1e26132f4adb06434e8df9c",
+  "verification_subject": "post-merge working tree containing this branch diff; final commit SHA is recorded in the PR",
+  "property": "MP4-TABLE-005a/b: bounded stsc validation/per-chunk expansion plus compositional chunk-map materialization",
+  "assurance": "selective exact formal verification over bounded structural validation domain and fixed-shape compositional materialization domain",
+  "requirement": "Required",
+  "verdict": "Pass",
+  "boundary_design": "boundary-analysis.md",
+  "input_domain": {
+    "validation": "chunks 0..3, stsc entries 0..2, first_chunk 0..5, spc 0..4, sd 0..2",
+    "helper_materialization": "(spc,sizes.len) pairs (1,0), (1,1), (2,1), (2,2); full u32 sizes, full u64 offsets, sd 1..2, empty initial output/idx 0",
+    "end_to_end": "empty, single sample accept/overflow, short and overlong count mismatch composition"
+  },
+  "assumptions": [],
+  "unwinding_assertions": "enabled by canonical invocation; zero unwinding assertion failures in canonical raw logs",
+  "stubs": [],
+  "production_seams": ["chunk_samples", "append_chunk_samples", "build_chunk_map"],
+  "execution": {
+    "runner": "tools/run-formal-kani.mjs",
+    "group": "mp4-table-chunk-map",
+    "registry_size": 56,
+    "timeout_ms": 600000,
+    "rss_ceiling_kib_exclusive": 4194304,
+    "environment": "environment.txt"
+  },
+  "formal": {
+    "required": "kani-canonical/verdict.json",
+    "post_revert": "kani-post-revert/verdict.json",
+    "required_summary": {
+      "selected_proofs": 14,
+      "verified_proofs": 14,
+      "total_elapsed_ms": 289284,
+      "max_observed_rss_kb": 2602632,
+      "rss_measured_proofs": 14,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    "post_revert_summary": {
+      "selected_proofs": 14,
+      "verified_proofs": 14,
+      "total_elapsed_ms": 151571,
+      "max_observed_rss_kb": 2596700,
+      "rss_measured_proofs": 14,
+      "peak_memory_measurement": "/usr/bin/time -v"
+    },
+    "regressions": {
+      "mp4-scan": {
+        "selected_proofs": 1,
+        "verified_proofs": 1,
+        "total_elapsed_ms": 20388,
+        "max_observed_rss_kb": 321624,
+        "rss_measured_proofs": 1,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "mp4-avi-boundary": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 16446,
+        "max_observed_rss_kb": 318520,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      },
+      "mp4-pcm-declaration": {
+        "selected_proofs": 2,
+        "verified_proofs": 2,
+        "total_elapsed_ms": 10545,
+        "max_observed_rss_kb": 320236,
+        "rss_measured_proofs": 2,
+        "peak_memory_measurement": "/usr/bin/time -v"
+      }
+    },
+    "all_harnesses": "NotRun: unselected legacy and other proof groups are outside this slice"
+  },
+  "mutation": {
+    "dir": "mutation",
+    "edit": "production append_chunk_samples checked_add overflow rejection changed to wrapping_add",
+    "lane_verdict": "fail",
+    "failed_harnesses": [
+      "mp4_chunk_map_helper_spc1_len1_bounded_exact",
+      "mp4_chunk_map_helper_spc2_len1_reject_bounded_exact",
+      "mp4_chunk_map_helper_spc2_len2_bounded_exact",
+      "mp4_chunk_map_end_to_end_single_sample_bounded_exact"
+    ],
+    "verified_count": 10,
+    "failed_count": 4,
+    "restore_method": "byte-for-byte copy from mutation/mp4.rs.before-mutation",
+    "sha256_before_after": "28bd3995103ae41aed919953db6ec3ec8d2c344c5c9d4bb856755c963ba03e66",
+    "cmp_exit": 0,
+    "post_revert_lane": "kani-post-revert/verdict.json"
+  },
+  "runtime": {
+    "fmt_exit": 0,
+    "check_exit": 0,
+    "lint_exit": 0,
+    "test_exit": 0,
+    "test_formal_exit": 0,
+    "node_check_exit": 0,
+    "prek_exit": 0,
+    "logs": "native/"
+  },
+  "resource_abort_evidence": "aborted-*.txt and kani-canonical-aborted-* record solver/memory cost trials; none are product counterexamples",
+  "operator_error": "one all-harness lane was accidentally started without AL_KANI_HARNESS_GROUP, immediately aborted, and is not used as group evidence",
+  "residual_notrun_scope": [
+    "multi-chunk end-to-end materialization",
+    "spc 3/4",
+    "sizes len 3/4 and 3+ samples",
+    "stts/ctts time accumulation",
+    "4+ chunks and 3+ stsc entries/full integer table",
+    "parser integration",
+    "PCM extraction/conversion",
+    "diagnostics, I/O, allocation, dynamic Vec arbitrary growth, public API no-panic"
+  ],
+  "integrated_ci": {
+    "result": "NotRun",
+    "reason": "integration validation requires post-merge CI evidence for the main SHA and is Coordinator-owned"
+  }
+}

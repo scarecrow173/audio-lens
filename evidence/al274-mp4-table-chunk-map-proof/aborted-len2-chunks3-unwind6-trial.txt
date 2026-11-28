@@ -1,0 +1,9 @@
+# aborted len2/chunks3 unwind(6) trial
+
+`mp4_stsc_chunk_samples_len2_chunks3_bounded_exact` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:33 elapsed: CBMC RSS 11,881,524 KiB, `--unwind 6`.
+
+The raw len1 log shows that unwind(6) unrolls the production inner expansion loop five times even though the maximum semantically reachable run in this bounded validation domain is three. The extra unreachable iterations are not free: their guarded vector pushes multiply the branch structure. The next trial reduces the fixed-shape len2 proofs to unwind(4), matching the maximum production/assertion iteration count plus the terminating loop test. Input values and assertions are unchanged.

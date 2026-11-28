@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 42 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4 PCM declaration/capability + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 1 AVI clock start + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 56 harnesses
+  (13 WAV + 1 MP4 scan + 14 MP4 table chunk-map + 2 MP4 PCM declaration/capability + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 1 AVI clock start + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -199,7 +199,13 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   MP4-BOX-002/AVI-CHUNK-001 proofs (`mp4_box_header_step_exact` and
   `avi_chunk_step_exact`); `AL_KANI_HARNESS_GROUP="mp4-scan"` selects
   the Required MP4-SCAN-003 proof
-  (`mp4_box_scan_progress_bounded_exact`); `AL_KANI_HARNESS_GROUP="mp4-pcm-declaration"`
+  (`mp4_box_scan_progress_bounded_exact`); `AL_KANI_HARNESS_GROUP="mp4-table-chunk-map"`
+  selects the fourteen Required MP4-TABLE-005 stsc expansion/chunk-map materialization proofs
+  (`mp4_stsc_chunk_samples_len0_bounded_exact`, `mp4_stsc_chunk_samples_len1_bounded_exact`,
+  `mp4_stsc_chunk_samples_len2_chunks0_bounded_exact`, `mp4_stsc_chunk_samples_len2_chunks1_bounded_exact`,
+  `mp4_stsc_chunk_samples_len2_chunks2_bounded_exact`, `mp4_stsc_chunk_samples_len2_chunks3_bounded_exact`,
+  four `mp4_chunk_map_helper_*` per-chunk proofs, and four `mp4_chunk_map_end_to_end_*` composition proofs);
+  `AL_KANI_HARNESS_GROUP="mp4-pcm-declaration"`
   selects the two Required MP4-PCM-DECL-006 declaration/capability proofs
   (`mp4_pcm_declaration_classification_exact` and `mp4_pcm_capability_width_exact`);
   `AL_KANI_HARNESS_GROUP="avi-movi-tag"`
@@ -227,17 +233,31 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `avi_strh_presence_bounded_exact`;
   `AL_KANI_HARNESS_GROUP="avi-clock-start"` selects
   `avi_stream_start_tick_exact`. The WAV proofs and the audio strf declaration proof are registered in
-  `crates/al-media/src/wav.rs`; the MP4 scan/boundary/PCM declaration and AVI boundary/tag/scan/stream declaration proofs are
+  `crates/al-media/src/wav.rs`; the MP4 scan/boundary/table chunk-map/PCM declaration and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`; the format signature proof is registered in
   `crates/al-media/src/format.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and leaving both unset runs all 42. When `/usr/bin/time` is available
+  and leaving both unset runs all 56. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
   selected/verified proof counts, total elapsed ms, maximum observed RSS,
   and measurement availability.
+- For a change to MP4 sample-table `stsc` validation, per-chunk expansion,
+  `stsz` count matching, `stco`/`co64` chunk offsets, or chunk-map materialization,
+  run `AL_KANI_HARNESS_GROUP=mp4-table-chunk-map AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`.
+  Confirm each raw proof result with unwinding assertions enabled and record elapsed
+  time and peak RSS. The validation family proves chunks 0..3 and stsc entries 0..2 in the declared bounded
+  scalar domain. The materialization family proves production `append_chunk_samples`
+  for (spc, sizes.len) pairs (1,0), (1,1), (2,1), and (2,2) with full u32 sample sizes and full u64 chunk offsets,
+  plus minimal production `build_chunk_map` empty/single/count-mismatch composition.
+  It does not prove multi-chunk end-to-end materialization, spc 3/4, sizes 3..4,
+  three or more samples, stts/ctts, larger tables, parser integration,
+  PCM extraction/conversion, diagnostics, I/O, allocation, or public API no-panic.
+  Rerun `mp4-scan`, `mp4-avi-boundary`, `mp4-pcm-declaration`, and native parser
+  tests for neighboring behavior. See `evidence/al274-mp4-table-chunk-map-proof/`
+  for the boundary and mutation.
 - For a change to MP4 sound-entry PCM declaration, `pcmC` handling,
   `lpcm` flags/defaults, capability gating, or supported sample width, run
   `AL_KANI_HARNESS_GROUP=mp4-pcm-declaration AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`.

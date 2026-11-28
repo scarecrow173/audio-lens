@@ -1,0 +1,11 @@
+# aborted static-oracle diagnostic trial
+
+The static-oracle diagnostic was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:12 elapsed: CBMC RSS 480,932 KiB, `--unwind 3`.
+- 00:24 elapsed: CBMC RSS 1,348,776 KiB.
+- 00:43 elapsed: CBMC RSS 8,323,116 KiB.
+
+The oracle's symbolic array indexing is therefore not the dominant cost. The next diagnostic fixes the input vector length/capacity exactly at construction (`vec![size0, size1]`) rather than allocating length 4 and truncating to a symbolic length.

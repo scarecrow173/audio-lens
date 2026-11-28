@@ -1,0 +1,9 @@
+# aborted fixed-spc diagnostic trial
+
+The fixed-spc `(1,1)` diagnostic harness was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:19 elapsed: CBMC RSS 763,892 KiB, `--unwind 3`.
+
+This matched the direct symbolic-spc trial's early trajectory (773,760 KiB at 00:21), so spc control branching is not the dominant cost. The next diagnostic fixes `sizes_len` to the count-match value 2, isolating symbolic vector-length/count mismatch branching from full-width arithmetic and Vec materialization cost.

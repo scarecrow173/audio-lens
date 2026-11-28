@@ -1,0 +1,12 @@
+# aborted unwind(8) trial
+
+The first mp4-table-chunk-map lane attempt was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 02:32 elapsed: CBMC RSS 1,777,028 KiB, `mp4_stsc_chunk_samples_bounded_exact`, `--unwind 8`.
+- 03:15 elapsed: CBMC RSS 1,952,292 KiB.
+- 03:43 elapsed: CBMC RSS 2,325,040 KiB.
+- 04:23 elapsed: CBMC RSS 3,269,684 KiB.
+
+The proof used `#[kani::unwind(8)]`, while the maximum meaningful production/materialization loop trip in the declared bounded domain is 4 (and the validation expansion is at most 3 per contiguous coverage sequence). The trial was stopped before it crossed the 4 GiB design ceiling so the worker could first correct the excessive unwind bound without narrowing the input domain, removing assertions, or weakening the oracle. No verdict was drawn from this run.

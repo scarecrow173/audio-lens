@@ -1,0 +1,29 @@
+[fmt] $ cargo fmt --all -- --check
+Diff in \\?\G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media\src\mp4.rs:1898:
+     fn expected_stsc_valid(chunks: usize, spec: SymbolicStsc) -> bool {
+         match spec.len {
+             0 => chunks == 0,
+[31m-            1 => {
+[0m[31m-                chunks > 0
+[0m[31m-                    && spec.first[0] == 1
+[0m[31m-                    && spec.spc[0] != 0
+[0m[31m-                    && spec.sd[0] != 0
+[0m[31m-            }
+[0m[32m+            1 => chunks > 0 && spec.first[0] == 1 && spec.spc[0] != 0 && spec.sd[0] != 0,
+[0m             2 => {
+                 chunks > 0
+                     && spec.first[0] == 1
+Diff in \\?\G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media\src\mp4.rs:2393:
+             stsc: vec![(1, 2, 1), (3, 1, 2)],
+         };
+         let map = build_chunk_map(&table()).unwrap();
+[31m-        assert_eq!(
+[0m[31m-            map.samples,
+[0m[31m-            vec![(100, 2, 1), (102, 3, 1), (300, 4, 2)]
+[0m[31m-        );
+[0m[32m+        assert_eq!(map.samples, vec![(100, 2, 1), (102, 3, 1), (300, 4, 2)]);
+[0m
+         let mut short_sizes = table();
+         short_sizes.sizes.pop();
+[fmt] ERROR task failed
+__EXIT:1

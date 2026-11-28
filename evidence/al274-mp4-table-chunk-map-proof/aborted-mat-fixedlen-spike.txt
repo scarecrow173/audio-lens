@@ -1,0 +1,11 @@
+# aborted fixed-length diagnostic trial
+
+The exact-length vector diagnostic was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:06 elapsed: CBMC RSS 249,664 KiB, `--unwind 3`.
+- 00:16 elapsed: CBMC RSS 570,944 KiB.
+- 00:25 elapsed: CBMC RSS 1,935,640 KiB.
+
+Exact vector length/capacity alone did not control the cost. A combined lower-bound spike now fixes spc and uses small finite numeric representatives in addition to exact length and the static oracle.
