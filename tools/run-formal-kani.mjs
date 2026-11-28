@@ -4,7 +4,8 @@
 // WAV-CHUNK-003/WAV-SCAN-004/WAV-RANGE-008 replacement については
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
 // tag identity/movi entry composition/movi scan collection/stream kind
-// classification/strh declaration/strh presence/strf declaration/strf capture/wb concatenation
+// classification/strh declaration/strh presence/strf declaration/strf capture/wb concatenation、
+// AVI-TIME-004 の stream start tick
 // については src/mp4.rs/src/avi.rs、
 // audio strf WAVEFORMATEX declaration については src/wav.rs、
 // format signature detection については src/format.rs)を
@@ -202,6 +203,7 @@ const AVI_MOVI_SCAN_HARNESSES = ["avi_movi_scan_collection_bounded_exact"];
 const AVI_STREAM_KIND_HARNESSES = ["avi_stream_kind_classification_bounded_exact"];
 const AVI_STRH_DECLARATION_HARNESSES = ["avi_strh_declaration_bounded_exact"];
 const AVI_STRH_PRESENCE_HARNESSES = ["avi_strh_presence_bounded_exact"];
+const AVI_CLOCK_START_HARNESSES = ["avi_stream_start_tick_exact"];
 const AVI_STRF_DECLARATION_HARNESSES = ["avi_video_strf_declaration_bounded_exact"];
 const AVI_STRF_AUDIO_DECLARATION_HARNESSES = ["avi_audio_strf_declaration_bounded_exact"];
 const FORMAT_SIGNATURE_HARNESSES = ["format_signature_detection_bounded_exact"];
@@ -223,6 +225,7 @@ const HARNESS_GROUPS = {
   "avi-stream-kind": AVI_STREAM_KIND_HARNESSES,
   "avi-strh-declaration": AVI_STRH_DECLARATION_HARNESSES,
   "avi-strh-presence": AVI_STRH_PRESENCE_HARNESSES,
+  "avi-clock-start": AVI_CLOCK_START_HARNESSES,
   "avi-strf-declaration": AVI_STRF_DECLARATION_HARNESSES,
   "avi-strf-audio-declaration": AVI_STRF_AUDIO_DECLARATION_HARNESSES,
   "format-signature": FORMAT_SIGNATURE_HARNESSES,
@@ -250,6 +253,7 @@ const HARNESSES = [
   ...AVI_STREAM_KIND_HARNESSES,
   ...AVI_STRH_DECLARATION_HARNESSES,
   ...AVI_STRH_PRESENCE_HARNESSES,
+  ...AVI_CLOCK_START_HARNESSES,
   ...AVI_STRF_DECLARATION_HARNESSES,
   ...AVI_STRF_AUDIO_DECLARATION_HARNESSES,
   ...FORMAT_SIGNATURE_HARNESSES,

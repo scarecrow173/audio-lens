@@ -1,0 +1,31 @@
+$ mise run test al-media --lib packet_ticks_
+[test] $ cargo test --locked -p al-media --lib packet_ticks_
+   Compiling al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-avi-clock-start\crates\al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
+     Running unittests src\lib.rs (target\debug\deps\al_media-bfff9d314c976de1.exe)
+
+running 3 tests
+test avi::boundary_tests::packet_ticks_use_nonzero_start_at_i64_max ... ok
+test avi::boundary_tests::packet_ticks_track_existing_media_streams_and_skip_missing_or_other_streams ... ok
+test avi::boundary_tests::packet_ticks_reject_overflow_even_for_other_stream_without_packets ... FAILED
+
+failures:
+
+---- avi::boundary_tests::packet_ticks_reject_overflow_even_for_other_stream_without_packets stdout ----
+
+thread 'avi::boundary_tests::packet_ticks_reject_overflow_even_for_other_stream_without_packets' (59472) panicked at crates\al-media\src\avi.rs:2843:9:
+assertion failed: matches!(packet_ticks(&[stream], &[]), Err(MediaError::Malformed { reason })
+    if reason == "stream start offset overflows i64")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    avi::boundary_tests::packet_ticks_reject_overflow_even_for_other_stream_without_packets
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 119 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p al-media --lib`
+mbx[cache]: 0 hits, 0 misses, 1 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: 10.9 TiB logical of target/ belonged to checkouts that no longer exist. neither does it.
+[test] ERROR task failed
+exit=101
