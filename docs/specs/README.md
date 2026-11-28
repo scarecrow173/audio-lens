@@ -28,6 +28,7 @@ Directory: `docs/specs`
 | SPEC-034SmqnKZslN3lFq9I7ahH | Issue #158 Full CI 統一: 全実行化・共通 ci-summary Fail-Closed 集約・expected_sha 契約(安全な第一段階) | approved | [full-ci-ci-summary-issue-158.md](./full-ci-ci-summary-issue-158.md) |
 | SPEC-035guiAppMvp0000000000000 | GUI アプリ MVP 画面・操作仕様 | proposed | [gui-app-mvp.md](./gui-app-mvp.md) |
 | SPEC-034Z9kQmDatasetScen01 | Dataset tab→workspace driver-neutral scenario + AL 独立 oracle（AL#127） | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
+| SPEC-AL127OBSNONINTERFERENCE | Issue #127 OBS 非干渉 oracle: Logging 状態が f64 解析・CLI JSON・Export に干渉しないこと | proposed | [issue-127-obs-noninterference.md](./issue-127-obs-noninterference.md) |
 | SPEC-034Y17EML4OKyeGCYsuFS8 | Issue #127 RF#628 consumer oracle: file-based f64 fidelity・長尺非回帰・gap/Validity | proposed | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | SPEC-034bAl189GuiMtx001 | Native al-desktop 機能 × 検証 lane 対応表（Issue #189 AC2） | proposed | [issue-189-native-gui-feature-matrix.md](./issue-189-native-gui-feature-matrix.md) |
 | SPEC-034WsMa4H4RpNbIsbWENgu | Issue #199 docs/impl/ir・exp 管理 index を doc-maintenance で生成可能にする | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
