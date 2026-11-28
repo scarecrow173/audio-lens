@@ -1,0 +1,22 @@
+Sync Commit: 44acc115b3ce622e59051a51c7f51d3c88119530
+Restored avi.rs blob: 29053e3ac74a1db7fc225b839ee12c7e04c69af0
+
+$ AL_KANI_HARNESS_GROUP=avi-clock-start AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"pass","reason":"all 1 kani harness(es) verified","env":"Ubuntu","details":[{"harness":"avi_stream_start_tick_exact","ok":true,"bad":false,"timedOut":false,"status":0,"elapsed_ms":13097,"max_rss_kb":255816,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 0\n\tFile system outputs: 111056\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"}],"cost_summary":{"selected_proofs":1,"verified_proofs":1,"total_elapsed_ms":13097,"max_observed_rss_kb":255816,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+exit=0
+
+$ AL_KANI_HARNESS_GROUP=avi-strh-presence AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"pass","reason":"all 1 kani harness(es) verified","env":"Ubuntu","details":[{"harness":"avi_strh_presence_bounded_exact","ok":true,"bad":false,"timedOut":false,"status":0,"elapsed_ms":15129,"max_rss_kb":468132,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 9920\n\tFile system outputs: 82864\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"}],"cost_summary":{"selected_proofs":1,"verified_proofs":1,"total_elapsed_ms":15129,"max_observed_rss_kb":468132,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+exit=0
+
+$ AL_KANI_HARNESS_GROUP=avi-strh-declaration AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"pass","reason":"all 1 kani harness(es) verified","env":"Ubuntu","details":[{"harness":"avi_strh_declaration_bounded_exact","ok":true,"bad":false,"timedOut":false,"status":0,"elapsed_ms":6550,"max_rss_kb":308384,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 968\n\tFile system outputs: 56216\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"}],"cost_summary":{"selected_proofs":1,"verified_proofs":1,"total_elapsed_ms":6550,"max_observed_rss_kb":308384,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+exit=0
+
+$ AL_KANI_HARNESS_GROUP=avi-stream-kind AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"pass","reason":"all 1 kani harness(es) verified","env":"Ubuntu","details":[{"harness":"avi_stream_kind_classification_bounded_exact","ok":true,"bad":false,"timedOut":false,"status":0,"elapsed_ms":20954,"max_rss_kb":500020,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 288\n\tFile system outputs: 61600\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 0"}],"cost_summary":{"selected_proofs":1,"verified_proofs":1,"total_elapsed_ms":20954,"max_observed_rss_kb":500020,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+exit=0

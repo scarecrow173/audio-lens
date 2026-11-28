@@ -1,0 +1,58 @@
+{
+  "issue": 274,
+  "branch": "feature/274-avi-clock-start-proof",
+  "base_sha": "b14746b7a34f790572ec1bb64f596b571c624559",
+  "verification_subject_sha": "44acc115b3ce622e59051a51c7f51d3c88119530",
+  "verified_sync_commit": "44acc115b3ce622e59051a51c7f51d3c88119530",
+  "property": "AVI-TIME-004: stream start tick only",
+  "assurance": "Bounded Exhaustive",
+  "requirement": "Required",
+  "verdict": "Pass",
+  "boundary_design": "boundary-analysis.md",
+  "input_domain": "All pairs of u32 values for dwStart and dwScale",
+  "assumptions": [],
+  "unwinding_assertions": "Enabled; no explicit bound",
+  "stubs": [],
+  "execution": {
+    "runner": "tools/run-formal-kani.mjs via mise run test-formal-kani",
+    "group": "avi-clock-start",
+    "harness": "avi_stream_start_tick_exact",
+    "registry_size": 40,
+    "environment": "environment.txt",
+    "timeout_ms": 600000,
+    "design_budget_ms": 600000,
+    "rss_ceiling_kib_exclusive": 4194304
+  },
+  "formal": {
+    "required": "avi-clock-start/verdict.json",
+    "regressions": [
+      "avi-strh-presence/verdict.json",
+      "avi-strh-declaration/verdict.json",
+      "avi-stream-kind/verdict.json"
+    ],
+    "commands": "final-formal.txt",
+    "all_harnesses": "NotRun: unselected legacy and other proof groups are outside this slice"
+  },
+  "mutation": {
+    "dir": "mutation-overflow",
+    "edit": "Accept overflowing i64 multiplication by wrapping",
+    "exit": 1,
+    "raw_result": "VERIFICATION:- FAILED",
+    "failed_checks": ["assertion failed: avi_stream_start_tick(start, scale) == expected"],
+    "restore_blob": "29053e3ac74a1db7fc225b839ee12c7e04c69af0",
+    "interrupted_endpoint_trial": "mutation-endpoint-observation.txt"
+  },
+  "runtime": {
+    "commands": "native.txt",
+    "hygiene": "prek.txt",
+    "restore_regression": "final-packet-ticks.txt",
+    "fixtures": [
+      "packet_ticks_use_nonzero_start_at_i64_max",
+      "packet_ticks_reject_overflow_even_for_other_stream_without_packets"
+    ]
+  },
+  "integrated_ci": {
+    "result": "NotRun",
+    "reason": "Awaiting required CI evidence for the post-merge main SHA"
+  }
+}

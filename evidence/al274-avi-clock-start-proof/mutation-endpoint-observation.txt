@@ -1,0 +1,6 @@
+$ wsl.exe -d Ubuntu --exec ps -p 24849,24958 -o pid,ppid,etimes,time,rss,comm,args
+  PID  PPID ELAPSED     TIME   RSS COMMAND         COMMAND
+24849 24848     136 00:00:00  1280 time            /usr/bin/time -v cargo kani -p al-media --tests --harness avi_stream_start_tick_exact -Z stubbing
+24958 24859     132 00:02:22 37128 cbmc            cbmc --no-malloc-may-fail --no-undefined-shift-check --no-signed-overflow-check --nan-check --no-self-loops-to-assumptions --no-pointer-primitive-check --object-bits 16 --sat-solver cadical --slice-formula /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/c422884865935d64/out/al_media-c422884865935d64__RNvNtNtCsagM2MKksdvB_8al_media3avi6proofs27avi_stream_start_tick_exact.out --verbosity 9 --json-ui
+
+Sent SIGTERM to CBMC PID 24958 only. The raw log reports "CBMC failed with status 15"; this does not establish an assertion failure.

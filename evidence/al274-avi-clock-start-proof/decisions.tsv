@@ -1,0 +1,7 @@
+ts	phase	decision	why	evidence	result
+2026-11-28T01:34:15Z	boundary	u32 入力対を制限せず、初期 tick の算術だけを検証する	全域の正確な tick または拒否が必要で、後続の時計処理は独立の契約	boundary-analysis.md	1 harness、600 秒以内・4 GiB 未満
+2026-11-28T01:37:50Z	initial	登録前候補の全域 proof を実走した	予算内で実行可能なことを先に確認する	initial/verdict.json	Pass: 29529 ms、301688 KiB
+2026-11-28T01:37:52Z	mutation	i64::MAX を拒む変異を一時注入した	積の上限を含むことを検査できるか確認する	mutation-native.txt	境界の runtime 回帰が exit 101、製品 blob は完全復元
+2026-11-28T01:41:15Z	mutation	上限ちょうどの Kani 変異を中断した	SAT 探索の継続より、overflow 受理の変異で検出能力を確認する	mutation-endpoint-observation.txt	CBMC SIGTERM。assertion の検出に数えない
+2026-11-28T01:41:21Z	mutation	overflow を wrapping で受理する変異を検出した	拒否側の契約違反を同じ全域 oracle で検査する	mutation-overflow/kani-avi_stream_start_tick_exact.txt	Kani assertion failure、Windows の overflow 回帰も失敗
+2026-11-28T01:41:23Z	final	製品 blob の復元を確認し、選択 4 group を再実行した	変異が残っていない同じ SHA の検証を残す	final-formal.txt	4 group Pass、合計 55730 ms

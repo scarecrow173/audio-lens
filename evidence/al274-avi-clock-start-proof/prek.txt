@@ -1,0 +1,14 @@
+$ mise exec -- prek run --all-files
+trim trailing whitespace.................................................Passed
+fix end of files.........................................................Passed
+mixed line ending........................................................Passed
+fix utf-8 byte order marker..............................................Passed
+check yaml...............................................................Passed
+check toml...............................................................Passed
+detect private key.......................................................Passed
+check illegal windows names..........................(no files to check)Skipped
+biome check --write......................................................Passed
+actionlint (changed workflows)...........................................Passed
+check-ci-workflow........................................................Passed
+check-ci-tracker-workflows...............................................Passed
+exit=0

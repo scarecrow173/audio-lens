@@ -1,0 +1,6 @@
+$ AL_KANI_HARNESS_GROUP=avi-clock-start AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani
+92c1a9eb45b988f08ad0bd71afa54af2feeb9fbb
+[test-formal-kani] $ node tools/run-formal-kani.mjs
+{"lane":"test-formal-kani","verdict":"fail","reason":"1 harness(es) failed verification (0 verified): avi_stream_start_tick_exact","env":"Ubuntu","details":[{"harness":"avi_stream_start_tick_exact","ok":false,"bad":true,"timedOut":false,"status":1,"elapsed_ms":147851,"max_rss_kb":271124,"peak_memory_measurement":"/usr/bin/time -v","tail":"\tSwaps: 0\n\tFile system inputs: 1480\n\tFile system outputs: 111472\n\tSocket messages sent: 0\n\tSocket messages received: 0\n\tSignals delivered: 0\n\tPage size (bytes): 4096\n\tExit status: 1"}],"cost_summary":{"selected_proofs":1,"verified_proofs":0,"total_elapsed_ms":147851,"max_observed_rss_kb":271124,"rss_measured_proofs":1,"peak_memory_measurement":"/usr/bin/time -v"}}
+[test-formal-kani] ERROR task failed
+exit=1
