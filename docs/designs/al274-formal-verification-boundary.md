@@ -308,6 +308,26 @@ presence 更新を `avi_strh_presence_step` に委ねる。構造エラーの伝
 [境界分析](../../evidence/al274-avi-strh-presence-proof/boundary-analysis.md)、
 実行と Sync Commit は同ディレクトリの証跡に記録する。
 
+### AVI-TIME-004 ストリーム開始 tick
+
+`packet_ticks` の初期値だけを局所証明の境界とする。製品 helper
+`avi_stream_start_tick` は全 `u32` 入力対に対し、`dwStart * dwScale`
+が `i64::MAX` 以下なら正確な tick を返し、超えるなら拒否する。
+独立 oracle は `u64` へ幅拡張した積を `i64::MAX as u64` と比較する。
+入力領域は分割せず、`assume`、stub、反復 bound は使わない。
+
+初期化は従来どおり stream 宣言順で packet 処理前に行う。
+`packet_ticks` の回帰テストは、非ゼロの初回 tick と、packet を持たない
+他種 stream に対する既存の `Malformed` を確認する。
+remainder、packet 増分・累積、stream 間の分離、PCM、parser 全体は
+局所証明に含めない。
+
+`AL_KANI_HARNESS_GROUP=avi-clock-start AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`
+で `avi_stream_start_tick_exact` を選択する。registry は 40 件。
+1 proof の予算は 600 秒以内・ピーク RSS 4 GiB 未満とする。
+[境界分析](../../evidence/al274-avi-clock-start-proof/boundary-analysis.md)
+に oracle と除外範囲を、同ディレクトリの証跡に実行結果と変異を記録する。
+
 ## canonical 21 proof の disposition 要約
 
 - **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。

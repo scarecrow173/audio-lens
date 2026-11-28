@@ -666,6 +666,10 @@ fn tick_advance(
     i64::try_from(t).map_err(|_| MediaError::malformed("stream clock advance overflows i64"))
 }
 
+fn avi_stream_start_tick(start: u32, scale: u32) -> Option<i64> {
+    i64::from(start).checked_mul(i64::from(scale))
+}
+
 /// Stream-clock position of every `movi` packet, in mux order — the
 /// cumulative `strh` ticks consumed by earlier packets of the same
 /// stream, offset by `dwStart`. `None` for packets of streams that are
@@ -681,8 +685,7 @@ fn packet_ticks(
     let mut remainders = vec![0; streams.len()];
     for s in streams {
         next.push(
-            i64::from(s.start)
-                .checked_mul(i64::from(s.scale))
+            avi_stream_start_tick(s.start, s.scale)
                 .ok_or_else(|| MediaError::malformed("stream start offset overflows i64"))?,
         );
     }
@@ -1720,6 +1723,19 @@ mod tests {
 #[cfg(kani)]
 mod proofs {
     use super::*;
+
+    #[kani::proof]
+    fn avi_stream_start_tick_exact() {
+        let start: u32 = kani::any();
+        let scale: u32 = kani::any();
+        let product = u64::from(start) * u64::from(scale);
+        let expected = if product <= i64::MAX as u64 {
+            Some(product as i64)
+        } else {
+            None
+        };
+        assert!(avi_stream_start_tick(start, scale) == expected);
+    }
 
     #[kani::proof]
     fn avi_chunk_step_exact() {
@@ -2802,6 +2818,32 @@ mod boundary_tests {
         head.format = bih(1, i32::MIN, 32, 0);
         let info = video_info(&head, 0).unwrap();
         assert_eq!(info.height, i32::MIN.unsigned_abs());
+    }
+
+    #[test]
+    fn packet_ticks_use_nonzero_start_at_i64_max() {
+        let mut stream = classification_stream_head(*b"auds", 4_042_815_511);
+        stream.start = 2_281_422_937;
+        stream.sample_size = 1;
+        let packet = MoviPacket {
+            stream_no: 0,
+            kind: *b"wb",
+            body: &[],
+        };
+
+        let ticks = packet_ticks(&[stream], &[packet]).unwrap();
+        assert_eq!(ticks, vec![Some(i64::MAX)]);
+    }
+
+    #[test]
+    fn packet_ticks_reject_overflow_even_for_other_stream_without_packets() {
+        let mut stream = classification_stream_head(*b"xxxx", u32::MAX);
+        stream.start = u32::MAX;
+
+        assert!(matches!(
+            packet_ticks(&[stream], &[]),
+            Err(MediaError::Malformed { reason }) if reason == "stream start offset overflows i64"
+        ));
     }
 
     #[test]

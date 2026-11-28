@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 39 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 40 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 1 AVI clock start + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -221,13 +221,15 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `AL_KANI_HARNESS_GROUP="avi-wb-concatenation"` selects
   `avi_audio_wb_concatenation_bounded_exact`;
   `AL_KANI_HARNESS_GROUP="avi-strh-presence"` selects
-  `avi_strh_presence_bounded_exact`. The WAV proofs and the audio strf declaration proof are registered in
+  `avi_strh_presence_bounded_exact`;
+  `AL_KANI_HARNESS_GROUP="avi-clock-start"` selects
+  `avi_stream_start_tick_exact`. The WAV proofs and the audio strf declaration proof are registered in
   `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`; the format signature proof is registered in
   `crates/al-media/src/format.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and an unset variable runs all 39. When `/usr/bin/time` is available
+  and leaving both unset runs all 40. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
@@ -253,6 +255,16 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   The proof covers the presence decision or first rejected entry for three
   representative entries, not the nested walker or complete declarations. See
   `evidence/al274-avi-strh-presence-proof/` for the boundary and mutation.
+- For changes to AVI stream start ticks, run
+  `AL_KANI_HARNESS_GROUP=avi-clock-start AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`.
+  Check the raw proof result and the budget (at most 600 seconds, peak RSS
+  below 4 GiB). The harness checks the checked start product for every
+  `u32` input pair against a widened unsigned oracle without assumptions.
+  Rerun `avi-strh-presence`, `avi-strh-declaration`, `avi-stream-kind`,
+  and `mise run test al-media` for the connection to `packet_ticks`.
+  Do not extend this proof to remainder, packet accumulation, stream
+  separation, PCM, or the full parser. See
+  `evidence/al274-avi-clock-start-proof/` for the boundary and mutation.
 - Two registered WAV proofs —
   `wav_reads_never_panics_unsigned` and
   `read_wav_range_never_panics_signed` — carry
