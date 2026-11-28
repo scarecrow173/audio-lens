@@ -24,6 +24,7 @@ Directory: `docs/test-specs`
 | TSPEC-034AaE61nEEdgSDFQNXCjW | ゴールデン fixture マトリクスの検証 | proposed | [golden-validation.md](./golden-validation.md) |
 | TSPEC-034z0Ht3SwLfLVjMLB1TKy | WAV インジェストとメタデータ記録 | proposed | [ingest-wav-decode.md](./ingest-wav-decode.md) |
 | TSPEC-034Z9kQmDatasetScen04 | Dataset tab→workspace scenario の検証仕様 | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
+| TESTSPEC-AL127OBSNONINTERFERENCE | Issue #127 OBS 非干渉 oracle test specification | proposed | [issue-127-obs-noninterference.md](./issue-127-obs-noninterference.md) |
 | TSPEC-034Y19pTojHQhGnOiVrawz | Issue #127 RF#628 consumer oracle: file-based oracle テスト仕様 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | TSPEC-034WsMpecRKShroKP0mrqH | impl index 生成契約: front matter schema・managed marker・決定的出力 | approved | [issue-199-impl-index-generation.md](./issue-199-impl-index-generation.md) |
 | TSPEC-034WuVDeP2Keiu82igc78e | ir 必須セクション契約: missing-section 0 件と本文具体性 | approved | [issue-202-ir-missing-sections.md](./issue-202-ir-missing-sections.md) |

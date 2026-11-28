@@ -28,6 +28,7 @@ Directory: `docs/designs`
 | DESIGN-035guiAppArch000000000000 | GUI アプリアーキテクチャ(al-service / al-gui) | approved | [gui-app-architecture.md](./gui-app-architecture.md) |
 | DESIGN-034yYLa18yjs2eEhATeu20 | インジェストとAVタイミング設計 | approved | [ingest-av.md](./ingest-av.md) |
 | DESIGN-034Z9kQmDatasetScen02 | Dataset tab→workspace scenario の設計 | approved | [issue-127-dataset-scenario.md](./issue-127-dataset-scenario.md) |
+| DESIGN-AL127OBSNONINTERFERENCE | Issue #127 OBS 非干渉 oracle 設計 | proposed | [issue-127-obs-noninterference.md](./issue-127-obs-noninterference.md) |
 | DESIGN-034Y19nInNC42C6kYwz7tm | Issue #127 RF#628 consumer oracle: file-based f64/長尺/gap oracle 設計 | approved | [issue-127-rf628-consumer-oracle.md](./issue-127-rf628-consumer-oracle.md) |
 | DESIGN-034WsMaALpLsJSgSFhJLyp | Issue #199 impl index 生成対応: front matter 是正と managed marker 設計 | approved | [issue-199-impl-index-generation-design.md](./issue-199-impl-index-generation-design.md) |
 | DESIGN-034WuVuaQKt33yJv9vseJb | Issue #202 ir missing-section 補完設計 | approved | [issue-202-ir-missing-sections-design.md](./issue-202-ir-missing-sections-design.md) |
