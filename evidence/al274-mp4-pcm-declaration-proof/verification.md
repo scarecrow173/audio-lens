@@ -1,6 +1,6 @@
 # 検証結果: MP4 PCM declaration/capability
 
-基点は `f187ab33927359dc927dd32b39e4a65bd8cfb704`（作業開始時の `origin/main`）。PR #300 merge commit `0f1a1aac86336bff98df8bab1162e23bf5c36672` が ancestor であることを `git merge-base --is-ancestor` exit 0 で確認した。検証対象 SHA は commit 後に本書へ記録する。
+基点は `f187ab33927359dc927dd32b39e4a65bd8cfb704`（作業開始時の `origin/main`）。PR #300 merge commit `0f1a1aac86336bff98df8bab1162e23bf5c36672` が ancestor であることを `git merge-base --is-ancestor` exit 0 で確認した。検証対象 SHA は `5c3a6f5921c791d53485e8fab5600c0b76450b1b`。この後の evidence metadata 更新は製品コード・検証対象ドキュメントを変えない記録同期である。
 
 [境界分析](boundary-analysis.md) を実装前に確定した。`.devin/dispatch-specs/al274-next-after-pr300.explore.json` はこの worktree に存在しないため、Dispatch Spec に転記された recommended slice を operative input とした。ローカル検証は変更範囲の検証であり、統合検証は merge 後の対象 main SHA に対する CI 証拠で判定する。
 
@@ -83,7 +83,7 @@ proof harness は production `pcm_layout`、`pcm_sample_width_value`、`pcm_supp
 ## NotRun / Unsupported / NotApplicable
 
 - 未選択 Kani group、legacy timeout proof を含む全件 lane: NotRun。この slice の必須検証ではない。
-- manual/branch CI: push 後に read-only で確認し、存在しなければ Branch CI NotApplicable/NotRun として更新する。manual dispatch は起動していない。
+- branch CI: NotApplicable/NotRun。`gh run list --branch feature/274-mp4-pcm-declaration-proof --workflow ci.yml --limit 10` は exit 0・空出力だった。`ci.yml` は `workflow_dispatch` のみで branch push では起動しない。manual dispatch は起動していない。
 - 統合 CI: NotRun。merge 後の main SHA に対する CI 証拠は Coordinator が確認する。
 - GUI/hardware/audio-device gate: NotApplicable。
 - Windows `os error 206`: 発生せず。

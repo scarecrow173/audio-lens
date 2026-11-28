@@ -2,8 +2,8 @@
   "issue": 274,
   "branch": "feature/274-mp4-pcm-declaration-proof",
   "base_sha": "f187ab33927359dc927dd32b39e4a65bd8cfb704",
-  "verification_subject_sha": "pending-first-commit",
-  "verified_sync_commit": "pending-final-sync-commit",
+  "verification_subject_sha": "5c3a6f5921c791d53485e8fab5600c0b76450b1b",
+  "verified_sync_commit": "5c3a6f5921c791d53485e8fab5600c0b76450b1b",
   "property": "MP4-PCM-DECL-006: fixed scalar sound-entry PCM declaration/capability classification and sample-width support",
   "assurance": "selective exact formal verification over fixed scalar declaration domain",
   "requirement": "Required",
@@ -110,8 +110,8 @@
     "AVI residual properties, WAV conversion/writer, Lean/runner redesign, full old/new cost matrix"
   ],
   "branch_ci": {
-    "result": "pending-push-check",
-    "reason": "will be updated after read-only branch CI inspection; no manual dispatch was started"
+    "result": "NotApplicable/NotRun",
+    "reason": "gh run list for ci.yml on the pushed branch exited 0 with empty output; ci.yml is workflow_dispatch-only and no manual dispatch was started"
   },
   "integrated_ci": {
     "result": "NotRun",
