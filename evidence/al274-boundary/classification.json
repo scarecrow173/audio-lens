@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-26",
+  "generated_at": "2026-11-28",
   "baseline": {
     "origin_main": "c91b8ce20c90733fa21098451cb768a74425884d",
     "head": "c91b8ce20c90733fa21098451cb768a74425884d",
-    "note": "行番号は inventory 作成時 HEAD c91b8ce のもの。runner/test code を正本とし、docs/specs は正本にしない。"
+    "note": "行番号は inventory 作成時 HEAD c91b8ce のもの。runner/test code を正本とし、docs/specs は正本にしない。 2026-11-28 に現行 main へ照合更新。"
   },
   "vocabulary": {
     "requirement_states": ["Required", "Deferred", "NotApplicable"],
@@ -23,7 +23,8 @@
       "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
       "unproven_scope": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "wav_frame_count_never_panics_signed",
@@ -36,7 +37,8 @@
       "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
       "unproven_scope": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "read_wav_range_never_panics_signed",
@@ -49,7 +51,8 @@
       "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
       "unproven_scope": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "wav_reads_never_panics_unsigned",
@@ -62,7 +65,8 @@
       "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
       "unproven_scope": ["48byte 外の入力", "長尺入力", "allocation/formatting 全体"],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "writer_round_trip_pcm_s16",
@@ -81,7 +85,8 @@
         "PcmU8/PcmS8"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "writer_round_trip_pcm_s24",
@@ -100,7 +105,8 @@
         "PcmU8/PcmS8"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "writer_round_trip_pcm_s32",
@@ -119,7 +125,8 @@
         "PcmU8/PcmS8"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "writer_round_trip_float32",
@@ -138,7 +145,8 @@
         "PcmU8/PcmS8"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "writer_round_trip_float64",
@@ -157,35 +165,385 @@
         "PcmU8/PcmS8"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
-      "name": "header_reads_valid_ranges_slice_exact",
-      "family": "wav-header-range",
-      "current_verdict": "NotRun",
-      "recommended_disposition": "再構成",
+      "name": "wav_chunk_boundary_step_exact",
+      "family": "wav-chunk-scan",
+      "target_properties": ["WAV-CHUNK-003"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
       "requirement_state_for_existing_proof": "Required",
-      "execution_budget_for_existing_proof": "新規実走なし。現行形を Required proof としない。代替が Pass するまで legacy inventory として残す",
-      "rationale": "valid range arithmetic/slice exactness を代表的局所 proof に再設計する",
-      "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
-      "unproven_scope": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"],
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "I/O",
+        "allocation",
+        "PCM decode",
+        "diagnostic",
+        "公開 API 全体 no-panic",
+        "未知 chunk semantic"
+      ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": "NotRun",
-      "replacement_note": "現行 proof ではなく、置換後の Required local proof が未実走である"
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression/verdict.json; elapsed 8337 ms; max RSS 308784 KiB"
     },
     {
-      "name": "header_reads_invalid_ranges_error",
-      "family": "wav-header-range",
-      "current_verdict": "NotRun",
-      "recommended_disposition": "再構成",
+      "name": "wav_chunk_scan_progress_bounded_exact",
+      "family": "wav-chunk-scan",
+      "target_properties": ["WAV-SCAN-004"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
       "requirement_state_for_existing_proof": "Required",
-      "execution_budget_for_existing_proof": "新規実走なし。現行形を Required proof としない。代替が Pass するまで legacy inventory として残す",
-      "rationale": "invalid range rejection を代表的局所 proof に再設計する",
-      "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
-      "unproven_scope": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"],
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "4 valid chunk 以上",
+        "無制限 scan termination",
+        "I/O error",
+        "chunk semantic"
+      ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": "NotRun",
-      "replacement_note": "現行 proof ではなく、置換後の Required local proof が未実走である"
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression/verdict.json; elapsed 11172 ms; max RSS 319516 KiB"
+    },
+    {
+      "name": "wav_range_plan_valid_ranges_exact",
+      "family": "wav-range",
+      "target_properties": ["WAV-RANGE-008"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "I/O",
+        "allocation",
+        "PCM decode",
+        "diagnostic formatting",
+        "公開 API 全体 no-panic"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-range-regression/verdict.json; elapsed 13611 ms; max RSS 304736 KiB"
+    },
+    {
+      "name": "wav_range_plan_invalid_ranges_error",
+      "family": "wav-range",
+      "target_properties": ["WAV-RANGE-008"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "I/O",
+        "allocation",
+        "PCM decode",
+        "diagnostic formatting",
+        "公開 API 全体 no-panic"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-range-regression/verdict.json; elapsed 5367 ms; max RSS 302464 KiB"
+    },
+    {
+      "name": "mp4_box_header_step_exact",
+      "family": "mp4-avi-boundary",
+      "target_properties": ["MP4-BOX-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["box type semantic", "sample table", "PCM", "公開 parser 全体 no-panic"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-avi-boundary-regression/verdict.json; elapsed 12786 ms; max RSS 313388 KiB"
+    },
+    {
+      "name": "avi_chunk_step_exact",
+      "family": "mp4-avi-boundary",
+      "target_properties": ["AVI-CHUNK-001"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "nested LIST/OpenDML/idx1 semantic",
+        "movi timing",
+        "PCM",
+        "公開 parser 全体 no-panic"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-avi-boundary-regression/verdict.json; elapsed 7734 ms; max RSS 310776 KiB"
+    },
+    {
+      "name": "mp4_box_scan_progress_bounded_exact",
+      "family": "mp4-scan",
+      "target_properties": ["MP4-SCAN-003"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "4 valid box 以上",
+        "深い nesting",
+        "box semantic",
+        "公開 parser 全体 no-panic"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-scan-regression/verdict.json; elapsed 25119 ms; max RSS 316280 KiB"
+    },
+    {
+      "name": "avi_movi_packet_tag_exact",
+      "family": "avi-movi-tag",
+      "target_properties": ["AVI-MOVI-003"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["packet body boundary", "scan accumulation", "timing", "PCM"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-tag-regression/verdict.json; elapsed 25442 ms; max RSS 304052 KiB"
+    },
+    {
+      "name": "avi_movi_entry_decision_exact",
+      "family": "avi-movi-composition",
+      "target_properties": ["AVI-MOVI-003"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "chunk body slice/lifetime composition",
+        "nested walker",
+        "scan accumulation"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-composition-regression/verdict.json; elapsed 17735 ms; max RSS 310584 KiB"
+    },
+    {
+      "name": "avi_movi_scan_collection_bounded_exact",
+      "family": "avi-movi-scan",
+      "target_properties": ["AVI-MOVI-003"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "4件以上・無制限 iteration termination",
+        "Vec accumulation",
+        "body boundary との完全合成"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-scan-regression/verdict.json; elapsed 11124 ms; max RSS 319760 KiB"
+    },
+    {
+      "name": "avi_stream_kind_classification_bounded_exact",
+      "family": "avi-stream-kind",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["longer stream table", "parser walker", "timing/PCM integration"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-clock-start-proof/avi-stream-kind/verdict.json; elapsed 20954 ms; max RSS 500020 KiB"
+    },
+    {
+      "name": "avi_strh_declaration_bounded_exact",
+      "family": "avi-strh-declaration",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "prefix 以降の trailing bytes",
+        "nested walker",
+        "declaration correspondence"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-clock-start-proof/avi-strh-declaration/verdict.json; elapsed 6550 ms; max RSS 308384 KiB"
+    },
+    {
+      "name": "avi_strh_presence_bounded_exact",
+      "family": "avi-strh-presence",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["任意長 nested walker", "複数 strl", "全 declaration correspondence"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-clock-start-proof/avi-strh-presence/verdict.json; elapsed 15129 ms; max RSS 468132 KiB"
+    },
+    {
+      "name": "avi_stream_start_tick_exact",
+      "family": "avi-clock-start",
+      "target_properties": ["AVI-TIME-004"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "remainder",
+        "packet increment/accumulation",
+        "stream separation",
+        "PCM",
+        "parser 全体"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-clock-start-proof/avi-clock-start/verdict.json; elapsed 13097 ms; max RSS 255816 KiB"
+    },
+    {
+      "name": "avi_video_strf_declaration_bounded_exact",
+      "family": "avi-strf-declaration",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "trailing bytes",
+        "video feature integration",
+        "compressed video semantics"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-declaration-regression/verdict.json; elapsed 6214 ms; max RSS 304664 KiB"
+    },
+    {
+      "name": "avi_audio_strf_declaration_bounded_exact",
+      "family": "avi-strf-audio-declaration",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["PCM decode semantics", "strf extension", "non-PCM capability 全体"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-audio-declaration-regression/verdict.json; elapsed 6209 ms; max RSS 305824 KiB"
+    },
+    {
+      "name": "format_signature_detection_bounded_exact",
+      "family": "format-signature",
+      "target_properties": ["WAV-SIG-001", "MP4-SIG-001"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["decode capability", "free/mdat 先頭 MP4", "parser 全体"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-wb-concatenation-proof/kani-format-signature-regression/verdict.json; elapsed 10797 ms; max RSS 435704 KiB"
+    },
+    {
+      "name": "avi_strl_entry_classification_exact",
+      "family": "avi-strf-capture",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["entry body semantics", "walker integration"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 7032 ms; max RSS 304692 KiB"
+    },
+    {
+      "name": "avi_strf_capture_ordering_bounded_exact",
+      "family": "avi-strf-capture",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["任意長 walker", "複数 strl", "body copy semantics"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 9229 ms; max RSS 305936 KiB"
+    },
+    {
+      "name": "avi_strf_materialize_bounded_exact",
+      "family": "avi-strf-capture",
+      "target_properties": ["AVI-STREAM-002"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": ["3 byte 以上の payload", "allocation behavior", "parser integration"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 15495 ms; max RSS 436408 KiB"
+    },
+    {
+      "name": "avi_audio_wb_concatenation_bounded_exact",
+      "family": "avi-wb-concatenation",
+      "target_properties": ["AVI-PCM-005"],
+      "current_verdict": "Pass",
+      "recommended_disposition": "assurance pack Required local proof として維持",
+      "requirement_state_for_existing_proof": "Required",
+      "execution_budget_for_existing_proof": "各 proof 10分以内・4GiB未満。該当 evidence の latest pass は概ね数秒〜40秒・1GiB未満",
+      "rationale": "旧 whole-call proof が実用予算内に verdict を返さなかったため、Property 単位の純粋算術/境界/分類/小規模合成へ分解",
+      "connection_conditions": "局所 proof を公開 API 全体 no-panic へ転用しない。production helper 呼出・constructor 事前条件・事後条件の接続を個別 evidence で管理",
+      "unproven_scope": [
+        "任意長 copy",
+        "dynamic Vec",
+        "missing/empty behavior",
+        "PCM decode semantics",
+        "parser/walker"
+      ],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "latest pass evidence: evidence/al274-avi-strh-presence-proof/avi-wb-concatenation/verdict.json; elapsed 40371 ms; max RSS 823084 KiB"
     },
     {
       "name": "mp4_never_panics_ftyp_signed",
@@ -203,7 +561,8 @@
         "allocation/formatting 全体"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "avi_never_panics_riff_signed",
@@ -221,7 +580,8 @@
         "allocation/formatting 全体"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "containers_never_panics_unsigned",
@@ -239,20 +599,22 @@
         "allocation/formatting 全体"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "detect_format_signature_rules",
       "family": "format-detection",
       "current_verdict": "Pass",
-      "recommended_disposition": "Kaniに残す/再構成",
+      "recommended_disposition": "legacy small proof として維持。format_signature_detection_bounded_exact が拡張 replacement",
       "requirement_state_for_existing_proof": "Required",
       "execution_budget_for_existing_proof": "新規実走なし。現行形を Required proof としない。代替が Pass するまで legacy inventory として残す",
       "rationale": "small pure property。len boundary matrix と RIFF/ftyp 競合を拡張して維持する",
       "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
       "unproven_scope": ["len 0..6/9..11/13以上の個別入力", "prefix-only 性質の接続証明"],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": "Pass",
+      "replacement_note": "format_signature_detection_bounded_exact が main 統合済み evidence で Pass。legacy proof も regression evidence で Pass"
     },
     {
       "name": "mp4_writer_output_decodes",
@@ -270,7 +632,8 @@
         "non-uniform sample table"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "avi_writer_output_decodes",
@@ -287,7 +650,8 @@
         "video compression variants"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "mutated_mp4_never_panics",
@@ -305,7 +669,8 @@
         "実尺入力"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "truncated_mp4_never_panics",
@@ -323,7 +688,8 @@
         "実尺入力"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "mutated_avi_never_panics",
@@ -341,7 +707,8 @@
         "実尺入力"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     },
     {
       "name": "truncated_avi_never_panics",
@@ -359,7 +726,8 @@
         "実尺入力"
       ],
       "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
-      "replacement_verdict": null
+      "replacement_verdict": null,
+      "replacement_note": "対応する assurance pack は一部 Pass。legacy whole-call/end-to-end proof は引き続き timeout evidence で、Pass 扱いしない"
     }
   ],
   "target_verification_structure": [
@@ -373,14 +741,16 @@
       "method": "Kani local + proptest",
       "execution_budget": "proof 2分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "prefix-only 性質の接続証明",
       "connection_conditions": "signature は parse 成功を意味しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "format_signature_detection_bounded_exact が len/prefix/RIFF precedence を exact に Pass。signature は parse 成功を意味しない（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["format_signature_detection_bounded_exact"]
     },
     {
       "id": "WAV-RIFF-002",
@@ -392,14 +762,16 @@
       "method": "Kani local",
       "execution_budget": "proof 5分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "実ファイル streaming reader 全経路",
       "connection_conditions": "wav_layout が helper の事前条件を満たすことを接続",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "RIFF size/input length arithmetic helper proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-CHUNK-003",
@@ -411,14 +783,16 @@
       "method": "Kani local + proptest mutation",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "大きな chunk 数・未知 chunk semantic",
       "connection_conditions": "scan progress と合成し、公開 API no-panic へ直接転用しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "wav_chunk_boundary_step_exact が Pass。大きな chunk 数と未知 chunk semantic は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["wav_chunk_boundary_step_exact"]
     },
     {
       "id": "WAV-SCAN-004",
@@ -430,14 +804,16 @@
       "method": "Kani local",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "無制限 chunk 数・I/O error 系列",
       "connection_conditions": "実装 loop が同じ遷移を持つことを True to the Code に示す",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "wav_chunk_scan_progress_bounded_exact が small scan model で Pass。4 valid chunk 以上と無制限 termination は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["wav_chunk_scan_progress_bounded_exact"]
     },
     {
       "id": "WAV-FMT-005",
@@ -449,14 +825,16 @@
       "method": "proptest primary + selective Kani",
       "execution_budget": "現行 lane 内、selective proof 5分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "fmt 拡張・非 PCM 形式の完全適合",
       "connection_conditions": "構造受理は PCM decode 成功を意味しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "fmt/data presence/duplicate/order の selective formal proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-PCM-LAYOUT-006",
@@ -468,14 +846,16 @@
       "method": "Kani local + proptest mutation",
       "execution_budget": "proof 5分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "未対応 codec capability 判定全体",
       "connection_conditions": "layout valid は data len/frame 整列と合成して decode 可能条件になる",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "format/layout validation proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-PCM-CONV-007",
@@ -487,14 +867,16 @@
       "method": "Kani symbolic conversion + proptest round-trip",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "長尺 sample loop の性能・allocation",
       "connection_conditions": "変換 proof は layout valid と frame-aligned input を事前条件とする",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "PCM conversion symbolic proof は未実装。round-trip proptest は維持（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-RANGE-008",
@@ -506,14 +888,19 @@
       "method": "Kani local + proptest integration",
       "execution_budget": "proof 5分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "実 I/O short read・allocation 失敗",
       "connection_conditions": "helper の事前条件を満たし事後条件から public contract を導く",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "wav_range_plan_valid_ranges_exact / invalid_ranges_error が Pass。I/O/allocation/PCM/diagnostic は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": [
+        "wav_range_plan_valid_ranges_exact",
+        "wav_range_plan_invalid_ranges_error"
+      ]
     },
     {
       "id": "WAV-WRITER-009",
@@ -525,14 +912,16 @@
       "method": "proptest primary + Kani local/concrete matrix",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "長尺 streaming write・filesystem 永続化",
       "connection_conditions": "writer output の decode 受理は round-trip proptest と合成",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "writer header/parameter arithmetic の selective proof は未実装。proptest primary（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-ROUNDTRIP-010",
@@ -544,14 +933,16 @@
       "method": "proptest primary、Kani selective concrete matrix は Deferred",
       "execution_budget": "現行 lane 内、optional proof 10分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "clamp/round が効く任意 f64、NaN、PcmU8/PcmS8 writer 不在",
       "connection_conditions": "local proof は補強であって代替ではない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "round-trip proptest は現行 lane で維持。symbolic end-to-end Kani は Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "WAV-CORRUPT-011",
@@ -563,14 +954,16 @@
       "method": "proptest primary、Kani whole-call は Deferred",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "任意長・実尺・全 corruption 組合せの形式網羅",
       "connection_conditions": "局所 proof を API 全体 no-panic と読み替えない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "arbitrary/mutated/truncated proptest は維持。whole-call Kani は timeout evidence のまま Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-SIG-001",
@@ -582,14 +975,16 @@
       "method": "Kani local + proptest",
       "execution_budget": "proof 2分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "ftyp を持たない legal ISO-BMFF は現行契約で未検出",
       "connection_conditions": "検出結果は decode capability を保証しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "format_signature_detection_bounded_exact が Pass。decode capability は別 Property（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["format_signature_detection_bounded_exact"]
     },
     {
       "id": "MP4-BOX-002",
@@ -601,14 +996,16 @@
       "method": "Kani local",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "semantic box type 解釈",
       "connection_conditions": "box scan progress と合成",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "mp4_box_header_step_exact が Pass。box semantic は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["mp4_box_header_step_exact"]
     },
     {
       "id": "MP4-SCAN-003",
@@ -620,14 +1017,16 @@
       "method": "Kani local",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "多数 box・深い nesting の performance",
       "connection_conditions": "box_header proof と実装接続が必要",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "mp4_box_scan_progress_bounded_exact が small scan model で Pass。4 valid box 以上は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["mp4_box_scan_progress_bounded_exact"]
     },
     {
       "id": "MP4-STRUCT-004",
@@ -639,14 +1038,16 @@
       "method": "proptest primary",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "fragmented MP4・edit list・multi-run table の完全網羅",
       "connection_conditions": "walker proofは構造 semantic に直接転用しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "構造/declared facts は proptest primary。formal whole-structure proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-TABLE-005",
@@ -658,14 +1059,16 @@
       "method": "Kani local + proptest roundtrip",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "multi-chunk/編集リスト全組合せ",
       "connection_conditions": "decode が table helper の事前条件を満たす",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "sample table arithmetic proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-PCM-DECL-006",
@@ -677,14 +1080,16 @@
       "method": "proptest primary + Kani concrete matrix",
       "execution_budget": "proof 10分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / selective formal NotRun",
       "unproven_scope": "新 codec/fourcc の未知領域",
       "connection_conditions": "capability observation は structural corruption と分離",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "codec declaration matrix は proptest で維持。selective formal matrix は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-PCM-EXTRACT-007",
@@ -696,14 +1101,16 @@
       "method": "Kani local + proptest",
       "execution_budget": "proof 10分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "compressed codec・長尺 payload・performance",
       "connection_conditions": "sample table boundary proofと合成",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "sample extraction arithmetic/conversion proof は未実装（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-PARTIAL-008",
@@ -715,14 +1122,16 @@
       "method": "proptest primary",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "全 compressed codec の実 decode 能力",
       "connection_conditions": "partial ingest は structural validity の保証ではない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "NotApplicable",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "compressed/missing audio partial ingest は proptest primary（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-ROUNDTRIP-009",
@@ -734,14 +1143,16 @@
       "method": "proptest primary + optional concrete Kani matrix",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "広い spec 空間の形式的網羅",
       "connection_conditions": "local proof は補強であって代替ではない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "round-trip proptest は維持。symbolic end-to-end Kani は Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "MP4-CORRUPT-010",
@@ -753,14 +1164,16 @@
       "method": "proptest primary、Kani whole-call は Deferred",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "複合 corruption・実尺・全構造の形式網羅",
       "connection_conditions": "box local proofを API 全体 no-panic に転用しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "corruption proptest は維持。whole-call Kani は Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "AVI-CHUNK-001",
@@ -772,14 +1185,16 @@
       "method": "Kani local",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Pass",
       "unproven_scope": "nested LIST/OpenDML/idx1 の全 semantic",
       "connection_conditions": "WAV walker と共通責務かは実装確認後に判断",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "avi_chunk_step_exact が Pass。nested LIST/OpenDML/idx1 semantic は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["avi_chunk_step_exact"]
     },
     {
       "id": "AVI-STREAM-002",
@@ -791,14 +1206,25 @@
       "method": "proptest primary + selective Kani matrix",
       "execution_budget": "proof 10分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "未知 codec/圧縮形式の完全網羅",
       "connection_conditions": "stream declaration は packet decode 成功を意味しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "kind/strh/strf/capture/presence の複数 local proof は Pass。完全な declaration correspondence・任意長 nested walker・複数 strl は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": [
+        "avi_stream_kind_classification_bounded_exact",
+        "avi_strh_declaration_bounded_exact",
+        "avi_strh_presence_bounded_exact",
+        "avi_video_strf_declaration_bounded_exact",
+        "avi_audio_strf_declaration_bounded_exact",
+        "avi_strl_entry_classification_exact",
+        "avi_strf_capture_ordering_bounded_exact",
+        "avi_strf_materialize_bounded_exact"
+      ]
     },
     {
       "id": "AVI-MOVI-003",
@@ -810,14 +1236,20 @@
       "method": "Kani local",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "zero-length/drop frame 以外の codec semantic",
       "connection_conditions": "packet boundary は timestamp/PCM decode の事前条件",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "tag/entry/scan collection local proof は Pass。body boundary/lifetime composition・4件以上/unbounded iteration・実 Vec accumulation は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": [
+        "avi_movi_packet_tag_exact",
+        "avi_movi_entry_decision_exact",
+        "avi_movi_scan_collection_bounded_exact"
+      ]
     },
     {
       "id": "AVI-TIME-004",
@@ -829,14 +1261,16 @@
       "method": "Kani local + proptest integration",
       "execution_budget": "proof 10分以内・4GiB未満",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "長尺 packet 列の性能・全 interleave",
       "connection_conditions": "movi packet boundary proofと合成",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "avi_stream_start_tick_exact は Pass。remainder・packet increment/accumulation・stream separation は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["avi_stream_start_tick_exact"]
     },
     {
       "id": "AVI-PCM-005",
@@ -848,14 +1282,16 @@
       "method": "Kani local + proptest",
       "execution_budget": "proof 10分以内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "NotRun",
       "unproven_scope": "strf 拡張・非 PCM codec",
       "connection_conditions": "WAV conversion proof を共有できる場合は接続条件を記録",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Required",
         "note": "Property 全体と形式的 assurance の要求状態は同じ"
-      }
+      },
+      "current_evidence_note": "audio strf declaration と first-audio wb concatenation local proof は Pass。PCM decode semantics・任意長 copy・dynamic buffer は未証明（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": ["avi_audio_wb_concatenation_bounded_exact"]
     },
     {
       "id": "AVI-VIDEO-006",
@@ -867,14 +1303,16 @@
       "method": "proptest primary",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / selective formal partial",
       "unproven_scope": "非 DIB/圧縮 video・画像処理全体",
       "connection_conditions": "video proof は音声 parser proof と混ぜない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "video strf declaration field proof は Pass。feature integration は proptest primary（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "AVI-PARTIAL-007",
@@ -886,14 +1324,16 @@
       "method": "proptest primary",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "全 codec capability",
       "connection_conditions": "partial ingest は structural validity の保証ではない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "NotApplicable",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "missing/undecodable auds partial ingest は proptest primary（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "AVI-ROUNDTRIP-008",
@@ -905,14 +1345,16 @@
       "method": "proptest primary + optional concrete Kani matrix",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "広い spec 空間の形式的網羅",
       "connection_conditions": "local proof は補強であって代替ではない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "round-trip proptest は維持。symbolic end-to-end Kani は Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     },
     {
       "id": "AVI-CORRUPT-009",
@@ -924,21 +1366,24 @@
       "method": "proptest primary、Kani whole-call は Deferred",
       "execution_budget": "現行 lane 内",
       "requirement_state": "Required",
-      "current_verdict": "NotRun(設計 slice)",
+      "current_verdict": "Property Tested Pass / formal Deferred",
       "unproven_scope": "複合 corruption・実尺・全構造の形式網羅",
       "connection_conditions": "RIFF/movi local proofを API 全体 no-panic に転用しない",
       "assurance_allocation": {
         "proptest_requirement_state": "Required",
         "formal_requirement_state": "Deferred",
         "note": "Property 全体は Required。proptest を primary assurance とし、形式的 whole-call/end-to-end proof はこの割当に従う"
-      }
+      },
+      "current_evidence_note": "corruption proptest は維持。whole-call Kani は Deferred（現行 main 886828500b85452774af2be7114437ebb226976b の ledger 照合。本 slice は再実行なし）",
+      "implemented_proofs": []
     }
   ],
   "assurance_pack": {
     "recommended": true,
     "shape": "proptest 13件を常時実行 baseline に保ち、Kani は signature/PCM conversion/chunk-box boundary/scan progress/range/timing arithmetic の小さい assurance pack へ再構成する。whole-call symbolic proof は代替が Pass するまで legacy inventory として残し Required proof から外す",
     "budget": "各 Required local proof 10分以内・peak 4GiB未満。WAV/MP4/AVI sequential pack 60分以内。関連変更の property 単位選択実行 10〜20分以内を目標。予算は後続実装 slice の実測で見直す",
-    "ci": "Daily Full CI 集約・非ブロッキング。PR 必須 blocking Kani lane は作らない。Required proof の NotRun は最終受入を止めるが lint/test hygiene とは分離する"
+    "ci": "Daily Full CI 集約・非ブロッキング。PR 必須 blocking Kani lane は作らない。Required proof の NotRun は最終受入を止めるが lint/test hygiene とは分離する",
+    "current_state": "現行 main では 21 件の新規 local proof が registry に入り、対応 evidence では Pass。MP4-TABLE-005、MP4-PCM extraction、AVI-TIME-004 の accumulation/remainder、AVI-PCM decode、WAV PCM/writer/layout、unbounded scan/iteration などは未証明として残る"
   },
   "rf_reduction": {
     "decision": "候補あり。ただし新規 Issue 起票や既存 Issue 更新は本 slice では行わない",
@@ -948,6 +1393,110 @@
       "RIFF chunk boundary walker と WAVEFORMATEX/PCM conversion の検証済み共通契約",
       "diagnostic error payload を検証対象から分離する設計知見。cfg(kani) 置換ではなく lazy diagnostic/contract型の再設計として評価"
     ],
-    "coordinator_confirmation": "未実施。Issue 起票/更新不要と判断したため"
-  }
+    "coordinator_confirmation": "本 slice では候補の判定のみ。新規 Issue 起票は不要と判断し、Coordinator への確認は実施しなかった"
+  },
+  "current": {
+    "origin_main": "886828500b85452774af2be7114437ebb226976b",
+    "head": "886828500b85452774af2be7114437ebb226976b",
+    "compared_at": "2026-11-28",
+    "note": "現行 main の tools/run-formal-kani.mjs HARNESSES と crates/al-media/tests/src の #[kani::proof] を read-only 照合。Kani 再計測はしていない"
+  },
+  "drift_from_baseline": {
+    "baseline": "c91b8ce20c90733fa21098451cb768a74425884d",
+    "current": "886828500b85452774af2be7114437ebb226976b",
+    "added_proofs": [
+      "wav_chunk_boundary_step_exact",
+      "wav_chunk_scan_progress_bounded_exact",
+      "wav_range_plan_valid_ranges_exact",
+      "wav_range_plan_invalid_ranges_error",
+      "mp4_box_header_step_exact",
+      "avi_chunk_step_exact",
+      "mp4_box_scan_progress_bounded_exact",
+      "avi_movi_packet_tag_exact",
+      "avi_movi_entry_decision_exact",
+      "avi_movi_scan_collection_bounded_exact",
+      "avi_stream_kind_classification_bounded_exact",
+      "avi_strh_declaration_bounded_exact",
+      "avi_strh_presence_bounded_exact",
+      "avi_stream_start_tick_exact",
+      "avi_video_strf_declaration_bounded_exact",
+      "avi_audio_strf_declaration_bounded_exact",
+      "format_signature_detection_bounded_exact",
+      "avi_strl_entry_classification_exact",
+      "avi_strf_capture_ordering_bounded_exact",
+      "avi_strf_materialize_bounded_exact",
+      "avi_audio_wb_concatenation_bounded_exact"
+    ],
+    "retired_proofs": [
+      "header_reads_valid_ranges_slice_exact",
+      "header_reads_invalid_ranges_error"
+    ],
+    "replaced_proofs": [
+      {
+        "from": "header_reads_valid_ranges_slice_exact",
+        "to": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+      },
+      {
+        "from": "header_reads_invalid_ranges_error",
+        "to": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+      }
+    ],
+    "continued_legacy_proofs": [
+      "decode_wav_never_panics_signed",
+      "wav_frame_count_never_panics_signed",
+      "read_wav_range_never_panics_signed",
+      "wav_reads_never_panics_unsigned",
+      "writer_round_trip_pcm_s16",
+      "writer_round_trip_pcm_s24",
+      "writer_round_trip_pcm_s32",
+      "writer_round_trip_float32",
+      "writer_round_trip_float64",
+      "mp4_never_panics_ftyp_signed",
+      "avi_never_panics_riff_signed",
+      "containers_never_panics_unsigned",
+      "detect_format_signature_rules",
+      "mp4_writer_output_decodes",
+      "avi_writer_output_decodes",
+      "mutated_mp4_never_panics",
+      "truncated_mp4_never_panics",
+      "mutated_avi_never_panics",
+      "truncated_avi_never_panics"
+    ],
+    "verdict_changes": [
+      "WAV-RANGE-008 replacement valid/invalid は PR #281 の valid timeout を再設計し、main 統合済み evidence で Pass",
+      "WAV chunk/scan、MP4 box/scan、AVI chunk/movi/stream declaration/strf/wb/start tick、format signature の local proof が baseline 後に追加され、対応 evidence で Pass",
+      "legacy whole-call proof群は registry に残るが verdict は引き続き NotRun/timeout evidence。detect_format_signature_rules は Pass、format_signature_detection_bounded_exact も Pass"
+    ],
+    "spike_separation": "spike_ 12 proof は runner registry に入っていない。canonical 40 proof と分離されている"
+  },
+  "retired_entries": [
+    {
+      "name": "header_reads_valid_ranges_slice_exact",
+      "family": "wav-header-range",
+      "current_verdict": "NotRun",
+      "recommended_disposition": "退役済み",
+      "requirement_state_for_existing_proof": "NotApplicable",
+      "execution_budget_for_existing_proof": "新規実走なし。現行形を Required proof としない。代替が Pass するまで legacy inventory として残す",
+      "rationale": "valid range arithmetic/slice exactness を代表的局所 proof に再設計する",
+      "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
+      "unproven_scope": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "wav-range exact replacement group が main 統合済み evidence で Pass した後に registry/tests から退役"
+    },
+    {
+      "name": "header_reads_invalid_ranges_error",
+      "family": "wav-header-range",
+      "current_verdict": "NotRun",
+      "recommended_disposition": "退役済み",
+      "requirement_state_for_existing_proof": "NotApplicable",
+      "execution_budget_for_existing_proof": "新規実走なし。現行形を Required proof としない。代替が Pass するまで legacy inventory として残す",
+      "rationale": "invalid range rejection を代表的局所 proof に再設計する",
+      "connection_conditions": "下位契約・事前条件・事後条件から上位契約を導く。局所 proof の成功を公開 API 全体 no-panic に転用しない。proptest と formal proof の保証種別を分離する",
+      "unproven_scope": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"],
+      "ci_shape": "Daily Full CI へ集約する非ブロッキング assurance pack。PR 必須 blocking Kani lane は新設しない",
+      "replacement_verdict": "Pass",
+      "replacement_note": "wav-range exact replacement group が main 統合済み evidence で Pass した後に registry/tests から退役"
+    }
+  ]
 }
