@@ -4,7 +4,7 @@ type: "evidence"
 status: "approved"
 title: "検証記録: Ruviform 移行・pin 更新・契約 API・消費者 oracle"
 created: "2026-11-19"
-updated: "2026-11-26"
+updated: "2026-11-28"
 owners: []
 relations:
   source: []
@@ -83,6 +83,14 @@ Ruviform 依存・pin 更新・契約 API 採用・consumer oracle に関する�
 - 差分評価: `ruviform-audio` ProbeDeck capture push bugfix、`ruviform-plugin-core`/`plugin-host` の wire v5→v9・`Plugin::buses` Option 化、`ruviform-ui` Input/CommandParams、`ruviform-ui-gpui` IMM32/native surface 変更を分類。AL は plugin host/device boundary を消費せず、UI 新 API も未消費。詳細は `evidence/al127/87a7ba8f-verification.md`。
 - 検証: pin guard、`cargo fetch --locked`、analysis/service/CLI/GUI check/test、UI typecheck/test、GPUI check/lint/test/build、real-headless blocked-probe、prek が全て exit 0。`test al-analysis` は rf628 oracle を含む 151 tests pass。`build-ui-gpui` は gpui fork 経由の `al-desktop` Native Build/Link 合格。
 - upstream `87a7ba8f` 自体の covering CI run はなし。ancestor `ab6dc99f` の `ci` run 45749815004・`daily-ci` run 45749786810 は success で、`ab6dc99f..87a7ba8f` は production code 差分なし。interactive real GUI/pixel/IME、macOS/Linux、cross-consumer tuple、upstream main `0fb97d1b` は Deferred/後続。
+
+## AL#127 ruviform pin eea9e209 追従
+
+- candidate tuple: ruviform `eea9e2090a23e24dd5cd7a0799b25175c91cad9c` / AL pin bump commit `4c8f2b7f9702ea4bc9a6bc01b4168e34719696a2` / lockfile resolved `eea9e2090a23e24dd5cd7a0799b25175c91cad9c`。25 個の ruviform package が単一 SHA に解決され、manifest 非変更を維持。
+- `Cargo.lock` 差分は 25 個の ruviform source fragment のみ。package 追加・削除や無関係 version bump はなく、`gpui` fork source は前 slice から既存で本 slice の新規差分ではない。
+- 差分評価: `ruviform-media-core` の plan-owned musical transport と `SpanSink` 破壊的 signature、`ruviform-audio`/plugin bridge/core の transport handoff、`ruviform-audio-test` の test runtime 適合、`ruviform-ui` IPC decision core、`ruviform-ui-test` EOF 分類を分類。AL direct use は PCM oracle のみで、AL 側コード適合は不要だった。詳細は `evidence/al127/eea9e209-verification.md`。
+- 検証: pin guard、`cargo fetch --locked`、analysis/service/CLI/GUI check/test、UI typecheck/test、GPUI check/lint/test/build、real-headless blocked-probe、prek が全て exit 0。`test al-analysis` は rf628 oracle を含む 151 tests pass、`test-ui-gpui` は 118 tests pass、`build-ui-gpui` は gpui fork 経由の `al-desktop` Native Build/Link 合格。
+- upstream `eea9e209` では `ci` run 46134393707 が success。`consumer-verify` run 46144010070 は verify-audiolens success / verify-synvelis failure / summary failure で、cross-consumer tuple は未解決のまま後続。interactive real GUI/pixel/IME、macOS/Linux、外部実機は Deferred/後続。
 
 ## 未検証・制約
 
