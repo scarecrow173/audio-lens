@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-26",
+  "generated_at": "2026-11-28",
   "baseline": {
     "origin_main": "c91b8ce20c90733fa21098451cb768a74425884d",
     "head": "c91b8ce20c90733fa21098451cb768a74425884d",
@@ -24,7 +24,7 @@
     "verdict": "Timeout/環境不足/exit 0/CI green を Proof Pass としない。要求状態と verdict を分離する"
   },
   "counts": {
-    "canonical": 21,
+    "canonical": 40,
     "spike": 12,
     "proptest": 13
   },
@@ -35,7 +35,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 397
+        "line": 442
       },
       "entry_points": ["decode_wav"],
       "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
@@ -59,7 +59,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / peak 約3.8GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
@@ -79,7 +79,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 408
+        "line": 453
       },
       "entry_points": ["wav_frame_count"],
       "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
@@ -103,7 +103,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 600s timeout / peak 約2.6GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
@@ -123,7 +123,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 434
+        "line": 479
       },
       "entry_points": ["read_wav_range"],
       "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
@@ -155,7 +155,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout / 観測 peak 10324MiB(欠測あり); trial 1200s timeout / 約3.6GiB; ablation 600s timeout 8471MiB baseline / 6744MiB fmt",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "signed 48byte bounded input の no-panic(Bounded Exhaustive)",
@@ -177,7 +177,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 384
+        "line": 429
       },
       "entry_points": ["decode_wav", "wav_frame_count", "read_wav_range"],
       "old_contract": "decode_wav/wav_frame_count/read_wav_range は任意入力で panic せず Ok または Err(MediaError) を返す。旧 combined proof から入口×signature class に分割した。",
@@ -209,7 +209,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout / peak 13762MiB; trial 900s timeout / 約3.1GiB; ablation 600s timeout 5818MiB baseline / 7883MiB fmt",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "unsigned 48byte bounded input の no-panic(Bounded Exhaustive)",
@@ -231,7 +231,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 526
+        "line": 571
       },
       "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
       "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
@@ -258,7 +258,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.2GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
@@ -286,7 +286,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 532
+        "line": 577
       },
       "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
       "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
@@ -313,7 +313,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.2GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
@@ -341,7 +341,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 538
+        "line": 583
       },
       "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
       "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
@@ -368,7 +368,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約2.1GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
@@ -396,7 +396,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 544
+        "line": 589
       },
       "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
       "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
@@ -423,7 +423,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.4GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
@@ -451,7 +451,7 @@
       "runner_registered": true,
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 550
+        "line": 595
       },
       "entry_points": ["WavWriter::new", "write_samples", "finish", "decode_wav"],
       "old_contract": "writer_round_trip_is_exact。symbolic encoding proof を encoding 別に分割した",
@@ -478,7 +478,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "固定 encoding・有効 writer 空間・1 frame の write→decode 厳密往復",
@@ -501,92 +501,965 @@
       "new_verification": "PCM conversion を独立 Property として証明し、round-trip は proptest primary。固定長 sink/concrete matrix 採用は実装 slice の open decision"
     },
     {
-      "name": "header_reads_valid_ranges_slice_exact",
-      "family": "wav-header-range",
+      "name": "wav_chunk_boundary_step_exact",
+      "family": "wav-chunk-scan",
       "runner_registered": true,
       "location": {
-        "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 585
+        "file": "crates/al-media/src/wav.rs",
+        "line": 593
       },
-      "entry_points": ["wav_frame_count", "read_wav_range"],
-      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
-      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
-      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "entry_points": ["wav_chunk_step"],
+      "target_properties": ["WAV-CHUNK-003"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "chunk header・body_end・pad・next offset・region containment・少なくとも 8 byte の進行・残余量減少",
+      "input_state_domain": "full u64 offset/file length と full u32 chunk size。valid/invalid/terminal exact complement",
       "bounds": {
-        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
-        "unwind": 32
+        "input": "full u64 offset/file length と full u32 chunk size。valid/invalid/terminal exact complement",
+        "unwind": "default/explicitなし"
       },
-      "assumptions": ["start < end && end <= 8"],
+      "assumptions": [],
       "stubs": [],
-      "abstractions": [],
-      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
-      "proptest_overlap": [
-        "frame_count_and_range_reads_hold_the_contract",
-        "writer_output_round_trips_losslessly"
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
       ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
       "current_evidence": {
-        "verdict": "NotRun",
-        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
-        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.5GiB",
-        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-chunk-scan-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 8337 ms、max RSS 308784 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression/verdict.json; elapsed 8337 ms; max_rss 308784 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-chunk-scan-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
       },
       "guarantee": {
-        "designed": "valid range の frame 数と sample slice 一致",
-        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
-        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+        "designed": "chunk header・body_end・pad・next offset・region containment・少なくとも 8 byte の進行・残余量減少",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "I/O",
+          "allocation",
+          "PCM decode",
+          "diagnostic",
+          "公開 API 全体 no-panic",
+          "未知 chunk semantic"
+        ]
       },
-      "audit": [
-        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
-      ],
+      "audit": [],
       "residual_risks": [
-        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+        "I/O、allocation、PCM decode、diagnostic、公開 API 全体 no-panic、未知 chunk semantic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
       ],
-      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する"
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
     },
     {
-      "name": "header_reads_invalid_ranges_error",
-      "family": "wav-header-range",
+      "name": "wav_chunk_scan_progress_bounded_exact",
+      "family": "wav-chunk-scan",
       "runner_registered": true,
       "location": {
-        "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 608
+        "file": "crates/al-media/src/wav.rs",
+        "line": 666
       },
-      "entry_points": ["wav_frame_count", "read_wav_range"],
-      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
-      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
-      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "entry_points": ["wav_scan_position/wav_chunk_step"],
+      "target_properties": ["WAV-SCAN-004"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "terminal exact end/trailing bytes、valid step strict progress、invalid first stop、残余量減少",
+      "input_state_domain": "file_len>=12、初期 offset 12、full u64 file length と full u32 size 列。高々 3 valid chunk の small scan model",
       "bounds": {
-        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
-        "unwind": 32
+        "input": "file_len>=12、初期 offset 12、full u64 file length と full u32 size 列。高々 3 valid chunk の small scan model",
+        "unwind": "6"
       },
-      "assumptions": ["!(start < end && end <= 8)"],
+      "assumptions": [],
       "stubs": [],
-      "abstractions": [],
-      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
-      "proptest_overlap": [
-        "frame_count_and_range_reads_hold_the_contract",
-        "writer_output_round_trips_losslessly"
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
       ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
       "current_evidence": {
-        "verdict": "NotRun",
-        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
-        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約5.2GiB",
-        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-chunk-scan-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 11172 ms、max RSS 319516 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-chunk-scan-regression/verdict.json; elapsed 11172 ms; max_rss 319516 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-chunk-scan-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
       },
       "guarantee": {
-        "designed": "invalid range が必ず Err",
-        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
-        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+        "designed": "terminal exact end/trailing bytes、valid step strict progress、invalid first stop、残余量減少",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "4 valid chunk 以上",
+          "無制限 scan termination",
+          "I/O error",
+          "chunk semantic"
+        ]
       },
-      "audit": [
-        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
-      ],
+      "audit": [],
       "residual_risks": [
-        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+        "4 valid chunk 以上、無制限 scan termination、I/O error、chunk semantic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
       ],
-      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する"
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "wav_range_plan_valid_ranges_exact",
+      "family": "wav-range",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/wav.rs",
+        "line": 712
+      },
+      "entry_points": ["WavDataLayout::range_plan"],
+      "target_properties": ["WAV-RANGE-008"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "受理、frame count、byte offset/byte length/exclusive byte end、data extent containment、算術安全性",
+      "input_state_domain": "constructor-admitted layout 全域と valid public u64 frame index。start/frame_count/tail の exact constructive decomposition",
+      "bounds": {
+        "input": "constructor-admitted layout 全域と valid public u64 frame index。start/frame_count/tail の exact constructive decomposition",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-proof-redesign/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 13611 ms、max RSS 304736 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-range-regression/verdict.json; elapsed 13611 ms; max_rss 304736 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-proof-redesign/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "受理、frame count、byte offset/byte length/exclusive byte end、data extent containment、算術安全性",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "I/O",
+          "allocation",
+          "PCM decode",
+          "diagnostic formatting",
+          "公開 API 全体 no-panic"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "I/O、allocation、PCM decode、diagnostic formatting、公開 API 全体 no-panic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "wav_range_plan_invalid_ranges_error",
+      "family": "wav-range",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/wav.rs",
+        "line": 759
+      },
+      "entry_points": ["WavDataLayout::range_plan"],
+      "target_properties": ["WAV-RANGE-008"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "invalid range の全件拒否と compact error payload total_frames 一致",
+      "input_state_domain": "valid predicate の exact complement を満たす full u64 start/end",
+      "bounds": {
+        "input": "valid predicate の exact complement を満たす full u64 start/end",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-proof-redesign/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 5367 ms、max RSS 302464 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-wav-range-regression/verdict.json; elapsed 5367 ms; max_rss 302464 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-proof-redesign/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "invalid range の全件拒否と compact error payload total_frames 一致",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "I/O",
+          "allocation",
+          "PCM decode",
+          "diagnostic formatting",
+          "公開 API 全体 no-panic"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "I/O、allocation、PCM decode、diagnostic formatting、公開 API 全体 no-panic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "mp4_box_header_step_exact",
+      "family": "mp4-avi-boundary",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/mp4.rs",
+        "line": 1665
+      },
+      "entry_points": ["mp4_box_boundary_step"],
+      "target_properties": ["MP4-BOX-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "size32/size64/size0、truncated header、minimum size、checked arithmetic、region limit、進行と残余量減少",
+      "input_state_domain": "full u64 box offset/region limit、full u32 size32、full u64 largesize",
+      "bounds": {
+        "input": "full u64 box offset/region limit、full u32 size32、full u64 largesize",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-mp4-avi-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 12786 ms、max RSS 313388 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-avi-boundary-regression/verdict.json; elapsed 12786 ms; max_rss 313388 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-mp4-avi-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "size32/size64/size0、truncated header、minimum size、checked arithmetic、region limit、進行と残余量減少",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["box type semantic", "sample table", "PCM", "公開 parser 全体 no-panic"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "box type semantic、sample table、PCM、公開 parser 全体 no-panic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_chunk_step_exact",
+      "family": "mp4-avi-boundary",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 1741
+      },
+      "entry_points": ["avi_chunk_step"],
+      "target_properties": ["AVI-CHUNK-001"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "empty/exact end/trailing/valid/invalid exact complement、body/pad/next、region limit、進行と残余量減少",
+      "input_state_domain": "full u64 region-relative offset/region length と full u32 chunk size",
+      "bounds": {
+        "input": "full u64 region-relative offset/region length と full u32 chunk size",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-mp4-avi-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 7734 ms、max RSS 310776 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-avi-boundary-regression/verdict.json; elapsed 7734 ms; max_rss 310776 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-mp4-avi-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "empty/exact end/trailing/valid/invalid exact complement、body/pad/next、region limit、進行と残余量減少",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "nested LIST/OpenDML/idx1 semantic",
+          "movi timing",
+          "PCM",
+          "公開 parser 全体 no-panic"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "nested LIST/OpenDML/idx1 semantic、movi timing、PCM、公開 parser 全体 no-panic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "mp4_box_scan_progress_bounded_exact",
+      "family": "mp4-scan",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/mp4.rs",
+        "line": 1752
+      },
+      "entry_points": ["mp4_scan_position/mp4_box_boundary_step"],
+      "target_properties": ["MP4-SCAN-003"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "terminal exact end、1..7 byte trailing、strict progress、first invalid stop、残余量減少",
+      "input_state_domain": "start<=end の full u64 region と高々 3 valid box の small scan model",
+      "bounds": {
+        "input": "start<=end の full u64 region と高々 3 valid box の small scan model",
+        "unwind": "6"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-mp4-scan-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 25119 ms、max RSS 316280 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-mp4-scan-regression/verdict.json; elapsed 25119 ms; max_rss 316280 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-mp4-scan-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "terminal exact end、1..7 byte trailing、strict progress、first invalid stop、残余量減少",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "4 valid box 以上",
+          "深い nesting",
+          "box semantic",
+          "公開 parser 全体 no-panic"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "4 valid box 以上、深い nesting、box semantic、公開 parser 全体 no-panic",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_movi_packet_tag_exact",
+      "family": "avi-movi-tag",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 1814
+      },
+      "entry_points": ["avi_movi_packet_tag"],
+      "target_properties": ["AVI-MOVI-003"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "2 桁 decimal stream prefix、kind suffix の保持、非数字 prefix の拒否 exact complement",
+      "input_state_domain": "full [u8;4] chunk id",
+      "bounds": {
+        "input": "full [u8;4] chunk id",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-movi-tag-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 25442 ms、max RSS 304052 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-tag-regression/verdict.json; elapsed 25442 ms; max_rss 304052 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-movi-tag-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "2 桁 decimal stream prefix、kind suffix の保持、非数字 prefix の拒否 exact complement",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["packet body boundary", "scan accumulation", "timing", "PCM"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "packet body boundary、scan accumulation、timing、PCM",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_movi_entry_decision_exact",
+      "family": "avi-movi-composition",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 1836
+      },
+      "entry_points": ["avi_movi_entry_decision"],
+      "target_properties": ["AVI-MOVI-003"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "packet/ignore/reject-short-list-type/reject-rec-list の exact complement",
+      "input_state_domain": "full [u8;4] id と optional [u8;4] list type",
+      "bounds": {
+        "input": "full [u8;4] id と optional [u8;4] list type",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-movi-composition-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 17735 ms、max RSS 310584 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-composition-regression/verdict.json; elapsed 17735 ms; max_rss 310584 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-movi-composition-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "packet/ignore/reject-short-list-type/reject-rec-list の exact complement",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "chunk body slice/lifetime composition",
+          "nested walker",
+          "scan accumulation"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "chunk body slice/lifetime composition、nested walker、scan accumulation",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_movi_scan_collection_bounded_exact",
+      "family": "avi-movi-scan",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2046
+      },
+      "entry_points": ["avi_movi_scan_step"],
+      "target_properties": ["AVI-MOVI-003"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "collect/skip/stop、packet ordering、first reject stop、scanned count exactness",
+      "input_state_domain": "3 entry symbolic sequence。id/list type equivalence classes",
+      "bounds": {
+        "input": "3 entry symbolic sequence。id/list type equivalence classes",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-movi-scan-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 11124 ms、max RSS 319760 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-movi-scan-regression/verdict.json; elapsed 11124 ms; max_rss 319760 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-movi-scan-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "collect/skip/stop、packet ordering、first reject stop、scanned count exactness",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "4件以上・無制限 iteration termination",
+          "Vec accumulation",
+          "body boundary との完全合成"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "4件以上・無制限 iteration termination、Vec accumulation、body boundary との完全合成",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_stream_kind_classification_bounded_exact",
+      "family": "avi-stream-kind",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2452
+      },
+      "entry_points": ["stream kind classification helpers"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "auds/vids/other、wb/db/dc、first stream selection、payload/timeline slot classification exact complement",
+      "input_state_domain": "3 stream type table、full usize stream index、full [u8;2] kind",
+      "bounds": {
+        "input": "3 stream type table、full usize stream index、full [u8;2] kind",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-stream-kind-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 20954 ms、max RSS 500020 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-clock-start-proof/avi-stream-kind/verdict.json; elapsed 20954 ms; max_rss 500020 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-stream-kind-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "auds/vids/other、wb/db/dc、first stream selection、payload/timeline slot classification exact complement",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["longer stream table", "parser walker", "timing/PCM integration"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "longer stream table、parser walker、timing/PCM integration",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_strh_declaration_bounded_exact",
+      "family": "avi-strh-declaration",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2125
+      },
+      "entry_points": ["avi_strh_accepts_body_len/avi_strh_declaration_fields"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "48 byte threshold acceptance/rejection、fcc_type/scale/rate/start/length/sample_size の exact byte offset extraction",
+      "input_state_domain": "full usize body length と fixed 48-byte symbolic prefix",
+      "bounds": {
+        "input": "full usize body length と fixed 48-byte symbolic prefix",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strh-declaration-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 6550 ms、max RSS 308384 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-clock-start-proof/avi-strh-declaration/verdict.json; elapsed 6550 ms; max_rss 308384 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strh-declaration-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "48 byte threshold acceptance/rejection、fcc_type/scale/rate/start/length/sample_size の exact byte offset extraction",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "prefix 以降の trailing bytes",
+          "nested walker",
+          "declaration correspondence"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "prefix 以降の trailing bytes、nested walker、declaration correspondence",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_strh_presence_bounded_exact",
+      "family": "avi-strh-presence",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2085
+      },
+      "entry_points": ["avi_strh_presence_step"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "presence decision、first invalid entry position、valid entries before/after invalid の ordering",
+      "input_state_domain": "3 representative strl entries。other/valid 48-byte strh/invalid 47-byte strh",
+      "bounds": {
+        "input": "3 representative strl entries。other/valid 48-byte strh/invalid 47-byte strh",
+        "unwind": "5"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strh-presence-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 15129 ms、max RSS 468132 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-clock-start-proof/avi-strh-presence/verdict.json; elapsed 15129 ms; max_rss 468132 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strh-presence-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "presence decision、first invalid entry position、valid entries before/after invalid の ordering",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["任意長 nested walker", "複数 strl", "全 declaration correspondence"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "任意長 nested walker、複数 strl、全 declaration correspondence",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_stream_start_tick_exact",
+      "family": "avi-clock-start",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 1728
+      },
+      "entry_points": ["avi_stream_start_tick"],
+      "target_properties": ["AVI-TIME-004"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "dwStart*dwScale が i64::MAX 以下なら exact tick、超過なら拒否。widened u64 oracle",
+      "input_state_domain": "全 u32 start/scale 入力対",
+      "bounds": {
+        "input": "全 u32 start/scale 入力対",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-clock-start-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 13097 ms、max RSS 255816 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-clock-start-proof/avi-clock-start/verdict.json; elapsed 13097 ms; max_rss 255816 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-clock-start-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "dwStart*dwScale が i64::MAX 以下なら exact tick、超過なら拒否。widened u64 oracle",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "remainder",
+          "packet increment/accumulation",
+          "stream separation",
+          "PCM",
+          "parser 全体"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "remainder、packet increment/accumulation、stream separation、PCM、parser 全体",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_video_strf_declaration_bounded_exact",
+      "family": "avi-strf-declaration",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2161
+      },
+      "entry_points": ["avi_video_strf_accepts_body_len/avi_video_strf_declaration_fields"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "40 byte threshold、width/height absolute value/bits_per_pixel/compression の exact extraction",
+      "input_state_domain": "full usize body length と fixed 40-byte symbolic BITMAPINFOHEADER prefix",
+      "bounds": {
+        "input": "full usize body length と fixed 40-byte symbolic BITMAPINFOHEADER prefix",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strf-declaration-proof2/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 6214 ms、max RSS 304664 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-declaration-regression/verdict.json; elapsed 6214 ms; max_rss 304664 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strf-declaration-proof2/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "40 byte threshold、width/height absolute value/bits_per_pixel/compression の exact extraction",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["trailing bytes", "video feature integration", "compressed video semantics"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "trailing bytes、video feature integration、compressed video semantics",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_audio_strf_declaration_bounded_exact",
+      "family": "avi-strf-audio-declaration",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/wav.rs",
+        "line": 773
+      },
+      "entry_points": ["WAVEFORMATEX declaration helpers"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "16 byte threshold、format tag/channels/sample rate/byte rate/block align/bits per sample exact extraction",
+      "input_state_domain": "full usize body length と fixed 16-byte symbolic WAVEFORMATEX prefix",
+      "bounds": {
+        "input": "full usize body length と fixed 16-byte symbolic WAVEFORMATEX prefix",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strf-audio-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 6209 ms、max RSS 305824 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-avi-strf-audio-declaration-regression/verdict.json; elapsed 6209 ms; max_rss 305824 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strf-audio-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "16 byte threshold、format tag/channels/sample rate/byte rate/block align/bits per sample exact extraction",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["PCM decode semantics", "strf extension", "non-PCM capability 全体"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "PCM decode semantics、strf extension、non-PCM capability 全体",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "format_signature_detection_bounded_exact",
+      "family": "format-signature",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/format.rs",
+        "line": 187
+      },
+      "entry_points": ["signature_format_from_prefix/detect_format"],
+      "target_properties": ["WAV-SIG-001", "MP4-SIG-001"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "len <8/8..11/>=12、RIFF/WAVE/AVI /ftyp、RIFF precedence、unknown RIFF non-fallback、None complement。public shell matrixと trailing non-dependence を接続",
+      "input_state_domain": "full usize length と symbolic fixed 12-byte prefix",
+      "bounds": {
+        "input": "full usize length と symbolic fixed 12-byte prefix",
+        "unwind": "16"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-format-signature-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 10797 ms、max RSS 435704 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-wb-concatenation-proof/kani-format-signature-regression/verdict.json; elapsed 10797 ms; max_rss 435704 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-format-signature-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "len <8/8..11/>=12、RIFF/WAVE/AVI /ftyp、RIFF precedence、unknown RIFF non-fallback、None complement。public shell matrixと trailing non-dependence を接続",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["decode capability", "free/mdat 先頭 MP4", "parser 全体"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "decode capability、free/mdat 先頭 MP4、parser 全体",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_strl_entry_classification_exact",
+      "family": "avi-strf-capture",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2226
+      },
+      "entry_points": ["avi_strl_entry_class"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "strh/strf/ignore exact complement",
+      "input_state_domain": "full [u8;4] entry id",
+      "bounds": {
+        "input": "full [u8;4] entry id",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strf-capture-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 7032 ms、max RSS 304692 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 7032 ms; max_rss 304692 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strf-capture-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "strh/strf/ignore exact complement",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["entry body semantics", "walker integration"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "entry body semantics、walker integration",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_strf_capture_ordering_bounded_exact",
+      "family": "avi-strf-capture",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2290
+      },
+      "entry_points": ["avi_strf_capture_step"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "first strf capture、later strf replacement ordering、non-strf preservation exactness",
+      "input_state_domain": "3 entry symbolic sequence。strh/strf/ignore classification",
+      "bounds": {
+        "input": "3 entry symbolic sequence。strh/strf/ignore classification",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strf-capture-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 9229 ms、max RSS 305936 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 9229 ms; max_rss 305936 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strf-capture-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "first strf capture、later strf replacement ordering、non-strf preservation exactness",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["任意長 walker", "複数 strl", "body copy semantics"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "任意長 walker、複数 strl、body copy semantics",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_strf_materialize_bounded_exact",
+      "family": "avi-strf-capture",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2316
+      },
+      "entry_points": ["avi_strf_materialize"],
+      "target_properties": ["AVI-STREAM-002"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "missing capture は empty、present capture は length/content exact copy",
+      "input_state_domain": "optional capture、0..2 byte representative payload",
+      "bounds": {
+        "input": "optional capture、0..2 byte representative payload",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-strf-capture-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 15495 ms、max RSS 436408 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-strh-presence-proof/avi-strf-capture/verdict.json; elapsed 15495 ms; max_rss 436408 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-strf-capture-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "missing capture は empty、present capture は length/content exact copy",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": ["3 byte 以上の payload", "allocation behavior", "parser integration"]
+      },
+      "audit": [],
+      "residual_risks": [
+        "3 byte 以上の payload、allocation behavior、parser integration",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
+    },
+    {
+      "name": "avi_audio_wb_concatenation_bounded_exact",
+      "family": "avi-wb-concatenation",
+      "runner_registered": true,
+      "location": {
+        "file": "crates/al-media/src/avi.rs",
+        "line": 2570
+      },
+      "entry_points": ["selected audio wb append loop"],
+      "target_properties": ["AVI-PCM-005"],
+      "old_contract": "baseline 時点には存在しない新規 local proof。旧 whole-call proof が担おうとした領域を Property 単位へ分解したもの",
+      "required_guarantee": "first-audio selection、append order、body copy exactness、non-selected exclusion",
+      "input_state_domain": "3 streams/3 packets、0..2 byte bodies、exact class/index/kind equivalence classes",
+      "bounds": {
+        "input": "3 streams/3 packets、0..2 byte bodies、exact class/index/kind equivalence classes",
+        "unwind": "default/explicitなし"
+      },
+      "assumptions": [],
+      "stubs": [],
+      "abstractions": [
+        "production pure helper または production decision step を直接検証する bounded exact model"
+      ],
+      "oracle_source": "production helper と独立 oracle/expected model の比較。product 契約が正本",
+      "proptest_overlap": [],
+      "current_evidence": {
+        "verdict": "Pass",
+        "verdict_detail": "evidence/al274-avi-wb-concatenation-proof/ の非 mutation verdict に VERIFICATION SUCCESSFUL 相当の pass 記録。elapsed 40371 ms、max RSS 823084 KiB",
+        "cost_evidence": "latest passing regression evidence: evidence/al274-avi-strh-presence-proof/avi-wb-concatenation/verdict.json; elapsed 40371 ms; max_rss 823084 KiB (/usr/bin/time -v)",
+        "evidence_refs": ["evidence/al274-avi-wb-concatenation-proof/"],
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。本 slice は Kani 再実行なし"
+      },
+      "guarantee": {
+        "designed": "first-audio selection、append order、body copy exactness、non-selected exclusion",
+        "acquired": "宣言した bounded/exact domain 内の Bounded Exhaustive local guarantee",
+        "exclusions": [
+          "任意長 copy",
+          "dynamic Vec",
+          "missing/empty behavior",
+          "PCM decode semantics",
+          "parser/walker"
+        ]
+      },
+      "audit": [],
+      "residual_risks": [
+        "任意長 copy、dynamic Vec、missing/empty behavior、PCM decode semantics、parser/walker",
+        "局所 proof を公開 API 全体 no-panic へ転用しない"
+      ],
+      "new_verification": "assurance pack の Required local proof。mutation evidence は対応 evidence directory に記録済み"
     },
     {
       "name": "mp4_never_panics_ftyp_signed",
@@ -617,7 +1490,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "mp4-signed 64byte bounded input no-panic",
@@ -664,7 +1537,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; 個別 trial 未完了",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "avi-signed 64byte bounded input no-panic",
@@ -711,7 +1584,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.3GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "unsigned 64byte bounded input no-panic",
@@ -755,7 +1628,7 @@
         "verdict_detail": "canonical 1500s/proof lane で唯一 VERIFICATION SUCCESSFUL",
         "cost_evidence": "Pass: canonical で唯一 VERIFICATION SUCCESSFUL。symex 約0.69s。当初 residual 169 checks/0.63s、trial wall-clock 55s",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "len 7/8/12 の signature rule",
@@ -794,7 +1667,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout / peak 7150MiB; trial 1200s timeout / 約4.5GiB; ablation baseline 600s timeout / 4356MiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "writer 生成 byte 列が decode に受理され PCM/metadata が一致",
@@ -840,7 +1713,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約3.9GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "writer 生成 byte 列が decode に受理され PCM/metadata が一致",
@@ -886,7 +1759,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約2.4GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "mp4 concrete base の mutated corruption class no-panic",
@@ -933,7 +1806,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.5GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "mp4 concrete base の truncated corruption class no-panic",
@@ -980,7 +1853,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 1200s timeout / 約2.9GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "avi concrete base の mutated corruption class no-panic",
@@ -1027,7 +1900,7 @@
         "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
         "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.9GiB",
         "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
-        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+        "synchronization_note": "現行 main 886828500b85452774af2be7114437ebb226976b の registry/proof 名と read-only 照合。ledger baseline c91b8ce20c90733fa21098451cb768a74425884d からの継続 legacy proof。本 slice は Kani 再実行なし"
       },
       "guarantee": {
         "designed": "avi concrete base の truncated corruption class no-panic",
@@ -1051,7 +1924,7 @@
       "name": "spike_wav_unsigned_baseline",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 446
+        "line": 491
       },
       "runner_registered": false,
       "purpose": "control: no stub, unsigned body",
@@ -1062,7 +1935,7 @@
       "name": "spike_wav_range_baseline",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 452
+        "line": 497
       },
       "runner_registered": false,
       "purpose": "control: no stub, range body",
@@ -1073,7 +1946,7 @@
       "name": "spike_wav_unsigned_fmt",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 459
+        "line": 504
       },
       "runner_registered": false,
       "purpose": "fmt-only ablation",
@@ -1084,7 +1957,7 @@
       "name": "spike_wav_unsigned_alloc",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 469
+        "line": 514
       },
       "runner_registered": false,
       "purpose": "alloc-only ablation",
@@ -1095,7 +1968,7 @@
       "name": "spike_wav_unsigned_both",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 480
+        "line": 525
       },
       "runner_registered": false,
       "purpose": "fmt+alloc ablation",
@@ -1106,7 +1979,7 @@
       "name": "spike_wav_range_fmt",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 487
+        "line": 532
       },
       "runner_registered": false,
       "purpose": "fmt-only ablation",
@@ -1117,7 +1990,7 @@
       "name": "spike_wav_range_alloc",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 497
+        "line": 542
       },
       "runner_registered": false,
       "purpose": "alloc-only ablation",
@@ -1128,7 +2001,7 @@
       "name": "spike_wav_range_both",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 508
+        "line": 553
       },
       "runner_registered": false,
       "purpose": "fmt+alloc ablation",
@@ -1185,73 +2058,73 @@
       "name": "decode_wav_never_panics_on_arbitrary_bytes",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 105
+        "line": 150
       },
       "family": "WAV",
       "contract": "任意 0..=4096byte で decode_wav が panic しない",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-read-no-panic",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "frame_count_and_range_reads_hold_the_contract",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 115
+        "line": 160
       },
       "family": "WAV",
       "contract": "frame count/full decode/range read の整合",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-header-range",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "writer_output_round_trips_losslessly",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 163
+        "line": 208
       },
       "family": "WAV",
       "contract": "5 encoding・channels/rate/frame/分割 write の exact round-trip",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-writer-roundtrip",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "writer_new_rejects_exactly_the_documented_invalid_params",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 218
+        "line": 263
       },
       "family": "WAV",
       "contract": "WavWriter::new の invalid parameter 判定",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-writer-params",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "write_samples_rejects_exactly_unaligned_lengths",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 235
+        "line": 280
       },
       "family": "WAV",
       "contract": "frame 非整列長だけを拒否",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-writer-params",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "mutated_or_truncated_headers_never_panic",
       "location": {
         "file": "crates/al-media/tests/formal_wav.rs",
-        "line": 249
+        "line": 294
       },
       "family": "WAV",
       "contract": "mutation/truncation header で panic しない",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "wav-corruption-no-panic",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "container_decoders_never_panic_on_arbitrary_bytes",
@@ -1263,7 +2136,7 @@
       "contract": "任意 0..=4096byte で MP4/AVI/detect が panic しない",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "container-no-panic",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "mp4_writer_output_round_trips_through_decode",
@@ -1275,7 +2148,7 @@
       "contract": "write_mp4 出力の facts/timing/pcm/integrity round-trip",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "mp4-writer-roundtrip",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "avi_writer_output_round_trips_through_decode",
@@ -1287,7 +2160,7 @@
       "contract": "write_avi 出力の video/audio/movi_order timing round-trip",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "avi-writer-roundtrip",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "compressed_audio_is_an_observation_not_an_error",
@@ -1299,7 +2172,7 @@
       "contract": "compressed-only soun が capability observation",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "mp4-partial-ingest",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "missing_or_undecodable_auds_is_audio_unavailable",
@@ -1311,7 +2184,7 @@
       "contract": "missing/non-PCM/empty auds が audio_unavailable",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "avi-partial-ingest",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "detect_format_follows_signature_rules",
@@ -1323,7 +2196,7 @@
       "contract": "detect_format が signature/truncated view model と一致",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "format-detection",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
     },
     {
       "name": "mutated_or_truncated_containers_never_panic",
@@ -1335,7 +2208,183 @@
       "contract": "MP4/AVI への multi-edit+truncate で panic しない",
       "input_domain": "proptest generator による統計的サンプリング。Kani bounded exhaustive とは保証種別が異なる",
       "overlap": "container-corruption-no-panic",
-      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、既存証跡では 13/13 Pass"
+      "current_role": "Required の常時実行 property test lane（mise run test-formal）。本 slice では再実行せず、main 統合済み proof slice の検証記録で 13/13 Pass が維持されている"
+    }
+  ],
+  "current": {
+    "origin_main": "886828500b85452774af2be7114437ebb226976b",
+    "head": "886828500b85452774af2be7114437ebb226976b",
+    "compared_at": "2026-11-28",
+    "note": "現行 main の tools/run-formal-kani.mjs HARNESSES と crates/al-media/tests/src の #[kani::proof] を read-only 照合。Kani 再計測はしていない"
+  },
+  "drift_from_baseline": {
+    "baseline": "c91b8ce20c90733fa21098451cb768a74425884d",
+    "current": "886828500b85452774af2be7114437ebb226976b",
+    "added_proofs": [
+      "wav_chunk_boundary_step_exact",
+      "wav_chunk_scan_progress_bounded_exact",
+      "wav_range_plan_valid_ranges_exact",
+      "wav_range_plan_invalid_ranges_error",
+      "mp4_box_header_step_exact",
+      "avi_chunk_step_exact",
+      "mp4_box_scan_progress_bounded_exact",
+      "avi_movi_packet_tag_exact",
+      "avi_movi_entry_decision_exact",
+      "avi_movi_scan_collection_bounded_exact",
+      "avi_stream_kind_classification_bounded_exact",
+      "avi_strh_declaration_bounded_exact",
+      "avi_strh_presence_bounded_exact",
+      "avi_stream_start_tick_exact",
+      "avi_video_strf_declaration_bounded_exact",
+      "avi_audio_strf_declaration_bounded_exact",
+      "format_signature_detection_bounded_exact",
+      "avi_strl_entry_classification_exact",
+      "avi_strf_capture_ordering_bounded_exact",
+      "avi_strf_materialize_bounded_exact",
+      "avi_audio_wb_concatenation_bounded_exact"
+    ],
+    "retired_proofs": [
+      "header_reads_valid_ranges_slice_exact",
+      "header_reads_invalid_ranges_error"
+    ],
+    "replaced_proofs": [
+      {
+        "from": "header_reads_valid_ranges_slice_exact",
+        "to": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+      },
+      {
+        "from": "header_reads_invalid_ranges_error",
+        "to": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"]
+      }
+    ],
+    "continued_legacy_proofs": [
+      "decode_wav_never_panics_signed",
+      "wav_frame_count_never_panics_signed",
+      "read_wav_range_never_panics_signed",
+      "wav_reads_never_panics_unsigned",
+      "writer_round_trip_pcm_s16",
+      "writer_round_trip_pcm_s24",
+      "writer_round_trip_pcm_s32",
+      "writer_round_trip_float32",
+      "writer_round_trip_float64",
+      "mp4_never_panics_ftyp_signed",
+      "avi_never_panics_riff_signed",
+      "containers_never_panics_unsigned",
+      "detect_format_signature_rules",
+      "mp4_writer_output_decodes",
+      "avi_writer_output_decodes",
+      "mutated_mp4_never_panics",
+      "truncated_mp4_never_panics",
+      "mutated_avi_never_panics",
+      "truncated_avi_never_panics"
+    ],
+    "verdict_changes": [
+      "WAV-RANGE-008 replacement valid/invalid は PR #281 の valid timeout を再設計し、main 統合済み evidence で Pass",
+      "WAV chunk/scan、MP4 box/scan、AVI chunk/movi/stream declaration/strf/wb/start tick、format signature の local proof が baseline 後に追加され、対応 evidence で Pass",
+      "legacy whole-call proof群は registry に残るが verdict は引き続き NotRun/timeout evidence。detect_format_signature_rules は Pass、format_signature_detection_bounded_exact も Pass"
+    ],
+    "spike_separation": "spike_ 12 proof は runner registry に入っていない。canonical 40 proof と分離されている"
+  },
+  "retired_proofs": [
+    {
+      "name": "header_reads_valid_ranges_slice_exact",
+      "family": "wav-header-range",
+      "runner_registered": false,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 585
+      },
+      "entry_points": ["wav_frame_count", "read_wav_range"],
+      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
+      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
+      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "bounds": {
+        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
+        "unwind": 32
+      },
+      "assumptions": ["start < end && end <= 8"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "frame_count_and_range_reads_hold_the_contract",
+        "writer_output_round_trips_losslessly"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 900s timeout / 約2.5GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "valid range の frame 数と sample slice 一致",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+      },
+      "audit": [
+        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
+      ],
+      "residual_risks": [
+        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+      ],
+      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する",
+      "retirement": {
+        "state": "retired-from-runner",
+        "replacement": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"],
+        "reason": "WAV-RANGE-008 exact replacement proof group が Pass した後に registry/tests から退役。保証空白を隠すのではなく replacement に移行",
+        "evidence_refs": ["evidence/al274-proof-redesign/"]
+      }
+    },
+    {
+      "name": "header_reads_invalid_ranges_error",
+      "family": "wav-header-range",
+      "runner_registered": false,
+      "location": {
+        "file": "crates/al-media/tests/formal_wav.rs",
+        "line": 608
+      },
+      "entry_points": ["wav_frame_count", "read_wav_range"],
+      "old_contract": "header_reads_agree_with_writer_layout を valid/invalid の補集合 pair に分割した",
+      "required_guarantee": "Range 計算は Required の局所形式保証。frame count・validation・byte offset/length・slice exactness を直接証明する",
+      "input_state_domain": "concrete 2ch/48kHz/8frame/PcmS16 fixture 上で start/end が u8 由来 [0,255]",
+      "bounds": {
+        "input": "fixture 固定。u64 API 全域・他 channel/encoding/長尺 layout は対象外",
+        "unwind": 32
+      },
+      "assumptions": ["!(start < end && end <= 8)"],
+      "stubs": [],
+      "abstractions": [],
+      "oracle_source": "製品契約・テスト oracle・writer/reader round-trip oracle",
+      "proptest_overlap": [
+        "frame_count_and_range_reads_hold_the_contract",
+        "writer_output_round_trips_losslessly"
+      ],
+      "current_evidence": {
+        "verdict": "NotRun",
+        "verdict_detail": "canonical 1500s/proof は timeout。VERIFICATION FAILED や unwinding assertion failure はないが、timeout は Pass ではない",
+        "cost_evidence": "canonical 1500s timeout; trial 600s timeout / 約5.2GiB",
+        "evidence_refs": ["evidence/al274/verification.md", "evidence/al274/residual/verdict.json"],
+        "synchronization_note": "product source は 2026-11-04 以降変更なしだが、本 slice は現行 HEAD に対する Sync Commit を新たに主張しない"
+      },
+      "guarantee": {
+        "designed": "invalid range が必ず Err",
+        "acquired": "timeout のためこの proof から形式保証は未取得。proptest の Property Tested 保証だけが残る",
+        "exclusions": ["fixture 以外の layout", "u64 全域", "任意 writer 出力"]
+      },
+      "audit": [
+        "u8 由来 [0,255] は 8frame fixture の valid pair と代表的 invalid pair を覆うが、公開 u64 API 全域ではない"
+      ],
+      "residual_risks": [
+        "Range の局所 proof を layout walk/I/O/allocation/decode を含む全 API no-panic と混同する危険"
+      ],
+      "new_verification": "range validation/byte offset 計算を pure helper または小さな責務へ分離し、u64 boundary を直接証明する",
+      "retirement": {
+        "state": "retired-from-runner",
+        "replacement": ["wav_range_plan_valid_ranges_exact", "wav_range_plan_invalid_ranges_error"],
+        "reason": "WAV-RANGE-008 exact replacement proof group が Pass した後に registry/tests から退役。保証空白を隠すのではなく replacement に移行",
+        "evidence_refs": ["evidence/al274-proof-redesign/"]
+      }
     }
   ]
 }

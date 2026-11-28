@@ -21,3 +21,4 @@ Directory: `docs/knowledge`
 | KNOW-F9q35gwGjC2ez4BCkzflfg | 性能工学: 特性化・baseline・等価性ゲート・最適化方法論 | confirmed | [performance-engineering.md](./performance-engineering.md) |
 | KNOW-HiQYg29MP0OZp4vrNUhv8n | Ruviform コラボレーション: 依存解決・契約 API・消費者検証 | confirmed | [ruviform-collaboration.md](./ruviform-collaboration.md) |
 | KNOW-1n0ScAnNs7xrnhmDSd18Wa | 可視化と export: dataset 由来製品・決定性・パッケージ | confirmed | [viz-export.md](./viz-export.md) |
+| KNOW-7xWs8dSzCMG493oYPAwa8I | Media Parser 形式的検証: Kani 境界設計・solver 支配要因・stub/mutation の知見 | confirmed | [formal-verification.md](./formal-verification.md) |
