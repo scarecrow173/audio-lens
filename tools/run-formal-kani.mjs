@@ -5,6 +5,7 @@
 // src/wav.rs、MP4-BOX-002/MP4-SCAN-003/AVI-CHUNK-001/AVI-MOVI-003
 // tag identity/movi entry composition/movi scan collection/stream kind
 // classification/strh declaration/strh presence/strf declaration/strf capture/wb concatenation、
+// MP4-PCM-DECL-006 の PCM declaration/capability、
 // AVI-TIME-004 の stream start tick
 // については src/mp4.rs/src/avi.rs、
 // audio strf WAVEFORMATEX declaration については src/wav.rs、
@@ -197,6 +198,10 @@ const WAV_RANGE_HARNESSES = [
 ];
 const MP4_AVI_BOUNDARY_HARNESSES = ["mp4_box_header_step_exact", "avi_chunk_step_exact"];
 const MP4_SCAN_HARNESSES = ["mp4_box_scan_progress_bounded_exact"];
+const MP4_PCM_DECLARATION_HARNESSES = [
+  "mp4_pcm_declaration_classification_exact",
+  "mp4_pcm_capability_width_exact",
+];
 const AVI_MOVI_TAG_HARNESSES = ["avi_movi_packet_tag_exact"];
 const AVI_MOVI_COMPOSITION_HARNESSES = ["avi_movi_entry_decision_exact"];
 const AVI_MOVI_SCAN_HARNESSES = ["avi_movi_scan_collection_bounded_exact"];
@@ -219,6 +224,7 @@ const HARNESS_GROUPS = {
   "wav-range": WAV_RANGE_HARNESSES,
   "mp4-avi-boundary": MP4_AVI_BOUNDARY_HARNESSES,
   "mp4-scan": MP4_SCAN_HARNESSES,
+  "mp4-pcm-declaration": MP4_PCM_DECLARATION_HARNESSES,
   "avi-movi-tag": AVI_MOVI_TAG_HARNESSES,
   "avi-movi-composition": AVI_MOVI_COMPOSITION_HARNESSES,
   "avi-movi-scan": AVI_MOVI_SCAN_HARNESSES,
@@ -247,6 +253,7 @@ const HARNESSES = [
   ...WAV_RANGE_HARNESSES,
   ...MP4_AVI_BOUNDARY_HARNESSES,
   ...MP4_SCAN_HARNESSES,
+  ...MP4_PCM_DECLARATION_HARNESSES,
   ...AVI_MOVI_TAG_HARNESSES,
   ...AVI_MOVI_COMPOSITION_HARNESSES,
   ...AVI_MOVI_SCAN_HARNESSES,

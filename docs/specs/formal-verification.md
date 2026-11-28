@@ -235,6 +235,8 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
 | `kani_proofs::truncated_mp4_never_panics` / `truncated_avi_never_panics` | writer 生成物の任意長 truncate で panic しない — al#274 で mutate と分離。mutate+truncate の結合入力は proptest `mutated_or_truncated_containers_never_panic`(最大 16 箇所編集+truncate)が担保する |
 | `mp4_box_header_step_exact` | full u64 の box offset/region limit、full u32 size field、full u64 largesize field について、production pure helper が size32/size64(size==1)/size0、truncated header、size/largesize minimum、checked arithmetic、region limit を exact complement へ写すこと。valid box の body_start/body_end/end containment、少なくとも header 分の進行、残余量減少を検証する |
 | `mp4_box_scan_progress_bounded_exact` | `start<=end` の constructor precondition を持つ full u64 region と、高々 4 回分の full u32 size32/full u64 largesize 列について、terminal exact end・1..7 byte trailing・valid step の strict progress/残余量減少・first invalid 終端を検証する。small scan bound は高々 3 valid box で、4 valid box 以上は未証明領域に残す |
+| `mp4_pcm_declaration_classification_exact` | full symbolic `[u8; 4]` codec、u16 channels/bits、u32 sample_rate、`Option<u32>` lpcm flags、`Option<(u8,u8)>` pcmC について、production `pcm_layout` が legacy PCM、ISO `ipcm`/`fpcm`、`lpcm` flags/defaults、unknown/compressed complement を exact に分類し、layout field を独立 oracle と一致させる |
+| `mp4_pcm_capability_width_exact` | production capability helper が zero channels/sample rate gate と supported integer/float sample width matrix を exact に合成し、declaration から capability への composition を独立 oracle と一致させる |
 | `avi_chunk_step_exact` | full u64 の region-relative offset/region length と full u32 chunk size について、production pure helper が empty/exact end、1..7 byte trailing、valid chunk、invalid chunk を exact complement へ写すこと。body_start/body_end/pad-inclusive next offset、region limit、少なくとも 8 byte の進行、残余量減少を検証する |
 
 ### bounds・assumptions・model/product の区別
@@ -304,6 +306,24 @@ suite と `#[cfg(kani)]` bounded proof harness を同居させる。
   no-panic は保証外である。bounded model の成功を無制限 scan
   termination の機械証明と読み替えない。詳細な境界と coverage は
   `evidence/al274-mp4-scan-proof/boundary-analysis.md` を正本とする。
+- **MP4-PCM-DECL-006 exact proof**: `crates/al-media/src/mp4.rs` の
+  production declaration seam `pcm_layout`、capability helper
+  `pcm_supported_width`、width matrix `pcm_sample_width_value` を fixed
+  scalar sound-entry declaration domain で検査する。input narrowing
+  assume は置かず、codec fourcc は full `[u8; 4]`、channels/bits は
+  full u16、sample_rate は full u32、`lpcm_flags` は presence bit +
+  full u32、`pcmC` は presence bit + full u8 flags/sample size の exact
+  reparameterizationである。legacy PCM fourcc、ISO `ipcm`/`fpcm` の
+  `pcmC` presence/endianness/sample size、`lpcm` flags/default、
+  unknown/compressed complement、zero channels/sample rate capability
+  gate、integer 8/16/24/32 bit と float 32/64 bit の width matrixを
+  independent oracle と比較する。`pcm_tracks` と最初の PCM extraction
+  selection は production `first_pcm_declaration` を共有し、sample
+  table、payload byte extraction、endian conversion、PCM decode
+  semantics、parser integration、diagnostics、I/O、allocation、
+  writer round-trip、公開 API 全体 no-panic は保証外である。詳細な
+  境界と coverage は
+  `evidence/al274-mp4-pcm-declaration-proof/boundary-analysis.md` を正本とする。
 - **AVI-MOVI-003 tag identity exact proof**: `crates/al-media/src/avi.rs`
   の production pure helper `avi_movi_packet_tag` を symbolic full
   `[u8; 4]` chunk id だけで検査する。input narrowing assume は置かず、
@@ -696,8 +716,9 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  登録 harness は 40 件(WAV 13 +
-  MP4 scan 1 + MP4/AVI boundary 2 + AVI movi tag 1 + AVI movi composition 1 +
+  登録 harness は 42 件(WAV 13 +
+  MP4 scan 1 + MP4 PCM declaration/capability 2 + MP4/AVI boundary 2 +
+  AVI movi tag 1 + AVI movi composition 1 +
   AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI video strf declaration 1 +
   AVI audio strf declaration 1 + format signature 1 + AVI strf capture 3 +
   AVI `wb` concatenation 1 + AVI `strh` presence 1 + AVI clock start 1 +
@@ -706,7 +727,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
   MP4-BOX-002/AVI-CHUNK-001 の 2 proof、`"mp4-scan"` は MP4-SCAN-003
-  の 1 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof、
+  の 1 proof、`"mp4-pcm-declaration"` は MP4-PCM-DECL-006 declaration/capability
+  の 2 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof、
   `"avi-movi-composition"` は AVI-MOVI-003 movi entry composition の 1 proof、
   `"avi-movi-scan"` は AVI-MOVI-003 movi scan collection の 1 proof、
   `"avi-stream-kind"` は AVI stream existence/kind classification の 1 proof、

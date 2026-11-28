@@ -1,0 +1,31 @@
+$ mise run fmt
+[fmt] $ cargo fmt --all -- --check
+Diff in \\?\G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-media\src\mp4.rs:1825:
+         let channels: u16 = kani::any();
+         let bits: u16 = kani::any();
+         let sample_rate: u32 = kani::any();
+[31m-        let lpcm_flags: Option<u32> = if kani::any() {
+[0m[31m-            Some(kani::any())
+[0m[31m-        } else {
+[0m[31m-            None
+[0m[31m-        };
+[0m[32m+        let lpcm_flags: Option<u32> = if kani::any() { Some(kani::any()) } else { None };
+[0m         let pcmc: Option<(u8, u8)> = if kani::any() {
+             Some((kani::any(), kani::any()))
+         } else {
+Diff in \\?\G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-media\src\mp4.rs:1881:
+             if flags & 8 == 0 || flags & 32 != 0 {
+                 return None;
+             }
+[31m-            base(
+[0m[31m-                flags & 1 != 0,
+[0m[31m-                flags & 4 != 0,
+[0m[31m-                flags & 2 != 0,
+[0m[31m-                entry.bits,
+[0m[31m-            )
+[0m[32m+            base(flags & 1 != 0, flags & 4 != 0, flags & 2 != 0, entry.bits)
+[0m         } else {
+             None
+         }
+[fmt] ERROR task failed
+exit=1

@@ -1,0 +1,120 @@
+{
+  "issue": 274,
+  "branch": "feature/274-mp4-pcm-declaration-proof",
+  "base_sha": "f187ab33927359dc927dd32b39e4a65bd8cfb704",
+  "verification_subject_sha": "pending-first-commit",
+  "verified_sync_commit": "pending-final-sync-commit",
+  "property": "MP4-PCM-DECL-006: fixed scalar sound-entry PCM declaration/capability classification and sample-width support",
+  "assurance": "selective exact formal verification over fixed scalar declaration domain",
+  "requirement": "Required",
+  "verdict": "Pass",
+  "boundary_design": "boundary-analysis.md",
+  "input_domain": {
+    "format": "full [u8; 4]",
+    "channels": "full u16",
+    "bits": "full u16",
+    "sample_rate": "full u32",
+    "lpcm_flags": "None plus all u32 payloads via exact presence-bit reparameterization",
+    "pcmc": "None plus all (u8,u8) payloads via exact presence-bit reparameterization",
+    "width_matrix": "full bool float flag and full u16 bits",
+    "capability_gate": "full u16 channels and full u32 sample_rate"
+  },
+  "decomposition": "no finite-class split was needed; two symbolic scalar proofs cover the declared domain exactly",
+  "assumptions": [],
+  "unwinding_assertions": "enabled by the canonical Kani invocation; the new proofs have no explicit unwind annotation or loop bound",
+  "stubs": [],
+  "production_seams": [
+    "pcm_layout",
+    "pcm_sample_width_value",
+    "pcm_supported_width",
+    "first_pcm_declaration"
+  ],
+  "execution": {
+    "runner": "tools/run-formal-kani.mjs via mise run test-formal-kani",
+    "group": "mp4-pcm-declaration",
+    "harnesses": ["mp4_pcm_declaration_classification_exact", "mp4_pcm_capability_width_exact"],
+    "registry_size": 42,
+    "environment": "environment.txt",
+    "timeout_ms": 600000,
+    "design_budget_ms_per_proof": 600000,
+    "rss_ceiling_kib_exclusive": 4194304
+  },
+  "formal": {
+    "required": "kani/verdict.json",
+    "post_revert": "kani-post-revert/verdict.json",
+    "regressions": [
+      "kani-mp4-scan-regression/verdict.json",
+      "kani-mp4-avi-boundary-regression/verdict.json"
+    ],
+    "commands": ["kani-lane.pre.txt", "kani-post-revert-lane.txt", "kani-regressions.txt"],
+    "initial_results": [
+      {
+        "harness": "mp4_pcm_declaration_classification_exact",
+        "raw_result": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 15733,
+        "max_rss_kb": 336772
+      },
+      {
+        "harness": "mp4_pcm_capability_width_exact",
+        "raw_result": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 5750,
+        "max_rss_kb": 316184
+      }
+    ],
+    "post_revert_results": [
+      {
+        "harness": "mp4_pcm_declaration_classification_exact",
+        "raw_result": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 7976,
+        "max_rss_kb": 312888
+      },
+      {
+        "harness": "mp4_pcm_capability_width_exact",
+        "raw_result": "VERIFICATION:- SUCCESSFUL",
+        "elapsed_ms": 11397,
+        "max_rss_kb": 315984
+      }
+    ],
+    "all_harnesses": "NotRun: unselected legacy and other proof groups are outside this slice"
+  },
+  "mutation": {
+    "dir": "mutation",
+    "edit": "production integer PCM 24-bit sample width changed from 3 bytes to 2 bytes",
+    "exit": 1,
+    "lane_verdict": "fail",
+    "failed_harness": "mp4_pcm_capability_width_exact",
+    "raw_result": "VERIFICATION:- FAILED",
+    "other_harness": "mp4_pcm_declaration_classification_exact remained VERIFICATION:- SUCCESSFUL",
+    "restore_method": "byte-for-byte copy from mutation/mp4.rs.before-mutation",
+    "sha256_before_after": "e86f5123ce1307317940a996a816cbaa37c2e02fad56dad7acbc82ac2aeb9a9c",
+    "cmp_exit": 0,
+    "post_revert_lane": "kani-post-revert/verdict.json"
+  },
+  "runtime": {
+    "commands": [
+      "check.pre.txt",
+      "lint.pre.txt",
+      "test.pre.txt",
+      "test-formal.pre.txt",
+      "fmt.final.txt",
+      "node-check.final.txt",
+      "prek.final.txt"
+    ],
+    "fmt_initial": "fmt.pre.txt records initial formatting failure before cargo fmt --all was applied; final canonical fmt passed"
+  },
+  "residual_notrun_scope": [
+    "MP4-TABLE-005 sample-table accumulation",
+    "MP4-PCM-EXTRACT-007 extraction/endian conversion/payload decode semantics",
+    "sound-entry box parser completeness and parser integration gaps",
+    "diagnostics, I/O, allocation, dynamic Vec behavior, writer round-trip, public API whole no-panic",
+    "AVI residual properties, WAV conversion/writer, Lean/runner redesign, full old/new cost matrix"
+  ],
+  "branch_ci": {
+    "result": "pending-push-check",
+    "reason": "will be updated after read-only branch CI inspection; no manual dispatch was started"
+  },
+  "integrated_ci": {
+    "result": "NotRun",
+    "reason": "integration validation requires post-merge CI evidence for the main SHA and is Coordinator-owned"
+  }
+}

@@ -183,8 +183,8 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `<dir>/kani-<harness>.txt` and the final JSON verdict to
   `<dir>/verdict.json`. Provision inside WSL2:
   `cargo install --locked kani-verifier && cargo kani setup`.
-- The runner's `HARNESSES` array is the registry: 40 harnesses
-  (13 WAV + 1 MP4 scan + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 1 AVI clock start + 10 legacy containers). It always passes
+- The runner's `HARNESSES` array is the registry: 42 harnesses
+  (13 WAV + 1 MP4 scan + 2 MP4 PCM declaration/capability + 2 MP4/AVI boundary + 1 AVI movi tag + 1 AVI movi composition + 1 AVI movi scan + 1 AVI stream kind + 1 AVI strh declaration + 1 AVI video strf declaration + 1 AVI audio strf declaration + 1 format signature + 3 AVI strf capture + 1 AVI `wb` concatenation + 1 AVI `strh` presence + 1 AVI clock start + 10 legacy containers). It always passes
   `-Z stubbing`; this only enables the attribute mechanism, so harnesses
   without stub attributes keep the same verification semantics.
   `AL_KANI_HARNESSES="a,b,c"` selects a comma-separated subset of
@@ -199,7 +199,10 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   MP4-BOX-002/AVI-CHUNK-001 proofs (`mp4_box_header_step_exact` and
   `avi_chunk_step_exact`); `AL_KANI_HARNESS_GROUP="mp4-scan"` selects
   the Required MP4-SCAN-003 proof
-  (`mp4_box_scan_progress_bounded_exact`); `AL_KANI_HARNESS_GROUP="avi-movi-tag"`
+  (`mp4_box_scan_progress_bounded_exact`); `AL_KANI_HARNESS_GROUP="mp4-pcm-declaration"`
+  selects the two Required MP4-PCM-DECL-006 declaration/capability proofs
+  (`mp4_pcm_declaration_classification_exact` and `mp4_pcm_capability_width_exact`);
+  `AL_KANI_HARNESS_GROUP="avi-movi-tag"`
   selects the Required AVI-MOVI-003 tag identity proof
   (`avi_movi_packet_tag_exact`); `AL_KANI_HARNESS_GROUP="avi-movi-composition"`
   selects the Required AVI-MOVI-003 movi entry composition proof
@@ -224,17 +227,25 @@ mise run test-formal-kani   # Kani bounded proofs, environment-gated
   `avi_strh_presence_bounded_exact`;
   `AL_KANI_HARNESS_GROUP="avi-clock-start"` selects
   `avi_stream_start_tick_exact`. The WAV proofs and the audio strf declaration proof are registered in
-  `crates/al-media/src/wav.rs`; the MP4 scan/boundary and AVI boundary/tag/scan/stream declaration proofs are
+  `crates/al-media/src/wav.rs`; the MP4 scan/boundary/PCM declaration and AVI boundary/tag/scan/stream declaration proofs are
   registered in `crates/al-media/src/mp4.rs` and
   `crates/al-media/src/avi.rs`; the format signature proof is registered in
   `crates/al-media/src/format.rs`. The two selection variables are mutually
   exclusive; unregistered names or groups are fail-closed `not_run`,
-  and leaving both unset runs all 40. When `/usr/bin/time` is available
+  and leaving both unset runs all 42. When `/usr/bin/time` is available
   the runner wraps each harness with GNU time, records elapsed ms and
   maximum resident set size in the raw log header, copies both into the
   JSON verdict details, and adds a lane-level `cost_summary` with the
   selected/verified proof counts, total elapsed ms, maximum observed RSS,
   and measurement availability.
+- For a change to MP4 sound-entry PCM declaration, `pcmC` handling,
+  `lpcm` flags/defaults, capability gating, or supported sample width, run
+  `AL_KANI_HARNESS_GROUP=mp4-pcm-declaration AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`.
+  Confirm the raw proof result with unwinding assertions enabled and record
+  elapsed time and peak RSS. The proof owns fixed scalar declaration/capability
+  only; parser integration, sample tables, extraction, conversion, diagnostics,
+  I/O, allocation, and payload semantics remain outside it. See
+  `evidence/al274-mp4-pcm-declaration-proof/` for the boundary and mutation.
 - For a change to AVI audio selection or append order, run
   `AL_KANI_HARNESS_GROUP=avi-wb-concatenation AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`
   and check both the verdict and the raw proof result. Unlike the `strf`
