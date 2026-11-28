@@ -1,0 +1,3066 @@
+# exit=0 signal= timedOut=false error= elapsed_ms=7976 max_rss_kb=312888
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `i`
+   --> crates/al-media/src/video.rs:948:14
+    |
+948 | ...or (i, (&a, &e)) in actual.iter().zip(expected).enumerate...
+    |        ^
+949 | ...   asser...i}]");
+    |       -----...----- you might have meant to use string interpolation in this string literal
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+    |
+948 |         for (_i, (&a, &e)) in actual.iter().zip(expected).enumerate() {
+    |              +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: function `fmt_format_empty` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:11:15
+   |
+11 | ...fn fmt_f...empty(_a...
+   |       ^^^^^...^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `handle_alloc_error_infallible` is never used
+  --> crates/al-media/tests/kani_stub_models/mod.rs:18:15
+   |
+18 | ...fn handl...lible(_l...
+   |       ^^^^^...^^^^^
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:62:25
+   |
+62 |   pub fn expect_close_u64(metric: &...
+   |                           ^^^^^^
+63 |       let diff = expected.abs_diff(...
+64 | /     assert!(
+65 | |         diff <= tol,
+66 | |         "{metric}: expected {expe...
+67 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+help: if this is intentional, prefix it with an underscore
+   |
+62 | pub fn expect_close_u64(_metric: &str, expected: u64, actual: u64, tol: u64) {
+   |                         +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:72:23
+   |
+72 |   pub fn expect_between(metric: &...
+   |                         ^^^^^^
+73 | /     assert!(
+74 | |         actual >= lo && actual ...
+75 | |         "{metric}: expected [{l...
+76 | |     );
+   | |_____- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+72 | pub fn expect_between(_metric: &str, lo: f64, hi: f64, actual: f64) {
+   |                       +
+
+warning: unused variable: `metric`
+  --> crates/al-testkit/src/expect.rs:81:20
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                    ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(_metric: &str, ok: bool, detail: impl std::fmt::Display) {
+   |                    +
+
+warning: unused variable: `detail`
+  --> crates/al-testkit/src/expect.rs:81:44
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, detail: impl ...
+   |                                            ^^^^^^
+82 |     asser...il}");
+   |     -----...----- you might have meant to use string interpolation in this string literal
+   |
+help: if this is intentional, prefix it with an underscore
+   |
+81 | pub fn expect_true(metric: &str, ok: bool, _detail: impl std::fmt::Display) {
+   |                                            +
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | ...re(register_tool)]
+  |       ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+Checking harness mp4::proofs::mp4_pcm_declaration_classification_exact...
+CBMC 6.11.0 (cbmc-6.11.0)
+CBMC version 6.11.0 (cbmc-6.11.0) 64-bit x86_64 linux
+Reading GOTO program from file /home/akiyoshi/.cache/al-formal-kani/src/target/kani/x86_64-unknown-linux-gnu/debug/build/al-media/02a4dcc27cfe8530/out/al_media-02a4dcc27cfe8530__RNvNtNtCsagM2MKksdvB_8al_media3mp46proofs40mp4_pcm_declaration_classification_exact.out
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+Generic Property Instrumentation
+Running with 16 object bits, 48 offset bits (user-specified)
+Starting Bounded Model Checking
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1040 column 15 function std::option::Option::<u32>::unwrap_or thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2869 column 15 function <std::option::Option<(u8, u8)> as std::ops::Try>::branch thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2869 column 15 function <std::option::Option<(u8, u8)> as std::ops::Try>::branch thread 0
+aborting path on assume(false) at file crates/al-media/src/lib.rs line 0 column 0 function mp4::pcm_layout thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2869 column 15 function <std::option::Option<(u8, u8)> as std::ops::Try>::branch thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2869 column 15 function <std::option::Option<(u8, u8)> as std::ops::Try>::branch thread 0
+aborting path on assume(false) at file crates/al-media/src/lib.rs line 0 column 0 function mp4::proofs::expected_pcm_layout thread 0
+Unwinding loop memcmp.0 iteration 1 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 2 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 3 file <builtin-library-memcmp> line 25 function memcmp thread 0
+Unwinding loop memcmp.0 iteration 4 file <builtin-library-memcmp> line 25 function memcmp thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 1040 column 15 function std::option::Option::<u32>::unwrap_or thread 0
+aborting path on assume(false) at file /home/runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs line 2439 column 15 function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq thread 0
+Runtime Symex: 0.257263s
+size of program expression: 7455 steps
+slicing removed 5026 assignments
+Generated 1216 VCC(s), 11 remaining after simplification
+Runtime Postprocess Equation: 0.00452287s
+Passing problem to propositional reduction
+converting SSA
+Runtime Convert SSA: 0.0263637s
+Running propositional reduction
+Post-processing
+Runtime Post-process: 8.152e-06s
+Solving with CaDiCaL 3.0.0
+12831 variables, 28470 clauses
+SAT checker: instance is SATISFIABLE
+Runtime Solver: 0.00194096s
+Runtime decision procedure: 0.0288999s
+Running propositional reduction
+Solving with CaDiCaL 3.0.0
+12832 variables, 28471 clauses
+SAT checker: instance is UNSATISFIABLE
+Runtime Solver: 0.077508s
+Runtime decision procedure: 0.0777437s
+
+RESULTS:
+Check 1: memcmp.precondition.1
+	 - Status: SUCCESS
+	 - Description: "memcmp region 1 readable"
+	 - Location: <builtin-library-memcmp>:19 in function memcmp
+
+Check 2: memcmp.precondition.2
+	 - Status: SUCCESS
+	 - Description: "memcpy region 2 readable"
+	 - Location: <builtin-library-memcmp>:21 in function memcmp
+
+Check 3: <std::option::Option<(u8, u8)> as std::ops::Try>::branch.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2869:15 in function <std::option::Option<(u8, u8)> as std::ops::Try>::branch
+
+Check 4: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 5: <std::option::Option<mp4::PcmLayout> as std::ops::FromResidual<std::option::Option<std::convert::Infallible>>>::from_residual.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2883:15 in function <std::option::Option<mp4::PcmLayout> as std::ops::FromResidual<std::option::Option<std::convert::Infallible>>>::from_residual
+
+Check 6: mp4::proofs::expected_pcm_layout.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/lib.rs:0:0 in function mp4::proofs::expected_pcm_layout
+
+Check 7: mp4::pcm_layout.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: crates/al-media/src/lib.rs:0:0 in function mp4::pcm_layout
+
+Check 8: std::option::Option::<u32>::unwrap_or.unreachable.1
+	 - Status: SUCCESS
+	 - Description: "unreachable code"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:1040:15 in function std::option::Option::<u32>::unwrap_or
+
+Check 9: mp4::proofs::mp4_pcm_declaration_classification_exact.assertion.1
+	 - Status: SUCCESS
+	 - Description: "assertion failed: actual == expected"
+	 - Location: crates/al-media/src/mp4.rs:1903:9 in function mp4::proofs::mp4_pcm_declaration_classification_exact
+
+Check 10: mp4::pcm_layout::{closure#0}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 11: mp4::pcm_layout::{closure#0}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 12: mp4::pcm_layout::{closure#0}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 13: mp4::pcm_layout::{closure#0}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 14: mp4::pcm_layout::{closure#0}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 15: mp4::pcm_layout::{closure#0}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 16: mp4::pcm_layout::{closure#0}.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 17: mp4::pcm_layout::{closure#0}.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 18: mp4::pcm_layout::{closure#0}.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 19: mp4::pcm_layout::{closure#0}.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 20: mp4::pcm_layout::{closure#0}.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 21: mp4::pcm_layout::{closure#0}.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:850:23 in function mp4::pcm_layout::{closure#0}
+
+Check 22: mp4::pcm_layout::{closure#0}.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 23: mp4::pcm_layout::{closure#0}.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 24: mp4::pcm_layout::{closure#0}.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 25: mp4::pcm_layout::{closure#0}.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 26: mp4::pcm_layout::{closure#0}.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 27: mp4::pcm_layout::{closure#0}.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:851:26 in function mp4::pcm_layout::{closure#0}
+
+Check 28: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 29: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 30: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 31: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 32: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 33: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 34: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 35: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 36: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 37: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 38: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 39: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1851:27 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 40: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 41: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 42: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 43: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 44: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 45: mp4::proofs::expected_pcm_layout::{closure#0}.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1852:30 in function mp4::proofs::expected_pcm_layout::{closure#0}
+
+Check 46: mp4::pcm_layout.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 47: mp4::pcm_layout.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 48: mp4::pcm_layout.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 49: mp4::pcm_layout.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 50: mp4::pcm_layout.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 51: mp4::pcm_layout.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 52: mp4::pcm_layout.array_bounds.1
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 53: mp4::pcm_layout.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 54: mp4::pcm_layout.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 55: mp4::pcm_layout.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 56: mp4::pcm_layout.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 57: mp4::pcm_layout.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 58: mp4::pcm_layout.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 59: mp4::pcm_layout.array_bounds.2
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 60: mp4::pcm_layout.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 61: mp4::pcm_layout.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 62: mp4::pcm_layout.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 63: mp4::pcm_layout.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 64: mp4::pcm_layout.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 65: mp4::pcm_layout.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 66: mp4::pcm_layout.array_bounds.3
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 67: mp4::pcm_layout.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 68: mp4::pcm_layout.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 69: mp4::pcm_layout.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 70: mp4::pcm_layout.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 71: mp4::pcm_layout.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 72: mp4::pcm_layout.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 73: mp4::pcm_layout.array_bounds.4
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 74: mp4::pcm_layout.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 75: mp4::pcm_layout.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 76: mp4::pcm_layout.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 77: mp4::pcm_layout.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 78: mp4::pcm_layout.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 79: mp4::pcm_layout.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:876:21 in function mp4::pcm_layout
+
+Check 80: mp4::pcm_layout.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:882:24 in function mp4::pcm_layout
+
+Check 81: mp4::pcm_layout.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 82: mp4::pcm_layout.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 83: mp4::pcm_layout.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 84: mp4::pcm_layout.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 85: mp4::pcm_layout.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 86: mp4::pcm_layout.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:888:17 in function mp4::pcm_layout
+
+Check 87: mp4::pcm_layout.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 88: mp4::pcm_layout.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 89: mp4::pcm_layout.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 90: mp4::pcm_layout.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 91: mp4::pcm_layout.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 92: mp4::pcm_layout.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 93: mp4::pcm_layout.array_bounds.5
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 94: mp4::pcm_layout.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 95: mp4::pcm_layout.pointer_dereference.45
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 96: mp4::pcm_layout.pointer_dereference.46
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 97: mp4::pcm_layout.pointer_dereference.47
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 98: mp4::pcm_layout.pointer_dereference.48
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 99: mp4::pcm_layout.pointer_dereference.49
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 100: mp4::pcm_layout.array_bounds.6
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 101: mp4::pcm_layout.pointer_dereference.50
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 102: mp4::pcm_layout.pointer_dereference.51
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 103: mp4::pcm_layout.pointer_dereference.52
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 104: mp4::pcm_layout.pointer_dereference.53
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 105: mp4::pcm_layout.pointer_dereference.54
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 106: mp4::pcm_layout.pointer_dereference.55
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 107: mp4::pcm_layout.array_bounds.7
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 108: mp4::pcm_layout.pointer_dereference.56
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 109: mp4::pcm_layout.pointer_dereference.57
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 110: mp4::pcm_layout.pointer_dereference.58
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 111: mp4::pcm_layout.pointer_dereference.59
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 112: mp4::pcm_layout.pointer_dereference.60
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 113: mp4::pcm_layout.pointer_dereference.61
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 114: mp4::pcm_layout.array_bounds.8
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 115: mp4::pcm_layout.pointer_dereference.62
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 116: mp4::pcm_layout.pointer_dereference.63
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 117: mp4::pcm_layout.pointer_dereference.64
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 118: mp4::pcm_layout.pointer_dereference.65
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 119: mp4::pcm_layout.pointer_dereference.66
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 120: mp4::pcm_layout.pointer_dereference.67
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 121: mp4::pcm_layout.array_bounds.9
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 122: mp4::pcm_layout.pointer_dereference.68
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 123: mp4::pcm_layout.pointer_dereference.69
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 124: mp4::pcm_layout.pointer_dereference.70
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 125: mp4::pcm_layout.pointer_dereference.71
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 126: mp4::pcm_layout.pointer_dereference.72
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 127: mp4::pcm_layout.pointer_dereference.73
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 128: mp4::pcm_layout.array_bounds.10
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 129: mp4::pcm_layout.pointer_dereference.74
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 130: mp4::pcm_layout.pointer_dereference.75
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 131: mp4::pcm_layout.pointer_dereference.76
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 132: mp4::pcm_layout.pointer_dereference.77
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 133: mp4::pcm_layout.pointer_dereference.78
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 134: mp4::pcm_layout.pointer_dereference.79
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:870:33 in function mp4::pcm_layout
+
+Check 135: mp4::pcm_layout.pointer_dereference.80
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 136: mp4::pcm_layout.pointer_dereference.81
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 137: mp4::pcm_layout.pointer_dereference.82
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 138: mp4::pcm_layout.pointer_dereference.83
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 139: mp4::pcm_layout.pointer_dereference.84
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 140: mp4::pcm_layout.pointer_dereference.85
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 141: mp4::pcm_layout.array_bounds.11
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 142: mp4::pcm_layout.pointer_dereference.86
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 143: mp4::pcm_layout.pointer_dereference.87
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 144: mp4::pcm_layout.pointer_dereference.88
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 145: mp4::pcm_layout.pointer_dereference.89
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 146: mp4::pcm_layout.pointer_dereference.90
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 147: mp4::pcm_layout.pointer_dereference.91
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 148: mp4::pcm_layout.array_bounds.12
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 149: mp4::pcm_layout.pointer_dereference.92
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 150: mp4::pcm_layout.pointer_dereference.93
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 151: mp4::pcm_layout.pointer_dereference.94
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 152: mp4::pcm_layout.pointer_dereference.95
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 153: mp4::pcm_layout.pointer_dereference.96
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 154: mp4::pcm_layout.pointer_dereference.97
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 155: mp4::pcm_layout.array_bounds.13
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 156: mp4::pcm_layout.pointer_dereference.98
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 157: mp4::pcm_layout.pointer_dereference.99
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 158: mp4::pcm_layout.pointer_dereference.100
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 159: mp4::pcm_layout.pointer_dereference.101
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 160: mp4::pcm_layout.pointer_dereference.102
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 161: mp4::pcm_layout.pointer_dereference.103
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 162: mp4::pcm_layout.array_bounds.14
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 163: mp4::pcm_layout.pointer_dereference.104
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 164: mp4::pcm_layout.pointer_dereference.105
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 165: mp4::pcm_layout.pointer_dereference.106
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 166: mp4::pcm_layout.pointer_dereference.107
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 167: mp4::pcm_layout.pointer_dereference.108
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 168: mp4::pcm_layout.pointer_dereference.109
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 169: mp4::pcm_layout.array_bounds.15
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 170: mp4::pcm_layout.pointer_dereference.110
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 171: mp4::pcm_layout.pointer_dereference.111
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 172: mp4::pcm_layout.pointer_dereference.112
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 173: mp4::pcm_layout.pointer_dereference.113
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 174: mp4::pcm_layout.pointer_dereference.114
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 175: mp4::pcm_layout.pointer_dereference.115
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 176: mp4::pcm_layout.array_bounds.16
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 177: mp4::pcm_layout.pointer_dereference.116
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 178: mp4::pcm_layout.pointer_dereference.117
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 179: mp4::pcm_layout.pointer_dereference.118
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 180: mp4::pcm_layout.pointer_dereference.119
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 181: mp4::pcm_layout.pointer_dereference.120
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 182: mp4::pcm_layout.pointer_dereference.121
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:866:33 in function mp4::pcm_layout
+
+Check 183: mp4::pcm_layout.pointer_dereference.122
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 184: mp4::pcm_layout.pointer_dereference.123
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 185: mp4::pcm_layout.pointer_dereference.124
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 186: mp4::pcm_layout.pointer_dereference.125
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 187: mp4::pcm_layout.pointer_dereference.126
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 188: mp4::pcm_layout.pointer_dereference.127
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 189: mp4::pcm_layout.array_bounds.17
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 190: mp4::pcm_layout.pointer_dereference.128
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 191: mp4::pcm_layout.pointer_dereference.129
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 192: mp4::pcm_layout.pointer_dereference.130
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 193: mp4::pcm_layout.pointer_dereference.131
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 194: mp4::pcm_layout.pointer_dereference.132
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 195: mp4::pcm_layout.pointer_dereference.133
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 196: mp4::pcm_layout.array_bounds.18
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 197: mp4::pcm_layout.pointer_dereference.134
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 198: mp4::pcm_layout.pointer_dereference.135
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 199: mp4::pcm_layout.pointer_dereference.136
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 200: mp4::pcm_layout.pointer_dereference.137
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 201: mp4::pcm_layout.pointer_dereference.138
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 202: mp4::pcm_layout.pointer_dereference.139
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 203: mp4::pcm_layout.array_bounds.19
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 204: mp4::pcm_layout.pointer_dereference.140
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 205: mp4::pcm_layout.pointer_dereference.141
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 206: mp4::pcm_layout.pointer_dereference.142
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 207: mp4::pcm_layout.pointer_dereference.143
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 208: mp4::pcm_layout.pointer_dereference.144
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 209: mp4::pcm_layout.pointer_dereference.145
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 210: mp4::pcm_layout.array_bounds.20
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 211: mp4::pcm_layout.pointer_dereference.146
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 212: mp4::pcm_layout.pointer_dereference.147
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 213: mp4::pcm_layout.pointer_dereference.148
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 214: mp4::pcm_layout.pointer_dereference.149
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 215: mp4::pcm_layout.pointer_dereference.150
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 216: mp4::pcm_layout.pointer_dereference.151
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 217: mp4::pcm_layout.array_bounds.21
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 218: mp4::pcm_layout.pointer_dereference.152
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 219: mp4::pcm_layout.pointer_dereference.153
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 220: mp4::pcm_layout.pointer_dereference.154
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 221: mp4::pcm_layout.pointer_dereference.155
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 222: mp4::pcm_layout.pointer_dereference.156
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 223: mp4::pcm_layout.pointer_dereference.157
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 224: mp4::pcm_layout.array_bounds.22
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 225: mp4::pcm_layout.pointer_dereference.158
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 226: mp4::pcm_layout.pointer_dereference.159
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 227: mp4::pcm_layout.pointer_dereference.160
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 228: mp4::pcm_layout.pointer_dereference.161
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 229: mp4::pcm_layout.pointer_dereference.162
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 230: mp4::pcm_layout.pointer_dereference.163
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:857:44 in function mp4::pcm_layout
+
+Check 231: mp4::pcm_layout.pointer_dereference.164
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 232: mp4::pcm_layout.pointer_dereference.165
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 233: mp4::pcm_layout.pointer_dereference.166
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 234: mp4::pcm_layout.pointer_dereference.167
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 235: mp4::pcm_layout.pointer_dereference.168
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 236: mp4::pcm_layout.pointer_dereference.169
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 237: mp4::pcm_layout.array_bounds.23
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 238: mp4::pcm_layout.pointer_dereference.170
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 239: mp4::pcm_layout.pointer_dereference.171
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 240: mp4::pcm_layout.pointer_dereference.172
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 241: mp4::pcm_layout.pointer_dereference.173
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 242: mp4::pcm_layout.pointer_dereference.174
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 243: mp4::pcm_layout.pointer_dereference.175
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 244: mp4::pcm_layout.array_bounds.24
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 245: mp4::pcm_layout.pointer_dereference.176
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 246: mp4::pcm_layout.pointer_dereference.177
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 247: mp4::pcm_layout.pointer_dereference.178
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 248: mp4::pcm_layout.pointer_dereference.179
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 249: mp4::pcm_layout.pointer_dereference.180
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 250: mp4::pcm_layout.pointer_dereference.181
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 251: mp4::pcm_layout.array_bounds.25
+	 - Status: SUCCESS
+	 - Description: "index out of bounds: the length is less than or equal to the given index"
+	 - Location: crates/al-media/src/mp4.rs:854:5 in function mp4::pcm_layout
+
+Check 252: mp4::pcm_layout.pointer_dereference.182
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:891:14 in function mp4::pcm_layout
+
+Check 253: mp4::pcm_layout.pointer_dereference.183
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 254: mp4::pcm_layout.pointer_dereference.184
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 255: mp4::pcm_layout.pointer_dereference.185
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 256: mp4::pcm_layout.pointer_dereference.186
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 257: mp4::pcm_layout.pointer_dereference.187
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 258: mp4::pcm_layout.pointer_dereference.188
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:856:45 in function mp4::pcm_layout
+
+Check 259: mp4::proofs::expected_pcm_layout.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 260: mp4::proofs::expected_pcm_layout.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 261: mp4::proofs::expected_pcm_layout.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 262: mp4::proofs::expected_pcm_layout.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 263: mp4::proofs::expected_pcm_layout.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 264: mp4::proofs::expected_pcm_layout.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1856:38 in function mp4::proofs::expected_pcm_layout
+
+Check 265: mp4::proofs::expected_pcm_layout.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 266: mp4::proofs::expected_pcm_layout.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 267: mp4::proofs::expected_pcm_layout.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 268: mp4::proofs::expected_pcm_layout.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 269: mp4::proofs::expected_pcm_layout.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 270: mp4::proofs::expected_pcm_layout.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1858:37 in function mp4::proofs::expected_pcm_layout
+
+Check 271: mp4::proofs::expected_pcm_layout.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 272: mp4::proofs::expected_pcm_layout.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 273: mp4::proofs::expected_pcm_layout.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 274: mp4::proofs::expected_pcm_layout.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 275: mp4::proofs::expected_pcm_layout.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 276: mp4::proofs::expected_pcm_layout.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1870:33 in function mp4::proofs::expected_pcm_layout
+
+Check 277: mp4::proofs::expected_pcm_layout.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 278: mp4::proofs::expected_pcm_layout.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 279: mp4::proofs::expected_pcm_layout.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 280: mp4::proofs::expected_pcm_layout.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 281: mp4::proofs::expected_pcm_layout.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 282: mp4::proofs::expected_pcm_layout.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1873:33 in function mp4::proofs::expected_pcm_layout
+
+Check 283: mp4::proofs::expected_pcm_layout.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 284: mp4::proofs::expected_pcm_layout.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 285: mp4::proofs::expected_pcm_layout.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 286: mp4::proofs::expected_pcm_layout.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 287: mp4::proofs::expected_pcm_layout.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 288: mp4::proofs::expected_pcm_layout.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1876:25 in function mp4::proofs::expected_pcm_layout
+
+Check 289: mp4::proofs::expected_pcm_layout.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1878:24 in function mp4::proofs::expected_pcm_layout
+
+Check 290: mp4::proofs::expected_pcm_layout.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 291: mp4::proofs::expected_pcm_layout.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 292: mp4::proofs::expected_pcm_layout.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 293: mp4::proofs::expected_pcm_layout.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 294: mp4::proofs::expected_pcm_layout.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 295: mp4::proofs::expected_pcm_layout.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:1880:66 in function mp4::proofs::expected_pcm_layout
+
+Check 296: mp4::proofs::expected_pcm_layout.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:1882:13 in function mp4::proofs::expected_pcm_layout
+
+Check 297: <std::option::Option<mp4::PcmLayout> as std::ops::FromResidual<std::option::Option<std::convert::Infallible>>>::from_residual.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2884:21 in function <std::option::Option<mp4::PcmLayout> as std::ops::FromResidual<std::option::Option<std::convert::Infallible>>>::from_residual
+
+Check 298: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 299: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 300: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 301: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 302: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 303: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 304: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 305: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 306: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 307: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 308: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 309: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:825:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 310: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 311: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 312: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 313: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 314: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 315: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 316: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.19
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 317: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.20
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 318: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.21
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 319: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.22
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 320: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.23
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 321: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.24
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:826:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 322: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.25
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 323: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.26
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 324: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.27
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 325: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.28
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 326: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.29
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 327: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.30
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 328: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.31
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 329: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.32
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 330: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.33
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 331: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.34
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 332: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.35
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 333: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.36
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:827:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 334: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.37
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 335: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.38
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 336: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.39
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 337: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.40
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 338: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.41
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 339: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.42
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 340: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.43
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 341: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.44
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 342: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.45
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 343: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.46
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 344: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.47
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 345: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.48
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:828:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 346: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.49
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 347: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.50
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 348: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.51
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 349: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.52
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 350: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.53
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 351: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.54
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 352: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.55
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 353: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.56
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 354: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.57
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 355: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.58
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 356: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.59
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 357: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.60
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:829:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 358: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.61
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 359: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.62
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 360: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.63
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 361: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.64
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 362: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.65
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 363: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.66
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 364: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.67
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 365: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.68
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 366: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.69
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 367: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.70
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 368: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.71
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 369: <mp4::PcmLayout as std::cmp::PartialEq>::eq.pointer_dereference.72
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: crates/al-media/src/mp4.rs:830:5 in function <mp4::PcmLayout as std::cmp::PartialEq>::eq
+
+Check 370: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 371: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 372: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 373: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 374: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 375: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 376: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 377: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 378: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 379: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 380: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 381: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 382: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.13
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 383: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.14
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 384: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.15
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 385: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.16
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 386: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.17
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 387: <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq.pointer_dereference.18
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: ../../../../runner/.rustup/toolchains/nightly-2026-08-21-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:2439:15 in function <std::option::Option<mp4::PcmLayout> as std::cmp::PartialEq>::eq
+
+Check 388: memcmp.pointer_dereference.1
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 389: memcmp.pointer_dereference.2
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 390: memcmp.pointer_dereference.3
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 391: memcmp.pointer_dereference.4
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 392: memcmp.pointer_dereference.5
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 393: memcmp.pointer_dereference.6
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 394: memcmp.pointer_dereference.7
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer NULL"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 395: memcmp.pointer_dereference.8
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer invalid"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 396: memcmp.pointer_dereference.9
+	 - Status: SUCCESS
+	 - Description: "dereference failure: deallocated dynamic object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 397: memcmp.pointer_dereference.10
+	 - Status: SUCCESS
+	 - Description: "dereference failure: dead object"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 398: memcmp.pointer_dereference.11
+	 - Status: SUCCESS
+	 - Description: "dereference failure: pointer outside object bounds"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+Check 399: memcmp.pointer_dereference.12
+	 - Status: SUCCESS
+	 - Description: "dereference failure: invalid integer address"
+	 - Location: <builtin-library-memcmp>:27 in function memcmp
+
+
+SUMMARY:
+ ** 0 of 399 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 0.47385862s
+
+Manual Harness Summary:
+Complete - 1 successfully verified harnesses, 0 failures, 1 total.
+
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.03s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.85s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+	Command being timed: "cargo kani -p al-media --tests --harness mp4_pcm_declaration_classification_exact -Z stubbing"
+	User time (seconds): 6.41
+	System time (seconds): 1.23
+	Percent of CPU this job got: 105%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.27
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 312888
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 1
+	Minor (reclaiming a frame) page faults: 215998
+	Voluntary context switches: 2440
+	Involuntary context switches: 102
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 112856
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

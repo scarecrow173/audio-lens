@@ -1,0 +1,98 @@
+$ mise run check al-media
+[check] $ cargo check --locked --all-targets -p al-media
+mbx[cache]: moved the existing target/ directory under the managed root (255.0 MiB logical)
+   Compiling autocfg v1.5.1
+    Checking strength_reduce v0.2.4
+    Checking bitflags v2.13.2
+    Checking smallvec v1.16.4
+    Checking log v0.4.35
+    Checking lazy_static v1.5.1
+    Checking bytemuck v1.25.2
+    Checking regex-lite v0.1.9
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+    Checking windows-link v0.2.1
+    Checking rand_core v0.10.1
+    Checking once_cell v1.21.4
+   Compiling serde_core v1.0.229
+    Checking cfg-if v1.0.5
+    Checking ruviform-media-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+   Compiling num-traits v0.2.19
+   Compiling getrandom v0.4.3
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-core)
+    Checking extended v0.1.0
+   Compiling serde_json v1.0.154
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking pin-project-lite v0.2.17
+    Checking tracing-core v0.1.36
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-media-core\src\lib.rs
+    Checking windows-sys v0.61.2
+    Checking fastrand v2.5.0
+    Checking wait-timeout v0.2.1
+    Checking bit-vec v0.10.2
+    Checking fnv v1.0.7
+    Checking ruviform-io-file v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+    Checking quick-error v1.2.3
+    Checking cpufeatures v0.3.1
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-media-core\src\lib.rs
+    Checking ruviform-video-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+    Checking ruviform-audio-core v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+    Checking bit-set v0.11.1
+    Checking rand_xorshift v0.5.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-file\src\lib.rs
+    Checking core_detect v1.0.0
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-video-core\src\lib.rs
+    Checking chacha20 v0.10.2
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-audio-core\src\lib.rs
+    Checking regex-syntax v0.8.11
+    Checking unarray v0.1.4
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-video-core\src\lib.rs
+    Checking al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-testkit)
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-audio-core\src\lib.rs
+    Checking ruviform-media-io v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-file\src\lib.rs
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-media-io\src\lib.rs
+    Checking tempfile v3.27.0
+    Checking rand v0.10.3
+    Checking num-integer v0.1.47
+    Checking num-complex v0.4.6
+    Checking rusty-fork v0.3.1
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+    Checking primal-check v0.3.4
+    Checking transpose v0.2.3
+    Checking proptest v1.12.0
+   Compiling tracing-attributes v0.1.31
+    Checking rustfft v6.4.1
+   Compiling serde_derive v1.0.229
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-media-io\src\lib.rs
+    Checking ruviform-io-avi v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+    Checking symphonia-core v0.6.1
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-avi\src\lib.rs
+    Checking tracing v0.1.44
+    Checking symphonia-metadata v0.6.1
+    Checking symphonia-codec-pcm v0.6.1
+    Checking symphonia-codec-adpcm v0.6.1
+    Checking symphonia-common v0.6.1
+    Checking symphonia-format-riff v0.6.1
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-avi\src\lib.rs
+    Checking symphonia-format-ogg v0.6.1
+    Checking symphonia-format-mkv v0.6.1
+    Checking symphonia-bundle-flac v0.6.1
+    Checking symphonia-codec-vorbis v0.6.1
+    Checking symphonia-codec-aac v0.6.1
+    Checking symphonia-format-isomp4 v0.6.1
+    Checking symphonia v0.6.1
+    Checking ruviform-io-symphonia v0.1.0 (https://github.com/scarecrow173/ruviform.git#eea9e209)
+mbx[warning]: prediction was not restored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-symphonia\src\lib.rs
+mbx[warning]: result was not stored: absolute path has no stable cache mapping: C:\Users\akiyoshi\.cargo\git\checkouts\ruviform-8f0ffdb08acc57df\eea9e20\crates\ruviform-io-symphonia\src\lib.rs
+    Checking al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-job)
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.76s
+mbx[cache]: 84 hits, 13 misses; 0 B downloaded, 0 B uploaded, 1.9 MiB stored locally
+mbx[savings]: found 11.4 TiB logical of target/ whose checkouts left long ago. the estate has been settled.
+exit=0

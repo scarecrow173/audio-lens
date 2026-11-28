@@ -1,0 +1,2 @@
+$ mise exec -- node --check tools/run-formal-kani.mjs
+exit=0

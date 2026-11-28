@@ -114,7 +114,7 @@ open draft PR #281 は main に統合されていないが、WAV-RANGE-008 の r
 
 ## main 統合済み proof slice 群の知見
 
-PR #282 以降、WAV range、chunk scan、format signature、MP4 box/scan、AVI chunk/movi/stream/strf/wb/timing arithmetic の local proof が段階的に main へ統合された。現行 main `886828500b85452774af2be7114437ebb226976b` の registry には 40 件の canonical harness があり、baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 21 件である。`header_reads_valid_ranges_slice_exact` と `header_reads_invalid_ranges_error` は WAV-RANGE-008 の exact replacement へ置き換えられて退役した。
+PR #282 以降、WAV range、chunk scan、format signature、MP4 box/scan/PCM declaration、AVI chunk/movi/stream/strf/wb/timing arithmetic の local proof が段階的に統合された。現行 registry には 42 件の canonical harness があり、baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 23 件である。`header_reads_valid_ranges_slice_exact` と `header_reads_invalid_ranges_error` は WAV-RANGE-008 の exact replacement へ置き換えられて退役した。
 
 主な local proof の最新の非 mutation pass evidence は、概ね次の範囲にある。
 
@@ -168,7 +168,7 @@ mutation evidence が重要なのは、proof が単に何も検査していな�
 
 ## spike harness と正式 proof の分離
 
-`spike_` 12 件は runner registryの canonical 40 件に含まれない。spike は ablation、solver 実験、no-stub baseline、stub 組合せの比較に使う。正式 proof と同じ表に混ぜると、採用済み保証と実験結果の区別が失われる。
+`spike_` 12 件は runner registryの canonical 42 件に含まれない。spike は ablation、solver 実験、no-stub baseline、stub 組合せの比較に使う。正式 proof と同じ表に混ぜると、採用済み保証と実験結果の区別が失われる。
 
 分離の運用は次である。
 

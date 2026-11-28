@@ -820,6 +820,7 @@ fn parse_sound_entry(body: &[u8], format: [u8; 4]) -> Result<SoundEntry, MediaEr
 }
 
 /// PCM byte layout derived from a sound sample entry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct PcmLayout {
     float: bool,
     signed: bool,
@@ -891,19 +892,39 @@ fn pcm_layout(entry: &SoundEntry) -> Option<PcmLayout> {
     }
 }
 
-fn pcm_sample_width(layout: &PcmLayout) -> Result<usize, MediaError> {
-    match (layout.float, layout.bits) {
-        (true, 32) => Ok(4),
-        (true, 64) => Ok(8),
-        (false, 8) => Ok(1),
-        (false, 16) => Ok(2),
-        (false, 24) => Ok(3),
-        (false, 32) => Ok(4),
-        (float, bits) => Err(MediaError::input_unavailable(format!(
-            "unsupported PCM width {}-bit float={float}",
-            bits
-        ))),
+fn pcm_sample_width_value(float: bool, bits: u16) -> Option<usize> {
+    match (float, bits) {
+        (true, 32) => Some(4),
+        (true, 64) => Some(8),
+        (false, 8) => Some(1),
+        (false, 16) => Some(2),
+        (false, 24) => Some(3),
+        (false, 32) => Some(4),
+        _ => None,
     }
+}
+
+fn pcm_supported_width(layout: &PcmLayout) -> Option<usize> {
+    if layout.channels == 0 || layout.sample_rate == 0 {
+        return None;
+    }
+    pcm_sample_width_value(layout.float, layout.bits)
+}
+
+fn pcm_sample_width(layout: &PcmLayout) -> Result<usize, MediaError> {
+    pcm_sample_width_value(layout.float, layout.bits).ok_or_else(|| {
+        MediaError::input_unavailable(format!(
+            "unsupported PCM width {}-bit float={}",
+            layout.bits, layout.float
+        ))
+    })
+}
+
+fn first_pcm_declaration(sound: &[SoundEntry]) -> Option<(usize, &SoundEntry, PcmLayout)> {
+    sound
+        .iter()
+        .enumerate()
+        .find_map(|(index, entry)| pcm_layout(entry).map(|layout| (index, entry, layout)))
 }
 
 /// Decode raw PCM bytes to integer-scale `f64` under `layout`, keeping
@@ -1423,9 +1444,8 @@ fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
         .iter()
         .enumerate()
         .filter(|(_, t)| {
-            t.sound.iter().find_map(pcm_layout).is_some_and(|layout| {
-                layout.channels > 0 && layout.sample_rate > 0 && pcm_sample_width(&layout).is_ok()
-            })
+            first_pcm_declaration(&t.sound)
+                .is_some_and(|(_, _, layout)| pcm_supported_width(&layout).is_some())
         })
         .map(|(i, _)| i as u32)
         .collect();
@@ -1450,11 +1470,8 @@ fn parse_mp4(data: &[u8], extract_pcm: bool) -> Result<Mp4Media, MediaError> {
             }
             continue;
         }
-        let chosen = trak
-            .sound
-            .iter()
-            .enumerate()
-            .find_map(|(i, e)| pcm_layout(e).map(|l| (i as u32 + 1, e, l)));
+        let chosen = first_pcm_declaration(&trak.sound)
+            .map(|(index, entry, layout)| (index as u32 + 1, entry, layout));
         let Some((sd_index, entry, layout)) = chosen else {
             let codec = trak
                 .entry_formats
@@ -1802,6 +1819,126 @@ mod proofs {
             }
         }
     }
+
+    fn symbolic_sound_entry() -> SoundEntry {
+        let format: [u8; 4] = kani::any();
+        let channels: u16 = kani::any();
+        let bits: u16 = kani::any();
+        let sample_rate: u32 = kani::any();
+        let lpcm_flags: Option<u32> = if kani::any() { Some(kani::any()) } else { None };
+        let pcmc: Option<(u8, u8)> = if kani::any() {
+            Some((kani::any(), kani::any()))
+        } else {
+            None
+        };
+        SoundEntry {
+            format,
+            channels,
+            bits,
+            sample_rate,
+            lpcm_flags,
+            pcmc,
+        }
+    }
+
+    fn expected_pcm_layout(entry: &SoundEntry) -> Option<PcmLayout> {
+        let base = |float, signed, big_endian, bits| {
+            Some(PcmLayout {
+                float,
+                signed,
+                big_endian,
+                bits,
+                channels: entry.channels,
+                sample_rate: entry.sample_rate,
+            })
+        };
+        if entry.format == *b"sowt" {
+            base(false, true, false, entry.bits)
+        } else if entry.format == *b"twos" {
+            base(false, true, true, entry.bits)
+        } else if entry.format == *b"in24" {
+            base(false, true, true, 24)
+        } else if entry.format == *b"in32" {
+            base(false, true, true, 32)
+        } else if entry.format == *b"fl32" {
+            base(true, true, true, 32)
+        } else if entry.format == *b"fl64" {
+            base(true, true, true, 64)
+        } else if entry.format == *b"raw " {
+            base(false, false, false, 8)
+        } else if entry.format == *b"ipcm" {
+            let (flags, size) = entry.pcmc?;
+            base(false, true, flags & 1 == 0, u16::from(size))
+        } else if entry.format == *b"fpcm" {
+            let (flags, size) = entry.pcmc?;
+            base(true, true, flags & 1 == 0, u16::from(size))
+        } else if entry.format == *b"lpcm" {
+            let flags = entry.lpcm_flags.unwrap_or(2 | 4 | 8);
+            if flags & 8 == 0 || flags & 32 != 0 {
+                return None;
+            }
+            base(flags & 1 != 0, flags & 4 != 0, flags & 2 != 0, entry.bits)
+        } else {
+            None
+        }
+    }
+
+    fn expected_pcm_width(float: bool, bits: u16) -> Option<usize> {
+        match (float, bits) {
+            (true, 32) => Some(4),
+            (true, 64) => Some(8),
+            (false, 8) => Some(1),
+            (false, 16) => Some(2),
+            (false, 24) => Some(3),
+            (false, 32) => Some(4),
+            _ => None,
+        }
+    }
+
+    #[kani::proof]
+    fn mp4_pcm_declaration_classification_exact() {
+        let entry = symbolic_sound_entry();
+        let actual = pcm_layout(&entry);
+        let expected = expected_pcm_layout(&entry);
+        assert_eq!(actual, expected);
+    }
+
+    #[kani::proof]
+    fn mp4_pcm_capability_width_exact() {
+        let float: bool = kani::any();
+        let bits: u16 = kani::any();
+        let signed: bool = kani::any();
+        let big_endian: bool = kani::any();
+        let channels: u16 = kani::any();
+        let sample_rate: u32 = kani::any();
+        let width = expected_pcm_width(float, bits);
+        assert_eq!(pcm_sample_width_value(float, bits), width);
+        let layout = PcmLayout {
+            float,
+            signed,
+            big_endian,
+            bits,
+            channels,
+            sample_rate,
+        };
+        let expected_supported = if channels == 0 || sample_rate == 0 {
+            None
+        } else {
+            width
+        };
+        assert_eq!(pcm_supported_width(&layout), expected_supported);
+
+        let entry = symbolic_sound_entry();
+        let actual = pcm_layout(&entry).as_ref().and_then(pcm_supported_width);
+        let expected = expected_pcm_layout(&entry).as_ref().and_then(|layout| {
+            if layout.channels == 0 || layout.sample_rate == 0 {
+                None
+            } else {
+                expected_pcm_width(layout.float, layout.bits)
+            }
+        });
+        assert_eq!(actual, expected);
+    }
 }
 
 #[cfg(test)]
@@ -1996,5 +2133,78 @@ mod tests {
             child_boxes_error(&overrun, 0, overrun.len()),
             "test: box free extends past end of region"
         );
+    }
+
+    fn sound_entry(format: &[u8; 4], bits: u16, channels: u16, sample_rate: u32) -> SoundEntry {
+        SoundEntry {
+            format: *format,
+            channels,
+            bits,
+            sample_rate,
+            lpcm_flags: None,
+            pcmc: None,
+        }
+    }
+
+    #[test]
+    fn pcm_declaration_classifies_iso_pcmc_and_complements() {
+        let mut entry = sound_entry(b"ipcm", 16, 2, 48_000);
+        assert!(pcm_layout(&entry).is_none());
+        entry.pcmc = Some((1, 24));
+        let layout = pcm_layout(&entry).unwrap();
+        assert_eq!(
+            (
+                layout.float,
+                layout.signed,
+                layout.big_endian,
+                layout.bits,
+                layout.channels,
+                layout.sample_rate
+            ),
+            (false, true, false, 24, 2, 48_000)
+        );
+
+        let compressed = sound_entry(b"mp4a", 16, 2, 48_000);
+        assert!(pcm_layout(&compressed).is_none());
+    }
+
+    #[test]
+    fn pcm_capability_width_matrix_and_zero_gate_are_explicit() {
+        for (float, bits, width) in [
+            (false, 8, 1),
+            (false, 16, 2),
+            (false, 24, 3),
+            (false, 32, 4),
+            (true, 32, 4),
+            (true, 64, 8),
+        ] {
+            assert_eq!(pcm_sample_width_value(float, bits), Some(width));
+        }
+        for (float, bits) in [(false, 0), (false, 12), (false, 64), (true, 8), (true, 24)] {
+            assert_eq!(pcm_sample_width_value(float, bits), None);
+        }
+
+        let mut entry = sound_entry(b"sowt", 16, 2, 48_000);
+        let layout = pcm_layout(&entry).unwrap();
+        assert_eq!(pcm_supported_width(&layout), Some(2));
+        entry.channels = 0;
+        let layout = pcm_layout(&entry).unwrap();
+        assert_eq!(pcm_supported_width(&layout), None);
+        entry.channels = 2;
+        entry.sample_rate = 0;
+        let layout = pcm_layout(&entry).unwrap();
+        assert_eq!(pcm_supported_width(&layout), None);
+    }
+
+    #[test]
+    fn first_pcm_declaration_keeps_first_pcm_layout_even_when_unsupported() {
+        let compressed = sound_entry(b"mp4a", 16, 2, 48_000);
+        let unsupported = sound_entry(b"sowt", 12, 2, 48_000);
+        let supported = sound_entry(b"twos", 16, 2, 48_000);
+        let entries = [compressed, unsupported, supported];
+        let (index, entry, layout) = first_pcm_declaration(&entries).unwrap();
+        assert_eq!(index, 1);
+        assert_eq!(&entry.format, b"sowt");
+        assert_eq!(pcm_supported_width(&layout), None);
     }
 }

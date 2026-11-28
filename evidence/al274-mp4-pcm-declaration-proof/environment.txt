@@ -1,0 +1,31 @@
+ts_utc=2026-11-28T17:33:15Z
+host=MINGW64_NT-10.0-26300 DESKTOP-NH00KUI 3.6.7-fb42d713.x86_64 2026-03-29 11:44 UTC x86_64 Msys
+pwd=/g/orca/workspaces/audio-lens/al274-mp4-pcm-declaration-proof
+head=f187ab33927359dc927dd32b39e4a65bd8cfb704
+origin_main=f187ab33927359dc927dd32b39e4a65bd8cfb704
+rust=rustc 1.99.1 (58cf8f9c3 2026-10-13)
+cargo=cargo 1.99.1 (5f94df478 2026-08-27)
+mise=2026.11.2 windows-x64 (2026-11-05)
+mise WARN  mise version 2026.11.12 available
+mise WARN  mise was installed by WinGet, update it with:
+
+  winget upgrade jdx.mise
+
+node=v26.12.1
+wsl_distros=Ubuntu  docker-desktop
+kani=Kani Rust Verifier 0.68.0 (cargo plugin)
+cbmc=bash: line 1: cbmc: command not found
+os=
+x86_64
+kani_embedded_cbmc=CBMC 6.11.0 (from Kani raw verification output)
+wsl_os=
+wsl_kernel=Linux 6.6.87.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+
+wsl_os_release_PRETTY_NAME="Ubuntu 24.04.4 LTS"
+wsl_os_release_NAME="Ubuntu"
+wsl_os_release_VERSION_ID="24.04"
+wsl_os_release_VERSION="24.04.4 LTS (Noble Numbat)"
+wsl_os_release_VERSION_CODENAME=noble
+wsl_os_release_ID=ubuntu
+wsl_os_release_ID_LIKE=debian
+wsl_os_release_HOME_URL="https://www.ubuntu.com/"

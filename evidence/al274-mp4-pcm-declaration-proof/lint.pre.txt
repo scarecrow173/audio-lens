@@ -1,0 +1,10 @@
+$ mise run lint al-media
+[lint] $ if [ "$#" -lt 1 ]; then
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-core)
+    Checking al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-testkit)
+    Checking al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-job)
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-pcm-declaration-proof\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.19s
+mbx[cache]: 3 hits, 12 misses; 0 B downloaded, 0 B uploaded, 1.4 MiB stored locally
+mbx[savings]: 308313 compilations served. the monocle stays on.
+exit=0

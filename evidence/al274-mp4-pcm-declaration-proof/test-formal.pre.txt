@@ -1,0 +1,30 @@
+$ mise run test-formal
+[test-formal] $ cargo test --locked -p al-media --test formal_wav --test formal_containers
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running tests\formal_containers.rs (target\debug\deps\formal_containers-7fe44fcee5061f33.exe)
+
+running 7 tests
+test detect_format_follows_signature_rules ... ok
+test missing_or_undecodable_auds_is_audio_unavailable ... ok
+test mutated_or_truncated_containers_never_panic ... ok
+test compressed_audio_is_an_observation_not_an_error ... ok
+test avi_writer_output_round_trips_through_decode ... ok
+test mp4_writer_output_round_trips_through_decode ... ok
+test container_decoders_never_panic_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests\formal_wav.rs (target\debug\deps\formal_wav-1f29e7270127782c.exe)
+
+running 7 tests
+test terminal_chunk_boundaries_follow_pad_and_exact_end_contract ... ok
+test write_samples_rejects_exactly_unaligned_lengths ... ok
+test mutated_or_truncated_headers_never_panic ... ok
+test writer_new_rejects_exactly_the_documented_invalid_params ... ok
+test writer_output_round_trips_losslessly ... ok
+test frame_count_and_range_reads_hold_the_contract ... ok
+test decode_wav_never_panics_on_arbitrary_bytes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+exit=0

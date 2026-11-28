@@ -93,7 +93,7 @@ Kani local proof の第一候補は次の性質である。
 
 ### 現行 assurance pack の成立状況
 
-現行 main `886828500b85452774af2be7114437ebb226976b` では、registry に 40 件の canonical harness がある。うち baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 21 件で、対応 evidence は Pass を記録している。`spike_` 12 件は canonical registry に混ぜない。
+現行 registry には 42 件の canonical harness がある。うち baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 23 件で、対応 evidence は Pass を記録している。`spike_` 12 件は canonical registry に混ぜない。
 
 | Property / 代表 proof | 証明範囲 | 現行 verdict | 明示された残り |
 | --- | --- | --- | --- |
@@ -104,6 +104,7 @@ Kani local proof の第一候補は次の性質である。
 | MP4-SIG-001 / `format_signature_detection_bounded_exact` | `ftyp` offset/size/version の exact detection | Pass | free/mdat 先頭 MP4、decode capability |
 | MP4-BOX-002 / `mp4_box_header_step_exact` | size32/size64/size0、minimum size、overflow、limit、progress | Pass | box semantic、sample table、PCM |
 | MP4-SCAN-003 / `mp4_box_scan_progress_bounded_exact` | 3 valid box までの scan model | Pass | 4 valid box 以上、深い nesting、box semantic |
+| MP4-PCM-DECL-006 / `mp4_pcm_declaration_classification_exact`, `mp4_pcm_capability_width_exact` | fixed scalar sound-entry declaration domain での PCM classification、ISO pcmC、lpcm flags/defaults、unknown complement、zero channel/rate capability gate、sample-width matrix | Pass | parser integration、sample table、PCM extraction/conversion、payload semantics、diagnostics、I/O、allocation |
 | AVI-CHUNK-001 / `avi_chunk_step_exact` | RIFF chunk boundary/padding/progress | Pass | nested LIST/OpenDML/idx1 semantic |
 | AVI-MOVI-003 / tag/entry/scan collection proof | decimal stream prefix、LIST/rec 判定、3 entry collect/skip/stop | local proof は Pass、Property 全体は NotRun | body boundary/lifetime composition、4件以上、実 Vec accumulation、無制限 iteration |
 | AVI-STREAM-002 / kind/strh/strf/capture/presence proof | stream kind、strh/strf fixed header extraction、capture ordering、strh presence | local proof は Pass、Property 全体は NotRun | 任意長 nested walker、複数 strl、完全な declaration correspondence |
@@ -200,7 +201,7 @@ Lean の導入候補は、Kani の bounded model checking では任意長・任�
 | MP4-SCAN-003 box scan progress | Kani local | Pass | 4 valid box 以上、深い nesting |
 | MP4-STRUCT-004 required boxes/facts | proptest primary | Property Tested Pass / formal Deferred | whole-structure formal proof 未実装 |
 | MP4-TABLE-005 sample table arithmetic | Kani local + proptest roundtrip | NotRun | proof 未実装 |
-| MP4-PCM-DECL-006 PCM codec declaration/capability | proptest primary + concrete matrix | Property Tested Pass / selective formal NotRun | selective formal matrix 未実装 |
+| MP4-PCM-DECL-006 PCM codec declaration/capability | Kani local + proptest/concrete matrix | Pass | parser integration、sample table、PCM extraction/conversion、payload semantics、diagnostics、I/O、allocation |
 | MP4-PCM-EXTRACT-007 PCM extraction arithmetic | Kani local + proptest | NotRun | proof 未実装 |
 | MP4-PARTIAL-008 partial ingest | proptest primary | Property Tested Pass / formal Deferred | formal proof は適用しない |
 | MP4-ROUNDTRIP-009 round-trip | proptest primary | Property Tested Pass / formal Deferred | symbolic end-to-end Kani は Deferred |
