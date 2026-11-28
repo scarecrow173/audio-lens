@@ -1,0 +1,11 @@
+# aborted len2 multi-chunk trial
+
+`mp4_stsc_chunk_samples_len2_bounded_exact` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:08 elapsed: CBMC RSS 483,824 KiB, `--unwind 6`.
+- 00:38 elapsed: CBMC RSS 2,843,304 KiB.
+- 01:01 elapsed: CBMC RSS 14,092,868 KiB.
+
+Although the vector length was statically 2, the harness still checked chunks 0, 1, 2, and 3 in one formula. The nested first/second run expansion creates correlated branch structure across those calls and crosses the memory ceiling. The next split fixes chunk count per proof; it does not remove any `(chunks, entry-value)` pair from the declared bounded cross product.

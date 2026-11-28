@@ -198,6 +198,22 @@ const WAV_RANGE_HARNESSES = [
 ];
 const MP4_AVI_BOUNDARY_HARNESSES = ["mp4_box_header_step_exact", "avi_chunk_step_exact"];
 const MP4_SCAN_HARNESSES = ["mp4_box_scan_progress_bounded_exact"];
+const MP4_TABLE_CHUNK_MAP_HARNESSES = [
+  "mp4_stsc_chunk_samples_len0_bounded_exact",
+  "mp4_stsc_chunk_samples_len1_bounded_exact",
+  "mp4_stsc_chunk_samples_len2_chunks0_bounded_exact",
+  "mp4_stsc_chunk_samples_len2_chunks1_bounded_exact",
+  "mp4_stsc_chunk_samples_len2_chunks2_bounded_exact",
+  "mp4_stsc_chunk_samples_len2_chunks3_bounded_exact",
+  "mp4_chunk_map_helper_spc1_len0_reject_bounded_exact",
+  "mp4_chunk_map_helper_spc1_len1_bounded_exact",
+  "mp4_chunk_map_helper_spc2_len1_reject_bounded_exact",
+  "mp4_chunk_map_helper_spc2_len2_bounded_exact",
+  "mp4_chunk_map_end_to_end_empty_bounded_exact",
+  "mp4_chunk_map_end_to_end_single_sample_bounded_exact",
+  "mp4_chunk_map_end_to_end_short_sizes_reject_bounded_exact",
+  "mp4_chunk_map_end_to_end_overlong_sizes_reject_bounded_exact",
+];
 const MP4_PCM_DECLARATION_HARNESSES = [
   "mp4_pcm_declaration_classification_exact",
   "mp4_pcm_capability_width_exact",
@@ -224,6 +240,7 @@ const HARNESS_GROUPS = {
   "wav-range": WAV_RANGE_HARNESSES,
   "mp4-avi-boundary": MP4_AVI_BOUNDARY_HARNESSES,
   "mp4-scan": MP4_SCAN_HARNESSES,
+  "mp4-table-chunk-map": MP4_TABLE_CHUNK_MAP_HARNESSES,
   "mp4-pcm-declaration": MP4_PCM_DECLARATION_HARNESSES,
   "avi-movi-tag": AVI_MOVI_TAG_HARNESSES,
   "avi-movi-composition": AVI_MOVI_COMPOSITION_HARNESSES,
@@ -253,6 +270,7 @@ const HARNESSES = [
   ...WAV_RANGE_HARNESSES,
   ...MP4_AVI_BOUNDARY_HARNESSES,
   ...MP4_SCAN_HARNESSES,
+  ...MP4_TABLE_CHUNK_MAP_HARNESSES,
   ...MP4_PCM_DECLARATION_HARNESSES,
   ...AVI_MOVI_TAG_HARNESSES,
   ...AVI_MOVI_COMPOSITION_HARNESSES,

@@ -1,0 +1,11 @@
+# aborted fixed-shape unwind(4) spike
+
+`spike_mp4_chunk_map_fixed_shape_full_width` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:33 elapsed: CBMC RSS 589,128 KiB, `--unwind 4`.
+- 00:49 elapsed: CBMC RSS 1,023,648 KiB.
+- 01:38 elapsed: CBMC RSS 13,118,988 KiB.
+
+Unwind(4) improved the early growth relative to unwind(5), but the three-chunk outer loop still forces an unwinding level above the two-sample inner loop and the formula explodes before a verdict. The final boundary therefore reduces the materialization constructor domain to chunks 0..2, where production outer iteration, stsc entry iteration, expansion, and sample accumulation all have maximum trip count two. This permits unwind(3) with no intentional extra production iteration. The validation proof family retains chunks 0..3. Full u64 chunk offsets and full u32 sample sizes remain unchanged.

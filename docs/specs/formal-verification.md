@@ -716,8 +716,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   formal_containers`)。
 - `mise run test-formal-kani`: Kani lane。env-detect の結果に
   応じて pass/fail/not_run/unsupported を JSON verdict で返す。
-  登録 harness は 42 件(WAV 13 +
-  MP4 scan 1 + MP4 PCM declaration/capability 2 + MP4/AVI boundary 2 +
+  登録 harness は 56 件(WAV 13 +
+  MP4 scan 1 + MP4 table chunk-map 14 + MP4 PCM declaration/capability 2 + MP4/AVI boundary 2 +
   AVI movi tag 1 + AVI movi composition 1 +
   AVI movi scan 1 + AVI stream kind 1 + AVI strh declaration 1 + AVI video strf declaration 1 +
   AVI audio strf declaration 1 + format signature 1 + AVI strf capture 3 +
@@ -727,7 +727,8 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   WAV-CHUNK-003/WAV-SCAN-004 の 2 proof、`"wav-range"` は
   WAV-RANGE-008 の 2 proof、`"mp4-avi-boundary"` は
   MP4-BOX-002/AVI-CHUNK-001 の 2 proof、`"mp4-scan"` は MP4-SCAN-003
-  の 1 proof、`"mp4-pcm-declaration"` は MP4-PCM-DECL-006 declaration/capability
+  の 1 proof、`"mp4-table-chunk-map"` は MP4-TABLE-005 stsc expansion/chunk-map
+  materialization subboundary の compositional split 14 proof、`"mp4-pcm-declaration"` は MP4-PCM-DECL-006 declaration/capability
   の 2 proof、`"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof、
   `"avi-movi-composition"` は AVI-MOVI-003 movi entry composition の 1 proof、
   `"avi-movi-scan"` は AVI-MOVI-003 movi scan collection の 1 proof、
@@ -746,6 +747,10 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
   per-harness detail に加え、選択 proof 数・verified proof 数・
   total elapsed ms・max observed RSS KiB・計測可否を持つ additive
   `cost_summary` を返す。
+- `AL_KANI_HARNESS_GROUP=mp4-table-chunk-map AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`:
+  MP4 sample table の stsc expansion/chunk-map materialization 局所契約を再実行する。
+  raw log の proof 結果、unwinding assertion、600 秒以内、ピーク RSS 4 GiB 未満を確認する。
+  変更時は `mp4-scan`、`mp4-avi-boundary`、`mp4-pcm-declaration` と native parser test も確認する。
 - `AL_KANI_HARNESS_GROUP=avi-wb-concatenation AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`:
   この局所契約の再実行。`AL_KANI_LOG_DIR` で raw log と verdict を保持し、
   exit 0 だけでなく `pass` と `VERIFICATION:- SUCCESSFUL` を確認する。
@@ -774,6 +779,7 @@ RawVec/Layout/capacity 計算である。これらは検証対象の安全性・
 - 証拠台帳: `evidence/al256/`・`evidence/al274/`・
   `evidence/al274-proof-redesign/`・`evidence/al274-chunk-scan-proof/`・
   `evidence/al274-mp4-avi-proof/`・`evidence/al274-mp4-scan-proof/`・
+  `evidence/al274-mp4-table-chunk-map-proof/`・
   `evidence/al274-avi-movi-tag-proof/`・`evidence/al274-avi-movi-composition-proof/`・
   `evidence/al274-avi-movi-scan-proof/`・`evidence/al274-avi-stream-kind-proof/`・
   `evidence/al274-avi-strh-declaration-proof/`・

@@ -1,0 +1,11 @@
+# aborted chunks2/len2 direct-spc unwind(3) trial
+
+`mp4_chunk_map_chunks2_len2_bounded_exact` with independent symbolic spc values in 1..2 was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:01 elapsed: CBMC RSS 47,884 KiB, `--unwind 3`.
+- 00:11 elapsed: CBMC RSS 367,344 KiB.
+- 00:43 elapsed: CBMC RSS 4,455,200 KiB.
+
+The next measurement temporarily fixes spc to `(1,1)` in the same harness. This is a diagnostic spike, not a boundary reduction. It distinguishes full-width/Vec solver cost from spc/control branching cost.

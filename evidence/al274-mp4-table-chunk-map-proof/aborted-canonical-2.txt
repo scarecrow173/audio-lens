@@ -1,0 +1,3 @@
+# aborted canonical lane trial 2
+
+The second canonical group run was manually aborted before completion. This was not a product counterexample and not a proof failure. `mp4_stsc_chunk_samples_len2_chunks0_bounded_exact` reached CBMC RSS 2,015,880 KiB at 00:10 with `--unwind 4`. chunks0/1 do not reach the extra unrolling required by chunks2/3, so their explicit unwind was reduced to 3 while keeping unwinding assertions enabled. Logs for len0/len1 in this aborted lane are retained as partial trial evidence, not canonical verdicts.

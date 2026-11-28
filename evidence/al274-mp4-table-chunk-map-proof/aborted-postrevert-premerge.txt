@@ -1,0 +1,3 @@
+# aborted pre-merge post-revert lane
+
+The first post-revert lane was manually aborted after two harness logs because origin/main advanced to 9b4a3545f95ea1cef1e26132f4adb06434e8df9c and the branch was fast-forwarded while the lane was running. This abort is a verification-sequencing decision, not a product counterexample and not a proof failure. The canonical post-revert lane was restarted after the merge so the final evidence unambiguously belongs to the merged tree.

@@ -1,0 +1,10 @@
+# aborted small-numeric diagnostic trial
+
+The small-numeric diagnostic (offsets/sizes modulo 8) was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:07 elapsed: CBMC RSS 352,408 KiB, `--unwind 3`.
+- 00:18 elapsed: CBMC RSS 725,768 KiB.
+
+The trajectory matches the full-width trials, so input bitwidth is not the dominant cost. The remaining avoidable source is the proof oracle's symbolic indexing (`sizes[total]` and `expected[total]`). The next trial restores full-width inputs and rewrites the oracle as static two-chunk/two-sample scalar expansion with no dynamic index arithmetic.

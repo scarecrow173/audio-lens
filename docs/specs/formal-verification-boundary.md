@@ -93,7 +93,7 @@ Kani local proof の第一候補は次の性質である。
 
 ### 現行 assurance pack の成立状況
 
-現行 registry には 42 件の canonical harness がある。うち baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 23 件で、対応 evidence は Pass を記録している。`spike_` 12 件は canonical registry に混ぜない。
+現行 registry には 56 件の canonical harness がある。うち baseline `c91b8ce20c90733fa21098451cb768a74425884d` 以降に追加された local proof は 37 件で、対応 evidence は Pass を記録している。`spike_` 12 件は canonical registry に混ぜない。
 
 | Property / 代表 proof | 証明範囲 | 現行 verdict | 明示された残り |
 | --- | --- | --- | --- |
@@ -104,6 +104,7 @@ Kani local proof の第一候補は次の性質である。
 | MP4-SIG-001 / `format_signature_detection_bounded_exact` | `ftyp` offset/size/version の exact detection | Pass | free/mdat 先頭 MP4、decode capability |
 | MP4-BOX-002 / `mp4_box_header_step_exact` | size32/size64/size0、minimum size、overflow、limit、progress | Pass | box semantic、sample table、PCM |
 | MP4-SCAN-003 / `mp4_box_scan_progress_bounded_exact` | 3 valid box までの scan model | Pass | 4 valid box 以上、深い nesting、box semantic |
+| MP4-TABLE-005 / stsc expansion/chunk-map materialization proof family | chunk 0..3、stsc entry 0..2 の bounded validation domain での stsc valid/invalid exact complement と per-chunk expansion。production `append_chunk_samples` の `(spc,sizes.len)` pair `(1,0), (1,1), (2,1), (2,2)` における stsz count exactness、stco 起点 offset 累積、`idx` 進行、overflow exact complement。production `build_chunk_map` の empty/single/count-mismatch composition | local proof は Pass、Property 全体は NotRun | stts/ctts、multi-chunk end-to-end materialization、spc 3/4、sizes 3..4、3 件以上 sample、full integer table、parser integration、PCM extraction/conversion |
 | MP4-PCM-DECL-006 / `mp4_pcm_declaration_classification_exact`, `mp4_pcm_capability_width_exact` | fixed scalar sound-entry declaration domain での PCM classification、ISO pcmC、lpcm flags/defaults、unknown complement、zero channel/rate capability gate、sample-width matrix | Pass | parser integration、sample table、PCM extraction/conversion、payload semantics、diagnostics、I/O、allocation |
 | AVI-CHUNK-001 / `avi_chunk_step_exact` | RIFF chunk boundary/padding/progress | Pass | nested LIST/OpenDML/idx1 semantic |
 | AVI-MOVI-003 / tag/entry/scan collection proof | decimal stream prefix、LIST/rec 判定、3 entry collect/skip/stop | local proof は Pass、Property 全体は NotRun | body boundary/lifetime composition、4件以上、実 Vec accumulation、無制限 iteration |
@@ -111,7 +112,7 @@ Kani local proof の第一候補は次の性質である。
 | AVI-TIME-004 / `avi_stream_start_tick_exact` | 全 u32 start/scale 入力対の start tick と overflow exactness | local proof は Pass、Property 全体は NotRun | remainder、packet increment/accumulation、stream separation |
 | AVI-PCM-005 / audio strf declaration、wb concatenation proof | WAVEFORMATEX fixed header extraction、3 packet/0..2 byte modelでの first-audio wb copy ordering | local proof は Pass、Property 全体は NotRun | PCM conversion semantics、任意長 copy、dynamic Vec、missing/empty behavior |
 
-Required local proof が Pass した項目でも、上表の残りは証明済みにしない。AVI-MOVI-003、AVI-STREAM-002、AVI-TIME-004、AVI-PCM-005 のように一部 local proof だけが揃っている Property は、Property 全体 verdict として NotRun を維持する。
+Required local proof が Pass した項目でも、上表の残りは証明済みにしない。MP4-TABLE-005、AVI-MOVI-003、AVI-STREAM-002、AVI-TIME-004、AVI-PCM-005 のように一部 local proof だけが揃っている Property は、Property 全体 verdict として NotRun を維持する。
 
 ### 新たに Required とすべき Kani local proof
 
@@ -120,7 +121,7 @@ Required local proof が Pass した項目でも、上表の残りは証明済�
 - WAV-RIFF-002: RIFF size と入力長の整合。
 - WAV-PCM-LAYOUT-006: format tag/bits/channels/rate/block_align/byte_rate の validation。
 - WAV-PCM-CONV-007: PCM byte→f64 変換と writer encode の clamp/round/cast。
-- MP4-TABLE-005: sample table offset/count/size/time 計算。
+- MP4-TABLE-005: stts/ctts time accumulation、multi-chunk end-to-end materialization、spc 3/4、sizes 3..4、3 件以上 sample、4 件以上 chunk、3 件以上 stsc entry、full integer table、parser integration を含む残りの sample table offset/count/size/time 計算。
 - MP4-PCM-EXTRACT-007: PCM extraction offset/width conversion。
 - AVI-TIME-004: remainder、packet increment/accumulation、stream separation。
 - AVI-PCM-005: PCM decode conversion semantics。
@@ -200,7 +201,7 @@ Lean の導入候補は、Kani の bounded model checking では任意長・任�
 | MP4-BOX-002 box header boundary | Kani local | Pass | box semantic、sample table、PCM |
 | MP4-SCAN-003 box scan progress | Kani local | Pass | 4 valid box 以上、深い nesting |
 | MP4-STRUCT-004 required boxes/facts | proptest primary | Property Tested Pass / formal Deferred | whole-structure formal proof 未実装 |
-| MP4-TABLE-005 sample table arithmetic | Kani local + proptest roundtrip | NotRun | proof 未実装 |
+| MP4-TABLE-005 sample table arithmetic | Kani local + proptest roundtrip | local proof は Pass、Property 全体は NotRun | stts/ctts、より大きな table、parser integration、PCM extraction/conversion |
 | MP4-PCM-DECL-006 PCM codec declaration/capability | Kani local + proptest/concrete matrix | Pass | parser integration、sample table、PCM extraction/conversion、payload semantics、diagnostics、I/O、allocation |
 | MP4-PCM-EXTRACT-007 PCM extraction arithmetic | Kani local + proptest | NotRun | proof 未実装 |
 | MP4-PARTIAL-008 partial ingest | proptest primary | Property Tested Pass / formal Deferred | formal proof は適用しない |

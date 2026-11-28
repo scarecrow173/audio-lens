@@ -1,0 +1,15 @@
+# aborted materialization chunks3/len2 small-total trial
+
+`mp4_chunk_map_chunks3_len2_small_total_bounded_exact` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:05 elapsed: CBMC RSS 316,828 KiB, `--unwind 5`.
+- 00:14 elapsed: CBMC RSS 699,100 KiB.
+- 00:27 elapsed: CBMC RSS 1,098,192 KiB.
+- 00:45 elapsed: CBMC RSS 1,493,512 KiB.
+- 01:04 elapsed: CBMC RSS 1,862,172 KiB.
+- 01:46 elapsed: CBMC RSS 2,645,640 KiB.
+- 02:10 elapsed: CBMC RSS 8,687,896 KiB.
+
+Even after partitioning to total declared samples at most four, four symbolic shape table entries in one harness cross the memory ceiling. The next measurement is a fixed-shape spike to separate full-width u64/u32 bitvector cost from shape/length branching cost. No verdict was drawn.

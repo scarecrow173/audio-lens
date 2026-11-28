@@ -360,6 +360,38 @@ presence bit は全 Variant を覆う exact reparameterizationであり、
 [境界分析](../../evidence/al274-mp4-pcm-declaration-proof/boundary-analysis.md)
 と同ディレクトリの証跡に記録する。
 
+### MP4-TABLE-005 stsc/chunk-map implementation boundary
+
+この slice は MP4 sample table arithmetic のうち、production `chunk_samples` が
+所有する stsc validation/per-chunk expansion と、production `append_chunk_samples` /
+`build_chunk_map` が所有する stsz 件数整合、stco 起点の sample file-offset 累積、
+`checked_add` overflow rejection に限定する。stts/ctts time accumulation、box parser
+integration、sample extraction/conversion、diagnostics、I/O、allocation、
+unbounded/任意長 table、公開 API 全体 no-panic は含めない。
+
+validation family は chunk 0..3、stsc entry 0..2、`first_chunk` 0..5、
+`samples_per_chunk` 0..4、sample-description index 0..2 の bounded domain を保ち、
+len/chunks structural split で production `chunk_samples` を直接検証する。
+materialization family は direct multi-chunk end-to-end proof が solver/memory budget に
+乗らない実測を踏まえ、behavior-preserving な production seam `append_chunk_samples`
+へ分解する。helper proof は `(spc, sizes.len)` pair `(1,0), (1,1), (2,1), (2,2)`、full u32 sample size、
+full u64 chunk offset、sample-description index 1..2 の fixed shapeで、decode-order
+offset、`idx` 進行、partial mutation、size exhaustion、overflow exact complementを検証する。
+end-to-end proof は production `build_chunk_map` の empty、single-sample accept/overflow、
+short/overlong count mismatch composition を検証する。multi-chunk end-to-end
+materialization、spc 3/4、sizes 3..4、3 件以上 sample は residual NotRun scopeである。
+
+いずれも `kani::assume`、fmt/alloc/IO stub、proof-only production 置換は使わない。
+explicit unwind は到達反復に合わせ、unwinding assertion を残す。mutation は chunk
+offset の checked overflow rejection を壊して lane failure を確認し、byte-for-byte
+revert 後に同じ lane を再実行する。境界、実測 cost、中止 trial、実行結果、変異、
+費用は [境界分析](../../evidence/al274-mp4-table-chunk-map-proof/boundary-analysis.md)
+と同ディレクトリの証跡に記録する。
+
+`AL_KANI_HARNESS_GROUP=mp4-table-chunk-map AL_KANI_TIMEOUT_MS=600000 mise run test-formal-kani`
+で 14 proof を選択する。registry は 56 件。1 proof の予算は 600 秒以内・
+ピーク RSS 4 GiB 未満とする。
+
 ## canonical 21 proof の disposition 要約
 
 - **Kani に残す/再構成:** `detect_format_signature_rules`。small pure property に適合するが、len 0,7,8,11,12,13 と RIFF/ftyp 競合の boundary matrix に再構成する。
@@ -494,7 +526,7 @@ Cross-repo Issue の起票または更新が必要と判断した場合は、実
 ## 後続 slice に残す作業
 
 - WAV-CHUNK-003/WAV-SCAN-004 は PR #283、MP4-BOX-002/AVI-CHUNK-001 は PR #284、MP4-SCAN-003 bounded scan は PR #285、AVI-MOVI-003 tag identity は PR #286、AVI-MOVI-003 movi entry composition は PR #287、AVI-MOVI-003 movi scan collection は PR #288、AVI stream existence/kind classification は PR #289、AVI-STREAM-002 `strh` declaration field extraction/validation は PR #290、AVI-STREAM-002 video `strf` BITMAPINFOHEADER declaration field extraction/validation は PR #291、AVI-STREAM-002 audio `strf` WAVEFORMATEX declaration field extraction/validation は PR #292、container format signature detection は PR #293/#294、AVI-STREAM-002 `strf` capture presence/copy/ordering は PR #295で実装・実走済みである。残り Required local proof の実装と実走。
-- AVI-MOVI-003 の unbounded iteration termination、N+1 件以上の entry 列、実 `Vec<MoviPacket>` accumulation、body slice/lifetime composition、nested movi/list walker 全体、longer stream table/dynamic `Vec`、declaration correspondence、packet body boundary と tag の完全合成、MP4-TABLE-005（`stts`/`ctts`/`stsc`/`stsz`/`stco` 累積と `Vec` 展開）、MP4-PCM extraction/conversion、AVI-TIME-004（u128 除算・remainder・複数 stream/packet 累積）、AVI-PCM。
+- AVI-MOVI-003 の unbounded iteration termination、N+1 件以上の entry 列、実 `Vec<MoviPacket>` accumulation、body slice/lifetime composition、nested movi/list walker 全体、longer stream table/dynamic `Vec`、declaration correspondence、packet body boundary と tag の完全合成、MP4-TABLE-005 の残り（`stts`/`ctts` time accumulation、multi-chunk end-to-end materialization、spc 3/4、sizes 3..4、3 件以上 sample、4 件以上 chunk、3 件以上 stsc entry、full integer table、parser integration）、MP4-PCM extraction/conversion、AVI-TIME-004（u128 除算・remainder・複数 stream/packet 累積）、AVI-PCM。
 - runner 登録 schema、assurance pack、選択実行の Daily CI 集約。
 - lazy diagnostic の製品設計と実装（採用する場合）。
 - 全体 mutation matrix と完全な旧新 cost matrix。MP4/AVI boundary slice の mutation/cost 比較は `evidence/al274-mp4-avi-proof/` に限定証拠として記録済み。
@@ -504,4 +536,4 @@ Cross-repo Issue の起票または更新が必要と判断した場合は、実
 
 ## 完了時の検証境界
 
-元の設計/ledger slice では、ローカル検証を lease 内ファイルの markdown/JSON/照合に比例させ、`mise run fmt` と `mise exec -- prek run --all-files` を canonical hygiene とした。`check`/`lint`/`test`/`test-formal`/`test-formal-kani` はコード変更を伴わないため NotApplicable とした。後続 implementation slice では別途、対象クレートの `check`/`lint`/`test`/`test-formal` と選択 Kani assurance group を必須検証とする。MP4/AVI boundary slice の実行結果は `evidence/al274-mp4-avi-proof/verification.md`、MP4 scan slice の実行結果は `evidence/al274-mp4-scan-proof/verification.md`、AVI movi tag slice の実行結果は `evidence/al274-avi-movi-tag-proof/verification.md`、AVI movi scan collection slice の実行結果は `evidence/al274-avi-movi-scan-proof/verification.md`、AVI stream existence/kind classification slice の実行結果は `evidence/al274-avi-stream-kind-proof/verification.md`、AVI strh declaration slice の実行結果は `evidence/al274-avi-strh-declaration-proof/verification.md`、AVI video strf declaration slice の実行結果は `evidence/al274-avi-strf-declaration-proof2/verification.md`、AVI audio strf declaration slice の実行結果は `evidence/al274-avi-strf-audio-proof/verification.md`、format signature detection slice の実行結果は `evidence/al274-format-signature-proof/verification.md`、AVI strf capture slice の実行結果は `evidence/al274-avi-strf-capture-proof/verification.md`、MP4 PCM declaration/capability slice の実行結果は `evidence/al274-mp4-pcm-declaration-proof/verification.md` に記録する。統合検証は merge 後の対象 SHA に対する CI 証拠で確認する。
+元の設計/ledger slice では、ローカル検証を lease 内ファイルの markdown/JSON/照合に比例させ、`mise run fmt` と `mise exec -- prek run --all-files` を canonical hygiene とした。`check`/`lint`/`test`/`test-formal`/`test-formal-kani` はコード変更を伴わないため NotApplicable とした。後続 implementation slice では別途、対象クレートの `check`/`lint`/`test`/`test-formal` と選択 Kani assurance group を必須検証とする。MP4/AVI boundary slice の実行結果は `evidence/al274-mp4-avi-proof/verification.md`、MP4 scan slice の実行結果は `evidence/al274-mp4-scan-proof/verification.md`、AVI movi tag slice の実行結果は `evidence/al274-avi-movi-tag-proof/verification.md`、AVI movi scan collection slice の実行結果は `evidence/al274-avi-movi-scan-proof/verification.md`、AVI stream existence/kind classification slice の実行結果は `evidence/al274-avi-stream-kind-proof/verification.md`、AVI strh declaration slice の実行結果は `evidence/al274-avi-strh-declaration-proof/verification.md`、AVI video strf declaration slice の実行結果は `evidence/al274-avi-strf-declaration-proof2/verification.md`、AVI audio strf declaration slice の実行結果は `evidence/al274-avi-strf-audio-proof/verification.md`、format signature detection slice の実行結果は `evidence/al274-format-signature-proof/verification.md`、AVI strf capture slice の実行結果は `evidence/al274-avi-strf-capture-proof/verification.md`、MP4 PCM declaration/capability slice の実行結果は `evidence/al274-mp4-pcm-declaration-proof/verification.md`、MP4 table chunk-map slice の実行結果は `evidence/al274-mp4-table-chunk-map-proof/verification.md` に記録する。統合検証は merge 後の対象 SHA に対する CI 証拠で確認する。

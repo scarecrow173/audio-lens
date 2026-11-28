@@ -1,0 +1,27 @@
+{
+  "lane": "test-formal-kani",
+  "verdict": "not_run",
+  "reason": "0/1 harness(es) verified; incomplete: mp4_chunk_map_chunks3_len2_small_total_bounded_exact(exit 143)",
+  "env": "Ubuntu",
+  "details": [
+    {
+      "harness": "mp4_chunk_map_chunks3_len2_small_total_bounded_exact",
+      "ok": false,
+      "bad": false,
+      "timedOut": false,
+      "status": 143,
+      "elapsed_ms": 176747,
+      "max_rss_kb": null,
+      "peak_memory_measurement": "/usr/bin/time -v",
+      "tail": "   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s\n   Compiling al-media v0.1.0 (/home/akiyoshi/.cache/al-formal-kani/src/crates/al-media)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s"
+    }
+  ],
+  "cost_summary": {
+    "selected_proofs": 1,
+    "verified_proofs": 0,
+    "total_elapsed_ms": 176747,
+    "max_observed_rss_kb": null,
+    "rss_measured_proofs": 0,
+    "peak_memory_measurement": "/usr/bin/time -v"
+  }
+}

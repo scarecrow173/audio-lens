@@ -1,0 +1,8 @@
+[check] $ cargo check --locked --all-targets -p al-media
+[WARN ] this checkout was not recorded as a cache root: failed atomic write: G:\cache\mbx\actions\checkouts/v1\515471d1ed378cfe4cc1f5b500e8a3754efa6d424b7595d364b4f3c20a2b28a0\b104a609a39c40bd2842aef039b847c4eaffb581306725b878221b72a016b108.json
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.07s
+mbx[cache]: 0 hits, 0 misses, 8 not looked up, 10 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: 20.0 TiB logical of old files removed to date. the broom sends its regards.

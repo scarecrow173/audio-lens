@@ -1,0 +1,3 @@
+[check] $ cargo check --locked --all-targets -p al-media
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+__EXIT:0

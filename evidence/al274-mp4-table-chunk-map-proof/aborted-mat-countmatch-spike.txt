@@ -1,0 +1,9 @@
+# aborted count-match diagnostic trial
+
+The count-match diagnostic (`spc=(1,1)`, `sizes_len=2`) was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:18 elapsed: CBMC RSS 1,761,376 KiB, `--unwind 3`.
+
+Count/vector-length branching is therefore not the dominant cost either. The remaining dominant cost is full-width u64/u32 bitvector data flowing through nested Vec materialization. The next diagnostic uses a deliberately small finite numeric domain to determine whether the control-flow/materialization proof is tractable; overflow boundary evidence must then be designed as an explicit finite edge class rather than claiming full-width exhaustive arithmetic.

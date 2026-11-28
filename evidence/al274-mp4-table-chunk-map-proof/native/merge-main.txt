@@ -1,0 +1,20 @@
+Updating 0e89c27..9b4a354
+Fast-forward
+ crates/al-cli/tests/obs_noninterference.rs       | 532 +++++++++++++++++++++++
+ docs/designs/README.md                           |   1 +
+ docs/designs/issue-127-obs-noninterference.md    | 118 +++++
+ docs/impl/ir/issue-127-obs-noninterference.md    |  77 ++++
+ docs/specs/README.md                             |   1 +
+ docs/specs/issue-127-obs-noninterference.md      | 102 +++++
+ docs/tasks/issue-127-obs-noninterference.md      |  51 +++
+ docs/test-specs/README.md                        |   1 +
+ docs/test-specs/issue-127-obs-noninterference.md | 131 ++++++
+ evidence/al127/obs-noninterference.md            |  87 ++++
+ 10 files changed, 1101 insertions(+)
+ create mode 100644 crates/al-cli/tests/obs_noninterference.rs
+ create mode 100644 docs/designs/issue-127-obs-noninterference.md
+ create mode 100644 docs/impl/ir/issue-127-obs-noninterference.md
+ create mode 100644 docs/specs/issue-127-obs-noninterference.md
+ create mode 100644 docs/tasks/issue-127-obs-noninterference.md
+ create mode 100644 docs/test-specs/issue-127-obs-noninterference.md
+ create mode 100644 evidence/al127/obs-noninterference.md

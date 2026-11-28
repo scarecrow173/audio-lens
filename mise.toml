@@ -242,13 +242,14 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # 動かないため tools/run-formal-kani.mjs が実行環境を検出し(native
 # linux/macOS または WSL2)利用可能なら `cargo kani` を実行する。
 # 登録 harness は runner の HARNESSES が正本で、WAV 13 件 +
-# MP4 scan 1 件 + MP4 PCM declaration/capability 2 件 +
+# MP4 scan 1 件 + MP4 table chunk-map 14 件 +
+# MP4 PCM declaration/capability 2 件 +
 # MP4/AVI boundary 2 件 + AVI movi tag 1 件 +
 # AVI movi composition 1 件 + AVI movi scan 1 件 + AVI stream kind 1 件 +
 # AVI strh declaration 1 件 + AVI video strf declaration 1 件 +
 # AVI audio strf declaration 1 件 + format signature 1 件 +
 # AVI strf capture 3 件 + AVI wb concatenation 1 件 + AVI strh presence 1 件 +
-# AVI clock start 1 件 + legacy containers 10 件の計 42 件。
+# AVI clock start 1 件 + legacy containers 10 件の計 56 件。
 # runner は全 harness に `-Z stubbing`
 # を渡して stub attribute 機構を有効化するが、stub attribute を
 # 持たない harness の検証意味論は変わらない。
@@ -261,6 +262,8 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # WAV-SCAN-004 の 2 proof、`"wav-range"` は WAV-RANGE-008 の
 # 2 proof、`"mp4-avi-boundary"` は MP4-BOX-002 / AVI-CHUNK-001 の
 # 2 proof、`"mp4-scan"` は MP4-SCAN-003 の 1 proof、
+# `"mp4-table-chunk-map"` は MP4-TABLE-005 stsc expansion/chunk-map
+# materialization subboundary の compositional split 14 proof、
 # `"mp4-pcm-declaration"` は MP4-PCM-DECL-006 declaration/capability の 2 proof、
 # `"avi-movi-tag"` は AVI-MOVI-003 tag identity の 1 proof、
 # `"avi-movi-composition"` は AVI-MOVI-003 movi entry composition の
@@ -285,7 +288,7 @@ run = "cargo test --locked -p al-media --test formal_wav --test formal_container
 # (環境不在は lane 失敗ではない — POLICIES §3)。実走して
 # verification 結果が出れば pass/fail で exit 0/1 の fail-closed。
 [tasks.test-formal-kani]
-description = "al-media WAV+MP4/AVI Kani bounded proofs via env-detect (42 harnesses, Issue #256/#274)"
+description = "al-media WAV+MP4/AVI Kani bounded proofs via env-detect (56 harnesses, Issue #256/#274)"
 run = "node tools/run-formal-kani.mjs"
 
 [tasks.verify-full]

@@ -1,0 +1,13 @@
+# aborted materialization chunks3/len2 fixed-copy trial
+
+`mp4_chunk_map_chunks3_len2_bounded_exact` with fixed-copy plus `truncate` input construction was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:06 elapsed: CBMC RSS 332,792 KiB, `--unwind 5`.
+- 01:01 elapsed: CBMC RSS 1,714,828 KiB.
+- 01:41 elapsed: CBMC RSS 2,641,656 KiB.
+- 02:04 elapsed: CBMC RSS 2,662,136 KiB.
+- 02:10 elapsed: CBMC RSS 3,853,008 KiB.
+
+The input construction change did not control the explosion. The dominating structure is therefore the symbolic per-chunk sample-count control flow itself. The next redesign partitions constructor-valid len2 shapes by total declared samples: at most 4 (accept possible) versus greater than 4 (always count-rejected because the declared sizes domain has at most 4 entries). This is an exact finite partition of the same input domain, not input narrowing.

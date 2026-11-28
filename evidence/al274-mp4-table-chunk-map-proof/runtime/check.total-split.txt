@@ -1,0 +1,6 @@
+[check] $ cargo check --locked --all-targets -p al-media
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.29s
+mbx[cache]: 0 hits, 0 misses, 8 not looked up, 10 incremental; 0 B downloaded, 0 B uploaded, 0 B stored locally
+mbx[savings]: 669.2 GiB of outputs exist once and appear everywhere. do not tell the checkouts.
+__EXIT:0

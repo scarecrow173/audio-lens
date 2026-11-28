@@ -1,0 +1,9 @@
+[lint] $ if [ "$#" -lt 1 ]; then
+   Compiling al-core v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-core)
+    Checking al-testkit v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-testkit)
+    Checking al-job v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-job)
+    Checking al-media v0.1.0 (G:\orca\workspaces\audio-lens\al274-mp4-table-chunk-map\crates\al-media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.53s
+mbx[cache]: 3 hits, 12 misses; 0 B downloaded, 0 B uploaded, 1.3 MiB stored locally
+mbx[savings]: 11.6 TiB logical of target/ had outlived its checkouts. it has been dealt with.
+__EXIT:0

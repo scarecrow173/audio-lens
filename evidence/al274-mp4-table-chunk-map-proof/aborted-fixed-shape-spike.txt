@@ -1,0 +1,10 @@
+# aborted fixed-shape materialization spike
+
+`spike_mp4_chunk_map_fixed_shape_full_width` was manually aborted before a Kani verdict. This was not a product counterexample and not a proof failure.
+
+Observed process evidence (WSL Ubuntu, `ps`):
+
+- 00:35 elapsed: CBMC RSS 1,269,432 KiB, fixed chunks3/len2 transition shape, spc 1/1, full u64 offsets, full u32 sizes, symbolic sizes_len, `--unwind 5`.
+- 02:02 elapsed: CBMC RSS 5,332,616 KiB.
+
+Even a single fixed valid shape crosses the memory ceiling when unwind(5) unrolls the production sample loop beyond the useful trip count. The next redesign makes the materialization sample-per-chunk bound 1..2 (the minimum domain that exercises accumulation beyond the first sample), keeps full u64/u32 widths, rewrites the oracle/assertion so no proof loop requires more than three iterations, and uses unwind(4), the minimum required by the production three-chunk outer loop. Validation stsc still covers spc 0..4 exactly; the reduced 1..2 bound is only the downstream materialization constructor domain and will be explicit in the boundary.
